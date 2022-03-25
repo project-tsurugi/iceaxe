@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+
+    id 'com.github.spotbugs'
+}
+
+group = 'com.nautilus_technologies.iceaxe'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+}
+
+checkstyle {
+    configFile = rootProject.file('buildSrc/src/main/resources/checkstyle.xml')
+}
+
+spotbugsMain {
+    ignoreFailures = true
+    reports {
+        xml {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/main/spotbugs.xml")
+        }
+    }
+}
+
+checkstyleMain.enabled = false
+checkstyleTest.enabled = false
+spotbugsMain.enabled = false
+spotbugsTest.enabled = false
+
+tasks.withType(JavaCompile) { task ->
+    task.options.encoding = 'UTF-8'
+}
+
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+task testsJar(type: Jar) {
+    classifier 'tests'
+    from sourceSets.test.output
+}
+
+artifacts {
+    archives tasks.sourcesJar
+    archives tasks.testsJar
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty('junit.jupiter.testclass.order.default', 'org.junit.jupiter.api.ClassOrderer$OrderAnnotation')
+
+    ignoreFailures = true
+
+    testLogging {
+        showStandardStreams true
+        events 'started', 'skipped', 'passed', 'failed'
+        exceptionFormat 'full'
+    }
+}

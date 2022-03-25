@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+
+    id 'iceaxe.java-conventions'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = project.name
+
+            from components.java
+
+            artifact sourcesJar {
+                classifier = 'sources'
+                archiveExtension  = 'jar'
+            }
+        }
+    }
+}
+
+checkstyleMain.enabled = true
+spotbugsMain.enabled = true
