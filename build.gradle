@@ -3,8 +3,6 @@ plugins {
 }
 
 dependencies {
-    api 'com.nautilus_technologies.tsubakuro:common:0.0.1'
+    api 'com.nautilus_technologies.tsubakuro:connector:0.0.1'
     api 'com.nautilus_technologies.tsubakuro:sql:0.0.1'
-    api 'com.nautilus_technologies.tsubakuro:ipc:0.0.1'
-    api 'com.nautilus_technologies.tsubakuro:stream:0.0.1'
 }
