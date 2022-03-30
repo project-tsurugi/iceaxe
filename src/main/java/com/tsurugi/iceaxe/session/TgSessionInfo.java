@@ -7,6 +7,27 @@ import java.util.concurrent.TimeUnit;
  */
 public class TgSessionInfo {
 
+    /**
+     * create Session Information
+     * 
+     * @return Session Information
+     */
+    public static TgSessionInfo of() {
+        return new TgSessionInfo();
+    }
+
+    /**
+     * create Session Information
+     * 
+     * @param user     user id
+     * @param password password
+     * @return Session Information
+     */
+    public static TgSessionInfo of(String user, String password) {
+        var info = new TgSessionInfo().user(user).password(password);
+        return info;
+    }
+
     private String user;
     private String password;
     private long timeoutTime = Long.MAX_VALUE;
@@ -89,27 +110,6 @@ public class TgSessionInfo {
      */
     public TimeUnit timeoutUnit() {
         return timeoutUnit;
-    }
-
-    /**
-     * create Session Information
-     * 
-     * @return Session Information
-     */
-    public static TgSessionInfo of() {
-        return new TgSessionInfo();
-    }
-
-    /**
-     * create Session Information
-     * 
-     * @param user     user id
-     * @param password password
-     * @return Session Information
-     */
-    public static TgSessionInfo of(String user, String password) {
-        var info = new TgSessionInfo().user(user).password(password);
-        return info;
     }
 
     @Override
