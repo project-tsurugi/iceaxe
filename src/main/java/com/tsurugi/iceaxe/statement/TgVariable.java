@@ -1,17 +1,14 @@
 package com.tsurugi.iceaxe.statement;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.nautilus_technologies.tsubakuro.protos.CommonProtos.DataType;
 import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder;
 import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder.Variable;
 
 /**
- * Tsurugi Variable
+ * Tsurugi Variable definition for PreparedStatement
  */
 public class TgVariable {
 
@@ -24,49 +21,22 @@ public class TgVariable {
         return new TgVariable();
     }
 
-    protected static final Map<Object, DataType> TYPE_MAP;
+    protected static final Map<Object, TgDataType> TYPE_MAP;
     static {
-        Map<Object, DataType> map = new IdentityHashMap<>();
+        Map<Object, TgDataType> map = new IdentityHashMap<>();
         for (TgDataType type : TgDataType.values()) {
-            var lowType = type.getLowDataType();
-            map.put(type, lowType);
-
             for (Class<?> c : type.getClassList()) {
-                map.put(c, lowType);
+                map.put(c, type);
             }
         }
         TYPE_MAP = Collections.unmodifiableMap(map);
     }
 
-    protected static final class TgVariableElement { // record
-        private final String name;
-        /** low type */
-        private final DataType type;
-
-        public TgVariableElement(String name, DataType type) {
-            this.name = name;
-            this.type = type;
-        }
-
-        public String name() {
-            return name;
-        }
-
-        public DataType type() {
-            return type;
-        }
-
-        @Override
-        public String toString() {
-            return name + ":" + type;
-        }
-    }
-
-    private final List<TgVariableElement> variableList = new ArrayList<>();
+    private final PlaceHolder.Builder lowBuilder = PlaceHolder.newBuilder();
     private PlaceHolder lowPlaceHolder;
 
     /**
-     * Tsurugi Variable
+     * Tsurugi Variable definition for PreparedStatement
      */
     public TgVariable() {
         // do nothing
@@ -80,7 +50,7 @@ public class TgVariable {
      * @return this
      */
     public TgVariable int4(String name) {
-        add(name, DataType.INT4);
+        add(name, TgDataType.INT4);
         return this;
     }
 
@@ -91,7 +61,7 @@ public class TgVariable {
      * @return this
      */
     public TgVariable int8(String name) {
-        add(name, DataType.INT8);
+        add(name, TgDataType.INT8);
         return this;
     }
 
@@ -102,7 +72,7 @@ public class TgVariable {
      * @return this
      */
     public TgVariable float4(String name) {
-        add(name, DataType.FLOAT4);
+        add(name, TgDataType.FLOAT4);
         return this;
     }
 
@@ -113,7 +83,7 @@ public class TgVariable {
      * @return this
      */
     public TgVariable float8(String name) {
-        add(name, DataType.FLOAT8);
+        add(name, TgDataType.FLOAT8);
         return this;
     }
 
@@ -124,7 +94,7 @@ public class TgVariable {
      * @return this
      */
     public TgVariable character(String name) {
-        add(name, DataType.CHARACTER);
+        add(name, TgDataType.CHARACTER);
         return this;
     }
 
@@ -137,8 +107,7 @@ public class TgVariable {
      * @return this
      */
     public TgVariable set(String name, TgDataType type) {
-        var lowType = getLowDataType(type);
-        add(name, lowType);
+        add(name, type);
         return this;
     }
 
@@ -150,32 +119,28 @@ public class TgVariable {
      * @return this
      */
     public TgVariable set(String name, Class<?> type) {
-        var lowType = getLowDataType(type);
+        var lowType = getDataType(type);
         add(name, lowType);
         return this;
     }
 
-    protected DataType getLowDataType(Object type) {
-        var lowType = TYPE_MAP.get(type);
-        if (lowType == null) {
+    protected TgDataType getDataType(Object type) {
+        var tgType = TYPE_MAP.get(type);
+        if (tgType == null) {
             throw new IllegalArgumentException("unsupported data type. type=" + type);
         }
-        return lowType;
+        return tgType;
     }
 
-    protected final void add(String name, DataType lowType) {
-        variableList.add(new TgVariableElement(name, lowType));
+    protected final void add(String name, TgDataType type) {
+        var lowVariable = Variable.newBuilder().setName(name).setType(type.getLowDataType()).build();
+        lowBuilder.addVariables(lowVariable);
         this.lowPlaceHolder = null;
     }
 
     // internal
     public PlaceHolder toLowPlaceHolder() {
         if (this.lowPlaceHolder == null) {
-            var lowBuilder = PlaceHolder.newBuilder();
-            for (var variable : variableList) {
-                var lowVariable = Variable.newBuilder().setName(variable.name()).setType(variable.type()).build();
-                lowBuilder.addVariables(lowVariable);
-            }
             this.lowPlaceHolder = lowBuilder.build();
         }
         return this.lowPlaceHolder;
@@ -183,6 +148,6 @@ public class TgVariable {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + variableList;
+        return getClass().getSimpleName() + "[" + lowBuilder + "]";
     }
 }
