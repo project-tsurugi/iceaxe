@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import com.nautilus_technologies.tsubakuro.channel.common.connection.Connector;
 import com.nautilus_technologies.tsubakuro.channel.common.connection.ConnectorImpl;
-import com.nautilus_technologies.tsubakuro.impl.low.sql.SessionImpl;
-import com.nautilus_technologies.tsubakuro.low.sql.Session;
+import com.nautilus_technologies.tsubakuro.impl.low.common.SessionImpl;
+import com.nautilus_technologies.tsubakuro.low.common.Session;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 

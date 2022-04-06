@@ -63,6 +63,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
                     this.hasNext = lowResultSet.nextRecord();
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
+                } catch (InterruptedException e) {
+                    throw new UncheckedIOException(new IOException(e));
                 }
                 this.moveNext = false;
             }

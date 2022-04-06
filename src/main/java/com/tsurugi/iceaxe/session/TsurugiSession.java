@@ -8,7 +8,7 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.channel.common.sql.SessionWire;
-import com.nautilus_technologies.tsubakuro.low.sql.Session;
+import com.nautilus_technologies.tsubakuro.low.common.Session;
 import com.nautilus_technologies.tsubakuro.protos.RequestProtos.TransactionOption;
 import com.tsurugi.iceaxe.result.TsurugiResultRecord;
 import com.tsurugi.iceaxe.statement.TgParameter;

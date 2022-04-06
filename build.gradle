@@ -4,5 +4,5 @@ plugins {
 
 dependencies {
     api 'com.nautilus_technologies.tsubakuro:connector:0.0.1'
-    api 'com.nautilus_technologies.tsubakuro:sql:0.0.1'
+    api 'com.nautilus_technologies.tsubakuro:session:0.0.1'
 }
