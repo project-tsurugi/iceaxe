@@ -27,11 +27,6 @@ public class IceaxeIoUtil {
         }
     }
 
-    @FunctionalInterface
-    public interface IoRunnable {
-        public void run() throws IOException;
-    }
-
     public static void close(NavigableSet<Closeable> closeableSet, IoRunnable runnable) throws IOException {
         IOException save = null;
         for (;;) {

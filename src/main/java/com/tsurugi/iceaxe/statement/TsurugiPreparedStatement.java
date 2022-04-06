@@ -2,43 +2,42 @@ package com.tsurugi.iceaxe.statement;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.concurrent.Future;
+import java.util.NavigableSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
-import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
+import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
 
 /**
  * Tsurugi PreparedStatement
- * 
- * @param <P> parameter type
- * @param <R> result record type
  */
-public class TsurugiPreparedStatement<P, R> implements Closeable {
+public abstract class TsurugiPreparedStatement implements Closeable {
 
     private final TsurugiSession ownerSession;
-    private Future<PreparedStatement> lowPreparedStatementFuture;
-    private PreparedStatement lowPreparedStatement;
+    private final NavigableSet<Closeable> closeableSet = new ConcurrentSkipListSet<>();
 
-    // internal
-    public TsurugiPreparedStatement(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture) {
+    protected TsurugiPreparedStatement(TsurugiSession session) {
         this.ownerSession = session;
-        this.lowPreparedStatementFuture = lowPreparedStatementFuture;
     }
 
-    protected final PreparedStatement getLowPreparedStatement() throws IOException {
-        if (this.lowPreparedStatementFuture != null) {
-            var info = ownerSession.getSessionInfo();
-            this.lowPreparedStatement = IceaxeIoUtil.getFromFuture(lowPreparedStatementFuture, info);
-            lowPreparedStatement.setCloseTimeout(info.timeoutTime(), info.timeoutUnit());
-            this.lowPreparedStatementFuture = null;
-        }
-        return this.lowPreparedStatement;
+    public final TgSessionInfo getSessionInfo() {
+        return ownerSession.getSessionInfo();
+    }
+
+    protected final void addChild(Closeable closeable) {
+        closeableSet.add(closeable);
+    }
+
+    // internal
+    public void removeChild(Closeable closeable) {
+        closeableSet.remove(closeable);
     }
 
     @Override
     public void close() throws IOException {
-        getLowPreparedStatement().close();
-        ownerSession.removeChild(this);
+        IceaxeIoUtil.close(closeableSet, () -> {
+            ownerSession.removeChild(this);
+        });
     }
 }
