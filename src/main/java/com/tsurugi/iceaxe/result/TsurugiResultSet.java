@@ -46,16 +46,21 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     @Override
     public Iterator<R> iterator() {
         try {
-            /* var lowRs = */ getLowResultSet();
-            return new TsurugiResultSetIterator(/* lowRs */);
+            var lowResultSet = getLowResultSet();
+            return new TsurugiResultSetIterator(lowResultSet);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     protected class TsurugiResultSetIterator implements Iterator<R> {
+        private final TsurugiResultRecord record;
         private boolean moveNext = true;
         private boolean hasNext;
+
+        public TsurugiResultSetIterator(ResultSet lowResultSet) {
+            this.record = new TsurugiResultRecord(lowResultSet);
+        }
 
         protected void moveNext() {
             if (this.moveNext) {
@@ -65,6 +70,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
                     throw new UncheckedIOException(e);
                 } catch (InterruptedException e) {
                     throw new UncheckedIOException(new IOException(e));
+                } finally {
+                    record.reset();
                 }
                 this.moveNext = false;
             }
@@ -82,40 +89,9 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             if (!this.hasNext) {
                 throw new NoSuchElementException();
             }
-            try {
-                var record = new TsurugiResultRecord();
-                while (lowResultSet.nextColumn()) {
-                    var name = "TODO"; // TODO name
-                    var value = getLowCurrentColumnValue();
-                    record.add(name, value);
-                }
-                var r = recordConverter.apply(record);
-                this.moveNext = true;
-                return r;
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-    }
-
-    protected Object getLowCurrentColumnValue() throws IOException {
-        if (lowResultSet.isNull()) {
-            return null;
-        }
-        var lowType = lowResultSet.type();
-        switch (lowType) {
-        case INT4:
-            return lowResultSet.getInt4();
-        case INT8:
-            return lowResultSet.getInt8();
-        case FLOAT4:
-            return lowResultSet.getFloat4();
-        case FLOAT8:
-            return lowResultSet.getFloat8();
-        case CHARACTER:
-            return lowResultSet.getCharacter();
-        default:
-            throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);
+            var r = recordConverter.apply(record);
+            this.moveNext = true;
+            return r;
         }
     }
 

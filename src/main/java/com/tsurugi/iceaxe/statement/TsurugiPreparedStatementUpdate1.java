@@ -13,26 +13,22 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
  * Tsurugi PreparedStatement
  * <ul>
  * <li>TODO+++翻訳: 更新系SQL</li>
- * <li>TODO+++翻訳: パラメーターあり</li>
+ * <li>TODO+++翻訳: SQLのパラメーターあり</li>
  * </ul>
  * 
  * @param <P> parameter type
  */
-public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatementWithLowPs {
-
-    private final Function<P, TgParameter> parameterConverter;
+public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatementWithLowPs<P> {
 
     // internal
     public TsurugiPreparedStatementUpdate1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameter> parameterConverter) {
-        super(session, lowPreparedStatementFuture);
-        this.parameterConverter = parameterConverter;
+        super(session, lowPreparedStatementFuture, parameterConverter);
     }
 
     public TsurugiResult execute(TsurugiTransaction transaction, P parameter) throws IOException {
         var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
-        var param = parameterConverter.apply(parameter);
-        var lowParameterSet = param.toLowParameterSet();
+        var lowParameterSet = getLowParameterSet(parameter);
         var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterSet);
         var result = new TsurugiResult(this, lowResultFuture);
         addChild(result);

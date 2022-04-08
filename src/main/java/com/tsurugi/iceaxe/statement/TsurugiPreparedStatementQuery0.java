@@ -12,7 +12,7 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
  * Tsurugi PreparedStatement
  * <ul>
  * <li>TODO+++翻訳: クエリー系SQL</li>
- * <li>TODO+++翻訳: パラメーターなし</li>
+ * <li>TODO+++翻訳: SQLのパラメーターなし</li>
  * </ul>
  * 
  * @param <R> record type

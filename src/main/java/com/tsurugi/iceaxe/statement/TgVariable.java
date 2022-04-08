@@ -1,6 +1,7 @@
 package com.tsurugi.iceaxe.statement;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -34,6 +35,8 @@ public class TgVariable {
 
     private final PlaceHolder.Builder lowBuilder = PlaceHolder.newBuilder();
     private PlaceHolder lowPlaceHolder;
+    /** Map&lt;name, type&gt; */
+    private Map<String, TgDataType> typeMap;
 
     /**
      * Tsurugi Variable definition for PreparedStatement
@@ -136,14 +139,43 @@ public class TgVariable {
         var lowVariable = Variable.newBuilder().setName(name).setType(type.getLowDataType()).build();
         lowBuilder.addVariables(lowVariable);
         this.lowPlaceHolder = null;
+        this.typeMap = null;
     }
 
     // internal
-    public PlaceHolder toLowPlaceHolder() {
+    public synchronized PlaceHolder toLowPlaceHolder() {
         if (this.lowPlaceHolder == null) {
             this.lowPlaceHolder = lowBuilder.build();
         }
         return this.lowPlaceHolder;
+    }
+
+    /**
+     * get data type
+     * 
+     * @param name name
+     * @return data type
+     */
+    public TgDataType getDataType(String name) {
+        if (this.typeMap == null) {
+            synchronized (this) {
+                var map = new HashMap<String, TgDataType>();
+                var list = lowBuilder.getVariablesList();
+                for (var v : list) {
+                    var lowName = v.getName();
+                    var lowType = v.getType();
+                    var type = TgDataType.of(lowType);
+                    map.put(lowName, type);
+                }
+                this.typeMap = map;
+            }
+        }
+
+        var type = typeMap.get(name);
+        if (type == null) {
+            throw new IllegalArgumentException("not found type. name=" + name);
+        }
+        return type;
     }
 
     @Override

@@ -14,30 +14,27 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
  * Tsurugi PreparedStatement
  * <ul>
  * <li>TODO+++翻訳: クエリー系SQL</li>
- * <li>TODO+++翻訳: パラメーターあり</li>
+ * <li>TODO+++翻訳: SQLのパラメーターあり</li>
  * </ul>
  * 
  * @param <P> parameter type
  * @param <R> record type
  */
-public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStatementWithLowPs {
+public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStatementWithLowPs<P> {
 
-    private final Function<P, TgParameter> parameterConverter;
     private final Function<TsurugiResultRecord, R> recordConverter;
 
     // internal
     public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameter> parameterConverter,
             Function<TsurugiResultRecord, R> recordConverter) {
-        super(session, lowPreparedStatementFuture);
-        this.parameterConverter = parameterConverter;
+        super(session, lowPreparedStatementFuture, parameterConverter);
         this.recordConverter = recordConverter;
     }
 
     public TsurugiResultSet<R> execute(TsurugiTransaction transaction, P parameter) throws IOException {
         var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
-        var param = parameterConverter.apply(parameter);
-        var lowParameterSet = param.toLowParameterSet();
+        var lowParameterSet = getLowParameterSet(parameter);
         var lowResultPair = lowTransaction.executeQuery(lowPs, lowParameterSet);
         var result = new TsurugiResultSet<>(this, lowResultPair.getLeft(), lowResultPair.getRight(), recordConverter);
         addChild(result);

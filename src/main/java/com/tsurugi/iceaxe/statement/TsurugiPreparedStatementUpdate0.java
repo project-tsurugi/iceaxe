@@ -10,7 +10,7 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
  * Tsurugi PreparedStatement
  * <ul>
  * <li>TODO+++翻訳: 更新系SQL</li>
- * <li>TODO+++翻訳: パラメーターなし</li>
+ * <li>TODO+++翻訳: SQLのパラメーターなし</li>
  * </ul>
  */
 public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {

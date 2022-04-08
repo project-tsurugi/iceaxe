@@ -1,6 +1,8 @@
 package com.tsurugi.iceaxe.statement;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import com.nautilus_technologies.tsubakuro.protos.CommonProtos.DataType;
 
@@ -46,5 +48,24 @@ public enum TgDataType {
     // internal
     public List<Class<?>> getClassList() {
         return this.classList;
+    }
+
+    private static final Map<DataType, TgDataType> LOW_TYPE_MAP;
+    static {
+        var map = new EnumMap<DataType, TgDataType>(DataType.class);
+        for (var type : values()) {
+            var lowType = type.getLowDataType();
+            map.put(lowType, type);
+        }
+        LOW_TYPE_MAP = map;
+    }
+
+    // internal
+    public static TgDataType of(DataType lowType) {
+        var type = LOW_TYPE_MAP.get(lowType);
+        if (type == null) {
+            throw new InternalError("unsupported type error. lowType=" + lowType);
+        }
+        return type;
     }
 }
