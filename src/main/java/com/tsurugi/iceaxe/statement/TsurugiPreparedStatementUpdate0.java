@@ -2,15 +2,15 @@ package com.tsurugi.iceaxe.statement;
 
 import java.io.IOException;
 
-import com.tsurugi.iceaxe.result.TsurugiResult;
+import com.tsurugi.iceaxe.result.TsurugiResultCount;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 
 /**
  * Tsurugi PreparedStatement
  * <ul>
- * <li>TODO+++–|–ó: XVŒnSQL</li>
- * <li>TODO+++–|–ó: SQL‚Ìƒpƒ‰ƒ[ƒ^[‚È‚µ</li>
+ * <li>TODO+++ç¿»è¨³: æ›´æ–°ç³»SQL</li>
+ * <li>TODO+++ç¿»è¨³: SQLã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ãªã—</li>
  * </ul>
  */
 public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
@@ -23,10 +23,17 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
         this.sql = sql;
     }
 
-    public TsurugiResult execute(TsurugiTransaction transaction) throws IOException {
+    /**
+     * execute statement
+     * 
+     * @param transaction Transaction
+     * @return result
+     * @throws IOException
+     */
+    public TsurugiResultCount execute(TsurugiTransaction transaction) throws IOException {
         var lowTransaction = transaction.getLowTransaction();
         var lowResultFuture = lowTransaction.executeStatement(sql);
-        var result = new TsurugiResult(this, lowResultFuture);
+        var result = new TsurugiResultCount(this, lowResultFuture);
         addChild(result);
         return result;
     }

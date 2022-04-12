@@ -45,7 +45,7 @@ public class TgVariable {
         // do nothing
     }
 
-    // FIXME name‚ğ‰Â•Ï’·ˆø”‚É‚µ‚½•û‚ª•Ö—˜‚©Hi‚»‚ñ‚Èg‚¢•û‚Í‚µ‚È‚¢‚©Hj
+    // FIXME nameã‚’å¯å¤‰é•·å¼•æ•°ã«ã—ãŸæ–¹ãŒä¾¿åˆ©ã‹ï¼Ÿï¼ˆãã‚“ãªä½¿ã„æ–¹ã¯ã—ãªã„ã‹ï¼Ÿï¼‰
     /**
      * add type(int)
      * 
@@ -101,7 +101,7 @@ public class TgVariable {
         return this;
     }
 
-    // FIXME setƒ‚Æ‚¢‚¤ƒ\ƒbƒh–¼‚æ‚èadd‚Ì•û‚ª‚¢‚¢‚©H
+    // FIXME setãƒ¡ã¨ã„ã†ã‚½ãƒƒãƒ‰åã‚ˆã‚Šaddã®æ–¹ãŒã„ã„ã‹ï¼Ÿ
     /**
      * add type
      * 

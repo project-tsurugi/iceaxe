@@ -61,9 +61,12 @@ public class TsurugiResult implements Closeable {
     public void close() throws IOException {
         // not try-finally
         var status = getResultStatus();
-        if (status != TgResultStatus.SUCCESS) {
-            // throw retry
+        try {
+            if (status != TgResultStatus.SUCCESS) {
+                // TODO throw retry
+            }
+        } finally {
+            owerPreparedStatement.removeChild(this);
         }
-        owerPreparedStatement.removeChild(this);
     }
 }

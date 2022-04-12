@@ -2,7 +2,9 @@ package com.tsurugi.iceaxe.result;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
@@ -38,6 +40,27 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             this.lowResultSetFuture = null;
         }
         return this.lowResultSet;
+    }
+
+    /**
+     * get name list
+     * 
+     * @return list of column name
+     * @throws IOException
+     */
+    public List<String> getNameList() throws IOException {
+        return getNameList(getLowResultSet());
+    }
+
+    static List<String> getNameList(ResultSet lowResultSet) throws IOException {
+        var lowMeta = lowResultSet.getRecordMeta();
+        var size = lowMeta.fieldCount();
+        var list = new ArrayList<String>(size);
+        for (int i = 0; i < size; i++) {
+            var name = lowMeta.name(i);
+            list.add(name);
+        }
+        return list;
     }
 
     /**

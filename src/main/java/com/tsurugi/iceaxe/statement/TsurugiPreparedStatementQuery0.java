@@ -11,8 +11,8 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 /**
  * Tsurugi PreparedStatement
  * <ul>
- * <li>TODO+++–|–ó: ƒNƒGƒŠ[ŒnSQL</li>
- * <li>TODO+++–|–ó: SQL‚Ìƒpƒ‰ƒ[ƒ^[‚È‚µ</li>
+ * <li>TODO+++ç¿»è¨³: ã‚¯ã‚¨ãƒªãƒ¼ç³»SQL</li>
+ * <li>TODO+++ç¿»è¨³: SQLã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ãªã—</li>
  * </ul>
  * 
  * @param <R> record type
@@ -29,6 +29,13 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
         this.recordConverter = recordConverter;
     }
 
+    /**
+     * execute query
+     * 
+     * @param transaction Transaction
+     * @return result
+     * @throws IOException
+     */
     public TsurugiResultSet<R> execute(TsurugiTransaction transaction) throws IOException {
         var lowTransaction = transaction.getLowTransaction();
         var lowResultPair = lowTransaction.executeQuery(sql);

@@ -13,8 +13,8 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 /**
  * Tsurugi PreparedStatement
  * <ul>
- * <li>TODO+++翻訳: クエリー系SQL</li>
- * <li>TODO+++翻訳: SQLのパラメーターあり</li>
+ * <li>TODO+++鄙ｻ險ｳ: 繧ｯ繧ｨ繝ｪ繝ｼ邉ｻSQL</li>
+ * <li>TODO+++鄙ｻ險ｳ: SQL縺ｮ繝代Λ繝｡繝ｼ繧ｿ繝ｼ縺ゅｊ</li>
  * </ul>
  * 
  * @param <P> parameter type
@@ -31,6 +31,14 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
         this.recordConverter = recordConverter;
     }
 
+    /**
+     * execute query
+     * 
+     * @param transaction Transaction
+     * @param parameter   SQL parameter
+     * @return result
+     * @throws IOException
+     */
     public TsurugiResultSet<R> execute(TsurugiTransaction transaction, P parameter) throws IOException {
         var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();

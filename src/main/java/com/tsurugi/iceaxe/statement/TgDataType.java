@@ -10,7 +10,7 @@ import com.nautilus_technologies.tsubakuro.protos.CommonProtos.DataType;
  * Tsurugi Data Type
  */
 public enum TgDataType {
-    // FIXME byte.class����INT4�Ɋ܂߂邩�H
+    // FIXME byte.class等もINT4に含めるか？
     /**
      * int
      */
