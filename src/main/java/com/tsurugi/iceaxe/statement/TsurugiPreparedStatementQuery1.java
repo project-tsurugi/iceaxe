@@ -43,8 +43,8 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
         var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
         var lowParameterSet = getLowParameterSet(parameter);
-        var lowResultPair = lowTransaction.executeQuery(lowPs, lowParameterSet);
-        var result = new TsurugiResultSet<>(this, lowResultPair.getLeft(), lowResultPair.getRight(), recordConverter);
+        var lowResultSetFuture = lowTransaction.executeQuery(lowPs, lowParameterSet);
+        var result = new TsurugiResultSet<>(this, lowResultSetFuture, recordConverter);
         addChild(result);
         return result;
     }

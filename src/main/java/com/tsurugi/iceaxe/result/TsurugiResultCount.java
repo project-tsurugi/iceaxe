@@ -11,9 +11,17 @@ import com.tsurugi.iceaxe.statement.TsurugiPreparedStatement;
  */
 public class TsurugiResultCount extends TsurugiResult {
 
+    private Future<ResultOnly> lowResultOnlyFuture;
+
     // internal
     public TsurugiResultCount(TsurugiPreparedStatement preparedStatement, Future<ResultOnly> lowResultOnlyFuture) {
-        super(preparedStatement, lowResultOnlyFuture);
+        super(preparedStatement);
+        this.lowResultOnlyFuture = lowResultOnlyFuture;
+    }
+
+    @Override
+    protected Future<ResultOnly> getLowResultOnlyFuture() throws IOException {
+        return lowResultOnlyFuture;
     }
 
     /**

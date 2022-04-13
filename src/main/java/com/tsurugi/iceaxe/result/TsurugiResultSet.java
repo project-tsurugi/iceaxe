@@ -31,9 +31,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private TsurugiResultRecord record;
 
     // internal
-    public TsurugiResultSet(TsurugiPreparedStatement preparedStatement, Future<ResultSet> lowResultSetFuture, Future<ResultOnly> lowResultOnlyFuture,
-            Function<TsurugiResultRecord, R> recordConverter) {
-        super(preparedStatement, lowResultOnlyFuture);
+    public TsurugiResultSet(TsurugiPreparedStatement preparedStatement, Future<ResultSet> lowResultSetFuture, Function<TsurugiResultRecord, R> recordConverter) {
+        super(preparedStatement);
         this.lowResultSetFuture = lowResultSetFuture;
         this.recordConverter = recordConverter;
     }
@@ -45,6 +44,11 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             this.lowResultSetFuture = null;
         }
         return this.lowResultSet;
+    }
+
+    @Override
+    protected Future<ResultOnly> getLowResultOnlyFuture() throws IOException {
+        return getLowResultSet().getResponse();
     }
 
     /**
@@ -96,6 +100,28 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             this.record = new TsurugiResultRecord(lowResultSet);
         }
         return this.record;
+    }
+
+    /**
+     * get record list
+     * 
+     * @return list of record
+     * @throws IOException
+     */
+    public List<R> getRecordList() throws IOException {
+        var list = new ArrayList<R>();
+        var lowResultSet = getLowResultSet();
+        var record = getRecord();
+        try {
+            while (lowResultSet.nextRecord()) {
+                record.reset();
+                var r = recordConverter.apply(record);
+                list.add(r);
+            }
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
+        return list;
     }
 
     /**

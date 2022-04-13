@@ -9,7 +9,7 @@ import java.util.Optional;
 import com.tsurugi.iceaxe.util.IceaxeConvertUtil;
 
 /**
- * Tsurugi Result Record for PreparedStatement
+ * Tsurugi Result Record
  */
 public class TsurugiResultEntity {
 

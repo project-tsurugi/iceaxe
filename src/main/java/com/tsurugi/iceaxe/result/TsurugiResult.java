@@ -12,16 +12,14 @@ import com.tsurugi.iceaxe.util.IceaxeIoUtil;
 /**
  * Tsurugi Result for PreparedStatement
  */
-public class TsurugiResult implements Closeable {
+public abstract class TsurugiResult implements Closeable {
 
     private final TsurugiPreparedStatement owerPreparedStatement;
-    private Future<ResultOnly> lowResultOnlyFuture;
     private ResultOnly lowResultOnly;
 
     // internal
-    public TsurugiResult(TsurugiPreparedStatement preparedStatement, Future<ResultOnly> lowResultOnlyFuture) {
+    public TsurugiResult(TsurugiPreparedStatement preparedStatement) {
         this.owerPreparedStatement = preparedStatement;
-        this.lowResultOnlyFuture = lowResultOnlyFuture;
     }
 
     protected final TgSessionInfo getSessionInfo() {
@@ -31,11 +29,13 @@ public class TsurugiResult implements Closeable {
     protected synchronized final ResultOnly getLowResultOnly() throws IOException {
         if (this.lowResultOnly == null) {
             var info = getSessionInfo();
+            var lowResultOnlyFuture = getLowResultOnlyFuture();
             this.lowResultOnly = IceaxeIoUtil.getFromFuture(lowResultOnlyFuture, info);
-            this.lowResultOnlyFuture = null;
         }
         return this.lowResultOnly;
     }
+
+    protected abstract Future<ResultOnly> getLowResultOnlyFuture() throws IOException;
 
     /**
      * get result status

@@ -12,7 +12,7 @@ import com.tsurugi.iceaxe.statement.TgDataType;
 import com.tsurugi.iceaxe.util.IceaxeConvertUtil;
 
 /**
- * Tsurugi Result Record (Low-ResultSet Wrapper)
+ * Tsurugi Result Record for {@link TsurugiResultSet}
  * 
  * <p>
  * TODO+++翻訳: 当クラスのメソッド群は以下の3種類に分類される。ある群のメソッドを使用したら、他の群のメソッドは使用不可。
