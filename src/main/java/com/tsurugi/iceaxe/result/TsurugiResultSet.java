@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
@@ -16,6 +17,9 @@ import com.tsurugi.iceaxe.util.IceaxeIoUtil;
 
 /**
  * Tsurugi Result Set for PreparedStatement
+ * <p>
+ * MT unsafe
+ * </p>
  * 
  * @param <R> record type
  */
@@ -24,6 +28,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private Future<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
     private final Function<TsurugiResultRecord, R> recordConverter;
+    private TsurugiResultRecord record;
 
     // internal
     public TsurugiResultSet(TsurugiPreparedStatement preparedStatement, Future<ResultSet> lowResultSetFuture, Future<ResultOnly> lowResultOnlyFuture,
@@ -64,13 +69,43 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     }
 
     /**
+     * get one record
+     * 
+     * @return record
+     * @throws IOException
+     */
+    public Optional<R> findRecord() throws IOException {
+        var lowResultSet = getLowResultSet();
+        try {
+            if (lowResultSet.nextRecord()) {
+                var record = getRecord();
+                record.reset();
+                var r = recordConverter.apply(record);
+                return Optional.of(r);
+            } else {
+                return Optional.empty();
+            }
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
+    }
+
+    protected TsurugiResultRecord getRecord() throws IOException {
+        if (this.record == null) {
+            var lowResultSet = getLowResultSet();
+            this.record = new TsurugiResultRecord(lowResultSet);
+        }
+        return this.record;
+    }
+
+    /**
      * @throws UncheckedIOException
      */
     @Override
     public Iterator<R> iterator() {
         try {
-            var lowResultSet = getLowResultSet();
-            return new TsurugiResultSetIterator(lowResultSet);
+            var record = getRecord();
+            return new TsurugiResultSetIterator(record);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -81,8 +116,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         private boolean moveNext = true;
         private boolean hasNext;
 
-        public TsurugiResultSetIterator(ResultSet lowResultSet) {
-            this.record = new TsurugiResultRecord(lowResultSet);
+        public TsurugiResultSetIterator(TsurugiResultRecord record) {
+            this.record = record;
         }
 
         protected void moveNext() {

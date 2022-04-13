@@ -39,6 +39,11 @@ public class TsurugiResult implements Closeable {
 
     /**
      * get result status
+     * <p>
+     * TODO+++翻訳: DBサーバー側で処理が終わるまでは{@link TgResultStatus#RESULT_NOT_SET}を返す。<br>
+     * DBサーバー側で処理が終わると{@link TgResultStatus#SUCCESS}または{@link TgResultStatus#ERROR}になる。
+     * </p>
+     * FIXME この説明で合っているか？
      * 
      * @return result status
      * @throws IOException

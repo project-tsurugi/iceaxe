@@ -22,7 +22,7 @@ public class TsurugiResultCount extends TsurugiResult {
      * @return the row count for SQL Data Manipulation Language (DML) statements
      */
     public int getUpdateCount() {
-        // TODO 更新件数取得
+        // FIXME 更新件数取得
         throw new InternalError("not yet implements");
     }
 
