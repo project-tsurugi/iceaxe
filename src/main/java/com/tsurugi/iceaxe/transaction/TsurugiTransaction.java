@@ -48,9 +48,14 @@ public class TsurugiTransaction implements Closeable {
      * @throws IOException
      */
     public synchronized void commit() throws IOException {
-        if (this.committed || this.rollbacked) {
-            throw new IllegalStateException("commit/rollback has already been called");
+        if (this.committed) {
+            // TODO ログ出力？
+            return;
         }
+        if (this.rollbacked) {
+            throw new IllegalStateException("rollback has already been called");
+        }
+
         finish(Transaction::commit);
         this.committed = true;
     }
@@ -61,15 +66,13 @@ public class TsurugiTransaction implements Closeable {
      * @throws IOException
      */
     public synchronized void rollback() throws IOException {
-        if (this.committed) {
-            throw new IllegalStateException("commit has already been called");
-        }
-        if (this.rollbacked) {
+        if (this.committed || this.rollbacked) {
             // TODO ログ出力？
-        } else {
-            finish(Transaction::rollback);
-            this.rollbacked = true;
+            return;
         }
+
+        finish(Transaction::rollback);
+        this.rollbacked = true;
     }
 
     protected void finish(IoFunction<Transaction, Future<ResultOnly>> finisher) throws IOException {

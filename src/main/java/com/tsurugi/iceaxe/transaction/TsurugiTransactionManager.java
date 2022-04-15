@@ -87,6 +87,6 @@ public class TsurugiTransactionManager {
                 }
             }
         }
-        throw new TsurugiTransactionIOException("retry over");
+        throw new TsurugiTransactionIOException("transaction retry over");
     }
 }
