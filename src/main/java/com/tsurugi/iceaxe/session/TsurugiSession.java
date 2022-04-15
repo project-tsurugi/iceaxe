@@ -66,7 +66,6 @@ public class TsurugiSession implements Closeable {
      */
     public <R> TsurugiPreparedStatementQuery0<R> createPreparedQuery(String sql, Function<TsurugiResultRecord, R> recordConverter) throws IOException {
         var ps = new TsurugiPreparedStatementQuery0<>(this, sql, recordConverter);
-        closeableSet.add(ps);
         return ps;
     }
 
@@ -87,7 +86,6 @@ public class TsurugiSession implements Closeable {
         var lowPlaceHolder = variable.toLowPlaceHolder();
         var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
         var ps = new TsurugiPreparedStatementQuery1<>(this, lowPreparedStatementFuture, parameterConverter, recordConverter);
-        closeableSet.add(ps);
         return ps;
     }
 
@@ -100,7 +98,6 @@ public class TsurugiSession implements Closeable {
      */
     public TsurugiPreparedStatementUpdate0 createPreparedStatement(String sql) throws IOException {
         var ps = new TsurugiPreparedStatementUpdate0(this, sql);
-        closeableSet.add(ps);
         return ps;
     }
 
@@ -118,7 +115,6 @@ public class TsurugiSession implements Closeable {
         var lowPlaceHolder = variable.toLowPlaceHolder();
         var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
         var ps = new TsurugiPreparedStatementUpdate1<>(this, lowPreparedStatementFuture, parameterConverter);
-        closeableSet.add(ps);
         return ps;
     }
 
@@ -139,7 +135,8 @@ public class TsurugiSession implements Closeable {
      * @return Transaction Manager
      */
     public TsurugiTransactionManager createTransactionManager(List<TgTransactionOption> defaultTransactionOptionList) {
-        return new TsurugiTransactionManager(this, defaultTransactionOptionList);
+        var tm = new TsurugiTransactionManager(this, defaultTransactionOptionList);
+        return tm;
     }
 
     /**
@@ -153,8 +150,12 @@ public class TsurugiSession implements Closeable {
         var lowOption = option.toLowTransactionOption();
         var lowTransactionFuture = getLowSession().createTransaction(lowOption);
         var transaction = new TsurugiTransaction(this, lowTransactionFuture);
-        closeableSet.add(transaction);
         return transaction;
+    }
+
+    // internal
+    public void addChild(Closeable closeable) {
+        closeableSet.add(closeable);
     }
 
     // internal

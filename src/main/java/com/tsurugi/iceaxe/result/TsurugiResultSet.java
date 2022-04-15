@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
-import com.tsurugi.iceaxe.statement.TsurugiPreparedStatement;
+import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionUncheckedIOException;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
@@ -32,8 +32,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private TsurugiResultRecord record;
 
     // internal
-    public TsurugiResultSet(TsurugiPreparedStatement preparedStatement, Future<ResultSet> lowResultSetFuture, Function<TsurugiResultRecord, R> recordConverter) {
-        super(preparedStatement);
+    public TsurugiResultSet(TsurugiTransaction transaction, Future<ResultSet> lowResultSetFuture, Function<TsurugiResultRecord, R> recordConverter) {
+        super(transaction);
         this.lowResultSetFuture = lowResultSetFuture;
         this.recordConverter = recordConverter;
     }

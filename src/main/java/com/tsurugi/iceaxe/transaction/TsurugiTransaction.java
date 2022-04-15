@@ -2,6 +2,8 @@ package com.tsurugi.iceaxe.transaction;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.NavigableSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Future;
 
 import com.nautilus_technologies.tsubakuro.low.sql.Transaction;
@@ -21,14 +23,16 @@ public class TsurugiTransaction implements Closeable {
     private Transaction lowTransaction;
     private boolean committed = false;
     private boolean rollbacked = false;
+    private final NavigableSet<Closeable> closeableSet = new ConcurrentSkipListSet<>();
 
     // internal
     public TsurugiTransaction(TsurugiSession session, Future<Transaction> lowTransactionFuture) {
         this.ownerSession = session;
         this.lowTransactionFuture = lowTransactionFuture;
+        session.addChild(this);
     }
 
-    protected final TgSessionInfo getSessionInfo() {
+    public final TgSessionInfo getSessionInfo() {
         return ownerSession.getSessionInfo();
     }
 
@@ -91,14 +95,26 @@ public class TsurugiTransaction implements Closeable {
         }
     }
 
+    // internal
+    public void addChild(Closeable closeable) {
+        closeableSet.add(closeable);
+    }
+
+    // internal
+    public void removeChild(Closeable closeable) {
+        closeableSet.remove(closeable);
+    }
+
     @Override
     public void close() throws IOException {
         if (!(this.committed || this.rollbacked)) {
             // commitやrollbackに失敗してもcloseは呼ばれるので、ここでIllegalStateException等を発生させるのは良くない
         }
 
-        // not try-finally
-        getLowTransaction().close();
-        ownerSession.removeChild(this);
+        IceaxeIoUtil.close(closeableSet, () -> {
+            // not try-finally
+            getLowTransaction().close();
+            ownerSession.removeChild(this);
+        });
     }
 }

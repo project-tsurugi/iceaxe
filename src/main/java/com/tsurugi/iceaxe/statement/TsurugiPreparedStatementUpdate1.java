@@ -40,8 +40,7 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
             var lowPs = getLowPreparedStatement();
             var lowParameterSet = getLowParameterSet(parameter);
             var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterSet);
-            var result = new TsurugiResultCount(this, lowResultFuture);
-            addChild(result);
+            var result = new TsurugiResultCount(transaction, lowResultFuture);
             return result;
         } catch (IOException e) {
             throw new TsurugiTransactionIOException(e);

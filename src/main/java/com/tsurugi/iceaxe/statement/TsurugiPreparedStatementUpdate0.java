@@ -35,8 +35,7 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
         try {
             var lowTransaction = transaction.getLowTransaction();
             var lowResultFuture = lowTransaction.executeStatement(sql);
-            var result = new TsurugiResultCount(this, lowResultFuture);
-            addChild(result);
+            var result = new TsurugiResultCount(transaction, lowResultFuture);
             return result;
         } catch (IOException e) {
             throw new TsurugiTransactionIOException(e);

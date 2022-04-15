@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
-import com.tsurugi.iceaxe.statement.TsurugiPreparedStatement;
+import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
 
@@ -15,16 +15,17 @@ import com.tsurugi.iceaxe.util.IceaxeIoUtil;
  */
 public abstract class TsurugiResult implements Closeable {
 
-    private final TsurugiPreparedStatement owerPreparedStatement;
+    private final TsurugiTransaction ownerTransaction;
     private ResultOnly lowResultOnly;
 
     // internal
-    public TsurugiResult(TsurugiPreparedStatement preparedStatement) {
-        this.owerPreparedStatement = preparedStatement;
+    public TsurugiResult(TsurugiTransaction transaction) {
+        this.ownerTransaction = transaction;
+        transaction.addChild(this);
     }
 
     protected final TgSessionInfo getSessionInfo() {
-        return owerPreparedStatement.getSessionInfo();
+        return ownerTransaction.getSessionInfo();
     }
 
     protected synchronized final ResultOnly getLowResultOnly() throws IOException {
@@ -87,7 +88,7 @@ public abstract class TsurugiResult implements Closeable {
             // FIXME resultCaseがRESULT_NOT_SETだったらどうすればよいか？
             checkResultStatus(true);
         } finally {
-            owerPreparedStatement.removeChild(this);
+            ownerTransaction.removeChild(this);
         }
     }
 }

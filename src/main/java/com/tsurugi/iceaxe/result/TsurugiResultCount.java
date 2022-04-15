@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.Future;
 
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
-import com.tsurugi.iceaxe.statement.TsurugiPreparedStatement;
+import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 
 /**
  * Tsurugi Result Count for PreparedStatement
@@ -14,8 +14,8 @@ public class TsurugiResultCount extends TsurugiResult {
     private Future<ResultOnly> lowResultOnlyFuture;
 
     // internal
-    public TsurugiResultCount(TsurugiPreparedStatement preparedStatement, Future<ResultOnly> lowResultOnlyFuture) {
-        super(preparedStatement);
+    public TsurugiResultCount(TsurugiTransaction transaction, Future<ResultOnly> lowResultOnlyFuture) {
+        super(transaction);
         this.lowResultOnlyFuture = lowResultOnlyFuture;
     }
 
