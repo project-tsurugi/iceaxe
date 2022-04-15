@@ -8,6 +8,7 @@ import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.tsurugi.iceaxe.result.TsurugiResultCount;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 
 /**
  * Tsurugi PreparedStatement
@@ -31,15 +32,19 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return result
-     * @throws IOException
+     * @throws TsurugiTransactionIOException
      */
-    public TsurugiResultCount execute(TsurugiTransaction transaction, P parameter) throws IOException {
-        var lowTransaction = transaction.getLowTransaction();
-        var lowPs = getLowPreparedStatement();
-        var lowParameterSet = getLowParameterSet(parameter);
-        var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterSet);
-        var result = new TsurugiResultCount(this, lowResultFuture);
-        addChild(result);
-        return result;
+    public TsurugiResultCount execute(TsurugiTransaction transaction, P parameter) throws TsurugiTransactionIOException {
+        try {
+            var lowTransaction = transaction.getLowTransaction();
+            var lowPs = getLowPreparedStatement();
+            var lowParameterSet = getLowParameterSet(parameter);
+            var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterSet);
+            var result = new TsurugiResultCount(this, lowResultFuture);
+            addChild(result);
+            return result;
+        } catch (IOException e) {
+            throw new TsurugiTransactionIOException(e);
+        }
     }
 }

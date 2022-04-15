@@ -6,7 +6,6 @@ import java.util.concurrent.Future;
 
 import com.nautilus_technologies.tsubakuro.low.sql.Transaction;
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
-import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly.ResultCase;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
@@ -20,7 +19,8 @@ public class TsurugiTransaction implements Closeable {
     private final TsurugiSession ownerSession;
     private Future<Transaction> lowTransactionFuture;
     private Transaction lowTransaction;
-    private boolean finished = false;
+    private boolean committed = false;
+    private boolean rollbacked = false;
 
     // internal
     public TsurugiTransaction(TsurugiSession session, Future<Transaction> lowTransactionFuture) {
@@ -43,38 +43,57 @@ public class TsurugiTransaction implements Closeable {
     }
 
     /**
-     * commit
+     * do commit
      * 
      * @throws IOException
      */
     public synchronized void commit() throws IOException {
+        if (this.committed || this.rollbacked) {
+            throw new IllegalStateException("commit/rollback has already been called");
+        }
         finish(Transaction::commit);
+        this.committed = true;
     }
 
     /**
-     * rollback
+     * do rollback
      * 
      * @throws IOException
      */
     public synchronized void rollback() throws IOException {
-        finish(Transaction::rollback);
+        if (this.committed) {
+            throw new IllegalStateException("commit has already been called");
+        }
+        if (this.rollbacked) {
+            // TODO ログ出力？
+        } else {
+            finish(Transaction::rollback);
+            this.rollbacked = true;
+        }
     }
 
     protected void finish(IoFunction<Transaction, Future<ResultOnly>> finisher) throws IOException {
-        if (this.finished) {
-            throw new IllegalStateException("commit/rollback has already been called");
-        }
         var lowResultFuture = finisher.apply(getLowTransaction());
         var info = getSessionInfo();
         var lowResult = IceaxeIoUtil.getFromFuture(lowResultFuture, info);
-        if (lowResult.getResultCase() != ResultCase.SUCCESS) {
-            throw new IOException(); // TODO Exception
+        var lowResultCase = lowResult.getResultCase();
+        switch (lowResultCase) {
+        case SUCCESS:
+            return;
+        case ERROR:
+            throw new TsurugiTransactionIOException(lowResult.getError());
+        default:
+            // FIXME commit/rollbackではSUCCESS,ERROR以外は返らないという想定で良いか？
+            throw new AssertionError(lowResultCase);
         }
-        this.finished = true;
     }
 
     @Override
     public void close() throws IOException {
+        if (!(this.committed || this.rollbacked)) {
+            // commitやrollbackに失敗してもcloseは呼ばれるので、ここでIllegalStateException等を発生させるのは良くない
+        }
+
         // not try-finally
         getLowTransaction().close();
         ownerSession.removeChild(this);

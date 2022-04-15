@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatement;
+import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
 
 /**
@@ -62,14 +63,29 @@ public abstract class TsurugiResult implements Closeable {
         }
     }
 
+    protected void checkResultStatus(boolean errorIfResultNotSet) throws IOException, TsurugiTransactionIOException {
+        var lowResultOnly = getLowResultOnly();
+        var lowResultCase = lowResultOnly.getResultCase();
+        switch (lowResultCase) {
+        case SUCCESS:
+            break;
+        case ERROR:
+            throw new TsurugiTransactionIOException(lowResultOnly.getError());
+        case RESULT_NOT_SET:
+            if (errorIfResultNotSet) {
+                throw new AssertionError(lowResultCase);
+            }
+            break;
+        default:
+            throw new AssertionError(lowResultCase);
+        }
+    }
+
     @Override
     public void close() throws IOException {
-        // not try-finally
-        var status = getResultStatus();
         try {
-            if (status != TgResultStatus.SUCCESS) {
-                // TODO throw retry
-            }
+            // FIXME resultCaseがRESULT_NOT_SETだったらどうすればよいか？
+            checkResultStatus(true);
         } finally {
             owerPreparedStatement.removeChild(this);
         }

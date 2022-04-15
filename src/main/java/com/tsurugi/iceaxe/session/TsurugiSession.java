@@ -2,6 +2,7 @@ package com.tsurugi.iceaxe.session;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Future;
@@ -18,6 +19,7 @@ import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugi.iceaxe.statement.TgParameter;
 import com.tsurugi.iceaxe.transaction.TgTransactionOption;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugi.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
 
 /**
@@ -118,6 +120,26 @@ public class TsurugiSession implements Closeable {
         var ps = new TsurugiPreparedStatementUpdate1<>(this, lowPreparedStatementFuture, parameterConverter);
         closeableSet.add(ps);
         return ps;
+    }
+
+    /**
+     * create transaction manager
+     * 
+     * @return Transaction Manager
+     */
+    public TsurugiTransactionManager createTransactionManager() {
+        return createTransactionManager(null);
+    }
+
+    /**
+     * create transaction manager
+     * 
+     * @param defaultTransactionOptionList transaction option
+     * 
+     * @return Transaction Manager
+     */
+    public TsurugiTransactionManager createTransactionManager(List<TgTransactionOption> defaultTransactionOptionList) {
+        return new TsurugiTransactionManager(this, defaultTransactionOptionList);
     }
 
     /**

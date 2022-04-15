@@ -28,14 +28,19 @@ public class TsurugiResultCount extends TsurugiResult {
      * get count
      * 
      * @return the row count for SQL Data Manipulation Language (DML) statements
+     * @throws IOException
      */
-    public int getUpdateCount() {
+    public int getUpdateCount() throws IOException {
+        // FIXME ステータスがRESULT_NOT_SETだったらどうする？
+        checkResultStatus(false);
         // FIXME 更新件数取得
         throw new InternalError("not yet implements");
     }
 
     @Override
     public void close() throws IOException {
+        // checkResultStatus(true); クローズ時にはステータスチェックは行わない
+        // 一度も更新件数を取得しない場合でも、commitでステータスチェックされる
         super.close();
     }
 }

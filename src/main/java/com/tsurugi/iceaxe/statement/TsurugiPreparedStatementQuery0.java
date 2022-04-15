@@ -7,6 +7,7 @@ import com.tsurugi.iceaxe.result.TsurugiResultRecord;
 import com.tsurugi.iceaxe.result.TsurugiResultSet;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 
 /**
  * Tsurugi PreparedStatement
@@ -34,13 +35,17 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
      * 
      * @param transaction Transaction
      * @return result
-     * @throws IOException
+     * @throws TsurugiTransactionIOException
      */
-    public TsurugiResultSet<R> execute(TsurugiTransaction transaction) throws IOException {
-        var lowTransaction = transaction.getLowTransaction();
-        var lowResultSetFuture = lowTransaction.executeQuery(sql);
-        var result = new TsurugiResultSet<>(this, lowResultSetFuture, recordConverter);
-        addChild(result);
-        return result;
+    public TsurugiResultSet<R> execute(TsurugiTransaction transaction) throws TsurugiTransactionIOException {
+        try {
+            var lowTransaction = transaction.getLowTransaction();
+            var lowResultSetFuture = lowTransaction.executeQuery(sql);
+            var result = new TsurugiResultSet<>(this, lowResultSetFuture, recordConverter);
+            addChild(result);
+            return result;
+        } catch (IOException e) {
+            throw new TsurugiTransactionIOException(e);
+        }
     }
 }

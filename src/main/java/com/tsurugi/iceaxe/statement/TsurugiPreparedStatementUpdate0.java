@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.tsurugi.iceaxe.result.TsurugiResultCount;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 
 /**
  * Tsurugi PreparedStatement
@@ -28,13 +29,17 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      * 
      * @param transaction Transaction
      * @return result
-     * @throws IOException
+     * @throws TsurugiTransactionIOException
      */
-    public TsurugiResultCount execute(TsurugiTransaction transaction) throws IOException {
-        var lowTransaction = transaction.getLowTransaction();
-        var lowResultFuture = lowTransaction.executeStatement(sql);
-        var result = new TsurugiResultCount(this, lowResultFuture);
-        addChild(result);
-        return result;
+    public TsurugiResultCount execute(TsurugiTransaction transaction) throws TsurugiTransactionIOException {
+        try {
+            var lowTransaction = transaction.getLowTransaction();
+            var lowResultFuture = lowTransaction.executeStatement(sql);
+            var result = new TsurugiResultCount(this, lowResultFuture);
+            addChild(result);
+            return result;
+        } catch (IOException e) {
+            throw new TsurugiTransactionIOException(e);
+        }
     }
 }
