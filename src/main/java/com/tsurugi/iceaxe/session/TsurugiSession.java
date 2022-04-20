@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.channel.common.sql.SessionWire;
 import com.nautilus_technologies.tsubakuro.low.common.Session;
+import com.tsurugi.iceaxe.result.TsurugiResultEntity;
 import com.tsurugi.iceaxe.result.TsurugiResultRecord;
 import com.tsurugi.iceaxe.statement.TgVariable;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementQuery0;
@@ -21,6 +22,7 @@ import com.tsurugi.iceaxe.transaction.TgTransactionOption;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
+import com.tsurugi.iceaxe.util.IoFunction;
 
 /**
  * Tsurugi Session
@@ -58,15 +60,40 @@ public class TsurugiSession implements Closeable {
     /**
      * create PreparedStatement
      * 
+     * @param sql SQL
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public TsurugiPreparedStatementQuery0<TsurugiResultEntity> createPreparedQuery(String sql) throws IOException {
+        return createPreparedQuery(sql, TsurugiResultEntity::of);
+    }
+
+    /**
+     * create PreparedStatement
+     * 
      * @param <R>             record type
      * @param sql             SQL
      * @param recordConverter converter from ResultRecord to R
      * @return PreparedStatement
      * @throws IOException
      */
-    public <R> TsurugiPreparedStatementQuery0<R> createPreparedQuery(String sql, Function<TsurugiResultRecord, R> recordConverter) throws IOException {
+    public <R> TsurugiPreparedStatementQuery0<R> createPreparedQuery(String sql, IoFunction<TsurugiResultRecord, R> recordConverter) throws IOException {
         var ps = new TsurugiPreparedStatementQuery0<>(this, sql, recordConverter);
         return ps;
+    }
+
+    /**
+     * create PreparedStatement
+     * 
+     * @param <P>                parameter type
+     * @param sql                SQL
+     * @param variable           variable definition
+     * @param parameterConverter converter from P to Parameter
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public <P> TsurugiPreparedStatementQuery1<P, TsurugiResultEntity> createPreparedQuery(String sql, TgVariable variable, Function<P, TgParameter> parameterConverter) throws IOException {
+        return createPreparedQuery(sql, variable, parameterConverter, TsurugiResultEntity::of);
     }
 
     /**
@@ -82,7 +109,7 @@ public class TsurugiSession implements Closeable {
      * @throws IOException
      */
     public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgVariable variable, Function<P, TgParameter> parameterConverter,
-            Function<TsurugiResultRecord, R> recordConverter) throws IOException {
+            IoFunction<TsurugiResultRecord, R> recordConverter) throws IOException {
         var lowPlaceHolder = variable.toLowPlaceHolder();
         var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
         var ps = new TsurugiPreparedStatementQuery1<>(this, lowPreparedStatementFuture, parameterConverter, recordConverter);
@@ -99,6 +126,18 @@ public class TsurugiSession implements Closeable {
     public TsurugiPreparedStatementUpdate0 createPreparedStatement(String sql) throws IOException {
         var ps = new TsurugiPreparedStatementUpdate0(this, sql);
         return ps;
+    }
+
+    /**
+     * create PreparedStatement
+     * 
+     * @param sql      SQL
+     * @param variable variable definition
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public TsurugiPreparedStatementUpdate1<TgParameter> createPreparedStatement(String sql, TgVariable variable) throws IOException {
+        return createPreparedStatement(sql, variable, TgParameter.IDENTITY);
     }
 
     /**

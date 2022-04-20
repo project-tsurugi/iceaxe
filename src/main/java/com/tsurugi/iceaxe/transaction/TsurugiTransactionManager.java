@@ -26,6 +26,17 @@ public class TsurugiTransactionManager {
     /**
      * execute transaction
      * 
+     * @param action action
+     * @throws IOException
+     * @see TsurugiPreparedStatement
+     */
+    public void execute(IoConsumer<TsurugiTransaction> action) throws IOException {
+        execute(defaultTransactionOptionList, action);
+    }
+
+    /**
+     * execute transaction
+     * 
      * @param transactionOptionList transaction option
      * @param action                action
      * @throws IOException
@@ -39,6 +50,20 @@ public class TsurugiTransactionManager {
             action.accept(transaction);
             return null;
         });
+    }
+
+    /**
+     * execute transaction
+     * 
+     * @param <R>                   return type
+     * @param transactionOptionList transaction option
+     * @param action                action
+     * @return return value
+     * @throws IOException
+     * @see TsurugiPreparedStatement
+     */
+    public <R> R execute(IoFunction<TsurugiTransaction, R> action) throws IOException {
+        return execute(defaultTransactionOptionList, action);
     }
 
     /**

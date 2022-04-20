@@ -10,6 +10,7 @@ import com.tsurugi.iceaxe.result.TsurugiResultSet;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
+import com.tsurugi.iceaxe.util.IoFunction;
 
 /**
  * Tsurugi PreparedStatement
@@ -23,11 +24,11 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
  */
 public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStatementWithLowPs<P> {
 
-    private final Function<TsurugiResultRecord, R> recordConverter;
+    private final IoFunction<TsurugiResultRecord, R> recordConverter;
 
     // internal
     public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameter> parameterConverter,
-            Function<TsurugiResultRecord, R> recordConverter) {
+            IoFunction<TsurugiResultRecord, R> recordConverter) {
         super(session, lowPreparedStatementFuture, parameterConverter);
         this.recordConverter = recordConverter;
     }

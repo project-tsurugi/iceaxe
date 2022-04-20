@@ -1,13 +1,13 @@
 package com.tsurugi.iceaxe.statement;
 
 import java.io.IOException;
-import java.util.function.Function;
 
 import com.tsurugi.iceaxe.result.TsurugiResultRecord;
 import com.tsurugi.iceaxe.result.TsurugiResultSet;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
+import com.tsurugi.iceaxe.util.IoFunction;
 
 /**
  * Tsurugi PreparedStatement
@@ -21,10 +21,10 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement {
 
     private final String sql;
-    private final Function<TsurugiResultRecord, R> recordConverter;
+    private final IoFunction<TsurugiResultRecord, R> recordConverter;
 
     // internal
-    public TsurugiPreparedStatementQuery0(TsurugiSession session, String sql, Function<TsurugiResultRecord, R> recordConverter) {
+    public TsurugiPreparedStatementQuery0(TsurugiSession session, String sql, IoFunction<TsurugiResultRecord, R> recordConverter) {
         super(session);
         this.sql = sql;
         this.recordConverter = recordConverter;

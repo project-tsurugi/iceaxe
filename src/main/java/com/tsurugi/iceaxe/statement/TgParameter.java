@@ -1,5 +1,7 @@
 package com.tsurugi.iceaxe.statement;
 
+import java.util.function.Function;
+
 import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet;
 
 /**
@@ -25,6 +27,11 @@ public interface TgParameter {
     public static TgParameterWithVariable of(TgVariable variable) {
         return new TgParameterWithVariable(variable);
     }
+
+    /**
+     * a function that always returns its input argument.
+     */
+    public static final Function<TgParameter, TgParameter> IDENTITY = p -> p;
 
     // internal
     public ParameterSet toLowParameterSet();

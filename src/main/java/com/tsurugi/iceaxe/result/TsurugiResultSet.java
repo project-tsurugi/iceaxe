@@ -1,13 +1,13 @@
 package com.tsurugi.iceaxe.result;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
@@ -15,6 +15,7 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionUncheckedIOException;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
+import com.tsurugi.iceaxe.util.IoFunction;
 
 /**
  * Tsurugi Result Set for PreparedStatement
@@ -28,11 +29,11 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     private Future<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
-    private final Function<TsurugiResultRecord, R> recordConverter;
+    private final IoFunction<TsurugiResultRecord, R> recordConverter;
     private TsurugiResultRecord record;
 
     // internal
-    public TsurugiResultSet(TsurugiTransaction transaction, Future<ResultSet> lowResultSetFuture, Function<TsurugiResultRecord, R> recordConverter) {
+    public TsurugiResultSet(TsurugiTransaction transaction, Future<ResultSet> lowResultSetFuture, IoFunction<TsurugiResultRecord, R> recordConverter) {
         super(transaction);
         this.lowResultSetFuture = lowResultSetFuture;
         this.recordConverter = recordConverter;
@@ -187,7 +188,14 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             if (!this.hasNext) {
                 throw new NoSuchElementException();
             }
-            var r = recordConverter.apply(record);
+            R r;
+            try {
+                r = recordConverter.apply(record);
+            } catch (TsurugiTransactionIOException e) {
+                throw new TsurugiTransactionUncheckedIOException(e);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
             this.moveNext = true;
             return r;
         }
