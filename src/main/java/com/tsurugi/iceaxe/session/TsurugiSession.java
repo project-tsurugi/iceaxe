@@ -12,12 +12,12 @@ import com.nautilus_technologies.tsubakuro.channel.common.sql.SessionWire;
 import com.nautilus_technologies.tsubakuro.low.common.Session;
 import com.tsurugi.iceaxe.result.TsurugiResultEntity;
 import com.tsurugi.iceaxe.result.TsurugiResultRecord;
-import com.tsurugi.iceaxe.statement.TgVariable;
+import com.tsurugi.iceaxe.statement.TgVariableList;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementUpdate1;
-import com.tsurugi.iceaxe.statement.TgParameter;
+import com.tsurugi.iceaxe.statement.TgParameterList;
 import com.tsurugi.iceaxe.transaction.TgTransactionOption;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionManager;
@@ -85,6 +85,18 @@ public class TsurugiSession implements Closeable {
     /**
      * create PreparedStatement
      * 
+     * @param sql      SQL
+     * @param variable variable definition
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public TsurugiPreparedStatementQuery1<TgParameterList, TsurugiResultEntity> createPreparedQuery(String sql, TgVariableList variable) throws IOException {
+        return createPreparedQuery(sql, variable, TgParameterList.IDENTITY, TsurugiResultEntity::of);
+    }
+
+    /**
+     * create PreparedStatement
+     * 
      * @param <P>                parameter type
      * @param sql                SQL
      * @param variable           variable definition
@@ -92,7 +104,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
-    public <P> TsurugiPreparedStatementQuery1<P, TsurugiResultEntity> createPreparedQuery(String sql, TgVariable variable, Function<P, TgParameter> parameterConverter) throws IOException {
+    public <P> TsurugiPreparedStatementQuery1<P, TsurugiResultEntity> createPreparedQuery(String sql, TgVariableList variable, Function<P, TgParameterList> parameterConverter) throws IOException {
         return createPreparedQuery(sql, variable, parameterConverter, TsurugiResultEntity::of);
     }
 
@@ -108,7 +120,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
-    public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgVariable variable, Function<P, TgParameter> parameterConverter,
+    public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgVariableList variable, Function<P, TgParameterList> parameterConverter,
             IoFunction<TsurugiResultRecord, R> recordConverter) throws IOException {
         var lowPlaceHolder = variable.toLowPlaceHolder();
         var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
@@ -136,8 +148,8 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
-    public TsurugiPreparedStatementUpdate1<TgParameter> createPreparedStatement(String sql, TgVariable variable) throws IOException {
-        return createPreparedStatement(sql, variable, TgParameter.IDENTITY);
+    public TsurugiPreparedStatementUpdate1<TgParameterList> createPreparedStatement(String sql, TgVariableList variable) throws IOException {
+        return createPreparedStatement(sql, variable, TgParameterList.IDENTITY);
     }
 
     /**
@@ -150,7 +162,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
-    public <P> TsurugiPreparedStatementUpdate1<P> createPreparedStatement(String sql, TgVariable variable, Function<P, TgParameter> parameterConverter) throws IOException {
+    public <P> TsurugiPreparedStatementUpdate1<P> createPreparedStatement(String sql, TgVariableList variable, Function<P, TgParameterList> parameterConverter) throws IOException {
         var lowPlaceHolder = variable.toLowPlaceHolder();
         var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
         var ps = new TsurugiPreparedStatementUpdate1<>(this, lowPreparedStatementFuture, parameterConverter);

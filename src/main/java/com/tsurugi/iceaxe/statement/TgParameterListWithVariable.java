@@ -8,19 +8,19 @@ import com.tsurugi.iceaxe.util.IceaxeConvertUtil;
  * Tsurugi Parameter for PreparedStatement
  * 
  * <p>
- * Perform conversion to the type defined in {@link TgVariable}.
+ * Perform conversion to the type defined in {@link TgVariableList}.
  * </p>
  */
-public class TgParameterWithVariable implements TgParameter {
+public class TgParameterListWithVariable implements TgParameterList {
 
-    private final TgVariable variable;
+    private final TgVariableList variable;
     private final ParameterSet.Builder lowBuilder = ParameterSet.newBuilder();
     private ParameterSet lowParameterSet;
 
     /**
      * Tsurugi Parameter for PreparedStatement
      */
-    public TgParameterWithVariable(TgVariable variable) {
+    public TgParameterListWithVariable(TgVariableList variable) {
         this.variable = variable;
     }
 
@@ -35,7 +35,7 @@ public class TgParameterWithVariable implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterWithVariable set(String name, Object value) {
+    public TgParameterListWithVariable add(String name, Object value) {
         var lowParameter = Parameter.newBuilder().setName(name);
         setValueTo(lowParameter, name, value);
         add(lowParameter);

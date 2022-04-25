@@ -7,10 +7,10 @@ import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet.Par
  * Tsurugi Parameter for PreparedStatement
  * 
  * <p>
- * Do not check with {@link TgVariable}.
+ * Do not check with {@link TgVariableList}.
  * </p>
  */
-public class TgParameterUncheck implements TgParameter {
+public class TgParameterListUncheck implements TgParameterList {
 
     private final ParameterSet.Builder lowBuilder = ParameterSet.newBuilder();
     private ParameterSet lowParameterSet;
@@ -18,7 +18,7 @@ public class TgParameterUncheck implements TgParameter {
     /**
      * Tsurugi Parameter for PreparedStatement
      */
-    public TgParameterUncheck() {
+    public TgParameterListUncheck() {
         // do nothing
     }
 
@@ -29,7 +29,7 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, int value) {
+    public TgParameterListUncheck add(String name, int value) {
         var lowParameter = Parameter.newBuilder().setName(name).setInt4Value(value);
         add(lowParameter);
         return this;
@@ -42,7 +42,7 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, Integer value) {
+    public TgParameterListUncheck add(String name, Integer value) {
         var lowParameter = Parameter.newBuilder().setName(name);
         if (value != null) {
             lowParameter.setInt4Value(value);
@@ -58,7 +58,7 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, long value) {
+    public TgParameterListUncheck add(String name, long value) {
         var lowParameter = Parameter.newBuilder().setName(name).setInt8Value(value);
         add(lowParameter);
         return this;
@@ -71,7 +71,7 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, Long value) {
+    public TgParameterListUncheck add(String name, Long value) {
         var lowParameter = Parameter.newBuilder().setName(name);
         if (value != null) {
             lowParameter.setInt8Value(value);
@@ -87,7 +87,7 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, float value) {
+    public TgParameterListUncheck add(String name, float value) {
         var lowParameter = Parameter.newBuilder().setName(name).setFloat4Value(value);
         add(lowParameter);
         return this;
@@ -100,7 +100,7 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, Float value) {
+    public TgParameterListUncheck add(String name, Float value) {
         var lowParameter = Parameter.newBuilder().setName(name);
         if (value != null) {
             lowParameter.setFloat4Value(value);
@@ -116,7 +116,7 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, double value) {
+    public TgParameterListUncheck add(String name, double value) {
         var lowParameter = Parameter.newBuilder().setName(name).setFloat8Value(value);
         add(lowParameter);
         return this;
@@ -129,7 +129,7 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, Double value) {
+    public TgParameterListUncheck add(String name, Double value) {
         var lowParameter = Parameter.newBuilder().setName(name);
         if (value != null) {
             lowParameter.setFloat8Value(value);
@@ -145,12 +145,24 @@ public class TgParameterUncheck implements TgParameter {
      * @param value value
      * @return this
      */
-    public TgParameterUncheck set(String name, String value) {
+    public TgParameterListUncheck add(String name, String value) {
         var lowParameter = Parameter.newBuilder().setName(name);
         if (value != null) {
             lowParameter.setCharacterValue(value);
         }
         add(lowParameter);
+        return this;
+    }
+
+    /**
+     * add parameter
+     * 
+     * @param parameter parameter
+     * @return this
+     */
+    public TgParameterListUncheck add(TgParameter parameter) {
+        lowBuilder.addParameters(parameter.toLowParameter());
+        this.lowParameterSet = null;
         return this;
     }
 

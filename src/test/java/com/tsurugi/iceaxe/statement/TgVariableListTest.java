@@ -11,53 +11,53 @@ import org.junit.jupiter.api.Test;
 
 import com.nautilus_technologies.tsubakuro.protos.CommonProtos.DataType;
 
-class TgVariableTest {
+class TgVariableListTest {
 
     @Test
     void testOf() {
-        var variable = TgVariable.of();
+        var variable = TgVariableList.of();
         assertVariable(Map.of(), variable);
-        assertEquals("TgVariable[]", variable.toString());
+        assertEquals("TgVariableList[]", variable.toString());
     }
 
     @Test
     void testInt4() {
-        var variable = new TgVariable().int4("foo");
+        var variable = new TgVariableList().int4("foo");
         assertVariable(Map.of("foo", INT4), variable);
     }
 
     @Test
     void testInt8() {
-        var variable = new TgVariable().int8("foo");
+        var variable = new TgVariableList().int8("foo");
         assertVariable(Map.of("foo", INT8), variable);
     }
 
     @Test
     void testFloat4() {
-        var variable = new TgVariable().float4("foo");
+        var variable = new TgVariableList().float4("foo");
         assertVariable(Map.of("foo", FLOAT4), variable);
     }
 
     @Test
     void testFloat8() {
-        var variable = new TgVariable().float8("foo");
+        var variable = new TgVariableList().float8("foo");
         assertVariable(Map.of("foo", FLOAT8), variable);
     }
 
     @Test
     void testCharacter() {
-        var variable = new TgVariable().character("foo");
+        var variable = new TgVariableList().character("foo");
         assertVariable(Map.of("foo", CHARACTER), variable);
     }
 
     @Test
     void testSetDataType() {
-        var variable = new TgVariable() //
-                .set("i4", TgDataType.INT4) //
-                .set("i8", TgDataType.INT8) //
-                .set("f4", TgDataType.FLOAT4) //
-                .set("f8", TgDataType.FLOAT8) //
-                .set("c", TgDataType.CHARACTER);
+        var variable = new TgVariableList() //
+                .add("i4", TgDataType.INT4) //
+                .add("i8", TgDataType.INT8) //
+                .add("f4", TgDataType.FLOAT4) //
+                .add("f8", TgDataType.FLOAT8) //
+                .add("c", TgDataType.CHARACTER);
         assertVariable(Map.ofEntries( //
                 entry("i4", INT4), //
                 entry("i8", INT8), //
@@ -68,16 +68,16 @@ class TgVariableTest {
 
     @Test
     void testSetClass() {
-        var variable = new TgVariable() //
-                .set("i4", int.class) //
-                .set("I4", Integer.class) //
-                .set("i8", long.class) //
-                .set("I8", Long.class) //
-                .set("f4", float.class) //
-                .set("F4", Float.class) //
-                .set("f8", double.class) //
-                .set("F8", Double.class) //
-                .set("c", String.class);
+        var variable = new TgVariableList() //
+                .add("i4", int.class) //
+                .add("I4", Integer.class) //
+                .add("i8", long.class) //
+                .add("I8", Long.class) //
+                .add("f4", float.class) //
+                .add("F4", Float.class) //
+                .add("f8", double.class) //
+                .add("F8", Double.class) //
+                .add("c", String.class);
         assertVariable(Map.ofEntries( //
                 entry("i4", INT4), //
                 entry("I4", INT4), //
@@ -90,7 +90,7 @@ class TgVariableTest {
                 entry("c", CHARACTER)), variable);
     }
 
-    private static void assertVariable(Map<String, TgDataType> expectedMap, TgVariable actual) {
+    private static void assertVariable(Map<String, TgDataType> expectedMap, TgVariableList actual) {
         var ph = actual.toLowPlaceHolder();
         var actualMap = ph.getVariablesList().stream().collect(Collectors.toMap(v -> v.getName(), v -> v.getType()));
         assertEquals(expectedMap.size(), actualMap.size());

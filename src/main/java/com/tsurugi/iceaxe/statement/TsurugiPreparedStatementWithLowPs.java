@@ -18,9 +18,9 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 
     private Future<PreparedStatement> lowPreparedStatementFuture;
     private PreparedStatement lowPreparedStatement;
-    private final Function<P, TgParameter> parameterConverter;
+    private final Function<P, TgParameterList> parameterConverter;
 
-    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameter> parameterConverter) {
+    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameterList> parameterConverter) {
         super(session);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
         this.parameterConverter = parameterConverter;

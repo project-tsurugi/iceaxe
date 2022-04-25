@@ -27,7 +27,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
     private final IoFunction<TsurugiResultRecord, R> recordConverter;
 
     // internal
-    public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameter> parameterConverter,
+    public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameterList> parameterConverter,
             IoFunction<TsurugiResultRecord, R> recordConverter) {
         super(session, lowPreparedStatementFuture, parameterConverter);
         this.recordConverter = recordConverter;

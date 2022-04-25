@@ -22,7 +22,7 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatementWithLowPs<P> {
 
     // internal
-    public TsurugiPreparedStatementUpdate1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameter> parameterConverter) {
+    public TsurugiPreparedStatementUpdate1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameterList> parameterConverter) {
         super(session, lowPreparedStatementFuture, parameterConverter);
     }
 

@@ -9,8 +9,8 @@ import com.tsurugi.iceaxe.TsurugiConnector;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.statement.TgDataType;
-import com.tsurugi.iceaxe.statement.TgParameter;
-import com.tsurugi.iceaxe.statement.TgVariable;
+import com.tsurugi.iceaxe.statement.TgParameterList;
+import com.tsurugi.iceaxe.statement.TgVariableList;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
@@ -49,16 +49,16 @@ public class Example01Insert {
 
         var sql = "insert into TEST values(:foo, :bar, :zzz)";
 
-//      var variable = TgVariable.of().int4("foo").int8("bar").character("zzz");
-        var variable = TgVariable.of().set("foo", TgDataType.INT4).set("bar", TgDataType.INT8).set("zzz", TgDataType.CHARACTER);
-//      var variable = TgVariable.of().set("foo", int.class).set("bar", long.class).set("zzz", String.class);
+//      var variable = TgVariableList.of().int4("foo").int8("bar").character("zzz");
+        var variable = TgVariableList.of().add("foo", TgDataType.INT4).add("bar", TgDataType.INT8).add("zzz", TgDataType.CHARACTER);
+//      var variable = TgVariableList.of().add("foo", int.class).add("bar", long.class).add("zzz", String.class);
 
         try (var ps = session.createPreparedStatement(sql, variable)) {
             tm.execute(transaction -> {
-                // TgParameter.of()を使う場合、値のデータ型はvariableで指定されたデータ型と一致していなければならない
-                var param = TgParameter.of().set("foo", 123).set("bar", 456L).set("zzz", "abc");
-                // TgParameter.of(variable)を使う場合、値はvariableで指定されたデータ型に変換される
-//              var param = TgParameter.of(variable).set("foo", 123).set("bar", 456).set("zzz", "abc");
+                // TgParameterList.of()を使う場合、値のデータ型はvariableで指定されたデータ型と一致していなければならない
+                var param = TgParameterList.of().add("foo", 123).add("bar", 456L).add("zzz", "abc");
+                // TgParameterList.of(variable)を使う場合、値はvariableで指定されたデータ型に変換される
+//              var param = TgParameterList.of(variable).add("foo", 123).add("bar", 456).add("zzz", "abc");
 
                 try (var result = ps.execute(transaction, param)) {
                     System.out.println(result.getUpdateCount());

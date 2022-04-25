@@ -3,8 +3,8 @@ package com.example.iceaxe;
 import java.io.IOException;
 
 import com.tsurugi.iceaxe.result.TsurugiResultRecord;
-import com.tsurugi.iceaxe.statement.TgParameter;
-import com.tsurugi.iceaxe.statement.TgVariable;
+import com.tsurugi.iceaxe.statement.TgParameterList;
+import com.tsurugi.iceaxe.statement.TgVariableList;
 
 /**
  * example entity for 'TEST' table
@@ -12,16 +12,16 @@ import com.tsurugi.iceaxe.statement.TgVariable;
 public class TestEntity {
     public static final String INSERT_SQL = "insert into TEST values(:foo, :bar, :zzz)";
 
-    public static final TgVariable VARIABLE = TgVariable.of().int4("foo").int8("bar").character("zzz");
-//  public static final TgVariable VARIABLE = TgVariable.of().set("foo", TgDataType.INT4).set("bar", TgDataType.INT8).set("zzz", TgDataType.CHARACTER);
-//  public static final TgVariable VARIABLE = TgVariable.of().set("foo", int.class).set("bar", long.class).set("zzz", String.class);
+    public static final TgVariableList VARIABLE = TgVariableList.of().int4("foo").int8("bar").character("zzz");
+//  public static final TgVariableList VARIABLE = TgVariableList.of().add("foo", TgDataType.INT4).add("bar", TgDataType.INT8).add("zzz", TgDataType.CHARACTER);
+//  public static final TgVariableList VARIABLE = TgVariableList.of().add("foo", int.class).add("bar", long.class).add("zzz", String.class);
 
-    public static TgParameter toParameter(TestEntity entity) {
-        return TgParameter.of().set("foo", entity.getFoo()).set("bar", entity.getBar()).set("zzz", entity.getZzz());
+    public static TgParameterList toParameter(TestEntity entity) {
+        return TgParameterList.of().add("foo", entity.getFoo()).add("bar", entity.getBar()).add("zzz", entity.getZzz());
     }
 
-//  public TgParameter toParameter() {
-//      return TgParameter.of().set("foo", foo).set("bar", bar).set("zzz", zzz);
+//  public TgParameterList toParameter() {
+//      return TgParameterList.of().add("foo", foo).add("bar", bar).add("zzz", zzz);
 //  }
 
     private Integer foo;

@@ -8,8 +8,9 @@ import com.tsurugi.iceaxe.TsurugiConnector;
 import com.tsurugi.iceaxe.result.TsurugiResultEntity;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
-import com.tsurugi.iceaxe.statement.TgParameter;
+import com.tsurugi.iceaxe.statement.TgParameterList;
 import com.tsurugi.iceaxe.statement.TgVariable;
+import com.tsurugi.iceaxe.statement.TgVariableList;
 
 /**
  * select example
@@ -26,6 +27,7 @@ public class Example02Select {
 
             selectByParameter1(session);
             selectByParameter2(session);
+            selectByParameter2Bind(session);
             selectByParameter2AsUserEntityList(session);
         }
     }
@@ -97,8 +99,8 @@ public class Example02Select {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         var sql = "select * from TEST where FOO = :foo";
-        var variable = TgVariable.of().int4("foo");
-        Function<Integer, TgParameter> paramConverter = foo -> TgParameter.of().set("foo", foo);
+        var variable = TgVariableList.of().int4("foo");
+        Function<Integer, TgParameterList> paramConverter = foo -> TgParameterList.of().add("foo", foo);
         try (var ps = session.createPreparedQuery(sql, variable, paramConverter)) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 int param = 123;
@@ -114,10 +116,28 @@ public class Example02Select {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
-        var variable = TgVariable.of().int4("foo").int8("bar");
-        try (var ps = session.createPreparedQuery(sql, variable, TgParameter.IDENTITY)) {
+        var variable = TgVariableList.of().int4("foo").int8("bar");
+        try (var ps = session.createPreparedQuery(sql, variable)) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
-                var param = TgParameter.of().set("foo", 123).set("bar", 456L);
+                var param = TgParameterList.of().add("foo", 123).add("bar", 456L);
+                try (var result = ps.execute(transaction, param)) {
+                    return result.getRecordList();
+                }
+            });
+            System.out.println(list);
+        }
+    }
+
+    void selectByParameter2Bind(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
+
+        var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
+        var foo = TgVariable.ofInt4("foo");
+        var bar = TgVariable.ofInt8("bar");
+        var variable = TgVariableList.of(foo, bar);
+        try (var ps = session.createPreparedQuery(sql, variable)) {
+            List<TsurugiResultEntity> list = tm.execute(transaction -> {
+                var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
                 try (var result = ps.execute(transaction, param)) {
                     return result.getRecordList();
                 }
@@ -130,10 +150,10 @@ public class Example02Select {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
-        var variable = TgVariable.of().int4("foo").int8("bar");
-        try (var ps = session.createPreparedQuery(sql, variable, TgParameter.IDENTITY, TestEntity::of)) {
+        var variable = TgVariableList.of().int4("foo").int8("bar");
+        try (var ps = session.createPreparedQuery(sql, variable, TgParameterList.IDENTITY, TestEntity::of)) {
             List<TestEntity> list = tm.execute(transaction -> {
-                var param = TgParameter.of().set("foo", 123).set("bar", 456L);
+                var param = TgParameterList.of().add("foo", 123).add("bar", 456L);
                 try (var result = ps.execute(transaction, param)) {
                     return result.getRecordList();
                 }
