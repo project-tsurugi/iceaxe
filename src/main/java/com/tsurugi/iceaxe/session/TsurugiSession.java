@@ -18,6 +18,7 @@ import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugi.iceaxe.statement.TgParameterList;
+import com.tsurugi.iceaxe.statement.TgParameterMapping;
 import com.tsurugi.iceaxe.transaction.TgTransactionOption;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionManager;
@@ -131,6 +132,24 @@ public class TsurugiSession implements Closeable {
     /**
      * create PreparedStatement
      * 
+     * @param <P>              parameter type
+     * @param <R>              record type
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param recordConverter  converter from ResultRecord to R
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgParameterMapping<P> parameterMapping, IoFunction<TsurugiResultRecord, R> recordConverter) throws IOException {
+        var lowPlaceHolder = parameterMapping.toLowPlaceHolder();
+        var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
+        var ps = new TsurugiPreparedStatementQuery1<>(this, lowPreparedStatementFuture, parameterMapping, recordConverter);
+        return ps;
+    }
+
+    /**
+     * create PreparedStatement
+     * 
      * @param sql SQL
      * @return PreparedStatement
      * @throws IOException
@@ -166,6 +185,22 @@ public class TsurugiSession implements Closeable {
         var lowPlaceHolder = variable.toLowPlaceHolder();
         var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
         var ps = new TsurugiPreparedStatementUpdate1<>(this, lowPreparedStatementFuture, parameterConverter);
+        return ps;
+    }
+
+    /**
+     * create PreparedStatement
+     * 
+     * @param <P>              parameter type
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public <P> TsurugiPreparedStatementUpdate1<P> createPreparedStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
+        var lowPlaceHolder = parameterMapping.toLowPlaceHolder();
+        var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
+        var ps = new TsurugiPreparedStatementUpdate1<>(this, lowPreparedStatementFuture, parameterMapping);
         return ps;
     }
 

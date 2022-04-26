@@ -10,7 +10,7 @@ import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet.Par
 public class TgParameter {
 
     /**
-     * create Tsurugi Parameter
+     * create Tsurugi Parameter(int)
      * 
      * @param name  name
      * @param value value
@@ -25,7 +25,7 @@ public class TgParameter {
     }
 
     /**
-     * create Tsurugi Parameter
+     * create Tsurugi Parameter(long)
      * 
      * @param name  name
      * @param value value
@@ -42,7 +42,7 @@ public class TgParameter {
     // TODO float, double
 
     /**
-     * create Tsurugi Parameter
+     * create Tsurugi Parameter(String)
      * 
      * @param name  name
      * @param value value

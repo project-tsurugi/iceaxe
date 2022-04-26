@@ -1,8 +1,6 @@
 package com.tsurugi.iceaxe.statement;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
 
 import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder;
@@ -36,17 +34,6 @@ public class TgVariableList {
         return variableList;
     }
 
-    protected static final Map<Object, TgDataType> TYPE_MAP;
-    static {
-        Map<Object, TgDataType> map = new IdentityHashMap<>();
-        for (TgDataType type : TgDataType.values()) {
-            for (Class<?> c : type.getClassList()) {
-                map.put(c, type);
-            }
-        }
-        TYPE_MAP = Collections.unmodifiableMap(map);
-    }
-
     private final PlaceHolder.Builder lowBuilder = PlaceHolder.newBuilder();
     private PlaceHolder lowPlaceHolder;
     /** Map&lt;name, type&gt; */
@@ -59,7 +46,6 @@ public class TgVariableList {
         // do nothing
     }
 
-    // FIXME nameを可変長引数にした方が便利か？（そんな使い方はしないか？）
     /**
      * add type(int)
      * 
@@ -140,8 +126,8 @@ public class TgVariableList {
         return this;
     }
 
-    protected TgDataType getDataType(Object type) {
-        var tgType = TYPE_MAP.get(type);
+    protected TgDataType getDataType(Class<?> type) {
+        var tgType = TgDataType.of(type);
         if (tgType == null) {
             throw new IllegalArgumentException("unsupported data type. type=" + type);
         }

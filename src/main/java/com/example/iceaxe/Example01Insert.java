@@ -10,6 +10,7 @@ import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.statement.TgDataType;
 import com.tsurugi.iceaxe.statement.TgParameterList;
+import com.tsurugi.iceaxe.statement.TgParameterMapping;
 import com.tsurugi.iceaxe.statement.TgVariableList;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
@@ -27,6 +28,7 @@ public class Example01Insert {
             insert0(session);
             insertParameter(session);
             insertEntity(session);
+            insertEntityMapping(session);
             insertForkJoin(session, List.of(/* entities */));
         }
     }
@@ -77,6 +79,32 @@ public class Example01Insert {
                 entity.setFoo(123);
                 entity.setBar(456L);
                 entity.setZzz("abc");
+                try (var result = ps.execute(transaction, entity)) {
+                    System.out.println(result.getUpdateCount());
+                }
+            });
+        }
+    }
+
+    void insertEntityMapping(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
+
+        var sql = "insert into TEST values(:foo, :bar, :zzz)";
+        var parameterMapping = TgParameterMapping.of(TestEntity.class) //
+                .int4("foo", TestEntity::getFoo) //
+                .int8("bar", TestEntity::getBar) //
+                .character("zzz", TestEntity::getZzz);
+//        var parameterMapping = TgParameterMapping.of(TestEntity.class) //
+//                .add("foo", TgDataType.INT4, TestEntity::getFoo) //
+//                .add("bar", TgDataType.INT8, TestEntity::getBar) //
+//                .add("zzz", TgDataType.CHARACTER, TestEntity::getZzz);
+//        var parameterMapping = TgParameterMapping.of(TestEntity.class) //
+//                .add("foo", int.class, TestEntity::getFoo) //
+//                .add("bar", long.class, TestEntity::getBar) //
+//                .add("zzz", String.class, TestEntity::getZzz);
+        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+            tm.execute(transaction -> {
+                var entity = new TestEntity(123, 456L, "abc");
                 try (var result = ps.execute(transaction, entity)) {
                     System.out.println(result.getUpdateCount());
                 }

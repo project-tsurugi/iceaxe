@@ -26,6 +26,11 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
         super(session, lowPreparedStatementFuture, parameterConverter);
     }
 
+    // internal
+    public TsurugiPreparedStatementUpdate1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
+        super(session, lowPreparedStatementFuture, parameterMapping);
+    }
+
     /**
      * execute statement
      * 

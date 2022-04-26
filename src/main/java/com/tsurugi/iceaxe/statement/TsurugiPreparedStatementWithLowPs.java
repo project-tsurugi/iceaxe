@@ -18,12 +18,23 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 
     private Future<PreparedStatement> lowPreparedStatementFuture;
     private PreparedStatement lowPreparedStatement;
-    private final Function<P, TgParameterList> parameterConverter;
+    private final Function<P, ParameterSet> parameterConverter;
 
     protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameterList> parameterConverter) {
         super(session);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
-        this.parameterConverter = parameterConverter;
+        this.parameterConverter = parameter -> {
+            var param = parameterConverter.apply(parameter);
+            return param.toLowParameterSet();
+        };
+    }
+
+    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> mapping) {
+        super(session);
+        this.lowPreparedStatementFuture = lowPreparedStatementFuture;
+        this.parameterConverter = parameter -> {
+            return mapping.toLowParameterSet(parameter);
+        };
     }
 
     protected synchronized final PreparedStatement getLowPreparedStatement() throws IOException {
@@ -37,9 +48,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     }
 
     protected final ParameterSet getLowParameterSet(P parameter) {
-        var param = parameterConverter.apply(parameter);
-        var lowParameterSet = param.toLowParameterSet();
-        return lowParameterSet;
+        return parameterConverter.apply(parameter);
     }
 
     @Override

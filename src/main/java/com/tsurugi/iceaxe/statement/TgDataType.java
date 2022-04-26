@@ -1,6 +1,7 @@
 package com.tsurugi.iceaxe.statement;
 
 import java.util.EnumMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,9 +46,29 @@ public enum TgDataType {
         return this.lowType;
     }
 
-    // internal
-    public List<Class<?>> getClassList() {
-        return this.classList;
+    protected static final Map<Class<?>, TgDataType> TYPE_MAP;
+    static {
+        Map<Class<?>, TgDataType> map = new IdentityHashMap<>();
+        for (TgDataType type : TgDataType.values()) {
+            for (Class<?> c : type.classList) {
+                map.put(c, type);
+            }
+        }
+        TYPE_MAP = map;
+    }
+
+    /**
+     * get data type
+     * 
+     * @param clazz class
+     * @return Tsurugi Data Type
+     */
+    public static TgDataType of(Class<?> clazz) {
+        var type = TYPE_MAP.get(clazz);
+        if (type == null) {
+            throw new InternalError("unsupported type error. class=" + clazz);
+        }
+        return type;
     }
 
     private static final Map<DataType, TgDataType> LOW_TYPE_MAP;

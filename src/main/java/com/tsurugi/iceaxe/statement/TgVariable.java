@@ -8,6 +8,12 @@ package com.tsurugi.iceaxe.statement;
  */
 public abstract class TgVariable<T> {
 
+    /**
+     * create Tsurugi Variable(int)
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
     public static TgVariable<Integer> ofInt4(String name) {
         return new TgVariable<>(name, TgDataType.INT4) {
 
@@ -18,6 +24,12 @@ public abstract class TgVariable<T> {
         };
     }
 
+    /**
+     * create Tsurugi Variable(long)
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
     public static TgVariable<Long> ofInt8(String name) {
         return new TgVariable<>(name, TgDataType.INT8) {
 
@@ -30,6 +42,12 @@ public abstract class TgVariable<T> {
 
     // TODO float, double
 
+    /**
+     * create Tsurugi Variable(String)
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
     public static TgVariable<String> ofCharacter(String name) {
         return new TgVariable<>(name, TgDataType.CHARACTER) {
 
