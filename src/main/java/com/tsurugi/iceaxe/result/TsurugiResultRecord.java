@@ -62,7 +62,8 @@ import com.tsurugi.iceaxe.util.IceaxeConvertUtil;
  * </ul>
  * <p>
  * 当クラスは{@link TsurugiResultSet}と連動しており、インスタンスは複数レコード間で共有される。<br>
- * そのため、レコードの値を保持する目的で、当インスタンスをユーザープログラムで保持してはならない。
+ * そのため、レコードの値を保持する目的で、当インスタンスをユーザープログラムで保持してはならない。<br>
+ * また、{@link TsurugiResultSet}のクローズ後に当クラスは使用できない。
  * </p>
  */
 public class TsurugiResultRecord {
