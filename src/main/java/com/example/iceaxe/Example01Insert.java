@@ -51,16 +51,32 @@ public class Example01Insert {
 
         var sql = "insert into TEST values(:foo, :bar, :zzz)";
 
-//      var variable = TgVariableList.of().int4("foo").int8("bar").character("zzz");
-        var variable = TgVariableList.of().add("foo", TgDataType.INT4).add("bar", TgDataType.INT8).add("zzz", TgDataType.CHARACTER);
-//      var variable = TgVariableList.of().add("foo", int.class).add("bar", long.class).add("zzz", String.class);
+        TgVariableList variable;
+        switch (0) {
+        default:
+            variable = TgVariableList.of().int4("foo").int8("bar").character("zzz");
+            break;
+        case 1:
+            variable = TgVariableList.of().add("foo", TgDataType.INT4).add("bar", TgDataType.INT8).add("zzz", TgDataType.CHARACTER);
+            break;
+        case 2:
+            variable = TgVariableList.of().add("foo", int.class).add("bar", long.class).add("zzz", String.class);
+            break;
+        }
 
         try (var ps = session.createPreparedStatement(sql, variable)) {
             tm.execute(transaction -> {
-                // TgParameterList.of()を使う場合、値のデータ型はvariableで指定されたデータ型と一致していなければならない
-                var param = TgParameterList.of().add("foo", 123).add("bar", 456L).add("zzz", "abc");
-                // TgParameterList.of(variable)を使う場合、値はvariableで指定されたデータ型に変換される
-//              var param = TgParameterList.of(variable).add("foo", 123).add("bar", 456).add("zzz", "abc");
+                TgParameterList param;
+                switch (0) {
+                default:
+                    // TgParameterList.of()を使う場合、値のデータ型はvariableで指定されたデータ型と一致していなければならない
+                    param = TgParameterList.of().add("foo", 123).add("bar", 456L).add("zzz", "abc");
+                    break;
+                case 1:
+                    // TgParameterList.of(variable)を使う場合、値はvariableで指定されたデータ型に変換される
+                    param = TgParameterList.of(variable).add("foo", 123).add("bar", 456).add("zzz", "abc");
+                    break;
+                }
 
                 try (var result = ps.execute(transaction, param)) {
                     System.out.println(result.getUpdateCount());
@@ -90,18 +106,29 @@ public class Example01Insert {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
 
         var sql = "insert into TEST values(:foo, :bar, :zzz)";
-        var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-                .int4("foo", TestEntity::getFoo) //
-                .int8("bar", TestEntity::getBar) //
-                .character("zzz", TestEntity::getZzz);
-//        var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-//                .add("foo", TgDataType.INT4, TestEntity::getFoo) //
-//                .add("bar", TgDataType.INT8, TestEntity::getBar) //
-//                .add("zzz", TgDataType.CHARACTER, TestEntity::getZzz);
-//        var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-//                .add("foo", int.class, TestEntity::getFoo) //
-//                .add("bar", long.class, TestEntity::getBar) //
-//                .add("zzz", String.class, TestEntity::getZzz);
+
+        TgParameterMapping<TestEntity> parameterMapping;
+        switch (0) {
+        default:
+            parameterMapping = TgParameterMapping.of(TestEntity.class) //
+                    .int4("foo", TestEntity::getFoo) //
+                    .int8("bar", TestEntity::getBar) //
+                    .character("zzz", TestEntity::getZzz);
+            break;
+        case 1:
+            parameterMapping = TgParameterMapping.of(TestEntity.class) //
+                    .add("foo", TgDataType.INT4, TestEntity::getFoo) //
+                    .add("bar", TgDataType.INT8, TestEntity::getBar) //
+                    .add("zzz", TgDataType.CHARACTER, TestEntity::getZzz);
+            break;
+        case 2:
+            parameterMapping = TgParameterMapping.of(TestEntity.class) //
+                    .add("foo", int.class, TestEntity::getFoo) //
+                    .add("bar", long.class, TestEntity::getBar) //
+                    .add("zzz", String.class, TestEntity::getZzz);
+            break;
+        }
+
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 var entity = new TestEntity(123, 456L, "abc");

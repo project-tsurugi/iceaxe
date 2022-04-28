@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.channel.common.sql.SessionWire;
 import com.nautilus_technologies.tsubakuro.low.common.Session;
+import com.tsurugi.iceaxe.result.TgResultMapping;
 import com.tsurugi.iceaxe.result.TsurugiResultEntity;
 import com.tsurugi.iceaxe.result.TsurugiResultRecord;
 import com.tsurugi.iceaxe.statement.TgVariableList;
@@ -86,6 +87,19 @@ public class TsurugiSession implements Closeable {
     /**
      * create PreparedStatement
      * 
+     * @param <R>           record type
+     * @param sql           SQL
+     * @param resultMapping result mapping
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public <R> TsurugiPreparedStatementQuery0<R> createPreparedQuery(String sql, TgResultMapping<R> resultMapping) throws IOException {
+        return createPreparedQuery(sql, resultMapping::convert);
+    }
+
+    /**
+     * create PreparedStatement
+     * 
      * @param sql      SQL
      * @param variable variable definition
      * @return PreparedStatement
@@ -132,6 +146,23 @@ public class TsurugiSession implements Closeable {
     /**
      * create PreparedStatement
      * 
+     * @param <P>                parameter type
+     * @param <R>                record type
+     * @param sql                SQL
+     * @param variable           variable definition
+     * @param parameterConverter converter from P to Parameter
+     * @param resultMapping      result mapping
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgVariableList variable, Function<P, TgParameterList> parameterConverter, TgResultMapping<R> resultMapping)
+            throws IOException {
+        return createPreparedQuery(sql, variable, parameterConverter, resultMapping::convert);
+    }
+
+    /**
+     * create PreparedStatement
+     * 
      * @param <P>              parameter type
      * @param <R>              record type
      * @param sql              SQL
@@ -145,6 +176,21 @@ public class TsurugiSession implements Closeable {
         var lowPreparedStatementFuture = getLowSession().prepare(sql, lowPlaceHolder);
         var ps = new TsurugiPreparedStatementQuery1<>(this, lowPreparedStatementFuture, parameterMapping, recordConverter);
         return ps;
+    }
+
+    /**
+     * create PreparedStatement
+     * 
+     * @param <P>              parameter type
+     * @param <R>              record type
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param resultMapping    result mapping
+     * @return PreparedStatement
+     * @throws IOException
+     */
+    public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException {
+        return createPreparedQuery(sql, parameterMapping, resultMapping::convert);
     }
 
     /**

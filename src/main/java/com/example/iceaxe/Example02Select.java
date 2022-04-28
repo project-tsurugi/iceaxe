@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.tsurugi.iceaxe.TsurugiConnector;
+import com.tsurugi.iceaxe.result.TgResultMapping;
 import com.tsurugi.iceaxe.result.TsurugiResultEntity;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
@@ -24,6 +25,7 @@ public class Example02Select {
             selectAsList(session);
             selectUserEntity(session);
             selectUserEntityList(session);
+            selectUserEntityListMapping(session);
 
             selectByParameter1(session);
             selectByParameter2(session);
@@ -86,6 +88,26 @@ public class Example02Select {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         try (var ps = session.createPreparedQuery("select * from TEST", TestEntity::of)) {
+            List<TestEntity> list = tm.execute(transaction -> {
+                try (var result = ps.execute(transaction)) {
+                    return result.getRecordList();
+                }
+            });
+            System.out.println(list);
+        }
+    }
+
+    void selectUserEntityListMapping(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
+
+        var sql = "select FOO, BAR, ZZZ from TEST";
+        var resultMapping = TgResultMapping.of(TestEntity::new) //
+                .int4(TestEntity::setFoo) //
+//TODO                .int8(TestEntity::setBar) //
+//TODO                .character(TestEntity::setZzz)
+        ;
+
+        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                     return result.getRecordList();

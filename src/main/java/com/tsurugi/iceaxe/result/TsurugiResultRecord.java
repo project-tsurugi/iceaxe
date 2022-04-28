@@ -286,12 +286,21 @@ public class TsurugiResultRecord {
 
     /* next */
 
-    protected Object nextLowValue() throws IOException {
-        var hasColumn = lowResultSet.nextColumn();
-        if (hasColumn) {
-            return getCurrentColumnValue();
+    /**
+     * move next column
+     * 
+     * @throws IllegalStateException if not found next column
+     */
+    public void nextColumn() {
+        boolean hasColumn = lowResultSet.nextColumn();
+        if (!hasColumn) {
+            throw new IllegalStateException("not found next column");
         }
-        throw new IllegalStateException("not found next column");
+    }
+
+    protected Object nextLowValue() throws IOException {
+        nextColumn();
+        return getCurrentColumnValue();
     }
 
     // int4
