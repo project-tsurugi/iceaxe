@@ -2,12 +2,11 @@ package com.tsurugi.iceaxe.statement;
 
 import java.io.IOException;
 
-import com.tsurugi.iceaxe.result.TsurugiResultRecord;
+import com.tsurugi.iceaxe.result.TgResultMapping;
 import com.tsurugi.iceaxe.result.TsurugiResultSet;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
-import com.tsurugi.iceaxe.util.IoFunction;
 
 /**
  * Tsurugi PreparedStatement
@@ -16,18 +15,18 @@ import com.tsurugi.iceaxe.util.IoFunction;
  * <li>TODO+++翻訳: SQLのパラメーターなし</li>
  * </ul>
  * 
- * @param <R> record type
+ * @param <R> result type
  */
 public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement {
 
     private final String sql;
-    private final IoFunction<TsurugiResultRecord, R> recordConverter;
+    private final TgResultMapping<R> resultMapping;
 
     // internal
-    public TsurugiPreparedStatementQuery0(TsurugiSession session, String sql, IoFunction<TsurugiResultRecord, R> recordConverter) {
+    public TsurugiPreparedStatementQuery0(TsurugiSession session, String sql, TgResultMapping<R> resultMapping) {
         super(session);
         this.sql = sql;
-        this.recordConverter = recordConverter;
+        this.resultMapping = resultMapping;
     }
 
     /**
@@ -41,7 +40,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
         try {
             var lowTransaction = transaction.getLowTransaction();
             var lowResultSetFuture = lowTransaction.executeQuery(sql);
-            var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, recordConverter);
+            var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping);
             return result;
         } catch (IOException e) {
             throw new TsurugiTransactionIOException(e);

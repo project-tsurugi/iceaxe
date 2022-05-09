@@ -15,7 +15,6 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionUncheckedIOException;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
-import com.tsurugi.iceaxe.util.IoFunction;
 
 /**
  * Tsurugi Result Set for PreparedStatement
@@ -23,20 +22,20 @@ import com.tsurugi.iceaxe.util.IoFunction;
  * MT unsafe
  * </p>
  * 
- * @param <R> record type
+ * @param <R> result type
  */
 public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     private Future<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
-    private final IoFunction<TsurugiResultRecord, R> recordConverter;
+    private final TgResultMapping<R> resultMapping;
     private TsurugiResultRecord record;
 
     // internal
-    public TsurugiResultSet(TsurugiTransaction transaction, Future<ResultSet> lowResultSetFuture, IoFunction<TsurugiResultRecord, R> recordConverter) {
+    public TsurugiResultSet(TsurugiTransaction transaction, Future<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping) {
         super(transaction);
         this.lowResultSetFuture = lowResultSetFuture;
-        this.recordConverter = recordConverter;
+        this.resultMapping = resultMapping;
     }
 
     protected synchronized final ResultSet getLowResultSet() throws IOException {
@@ -96,8 +95,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             if (nextLowRecord()) {
                 var record = getRecord();
                 record.reset();
-                var r = recordConverter.apply(record);
-                return Optional.of(r);
+                var result = resultMapping.convert(record);
+                return Optional.of(result);
             } else {
                 return Optional.empty();
             }
@@ -128,8 +127,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             var record = getRecord();
             while (nextLowRecord()) {
                 record.reset();
-                var r = recordConverter.apply(record);
-                list.add(r);
+                var result = resultMapping.convert(record);
+                list.add(result);
             }
         } catch (TsurugiTransactionIOException e) {
             throw e;
@@ -188,16 +187,17 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             if (!this.hasNext) {
                 throw new NoSuchElementException();
             }
-            R r;
+
+            R result;
             try {
-                r = recordConverter.apply(record);
+                result = resultMapping.convert(record);
             } catch (TsurugiTransactionIOException e) {
                 throw new TsurugiTransactionUncheckedIOException(e);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
             this.moveNext = true;
-            return r;
+            return result;
         }
     }
 

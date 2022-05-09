@@ -5,12 +5,11 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
-import com.tsurugi.iceaxe.result.TsurugiResultRecord;
+import com.tsurugi.iceaxe.result.TgResultMapping;
 import com.tsurugi.iceaxe.result.TsurugiResultSet;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
-import com.tsurugi.iceaxe.util.IoFunction;
 
 /**
  * Tsurugi PreparedStatement
@@ -20,24 +19,23 @@ import com.tsurugi.iceaxe.util.IoFunction;
  * </ul>
  * 
  * @param <P> parameter type
- * @param <R> record type
+ * @param <R> result type
  */
 public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStatementWithLowPs<P> {
 
-    private final IoFunction<TsurugiResultRecord, R> recordConverter;
+    private final TgResultMapping<R> resultMapping;
 
     // internal
     public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameterList> parameterConverter,
-            IoFunction<TsurugiResultRecord, R> recordConverter) {
+            TgResultMapping<R> resultMapping) {
         super(session, lowPreparedStatementFuture, parameterConverter);
-        this.recordConverter = recordConverter;
+        this.resultMapping = resultMapping;
     }
 
     // internal
-    public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping,
-            IoFunction<TsurugiResultRecord, R> recordConverter) {
+    public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) {
         super(session, lowPreparedStatementFuture, parameterMapping);
-        this.recordConverter = recordConverter;
+        this.resultMapping = resultMapping;
     }
 
     /**
@@ -54,7 +52,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
             var lowPs = getLowPreparedStatement();
             var lowParameterSet = getLowParameterSet(parameter);
             var lowResultSetFuture = lowTransaction.executeQuery(lowPs, lowParameterSet);
-            var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, recordConverter);
+            var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping);
             return result;
         } catch (IOException e) {
             throw new TsurugiTransactionIOException(e);

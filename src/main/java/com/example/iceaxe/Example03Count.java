@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tsurugi.iceaxe.TsurugiConnector;
+import com.tsurugi.iceaxe.result.TgResultMapping;
 import com.tsurugi.iceaxe.result.TsurugiResultEntity;
 import com.tsurugi.iceaxe.result.TsurugiResultRecord;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
-import com.tsurugi.iceaxe.util.IoFunction;
 
 /**
  * select count example
@@ -31,9 +31,9 @@ public class Example03Count {
         try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
             int count = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
-                    Optional<TsurugiResultEntity> record = result.findRecord();
+                    Optional<TsurugiResultEntity> recordOpt = result.findRecord();
                     // FIXME カラム名は大文字にすべき？
-                    return record.get().getInt4("count");
+                    return recordOpt.get().getInt4("count");
                 }
             });
             System.out.println(count);
@@ -43,8 +43,8 @@ public class Example03Count {
     void countAll2(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        IoFunction<TsurugiResultRecord, Integer> converter = record -> record.nextInt4();
-        try (var ps = session.createPreparedQuery("select count(*) from TEST", converter)) {
+        var resultMapping = TgResultMapping.of(record -> record.nextInt4());
+        try (var ps = session.createPreparedQuery("select count(*) from TEST", resultMapping)) {
             int count = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                     Optional<Integer> countOpt = result.findRecord();
@@ -58,7 +58,7 @@ public class Example03Count {
     void countGroup(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        try (var ps = session.createPreparedQuery("select ZZZ, count(*) from TEST group by ZZZ", CountByZzzEntity::of)) {
+        try (var ps = session.createPreparedQuery("select ZZZ, count(*) from TEST group by ZZZ", TgResultMapping.of(CountByZzzEntity::of))) {
             List<CountByZzzEntity> list = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                     return result.getRecordList();

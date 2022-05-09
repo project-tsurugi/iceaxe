@@ -71,7 +71,7 @@ public class Example02Select {
     void selectUserEntity(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        try (var ps = session.createPreparedQuery("select * from TEST", TestEntity::of)) {
+        try (var ps = session.createPreparedQuery("select * from TEST", TgResultMapping.of(TestEntity::of))) {
             tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                     for (TestEntity entity : result) {
@@ -87,7 +87,7 @@ public class Example02Select {
     void selectUserEntityList(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        try (var ps = session.createPreparedQuery("select * from TEST", TestEntity::of)) {
+        try (var ps = session.createPreparedQuery("select * from TEST", TgResultMapping.of(TestEntity::of))) {
             List<TestEntity> list = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                     return result.getRecordList();
@@ -173,7 +173,8 @@ public class Example02Select {
 
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var variable = TgVariableList.of().int4("foo").int8("bar");
-        try (var ps = session.createPreparedQuery(sql, variable, TgParameterList.IDENTITY, TestEntity::of)) {
+        var resultMapping = TgResultMapping.of(TestEntity::of);
+        try (var ps = session.createPreparedQuery(sql, variable, TgParameterList.IDENTITY, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
                 var param = TgParameterList.of().add("foo", 123).add("bar", 456L);
                 try (var result = ps.execute(transaction, param)) {
