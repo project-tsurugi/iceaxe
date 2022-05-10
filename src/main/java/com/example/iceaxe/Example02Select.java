@@ -10,6 +10,7 @@ import com.tsurugi.iceaxe.result.TsurugiResultEntity;
 import com.tsurugi.iceaxe.session.TgSessionInfo;
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.statement.TgParameterList;
+import com.tsurugi.iceaxe.statement.TgParameterMapping;
 import com.tsurugi.iceaxe.statement.TgVariable;
 import com.tsurugi.iceaxe.statement.TgVariableList;
 
@@ -122,8 +123,8 @@ public class Example02Select {
 
         var sql = "select * from TEST where FOO = :foo";
         var variable = TgVariableList.of().int4("foo");
-        Function<Integer, TgParameterList> paramConverter = foo -> TgParameterList.of().add("foo", foo);
-        try (var ps = session.createPreparedQuery(sql, variable, paramConverter)) {
+        Function<Integer, TgParameterList> parameterConverter = foo -> TgParameterList.of().add("foo", foo);
+        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable, parameterConverter))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 int param = 123;
                 try (var result = ps.execute(transaction, param)) {
@@ -139,7 +140,7 @@ public class Example02Select {
 
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var variable = TgVariableList.of().int4("foo").int8("bar");
-        try (var ps = session.createPreparedQuery(sql, variable)) {
+        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 var param = TgParameterList.of().add("foo", 123).add("bar", 456L);
                 try (var result = ps.execute(transaction, param)) {
@@ -157,7 +158,7 @@ public class Example02Select {
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
         var variable = TgVariableList.of(foo, bar);
-        try (var ps = session.createPreparedQuery(sql, variable)) {
+        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
                 try (var result = ps.execute(transaction, param)) {
@@ -173,8 +174,9 @@ public class Example02Select {
 
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var variable = TgVariableList.of().int4("foo").int8("bar");
+        var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = TgResultMapping.of(TestEntity::of);
-        try (var ps = session.createPreparedQuery(sql, variable, TgParameterList.IDENTITY, resultMapping)) {
+        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
                 var param = TgParameterList.of().add("foo", 123).add("bar", 456L);
                 try (var result = ps.execute(transaction, param)) {

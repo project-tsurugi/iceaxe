@@ -2,7 +2,6 @@ package com.tsurugi.iceaxe.statement;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet;
@@ -18,23 +17,12 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 
     private Future<PreparedStatement> lowPreparedStatementFuture;
     private PreparedStatement lowPreparedStatement;
-    private final Function<P, ParameterSet> parameterConverter;
+    private final TgParameterMapping<P> parameterMapping;
 
-    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameterList> parameterConverter) {
+    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
         super(session);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
-        this.parameterConverter = parameter -> {
-            var param = parameterConverter.apply(parameter);
-            return param.toLowParameterSet();
-        };
-    }
-
-    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> mapping) {
-        super(session);
-        this.lowPreparedStatementFuture = lowPreparedStatementFuture;
-        this.parameterConverter = parameter -> {
-            return mapping.toLowParameterSet(parameter);
-        };
+        this.parameterMapping = parameterMapping;
     }
 
     protected synchronized final PreparedStatement getLowPreparedStatement() throws IOException {
@@ -48,7 +36,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     }
 
     protected final ParameterSet getLowParameterSet(P parameter) {
-        return parameterConverter.apply(parameter);
+        return parameterMapping.toLowParameterSet(parameter);
     }
 
     @Override

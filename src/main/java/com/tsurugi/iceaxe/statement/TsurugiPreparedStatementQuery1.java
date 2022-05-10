@@ -2,7 +2,6 @@ package com.tsurugi.iceaxe.statement;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.tsurugi.iceaxe.result.TgResultMapping;
@@ -24,13 +23,6 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStatementWithLowPs<P> {
 
     private final TgResultMapping<R> resultMapping;
-
-    // internal
-    public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameterList> parameterConverter,
-            TgResultMapping<R> resultMapping) {
-        super(session, lowPreparedStatementFuture, parameterConverter);
-        this.resultMapping = resultMapping;
-    }
 
     // internal
     public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) {

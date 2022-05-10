@@ -2,7 +2,6 @@ package com.tsurugi.iceaxe.statement;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.tsurugi.iceaxe.result.TsurugiResultCount;
@@ -20,11 +19,6 @@ import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
  * @param <P> parameter type
  */
 public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatementWithLowPs<P> {
-
-    // internal
-    public TsurugiPreparedStatementUpdate1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, Function<P, TgParameterList> parameterConverter) {
-        super(session, lowPreparedStatementFuture, parameterConverter);
-    }
 
     // internal
     public TsurugiPreparedStatementUpdate1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {

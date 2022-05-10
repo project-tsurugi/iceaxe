@@ -64,7 +64,7 @@ public class Example01Insert {
             break;
         }
 
-        try (var ps = session.createPreparedStatement(sql, variable)) {
+        try (var ps = session.createPreparedStatement(sql, TgParameterMapping.of(variable))) {
             tm.execute(transaction -> {
                 TgParameterList param;
                 switch (0) {
@@ -88,7 +88,7 @@ public class Example01Insert {
     void insertEntity(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
 
-        try (var ps = session.createPreparedStatement(TestEntity.INSERT_SQL, TestEntity.VARIABLE, TestEntity::toParameter)) {
+        try (var ps = session.createPreparedStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLE, TestEntity::toParameter))) {
             tm.execute(transaction -> {
 //              var entity = new TestEntity(123, 456L, "abc");
                 var entity = new TestEntity();
@@ -142,7 +142,7 @@ public class Example01Insert {
     void insertForkJoin(TsurugiSession session, List<TestEntity> entityList) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
 
-        try (var ps = session.createPreparedStatement(TestEntity.INSERT_SQL, TestEntity.VARIABLE, TestEntity::toParameter)) {
+        try (var ps = session.createPreparedStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLE, TestEntity::toParameter))) {
             tm.execute(transaction -> {
                 var task = new InsertTask(transaction, ps, entityList).fork();
                 task.join();
