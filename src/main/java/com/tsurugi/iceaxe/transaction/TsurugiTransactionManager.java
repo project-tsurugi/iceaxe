@@ -63,7 +63,11 @@ public class TsurugiTransactionManager {
      * @see TsurugiPreparedStatement
      */
     public <R> R execute(IoFunction<TsurugiTransaction, R> action) throws IOException {
-        return execute(defaultTransactionOptionList, action);
+        var transactionOptionList = this.defaultTransactionOptionList;
+        if (transactionOptionList == null || transactionOptionList.isEmpty()) {
+            throw new IllegalStateException("defaultTransactionOptionList is not specified");
+        }
+        return execute(transactionOptionList, action);
     }
 
     /**
@@ -77,14 +81,11 @@ public class TsurugiTransactionManager {
      * @see TsurugiPreparedStatement
      */
     public <R> R execute(List<TgTransactionOption> transactionOptionList, IoFunction<TsurugiTransaction, R> action) throws IOException {
+        if (transactionOptionList == null || transactionOptionList.isEmpty()) {
+            throw new IllegalArgumentException("transactionOptionList is not specified");
+        }
         if (action == null) {
             throw new IllegalArgumentException("action is not specified");
-        }
-        if (transactionOptionList == null || transactionOptionList.isEmpty()) {
-            transactionOptionList = this.defaultTransactionOptionList;
-            if (transactionOptionList == null || transactionOptionList.isEmpty()) {
-                throw new IllegalArgumentException("transactionOptionList is not specified");
-            }
         }
         for (var option : transactionOptionList) {
             try (var transaction = ownerSession.createTransaction(option)) {

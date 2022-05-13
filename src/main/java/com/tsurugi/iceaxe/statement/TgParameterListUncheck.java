@@ -22,6 +22,88 @@ public class TgParameterListUncheck implements TgParameterList {
         // do nothing
     }
 
+    @Override
+    public TgParameterListUncheck int4(String name, int value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        lowParameter.setInt4Value(value);
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck int4(String name, Integer value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setInt4Value(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck int8(String name, long value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        lowParameter.setInt8Value(value);
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck int8(String name, Long value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setInt8Value(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck float4(String name, float value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        lowParameter.setFloat4Value(value);
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck float4(String name, Float value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setFloat4Value(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck float8(String name, double value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        lowParameter.setFloat8Value(value);
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck float8(String name, Double value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setFloat8Value(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck character(String name, String value) {
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setCharacterValue(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
     /**
      * add value(int)
      * 
@@ -30,9 +112,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, int value) {
-        var lowParameter = Parameter.newBuilder().setName(name).setInt4Value(value);
-        add(lowParameter);
-        return this;
+        return int4(name, value);
     }
 
     /**
@@ -43,12 +123,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, Integer value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setInt4Value(value);
-        }
-        add(lowParameter);
-        return this;
+        return int4(name, value);
     }
 
     /**
@@ -59,9 +134,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, long value) {
-        var lowParameter = Parameter.newBuilder().setName(name).setInt8Value(value);
-        add(lowParameter);
-        return this;
+        return int8(name, value);
     }
 
     /**
@@ -72,12 +145,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, Long value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setInt8Value(value);
-        }
-        add(lowParameter);
-        return this;
+        return int8(name, value);
     }
 
     /**
@@ -88,9 +156,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, float value) {
-        var lowParameter = Parameter.newBuilder().setName(name).setFloat4Value(value);
-        add(lowParameter);
-        return this;
+        return float4(name, value);
     }
 
     /**
@@ -101,12 +167,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, Float value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setFloat4Value(value);
-        }
-        add(lowParameter);
-        return this;
+        return float4(name, value);
     }
 
     /**
@@ -117,9 +178,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, double value) {
-        var lowParameter = Parameter.newBuilder().setName(name).setFloat8Value(value);
-        add(lowParameter);
-        return this;
+        return float8(name, value);
     }
 
     /**
@@ -130,12 +189,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, Double value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setFloat8Value(value);
-        }
-        add(lowParameter);
-        return this;
+        return float8(name, value);
     }
 
     /**
@@ -146,12 +200,7 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(String name, String value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setCharacterValue(value);
-        }
-        add(lowParameter);
-        return this;
+        return character(name, value);
     }
 
     /**

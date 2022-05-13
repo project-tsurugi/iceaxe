@@ -22,20 +22,25 @@ public class Example02Select {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            select(session);
-            selectAsList(session);
-            selectUserEntity(session);
-            selectUserEntityList(session);
-            selectUserEntityListMapping(session);
+            selectLoop(session);
+
+            selectAsList_execRs(session);
+            selectAsList_execPs(session);
+            selectAsList_execTm(session);
+
+            selectAsUserEntityLoop(session);
+            selectAsUserEntityList(session);
 
             selectByParameter1(session);
             selectByParameter2(session);
             selectByParameter2Bind(session);
-            selectByParameter2AsUserEntityList(session);
+            selectByParameter2AsUserEntityList_execRs(session);
+            selectByParameter2AsUserEntityList_execPs(session);
+            selectByParameter2AsUserEntityList_execTm(session);
         }
     }
 
-    void select(TsurugiSession session) throws IOException {
+    void selectLoop(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         try (var ps = session.createPreparedQuery("select * from TEST")) {
@@ -45,7 +50,6 @@ public class Example02Select {
                     System.out.println(nameList);
 
                     for (TsurugiResultEntity record : result) {
-                        // FIXME カラム名は大文字にすべき？
                         System.out.println(record.getInt4OrNull("foo"));
 //TODO                  System.out.println(record.getInt8OrNull("bar"));
 //TODO                  System.out.println(record.getCharacterOrNull("zzz"));
@@ -55,12 +59,11 @@ public class Example02Select {
         }
     }
 
-    void selectAsList(TsurugiSession session) throws IOException {
+    void selectAsList_execRs(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         try (var ps = session.createPreparedQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
-                // FIXME ps.executeAndGetListまたはps.getRecordListみたいなメソッドがあると便利？あるいは戻り値収集部分をラムダ式で渡すとか？
                 try (var result = ps.execute(transaction)) {
                     return result.getRecordList();
                 }
@@ -69,10 +72,30 @@ public class Example02Select {
         }
     }
 
-    void selectUserEntity(TsurugiSession session) throws IOException {
+    void selectAsList_execPs(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        try (var ps = session.createPreparedQuery("select * from TEST", TgResultMapping.of(TestEntity::of))) {
+        try (var ps = session.createPreparedQuery("select * from TEST")) {
+            List<TsurugiResultEntity> list = tm.execute(transaction -> {
+                return ps.executeAndGetList(transaction);
+            });
+            System.out.println(list);
+        }
+    }
+
+    void selectAsList_execTm(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
+
+        try (var ps = session.createPreparedQuery("select * from TEST")) {
+            List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
+            System.out.println(list);
+        }
+    }
+
+    void selectAsUserEntityLoop(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
+
+        try (var ps = session.createPreparedQuery("select * from TEST", resultMappingForTestEntity())) {
             tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                     for (TestEntity entity : result) {
@@ -85,30 +108,31 @@ public class Example02Select {
         }
     }
 
-    void selectUserEntityList(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
-        try (var ps = session.createPreparedQuery("select * from TEST", TgResultMapping.of(TestEntity::of))) {
-            List<TestEntity> list = tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
-                    return result.getRecordList();
-                }
+    private TgResultMapping<TestEntity> resultMappingForTestEntity() {
+        switch (0) {
+        default:
+            return TgResultMapping.of(record -> {
+                var entity = new TestEntity();
+                entity.setFoo(record.getInt4OrNull("foo"));
+//TODO          entity.setBar(record.getInt8OrNull("bar"));
+//TODO          entity.setZzz(record.getCharacterOrNull("zzz"));
+                return entity;
             });
-            System.out.println(list);
+        case 1:
+            return TgResultMapping.of(TestEntity::of);
+        case 2:
+            return TgResultMapping.of(TestEntity::new) //
+                    .int4(TestEntity::setFoo) //
+//TODO              .int8(TestEntity::setBar) //
+//TODO              .character(TestEntity::setZzz)
+            ;
         }
     }
 
-    void selectUserEntityListMapping(TsurugiSession session) throws IOException {
+    void selectAsUserEntityList(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        var sql = "select FOO, BAR, ZZZ from TEST";
-        var resultMapping = TgResultMapping.of(TestEntity::new) //
-                .int4(TestEntity::setFoo) //
-//TODO                .int8(TestEntity::setBar) //
-//TODO                .character(TestEntity::setZzz)
-        ;
-
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createPreparedQuery("select * from TEST", resultMappingForTestEntity())) {
             List<TestEntity> list = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                     return result.getRecordList();
@@ -169,20 +193,56 @@ public class Example02Select {
         }
     }
 
-    void selectByParameter2AsUserEntityList(TsurugiSession session) throws IOException {
+    void selectByParameter2AsUserEntityList_execRs(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
-        var variable = TgVariableList.of().int4("foo").int8("bar");
+        var foo = TgVariable.ofInt4("foo");
+        var bar = TgVariable.ofInt8("bar");
+        var variable = TgVariableList.of(foo, bar);
         var parameterMapping = TgParameterMapping.of(variable);
-        var resultMapping = TgResultMapping.of(TestEntity::of);
+        var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
-                var param = TgParameterList.of().add("foo", 123).add("bar", 456L);
+                var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
                 try (var result = ps.execute(transaction, param)) {
                     return result.getRecordList();
                 }
             });
+            System.out.println(list);
+        }
+    }
+
+    void selectByParameter2AsUserEntityList_execPs(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
+
+        var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
+        var foo = TgVariable.ofInt4("foo");
+        var bar = TgVariable.ofInt8("bar");
+        var variable = TgVariableList.of(foo, bar);
+        var parameterMapping = TgParameterMapping.of(variable);
+        var resultMapping = resultMappingForTestEntity();
+        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
+            List<TestEntity> list = tm.execute(transaction -> {
+                var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
+                return ps.executeAndGetList(transaction, param);
+            });
+            System.out.println(list);
+        }
+    }
+
+    void selectByParameter2AsUserEntityList_execTm(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
+
+        var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
+        var foo = TgVariable.ofInt4("foo");
+        var bar = TgVariable.ofInt8("bar");
+        var variable = TgVariableList.of(foo, bar);
+        var parameterMapping = TgParameterMapping.of(variable);
+        var resultMapping = resultMappingForTestEntity();
+        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
+            var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
+            List<TestEntity> list = ps.executeAndGetList(tm, param);
             System.out.println(list);
         }
     }

@@ -25,7 +25,10 @@ public class Example01Insert {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            insert0(session);
+            insert0_execRs(session);
+            insert0_execPs(session);
+            insert0_execTm(session);
+
             insertParameter(session);
             insertEntity(session);
             insertEntityMapping(session);
@@ -33,16 +36,36 @@ public class Example01Insert {
         }
     }
 
-    void insert0(TsurugiSession session) throws IOException {
+    void insert0_execRs(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
 
         try (var ps = session.createPreparedStatement("insert into TEST values(123, 456, 'abc')")) {
-            tm.execute(transaction -> {
-                // FIXME ps.execute毎にtryで囲むのはうざい？
+            int count = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
-                    System.out.println(result.getUpdateCount());
+                    return result.getUpdateCount();
                 }
             });
+            System.out.println(count);
+        }
+    }
+
+    void insert0_execPs(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
+
+        try (var ps = session.createPreparedStatement("insert into TEST values(123, 456, 'abc')")) {
+            int count = tm.execute(transaction -> {
+                return ps.executeAndGetCount(transaction);
+            });
+            System.out.println(count);
+        }
+    }
+
+    void insert0_execTm(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
+
+        try (var ps = session.createPreparedStatement("insert into TEST values(123, 456, 'abc')")) {
+            int count = ps.executeAndGetCount(tm);
+            System.out.println(count);
         }
     }
 
@@ -73,8 +96,15 @@ public class Example01Insert {
                     param = TgParameterList.of().add("foo", 123).add("bar", 456L).add("zzz", "abc");
                     break;
                 case 1:
+                    param = TgParameterList.of().int4("foo", 123).int8("bar", 456).character("zzz", "abc");
+                    break;
+                case 2:
                     // TgParameterList.of(variable)を使う場合、値はvariableで指定されたデータ型に変換される
                     param = TgParameterList.of(variable).add("foo", 123).add("bar", 456).add("zzz", "abc");
+                    break;
+                case 3:
+                    // TgParameterList.of(variable)でデータ型名のメソッドを使う場合、variableで指定されたデータ型と一致しない場合は実行時エラー
+                    param = TgParameterList.of(variable).int4("foo", 123).int8("bar", 456).character("zzz", "abc");
                     break;
                 }
 

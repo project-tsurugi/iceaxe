@@ -47,6 +47,87 @@ public interface TgParameterList {
      */
     public static final Function<TgParameterList, TgParameterList> IDENTITY = p -> p;
 
+    /**
+     * add value(int)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList int4(String name, int value);
+
+    /**
+     * add value(int)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList int4(String name, Integer value);
+
+    /**
+     * add value(long)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList int8(String name, long value);
+
+    /**
+     * add value(long)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList int8(String name, Long value);
+
+    /**
+     * add value(float)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList float4(String name, float value);
+
+    /**
+     * add value(float)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList float4(String name, Float value);
+
+    /**
+     * add value(double)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList float8(String name, double value);
+
+    /**
+     * add value(double)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList float8(String name, Double value);
+
+    /**
+     * add value(String)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList character(String name, String value);
+
     // internal
     public ParameterSet toLowParameterSet();
 }

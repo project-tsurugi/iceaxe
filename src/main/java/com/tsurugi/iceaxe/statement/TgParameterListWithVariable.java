@@ -28,6 +28,104 @@ public class TgParameterListWithVariable implements TgParameterList {
         return variable.getDataType(name);
     }
 
+    protected void checkType(String name, TgDataType type) {
+        var variableType = getType(name);
+        if (variableType != type) {
+            throw new IllegalStateException("type unmatch. name=" + name + ", variable=" + variableType + ", type=" + type);
+        }
+    }
+
+    @Override
+    public TgParameterListWithVariable int4(String name, int value) {
+        checkType(name, TgDataType.INT4);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        lowParameter.setInt4Value(value);
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable int4(String name, Integer value) {
+        checkType(name, TgDataType.INT4);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setInt4Value(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable int8(String name, long value) {
+        checkType(name, TgDataType.INT8);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        lowParameter.setInt8Value(value);
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable int8(String name, Long value) {
+        checkType(name, TgDataType.INT8);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setInt8Value(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable float4(String name, float value) {
+        checkType(name, TgDataType.FLOAT4);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        lowParameter.setFloat4Value(value);
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable float4(String name, Float value) {
+        checkType(name, TgDataType.FLOAT4);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setFloat4Value(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable float8(String name, double value) {
+        checkType(name, TgDataType.FLOAT8);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        lowParameter.setFloat8Value(value);
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable float8(String name, Double value) {
+        checkType(name, TgDataType.FLOAT8);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setFloat8Value(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable character(String name, String value) {
+        checkType(name, TgDataType.CHARACTER);
+        var lowParameter = Parameter.newBuilder().setName(name);
+        if (value != null) {
+            lowParameter.setCharacterValue(value);
+        }
+        add(lowParameter);
+        return this;
+    }
+
     /**
      * add value
      * 

@@ -1,13 +1,16 @@
 package com.tsurugi.iceaxe.statement;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.tsurugi.iceaxe.result.TsurugiResultCount;
 import com.tsurugi.iceaxe.session.TsurugiSession;
+import com.tsurugi.iceaxe.transaction.TgTransactionOption;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
+import com.tsurugi.iceaxe.transaction.TsurugiTransactionManager;
 
 /**
  * Tsurugi PreparedStatement
@@ -44,5 +47,50 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
         } catch (IOException e) {
             throw new TsurugiTransactionIOException(e);
         }
+    }
+
+    /**
+     * execute statement
+     * 
+     * @param transaction Transaction
+     * @param parameter   SQL parameter
+     * @return row count
+     * @throws TsurugiTransactionIOException
+     */
+    public int executeAndGetCount(TsurugiTransaction transaction, P parameter) throws TsurugiTransactionIOException {
+        try (var result = execute(transaction, parameter)) {
+            return result.getUpdateCount();
+        } catch (IOException e) {
+            throw new TsurugiTransactionIOException(e);
+        }
+    }
+
+    /**
+     * execute statement
+     * 
+     * @param tm        Transaction Manager
+     * @param parameter SQL parameter
+     * @return row count
+     * @throws IOException
+     */
+    public int executeAndGetCount(TsurugiTransactionManager tm, P parameter) throws IOException {
+        return tm.execute(transaction -> {
+            return executeAndGetCount(transaction, parameter);
+        });
+    }
+
+    /**
+     * execute statement
+     * 
+     * @param tm                    Transaction Manager
+     * @param transactionOptionList transaction option
+     * @param parameter             SQL parameter
+     * @return row count
+     * @throws IOException
+     */
+    public int executeAndGetCount(TsurugiTransactionManager tm, List<TgTransactionOption> transactionOptionList, P parameter) throws IOException {
+        return tm.execute(transactionOptionList, transaction -> {
+            return executeAndGetCount(transaction, parameter);
+        });
     }
 }

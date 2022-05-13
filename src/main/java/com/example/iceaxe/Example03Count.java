@@ -19,20 +19,23 @@ public class Example03Count {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            countAll1(session);
-            countAll2(session);
+            countAll0_execRs(session);
+            countAll0_execPs(session);
+            countAll0_execTm(session);
+
+            countAllAsInteger(session);
+
             countGroup(session);
         }
     }
 
-    void countAll1(TsurugiSession session) throws IOException {
+    void countAll0_execRs(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
             int count = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                     Optional<TsurugiResultEntity> recordOpt = result.findRecord();
-                    // FIXME カラム名は大文字にすべき？
                     return recordOpt.get().getInt4("count");
                 }
             });
@@ -40,7 +43,29 @@ public class Example03Count {
         }
     }
 
-    void countAll2(TsurugiSession session) throws IOException {
+    void countAll0_execPs(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
+
+        try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
+            int count = tm.execute(transaction -> {
+                Optional<TsurugiResultEntity> recordOpt = ps.executeAndFindRecord(transaction);
+                return recordOpt.get().getInt4("count");
+            });
+            System.out.println(count);
+        }
+    }
+
+    void countAll0_execTm(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
+
+        try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
+            Optional<TsurugiResultEntity> recordOpt = ps.executeAndFindRecord(tm);
+            int count = recordOpt.get().getInt4("count");
+            System.out.println(count);
+        }
+    }
+
+    void countAllAsInteger(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
         var resultMapping = TgResultMapping.of(record -> record.nextInt4());

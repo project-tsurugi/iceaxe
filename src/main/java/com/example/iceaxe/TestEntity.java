@@ -63,7 +63,6 @@ public class TestEntity {
 
     public static TestEntity of(TsurugiResultRecord record) throws IOException {
         var entity = new TestEntity();
-        // FIXME カラム名は大文字にすべき？
         entity.setFoo(record.getInt4OrNull("foo"));
 //TODO        entity.setBar(record.getInt8OrNull("bar"));
 //TODO        entity.setZzz(record.getCharacterOrNull("zzz"));
