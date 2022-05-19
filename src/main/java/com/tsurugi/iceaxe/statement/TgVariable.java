@@ -76,6 +76,15 @@ public abstract class TgVariable<T> {
     }
 
     /**
+     * get name
+     * 
+     * @return name
+     */
+    public String sqlName() {
+        return ":" + this.name;
+    }
+
+    /**
      * get type
      * 
      * @return type

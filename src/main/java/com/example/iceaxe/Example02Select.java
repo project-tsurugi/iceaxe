@@ -178,9 +178,10 @@ public class Example02Select {
     void selectByParameter2Bind(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
+//      var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
+        var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
         var variable = TgVariableList.of(foo, bar);
         try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
@@ -196,9 +197,9 @@ public class Example02Select {
     void selectByParameter2AsUserEntityList_execRs(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
+        var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
         var variable = TgVariableList.of(foo, bar);
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = resultMappingForTestEntity();
@@ -216,9 +217,9 @@ public class Example02Select {
     void selectByParameter2AsUserEntityList_execPs(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
+        var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
         var variable = TgVariableList.of(foo, bar);
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = resultMappingForTestEntity();
@@ -234,9 +235,9 @@ public class Example02Select {
     void selectByParameter2AsUserEntityList_execTm(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
 
-        var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
+        var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
         var variable = TgVariableList.of(foo, bar);
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = resultMappingForTestEntity();
