@@ -13,7 +13,6 @@ import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
-import com.tsurugi.iceaxe.transaction.TsurugiTransactionUncheckedIOException;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
 
 /**
@@ -147,7 +146,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             var record = getRecord();
             return new TsurugiResultSetIterator(record);
         } catch (IOException e) {
-            throw new TsurugiTransactionUncheckedIOException(new TsurugiTransactionIOException(e));
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -164,10 +163,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             if (this.moveNext) {
                 try {
                     this.hasNext = nextLowRecord();
-                } catch (TsurugiTransactionIOException e) {
-                    throw new TsurugiTransactionUncheckedIOException(e);
                 } catch (IOException e) {
-                    throw new TsurugiTransactionUncheckedIOException(new TsurugiTransactionIOException(e));
+                    throw new UncheckedIOException(e);
                 } finally {
                     record.reset();
                 }
@@ -191,8 +188,6 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             R result;
             try {
                 result = resultMapping.convert(record);
-            } catch (TsurugiTransactionIOException e) {
-                throw new TsurugiTransactionUncheckedIOException(e);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

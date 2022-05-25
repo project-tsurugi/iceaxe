@@ -14,8 +14,6 @@ import com.tsurugi.iceaxe.statement.TgParameterMapping;
 import com.tsurugi.iceaxe.statement.TgVariableList;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
-import com.tsurugi.iceaxe.transaction.TsurugiTransactionUncheckedIOException;
 
 /**
  * insert example
@@ -200,8 +198,6 @@ public class Example01Insert {
                         try (var result = preparedStatement.execute(transaction, entity)) {
                             // System.out.println(result.getUpdateCount());
                         }
-                    } catch (TsurugiTransactionIOException e) {
-                        throw new TsurugiTransactionUncheckedIOException(e);
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }

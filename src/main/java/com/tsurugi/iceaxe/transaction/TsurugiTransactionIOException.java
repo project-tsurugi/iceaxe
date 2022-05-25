@@ -8,7 +8,7 @@ import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.Error;
  * Tsurugi Transaction IOException
  */
 @SuppressWarnings("serial")
-public class TsurugiTransactionIOException extends IOException implements TsurugiTransactionException {
+public class TsurugiTransactionIOException extends IOException {
 
     private final Error lowError;
 
@@ -30,7 +30,6 @@ public class TsurugiTransactionIOException extends IOException implements Tsurug
         this.lowError = null;
     }
 
-    @Override
     public boolean isRetryable() {
         if (this.lowError == null) {
             return false;

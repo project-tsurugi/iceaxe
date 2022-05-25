@@ -53,7 +53,6 @@ public class TsurugiTransaction implements Closeable {
      */
     public synchronized void commit() throws IOException {
         if (this.committed) {
-            // TODO ログ出力？
             return;
         }
         if (this.rollbacked) {
@@ -71,7 +70,6 @@ public class TsurugiTransaction implements Closeable {
      */
     public synchronized void rollback() throws IOException {
         if (this.committed || this.rollbacked) {
-            // TODO ログ出力？
             return;
         }
 
@@ -93,6 +91,24 @@ public class TsurugiTransaction implements Closeable {
             // FIXME commit/rollbackではSUCCESS,ERROR以外は返らないという想定で良いか？
             throw new AssertionError(lowResultCase);
         }
+    }
+
+    /**
+     * get committed
+     * 
+     * @return true: committed
+     */
+    public synchronized boolean isCommitted() {
+        return this.committed;
+    }
+
+    /**
+     * get rollbacked
+     * 
+     * @return true: rollbacked
+     */
+    public synchronized boolean isRollbacked() {
+        return this.rollbacked;
     }
 
     // internal

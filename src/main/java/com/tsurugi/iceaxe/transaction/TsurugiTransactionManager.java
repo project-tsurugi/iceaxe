@@ -58,7 +58,7 @@ public class TsurugiTransactionManager {
      * @param <R>                   return type
      * @param transactionOptionList transaction option
      * @param action                action
-     * @return return value
+     * @return return value (null if transaction is rollbacked)
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
@@ -76,7 +76,7 @@ public class TsurugiTransactionManager {
      * @param <R>                   return type
      * @param transactionOptionList transaction option
      * @param action                action
-     * @return return value
+     * @return return value (null if transaction is rollbacked)
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
@@ -92,20 +92,32 @@ public class TsurugiTransactionManager {
                 boolean doRollback = true;
                 try {
                     var r = action.apply(transaction);
+                    if (transaction.isRollbacked()) {
+                        doRollback = false;
+                        return null;
+                    }
                     transaction.commit();
                     doRollback = false;
                     return r;
-                } catch (TsurugiTransactionIOException | TsurugiTransactionUncheckedIOException e) {
-                    if (e.isRetryable()) {
-                        // リトライ可能なabortの場合でもrollbackは呼ぶ
+                } catch (TsurugiTransactionIOException e) {
+                    if (isRetryable(e)) {
+                        // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
                         continue;
-                    }
-                    if (e instanceof TsurugiTransactionUncheckedIOException) {
-                        throw ((TsurugiTransactionUncheckedIOException) e).getCause();
                     }
                     throw e;
                 } catch (UncheckedIOException e) {
-                    throw e.getCause();
+                    var c = e.getCause();
+                    if (isRetryable(c)) {
+                        // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
+                        continue;
+                    }
+                    throw c;
+                } catch (Exception e) {
+                    if (isRetryable(e)) {
+                        // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
+                        continue;
+                    }
+                    throw e;
                 } finally {
                     if (doRollback) {
                         transaction.rollback();
@@ -114,5 +126,18 @@ public class TsurugiTransactionManager {
             }
         }
         throw new TsurugiTransactionIOException("transaction retry over");
+    }
+
+    protected boolean isRetryable(Exception e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof TsurugiTransactionIOException) {
+                return isRetryable((TsurugiTransactionIOException) t);
+            }
+        }
+        return false;
+    }
+
+    protected boolean isRetryable(TsurugiTransactionIOException e) {
+        return e.isRetryable();
     }
 }
