@@ -13,6 +13,9 @@ import com.tsurugi.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi Transaction Manager
+ * <p>
+ * MT safe (excluding setTimeout)
+ * </p>
  */
 public class TsurugiTransactionManager {
 
