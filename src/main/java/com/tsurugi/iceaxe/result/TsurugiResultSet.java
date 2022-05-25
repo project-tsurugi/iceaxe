@@ -8,12 +8,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
+import com.tsurugi.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
+import com.tsurugi.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi Result Set for PreparedStatement
@@ -28,6 +31,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private Future<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
     private final TgResultMapping<R> resultMapping;
+    private TgTimeValue rsTimeout;
     private TsurugiResultRecord record;
 
     // internal
@@ -35,12 +39,30 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         super(transaction);
         this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
+        setResultSetTimeout(transaction.getSessionInfo().timeout(TgTimeoutKey.RS_CONNECT));
+    }
+
+    /**
+     * set ResetSet-timeout
+     * 
+     * @param timeout time
+     */
+    public void setResultSetTimeout(long time, TimeUnit unit) {
+        setResultSetTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set ResetSet-timeout
+     * 
+     * @param timeout time
+     */
+    public void setResultSetTimeout(TgTimeValue timeout) {
+        this.rsTimeout = timeout;
     }
 
     protected synchronized final ResultSet getLowResultSet() throws IOException {
         if (this.lowResultSet == null) {
-            var info = getSessionInfo();
-            this.lowResultSet = IceaxeIoUtil.getFromFuture(lowResultSetFuture, info);
+            this.lowResultSet = IceaxeIoUtil.getFromFuture(lowResultSetFuture, rsTimeout);
             this.lowResultSetFuture = null;
         }
         return this.lowResultSet;

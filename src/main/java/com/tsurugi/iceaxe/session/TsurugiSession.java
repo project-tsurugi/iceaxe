@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.nautilus_technologies.tsubakuro.channel.common.sql.SessionWire;
 import com.nautilus_technologies.tsubakuro.low.common.Session;
 import com.tsurugi.iceaxe.result.TgResultMapping;
 import com.tsurugi.iceaxe.result.TsurugiResultEntity;
+import com.tsurugi.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugi.iceaxe.statement.TgParameterMapping;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementQuery1;
@@ -20,6 +22,7 @@ import com.tsurugi.iceaxe.transaction.TgTransactionOption;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
+import com.tsurugi.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi Session
@@ -29,6 +32,7 @@ public class TsurugiSession implements Closeable {
     private final TgSessionInfo sessionInfo;
     private final Session lowSession;
     private Future<SessionWire> lowSessionWireFuture;
+    private TgTimeValue connectTimeout;
     private final NavigableSet<Closeable> closeableSet = new ConcurrentSkipListSet<>();
 
     // internal
@@ -36,8 +40,46 @@ public class TsurugiSession implements Closeable {
         this.sessionInfo = info;
         this.lowSession = lowSession;
         this.lowSessionWireFuture = lowSessionWireFuture;
+        setConnectTimeout(info.timeout(TgTimeoutKey.SESSION_CONNECT));
+        setCloseTimeout(info.timeout(TgTimeoutKey.SESSION_CLOSE));
+    }
 
-        lowSession.setCloseTimeout(info.timeoutTime(), info.timeoutUnit());
+    /**
+     * set connect-timeout
+     * 
+     * @param time timeout time
+     * @param unit timeout unit
+     */
+    public void setConnectTimeout(long time, TimeUnit unit) {
+        setConnectTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set connect-timeout
+     * 
+     * @param timeout time
+     */
+    public void setConnectTimeout(TgTimeValue timeout) {
+        this.connectTimeout = timeout;
+    }
+
+    /**
+     * set close-timeout
+     * 
+     * @param time timeout time
+     * @param unit timeout unit
+     */
+    public void setCloseTimeout(long time, TimeUnit unit) {
+        setCloseTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set close-timeout
+     * 
+     * @param timeout time
+     */
+    public void setCloseTimeout(TgTimeValue timeout) {
+        lowSession.setCloseTimeout(timeout.value(), timeout.unit());
     }
 
     // internal
@@ -47,7 +89,7 @@ public class TsurugiSession implements Closeable {
 
     protected final synchronized Session getLowSession() throws IOException {
         if (this.lowSessionWireFuture != null) {
-            var lowSessionWire = IceaxeIoUtil.getFromFuture(lowSessionWireFuture, sessionInfo);
+            var lowSessionWire = IceaxeIoUtil.getFromFuture(lowSessionWireFuture, connectTimeout);
             lowSession.connect(lowSessionWire);
             this.lowSessionWireFuture = null;
         }

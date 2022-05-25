@@ -8,14 +8,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
-import com.tsurugi.iceaxe.session.TgSessionInfo;
-
 // internal
 public class IceaxeIoUtil {
 
-    public static <T> T getFromFuture(Future<T> future, TgSessionInfo info) throws IOException {
+    public static <T> T getFromFuture(Future<T> future, TgTimeValue timeout) throws IOException {
         try {
-            return future.get(info.timeoutTime(), info.timeoutUnit());
+            return future.get(timeout.value(), timeout.unit());
         } catch (ExecutionException e) {
             Throwable c = e.getCause();
             if (c instanceof IOException) {

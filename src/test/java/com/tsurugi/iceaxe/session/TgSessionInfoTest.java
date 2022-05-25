@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
+import com.tsurugi.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+
 class TgSessionInfoTest {
 
     @Test
@@ -22,9 +24,9 @@ class TgSessionInfoTest {
 
     @Test
     void testTimeout() {
-        var info = new TgSessionInfo().timeout(123, TimeUnit.SECONDS);
-        assertEquals(123L, info.timeoutTime());
-        assertEquals(TimeUnit.SECONDS, info.timeoutUnit());
+        var info = new TgSessionInfo().timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS);
+        assertEquals(123L, info.timeout(TgTimeoutKey.DEFAULT).value());
+        assertEquals(TimeUnit.SECONDS, info.timeout(TgTimeoutKey.DEFAULT).unit());
     }
 
     @Test
@@ -32,8 +34,8 @@ class TgSessionInfoTest {
         var info = TgSessionInfo.of();
         assertNull(info.user());
         assertNull(info.password());
-        assertEquals(Long.MAX_VALUE, info.timeoutTime());
-        assertEquals(TimeUnit.NANOSECONDS, info.timeoutUnit());
+        assertEquals(Long.MAX_VALUE, info.timeout(TgTimeoutKey.DEFAULT).value());
+        assertEquals(TimeUnit.NANOSECONDS, info.timeout(TgTimeoutKey.DEFAULT).unit());
     }
 
     @Test
@@ -41,16 +43,16 @@ class TgSessionInfoTest {
         var info = TgSessionInfo.of("u1", "p1");
         assertEquals("u1", info.user());
         assertEquals("p1", info.password());
-        assertEquals(Long.MAX_VALUE, info.timeoutTime());
-        assertEquals(TimeUnit.NANOSECONDS, info.timeoutUnit());
+        assertEquals(Long.MAX_VALUE, info.timeout(TgTimeoutKey.DEFAULT).value());
+        assertEquals(TimeUnit.NANOSECONDS, info.timeout(TgTimeoutKey.DEFAULT).unit());
     }
 
     @Test
     void testToString() {
         var empty = new TgSessionInfo();
-        assertEquals("TgSessionInfo{user=null, password=null, timeout=9223372036854775807NANOSECONDS}", empty.toString());
+        assertEquals("TgSessionInfo{user=null, password=null, timeout={DEFAULT=9223372036854775807nanoseconds}}", empty.toString());
 
-        var info = TgSessionInfo.of("u1", "p1").timeout(123, TimeUnit.SECONDS);
-        assertEquals("TgSessionInfo{user=u1, password=???, timeout=123SECONDS}", info.toString());
+        var info = TgSessionInfo.of("u1", "p1").timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS);
+        assertEquals("TgSessionInfo{user=u1, password=???, timeout={DEFAULT=123seconds}}", info.toString());
     }
 }

@@ -3,12 +3,14 @@ package com.tsurugi.iceaxe.result;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
-import com.tsurugi.iceaxe.session.TgSessionInfo;
+import com.tsurugi.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugi.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugi.iceaxe.util.IceaxeIoUtil;
+import com.tsurugi.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi Result for PreparedStatement
@@ -16,23 +18,38 @@ import com.tsurugi.iceaxe.util.IceaxeIoUtil;
 public abstract class TsurugiResult implements Closeable {
 
     private final TsurugiTransaction ownerTransaction;
+    protected TgTimeValue connectTimeout;
     private ResultOnly lowResultOnly;
 
     // internal
     public TsurugiResult(TsurugiTransaction transaction) {
         this.ownerTransaction = transaction;
         transaction.addChild(this);
+        setConnectTimeout(transaction.getSessionInfo().timeout(TgTimeoutKey.RESULT_CONNECT));
     }
 
-    protected final TgSessionInfo getSessionInfo() {
-        return ownerTransaction.getSessionInfo();
+    /**
+     * set connect-timeout
+     * 
+     * @param timeout time
+     */
+    public void setConnectTimeout(long time, TimeUnit unit) {
+        setConnectTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set connect-timeout
+     * 
+     * @param timeout time
+     */
+    public void setConnectTimeout(TgTimeValue timeout) {
+        this.connectTimeout = timeout;
     }
 
     protected synchronized final ResultOnly getLowResultOnly() throws IOException {
         if (this.lowResultOnly == null) {
-            var info = getSessionInfo();
             var lowResultOnlyFuture = getLowResultOnlyFuture();
-            this.lowResultOnly = IceaxeIoUtil.getFromFuture(lowResultOnlyFuture, info);
+            this.lowResultOnly = IceaxeIoUtil.getFromFuture(lowResultOnlyFuture, connectTimeout);
         }
         return this.lowResultOnly;
     }

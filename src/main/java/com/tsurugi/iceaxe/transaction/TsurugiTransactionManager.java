@@ -3,11 +3,13 @@ package com.tsurugi.iceaxe.transaction;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.tsurugi.iceaxe.session.TsurugiSession;
 import com.tsurugi.iceaxe.statement.TsurugiPreparedStatement;
 import com.tsurugi.iceaxe.util.IoConsumer;
 import com.tsurugi.iceaxe.util.IoFunction;
+import com.tsurugi.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi Transaction Manager
@@ -17,10 +19,71 @@ public class TsurugiTransactionManager {
     private final TsurugiSession ownerSession;
     private final List<TgTransactionOption> defaultTransactionOptionList;
 
+    private TgTimeValue beginTimeout;
+    private TgTimeValue commitTimeout;
+    private TgTimeValue rollbackTimeout;
+
     // internal
     public TsurugiTransactionManager(TsurugiSession session, List<TgTransactionOption> defaultTransactionOptionList) {
         this.ownerSession = session;
         this.defaultTransactionOptionList = defaultTransactionOptionList;
+    }
+
+    /**
+     * set transaction-begin-timeout
+     * 
+     * @param time timeout time
+     * @param unit timeout unit
+     */
+    public void setBeginTimeout(long time, TimeUnit unit) {
+        setBeginTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set transaction-begin-timeout
+     * 
+     * @param timeout time
+     */
+    public void setBeginTimeout(TgTimeValue timeout) {
+        this.beginTimeout = timeout;
+    }
+
+    /**
+     * set transaction-commit-timeout
+     * 
+     * @param time timeout time
+     * @param unit timeout unit
+     */
+    public void setCommitTimeout(long time, TimeUnit unit) {
+        setCommitTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set transaction-commit-timeout
+     * 
+     * @param timeout time
+     */
+    public void setCommitTimeout(TgTimeValue timeout) {
+        this.commitTimeout = timeout;
+    }
+
+    /**
+     * set transaction-rollback-timeout
+     * 
+     * @param time timeout time
+     * @param unit timeout unit
+     */
+    public void setRollbackTimeout(long time, TimeUnit unit) {
+        setRollbackTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set transaction-rollback-timeout
+     * 
+     * @param timeout time
+     */
+    public void setRollbackTimeout(TgTimeValue timeout) {
+        this.rollbackTimeout = timeout;
     }
 
     /**
@@ -89,6 +152,8 @@ public class TsurugiTransactionManager {
         }
         for (var option : transactionOptionList) {
             try (var transaction = ownerSession.createTransaction(option)) {
+                initializeTransaction(transaction);
+
                 boolean doRollback = true;
                 try {
                     var r = action.apply(transaction);
@@ -126,6 +191,18 @@ public class TsurugiTransactionManager {
             }
         }
         throw new TsurugiTransactionIOException("transaction retry over");
+    }
+
+    protected void initializeTransaction(TsurugiTransaction transaction) {
+        if (beginTimeout != null) {
+            transaction.setBeginTimeout(beginTimeout);
+        }
+        if (commitTimeout != null) {
+            transaction.setCommitTimeout(commitTimeout);
+        }
+        if (rollbackTimeout != null) {
+            transaction.setRollbackTimeout(rollbackTimeout);
+        }
     }
 
     protected boolean isRetryable(Exception e) {

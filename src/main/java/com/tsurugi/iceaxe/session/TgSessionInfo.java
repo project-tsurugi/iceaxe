@@ -1,6 +1,14 @@
 package com.tsurugi.iceaxe.session;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import com.tsurugi.iceaxe.result.TsurugiResult;
+import com.tsurugi.iceaxe.result.TsurugiResultSet;
+import com.tsurugi.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
+import com.tsurugi.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugi.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi Session Information
@@ -28,16 +36,45 @@ public class TgSessionInfo {
         return info;
     }
 
+    /**
+     * timeout key
+     */
+    public enum TgTimeoutKey {
+        /** default */
+        DEFAULT,
+
+        /** {@link TsurugiSession} connect */
+        SESSION_CONNECT,
+        /** {@link TsurugiSession} close */
+        SESSION_CLOSE,
+
+        /** {@link TsurugiPreparedStatementWithLowPs} connect */
+        PS_CONNECT,
+        /** {@link TsurugiPreparedStatementWithLowPs} close */
+        PS_CLOSE,
+
+        /** {@link TsurugiTransaction} begin */
+        TRANSACTION_BEGIN,
+        /** {@link TsurugiTransaction} commit */
+        TRANSACTION_COMMIT,
+        /** {@link TsurugiTransaction} rollback */
+        TRANSACTION_ROLLBACK,
+
+        /** {@link TsurugiResult} connect */
+        RESULT_CONNECT,
+        /** {@link TsurugiResultSet} connect */
+        RS_CONNECT,
+    }
+
     private String user;
     private String password;
-    private long timeoutTime = Long.MAX_VALUE;
-    private TimeUnit timeoutUnit = TimeUnit.NANOSECONDS;
+    private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = new EnumMap<>(TgTimeoutKey.class);
 
     /**
      * Tsurugi Session Information
      */
     public TgSessionInfo() {
-        // do nothing
+        timeoutMap.put(TgTimeoutKey.DEFAULT, TgTimeValue.of(Long.MAX_VALUE, TimeUnit.NANOSECONDS));
     }
 
     /**
@@ -65,14 +102,14 @@ public class TgSessionInfo {
     /**
      * set timeout
      * 
+     * @param key  timeout key
      * @param time timeout time
      * @param unit timeout unit
      * 
      * @return this
      */
-    public TgSessionInfo timeout(long time, TimeUnit unit) {
-        this.timeoutUnit = unit;
-        this.timeoutTime = time;
+    public TgSessionInfo timeout(TgTimeoutKey key, long time, TimeUnit unit) {
+        timeoutMap.put(key, new TgTimeValue(time, unit));
         return this;
     }
 
@@ -97,23 +134,19 @@ public class TgSessionInfo {
     /**
      * get timeout time
      * 
+     * @param key timeout key
      * @return time
      */
-    public long timeoutTime() {
-        return timeoutTime;
-    }
-
-    /**
-     * get timeout unit
-     * 
-     * @return unit
-     */
-    public TimeUnit timeoutUnit() {
-        return timeoutUnit;
+    public TgTimeValue timeout(TgTimeoutKey key) {
+        TgTimeValue value = timeoutMap.get(key);
+        if (value != null) {
+            return value;
+        }
+        return timeoutMap.get(TgTimeoutKey.DEFAULT);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{user=" + user + ", password=" + (password != null ? "???" : null) + ", timeout=" + timeoutTime + timeoutUnit + "}";
+        return getClass().getSimpleName() + "{user=" + user + ", password=" + (password != null ? "???" : null) + ", timeout=" + timeoutMap + "}";
     }
 }
