@@ -28,8 +28,9 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
         super(session);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
         this.parameterMapping = parameterMapping;
-        setConnectTimeout(session.getSessionInfo().timeout(TgTimeoutKey.PS_CONNECT));
-        setCloseTimeout(session.getSessionInfo().timeout(TgTimeoutKey.PS_CLOSE));
+        var info = session.getSessionInfo();
+        setConnectTimeout(info.timeout(TgTimeoutKey.PS_CONNECT));
+        setCloseTimeout(info.timeout(TgTimeoutKey.PS_CLOSE));
     }
 
     /**

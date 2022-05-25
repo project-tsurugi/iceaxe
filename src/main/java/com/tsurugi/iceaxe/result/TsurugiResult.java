@@ -25,7 +25,8 @@ public abstract class TsurugiResult implements Closeable {
     public TsurugiResult(TsurugiTransaction transaction) {
         this.ownerTransaction = transaction;
         transaction.addChild(this);
-        setConnectTimeout(transaction.getSessionInfo().timeout(TgTimeoutKey.RESULT_CONNECT));
+        var info = transaction.getSessionInfo();
+        setConnectTimeout(info.timeout(TgTimeoutKey.RESULT_CONNECT));
     }
 
     /**

@@ -39,7 +39,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         super(transaction);
         this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
-        setResultSetTimeout(transaction.getSessionInfo().timeout(TgTimeoutKey.RS_CONNECT));
+        var info = transaction.getSessionInfo();
+        setResultSetTimeout(info.timeout(TgTimeoutKey.RS_CONNECT));
     }
 
     /**

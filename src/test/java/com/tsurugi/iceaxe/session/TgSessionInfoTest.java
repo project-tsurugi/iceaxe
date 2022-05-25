@@ -25,8 +25,9 @@ class TgSessionInfoTest {
     @Test
     void testTimeout() {
         var info = new TgSessionInfo().timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS);
-        assertEquals(123L, info.timeout(TgTimeoutKey.DEFAULT).value());
-        assertEquals(TimeUnit.SECONDS, info.timeout(TgTimeoutKey.DEFAULT).unit());
+        var timeout = info.timeout(TgTimeoutKey.DEFAULT);
+        assertEquals(123L, timeout.value());
+        assertEquals(TimeUnit.SECONDS, timeout.unit());
     }
 
     @Test
@@ -34,8 +35,9 @@ class TgSessionInfoTest {
         var info = TgSessionInfo.of();
         assertNull(info.user());
         assertNull(info.password());
-        assertEquals(Long.MAX_VALUE, info.timeout(TgTimeoutKey.DEFAULT).value());
-        assertEquals(TimeUnit.NANOSECONDS, info.timeout(TgTimeoutKey.DEFAULT).unit());
+        var timeout = info.timeout(TgTimeoutKey.DEFAULT);
+        assertEquals(Long.MAX_VALUE, timeout.value());
+        assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
     }
 
     @Test
@@ -43,8 +45,9 @@ class TgSessionInfoTest {
         var info = TgSessionInfo.of("u1", "p1");
         assertEquals("u1", info.user());
         assertEquals("p1", info.password());
-        assertEquals(Long.MAX_VALUE, info.timeout(TgTimeoutKey.DEFAULT).value());
-        assertEquals(TimeUnit.NANOSECONDS, info.timeout(TgTimeoutKey.DEFAULT).unit());
+        var timeout = info.timeout(TgTimeoutKey.DEFAULT);
+        assertEquals(Long.MAX_VALUE, timeout.value());
+        assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
     }
 
     @Test
