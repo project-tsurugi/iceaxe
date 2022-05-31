@@ -20,7 +20,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransactionRuntimeException;
 /**
  * insert example
  */
-public class Example01Insert {
+public class Example11Insert {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");

@@ -11,7 +11,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 /**
  * specify timeout example
  */
-public class Example21Timeout {
+public class Example31Timeout {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");

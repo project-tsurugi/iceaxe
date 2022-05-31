@@ -11,4 +11,6 @@ public class TransactionOptionExample {
     public static final TgTransactionOption OCC = TgTransactionOption.of(TgTransactionType.OCC);
 
     public static final TgTransactionOption BATCH_READ_ONLY = TgTransactionOption.of(TgTransactionType.BATCH_READ_ONLY);
+
+    public static final TgTransactionOption BATCH_READ_WRITE = TgTransactionOption.of(TgTransactionType.BATCH_READ_WRITE);
 }

@@ -14,7 +14,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 /**
  * select count example
  */
-public class Example03Count {
+public class Example13Count {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");

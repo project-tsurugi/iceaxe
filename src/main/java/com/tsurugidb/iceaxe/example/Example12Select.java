@@ -17,7 +17,7 @@ import com.tsurugidb.iceaxe.statement.TgVariableList;
 /**
  * select example
  */
-public class Example02Select {
+public class Example12Select {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
