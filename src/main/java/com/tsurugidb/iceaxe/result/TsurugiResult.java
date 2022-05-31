@@ -2,15 +2,16 @@ package com.tsurugidb.iceaxe.result;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
+import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
+import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
+import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 
 /**
  * Tsurugi Result for PreparedStatement
@@ -18,7 +19,7 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 public abstract class TsurugiResult implements Closeable {
 
     private final TsurugiTransaction ownerTransaction;
-    protected TgTimeValue connectTimeout;
+    private final IceaxeTimeout connectTimeout;
     private ResultOnly lowResultOnly;
 
     // internal
@@ -26,7 +27,7 @@ public abstract class TsurugiResult implements Closeable {
         this.ownerTransaction = transaction;
         transaction.addChild(this);
         var info = transaction.getSessionInfo();
-        setConnectTimeout(info.timeout(TgTimeoutKey.RESULT_CONNECT));
+        this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CONNECT);
     }
 
     /**
@@ -44,7 +45,7 @@ public abstract class TsurugiResult implements Closeable {
      * @param timeout time
      */
     public void setConnectTimeout(TgTimeValue timeout) {
-        this.connectTimeout = timeout;
+        connectTimeout.set(timeout);
     }
 
     protected synchronized final ResultOnly getLowResultOnly() throws IOException {
@@ -55,7 +56,7 @@ public abstract class TsurugiResult implements Closeable {
         return this.lowResultOnly;
     }
 
-    protected abstract Future<ResultOnly> getLowResultOnlyFuture() throws IOException;
+    protected abstract FutureResponse<ResultOnly> getLowResultOnlyFuture() throws IOException;
 
     /**
      * get result status

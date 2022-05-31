@@ -7,16 +7,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
-import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
+import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
+import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
+import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 
 /**
  * Tsurugi Result Set for PreparedStatement
@@ -28,19 +29,28 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
  */
 public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
-    private Future<ResultSet> lowResultSetFuture;
+    private FutureResponse<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
     private final TgResultMapping<R> resultMapping;
-    private TgTimeValue rsTimeout;
+    private final IceaxeTimeout rsTimeout;
+    private final IceaxeTimeout closeTimeout;
     private TsurugiResultRecord record;
 
     // internal
-    public TsurugiResultSet(TsurugiTransaction transaction, Future<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping) {
+    public TsurugiResultSet(TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping) {
         super(transaction);
         this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
         var info = transaction.getSessionInfo();
-        setResultSetTimeout(info.timeout(TgTimeoutKey.RS_CONNECT));
+        this.rsTimeout = new IceaxeTimeout(info, TgTimeoutKey.RS_CONNECT);
+        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CLOSE);
+
+        applyCloseTimeout();
+    }
+
+    private void applyCloseTimeout() {
+//      closeTimeout.apply(lowResultSet);
+        closeTimeout.apply(lowResultSetFuture);
     }
 
     /**
@@ -58,19 +68,45 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
      * @param timeout time
      */
     public void setResultSetTimeout(TgTimeValue timeout) {
-        this.rsTimeout = timeout;
+        rsTimeout.set(timeout);
+    }
+
+    /**
+     * set close-timeout
+     * 
+     * @param time timeout time
+     * @param unit timeout unit
+     */
+    public void setCloseTimeout(long time, TimeUnit unit) {
+        setCloseTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set close-timeout
+     * 
+     * @param timeout time
+     */
+    public void setCloseTimeout(TgTimeValue timeout) {
+        closeTimeout.set(timeout);
+
+        applyCloseTimeout();
     }
 
     protected synchronized final ResultSet getLowResultSet() throws IOException {
         if (this.lowResultSet == null) {
             this.lowResultSet = IceaxeIoUtil.getFromFuture(lowResultSetFuture, rsTimeout);
-            this.lowResultSetFuture = null;
+            try {
+                IceaxeIoUtil.close(lowResultSetFuture);
+                this.lowResultSetFuture = null;
+            } finally {
+                applyCloseTimeout();
+            }
         }
         return this.lowResultSet;
     }
 
     @Override
-    protected Future<ResultOnly> getLowResultOnlyFuture() throws IOException {
+    protected FutureResponse<ResultOnly> getLowResultOnlyFuture() throws IOException {
         return getLowResultSet().getResponse();
     }
 
@@ -225,7 +261,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         // 一度もレコードを取得していない場合でも、commitでステータスチェックされる
 
         // not try-finally
-        getLowResultSet().close();
+        IceaxeIoUtil.close(lowResultSet, lowResultSetFuture);
         super.close();
     }
 }

@@ -1,26 +1,27 @@
 package com.tsurugidb.iceaxe.result;
 
 import java.io.IOException;
-import java.util.concurrent.Future;
 
-import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
+import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
+import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 
 /**
  * Tsurugi Result Count for PreparedStatement
  */
 public class TsurugiResultCount extends TsurugiResult {
 
-    private Future<ResultOnly> lowResultOnlyFuture;
+    private FutureResponse<ResultOnly> lowResultOnlyFuture;
 
     // internal
-    public TsurugiResultCount(TsurugiTransaction transaction, Future<ResultOnly> lowResultOnlyFuture) {
+    public TsurugiResultCount(TsurugiTransaction transaction, FutureResponse<ResultOnly> lowResultOnlyFuture) {
         super(transaction);
         this.lowResultOnlyFuture = lowResultOnlyFuture;
     }
 
     @Override
-    protected Future<ResultOnly> getLowResultOnlyFuture() throws IOException {
+    protected FutureResponse<ResultOnly> getLowResultOnlyFuture() throws IOException {
         return lowResultOnlyFuture;
     }
 
@@ -41,6 +42,9 @@ public class TsurugiResultCount extends TsurugiResult {
     public void close() throws IOException {
         // checkResultStatus(true); クローズ時にはステータスチェックは行わない
         // 一度も更新件数を取得しない場合でも、commitでステータスチェックされる
+
+        // not try-finally
+        IceaxeIoUtil.close(lowResultOnlyFuture);
         super.close();
     }
 }

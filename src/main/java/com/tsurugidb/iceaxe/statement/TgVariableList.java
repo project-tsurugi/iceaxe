@@ -1,10 +1,11 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder.Variable;
+import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
 
 /**
  * Tsurugi Variable definition for PreparedStatement
@@ -34,8 +35,7 @@ public class TgVariableList {
         return variableList;
     }
 
-    private final PlaceHolder.Builder lowBuilder = PlaceHolder.newBuilder();
-    private PlaceHolder lowPlaceHolder;
+    private final List<PlaceHolder> lowPlaceHolderList = new ArrayList<>();
     /** Map&lt;name, type&gt; */
     private Map<String, TgDataType> typeMap;
 
@@ -148,18 +148,14 @@ public class TgVariableList {
     }
 
     protected final void addInternal(String name, TgDataType type) {
-        var lowVariable = Variable.newBuilder().setName(name).setType(type.getLowDataType()).build();
-        lowBuilder.addVariables(lowVariable);
-        this.lowPlaceHolder = null;
+        var lowVariable = PlaceHolder.newBuilder().setName(name).setType(type.getLowDataType()).build();
+        lowPlaceHolderList.add(lowVariable);
         this.typeMap = null;
     }
 
     // internal
-    public synchronized PlaceHolder toLowPlaceHolder() {
-        if (this.lowPlaceHolder == null) {
-            this.lowPlaceHolder = lowBuilder.build();
-        }
-        return this.lowPlaceHolder;
+    public List<PlaceHolder> toLowPlaceHolderList() {
+        return this.lowPlaceHolderList;
     }
 
     /**
@@ -172,8 +168,7 @@ public class TgVariableList {
         if (this.typeMap == null) {
             synchronized (this) {
                 var map = new HashMap<String, TgDataType>();
-                var list = lowBuilder.getVariablesList();
-                for (var v : list) {
+                for (var v : lowPlaceHolderList) {
                     var lowName = v.getName();
                     var lowType = v.getType();
                     var type = TgDataType.of(lowType);
@@ -192,6 +187,6 @@ public class TgVariableList {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + lowBuilder + "]";
+        return getClass().getSimpleName() + lowPlaceHolderList;
     }
 }

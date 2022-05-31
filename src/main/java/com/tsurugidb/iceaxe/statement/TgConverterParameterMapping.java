@@ -1,9 +1,10 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.util.List;
 import java.util.function.Function;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder;
+import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
+import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
 
 /**
  * Tsurugi Parameter Mapping for Entity
@@ -39,12 +40,12 @@ public class TgConverterParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     @Override
-    public PlaceHolder toLowPlaceHolder() {
-        return variableList.toLowPlaceHolder();
+    public List<PlaceHolder> toLowPlaceHolderList() {
+        return variableList.toLowPlaceHolderList();
     }
 
     @Override
-    protected ParameterSet toLowParameterSet(P parameter) {
-        return parameterConverter.apply(parameter).toLowParameterSet();
+    protected List<Parameter> toLowParameterList(P parameter) {
+        return parameterConverter.apply(parameter).toLowParameterList();
     }
 }

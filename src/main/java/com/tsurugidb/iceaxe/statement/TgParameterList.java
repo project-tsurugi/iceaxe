@@ -1,8 +1,9 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.util.List;
 import java.util.function.Function;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet;
+import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
 
 /**
  * Tsurugi Parameter for PreparedStatement
@@ -129,5 +130,5 @@ public interface TgParameterList {
     public TgParameterList character(String name, String value);
 
     // internal
-    public ParameterSet toLowParameterSet();
+    public List<Parameter> toLowParameterList();
 }

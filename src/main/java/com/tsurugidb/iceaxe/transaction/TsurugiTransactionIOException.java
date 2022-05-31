@@ -2,7 +2,7 @@ package com.tsurugidb.iceaxe.transaction;
 
 import java.io.IOException;
 
-import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.Error;
+import com.tsurugidb.jogasaki.proto.SqlResponse.Error;
 
 /**
  * Tsurugi Transaction IOException

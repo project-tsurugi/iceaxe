@@ -6,20 +6,16 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
+import com.nautilus_technologies.tsubakuro.channel.common.connection.NullCredential;
+import com.nautilus_technologies.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 
 class TgSessionInfoTest {
 
     @Test
-    void testUser() {
-        var info = new TgSessionInfo().user("u1");
-        assertEquals("u1", info.user());
-    }
-
-    @Test
-    void testPassword() {
-        var info = new TgSessionInfo().password("p1");
-        assertEquals("p1", info.password());
+    void testCredential() {
+        var info = new TgSessionInfo().credential(NullCredential.INSTANCE);
+        assertEquals(NullCredential.INSTANCE, info.credential());
     }
 
     @Test
@@ -33,8 +29,7 @@ class TgSessionInfoTest {
     @Test
     void testOf() {
         var info = TgSessionInfo.of();
-        assertNull(info.user());
-        assertNull(info.password());
+        assertNull(info.credential());
         var timeout = info.timeout(TgTimeoutKey.DEFAULT);
         assertEquals(Long.MAX_VALUE, timeout.value());
         assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
@@ -43,8 +38,9 @@ class TgSessionInfoTest {
     @Test
     void testOfUser() {
         var info = TgSessionInfo.of("u1", "p1");
-        assertEquals("u1", info.user());
-        assertEquals("p1", info.password());
+        var credential = (UsernamePasswordCredential) info.credential();
+        assertEquals("u1", credential.getName());
+        assertEquals("p1", credential.getPassword().get());
         var timeout = info.timeout(TgTimeoutKey.DEFAULT);
         assertEquals(Long.MAX_VALUE, timeout.value());
         assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
@@ -53,9 +49,9 @@ class TgSessionInfoTest {
     @Test
     void testToString() {
         var empty = new TgSessionInfo();
-        assertEquals("TgSessionInfo{user=null, password=null, timeout={DEFAULT=9223372036854775807nanoseconds}}", empty.toString());
+        assertEquals("TgSessionInfo{credential=null, timeout={DEFAULT=9223372036854775807nanoseconds}}", empty.toString());
 
         var info = TgSessionInfo.of("u1", "p1").timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS);
-        assertEquals("TgSessionInfo{user=u1, password=???, timeout={DEFAULT=123seconds}}", info.toString());
+        assertEquals("TgSessionInfo{credential=UsernamePasswordCredential(name=u1), timeout={DEFAULT=123seconds}}", info.toString());
     }
 }

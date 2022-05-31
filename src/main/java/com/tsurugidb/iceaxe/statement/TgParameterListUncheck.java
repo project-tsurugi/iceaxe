@@ -1,7 +1,9 @@
 package com.tsurugidb.iceaxe.statement;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet.Parameter;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
 
 /**
  * Tsurugi Parameter for PreparedStatement
@@ -12,8 +14,7 @@ import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet.Par
  */
 public class TgParameterListUncheck implements TgParameterList {
 
-    private final ParameterSet.Builder lowBuilder = ParameterSet.newBuilder();
-    private ParameterSet lowParameterSet;
+    private final List<Parameter> lowParameterList = new ArrayList<>();
 
     /**
      * Tsurugi Parameter for PreparedStatement
@@ -210,27 +211,22 @@ public class TgParameterListUncheck implements TgParameterList {
      * @return this
      */
     public TgParameterListUncheck add(TgParameter parameter) {
-        lowBuilder.addParameters(parameter.toLowParameter());
-        this.lowParameterSet = null;
+        lowParameterList.add(parameter.toLowParameter());
         return this;
     }
 
     protected void add(Parameter.Builder lowParameter) {
-        lowBuilder.addParameters(lowParameter.build());
-        this.lowParameterSet = null;
+        lowParameterList.add(lowParameter.build());
     }
 
     // internal
     @Override
-    public ParameterSet toLowParameterSet() {
-        if (this.lowParameterSet == null) {
-            this.lowParameterSet = lowBuilder.build();
-        }
-        return this.lowParameterSet;
+    public List<Parameter> toLowParameterList() {
+        return this.lowParameterList;
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[" + lowBuilder + "]";
+        return getClass().getSimpleName() + lowParameterList;
     }
 }

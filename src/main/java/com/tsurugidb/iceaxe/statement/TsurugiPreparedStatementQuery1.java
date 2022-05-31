@@ -3,9 +3,9 @@ package com.tsurugidb.iceaxe.statement;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Future;
 
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
+import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -29,7 +29,8 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
     private final TgResultMapping<R> resultMapping;
 
     // internal
-    public TsurugiPreparedStatementQuery1(TsurugiSession session, Future<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) {
+    public TsurugiPreparedStatementQuery1(TsurugiSession session, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping,
+            TgResultMapping<R> resultMapping) {
         super(session, lowPreparedStatementFuture, parameterMapping);
         this.resultMapping = resultMapping;
     }
@@ -46,8 +47,8 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
         try {
             var lowTransaction = transaction.getLowTransaction();
             var lowPs = getLowPreparedStatement();
-            var lowParameterSet = getLowParameterSet(parameter);
-            var lowResultSetFuture = lowTransaction.executeQuery(lowPs, lowParameterSet);
+            var lowParameterList = getLowParameterList(parameter);
+            var lowResultSetFuture = lowTransaction.executeQuery(lowPs, lowParameterList);
             var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping);
             return result;
         } catch (IOException e) {

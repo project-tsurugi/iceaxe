@@ -1,15 +1,17 @@
 package com.tsurugidb.iceaxe.statement;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static com.tsurugidb.iceaxe.statement.TgDataType.*;
+import static com.tsurugidb.iceaxe.statement.TgDataType.CHARACTER;
+import static com.tsurugidb.iceaxe.statement.TgDataType.FLOAT4;
+import static com.tsurugidb.iceaxe.statement.TgDataType.FLOAT8;
+import static com.tsurugidb.iceaxe.statement.TgDataType.INT4;
+import static com.tsurugidb.iceaxe.statement.TgDataType.INT8;
 import static java.util.Map.entry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
-
-import com.nautilus_technologies.tsubakuro.protos.CommonProtos.DataType;
 
 class TgVariableListTest {
 
@@ -91,11 +93,11 @@ class TgVariableListTest {
     }
 
     private static void assertVariable(Map<String, TgDataType> expectedMap, TgVariableList actual) {
-        var ph = actual.toLowPlaceHolder();
-        var actualMap = ph.getVariablesList().stream().collect(Collectors.toMap(v -> v.getName(), v -> v.getType()));
+        var phList = actual.toLowPlaceHolderList();
+        var actualMap = phList.stream().collect(Collectors.toMap(v -> v.getName(), v -> v.getType()));
         assertEquals(expectedMap.size(), actualMap.size());
         expectedMap.forEach((name, expectedType) -> {
-            DataType actualType = actualMap.get(name);
+            var actualType = actualMap.get(name);
             assertEquals(expectedType.getLowDataType(), actualType);
         });
     }

@@ -1,8 +1,8 @@
 package com.tsurugidb.iceaxe.transaction;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.TransactionOption;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.TransactionOption.TransactionType;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.TransactionOption.WritePreserve;
+import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionOption;
+import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionType;
+import com.tsurugidb.jogasaki.proto.SqlRequest.WritePreserve;
 
 /**
  * Tsurugi Transaction Option
@@ -58,7 +58,7 @@ public class TgTransactionOption {
      * @return this
      */
     public TgTransactionOption addWritePreserveTable(String name) {
-        var value = WritePreserve.newBuilder().setName(name).build();
+        var value = WritePreserve.newBuilder().setTableName(name).build();
         lowBuilder.addWritePreserves(value);
         this.lowTransactionOption = null;
         return this;

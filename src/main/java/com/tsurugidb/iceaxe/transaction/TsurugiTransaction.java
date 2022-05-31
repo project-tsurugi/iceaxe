@@ -4,17 +4,18 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.nautilus_technologies.tsubakuro.low.sql.Transaction;
-import com.nautilus_technologies.tsubakuro.protos.ResponseProtos.ResultOnly;
+import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
+import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.IoFunction;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
+import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 
 /**
  * Tsurugi Transaction
@@ -22,20 +23,33 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 public class TsurugiTransaction implements Closeable {
 
     private final TsurugiSession ownerSession;
-    private Future<Transaction> lowTransactionFuture;
+    private FutureResponse<Transaction> lowTransactionFuture;
     private Transaction lowTransaction;
-    private TgTimeValue beginTimeout;
-    private TgTimeValue commitTimeout;
-    private TgTimeValue rollbackTimeout;
+    private final IceaxeTimeout beginTimeout;
+    private final IceaxeTimeout commitTimeout;
+    private final IceaxeTimeout rollbackTimeout;
+    private final IceaxeTimeout closeTimeout;
     private boolean committed = false;
     private boolean rollbacked = false;
     private final NavigableSet<Closeable> closeableSet = new ConcurrentSkipListSet<>();
 
     // internal
-    public TsurugiTransaction(TsurugiSession session, Future<Transaction> lowTransactionFuture) {
+    public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture) {
         this.ownerSession = session;
         this.lowTransactionFuture = lowTransactionFuture;
         session.addChild(this);
+        var info = session.getSessionInfo();
+        this.beginTimeout = new IceaxeTimeout(info, TgTimeoutKey.TRANSACTION_BEGIN);
+        this.commitTimeout = new IceaxeTimeout(info, TgTimeoutKey.TRANSACTION_COMMIT);
+        this.rollbackTimeout = new IceaxeTimeout(info, TgTimeoutKey.TRANSACTION_ROLLBACK);
+        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.TRANSACTION_CLOSE);
+
+        applyCloseTimeout();
+    }
+
+    private void applyCloseTimeout() {
+        closeTimeout.apply(lowTransaction);
+        closeTimeout.apply(lowTransactionFuture);
     }
 
     /**
@@ -54,15 +68,7 @@ public class TsurugiTransaction implements Closeable {
      * @param timeout time
      */
     public void setBeginTimeout(TgTimeValue timeout) {
-        this.beginTimeout = timeout;
-    }
-
-    protected TgTimeValue getBeginTimeout() {
-        if (this.beginTimeout == null) {
-            var info = getSessionInfo();
-            this.beginTimeout = info.timeout(TgTimeoutKey.TRANSACTION_BEGIN);
-        }
-        return this.beginTimeout;
+        beginTimeout.set(timeout);
     }
 
     /**
@@ -81,15 +87,7 @@ public class TsurugiTransaction implements Closeable {
      * @param timeout time
      */
     public void setCommitTimeout(TgTimeValue timeout) {
-        this.commitTimeout = timeout;
-    }
-
-    protected TgTimeValue getCommitTimeout() {
-        if (this.commitTimeout == null) {
-            var info = getSessionInfo();
-            this.commitTimeout = info.timeout(TgTimeoutKey.TRANSACTION_COMMIT);
-        }
-        return this.commitTimeout;
+        commitTimeout.set(timeout);
     }
 
     /**
@@ -108,15 +106,28 @@ public class TsurugiTransaction implements Closeable {
      * @param timeout time
      */
     public void setRollbackTimeout(TgTimeValue timeout) {
-        this.rollbackTimeout = timeout;
+        rollbackTimeout.set(timeout);
     }
 
-    protected TgTimeValue getRollbackTimeout() {
-        if (this.rollbackTimeout == null) {
-            var info = getSessionInfo();
-            this.rollbackTimeout = info.timeout(TgTimeoutKey.TRANSACTION_ROLLBACK);
-        }
-        return this.rollbackTimeout;
+    /**
+     * set transaction-close-timeout
+     * 
+     * @param time timeout time
+     * @param unit timeout unit
+     */
+    public void setCloseTimeout(long time, TimeUnit unit) {
+        setCloseTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set transaction-close-timeout
+     * 
+     * @param timeout time
+     */
+    public void setCloseTimeout(TgTimeValue timeout) {
+        closeTimeout.set(timeout);
+
+        applyCloseTimeout();
     }
 
     public final TgSessionInfo getSessionInfo() {
@@ -126,8 +137,13 @@ public class TsurugiTransaction implements Closeable {
     // internal
     public final synchronized Transaction getLowTransaction() throws IOException {
         if (this.lowTransaction == null) {
-            this.lowTransaction = IceaxeIoUtil.getFromFuture(lowTransactionFuture, getBeginTimeout());
-            this.lowTransactionFuture = null;
+            this.lowTransaction = IceaxeIoUtil.getFromFuture(lowTransactionFuture, beginTimeout);
+            try {
+                IceaxeIoUtil.close(lowTransactionFuture);
+                this.lowTransactionFuture = null;
+            } finally {
+                applyCloseTimeout();
+            }
         }
         return this.lowTransaction;
     }
@@ -145,7 +161,7 @@ public class TsurugiTransaction implements Closeable {
             throw new IllegalStateException("rollback has already been called");
         }
 
-        finish(Transaction::commit, getCommitTimeout());
+        finish(Transaction::commit, commitTimeout);
         this.committed = true;
     }
 
@@ -159,11 +175,11 @@ public class TsurugiTransaction implements Closeable {
             return;
         }
 
-        finish(Transaction::rollback, getRollbackTimeout());
+        finish(Transaction::rollback, rollbackTimeout);
         this.rollbacked = true;
     }
 
-    protected void finish(IoFunction<Transaction, Future<ResultOnly>> finisher, TgTimeValue timeout) throws IOException {
+    protected void finish(IoFunction<Transaction, FutureResponse<ResultOnly>> finisher, IceaxeTimeout timeout) throws IOException {
         var lowResultFuture = finisher.apply(getLowTransaction());
         var lowResult = IceaxeIoUtil.getFromFuture(lowResultFuture, timeout);
         var lowResultCase = lowResult.getResultCase();
@@ -214,7 +230,7 @@ public class TsurugiTransaction implements Closeable {
 
         IceaxeIoUtil.close(closeableSet, () -> {
             // not try-finally
-            getLowTransaction().close();
+            IceaxeIoUtil.close(lowTransaction, lowTransactionFuture);
             ownerSession.removeChild(this);
         });
     }

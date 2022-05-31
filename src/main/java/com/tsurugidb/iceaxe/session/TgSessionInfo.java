@@ -4,6 +4,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.nautilus_technologies.tsubakuro.channel.common.connection.Credential;
+import com.nautilus_technologies.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 import com.tsurugidb.iceaxe.result.TsurugiResult;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
@@ -32,8 +34,18 @@ public class TgSessionInfo {
      * @return Session Information
      */
     public static TgSessionInfo of(String user, String password) {
-        var info = new TgSessionInfo().user(user).password(password);
-        return info;
+        var credential = new UsernamePasswordCredential(user, password);
+        return of(credential);
+    }
+
+    /**
+     * create Session Information
+     * 
+     * @param credential Credential
+     * @return Session Information
+     */
+    public static TgSessionInfo of(Credential credential) {
+        return new TgSessionInfo().credential(credential);
     }
 
     /**
@@ -59,15 +71,18 @@ public class TgSessionInfo {
         TRANSACTION_COMMIT,
         /** {@link TsurugiTransaction} rollback */
         TRANSACTION_ROLLBACK,
+        /** {@link TsurugiTransaction} close */
+        TRANSACTION_CLOSE,
 
         /** {@link TsurugiResult} connect */
         RESULT_CONNECT,
         /** {@link TsurugiResultSet} connect */
         RS_CONNECT,
+        /** {@link TsurugiResult} close */
+        RESULT_CLOSE,
     }
 
-    private String user;
-    private String password;
+    private Credential credential;
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = new EnumMap<>(TgTimeoutKey.class);
 
     /**
@@ -78,25 +93,23 @@ public class TgSessionInfo {
     }
 
     /**
-     * set user
+     * set credential
      * 
-     * @param user user id
+     * @param credential Credential
      * @return this
      */
-    public TgSessionInfo user(String user) {
-        this.user = user;
+    public TgSessionInfo credential(Credential credential) {
+        this.credential = credential;
         return this;
     }
 
     /**
-     * set password
+     * get credential
      * 
-     * @param password password
-     * @return this
+     * @return Credential
      */
-    public TgSessionInfo password(String password) {
-        this.password = password;
-        return this;
+    public Credential credential() {
+        return this.credential;
     }
 
     /**
@@ -111,24 +124,6 @@ public class TgSessionInfo {
     public TgSessionInfo timeout(TgTimeoutKey key, long time, TimeUnit unit) {
         timeoutMap.put(key, new TgTimeValue(time, unit));
         return this;
-    }
-
-    /**
-     * get user
-     * 
-     * @return user id
-     */
-    public String user() {
-        return user;
-    }
-
-    /**
-     * get password
-     * 
-     * @return password
-     */
-    public String password() {
-        return password;
     }
 
     /**
@@ -147,6 +142,6 @@ public class TgSessionInfo {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{user=" + user + ", password=" + (password != null ? "???" : null) + ", timeout=" + timeoutMap + "}";
+        return getClass().getSimpleName() + "{credential=" + credential + ", timeout=" + timeoutMap + "}";
     }
 }

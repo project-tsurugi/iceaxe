@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet.Parameter;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder.Variable;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
+import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
+import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
 
 /**
  * Tsurugi Parameter Mapping for Entity
@@ -28,7 +26,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         return new TgEntityParameterMapping<>();
     }
 
-    private final PlaceHolder.Builder lowPlaceHolderBuilder = PlaceHolder.newBuilder();
+    private final List<PlaceHolder> lowPlaceHolderList = new ArrayList<>();
     private final List<Function<P, Parameter>> parameterConverterList = new ArrayList<>();
 
     /**
@@ -137,21 +135,21 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     protected void addVariable(String name, TgDataType type) {
-        var lowVariable = Variable.newBuilder().setName(name).setType(type.getLowDataType()).build();
-        lowPlaceHolderBuilder.addVariables(lowVariable);
+        var lowVariable = PlaceHolder.newBuilder().setName(name).setType(type.getLowDataType()).build();
+        lowPlaceHolderList.add(lowVariable);
     }
 
     @Override
-    public PlaceHolder toLowPlaceHolder() {
-        return lowPlaceHolderBuilder.build();
+    public List<PlaceHolder> toLowPlaceHolderList() {
+        return lowPlaceHolderList;
     }
 
     @Override
-    protected ParameterSet toLowParameterSet(P parameter) {
-        var lowBuilder = ParameterSet.newBuilder();
+    protected List<Parameter> toLowParameterList(P parameter) {
+        var list = new ArrayList<Parameter>(parameterConverterList.size());
         for (var converter : parameterConverterList) {
-            lowBuilder.addParameters(converter.apply(parameter));
+            list.add(converter.apply(parameter));
         }
-        return lowBuilder.build();
+        return list;
     }
 }

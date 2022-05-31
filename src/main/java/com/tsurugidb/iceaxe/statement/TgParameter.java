@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.statement;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet.Parameter;
+import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
 
 /**
  * Tsurugi Parameter

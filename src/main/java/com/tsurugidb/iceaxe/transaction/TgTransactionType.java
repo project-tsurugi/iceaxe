@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.transaction;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.TransactionOption.TransactionType;
+import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionType;
 
 /**
  * Tsurugi Transaction Type
@@ -13,15 +13,15 @@ public enum TgTransactionType {
     /**
      * short transaction
      */
-    OCC(TransactionType.TRANSACTION_TYPE_SHORT),
+    OCC(TransactionType.SHORT),
     /**
      * long transaction(read-write)
      */
-    BATCH_READ_WRITE(TransactionType.TRANSACTION_TYPE_LONG),
+    BATCH_READ_WRITE(TransactionType.LONG),
     /**
      * long transaction(read only)
      */
-    BATCH_READ_ONLY(TransactionType.TRANSACTION_TYPE_READ_ONLY);
+    BATCH_READ_ONLY(TransactionType.READ_ONLY);
 
     private final TransactionType lowTransactionType;
 

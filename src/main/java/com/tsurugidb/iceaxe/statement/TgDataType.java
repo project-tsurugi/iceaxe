@@ -5,7 +5,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.nautilus_technologies.tsubakuro.protos.CommonProtos.DataType;
+import com.tsurugidb.jogasaki.proto.SqlCommon.AtomType;
 
 /**
  * Tsurugi Data Type
@@ -15,34 +15,34 @@ public enum TgDataType {
     /**
      * int
      */
-    INT4(DataType.INT4, List.of(int.class, Integer.class)),
+    INT4(AtomType.INT4, List.of(int.class, Integer.class)),
     /**
      * long
      */
-    INT8(DataType.INT8, List.of(long.class, Long.class)),
+    INT8(AtomType.INT8, List.of(long.class, Long.class)),
     /**
      * float
      */
-    FLOAT4(DataType.FLOAT4, List.of(float.class, Float.class)),
+    FLOAT4(AtomType.FLOAT4, List.of(float.class, Float.class)),
     /**
      * double
      */
-    FLOAT8(DataType.FLOAT8, List.of(double.class, Double.class)),
+    FLOAT8(AtomType.FLOAT8, List.of(double.class, Double.class)),
     /**
      * String
      */
-    CHARACTER(DataType.CHARACTER, List.of(String.class));
+    CHARACTER(AtomType.CHARACTER, List.of(String.class));
 
-    private final DataType lowType;
+    private final AtomType lowType;
     private final List<Class<?>> classList;
 
-    private TgDataType(DataType lowType, List<Class<?>> classList) {
+    private TgDataType(AtomType lowType, List<Class<?>> classList) {
         this.lowType = lowType;
         this.classList = classList;
     }
 
     // internal
-    public DataType getLowDataType() {
+    public AtomType getLowDataType() {
         return this.lowType;
     }
 
@@ -71,9 +71,9 @@ public enum TgDataType {
         return type;
     }
 
-    private static final Map<DataType, TgDataType> LOW_TYPE_MAP;
+    private static final Map<AtomType, TgDataType> LOW_TYPE_MAP;
     static {
-        var map = new EnumMap<DataType, TgDataType>(DataType.class);
+        var map = new EnumMap<AtomType, TgDataType>(AtomType.class);
         for (var type : values()) {
             var lowType = type.getLowDataType();
             map.put(lowType, type);
@@ -82,7 +82,7 @@ public enum TgDataType {
     }
 
     // internal
-    public static TgDataType of(DataType lowType) {
+    public static TgDataType of(AtomType lowType) {
         var type = LOW_TYPE_MAP.get(lowType);
         if (type == null) {
             throw new InternalError("unsupported type error. lowType=" + lowType);

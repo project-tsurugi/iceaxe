@@ -1,9 +1,10 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.util.List;
 import java.util.function.Function;
 
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.ParameterSet;
-import com.nautilus_technologies.tsubakuro.protos.RequestProtos.PlaceHolder;
+import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
+import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
 
 /**
  * Tsurugi Parameter Mapping
@@ -46,8 +47,8 @@ public abstract class TgParameterMapping<P> {
     }
 
     // internal
-    public abstract PlaceHolder toLowPlaceHolder();
+    public abstract List<PlaceHolder> toLowPlaceHolderList();
 
     // internal
-    protected abstract ParameterSet toLowParameterSet(P parameter);
+    protected abstract List<Parameter> toLowParameterList(P parameter);
 }

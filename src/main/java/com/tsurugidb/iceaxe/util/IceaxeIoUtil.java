@@ -2,31 +2,29 @@ package com.tsurugidb.iceaxe.util;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
+
+import com.nautilus_technologies.tsubakuro.exception.ServerException;
+import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 
 // internal
 public class IceaxeIoUtil {
 
-    public static <T> T getFromFuture(Future<T> future, TgTimeValue timeout) throws IOException {
+    public static <T> T getFromFuture(FutureResponse<T> future, IceaxeTimeout timeout) throws IOException {
+        var time = timeout.get();
         try {
-            return future.get(timeout.value(), timeout.unit());
-        } catch (ExecutionException e) {
-            Throwable c = e.getCause();
-            if (c instanceof IOException) {
-                throw (IOException) c;
-            }
-            throw new IOException(e);
-        } catch (InterruptedException | TimeoutException e) {
+            return future.get(time.value(), time.unit());
+        } catch (ServerException | InterruptedException | TimeoutException e) {
             throw new IOException(e);
         }
     }
 
     public static void close(NavigableSet<Closeable> closeableSet, IoRunnable runnable) throws IOException {
-        IOException save = null;
+        List<Throwable> saveList = null;
         for (;;) {
             Closeable closeable;
             try {
@@ -37,22 +35,64 @@ public class IceaxeIoUtil {
             closeableSet.remove(closeable);
             try {
                 closeable.close();
+            } catch (Exception e) {
+                if (saveList == null) {
+                    saveList = new ArrayList<>();
+                }
+                saveList.add(e);
+            }
+        }
+
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            if (saveList != null) {
+                for (var save : saveList) {
+                    e.addSuppressed(save);
+                }
+            }
+            throw e;
+        }
+
+        if (saveList != null) {
+            IOException e = null;
+            for (var save : saveList) {
+                if (e == null) {
+                    if (save instanceof IOException) {
+                        e = (IOException) save;
+                    } else {
+                        e = new IOException(save);
+                    }
+                } else {
+                    e.addSuppressed(save);
+                }
+            }
+            throw e;
+        }
+    }
+
+    public static void close(AutoCloseable... closeables) throws IOException {
+        IOException save = null;
+        for (var closeable : closeables) {
+            if (closeable == null) {
+                continue;
+            }
+
+            try {
+                closeable.close();
             } catch (IOException e) {
                 if (save == null) {
                     save = e;
                 } else {
                     save.addSuppressed(e);
                 }
+            } catch (Exception e) {
+                if (save == null) {
+                    save = new IOException(e);
+                } else {
+                    save.addSuppressed(e);
+                }
             }
-        }
-
-        try {
-            runnable.run();
-        } catch (Throwable t) {
-            if (save != null) {
-                t.addSuppressed(save);
-            }
-            throw t;
         }
 
         if (save != null) {
