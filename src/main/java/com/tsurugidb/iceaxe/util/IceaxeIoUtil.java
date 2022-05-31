@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 
 // internal
 public class IceaxeIoUtil {
@@ -19,6 +20,17 @@ public class IceaxeIoUtil {
         try {
             return future.get(time.value(), time.unit());
         } catch (ServerException | InterruptedException | TimeoutException e) {
+            throw new IOException(e);
+        }
+    }
+
+    public static <T> T getFromTransactionFuture(FutureResponse<T> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
+        var time = timeout.get();
+        try {
+            return future.get(time.value(), time.unit());
+        } catch (ServerException e) {
+            throw new TsurugiTransactionException(e);
+        } catch (InterruptedException | TimeoutException e) {
             throw new IOException(e);
         }
     }

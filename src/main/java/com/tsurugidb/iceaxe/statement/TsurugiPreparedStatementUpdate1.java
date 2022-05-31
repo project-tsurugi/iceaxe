@@ -9,7 +9,7 @@ import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 
 /**
@@ -34,19 +34,16 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return result
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public TsurugiResultCount execute(TsurugiTransaction transaction, P parameter) throws TsurugiTransactionIOException {
-        try {
-            var lowTransaction = transaction.getLowTransaction();
-            var lowPs = getLowPreparedStatement();
-            var lowParameterList = getLowParameterList(parameter);
-            var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterList);
-            var result = new TsurugiResultCount(transaction, lowResultFuture);
-            return result;
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
-        }
+    public TsurugiResultCount execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
+        var lowTransaction = transaction.getLowTransaction();
+        var lowPs = getLowPreparedStatement();
+        var lowParameterList = getLowParameterList(parameter);
+        var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterList);
+        var result = new TsurugiResultCount(transaction, lowResultFuture);
+        return result;
     }
 
     /**
@@ -55,13 +52,12 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return row count
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public int executeAndGetCount(TsurugiTransaction transaction, P parameter) throws TsurugiTransactionIOException {
+    public int executeAndGetCount(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
         try (var result = execute(transaction, parameter)) {
             return result.getUpdateCount();
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
         }
     }
 

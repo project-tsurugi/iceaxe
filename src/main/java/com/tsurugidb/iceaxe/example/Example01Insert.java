@@ -14,6 +14,8 @@ import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariableList;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionRuntimeException;
 
 /**
  * insert example
@@ -194,18 +196,19 @@ public class Example01Insert {
         protected void compute() {
             if (list.size() <= 100) {
                 for (TestEntity entity : list) {
-                    try {
-                        try (var result = preparedStatement.execute(transaction, entity)) {
-                            // System.out.println(result.getUpdateCount());
-                        }
+                    try (var result = preparedStatement.execute(transaction, entity)) {
+                        // System.out.println(result.getUpdateCount());
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
+                    } catch (TsurugiTransactionException e) {
+                        throw new TsurugiTransactionRuntimeException(e);
                     }
                 }
             } else {
                 int n = list.size() / 2;
                 var task1 = new InsertTask(transaction, preparedStatement, list.subList(0, n)).fork();
                 var task2 = new InsertTask(transaction, preparedStatement, list.subList(n, list.size())).fork();
+                // FIXME TsurugiTransactionException例外処理
                 task1.join();
                 task2.join();
             }

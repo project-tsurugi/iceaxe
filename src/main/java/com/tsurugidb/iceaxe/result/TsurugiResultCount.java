@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 
@@ -30,9 +31,9 @@ public class TsurugiResultCount extends TsurugiResult {
      * 
      * @return the row count for SQL Data Manipulation Language (DML) statements
      * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public int getUpdateCount() throws IOException {
-        // FIXME ステータスがRESULT_NOT_SETだったらどうする？
+    public int getUpdateCount() throws IOException, TsurugiTransactionException {
         checkResultStatus(false);
         // FIXME 更新件数取得
         throw new InternalError("not yet implements");

@@ -13,7 +13,8 @@ import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -110,7 +111,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         return getLowResultSet().getResponse();
     }
 
-    protected boolean nextLowRecord() throws IOException, TsurugiTransactionIOException {
+    protected boolean nextLowRecord() throws IOException, TsurugiTransactionException {
         try {
             var lowResultSet = getLowResultSet();
             boolean exists = lowResultSet.nextRecord();
@@ -146,22 +147,17 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
      * get one record
      * 
      * @return record
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public Optional<R> findRecord() throws TsurugiTransactionIOException {
-        try {
-            if (nextLowRecord()) {
-                var record = getRecord();
-                record.reset();
-                var result = resultMapping.convert(record);
-                return Optional.of(result);
-            } else {
-                return Optional.empty();
-            }
-        } catch (TsurugiTransactionIOException e) {
-            throw e;
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
+    public Optional<R> findRecord() throws IOException, TsurugiTransactionException {
+        if (nextLowRecord()) {
+            var record = getRecord();
+            record.reset();
+            var result = resultMapping.convert(record);
+            return Optional.of(result);
+        } else {
+            return Optional.empty();
         }
     }
 
@@ -177,21 +173,16 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
      * get record list
      * 
      * @return list of record
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public List<R> getRecordList() throws TsurugiTransactionIOException {
+    public List<R> getRecordList() throws IOException, TsurugiTransactionException {
         var list = new ArrayList<R>();
-        try {
-            var record = getRecord();
-            while (nextLowRecord()) {
-                record.reset();
-                var result = resultMapping.convert(record);
-                list.add(result);
-            }
-        } catch (TsurugiTransactionIOException e) {
-            throw e;
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
+        var record = getRecord();
+        while (nextLowRecord()) {
+            record.reset();
+            var result = resultMapping.convert(record);
+            list.add(result);
         }
         return list;
     }
@@ -224,6 +215,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
                     this.hasNext = nextLowRecord();
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
+                } catch (TsurugiTransactionException e) {
+                    throw new TsurugiTransactionRuntimeException(e);
                 } finally {
                     record.reset();
                 }

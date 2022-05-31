@@ -152,8 +152,9 @@ public class TsurugiTransaction implements Closeable {
      * do commit
      * 
      * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public synchronized void commit() throws IOException {
+    public synchronized void commit() throws IOException, TsurugiTransactionException {
         if (this.committed) {
             return;
         }
@@ -169,8 +170,9 @@ public class TsurugiTransaction implements Closeable {
      * do rollback
      * 
      * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public synchronized void rollback() throws IOException {
+    public synchronized void rollback() throws IOException, TsurugiTransactionException {
         if (this.committed || this.rollbacked) {
             return;
         }
@@ -179,15 +181,15 @@ public class TsurugiTransaction implements Closeable {
         this.rollbacked = true;
     }
 
-    protected void finish(IoFunction<Transaction, FutureResponse<ResultOnly>> finisher, IceaxeTimeout timeout) throws IOException {
+    protected void finish(IoFunction<Transaction, FutureResponse<ResultOnly>> finisher, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
         var lowResultFuture = finisher.apply(getLowTransaction());
-        var lowResult = IceaxeIoUtil.getFromFuture(lowResultFuture, timeout);
+        var lowResult = IceaxeIoUtil.getFromTransactionFuture(lowResultFuture, timeout);
         var lowResultCase = lowResult.getResultCase();
         switch (lowResultCase) {
         case SUCCESS:
             return;
         case ERROR:
-            throw new TsurugiTransactionIOException(lowResult.getError());
+            throw new TsurugiTransactionException(lowResult.getError());
         default:
             // FIXME commit/rollbackではSUCCESS,ERROR以外は返らないという想定で良いか？
             throw new AssertionError(lowResultCase);

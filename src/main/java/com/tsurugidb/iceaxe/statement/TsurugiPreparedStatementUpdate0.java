@@ -7,7 +7,7 @@ import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 
 /**
@@ -32,17 +32,14 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      * 
      * @param transaction Transaction
      * @return result
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public TsurugiResultCount execute(TsurugiTransaction transaction) throws TsurugiTransactionIOException {
-        try {
-            var lowTransaction = transaction.getLowTransaction();
-            var lowResultFuture = lowTransaction.executeStatement(sql);
-            var result = new TsurugiResultCount(transaction, lowResultFuture);
-            return result;
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
-        }
+    public TsurugiResultCount execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+        var lowTransaction = transaction.getLowTransaction();
+        var lowResultFuture = lowTransaction.executeStatement(sql);
+        var result = new TsurugiResultCount(transaction, lowResultFuture);
+        return result;
     }
 
     /**
@@ -50,13 +47,12 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      * 
      * @param transaction Transaction
      * @return row count
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public int executeAndGetCount(TsurugiTransaction transaction) throws TsurugiTransactionIOException {
+    public int executeAndGetCount(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         try (var result = execute(transaction)) {
             return result.getUpdateCount();
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
         }
     }
 

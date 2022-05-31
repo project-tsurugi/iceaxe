@@ -1,14 +1,11 @@
 package com.tsurugidb.iceaxe.transaction;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatement;
-import com.tsurugidb.iceaxe.util.IoConsumer;
-import com.tsurugidb.iceaxe.util.IoFunction;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
@@ -89,6 +86,11 @@ public class TsurugiTransactionManager {
         this.rollbackTimeout = timeout;
     }
 
+    @FunctionalInterface
+    public interface TsurugiTransactionConsumer {
+        public void accept(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException;
+    }
+
     /**
      * execute transaction
      * 
@@ -96,7 +98,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public void execute(IoConsumer<TsurugiTransaction> action) throws IOException {
+    public void execute(TsurugiTransactionConsumer action) throws IOException {
         execute(defaultTransactionOptionList, action);
     }
 
@@ -108,7 +110,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public void execute(List<TgTransactionOption> transactionOptionList, IoConsumer<TsurugiTransaction> action) throws IOException {
+    public void execute(List<TgTransactionOption> transactionOptionList, TsurugiTransactionConsumer action) throws IOException {
         if (action == null) {
             throw new IllegalArgumentException("action is not specified");
         }
@@ -116,6 +118,11 @@ public class TsurugiTransactionManager {
             action.accept(transaction);
             return null;
         });
+    }
+
+    @FunctionalInterface
+    public interface TsurugiTransactionFuntion<R> {
+        public R apply(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException;
     }
 
     /**
@@ -128,7 +135,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public <R> R execute(IoFunction<TsurugiTransaction, R> action) throws IOException {
+    public <R> R execute(TsurugiTransactionFuntion<R> action) throws IOException {
         var transactionOptionList = this.defaultTransactionOptionList;
         if (transactionOptionList == null || transactionOptionList.isEmpty()) {
             throw new IllegalStateException("defaultTransactionOptionList is not specified");
@@ -146,7 +153,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public <R> R execute(List<TgTransactionOption> transactionOptionList, IoFunction<TsurugiTransaction, R> action) throws IOException {
+    public <R> R execute(List<TgTransactionOption> transactionOptionList, TsurugiTransactionFuntion<R> action) throws IOException {
         if (transactionOptionList == null || transactionOptionList.isEmpty()) {
             throw new IllegalArgumentException("transactionOptionList is not specified");
         }
@@ -167,19 +174,19 @@ public class TsurugiTransactionManager {
                     transaction.commit();
                     doRollback = false;
                     return r;
-                } catch (TsurugiTransactionIOException e) {
+                } catch (TsurugiTransactionException e) {
                     if (isRetryable(e)) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
                         continue;
                     }
-                    throw e;
-                } catch (UncheckedIOException e) {
+                    throw new IOException(e);
+                } catch (TsurugiTransactionRuntimeException e) {
                     var c = e.getCause();
                     if (isRetryable(c)) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
                         continue;
                     }
-                    throw c;
+                    throw new IOException(e);
                 } catch (Exception e) {
                     if (isRetryable(e)) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
@@ -188,12 +195,16 @@ public class TsurugiTransactionManager {
                     throw e;
                 } finally {
                     if (doRollback) {
-                        transaction.rollback();
+                        try {
+                            transaction.rollback();
+                        } catch (TsurugiTransactionException e) {
+                            throw new IOException(e);
+                        }
                     }
                 }
             }
         }
-        throw new TsurugiTransactionIOException("transaction retry over");
+        throw new IOException("transaction retry over");
     }
 
     protected void initializeTransaction(TsurugiTransaction transaction) {
@@ -210,14 +221,14 @@ public class TsurugiTransactionManager {
 
     protected boolean isRetryable(Exception e) {
         for (Throwable t = e; t != null; t = t.getCause()) {
-            if (t instanceof TsurugiTransactionIOException) {
-                return isRetryable((TsurugiTransactionIOException) t);
+            if (t instanceof TsurugiTransactionException) {
+                return isRetryable((TsurugiTransactionException) t);
             }
         }
         return false;
     }
 
-    protected boolean isRetryable(TsurugiTransactionIOException e) {
+    protected boolean isRetryable(TsurugiTransactionException e) {
         return e.isRetryable();
     }
 }

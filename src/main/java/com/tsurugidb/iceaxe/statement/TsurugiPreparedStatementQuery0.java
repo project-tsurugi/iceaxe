@@ -9,7 +9,7 @@ import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 
 /**
@@ -38,17 +38,14 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
      * 
      * @param transaction Transaction
      * @return Result Set
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public TsurugiResultSet<R> execute(TsurugiTransaction transaction) throws TsurugiTransactionIOException {
-        try {
-            var lowTransaction = transaction.getLowTransaction();
-            var lowResultSetFuture = lowTransaction.executeQuery(sql);
-            var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping);
-            return result;
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
-        }
+    public TsurugiResultSet<R> execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+        var lowTransaction = transaction.getLowTransaction();
+        var lowResultSetFuture = lowTransaction.executeQuery(sql);
+        var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping);
+        return result;
     }
 
     /**
@@ -56,13 +53,12 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
      * 
      * @param transaction Transaction
      * @return record
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public Optional<R> executeAndFindRecord(TsurugiTransaction transaction) throws TsurugiTransactionIOException {
+    public Optional<R> executeAndFindRecord(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         try (var rs = execute(transaction)) {
             return rs.findRecord();
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
         }
     }
 
@@ -98,13 +94,12 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
      * 
      * @param transaction Transaction
      * @return list of record
-     * @throws TsurugiTransactionIOException
+     * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public List<R> executeAndGetList(TsurugiTransaction transaction) throws TsurugiTransactionIOException {
+    public List<R> executeAndGetList(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         try (var rs = execute(transaction)) {
             return rs.getRecordList();
-        } catch (IOException e) {
-            throw new TsurugiTransactionIOException(e);
         }
     }
 
