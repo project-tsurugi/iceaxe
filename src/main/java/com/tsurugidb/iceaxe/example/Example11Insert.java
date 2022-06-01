@@ -15,6 +15,8 @@ import com.tsurugidb.iceaxe.statement.TgVariableList;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionRuntimeException;
 
 /**
@@ -25,20 +27,21 @@ public class Example11Insert {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            insert0_execRs(session);
-            insert0_execPs(session);
-            insert0_execTm(session);
+            var optionList = TgTransactionOptionList.of(TransactionOptionExample.OCC);
+            var tm = session.createTransactionManager(optionList);
 
-            insertParameter(session);
-            insertEntity(session);
-            insertEntityMapping(session);
-            insertForkJoin(session, List.of(/* entities */));
+            insert0_execRs(session, tm);
+            insert0_execPs(session, tm);
+            insert0_execTm(session, tm);
+
+            insertParameter(session, tm);
+            insertEntity(session, tm);
+            insertEntityMapping(session, tm);
+            insertForkJoin(session, tm, List.of(/* entities */));
         }
     }
 
-    void insert0_execRs(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
-
+    void insert0_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
@@ -49,9 +52,7 @@ public class Example11Insert {
         }
     }
 
-    void insert0_execPs(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
-
+    void insert0_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.execute(transaction -> {
                 return ps.executeAndGetCount(transaction);
@@ -60,18 +61,14 @@ public class Example11Insert {
         }
     }
 
-    void insert0_execTm(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
-
+    void insert0_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = ps.executeAndGetCount(tm);
             System.out.println(count);
         }
     }
 
-    void insertParameter(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
-
+    void insertParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "insert into TEST values(:foo, :bar, :zzz)";
 
         TgVariableList variable;
@@ -115,9 +112,7 @@ public class Example11Insert {
         }
     }
 
-    void insertEntity(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
-
+    void insertEntity(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLE, TestEntity::toParameter))) {
             tm.execute(transaction -> {
 //              var entity = new TestEntity(123, 456L, "abc");
@@ -132,9 +127,7 @@ public class Example11Insert {
         }
     }
 
-    void insertEntityMapping(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
-
+    void insertEntityMapping(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "insert into TEST values(:foo, :bar, :zzz)";
 
         TgParameterMapping<TestEntity> parameterMapping;
@@ -169,9 +162,7 @@ public class Example11Insert {
         }
     }
 
-    void insertForkJoin(TsurugiSession session, List<TestEntity> entityList) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC));
-
+    void insertForkJoin(TsurugiSession session, TsurugiTransactionManager tm, List<TestEntity> entityList) throws IOException {
         try (var ps = session.createPreparedStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLE, TestEntity::toParameter))) {
             tm.execute(transaction -> {
                 var task = new InsertTask(transaction, ps, entityList).fork();

@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.session;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +21,7 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -219,12 +219,12 @@ public class TsurugiSession implements Closeable {
     /**
      * create transaction manager
      * 
-     * @param defaultTransactionOptionList transaction option
+     * @param defaultTransactionOptionSupplier transaction option
      * 
      * @return Transaction Manager
      */
-    public TsurugiTransactionManager createTransactionManager(List<TgTransactionOption> defaultTransactionOptionList) {
-        var tm = new TsurugiTransactionManager(this, defaultTransactionOptionList);
+    public TsurugiTransactionManager createTransactionManager(TgTransactionOptionSupplier defaultTransactionOptionSupplier) {
+        var tm = new TsurugiTransactionManager(this, defaultTransactionOptionSupplier);
         return tm;
     }
 

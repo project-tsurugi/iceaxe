@@ -13,6 +13,8 @@ import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.statement.TgVariableList;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
 
 /**
  * select example
@@ -22,27 +24,28 @@ public class Example12Select {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            selectLoop(session);
+            var optionList = TgTransactionOptionList.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY);
+            var tm = session.createTransactionManager(optionList);
 
-            selectAsList_execRs(session);
-            selectAsList_execPs(session);
-            selectAsList_execTm(session);
+            selectLoop(session, tm);
 
-            selectAsUserEntityLoop(session);
-            selectAsUserEntityList(session);
+            selectAsList_execRs(session, tm);
+            selectAsList_execPs(session, tm);
+            selectAsList_execTm(session, tm);
 
-            selectByParameter1(session);
-            selectByParameter2(session);
-            selectByParameter2Bind(session);
-            selectByParameter2AsUserEntityList_execRs(session);
-            selectByParameter2AsUserEntityList_execPs(session);
-            selectByParameter2AsUserEntityList_execTm(session);
+            selectAsUserEntityLoop(session, tm);
+            selectAsUserEntityList(session, tm);
+
+            selectByParameter1(session, tm);
+            selectByParameter2(session, tm);
+            selectByParameter2Bind(session, tm);
+            selectByParameter2AsUserEntityList_execRs(session, tm);
+            selectByParameter2AsUserEntityList_execPs(session, tm);
+            selectByParameter2AsUserEntityList_execTm(session, tm);
         }
     }
 
-    void selectLoop(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select * from TEST")) {
             tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
@@ -59,9 +62,7 @@ public class Example12Select {
         }
     }
 
-    void selectAsList_execRs(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectAsList_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
@@ -72,9 +73,7 @@ public class Example12Select {
         }
     }
 
-    void selectAsList_execPs(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectAsList_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 return ps.executeAndGetList(transaction);
@@ -83,18 +82,14 @@ public class Example12Select {
         }
     }
 
-    void selectAsList_execTm(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectAsList_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
             System.out.println(list);
         }
     }
 
-    void selectAsUserEntityLoop(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectAsUserEntityLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select * from TEST", resultMappingForTestEntity())) {
             tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
@@ -129,9 +124,7 @@ public class Example12Select {
         }
     }
 
-    void selectAsUserEntityList(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectAsUserEntityList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select * from TEST", resultMappingForTestEntity())) {
             List<TestEntity> list = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
@@ -142,9 +135,7 @@ public class Example12Select {
         }
     }
 
-    void selectByParameter1(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectByParameter1(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "select * from TEST where FOO = :foo";
         var variable = TgVariableList.of().int4("foo");
         Function<Integer, TgParameterList> parameterConverter = foo -> TgParameterList.of().add("foo", foo);
@@ -159,9 +150,7 @@ public class Example12Select {
         }
     }
 
-    void selectByParameter2(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectByParameter2(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var variable = TgVariableList.of().int4("foo").int8("bar");
         try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable))) {
@@ -175,9 +164,7 @@ public class Example12Select {
         }
     }
 
-    void selectByParameter2Bind(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectByParameter2Bind(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
 //      var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
@@ -194,9 +181,7 @@ public class Example12Select {
         }
     }
 
-    void selectByParameter2AsUserEntityList_execRs(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectByParameter2AsUserEntityList_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
         var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
@@ -214,9 +199,7 @@ public class Example12Select {
         }
     }
 
-    void selectByParameter2AsUserEntityList_execPs(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectByParameter2AsUserEntityList_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
         var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
@@ -232,9 +215,7 @@ public class Example12Select {
         }
     }
 
-    void selectByParameter2AsUserEntityList_execTm(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void selectByParameter2AsUserEntityList_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
         var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();

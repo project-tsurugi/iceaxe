@@ -1,11 +1,10 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.io.IOException;
-import java.util.List;
 
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
+import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
@@ -72,13 +71,13 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
     /**
      * execute statement
      * 
-     * @param tm                    Transaction Manager
-     * @param transactionOptionList transaction option
+     * @param tm                        Transaction Manager
+     * @param transactionOptionSupplier transaction option
      * @return row count
      * @throws IOException
      */
-    public int executeAndGetCount(TsurugiTransactionManager tm, List<TgTransactionOption> transactionOptionList) throws IOException {
-        return tm.execute(transactionOptionList, transaction -> {
+    public int executeAndGetCount(TsurugiTransactionManager tm, TgTransactionOptionSupplier transactionOptionSupplier) throws IOException {
+        return tm.execute(transactionOptionSupplier, transaction -> {
             return executeAndGetCount(transaction);
         });
     }

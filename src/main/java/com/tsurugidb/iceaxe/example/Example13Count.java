@@ -10,6 +10,8 @@ import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
 
 /**
  * select count example
@@ -19,19 +21,20 @@ public class Example13Count {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            countAll0_execRs(session);
-            countAll0_execPs(session);
-            countAll0_execTm(session);
+            var optionList = TgTransactionOptionList.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY);
+            var tm = session.createTransactionManager(optionList);
 
-            countAllAsInteger(session);
+            countAll0_execRs(session, tm);
+            countAll0_execPs(session, tm);
+            countAll0_execTm(session, tm);
 
-            countGroup(session);
+            countAllAsInteger(session, tm);
+
+            countGroup(session, tm);
         }
     }
 
-    void countAll0_execRs(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void countAll0_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
             int count = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
@@ -43,9 +46,7 @@ public class Example13Count {
         }
     }
 
-    void countAll0_execPs(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void countAll0_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
             int count = tm.execute(transaction -> {
                 Optional<TsurugiResultEntity> recordOpt = ps.executeAndFindRecord(transaction);
@@ -55,9 +56,7 @@ public class Example13Count {
         }
     }
 
-    void countAll0_execTm(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void countAll0_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
             Optional<TsurugiResultEntity> recordOpt = ps.executeAndFindRecord(tm);
             int count = recordOpt.get().getInt4("count");
@@ -65,9 +64,7 @@ public class Example13Count {
         }
     }
 
-    void countAllAsInteger(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void countAllAsInteger(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var resultMapping = TgResultMapping.of(record -> record.nextInt4());
         try (var ps = session.createPreparedQuery("select count(*) from TEST", resultMapping)) {
             int count = tm.execute(transaction -> {
@@ -80,9 +77,7 @@ public class Example13Count {
         }
     }
 
-    void countGroup(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(List.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_ONLY));
-
+    void countGroup(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select ZZZ, count(*) from TEST group by ZZZ", TgResultMapping.of(CountByZzzEntity::of))) {
             List<CountByZzzEntity> list = tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
