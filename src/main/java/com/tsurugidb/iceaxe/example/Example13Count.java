@@ -110,7 +110,7 @@ public class Example13Count {
 
         public static CountByZzzEntity of(TsurugiResultRecord record) throws IOException {
             var entity = new CountByZzzEntity();
-//TODO      entity.setZzz(record.nextCharacter());
+            entity.setZzz(record.nextCharacter());
             entity.setCount(record.nextInt4());
             return entity;
         }

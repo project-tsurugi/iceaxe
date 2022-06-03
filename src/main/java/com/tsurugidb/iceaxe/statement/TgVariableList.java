@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.nautilus_technologies.tsubakuro.low.sql.Placeholders;
 import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
 
 /**
@@ -44,6 +45,17 @@ public class TgVariableList {
      */
     public TgVariableList() {
         // do nothing
+    }
+
+    /**
+     * add type(boolean)
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList bool(String name) {
+        addInternal(name, TgDataType.BOOLEAN);
+        return this;
     }
 
     /**
@@ -91,6 +103,17 @@ public class TgVariableList {
     }
 
     /**
+     * add type(decimal)
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList decimal(String name) {
+        addInternal(name, TgDataType.DECIMAL);
+        return this;
+    }
+
+    /**
      * add type(String)
      * 
      * @param name name
@@ -98,6 +121,72 @@ public class TgVariableList {
      */
     public TgVariableList character(String name) {
         addInternal(name, TgDataType.CHARACTER);
+        return this;
+    }
+
+    /**
+     * add type(byte[])
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList bytes(String name) {
+        addInternal(name, TgDataType.BYTES);
+        return this;
+    }
+
+    /**
+     * add type(boolean[])
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList bits(String name) {
+        addInternal(name, TgDataType.BITS);
+        return this;
+    }
+
+    /**
+     * add type(date)
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList date(String name) {
+        addInternal(name, TgDataType.DATE);
+        return this;
+    }
+
+    /**
+     * add type(time)
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList time(String name) {
+        addInternal(name, TgDataType.TIME);
+        return this;
+    }
+
+    /**
+     * add type(instant)
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList instant(String name) {
+        addInternal(name, TgDataType.INSTANT);
+        return this;
+    }
+
+    /**
+     * add type(instant)
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList zonedDateTime(String name) {
+        addInternal(name, TgDataType.INSTANT);
         return this;
     }
 
@@ -148,7 +237,7 @@ public class TgVariableList {
     }
 
     protected final void addInternal(String name, TgDataType type) {
-        var lowVariable = PlaceHolder.newBuilder().setName(name).setType(type.getLowDataType()).build();
+        var lowVariable = Placeholders.of(name, type.getLowDataType());
         lowPlaceHolderList.add(lowVariable);
         this.typeMap = null;
     }

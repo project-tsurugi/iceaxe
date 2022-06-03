@@ -1,8 +1,14 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nautilus_technologies.tsubakuro.low.sql.Parameters;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
 
@@ -37,93 +43,128 @@ public class TgParameterListWithVariable implements TgParameterList {
     }
 
     @Override
+    public TgParameterListWithVariable bool(String name, boolean value) {
+        checkType(name, TgDataType.BOOLEAN);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable bool(String name, Boolean value) {
+        checkType(name, TgDataType.BOOLEAN);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
     public TgParameterListWithVariable int4(String name, int value) {
         checkType(name, TgDataType.INT4);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        lowParameter.setInt4Value(value);
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListWithVariable int4(String name, Integer value) {
         checkType(name, TgDataType.INT4);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setInt4Value(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListWithVariable int8(String name, long value) {
         checkType(name, TgDataType.INT8);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        lowParameter.setInt8Value(value);
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListWithVariable int8(String name, Long value) {
         checkType(name, TgDataType.INT8);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setInt8Value(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListWithVariable float4(String name, float value) {
         checkType(name, TgDataType.FLOAT4);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        lowParameter.setFloat4Value(value);
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListWithVariable float4(String name, Float value) {
         checkType(name, TgDataType.FLOAT4);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setFloat4Value(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListWithVariable float8(String name, double value) {
         checkType(name, TgDataType.FLOAT8);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        lowParameter.setFloat8Value(value);
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListWithVariable float8(String name, Double value) {
         checkType(name, TgDataType.FLOAT8);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setFloat8Value(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable decimal(String name, BigDecimal value) {
+        checkType(name, TgDataType.DECIMAL);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListWithVariable character(String name, String value) {
         checkType(name, TgDataType.CHARACTER);
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setCharacterValue(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable bytes(String name, byte[] value) {
+        checkType(name, TgDataType.BYTES);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable bits(String name, boolean[] value) {
+        checkType(name, TgDataType.BITS);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable date(String name, LocalDate value) {
+        checkType(name, TgDataType.DATE);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable time(String name, LocalTime value) {
+        checkType(name, TgDataType.TIME);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable instant(String name, Instant value) {
+        checkType(name, TgDataType.INSTANT);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListWithVariable zonedDateTime(String name, ZonedDateTime value) {
+        checkType(name, TgDataType.INSTANT);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
@@ -135,46 +176,48 @@ public class TgParameterListWithVariable implements TgParameterList {
      * @return this
      */
     public TgParameterListWithVariable add(String name, Object value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        setValueTo(lowParameter, name, value);
-        add(lowParameter);
+        add(getLowParameter(name, value));
         return this;
     }
 
-    protected void setValueTo(Parameter.Builder lowParameter, String name, Object value) {
+    protected Parameter getLowParameter(String name, Object value) {
         if (value == null) {
-            return;
+            return Parameters.ofNull(name);
         }
 
         var type = getType(name);
         switch (type) {
+        case BOOLEAN:
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toBoolean(value));
         case INT4:
-            var int4 = IceaxeConvertUtil.toInt4(value);
-            lowParameter.setInt4Value(int4);
-            break;
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toInt4(value));
         case INT8:
-            var int8 = IceaxeConvertUtil.toInt8(value);
-            lowParameter.setInt8Value(int8);
-            break;
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toInt8(value));
         case FLOAT4:
-            var float4 = IceaxeConvertUtil.toFloat4(value);
-            lowParameter.setFloat4Value(float4);
-            break;
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toFloat4(value));
         case FLOAT8:
-            var float8 = IceaxeConvertUtil.toFloat8(value);
-            lowParameter.setFloat8Value(float8);
-            break;
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toFloat8(value));
+        case DECIMAL:
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toDecimal(value));
         case CHARACTER:
-            var character = IceaxeConvertUtil.toCharacter(value);
-            lowParameter.setCharacterValue(character);
-            break;
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toCharacter(value));
+        case BYTES:
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toBytes(value));
+        case BITS:
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toBits(value));
+        case DATE:
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toDate(value));
+        case TIME:
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toTime(value));
+        case INSTANT:
+            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toInstant(value));
         default:
             throw new InternalError("unsupported type error. type=" + type);
         }
     }
 
-    protected void add(Parameter.Builder lowParameter) {
-        lowParameterList.add(lowParameter.build());
+    protected void add(Parameter lowParameter) {
+        lowParameterList.add(lowParameter);
     }
 
     // internal

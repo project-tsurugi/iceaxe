@@ -1,5 +1,9 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -12,6 +16,10 @@ import com.tsurugidb.jogasaki.proto.SqlCommon.AtomType;
  */
 public enum TgDataType {
     // FIXME byte.class等もINT4に含めるか？
+    /**
+     * boolean
+     */
+    BOOLEAN(AtomType.BOOLEAN, List.of(boolean.class, Boolean.class)),
     /**
      * int
      */
@@ -29,9 +37,35 @@ public enum TgDataType {
      */
     FLOAT8(AtomType.FLOAT8, List.of(double.class, Double.class)),
     /**
+     * decimal
+     */
+    DECIMAL(AtomType.DECIMAL, List.of(BigDecimal.class)),
+    /**
      * String
      */
-    CHARACTER(AtomType.CHARACTER, List.of(String.class));
+    CHARACTER(AtomType.CHARACTER, List.of(String.class)),
+    /**
+     * byte[]
+     */
+    BYTES(AtomType.OCTET, List.of(byte[].class)),
+    /**
+     * boolean[]
+     */
+    BITS(AtomType.BIT, List.of(boolean[].class)),
+    /**
+     * date
+     */
+    DATE(AtomType.DATE, List.of(LocalDate.class)),
+    /**
+     * time
+     */
+    TIME(AtomType.TIME_OF_DAY, List.of(LocalTime.class)),
+    /**
+     * instant
+     */
+    INSTANT(AtomType.TIME_POINT, List.of(Instant.class)),
+    //
+    ;
 
     private final AtomType lowType;
     private final List<Class<?>> classList;

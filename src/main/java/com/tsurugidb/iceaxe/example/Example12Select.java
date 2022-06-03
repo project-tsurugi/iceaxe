@@ -54,8 +54,8 @@ public class Example12Select {
 
                     for (TsurugiResultEntity record : result) {
                         System.out.println(record.getInt4OrNull("foo"));
-//TODO                  System.out.println(record.getInt8OrNull("bar"));
-//TODO                  System.out.println(record.getCharacterOrNull("zzz"));
+                        System.out.println(record.getInt8OrNull("bar"));
+                        System.out.println(record.getCharacterOrNull("zzz"));
                     }
                 }
             });
@@ -109,8 +109,8 @@ public class Example12Select {
             return TgResultMapping.of(record -> {
                 var entity = new TestEntity();
                 entity.setFoo(record.getInt4OrNull("foo"));
-//TODO          entity.setBar(record.getInt8OrNull("bar"));
-//TODO          entity.setZzz(record.getCharacterOrNull("zzz"));
+                entity.setBar(record.getInt8OrNull("bar"));
+                entity.setZzz(record.getCharacterOrNull("zzz"));
                 return entity;
             });
         case 1:
@@ -118,9 +118,8 @@ public class Example12Select {
         case 2:
             return TgResultMapping.of(TestEntity::new) //
                     .int4(TestEntity::setFoo) //
-//TODO              .int8(TestEntity::setBar) //
-//TODO              .character(TestEntity::setZzz)
-            ;
+                    .int8(TestEntity::setBar) //
+                    .character(TestEntity::setZzz);
         }
     }
 

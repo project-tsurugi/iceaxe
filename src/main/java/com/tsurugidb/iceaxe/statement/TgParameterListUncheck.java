@@ -1,5 +1,10 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,85 +29,133 @@ public class TgParameterListUncheck implements TgParameterList {
     }
 
     @Override
+    public TgParameterListUncheck bool(String name, boolean value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck bool(String name, Boolean value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
     public TgParameterListUncheck int4(String name, int value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        lowParameter.setInt4Value(value);
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListUncheck int4(String name, Integer value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setInt4Value(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListUncheck int8(String name, long value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        lowParameter.setInt8Value(value);
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListUncheck int8(String name, Long value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setInt8Value(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListUncheck float4(String name, float value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        lowParameter.setFloat4Value(value);
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListUncheck float4(String name, Float value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setFloat4Value(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListUncheck float8(String name, double value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        lowParameter.setFloat8Value(value);
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListUncheck float8(String name, Double value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setFloat8Value(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck decimal(String name, BigDecimal value) {
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     @Override
     public TgParameterListUncheck character(String name, String value) {
-        var lowParameter = Parameter.newBuilder().setName(name);
-        if (value != null) {
-            lowParameter.setCharacterValue(value);
-        }
-        add(lowParameter);
+        add(IceaxeLowParameterUtil.create(name, value));
         return this;
+    }
+
+    @Override
+    public TgParameterListUncheck bytes(String name, byte[] value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck bits(String name, boolean[] value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck date(String name, LocalDate value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck time(String name, LocalTime value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck instant(String name, Instant value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    @Override
+    public TgParameterListUncheck zonedDateTime(String name, ZonedDateTime value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    /**
+     * add value(boolean)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, boolean value) {
+        return bool(name, value);
+    }
+
+    /**
+     * add value(boolean)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, Boolean value) {
+        return bool(name, value);
     }
 
     /**
@@ -194,6 +247,17 @@ public class TgParameterListUncheck implements TgParameterList {
     }
 
     /**
+     * add value(decimal)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, BigDecimal value) {
+        return decimal(name, value);
+    }
+
+    /**
      * add value(String)
      * 
      * @param name  name
@@ -202,6 +266,72 @@ public class TgParameterListUncheck implements TgParameterList {
      */
     public TgParameterListUncheck add(String name, String value) {
         return character(name, value);
+    }
+
+    /**
+     * add value(byte[])
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, byte[] value) {
+        return bytes(name, value);
+    }
+
+    /**
+     * add value(boolean[])
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, boolean[] value) {
+        return bits(name, value);
+    }
+
+    /**
+     * add value(date)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, LocalDate value) {
+        return date(name, value);
+    }
+
+    /**
+     * add value(time)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, LocalTime value) {
+        return time(name, value);
+    }
+
+    /**
+     * add value(Instant)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, Instant value) {
+        return instant(name, value);
+    }
+
+    /**
+     * add value(ZonedDateTime)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterListUncheck add(String name, ZonedDateTime value) {
+        return zonedDateTime(name, value);
     }
 
     /**
@@ -215,8 +345,8 @@ public class TgParameterListUncheck implements TgParameterList {
         return this;
     }
 
-    protected void add(Parameter.Builder lowParameter) {
-        lowParameterList.add(lowParameter.build());
+    protected void add(Parameter lowParameter) {
+        lowParameterList.add(lowParameter);
     }
 
     // internal

@@ -1,5 +1,11 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+
 /**
  * Tsurugi Variable
  * 
@@ -9,7 +15,23 @@ package com.tsurugidb.iceaxe.statement;
 public abstract class TgVariable<T> {
 
     /**
-     * create Tsurugi Variable(int)
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<Boolean> ofBoolean(String name) {
+        return new TgVariable<>(name, TgDataType.BOOLEAN) {
+
+            @Override
+            public TgParameter bind(Boolean value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
      * 
      * @param name name
      * @return Tsurugi Variable
@@ -25,7 +47,7 @@ public abstract class TgVariable<T> {
     }
 
     /**
-     * create Tsurugi Variable(long)
+     * create Tsurugi Variable
      * 
      * @param name name
      * @return Tsurugi Variable
@@ -40,10 +62,56 @@ public abstract class TgVariable<T> {
         };
     }
 
-    // TODO float, double
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<Float> ofFloat4(String name) {
+        return new TgVariable<>(name, TgDataType.FLOAT4) {
+
+            @Override
+            public TgParameter bind(Float value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
 
     /**
-     * create Tsurugi Variable(String)
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<Double> ofFloat8(String name) {
+        return new TgVariable<>(name, TgDataType.FLOAT8) {
+
+            @Override
+            public TgParameter bind(Double value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<BigDecimal> ofDecimal(String name) {
+        return new TgVariable<>(name, TgDataType.DECIMAL) {
+
+            @Override
+            public TgParameter bind(BigDecimal value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
      * 
      * @param name name
      * @return Tsurugi Variable
@@ -53,6 +121,102 @@ public abstract class TgVariable<T> {
 
             @Override
             public TgParameter bind(String value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<byte[]> ofBytes(String name) {
+        return new TgVariable<>(name, TgDataType.BYTES) {
+
+            @Override
+            public TgParameter bind(byte[] value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<boolean[]> ofBits(String name) {
+        return new TgVariable<>(name, TgDataType.BITS) {
+
+            @Override
+            public TgParameter bind(boolean[] value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<LocalDate> ofDate(String name) {
+        return new TgVariable<>(name, TgDataType.DATE) {
+
+            @Override
+            public TgParameter bind(LocalDate value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<LocalTime> ofTime(String name) {
+        return new TgVariable<>(name, TgDataType.TIME) {
+
+            @Override
+            public TgParameter bind(LocalTime value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<Instant> ofInstant(String name) {
+        return new TgVariable<>(name, TgDataType.INSTANT) {
+
+            @Override
+            public TgParameter bind(Instant value) {
+                return TgParameter.of(name(), value);
+            }
+        };
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariable<ZonedDateTime> ofZonedDateTime(String name) {
+        return new TgVariable<>(name, TgDataType.INSTANT) {
+
+            @Override
+            public TgParameter bind(ZonedDateTime value) {
                 return TgParameter.of(name(), value);
             }
         };
@@ -103,6 +267,6 @@ public abstract class TgVariable<T> {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{name=" + name + ", type=" + type + "}";
+        return TgVariable.class.getSimpleName() + "{name=" + name + ", type=" + type + "}";
     }
 }
