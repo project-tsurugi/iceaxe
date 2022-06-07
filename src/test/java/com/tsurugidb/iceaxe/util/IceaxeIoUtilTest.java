@@ -11,38 +11,11 @@ import org.junit.jupiter.api.Test;
 
 import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
-import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 
 class IceaxeIoUtilTest {
-
-    static class IceaxeFutureResponseTestMock<V> implements FutureResponse<V> {
-
-        @Override
-        public boolean isDone() {
-            fail();
-            return false;
-        }
-
-        @Override
-        public V get() throws IOException, ServerException, InterruptedException {
-            fail();
-            return null;
-        }
-
-        @Override
-        public V get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
-            fail();
-            return null;
-        }
-
-        @Override
-        public void close() throws IOException, ServerException, InterruptedException {
-            fail();
-        }
-    }
 
     @SuppressWarnings("serial")
     static class IceaxeServerExceptionTestMock extends ServerException {
