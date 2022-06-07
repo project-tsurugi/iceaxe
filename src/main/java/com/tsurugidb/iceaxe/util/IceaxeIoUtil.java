@@ -1,11 +1,7 @@
 package com.tsurugidb.iceaxe.util;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
@@ -35,50 +31,31 @@ public class IceaxeIoUtil {
         }
     }
 
-    public static void close(NavigableSet<Closeable> closeableSet, IoRunnable runnable) throws IOException {
-        List<Throwable> saveList = null;
-        for (;;) {
-            Closeable closeable;
-            try {
-                closeable = closeableSet.first();
-            } catch (NoSuchElementException e) {
-                break;
-            }
-            closeableSet.remove(closeable);
-            try {
-                closeable.close();
-            } catch (Exception e) {
-                if (saveList == null) {
-                    saveList = new ArrayList<>();
-                }
-                saveList.add(e);
-            }
-        }
+    public static void close(IceaxeCloseableSet closeableSet, IoRunnable runnable) throws IOException {
+        List<Throwable> saveList = closeableSet.close();
 
         try {
             runnable.run();
         } catch (Exception e) {
-            if (saveList != null) {
-                for (var save : saveList) {
-                    e.addSuppressed(save);
-                }
+            for (var save : saveList) {
+                e.addSuppressed(save);
             }
             throw e;
         }
 
-        if (saveList != null) {
-            IOException e = null;
-            for (var save : saveList) {
-                if (e == null) {
-                    if (save instanceof IOException) {
-                        e = (IOException) save;
-                    } else {
-                        e = new IOException(save);
-                    }
+        IOException e = null;
+        for (var save : saveList) {
+            if (e == null) {
+                if (save instanceof IOException) {
+                    e = (IOException) save;
                 } else {
-                    e.addSuppressed(save);
+                    e = new IOException(save);
                 }
+            } else {
+                e.addSuppressed(save);
             }
+        }
+        if (e != null) {
             throw e;
         }
     }

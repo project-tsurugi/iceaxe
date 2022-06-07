@@ -2,8 +2,6 @@ package com.tsurugidb.iceaxe.transaction;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.NavigableSet;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
 import com.nautilus_technologies.tsubakuro.low.sql.Transaction;
@@ -11,6 +9,7 @@ import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.IoFunction;
@@ -31,7 +30,7 @@ public class TsurugiTransaction implements Closeable {
     private final IceaxeTimeout closeTimeout;
     private boolean committed = false;
     private boolean rollbacked = false;
-    private final NavigableSet<Closeable> closeableSet = new ConcurrentSkipListSet<>();
+    private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
 
     // internal
     public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture) {

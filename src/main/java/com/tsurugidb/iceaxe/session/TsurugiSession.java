@@ -2,8 +2,6 @@ package com.tsurugidb.iceaxe.session;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.NavigableSet;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
 import com.nautilus_technologies.tsubakuro.channel.common.SessionWire;
@@ -19,9 +17,10 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
+import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -38,7 +37,7 @@ public class TsurugiSession implements Closeable {
     private SqlClient lowSqlClient;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
-    private final NavigableSet<Closeable> closeableSet = new ConcurrentSkipListSet<>();
+    private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
 
     // internal
     public TsurugiSession(TgSessionInfo info, Session lowSession, FutureResponse<SessionWire> lowSessionWireFuture) {
