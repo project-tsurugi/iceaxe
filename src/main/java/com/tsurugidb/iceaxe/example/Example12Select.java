@@ -115,11 +115,21 @@ public class Example12Select {
             });
         case 1:
             return TgResultMapping.of(TestEntity::of);
-        case 2:
+        case 2: // selectのカラムの順序依存
             return TgResultMapping.of(TestEntity::new) //
                     .int4(TestEntity::setFoo) //
                     .int8(TestEntity::setBar) //
                     .character(TestEntity::setZzz);
+        case 3: // selectのカラムの順序依存
+            return TgResultMapping.of(TestEntity::new) //
+                    .int4(0, TestEntity::setFoo) //
+                    .int8(1, TestEntity::setBar) //
+                    .character(2, TestEntity::setZzz);
+        case 4:
+            return TgResultMapping.of(TestEntity::new) //
+                    .int4("foo", TestEntity::setFoo) //
+                    .int8("bar", TestEntity::setBar) //
+                    .character("zzz", TestEntity::setZzz);
         }
     }
 
