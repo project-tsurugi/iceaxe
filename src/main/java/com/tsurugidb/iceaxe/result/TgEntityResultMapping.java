@@ -626,12 +626,13 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     protected synchronized void mergeColumnConverterMap(TsurugiResultRecord record) throws IOException {
         if (this.columnConverterMap != null) {
             var nameList = record.getNameList();
-            for (int i = 0; i < nameList.size(); i++) {
-                var name = nameList.get(i);
+            int i = 0;
+            for (var name : nameList) {
                 var converter = columnConverterMap.get(name);
                 if (converter != null) {
                     set(i, converter);
                 }
+                i++;
             }
             this.columnConverterMap = null;
         }
