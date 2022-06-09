@@ -1,4 +1,4 @@
-# IceAxe - Java High-level-API
+# Iceaxe - Java High-level-API
 
 ## Requirements
 
@@ -15,6 +15,16 @@ cd tsubakuro
 
 cd iceaxe
 ./gradlew build
+```
+
+## How to use
+
+To use on Gradle, add Iceaxe library to dependencies.
+
+```
+dependencies {
+    api 'com.nautilus_technologies.iceaxe:iceaxe:0.0.1'
+}
 ```
 
 ## License
