@@ -6,12 +6,15 @@ import java.util.concurrent.TimeUnit;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
 import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
 
 /**
  * specify timeout example
  */
 public class Example31Timeout {
+
+    private static final TgTransactionOptionList TX_OPTION = TgTransactionOptionList.of(TgTransactionOption.ofOCC());
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
@@ -25,7 +28,7 @@ public class Example31Timeout {
         info.timeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager(TgTransactionOptionList.of(TransactionOptionExample.OCC));
+            var tm = session.createTransactionManager(TX_OPTION);
             tm.execute(transaction -> {
                 // do sql
             });
@@ -36,7 +39,7 @@ public class Example31Timeout {
         var info = TgSessionInfo.of("user", "password");
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager(TgTransactionOptionList.of(TransactionOptionExample.OCC));
+            var tm = session.createTransactionManager(TX_OPTION);
             tm.setCommitTimeout(1, TimeUnit.HOURS);
 
             tm.execute(transaction -> {
@@ -49,7 +52,7 @@ public class Example31Timeout {
         var info = TgSessionInfo.of("user", "password");
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager(TgTransactionOptionList.of(TransactionOptionExample.OCC));
+            var tm = session.createTransactionManager(TX_OPTION);
             tm.execute(transaction -> {
                 transaction.setCommitTimeout(1, TimeUnit.HOURS);
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
 import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
 import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
 
@@ -17,12 +18,15 @@ import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
  * トランザクション内でリトライ可能なアボートが発生した場合は、自動的にトランザクションの先頭から再実行を行う。
  * </p>
  * <p>
- * トランザクションを実行する際には、指定されたトランザクションモードで実行する。<br>
+ * トランザクションは、指定されたトランザクションモードで実行する。<br>
  * TsurugiTransactionOptionListでは、1回目の実行は１番目の要素、2回目の実行には2番目の要素のトランザクションモードが使用される。<br>
- * Listで指定された要素数以上にアボートした場合は、executeメソッドから例外がスローされる。
+ * TsurugiTransactionOptionListで指定された要素数以上の回数アボートした場合は、executeメソッドから例外がスローされる。
  * </p>
  */
 public class Example03TransactionManager {
+
+    private static final TgTransactionOption OCC = TgTransactionOption.ofOCC();
+    private static final TgTransactionOption LTX = TgTransactionOption.ofLTX("table1", "table2");
 
     /**
      * @see Example02Session
@@ -37,8 +41,8 @@ public class Example03TransactionManager {
     }
 
     void manager1(TsurugiSession session) throws IOException {
-        var optionList = TgTransactionOptionList.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_WRITE);
-        var tm = session.createTransactionManager(optionList);
+        var option = TgTransactionOptionList.of(OCC, LTX);
+        var tm = session.createTransactionManager(option);
 
         tm.execute(transaction -> {
 //          preparedStatement.execute(transaction)
@@ -48,15 +52,15 @@ public class Example03TransactionManager {
     void manager2(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager();
 
-        var optionList = TgTransactionOptionList.of(TransactionOptionExample.OCC, TransactionOptionExample.BATCH_READ_WRITE);
-        tm.execute(optionList, transaction -> {
+        var option = TgTransactionOptionList.of(OCC, LTX);
+        tm.execute(option, transaction -> {
 //          preparedStatement.execute(transaction)
         });
     }
 
     void managerAlways(TsurugiSession session) throws IOException {
-        TgTransactionOptionSupplier optionSupplier = TgTransactionOptionSupplier.ofAlways(TransactionOptionExample.OCC);
-        var tm = session.createTransactionManager(optionSupplier);
+        var option = TgTransactionOptionSupplier.ofAlways(OCC);
+        var tm = session.createTransactionManager(option);
 
         tm.execute(transaction -> {
 //          preparedStatement.execute(transaction)
