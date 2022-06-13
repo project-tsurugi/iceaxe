@@ -16,8 +16,8 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
@@ -222,7 +222,7 @@ public class TsurugiSession implements Closeable {
      * 
      * @return Transaction Manager
      */
-    public TsurugiTransactionManager createTransactionManager(TgTransactionOptionSupplier defaultTransactionOptionSupplier) {
+    public TsurugiTransactionManager createTransactionManager(TgTxOptionSupplier defaultTransactionOptionSupplier) {
         var tm = new TsurugiTransactionManager(this, defaultTransactionOptionSupplier);
         return tm;
     }
@@ -234,7 +234,7 @@ public class TsurugiSession implements Closeable {
      * @return Transaction
      * @throws IOException
      */
-    public TsurugiTransaction createTransaction(TgTransactionOption option) throws IOException {
+    public TsurugiTransaction createTransaction(TgTxOption option) throws IOException {
         var lowOption = option.toLowTransactionOption();
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
         var transaction = new TsurugiTransaction(this, lowTransactionFuture);

@@ -16,14 +16,14 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 public class TsurugiTransactionManager {
 
     private final TsurugiSession ownerSession;
-    private final TgTransactionOptionSupplier defaultTransactionOptionSupplier;
+    private final TgTxOptionSupplier defaultTransactionOptionSupplier;
 
     private TgTimeValue beginTimeout;
     private TgTimeValue commitTimeout;
     private TgTimeValue rollbackTimeout;
 
     // internal
-    public TsurugiTransactionManager(TsurugiSession session, TgTransactionOptionSupplier defaultTransactionOptionSupplier) {
+    public TsurugiTransactionManager(TsurugiSession session, TgTxOptionSupplier defaultTransactionOptionSupplier) {
         this.ownerSession = session;
         this.defaultTransactionOptionSupplier = defaultTransactionOptionSupplier;
     }
@@ -109,7 +109,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public void execute(TgTransactionOptionSupplier transactionOptionSupplier, TsurugiTransactionConsumer action) throws IOException {
+    public void execute(TgTxOptionSupplier transactionOptionSupplier, TsurugiTransactionConsumer action) throws IOException {
         if (action == null) {
             throw new IllegalArgumentException("action is not specified");
         }
@@ -151,7 +151,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public <R> R execute(TgTransactionOptionSupplier transactionOptionSupplier, TsurugiTransactionFuntion<R> action) throws IOException {
+    public <R> R execute(TgTxOptionSupplier transactionOptionSupplier, TsurugiTransactionFuntion<R> action) throws IOException {
         if (transactionOptionSupplier == null) {
             throw new IllegalArgumentException("transactionOptionSupplier is not specified");
         }

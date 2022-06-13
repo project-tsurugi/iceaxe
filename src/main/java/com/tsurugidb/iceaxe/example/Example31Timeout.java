@@ -6,15 +6,15 @@ import java.util.concurrent.TimeUnit;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 
 /**
  * specify timeout example
  */
 public class Example31Timeout {
 
-    private static final TgTransactionOptionList TX_OPTION = TgTransactionOptionList.of(TgTransactionOption.ofOCC());
+    private static final TgTxOptionList TX_OPTION = TgTxOptionList.of(TgTxOption.ofOCC());
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");

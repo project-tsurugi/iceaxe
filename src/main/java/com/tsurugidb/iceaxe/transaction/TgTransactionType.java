@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction;
 
 import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionType;
 
+// FIXME トランザクショナルタイプは低レベルAPIの列挙型をそのまま使ってもよいか？
 /**
  * Tsurugi Transaction Type
  */

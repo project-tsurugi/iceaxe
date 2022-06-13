@@ -5,9 +5,9 @@ import java.io.IOException;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
 
 /**
  * TsurugiTransactionManager example
@@ -25,8 +25,8 @@ import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
  */
 public class Example03TransactionManager {
 
-    private static final TgTransactionOption OCC = TgTransactionOption.ofOCC();
-    private static final TgTransactionOption LTX = TgTransactionOption.ofLTX("table1", "table2");
+    private static final TgTxOption OCC = TgTxOption.ofOCC();
+    private static final TgTxOption LTX = TgTxOption.ofLTX("table1", "table2");
 
     /**
      * @see Example02Session
@@ -41,7 +41,7 @@ public class Example03TransactionManager {
     }
 
     void manager1(TsurugiSession session) throws IOException {
-        var option = TgTransactionOptionList.of(OCC, LTX);
+        var option = TgTxOptionList.of(OCC, LTX);
         var tm = session.createTransactionManager(option);
 
         tm.execute(transaction -> {
@@ -52,14 +52,14 @@ public class Example03TransactionManager {
     void manager2(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager();
 
-        var option = TgTransactionOptionList.of(OCC, LTX);
+        var option = TgTxOptionList.of(OCC, LTX);
         tm.execute(option, transaction -> {
 //          preparedStatement.execute(transaction)
         });
     }
 
     void managerAlways(TsurugiSession session) throws IOException {
-        var option = TgTransactionOptionSupplier.ofAlways(OCC);
+        var option = TgTxOptionSupplier.ofAlways(OCC);
         var tm = session.createTransactionManager(option);
 
         tm.execute(transaction -> {

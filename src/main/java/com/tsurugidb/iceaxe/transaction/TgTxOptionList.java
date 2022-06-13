@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * TgTransactionOption list
  */
-public class TgTransactionOptionList implements TgTransactionOptionSupplier {
+public class TgTxOptionList implements TgTxOptionSupplier {
 
     /**
      * create TgTransactionOptionList
@@ -13,11 +13,11 @@ public class TgTransactionOptionList implements TgTransactionOptionSupplier {
      * @param transactionOptionList options
      * @return TgTransactionOptionList
      */
-    public static TgTransactionOptionList of(TgTransactionOption... transactionOptionList) {
+    public static TgTxOptionList of(TgTxOption... transactionOptionList) {
         if (transactionOptionList == null || transactionOptionList.length == 0) {
             throw new IllegalArgumentException("transactionOptionList is null or empty");
         }
-        return new TgTransactionOptionList(List.of(transactionOptionList));
+        return new TgTxOptionList(List.of(transactionOptionList));
     }
 
     /**
@@ -26,26 +26,26 @@ public class TgTransactionOptionList implements TgTransactionOptionSupplier {
      * @param transactionOptionList options
      * @return TgTransactionOptionList
      */
-    public static TgTransactionOptionList of(List<TgTransactionOption> transactionOptionList) {
+    public static TgTxOptionList of(List<TgTxOption> transactionOptionList) {
         if (transactionOptionList == null || transactionOptionList.isEmpty()) {
             throw new IllegalArgumentException("transactionOptionList is null or empty");
         }
-        return new TgTransactionOptionList(transactionOptionList);
+        return new TgTxOptionList(transactionOptionList);
     }
 
-    private final List<TgTransactionOption> transactionOptionList;
+    private final List<TgTxOption> transactionOptionList;
 
     /**
      * TgTransactionOption list
      * 
      * @param transactionOptionList options
      */
-    public TgTransactionOptionList(List<TgTransactionOption> transactionOptionList) {
+    public TgTxOptionList(List<TgTxOption> transactionOptionList) {
         this.transactionOptionList = transactionOptionList;
     }
 
     @Override
-    public TgTransactionOption get(int attempt, TsurugiTransactionException e) {
+    public TgTxOption get(int attempt, TsurugiTransactionException e) {
         if (attempt == 0) {
             return transactionOptionList.get(0);
         }

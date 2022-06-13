@@ -9,15 +9,15 @@ import com.tsurugidb.jogasaki.proto.SqlRequest.WritePreserve;
 /**
  * Tsurugi Transaction Option
  */
-public class TgTransactionOption {
+public class TgTxOption {
 
     /**
      * create transaction option
      * 
      * @return transaction option
      */
-    public static TgTransactionOption of() {
-        return new TgTransactionOption();
+    public static TgTxOption of() {
+        return new TgTxOption();
     }
 
     /**
@@ -26,8 +26,8 @@ public class TgTransactionOption {
      * @param type transaction type
      * @return transaction option
      */
-    public static TgTransactionOption of(TgTransactionType type) {
-        return new TgTransactionOption().type(type);
+    public static TgTxOption of(TgTransactionType type) {
+        return new TgTxOption().type(type);
     }
 
     /**
@@ -35,7 +35,7 @@ public class TgTransactionOption {
      * 
      * @return transaction option
      */
-    public static TgTransactionOption ofOCC() {
+    public static TgTxOption ofOCC() {
         return of(TgTransactionType.OCC);
     }
 
@@ -45,7 +45,7 @@ public class TgTransactionOption {
      * @param writePreserveTableNames table name to Write Preserve
      * @return transaction option
      */
-    public static TgTransactionOption ofLTX(String... writePreserveTableNames) {
+    public static TgTxOption ofLTX(String... writePreserveTableNames) {
         // return ofLTX(List.of(writePreserveTableNames));
         var option = of(TgTransactionType.BATCH_READ_WRITE);
         for (var name : writePreserveTableNames) {
@@ -60,7 +60,7 @@ public class TgTransactionOption {
      * @param writePreserveTableNames table name to Write Preserve
      * @return transaction option
      */
-    public static TgTransactionOption ofLTX(Collection<String> writePreserveTableNames) {
+    public static TgTxOption ofLTX(Collection<String> writePreserveTableNames) {
         var option = of(TgTransactionType.BATCH_READ_WRITE);
         for (var name : writePreserveTableNames) {
             option.addWritePreserveTable(name);
@@ -73,7 +73,7 @@ public class TgTransactionOption {
      * 
      * @return transaction option
      */
-    public static TgTransactionOption ofRTX() {
+    public static TgTxOption ofRTX() {
         return of(TgTransactionType.BATCH_READ_ONLY);
     }
 
@@ -83,7 +83,7 @@ public class TgTransactionOption {
     /**
      * Tsurugi Transaction Option
      */
-    public TgTransactionOption() {
+    public TgTxOption() {
         // do nothing
     }
 
@@ -93,7 +93,7 @@ public class TgTransactionOption {
      * @param type transaction type
      * @return this
      */
-    public TgTransactionOption type(TgTransactionType type) {
+    public TgTxOption type(TgTransactionType type) {
         var lowType = type.getLowTransactionType();
         lowBuilder.setType(lowType);
         this.lowTransactionOption = null;
@@ -106,7 +106,7 @@ public class TgTransactionOption {
      * @param name table name
      * @return this
      */
-    public TgTransactionOption addWritePreserveTable(String name) {
+    public TgTxOption addWritePreserveTable(String name) {
         var value = WritePreserve.newBuilder().setTableName(name).build();
         lowBuilder.addWritePreserves(value);
         this.lowTransactionOption = null;

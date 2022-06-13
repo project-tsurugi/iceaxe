@@ -1,10 +1,10 @@
 package com.tsurugidb.iceaxe.transaction;
 
 /**
- * {@link TgTransactionOption} supplier
+ * {@link TgTxOption} supplier
  */
 @FunctionalInterface
-public interface TgTransactionOptionSupplier {
+public interface TgTxOptionSupplier {
 
     /**
      * create TsurugiTransactionOptionSupplier
@@ -12,8 +12,8 @@ public interface TgTransactionOptionSupplier {
      * @param transactionOptionList options
      * @return supplier
      */
-    public static TgTransactionOptionSupplier of(TgTransactionOption... transactionOptionList) {
-        return TgTransactionOptionList.of(transactionOptionList);
+    public static TgTxOptionSupplier of(TgTxOption... transactionOptionList) {
+        return TgTxOptionList.of(transactionOptionList);
     }
 
     /**
@@ -22,7 +22,7 @@ public interface TgTransactionOptionSupplier {
      * @param transactionOption option
      * @return supplier
      */
-    public static TgTransactionOptionSupplier ofAlways(TgTransactionOption transactionOption) {
+    public static TgTxOptionSupplier ofAlways(TgTxOption transactionOption) {
         return (var attempt, var e) -> {
             if (attempt == 0 || e.isRetryable()) {
                 return transactionOption;
@@ -38,5 +38,5 @@ public interface TgTransactionOptionSupplier {
      * @param e       transaction exception (null if attempt==0)
      * @return Transaction Option. TODO 翻訳+++: トランザクションを実行しない場合はnull
      */
-    public TgTransactionOption get(int attempt, TsurugiTransactionException e);
+    public TgTxOption get(int attempt, TsurugiTransactionException e);
 }

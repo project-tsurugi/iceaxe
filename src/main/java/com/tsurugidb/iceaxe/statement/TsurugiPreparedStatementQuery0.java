@@ -7,7 +7,7 @@ import java.util.Optional;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
@@ -83,7 +83,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
      * @return record
      * @throws IOException
      */
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTransactionOptionSupplier transactionOptionSupplier) throws IOException {
+    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTxOptionSupplier transactionOptionSupplier) throws IOException {
         return tm.execute(transactionOptionSupplier, transaction -> {
             return executeAndFindRecord(transaction);
         });
@@ -124,7 +124,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
      * @return list of record
      * @throws IOException
      */
-    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTransactionOptionSupplier transactionOptionSupplier) throws IOException {
+    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTxOptionSupplier transactionOptionSupplier) throws IOException {
         return tm.execute(transactionOptionSupplier, transaction -> {
             return executeAndGetList(transaction);
         });

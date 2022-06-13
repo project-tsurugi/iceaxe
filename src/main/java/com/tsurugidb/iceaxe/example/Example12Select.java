@@ -14,8 +14,8 @@ import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.statement.TgVariableList;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 
 /**
  * select example
@@ -25,7 +25,7 @@ public class Example12Select {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            var optionList = TgTransactionOptionList.of(TgTransactionOption.ofOCC(), TgTransactionOption.ofRTX());
+            var optionList = TgTxOptionList.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
             var tm = session.createTransactionManager(optionList);
 
             selectLoop(session, tm);

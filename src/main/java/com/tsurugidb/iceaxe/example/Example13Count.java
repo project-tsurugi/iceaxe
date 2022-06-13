@@ -11,8 +11,8 @@ import com.tsurugidb.iceaxe.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 
 /**
  * select count example
@@ -22,7 +22,7 @@ public class Example13Count {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("dbname");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            var optionList = TgTransactionOptionList.of(TgTransactionOption.ofOCC(), TgTransactionOption.ofRTX());
+            var optionList = TgTxOptionList.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
             var tm = session.createTransactionManager(optionList);
 
             countAll0_execRs(session, tm);

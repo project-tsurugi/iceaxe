@@ -6,7 +6,7 @@ import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
@@ -83,7 +83,7 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
      * @return row count
      * @throws IOException
      */
-    public int executeAndGetCount(TsurugiTransactionManager tm, TgTransactionOptionSupplier transactionOptionSupplier, P parameter) throws IOException {
+    public int executeAndGetCount(TsurugiTransactionManager tm, TgTxOptionSupplier transactionOptionSupplier, P parameter) throws IOException {
         return tm.execute(transactionOptionSupplier, transaction -> {
             return executeAndGetCount(transaction, parameter);
         });

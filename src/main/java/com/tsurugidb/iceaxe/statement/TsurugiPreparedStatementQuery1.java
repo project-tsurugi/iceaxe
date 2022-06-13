@@ -9,7 +9,7 @@ import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
@@ -91,7 +91,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @return record
      * @throws IOException
      */
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTransactionOptionSupplier transactionOptionSupplier, P parameter) throws IOException {
+    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTxOptionSupplier transactionOptionSupplier, P parameter) throws IOException {
         return tm.execute(transactionOptionSupplier, transaction -> {
             return executeAndFindRecord(transaction, parameter);
         });
@@ -135,7 +135,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @return list of record
      * @throws IOException
      */
-    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTransactionOptionSupplier transactionOptionSupplier, P parameter) throws IOException {
+    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTxOptionSupplier transactionOptionSupplier, P parameter) throws IOException {
         return tm.execute(transactionOptionSupplier, transaction -> {
             return executeAndGetList(transaction, parameter);
         });

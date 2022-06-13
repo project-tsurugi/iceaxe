@@ -9,10 +9,9 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOption;
-import com.tsurugidb.iceaxe.transaction.TgTransactionType;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
-import com.tsurugidb.iceaxe.transaction.TgTransactionOptionList;
 
 /**
  * batch example
@@ -41,8 +40,8 @@ public class Example21Batch {
         try (var deletePs = session.createPreparedStatement(deleteSql, deleteMapping); //
                 var insertPs = session.createPreparedStatement(insertSql, insertMapping)) {
 
-            var option = TgTransactionOption.of(TgTransactionType.BATCH_READ_WRITE).addWritePreserveTable("TEST");
-            var tm = session.createTransactionManager(TgTransactionOptionList.of(option));
+            var option = TgTxOption.ofLTX("TEST");
+            var tm = session.createTransactionManager(TgTxOptionList.of(option));
 
             tm.execute(transaction -> {
                 for (var entity : entityList) {
@@ -78,8 +77,8 @@ public class Example21Batch {
                     .character("zzz", TestEntity::getZzz);
             this.insertPs = session.createPreparedStatement(insertSql, insertMapping);
 
-            var option = TgTransactionOption.of(TgTransactionType.BATCH_READ_WRITE).addWritePreserveTable("TEST");
-            this.transactionManager = session.createTransactionManager(TgTransactionOptionList.of(option));
+            var option = TgTxOption.ofLTX("TEST");
+            this.transactionManager = session.createTransactionManager(TgTxOptionList.of(option));
         }
 
         public void execute(List<TestEntity> entityList) throws IOException {
