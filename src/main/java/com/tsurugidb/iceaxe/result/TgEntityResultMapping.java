@@ -580,6 +580,18 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         return this;
     }
 
+    /**
+     * add converter
+     * 
+     * @param converter converter to R
+     * @return this
+     */
+    public TgEntityResultMapping<R> add(IoBiConsumer<R, TsurugiResultRecord> converter) {
+        int index = columnConverterList.size();
+        set(index, converter);
+        return this;
+    }
+
     protected <V> void set(int index, IoFunction<TsurugiResultRecord, V> recordGetter, BiConsumer<R, V> setter) {
         set(index, (entity, record) -> {
             V value = recordGetter.apply(record);
