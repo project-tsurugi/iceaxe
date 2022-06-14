@@ -30,6 +30,16 @@ public abstract class TgParameterMapping<P> {
      * @param variableList variable definition
      * @return Tsurugi Parameter Mapping
      */
+    public static TgParameterMapping<TgParameterList> of(TgVariable<?>... variableList) {
+        return of(TgVariableList.of(variableList));
+    }
+
+    /**
+     * create Parameter Mapping
+     * 
+     * @param variableList variable definition
+     * @return Tsurugi Parameter Mapping
+     */
     public static TgParameterMapping<TgParameterList> of(TgVariableList variableList) {
         return of(variableList, TgParameterList.IDENTITY);
     }
