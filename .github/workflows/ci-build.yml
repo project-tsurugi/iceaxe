@@ -1,0 +1,99 @@
+name: Iceaxe-CI
+
+on: [push, pull_request]
+
+jobs:
+  Build:
+    runs-on: [self-hosted, docker]
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/project-tsurugi/oltp-sandbox:ubuntu-20.04
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GHCR_PAT }}
+      volumes:
+        - /work/docker-cache/.gradle:/root/.gradle
+    defaults:
+      run:
+        shell: bash
+    env:
+      JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
+      TSUBAKURO_PATH: tsurugi/tsubakuro
+
+    services:
+      tsurugi:
+        image: ghcr.io/project-tsurugi/tsurugi:latest
+        credentials:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
+
+    steps:
+      - id: Setup_Java
+        name: Setup_Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - id: Checkout
+        name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          token: ${{ secrets.GHA_PAT }}
+
+      - id: Checkout_Actions
+        name: Checkout_Actions
+        uses: actions/checkout@v2
+        with:
+          repository: project-tsurugi/tsurugi-github-actions
+          path: .github/actions
+          ref: master
+          submodules: recursive
+          token: ${{ secrets.GHA_PAT }}
+
+      - id: Checkout_Tsubakuro
+        name: Checkout_Tsubakuro
+        uses: actions/checkout@v2
+        with:
+          repository: project-tsurugi/tsubakuro
+          path: ${{ env.TSUBAKURO_PATH }}
+          ref: master
+          token: ${{ secrets.GHA_PAT }}
+
+      - id: Install_Tsubakuro
+        name: Install_Tsubakuro
+        run: ./gradlew -i PublishToMavenLocal
+        working-directory: ${{ env.TSUBAKURO_PATH }}
+
+      - id: Assemble
+        name: Assemble
+        run: |
+          ./gradlew -i clean assemble
+
+      - id: Check
+        name: Check
+        run: |
+          ./gradlew -i check
+
+      - id: Generate_Annotations
+        name: Generate_Annotations
+        uses: ./.github/actions/tsurugi-annotations-action
+        if: always()
+        with:
+          junit_input: '**/build/test-results/**/TEST-*.xml'
+          spotbugs_input: '**/build/reports/spotbugs/main/*.xml'
+          checkstyle_input: '**/build/reports/checkstyle/main.xml'
+
+      - id: Notify_Slack
+        name: Notify_Slack
+        uses: ./.github/actions/tsurugi-slack-action
+        if: always() && (contains(github.ref, '/tags/') || contains(github.ref, '/pull/') || contains(github.ref, '/heads/master'))
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          kind: 'job-result'
+          channel: 'tsurugi-build'
+          status: ${{ job.status }}
+          step_context: ${{ toJson(steps) }}
+          username: ${{ github.workflow }}
