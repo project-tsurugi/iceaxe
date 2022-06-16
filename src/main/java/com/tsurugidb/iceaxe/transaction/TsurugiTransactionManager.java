@@ -165,49 +165,49 @@ public class TsurugiTransactionManager {
             try (var transaction = ownerSession.createTransaction(option)) {
                 initializeTransaction(transaction);
 
-                boolean doRollback = true;
                 try {
                     var r = action.apply(transaction);
                     if (transaction.isRollbacked()) {
-                        doRollback = false;
                         return null;
                     }
                     transaction.commit();
-                    doRollback = false;
                     return r;
                 } catch (TsurugiTransactionException e) {
                     option = transactionOptionSupplier.get(i + 1, e);
                     if (option != null) {
-                        // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
+                        // リトライ可能なabortの場合でもrollbackは呼ぶ
+                        rollback(transaction, null);
                         continue;
                     }
-                    throw new IOException(e);
+                    var ioe = new IOException(e);
+                    rollback(transaction, ioe);
+                    throw ioe;
                 } catch (TsurugiTransactionRuntimeException e) {
                     var c = e.getCause();
                     option = transactionOptionSupplier.get(i + 1, c);
                     if (option != null) {
-                        // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
+                        // リトライ可能なabortの場合でもrollbackは呼ぶ
+                        rollback(transaction, null);
                         continue;
                     }
-                    throw new IOException(e);
+                    var ioe = new IOException(e);
+                    rollback(transaction, ioe);
+                    throw ioe;
                 } catch (Exception e) {
                     var c = findTransactionException(e);
                     if (c != null) {
                         option = transactionOptionSupplier.get(i + 1, c);
                         if (option != null) {
-                            // リトライ可能なabortの場合でもrollbackは呼ぶ（doRollback=true）
+                            // リトライ可能なabortの場合でもrollbackは呼ぶ
+                            rollback(transaction, null);
                             continue;
                         }
                     }
+                    rollback(transaction, e);
                     throw e;
-                } finally {
-                    if (doRollback) {
-                        try {
-                            transaction.rollback();
-                        } catch (TsurugiTransactionException e) {
-                            throw new IOException(e);
-                        }
-                    }
+                } catch (Throwable e) {
+                    rollback(transaction, e);
+                    throw e;
                 }
             }
         }
@@ -232,5 +232,25 @@ public class TsurugiTransactionManager {
             }
         }
         return null;
+    }
+
+    private void rollback(TsurugiTransaction transaction, Throwable save) throws IOException {
+        try {
+            if (transaction.available()) {
+                transaction.rollback();
+            }
+        } catch (IOException | RuntimeException | Error e) {
+            if (save != null) {
+                save.addSuppressed(e);
+            } else {
+                throw e;
+            }
+        } catch (Throwable e) {
+            if (save != null) {
+                save.addSuppressed(e);
+            } else {
+                throw new IOException(e);
+            }
+        }
     }
 }

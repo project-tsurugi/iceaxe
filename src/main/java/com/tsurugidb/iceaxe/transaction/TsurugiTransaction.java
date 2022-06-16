@@ -24,6 +24,7 @@ public class TsurugiTransaction implements Closeable {
     private final TsurugiSession ownerSession;
     private FutureResponse<Transaction> lowTransactionFuture;
     private Transaction lowTransaction;
+    private boolean calledGetLowTransaction = false;
     private final IceaxeTimeout beginTimeout;
     private final IceaxeTimeout commitTimeout;
     private final IceaxeTimeout rollbackTimeout;
@@ -129,12 +130,14 @@ public class TsurugiTransaction implements Closeable {
         applyCloseTimeout();
     }
 
+    // internal
     public final TgSessionInfo getSessionInfo() {
         return ownerSession.getSessionInfo();
     }
 
     // internal
     public final synchronized Transaction getLowTransaction() throws IOException {
+        this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
             this.lowTransaction = IceaxeIoUtil.getFromFuture(lowTransactionFuture, beginTimeout);
             try {
@@ -145,6 +148,19 @@ public class TsurugiTransaction implements Closeable {
             }
         }
         return this.lowTransaction;
+    }
+
+    /**
+     * Whether transaction is available
+     * 
+     * @return true: available
+     * @throws IOException
+     */
+    public final synchronized boolean available() throws IOException {
+        if (!this.calledGetLowTransaction) {
+            getLowTransaction();
+        }
+        return this.lowTransaction != null;
     }
 
     /**
