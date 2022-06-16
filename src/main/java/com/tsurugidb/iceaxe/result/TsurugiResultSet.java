@@ -250,6 +250,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     @Override
     public void close() throws IOException {
+        // TODO checkResultStatusが廃止されたら、コメントも削除
         // checkResultStatus(true); クローズ時にはステータスチェックは行わない
         // 一度もレコードを取得していない場合でも、commitでステータスチェックされる
 
