@@ -36,11 +36,14 @@ public class TsurugiResultCount extends TsurugiResult {
     public int getUpdateCount() throws IOException, TsurugiTransactionException {
         checkResultStatus(false);
         // FIXME 更新件数取得
-        throw new InternalError("not yet implements");
+//      throw new InternalError("not yet implements");
+        System.err.println("not yet implements TsurugiResultCount.getUpdateCount(), now always returns -1");
+        return -1;
     }
 
     @Override
     public void close() throws IOException {
+        // TODO checkResultStatusが廃止されたら、コメントも削除
         // checkResultStatus(true); クローズ時にはステータスチェックは行わない
         // 一度も更新件数を取得しない場合でも、commitでステータスチェックされる
 
