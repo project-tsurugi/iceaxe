@@ -23,7 +23,7 @@ To use on Gradle, add Iceaxe library to dependencies.
 
 ```
 dependencies {
-    api 'com.nautilus_technologies.iceaxe:iceaxe:0.0.1'
+    api 'com.nautilus_technologies.iceaxe:iceaxe-core:0.0.1'
 }
 ```
 
