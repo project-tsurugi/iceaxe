@@ -20,7 +20,7 @@ import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 public class Example13Count {
 
     void main() throws IOException {
-        var connector = TsurugiConnector.createConnector("dbname");
+        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
             var optionList = TgTxOptionList.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
             var tm = session.createTransactionManager(optionList);

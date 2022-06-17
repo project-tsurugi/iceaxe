@@ -19,7 +19,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 public class Example21Batch {
 
     void main() throws IOException {
-        var connector = TsurugiConnector.createConnector("dbname");
+        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
             batch1(session, List.of(/* entities */));
             batch2(session, List.of(/* entities */));

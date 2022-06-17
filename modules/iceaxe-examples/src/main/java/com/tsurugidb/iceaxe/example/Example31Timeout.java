@@ -17,7 +17,7 @@ public class Example31Timeout {
     private static final TgTxOptionList TX_OPTION = TgTxOptionList.of(TgTxOption.ofOCC());
 
     void main() throws IOException {
-        var connector = TsurugiConnector.createConnector("dbname");
+        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
         timeout1(connector);
         timeout2(connector);
         timeout3(connector);

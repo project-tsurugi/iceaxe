@@ -32,7 +32,7 @@ public class Example03TransactionManager {
      * @see Example02Session
      */
     void main() throws IOException {
-        var connector = TsurugiConnector.createConnector("dbname");
+        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
             manager1(session);
             manager2(session);
