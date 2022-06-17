@@ -1,2 +1,9 @@
 rootProject.name = 'iceaxe'
 
+include 'iceaxe-core'
+include 'iceaxe-examples'
+
+rootProject.children.each { project ->
+    project.projectDir = new File(settingsDir, "modules/${project.name}")
+    assert project.projectDir.isDirectory()
+}
