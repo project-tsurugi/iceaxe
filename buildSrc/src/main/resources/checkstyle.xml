@@ -57,7 +57,7 @@
     <module name="WhitespaceAfter"/>
     <module name="WhitespaceAround"/>
     <module name="ModifierOrder"/>
-    <module name="RedundantModifier"/>
+    <!-- <module name="RedundantModifier"/> -->
     <!-- <module name="AvoidNestedBlocks"/> -->
     <module name="EmptyBlock">
       <property name="severity" value="info"/>
@@ -71,11 +71,13 @@
     </module>
     <module name="EmptyStatement"/>
     <module name="EqualsHashCode"/>
+    <!--
     <module name="HiddenField">
       <property name="severity" value="error"/>
       <property name="ignoreConstructorParameter" value="true"/>
       <property name="ignoreSetter" value="true"/>
     </module>
+    -->
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
     <module name="MagicNumber">
