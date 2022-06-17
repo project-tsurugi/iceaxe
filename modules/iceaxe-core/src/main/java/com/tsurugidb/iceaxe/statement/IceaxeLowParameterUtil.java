@@ -10,7 +10,11 @@ import com.nautilus_technologies.tsubakuro.low.sql.Parameters;
 import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
 
 // internal
-public class IceaxeLowParameterUtil {
+public final class IceaxeLowParameterUtil {
+
+    private IceaxeLowParameterUtil() {
+        // do nothing
+    }
 
     public static Parameter create(String name, boolean value) {
         return Parameters.of(name, value);

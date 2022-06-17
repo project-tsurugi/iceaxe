@@ -13,7 +13,11 @@ import java.time.ZonedDateTime;
 /**
  * convert type utility
  */
-public class IceaxeConvertUtil {
+public final class IceaxeConvertUtil {
+
+    private IceaxeConvertUtil() {
+        // do nothing
+    }
 
     /**
      * convert to Boolean

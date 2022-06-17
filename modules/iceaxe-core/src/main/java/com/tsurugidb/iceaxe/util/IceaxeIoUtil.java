@@ -9,7 +9,11 @@ import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 
 // internal
-public class IceaxeIoUtil {
+public final class IceaxeIoUtil {
+
+    private IceaxeIoUtil() {
+        // do nothing
+    }
 
     public static <T> T getFromFuture(FutureResponse<T> future, IceaxeTimeout timeout) throws IOException {
         var time = timeout.get();

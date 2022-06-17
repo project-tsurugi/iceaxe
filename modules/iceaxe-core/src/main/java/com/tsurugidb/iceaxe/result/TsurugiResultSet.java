@@ -93,7 +93,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         applyCloseTimeout();
     }
 
-    protected synchronized final ResultSet getLowResultSet() throws IOException {
+    protected final synchronized ResultSet getLowResultSet() throws IOException {
         if (this.lowResultSet == null) {
             this.lowResultSet = IceaxeIoUtil.getFromFuture(lowResultSetFuture, rsTimeout);
             try {

@@ -48,7 +48,7 @@ public abstract class TsurugiResult implements Closeable {
         connectTimeout.set(timeout);
     }
 
-    protected synchronized final ResultOnly getLowResultOnly() throws IOException {
+    protected final synchronized ResultOnly getLowResultOnly() throws IOException {
         if (this.lowResultOnly == null) {
             var lowResultOnlyFuture = getLowResultOnlyFuture();
             this.lowResultOnly = IceaxeIoUtil.getFromFuture(lowResultOnlyFuture, connectTimeout);

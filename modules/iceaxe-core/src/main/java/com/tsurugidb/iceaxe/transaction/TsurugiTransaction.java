@@ -241,9 +241,9 @@ public class TsurugiTransaction implements Closeable {
 
     @Override
     public void close() throws IOException {
-        if (!(this.committed || this.rollbacked)) {
-            // commitやrollbackに失敗してもcloseは呼ばれるので、ここでIllegalStateException等を発生させるのは良くない
-        }
+//      if (!(this.committed || this.rollbacked)) {
+        // commitやrollbackに失敗してもcloseは呼ばれるので、ここでIllegalStateException等を発生させるのは良くない
+//      }
 
         IceaxeIoUtil.close(closeableSet, () -> {
             // not try-finally
