@@ -5,7 +5,7 @@ plugins {
     id 'com.github.spotbugs'
 }
 
-group = 'com.nautilus_technologies.iceaxe'
+group = 'com.tsurugidb.iceaxe'
 version = '0.0.1'
 
 repositories {
