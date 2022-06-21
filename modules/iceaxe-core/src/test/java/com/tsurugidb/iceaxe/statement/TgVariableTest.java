@@ -20,6 +20,12 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.BOOLEAN, variable.type());
         assertEquals(Parameters.of("foo", true), variable.bind(true).toLowParameter());
+        assertEquals(Parameters.of("foo", true), variable.bind(Boolean.TRUE).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -28,6 +34,12 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.INT4, variable.type());
         assertEquals(Parameters.of("foo", 123), variable.bind(123).toLowParameter());
+        assertEquals(Parameters.of("foo", 123), variable.bind(Integer.valueOf(123)).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -35,7 +47,13 @@ class TgVariableTest {
         var variable = TgVariable.ofInt8("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.INT8, variable.type());
-        assertEquals(Parameters.of("foo", 123L), variable.bind(123L).toLowParameter());
+        assertEquals(Parameters.of("foo", 123L), variable.bind(123).toLowParameter());
+        assertEquals(Parameters.of("foo", 123L), variable.bind(Long.valueOf(123)).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -43,7 +61,13 @@ class TgVariableTest {
         var variable = TgVariable.ofFloat4("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.FLOAT4, variable.type());
-        assertEquals(Parameters.of("foo", 123f), variable.bind(123f).toLowParameter());
+        assertEquals(Parameters.of("foo", 123f), variable.bind(123).toLowParameter());
+        assertEquals(Parameters.of("foo", 123f), variable.bind(Float.valueOf(123)).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -51,7 +75,13 @@ class TgVariableTest {
         var variable = TgVariable.ofFloat8("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.FLOAT8, variable.type());
-        assertEquals(Parameters.of("foo", 123d), variable.bind(123d).toLowParameter());
+        assertEquals(Parameters.of("foo", 123d), variable.bind(123).toLowParameter());
+        assertEquals(Parameters.of("foo", 123d), variable.bind(Double.valueOf(123)).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -60,6 +90,11 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.DECIMAL, variable.type());
         assertEquals(Parameters.of("foo", BigDecimal.valueOf(123)), variable.bind(BigDecimal.valueOf(123)).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -68,6 +103,11 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.CHARACTER, variable.type());
         assertEquals(Parameters.of("foo", "abc"), variable.bind("abc").toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -76,6 +116,11 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.BYTES, variable.type());
         assertEquals(Parameters.of("foo", new byte[] { 1, 2, 3 }), variable.bind(new byte[] { 1, 2, 3 }).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -84,6 +129,11 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.BITS, variable.type());
         assertEquals(Parameters.of("foo", new boolean[] { true, false, true }), variable.bind(new boolean[] { true, false, true }).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -92,6 +142,11 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.DATE, variable.type());
         assertEquals(Parameters.of("foo", LocalDate.of(2022, 6, 2)), variable.bind(LocalDate.of(2022, 6, 2)).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -100,6 +155,11 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.TIME, variable.type());
         assertEquals(Parameters.of("foo", LocalTime.of(23, 30, 59)), variable.bind(LocalTime.of(23, 30, 59)).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -111,6 +171,11 @@ class TgVariableTest {
         var zone = ZoneId.of("Asia/Tokyo");
         var instant = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant();
         assertEquals(Parameters.of("foo", instant), variable.bind(instant).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test
@@ -122,6 +187,11 @@ class TgVariableTest {
         var zone = ZoneId.of("Asia/Tokyo");
         var dateTime = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone);
         assertEquals(Parameters.of("foo", dateTime.toInstant()), variable.bind(dateTime).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
     }
 
     @Test

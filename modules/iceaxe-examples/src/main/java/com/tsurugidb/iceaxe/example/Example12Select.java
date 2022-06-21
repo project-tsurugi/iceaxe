@@ -182,7 +182,7 @@ public class Example12Select {
         var variable = TgVariableList.of(foo, bar);
         try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
-                var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
+                var param = TgParameterList.of(foo.bind(123), bar.bind(456));
                 try (var result = ps.execute(transaction, param)) {
                     return result.getRecordList();
                 }
@@ -200,7 +200,7 @@ public class Example12Select {
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
-                var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
+                var param = TgParameterList.of(foo.bind(123), bar.bind(456));
                 try (var result = ps.execute(transaction, param)) {
                     return result.getRecordList();
                 }
@@ -218,7 +218,7 @@ public class Example12Select {
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
-                var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
+                var param = TgParameterList.of(foo.bind(123), bar.bind(456));
                 return ps.executeAndGetList(transaction, param);
             });
             System.out.println(list);
@@ -233,7 +233,7 @@ public class Example12Select {
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
-            var param = TgParameterList.of(foo.bind(123), bar.bind(456L));
+            var param = TgParameterList.of(foo.bind(123), bar.bind(456));
             List<TestEntity> list = ps.executeAndGetList(tm, param);
             System.out.println(list);
         }

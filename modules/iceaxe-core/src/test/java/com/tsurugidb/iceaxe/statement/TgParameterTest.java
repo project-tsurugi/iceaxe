@@ -17,41 +17,71 @@ class TgParameterTest {
 
     @Test
     void testOfStringBoolean() {
-        assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (Boolean) null).toLowParameter());
-
         var parameter = TgParameter.of("foo", true);
         assertEquals(Parameters.of("foo", true), parameter.toLowParameter());
+    }
+
+    @Test
+    void testOfStringBooleanWrapper() {
+        assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (Boolean) null).toLowParameter());
+
+        var parameter = TgParameter.of("foo", Boolean.TRUE);
+        assertEquals(Parameters.of("foo", true), parameter.toLowParameter());
+    }
+
+    @Test
+    void testOfStringInt() {
+        var parameter = TgParameter.of("foo", 123);
+        assertEquals(Parameters.of("foo", 123), parameter.toLowParameter());
     }
 
     @Test
     void testOfStringInteger() {
         assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (Integer) null).toLowParameter());
 
-        var parameter = TgParameter.of("foo", 123);
+        var parameter = TgParameter.of("foo", Integer.valueOf(123));
         assertEquals(Parameters.of("foo", 123), parameter.toLowParameter());
     }
 
     @Test
     void testOfStringLong() {
-        assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (Long) null).toLowParameter());
-
         var parameter = TgParameter.of("foo", 123L);
         assertEquals(Parameters.of("foo", 123L), parameter.toLowParameter());
     }
 
     @Test
-    void testOfStringFloat() {
-        assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (Float) null).toLowParameter());
+    void testOfStringLongWrapper() {
+        assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (Long) null).toLowParameter());
 
+        var parameter = TgParameter.of("foo", Long.valueOf(123));
+        assertEquals(Parameters.of("foo", 123L), parameter.toLowParameter());
+    }
+
+    @Test
+    void testOfStringFloat() {
         var parameter = TgParameter.of("foo", 123f);
         assertEquals(Parameters.of("foo", 123f), parameter.toLowParameter());
     }
 
     @Test
+    void testOfStringFloatWrapper() {
+        assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (Float) null).toLowParameter());
+
+        var parameter = TgParameter.of("foo", Float.valueOf(123));
+        assertEquals(Parameters.of("foo", 123f), parameter.toLowParameter());
+    }
+
+    @Test
     void testOfStringDouble() {
+        var parameter = TgParameter.of("foo", 123d);
+        assertEquals(Parameters.of("foo", 123d), parameter.toLowParameter());
+    }
+
+    @Test
+    void testOfStringDoubleWrapper() {
         assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (Double) null).toLowParameter());
 
-        var parameter = TgParameter.of("foo", 123d);
+        var parameter = TgParameter.of("foo", Double.valueOf(123));
         assertEquals(Parameters.of("foo", 123d), parameter.toLowParameter());
     }
 
