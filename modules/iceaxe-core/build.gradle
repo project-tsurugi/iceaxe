@@ -6,4 +6,5 @@ dependencies {
     api 'com.tsurugidb.tsubakuro:tsubakuro-session:0.0.1'
     api 'com.tsurugidb.tsubakuro:tsubakuro-connector:0.0.1'
     implementation 'org.slf4j:slf4j-simple:1.7.32'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 }

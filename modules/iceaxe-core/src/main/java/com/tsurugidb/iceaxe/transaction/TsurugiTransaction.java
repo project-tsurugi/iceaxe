@@ -136,6 +136,7 @@ public class TsurugiTransaction implements Closeable {
     }
 
     // internal
+//  @ThreadSafe
     public final synchronized Transaction getLowTransaction() throws IOException {
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
@@ -156,6 +157,7 @@ public class TsurugiTransaction implements Closeable {
      * @return true: available
      * @throws IOException
      */
+//  @ThreadSafe
     public final synchronized boolean available() throws IOException {
         if (!this.calledGetLowTransaction) {
             getLowTransaction();

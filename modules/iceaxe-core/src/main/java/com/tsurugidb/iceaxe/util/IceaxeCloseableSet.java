@@ -6,9 +6,12 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 /**
  * Iceaxe Closeable set
  */
+@ThreadSafe
 public class IceaxeCloseableSet {
 
     private final Map<Closeable, ?> closeableMap = new IdentityHashMap<>();

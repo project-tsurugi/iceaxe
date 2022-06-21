@@ -4,6 +4,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -16,6 +19,7 @@ import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 /**
  * Tsurugi Result for PreparedStatement
  */
+@NotThreadSafe
 public abstract class TsurugiResult implements Closeable {
 
     private final TsurugiTransaction ownerTransaction;
@@ -102,6 +106,7 @@ public abstract class TsurugiResult implements Closeable {
     }
 
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void close() throws IOException {
         try {
             checkResultStatus(true);

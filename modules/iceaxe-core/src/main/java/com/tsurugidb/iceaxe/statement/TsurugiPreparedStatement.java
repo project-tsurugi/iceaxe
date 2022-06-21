@@ -3,6 +3,8 @@ package com.tsurugidb.iceaxe.statement;
 import java.io.Closeable;
 import java.io.IOException;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 
@@ -23,6 +25,7 @@ public abstract class TsurugiPreparedStatement implements Closeable {
     }
 
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void close() throws IOException {
         ownerSession.removeChild(this);
     }

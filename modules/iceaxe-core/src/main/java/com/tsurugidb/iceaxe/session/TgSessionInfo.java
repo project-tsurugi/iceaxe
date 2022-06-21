@@ -1,8 +1,11 @@
 package com.tsurugidb.iceaxe.session;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.nautilus_technologies.tsubakuro.channel.common.connection.Credential;
 import com.nautilus_technologies.tsubakuro.channel.common.connection.UsernamePasswordCredential;
@@ -15,6 +18,7 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 /**
  * Tsurugi Session Information
  */
+@ThreadSafe
 public class TgSessionInfo {
 
     /**
@@ -83,7 +87,7 @@ public class TgSessionInfo {
     }
 
     private Credential credential;
-    private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = new EnumMap<>(TgTimeoutKey.class);
+    private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
 
     /**
      * Tsurugi Session Information

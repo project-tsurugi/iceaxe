@@ -2,6 +2,8 @@ package com.tsurugidb.iceaxe.result;
 
 import java.io.IOException;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
@@ -11,6 +13,7 @@ import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 /**
  * Tsurugi Result Count for PreparedStatement
  */
+@NotThreadSafe
 public class TsurugiResultCount extends TsurugiResult {
 
     private FutureResponse<ResultOnly> lowResultOnlyFuture;

@@ -13,6 +13,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.tsurugidb.iceaxe.statement.TgDataType;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
@@ -73,6 +77,7 @@ import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
  * また、{@link TsurugiResultSet}のクローズ後に当クラスは使用できない。
  * </p>
  */
+@NotThreadSafe
 public class TsurugiResultRecord {
 
     protected static class TsurugiResultColumnValue { // record
@@ -152,6 +157,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @see #moveCurrentColumnNext()
      */
+    @Nullable
     public Object getCurrentColumnValue() throws IOException {
         if (lowResultSet.isNull()) {
             return null;
@@ -184,10 +190,12 @@ public class TsurugiResultRecord {
      * @return list of column name
      * @throws IOException
      */
+    @Nonnull
     public List<String> getNameList() throws IOException {
         return TsurugiResultSet.getNameList(lowResultSet);
     }
 
+    @Nonnull
     protected synchronized Map<String, TsurugiResultColumnValue> getColumnMap() throws IOException {
         if (this.columnMap == null) {
             this.columnMap = new LinkedHashMap<String, TsurugiResultColumnValue>();
@@ -203,6 +211,7 @@ public class TsurugiResultRecord {
         return this.columnMap;
     }
 
+    @Nonnull
     protected TsurugiResultColumnValue getColumn(String name) throws IOException {
         var map = getColumnMap();
         var column = map.get(name);
@@ -219,6 +228,7 @@ public class TsurugiResultRecord {
      * @return value
      * @throws IOException
      */
+    @Nullable
     public Object getValue(String name) throws IOException {
         var column = getColumn(name);
         return column.value();
@@ -231,6 +241,7 @@ public class TsurugiResultRecord {
      * @return data type
      * @throws IOException
      */
+    @Nonnull
     public TgDataType getType(String name) throws IOException {
         var column = getColumn(name);
         var lowMeta = lowResultSet.getRecordMeta();
@@ -277,6 +288,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Boolean> findBoolean(String name) throws IOException {
         var value = getBooleanOrNull(name);
         return Optional.ofNullable(value);
@@ -289,6 +301,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Boolean getBooleanOrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toBoolean(lowValue);
@@ -333,6 +346,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Integer> findInt4(String name) throws IOException {
         var value = getInt4OrNull(name);
         return Optional.ofNullable(value);
@@ -345,6 +359,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Integer getInt4OrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toInt4(lowValue);
@@ -389,6 +404,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Long> findInt8(String name) throws IOException {
         var value = getInt8OrNull(name);
         return Optional.ofNullable(value);
@@ -401,6 +417,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Long getInt8OrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toInt8(lowValue);
@@ -445,6 +462,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Float> findFloat4(String name) throws IOException {
         var value = getFloat4OrNull(name);
         return Optional.ofNullable(value);
@@ -457,6 +475,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Float getFloat4OrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toFloat4(lowValue);
@@ -501,6 +520,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Double> findFloat8(String name) throws IOException {
         var value = getFloat8OrNull(name);
         return Optional.ofNullable(value);
@@ -513,6 +533,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Double getFloat8OrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toFloat8(lowValue);
@@ -528,6 +549,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public BigDecimal getDecimal(String name) throws IOException {
         var value = getDecimalOrNull(name);
         Objects.requireNonNull(value);
@@ -557,6 +579,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<BigDecimal> findDecimal(String name) throws IOException {
         var value = getDecimalOrNull(name);
         return Optional.ofNullable(value);
@@ -569,6 +592,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public BigDecimal getDecimalOrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toDecimal(lowValue);
@@ -584,6 +608,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public String getCharacter(String name) throws IOException {
         var value = getCharacterOrNull(name);
         Objects.requireNonNull(value);
@@ -613,6 +638,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<String> findCharacter(String name) throws IOException {
         var value = getCharacterOrNull(name);
         return Optional.ofNullable(value);
@@ -625,6 +651,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public String getCharacterOrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toCharacter(lowValue);
@@ -640,6 +667,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public byte[] getBytes(String name) throws IOException {
         var value = getBytesOrNull(name);
         Objects.requireNonNull(value);
@@ -669,6 +697,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<byte[]> findBytes(String name) throws IOException {
         var value = getBytesOrNull(name);
         return Optional.ofNullable(value);
@@ -681,6 +710,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public byte[] getBytesOrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toBytes(lowValue);
@@ -696,6 +726,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public boolean[] getBits(String name) throws IOException {
         var value = getBitsOrNull(name);
         Objects.requireNonNull(value);
@@ -725,6 +756,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<boolean[]> findBits(String name) throws IOException {
         var value = getBitsOrNull(name);
         return Optional.ofNullable(value);
@@ -737,6 +769,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public boolean[] getBitsOrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toBits(lowValue);
@@ -752,6 +785,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public LocalDate getDate(String name) throws IOException {
         var value = getDateOrNull(name);
         Objects.requireNonNull(value);
@@ -781,6 +815,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<LocalDate> findDate(String name) throws IOException {
         var value = getDateOrNull(name);
         return Optional.ofNullable(value);
@@ -793,6 +828,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public LocalDate getDateOrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toDate(lowValue);
@@ -808,6 +844,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public LocalTime getTime(String name) throws IOException {
         var value = getTimeOrNull(name);
         Objects.requireNonNull(value);
@@ -837,6 +874,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<LocalTime> findTime(String name) throws IOException {
         var value = getTimeOrNull(name);
         return Optional.ofNullable(value);
@@ -849,6 +887,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public LocalTime getTimeOrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toTime(lowValue);
@@ -864,6 +903,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public Instant getInstant(String name) throws IOException {
         var value = getInstantOrNull(name);
         Objects.requireNonNull(value);
@@ -893,6 +933,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Instant> findInstant(String name) throws IOException {
         var value = getInstantOrNull(name);
         return Optional.ofNullable(value);
@@ -905,6 +946,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Instant getInstantOrNull(String name) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toInstant(lowValue);
@@ -921,6 +963,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public ZonedDateTime getZonedDateTime(String name, ZoneId zone) throws IOException {
         var value = getZonedDateTimeOrNull(name, zone);
         Objects.requireNonNull(value);
@@ -952,6 +995,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<ZonedDateTime> findZonedDateTime(String name, ZoneId zone) throws IOException {
         var value = getZonedDateTimeOrNull(name, zone);
         return Optional.ofNullable(value);
@@ -965,6 +1009,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public ZonedDateTime getZonedDateTimeOrNull(String name, ZoneId zone) throws IOException {
         var lowValue = getValue(name);
         return IceaxeConvertUtil.toZonedDateTime(lowValue, zone);
@@ -973,6 +1018,24 @@ public class TsurugiResultRecord {
     /*
      * next
      */
+
+    /**
+     * move next column
+     * 
+     * @throws IllegalStateException if not found next column
+     */
+    public void nextColumn() {
+        boolean hasColumn = lowResultSet.nextColumn();
+        if (!hasColumn) {
+            throw new IllegalStateException("not found next column");
+        }
+    }
+
+    @Nullable
+    protected Object nextLowValue() throws IOException {
+        nextColumn();
+        return getCurrentColumnValue();
+    }
 
     // boolean
 
@@ -1010,6 +1073,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Boolean> nextBooleanOpt() throws IOException {
         var value = nextBooleanOrNull();
         return Optional.ofNullable(value);
@@ -1021,26 +1085,10 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Boolean nextBooleanOrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toBoolean(lowValue);
-    }
-
-    /**
-     * move next column
-     * 
-     * @throws IllegalStateException if not found next column
-     */
-    public void nextColumn() {
-        boolean hasColumn = lowResultSet.nextColumn();
-        if (!hasColumn) {
-            throw new IllegalStateException("not found next column");
-        }
-    }
-
-    protected Object nextLowValue() throws IOException {
-        nextColumn();
-        return getCurrentColumnValue();
     }
 
     // int4
@@ -1079,6 +1127,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Integer> nextInt4Opt() throws IOException {
         var value = nextInt4OrNull();
         return Optional.ofNullable(value);
@@ -1090,6 +1139,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Integer nextInt4OrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toInt4(lowValue);
@@ -1131,6 +1181,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Long> nextInt8Opt() throws IOException {
         var value = nextInt8OrNull();
         return Optional.ofNullable(value);
@@ -1142,6 +1193,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Long nextInt8OrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toInt8(lowValue);
@@ -1183,6 +1235,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Float> nextFloat4Opt() throws IOException {
         var value = nextFloat4OrNull();
         return Optional.ofNullable(value);
@@ -1194,6 +1247,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Float nextFloat4OrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toFloat4(lowValue);
@@ -1235,6 +1289,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Double> nextFloat8Opt() throws IOException {
         var value = nextFloat8OrNull();
         return Optional.ofNullable(value);
@@ -1246,6 +1301,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Double nextFloat8OrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toFloat8(lowValue);
@@ -1260,6 +1316,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public BigDecimal nextDecimal() throws IOException {
         var value = nextDecimalOrNull();
         Objects.requireNonNull(value);
@@ -1287,6 +1344,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<BigDecimal> nextDecimalOpt() throws IOException {
         var value = nextDecimalOrNull();
         return Optional.ofNullable(value);
@@ -1298,6 +1356,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public BigDecimal nextDecimalOrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toDecimal(lowValue);
@@ -1312,6 +1371,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public String nextCharacter() throws IOException {
         var value = nextCharacterOrNull();
         Objects.requireNonNull(value);
@@ -1339,6 +1399,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<String> nextCharacterOpt() throws IOException {
         var value = nextCharacterOrNull();
         return Optional.ofNullable(value);
@@ -1350,6 +1411,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public String nextCharacterOrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toCharacter(lowValue);
@@ -1364,6 +1426,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public byte[] nextBytes() throws IOException {
         var value = nextBytesOrNull();
         Objects.requireNonNull(value);
@@ -1391,6 +1454,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<byte[]> nextBytesOpt() throws IOException {
         var value = nextBytesOrNull();
         return Optional.ofNullable(value);
@@ -1402,6 +1466,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public byte[] nextBytesOrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toBytes(lowValue);
@@ -1416,6 +1481,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public boolean[] nextBits() throws IOException {
         var value = nextBitsOrNull();
         Objects.requireNonNull(value);
@@ -1443,6 +1509,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<boolean[]> nextBitsOpt() throws IOException {
         var value = nextBitsOrNull();
         return Optional.ofNullable(value);
@@ -1454,6 +1521,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public boolean[] nextBitsOrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toBits(lowValue);
@@ -1468,6 +1536,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public LocalDate nextDate() throws IOException {
         var value = nextDateOrNull();
         Objects.requireNonNull(value);
@@ -1495,6 +1564,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<LocalDate> nextDateOpt() throws IOException {
         var value = nextDateOrNull();
         return Optional.ofNullable(value);
@@ -1506,6 +1576,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public LocalDate nextDateOrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toDate(lowValue);
@@ -1520,6 +1591,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public LocalTime nextTime() throws IOException {
         var value = nextTimeOrNull();
         Objects.requireNonNull(value);
@@ -1547,6 +1619,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<LocalTime> nextTimeOpt() throws IOException {
         var value = nextTimeOrNull();
         return Optional.ofNullable(value);
@@ -1558,6 +1631,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public LocalTime nextTimeOrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toTime(lowValue);
@@ -1572,6 +1646,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
+    @Nonnull
     public Instant nextInstant() throws IOException {
         var value = nextInstantOrNull();
         Objects.requireNonNull(value);
@@ -1599,6 +1674,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nonnull
     public Optional<Instant> nextInstantOpt() throws IOException {
         var value = nextInstantOrNull();
         return Optional.ofNullable(value);
@@ -1610,6 +1686,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
+    @Nullable
     public Instant nextInstantOrNull() throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toInstant(lowValue);
@@ -1625,7 +1702,8 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws NullPointerException if value is null
      */
-    public ZonedDateTime nextZonedDateTime(ZoneId zone) throws IOException {
+    @Nonnull
+    public ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone) throws IOException {
         var value = nextZonedDateTimeOrNull(zone);
         Objects.requireNonNull(value);
         return value;
@@ -1639,7 +1717,7 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
-    public ZonedDateTime nextZonedDateTime(ZoneId zone, ZonedDateTime defaultValue) throws IOException {
+    public ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone, ZonedDateTime defaultValue) throws IOException {
         var value = nextZonedDateTimeOrNull(zone);
         if (value == null) {
             return defaultValue;
@@ -1654,7 +1732,8 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
-    public Optional<ZonedDateTime> nextZonedDateTimeOpt(ZoneId zone) throws IOException {
+    @Nonnull
+    public Optional<ZonedDateTime> nextZonedDateTimeOpt(@Nonnull ZoneId zone) throws IOException {
         var value = nextZonedDateTimeOrNull(zone);
         return Optional.ofNullable(value);
     }
@@ -1666,7 +1745,8 @@ public class TsurugiResultRecord {
      * @return column value
      * @throws IOException
      */
-    public ZonedDateTime nextZonedDateTimeOrNull(ZoneId zone) throws IOException {
+    @Nullable
+    public ZonedDateTime nextZonedDateTimeOrNull(@Nonnull ZoneId zone) throws IOException {
         var lowValue = nextLowValue();
         return IceaxeConvertUtil.toZonedDateTime(lowValue, zone);
     }

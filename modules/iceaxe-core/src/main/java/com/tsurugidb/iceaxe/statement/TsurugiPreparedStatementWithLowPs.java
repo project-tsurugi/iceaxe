@@ -82,6 +82,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
         applyCloseTimeout();
     }
 
+//  @ThreadSafe
     protected final synchronized PreparedStatement getLowPreparedStatement() throws IOException {
         if (this.lowPreparedStatement == null) {
             this.lowPreparedStatement = IceaxeIoUtil.getFromFuture(lowPreparedStatementFuture, connectTimeout);

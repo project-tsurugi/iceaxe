@@ -1,6 +1,9 @@
 package com.tsurugidb.iceaxe.transaction;
 
 import java.util.Collection;
+import java.util.function.Consumer;
+
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionOption;
 import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionType;
@@ -9,6 +12,7 @@ import com.tsurugidb.jogasaki.proto.SqlRequest.WritePreserve;
 /**
  * Tsurugi Transaction Option
  */
+@ThreadSafe
 public class TgTxOption {
 
     /**
@@ -95,8 +99,9 @@ public class TgTxOption {
      */
     public TgTxOption type(TgTransactionType type) {
         var lowType = type.getLowTransactionType();
-        lowBuilder.setType(lowType);
-        this.lowTransactionOption = null;
+        modify(builder -> {
+            builder.setType(lowType);
+        });
         return this;
     }
 
@@ -108,9 +113,15 @@ public class TgTxOption {
      */
     public TgTxOption addWritePreserveTable(String name) {
         var value = WritePreserve.newBuilder().setTableName(name).build();
-        lowBuilder.addWritePreserves(value);
-        this.lowTransactionOption = null;
+        modify(builder -> {
+            builder.addWritePreserves(value);
+        });
         return this;
+    }
+
+    protected final synchronized void modify(Consumer<TransactionOption.Builder> modifier) {
+        modifier.accept(lowBuilder);
+        this.lowTransactionOption = null;
     }
 
     // internal

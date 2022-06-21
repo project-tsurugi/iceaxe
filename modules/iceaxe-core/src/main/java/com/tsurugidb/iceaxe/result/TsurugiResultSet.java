@@ -9,6 +9,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
@@ -22,12 +24,10 @@ import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 
 /**
  * Tsurugi Result Set for PreparedStatement
- * <p>
- * MT unsafe
- * </p>
  * 
  * @param <R> result type
  */
+@NotThreadSafe
 public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     private FutureResponse<ResultSet> lowResultSetFuture;

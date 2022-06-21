@@ -10,6 +10,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * convert type utility
  */
@@ -25,6 +28,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static Boolean toBoolean(Object obj) {
         if (obj == null) {
             return null;
@@ -56,6 +60,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static Integer toInt4(Object obj) {
         if (obj == null) {
             return null;
@@ -75,6 +80,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static Long toInt8(Object obj) {
         if (obj == null) {
             return null;
@@ -94,6 +100,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static Float toFloat4(Object obj) {
         if (obj == null) {
             return null;
@@ -113,6 +120,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static Double toFloat8(Object obj) {
         if (obj == null) {
             return null;
@@ -132,6 +140,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static BigDecimal toDecimal(Object obj) {
         if (obj == null) {
             return null;
@@ -163,6 +172,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static String toCharacter(Object obj) {
         if (obj == null) {
             return null;
@@ -179,6 +189,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static byte[] toBytes(Object obj) {
         if (obj == null) {
             return null;
@@ -195,6 +206,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static boolean[] toBits(Object obj) {
         if (obj == null) {
             return null;
@@ -211,6 +223,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static LocalDate toDate(Object obj) {
         if (obj == null) {
             return null;
@@ -243,6 +256,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static LocalTime toTime(Object obj) {
         if (obj == null) {
             return null;
@@ -275,6 +289,7 @@ public final class IceaxeConvertUtil {
      * @param obj value
      * @return value
      */
+    @Nullable
     public static Instant toInstant(Object obj) {
         if (obj == null) {
             return null;
@@ -301,7 +316,8 @@ public final class IceaxeConvertUtil {
      * @param zone time-zone
      * @return value
      */
-    public static ZonedDateTime toZonedDateTime(Object obj, ZoneId zone) {
+    @Nullable
+    public static ZonedDateTime toZonedDateTime(Object obj, @Nonnull ZoneId zone) {
         if (obj == null) {
             return null;
         }

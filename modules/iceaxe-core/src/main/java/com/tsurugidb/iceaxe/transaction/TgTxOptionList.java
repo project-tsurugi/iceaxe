@@ -2,9 +2,12 @@ package com.tsurugidb.iceaxe.transaction;
 
 import java.util.List;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 /**
  * TgTransactionOption list
  */
+@ThreadSafe
 public class TgTxOptionList implements TgTxOptionSupplier {
 
     /**

@@ -3,6 +3,8 @@ package com.tsurugidb.iceaxe.transaction;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatement;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -10,9 +12,10 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 /**
  * Tsurugi Transaction Manager
  * <p>
- * MT safe (excluding setTimeout)
+ * Thread Safe (excluding setTimeout)
  * </p>
  */
+@ThreadSafe
 public class TsurugiTransactionManager {
 
     private final TsurugiSession ownerSession;

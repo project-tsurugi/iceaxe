@@ -101,6 +101,7 @@ public class TsurugiSession implements Closeable {
         return sessionInfo;
     }
 
+//  @ThreadSafe
     protected final synchronized SqlClient getLowSqlClient() throws IOException {
         if (this.lowSqlClient == null) {
             var lowSession = getLowSession();
@@ -110,6 +111,7 @@ public class TsurugiSession implements Closeable {
         return this.lowSqlClient;
     }
 
+//  @ThreadSafe
     protected final synchronized Session getLowSession() throws IOException {
         if (!this.sessionConnected) {
             var lowSessionWire = IceaxeIoUtil.getFromFuture(lowSessionWireFuture, connectTimeout);
@@ -129,6 +131,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
+//  @ThreadSafe
     public TsurugiPreparedStatementQuery0<TsurugiResultEntity> createPreparedQuery(String sql) throws IOException {
         return createPreparedQuery(sql, TgResultMapping.DEFAULT);
     }
@@ -142,6 +145,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
+//  @ThreadSafe
     public <R> TsurugiPreparedStatementQuery0<R> createPreparedQuery(String sql, TgResultMapping<R> resultMapping) throws IOException {
         var ps = new TsurugiPreparedStatementQuery0<>(this, sql, resultMapping);
         return ps;
@@ -156,6 +160,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
+//  @ThreadSafe
     public <P> TsurugiPreparedStatementQuery1<P, TsurugiResultEntity> createPreparedQuery(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
         return createPreparedQuery(sql, parameterMapping, TgResultMapping.DEFAULT);
     }
@@ -171,6 +176,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
+//  @ThreadSafe
     public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException {
         var lowPlaceHolderList = parameterMapping.toLowPlaceHolderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceHolderList);
@@ -185,6 +191,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
+//  @ThreadSafe
     public TsurugiPreparedStatementUpdate0 createPreparedStatement(String sql) throws IOException {
         var ps = new TsurugiPreparedStatementUpdate0(this, sql);
         return ps;
@@ -199,6 +206,7 @@ public class TsurugiSession implements Closeable {
      * @return PreparedStatement
      * @throws IOException
      */
+//  @ThreadSafe
     public <P> TsurugiPreparedStatementUpdate1<P> createPreparedStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
         var lowPlaceHolderList = parameterMapping.toLowPlaceHolderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceHolderList);
@@ -211,6 +219,7 @@ public class TsurugiSession implements Closeable {
      * 
      * @return Transaction Manager
      */
+//  @ThreadSafe
     public TsurugiTransactionManager createTransactionManager() {
         return createTransactionManager(null);
     }
@@ -222,6 +231,7 @@ public class TsurugiSession implements Closeable {
      * 
      * @return Transaction Manager
      */
+//  @ThreadSafe
     public TsurugiTransactionManager createTransactionManager(TgTxOptionSupplier defaultTransactionOptionSupplier) {
         var tm = new TsurugiTransactionManager(this, defaultTransactionOptionSupplier);
         return tm;
@@ -234,6 +244,7 @@ public class TsurugiSession implements Closeable {
      * @return Transaction
      * @throws IOException
      */
+//  @ThreadSafe
     public TsurugiTransaction createTransaction(TgTxOption option) throws IOException {
         var lowOption = option.toLowTransactionOption();
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);

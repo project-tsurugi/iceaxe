@@ -621,6 +621,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     @Override
+//  @ThreadSafe
     protected R convert(TsurugiResultRecord record) throws IOException {
         mergeColumnConverterMap(record);
 
