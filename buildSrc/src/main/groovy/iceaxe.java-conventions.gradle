@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.tsurugidb.iceaxe'
-version = '0.0.1'
+version = '0.0.1-SNAPSHOT'
 
 ext {
     tsubakuroVersion = '0.0.1-SNAPSHOT'
