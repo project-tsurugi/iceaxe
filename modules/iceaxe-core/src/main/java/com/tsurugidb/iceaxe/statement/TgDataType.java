@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -63,7 +64,7 @@ public enum TgDataType {
     /**
      * instant
      */
-    INSTANT(AtomType.TIME_POINT, List.of(Instant.class)),
+    INSTANT(AtomType.TIME_POINT, List.of(Instant.class, ZonedDateTime.class)),
     //
     ;
 

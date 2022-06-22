@@ -27,6 +27,17 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param clazz parameter class
      * @return Tsurugi Parameter Mapping
      */
+    public static <P> TgEntityParameterMapping<P> of() {
+        return new TgEntityParameterMapping<>();
+    }
+
+    /**
+     * create Parameter Mapping
+     * 
+     * @param <P>   parameter type
+     * @param clazz parameter class
+     * @return Tsurugi Parameter Mapping
+     */
     public static <P> TgEntityParameterMapping<P> of(Class<P> clazz) {
         return new TgEntityParameterMapping<>();
     }
@@ -258,7 +269,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param getter getter from parameter
      * @return this
      */
-    public TgEntityParameterMapping<P> add(String name, TgDataType type, Function<P, Object> getter) {
+    public TgEntityParameterMapping<P> add(String name, TgDataType type, Function<P, ?> getter) {
         addVariable(name, type);
         switch (type) {
         case BOOLEAN:
@@ -293,14 +304,33 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     /**
      * add variable
      * 
+     * @param <V>    value type
      * @param name   name
      * @param type   type
      * @param getter getter from parameter
      * @return this
      */
-    public TgEntityParameterMapping<P> add(String name, Class<?> type, Function<P, Object> getter) {
+    public TgEntityParameterMapping<P> add(String name, Class<?> type, Function<P, ?> getter) {
         var tgType = TgDataType.of(type);
         return add(name, tgType, getter);
+    }
+
+    /**
+     * add variable
+     * 
+     * @param <V>      value type
+     * @param variable variable
+     * @param getter   getter from parameter
+     * @return this
+     */
+    public <V> TgEntityParameterMapping<P> add(TgVariable<V> variable, Function<P, V> getter) {
+        // return add(variable.name(), variable.type(), getter);
+        addVariable(variable.name(), variable.type());
+        parameterConverterList.add(parameter -> {
+            V value = getter.apply(parameter);
+            return variable.bind(value).toLowParameter();
+        });
+        return this;
     }
 
     protected void addVariable(String name, TgDataType type) {
