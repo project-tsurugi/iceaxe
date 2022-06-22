@@ -203,6 +203,6 @@ class TgVariableTest {
     @Test
     void testToString() {
         var variable = TgVariable.ofInt4("foo");
-        assertEquals("TgVariable{name=foo, type=INT4}", variable.toString());
+        assertEquals(":foo/*INT4*/", variable.toString());
     }
 }

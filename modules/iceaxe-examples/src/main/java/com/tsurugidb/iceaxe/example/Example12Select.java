@@ -178,7 +178,7 @@ public class Example12Select {
 //      var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
-        var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
+        var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
         var variable = TgVariableList.of(foo, bar);
         try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
@@ -194,7 +194,7 @@ public class Example12Select {
     void selectByParameter2AsUserEntityList_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
-        var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
+        var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
         var variable = TgVariableList.of(foo, bar);
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = resultMappingForTestEntity();
@@ -212,7 +212,7 @@ public class Example12Select {
     void selectByParameter2AsUserEntityList_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
-        var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
+        var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
         var variable = TgVariableList.of(foo, bar);
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = resultMappingForTestEntity();
@@ -228,7 +228,7 @@ public class Example12Select {
     void selectByParameter2AsUserEntityList_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgVariable.ofInt4("foo");
         var bar = TgVariable.ofInt8("bar");
-        var sql = "select * from TEST where FOO = " + foo.sqlName() + " and BAR <= " + bar.sqlName();
+        var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
         var variable = TgVariableList.of(foo, bar);
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = resultMappingForTestEntity();

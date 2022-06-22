@@ -507,6 +507,6 @@ public abstract class TgVariable<T> {
 
     @Override
     public String toString() {
-        return TgVariable.class.getSimpleName() + "{name=" + name + ", type=" + type + "}";
+        return sqlName() + "/*" + type + "*/";
     }
 }
