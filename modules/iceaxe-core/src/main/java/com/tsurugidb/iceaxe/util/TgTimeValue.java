@@ -2,9 +2,12 @@ package com.tsurugidb.iceaxe.util;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.concurrent.Immutable;
+
 /**
  * time
  */
+@Immutable
 public class TgTimeValue { // record
 
     /**

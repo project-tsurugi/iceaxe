@@ -8,14 +8,25 @@ import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 
-// internal
+/**
+ * Iceaxe I/O utility
+ */
 public final class IceaxeIoUtil {
 
     private IceaxeIoUtil() {
         // do nothing
     }
 
-    public static <T> T getFromFuture(FutureResponse<T> future, IceaxeTimeout timeout) throws IOException {
+    /**
+     * get value from future
+     * 
+     * @param <V>     the result value type
+     * @param future  future
+     * @param timeout the maximum time to wait
+     * @return result value
+     * @throws IOException
+     */
+    public static <V> V getFromFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException {
         var time = timeout.get();
         try {
             return future.get(time.value(), time.unit());
@@ -24,7 +35,17 @@ public final class IceaxeIoUtil {
         }
     }
 
-    public static <T> T getFromTransactionFuture(FutureResponse<T> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
+    /**
+     * get value from future for transaction (commit/rollback)
+     * 
+     * @param <V>     the result value type
+     * @param future  future
+     * @param timeout the maximum time to wait
+     * @return result value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public static <V> V getFromTransactionFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
         var time = timeout.get();
         try {
             return future.get(time.value(), time.unit());
@@ -35,6 +56,13 @@ public final class IceaxeIoUtil {
         }
     }
 
+    /**
+     * close resources
+     * 
+     * @param closeableSet Closeable set
+     * @param runnable     close action
+     * @throws IOException
+     */
     public static void close(IceaxeCloseableSet closeableSet, IoRunnable runnable) throws IOException {
         List<Throwable> saveList = closeableSet.close();
 
@@ -64,6 +92,12 @@ public final class IceaxeIoUtil {
         }
     }
 
+    /**
+     * close resources
+     * 
+     * @param closeables AutoCloseable
+     * @throws IOException
+     */
     public static void close(AutoCloseable... closeables) throws IOException {
         IOException save = null;
         for (var closeable : closeables) {

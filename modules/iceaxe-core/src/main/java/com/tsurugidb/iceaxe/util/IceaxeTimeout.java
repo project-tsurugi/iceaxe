@@ -37,8 +37,8 @@ public class IceaxeTimeout {
 
     public void apply(ServerResource target) {
         if (target != null) {
-            var timeout = get();
-            var lowTimeout = new Timeout(timeout.value(), timeout.unit(), Policy.ERROR);
+            var time = get();
+            var lowTimeout = new Timeout(time.value(), time.unit(), Policy.ERROR);
             target.setCloseTimeout(lowTimeout);
         }
     }
