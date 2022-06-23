@@ -5,10 +5,8 @@ import java.io.IOException;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
-import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 
 /**
  * TsurugiTransactionManager example
@@ -42,8 +40,8 @@ public class Example03TransactionManager {
     }
 
     void manager1(TsurugiSession session) throws IOException {
-        var option = TgTxOptionList.of(OCC, LTX);
-        var tm = session.createTransactionManager(option, TgCommitType.STORED);
+        var setting = TgTmSetting.of(OCC, LTX);
+        var tm = session.createTransactionManager(setting);
 
         tm.execute(transaction -> {
 //          preparedStatement.execute(transaction)
@@ -51,17 +49,17 @@ public class Example03TransactionManager {
     }
 
     void manager2(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager(TgCommitType.STORED);
+        var tm = session.createTransactionManager();
 
-        var option = TgTxOptionList.of(OCC, LTX);
-        tm.execute(option, transaction -> {
+        var setting = TgTmSetting.of(OCC, LTX);
+        tm.execute(setting, transaction -> {
 //          preparedStatement.execute(transaction)
         });
     }
 
     void managerAlways(TsurugiSession session) throws IOException {
-        var option = TgTxOptionSupplier.ofAlways(OCC);
-        var tm = session.createTransactionManager(option, TgCommitType.STORED);
+        var setting = TgTmSetting.ofAlways(OCC);
+        var tm = session.createTransactionManager(setting);
 
         tm.execute(transaction -> {
 //          preparedStatement.execute(transaction)

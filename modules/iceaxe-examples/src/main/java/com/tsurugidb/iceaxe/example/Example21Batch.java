@@ -9,8 +9,8 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 
 /**
@@ -40,8 +40,8 @@ public class Example21Batch {
         try (var deletePs = session.createPreparedStatement(deleteSql, deleteMapping); //
                 var insertPs = session.createPreparedStatement(insertSql, insertMapping)) {
 
-            var option = TgTxOption.ofLTX("TEST");
-            var tm = session.createTransactionManager(TgTxOptionList.of(option));
+            var setting = TgTmSetting.of(TgTxOption.ofLTX("TEST"));
+            var tm = session.createTransactionManager(setting);
 
             tm.execute(transaction -> {
                 for (var entity : entityList) {
@@ -77,8 +77,8 @@ public class Example21Batch {
                     .character("zzz", TestEntity::getZzz);
             this.insertPs = session.createPreparedStatement(insertSql, insertMapping);
 
-            var option = TgTxOption.ofLTX("TEST");
-            this.transactionManager = session.createTransactionManager(TgTxOptionList.of(option));
+            var setting = TgTmSetting.of(TgTxOption.ofLTX("TEST"));
+            this.transactionManager = session.createTransactionManager(setting);
         }
 
         public void execute(List<TestEntity> entityList) throws IOException {

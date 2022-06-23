@@ -6,15 +6,13 @@ import java.util.concurrent.TimeUnit;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 
 /**
  * example to specify timeout
  */
 public class Example32Timeout {
-
-    private static final TgTxOptionList TX_OPTION = TgTxOptionList.of(TgTxOption.ofOCC());
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
@@ -28,7 +26,8 @@ public class Example32Timeout {
         info.timeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager(TX_OPTION);
+            var setting = TgTmSetting.of(TgTxOption.ofOCC());
+            var tm = session.createTransactionManager(setting);
             tm.execute(transaction -> {
                 // do sql
             });
@@ -39,8 +38,8 @@ public class Example32Timeout {
         var info = TgSessionInfo.of("user", "password");
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager(TX_OPTION);
-            tm.setCommitTimeout(1, TimeUnit.HOURS);
+            var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitTimeout(1, TimeUnit.HOURS);
+            var tm = session.createTransactionManager(setting);
 
             tm.execute(transaction -> {
                 // do sql
@@ -52,7 +51,8 @@ public class Example32Timeout {
         var info = TgSessionInfo.of("user", "password");
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager(TX_OPTION);
+            var setting = TgTmSetting.of(TgTxOption.ofOCC());
+            var tm = session.createTransactionManager(setting);
             tm.execute(transaction -> {
                 transaction.setCommitTimeout(1, TimeUnit.HOURS);
 

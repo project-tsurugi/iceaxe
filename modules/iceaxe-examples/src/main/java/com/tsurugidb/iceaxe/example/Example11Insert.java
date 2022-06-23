@@ -13,11 +13,11 @@ import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariableList;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.transaction.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionRuntimeException;
 
 /**
@@ -28,8 +28,8 @@ public class Example11Insert {
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
         try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
-            var optionList = TgTxOptionList.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
-            var tm = session.createTransactionManager(optionList);
+            var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
+            var tm = session.createTransactionManager(setting);
 
             insert0_execRs(session, tm);
             insert0_execPs(session, tm);

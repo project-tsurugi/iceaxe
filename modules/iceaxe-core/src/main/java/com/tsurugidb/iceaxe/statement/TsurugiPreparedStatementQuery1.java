@@ -9,7 +9,7 @@ import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
@@ -85,14 +85,14 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
     /**
      * execute query
      * 
-     * @param tm                        Transaction Manager
-     * @param parameter                 SQL parameter
-     * @param transactionOptionSupplier transaction option
+     * @param tm        Transaction Manager
+     * @param setting   transaction manager settings
+     * @param parameter SQL parameter
      * @return record
      * @throws IOException
      */
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTxOptionSupplier transactionOptionSupplier, P parameter) throws IOException {
-        return tm.execute(transactionOptionSupplier, transaction -> {
+    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException {
+        return tm.execute(setting, transaction -> {
             return executeAndFindRecord(transaction, parameter);
         });
     }
@@ -129,14 +129,14 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
     /**
      * execute query
      * 
-     * @param tm                        Transaction Manager
-     * @param transactionOptionSupplier transaction option
-     * @param parameter                 SQL parameter
+     * @param tm        Transaction Manager
+     * @param setting   transaction manager settings
+     * @param parameter SQL parameter
      * @return list of record
      * @throws IOException
      */
-    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTxOptionSupplier transactionOptionSupplier, P parameter) throws IOException {
-        return tm.execute(transactionOptionSupplier, transaction -> {
+    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException {
+        return tm.execute(setting, transaction -> {
             return executeAndGetList(transaction, parameter);
         });
     }

@@ -1,13 +1,11 @@
 package com.tsurugidb.iceaxe.transaction;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatement;
-import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi Transaction Manager
@@ -19,89 +17,19 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 public class TsurugiTransactionManager {
 
     private final TsurugiSession ownerSession;
-    private final TgTxOptionSupplier defaultTransactionOptionSupplier;
-    private final TgCommitType defaultCommitType;
-
-    private TgTimeValue beginTimeout;
-    private TgTimeValue commitTimeout;
-    private TgTimeValue rollbackTimeout;
+    private final TgTmSetting defaultSetting;
 
     // internal
-    public TsurugiTransactionManager(TsurugiSession session, TgTxOptionSupplier defaultTransactionOptionSupplier, TgCommitType defaultCommitType) {
+    public TsurugiTransactionManager(TsurugiSession session, TgTmSetting defaultSetting) {
         this.ownerSession = session;
-        this.defaultTransactionOptionSupplier = defaultTransactionOptionSupplier;
-        this.defaultCommitType = defaultCommitType;
+        this.defaultSetting = defaultSetting;
     }
 
-    protected final TgTxOptionSupplier defaultTransactionOptionSupplier() {
-        if (this.defaultTransactionOptionSupplier == null) {
-            throw new IllegalStateException("defaultTransactionOptionSupplier is not specified");
+    protected final TgTmSetting defaultSetting() {
+        if (this.defaultSetting == null) {
+            throw new IllegalStateException("defaultSetting is not specified");
         }
-        return this.defaultTransactionOptionSupplier;
-    }
-
-    protected final TgCommitType defaultCommitType() {
-        if (this.defaultCommitType == null) {
-            throw new IllegalStateException("defaultCommitType is not specified");
-        }
-        return this.defaultCommitType;
-    }
-
-    /**
-     * set transaction-begin-timeout
-     * 
-     * @param time timeout time
-     * @param unit timeout unit
-     */
-    public void setBeginTimeout(long time, TimeUnit unit) {
-        setBeginTimeout(TgTimeValue.of(time, unit));
-    }
-
-    /**
-     * set transaction-begin-timeout
-     * 
-     * @param timeout time
-     */
-    public void setBeginTimeout(TgTimeValue timeout) {
-        this.beginTimeout = timeout;
-    }
-
-    /**
-     * set transaction-commit-timeout
-     * 
-     * @param time timeout time
-     * @param unit timeout unit
-     */
-    public void setCommitTimeout(long time, TimeUnit unit) {
-        setCommitTimeout(TgTimeValue.of(time, unit));
-    }
-
-    /**
-     * set transaction-commit-timeout
-     * 
-     * @param timeout time
-     */
-    public void setCommitTimeout(TgTimeValue timeout) {
-        this.commitTimeout = timeout;
-    }
-
-    /**
-     * set transaction-rollback-timeout
-     * 
-     * @param time timeout time
-     * @param unit timeout unit
-     */
-    public void setRollbackTimeout(long time, TimeUnit unit) {
-        setRollbackTimeout(TgTimeValue.of(time, unit));
-    }
-
-    /**
-     * set transaction-rollback-timeout
-     * 
-     * @param timeout time
-     */
-    public void setRollbackTimeout(TgTimeValue timeout) {
-        this.rollbackTimeout = timeout;
+        return this.defaultSetting;
     }
 
     @FunctionalInterface
@@ -117,35 +45,22 @@ public class TsurugiTransactionManager {
      * @see TsurugiPreparedStatement
      */
     public void execute(TsurugiTransactionConsumer action) throws IOException {
-        execute(defaultTransactionOptionSupplier(), defaultCommitType(), action);
+        execute(defaultSetting(), action);
     }
 
     /**
      * execute transaction
      * 
-     * @param transactionOptionSupplier transaction option
-     * @param action                    action
+     * @param setting transaction manager settings
+     * @param action  action
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public void execute(TgTxOptionSupplier transactionOptionSupplier, TsurugiTransactionConsumer action) throws IOException {
-        execute(transactionOptionSupplier, defaultCommitType(), action);
-    }
-
-    /**
-     * execute transaction
-     * 
-     * @param transactionOptionSupplier transaction option
-     * @param commitType                commit type
-     * @param action                    action
-     * @throws IOException
-     * @see TsurugiPreparedStatement
-     */
-    public void execute(TgTxOptionSupplier transactionOptionSupplier, TgCommitType commitType, TsurugiTransactionConsumer action) throws IOException {
+    public void execute(TgTmSetting setting, TsurugiTransactionConsumer action) throws IOException {
         if (action == null) {
             throw new IllegalArgumentException("action is not specified");
         }
-        execute(transactionOptionSupplier, commitType, transaction -> {
+        execute(setting, transaction -> {
             action.accept(transaction);
             return null;
         });
@@ -159,68 +74,51 @@ public class TsurugiTransactionManager {
     /**
      * execute transaction
      * 
-     * @param <R>                   return type
-     * @param transactionOptionList transaction option
-     * @param action                action
+     * @param <R>    return type
+     * @param action action
      * @return return value (null if transaction is rollbacked)
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
     public <R> R execute(TsurugiTransactionFuntion<R> action) throws IOException {
-        return execute(defaultTransactionOptionSupplier(), defaultCommitType(), action);
+        return execute(defaultSetting(), action);
     }
 
     /**
      * execute transaction
      * 
-     * @param <R>                       return type
-     * @param transactionOptionSupplier transaction option
-     * @param action                    action
+     * @param <R>     return type
+     * @param setting transaction manager settings
+     * @param action  action
      * @return return value (null if transaction is rollbacked)
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public <R> R execute(TgTxOptionSupplier transactionOptionSupplier, TsurugiTransactionFuntion<R> action) throws IOException {
-        return execute(transactionOptionSupplier, defaultCommitType(), action);
-    }
-
-    /**
-     * execute transaction
-     * 
-     * @param <R>                       return type
-     * @param transactionOptionSupplier transaction option
-     * @param commitType                commit type
-     * @param action                    action
-     * @return return value (null if transaction is rollbacked)
-     * @throws IOException
-     * @see TsurugiPreparedStatement
-     */
-    public <R> R execute(TgTxOptionSupplier transactionOptionSupplier, TgCommitType commitType, TsurugiTransactionFuntion<R> action) throws IOException {
-        if (transactionOptionSupplier == null) {
-            throw new IllegalArgumentException("transactionOptionSupplier is not specified");
-        }
-        if (commitType == null) {
-            throw new IllegalArgumentException("commitType is not specified");
+    public <R> R execute(TgTmSetting setting, TsurugiTransactionFuntion<R> action) throws IOException {
+        if (setting == null) {
+            throw new IllegalArgumentException("setting is not specified");
         }
         if (action == null) {
             throw new IllegalArgumentException("action is not specified");
         }
 
-        var option = transactionOptionSupplier.get(0, null);
+        var option = setting.getTransactionOption(0, null);
         assert option != null;
         for (int i = 0;; i++) {
             try (var transaction = ownerSession.createTransaction(option)) {
-                initializeTransaction(transaction);
+                setting.initializeTransaction(transaction);
 
                 try {
                     var r = action.apply(transaction);
                     if (transaction.isRollbacked()) {
                         return null;
                     }
+                    var info = ownerSession.getSessionInfo();
+                    var commitType = setting.getCommitType(info);
                     transaction.commit(commitType);
                     return r;
                 } catch (TsurugiTransactionException e) {
-                    option = transactionOptionSupplier.get(i + 1, e);
+                    option = setting.getTransactionOption(i + 1, e);
                     if (option != null) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ
                         rollback(transaction, null);
@@ -231,7 +129,7 @@ public class TsurugiTransactionManager {
                     throw ioe;
                 } catch (TsurugiTransactionRuntimeException e) {
                     var c = e.getCause();
-                    option = transactionOptionSupplier.get(i + 1, c);
+                    option = setting.getTransactionOption(i + 1, c);
                     if (option != null) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ
                         rollback(transaction, null);
@@ -243,7 +141,7 @@ public class TsurugiTransactionManager {
                 } catch (Exception e) {
                     var c = findTransactionException(e);
                     if (c != null) {
-                        option = transactionOptionSupplier.get(i + 1, c);
+                        option = setting.getTransactionOption(i + 1, c);
                         if (option != null) {
                             // リトライ可能なabortの場合でもrollbackは呼ぶ
                             rollback(transaction, null);
@@ -257,18 +155,6 @@ public class TsurugiTransactionManager {
                     throw e;
                 }
             }
-        }
-    }
-
-    protected void initializeTransaction(TsurugiTransaction transaction) {
-        if (beginTimeout != null) {
-            transaction.setBeginTimeout(beginTimeout);
-        }
-        if (commitTimeout != null) {
-            transaction.setCommitTimeout(commitTimeout);
-        }
-        if (rollbackTimeout != null) {
-            transaction.setRollbackTimeout(rollbackTimeout);
         }
     }
 

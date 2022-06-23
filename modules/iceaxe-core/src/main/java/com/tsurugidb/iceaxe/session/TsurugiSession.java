@@ -18,9 +18,8 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
-import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
@@ -224,43 +223,18 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public TsurugiTransactionManager createTransactionManager() {
-        return createTransactionManager((TgTxOptionSupplier) null);
+        return createTransactionManager(null);
     }
 
     /**
      * create transaction manager
      * 
-     * @param defaultTransactionOptionSupplier transaction option
+     * @param setting transaction manager settings
      * @return Transaction Manager
      */
 //  @ThreadSafe
-    public TsurugiTransactionManager createTransactionManager(TgTxOptionSupplier defaultTransactionOptionSupplier) {
-        var info = getSessionInfo();
-        var commitType = info.commitType();
-        return createTransactionManager(defaultTransactionOptionSupplier, commitType);
-    }
-
-    /**
-     * create transaction manager
-     * 
-     * @param commitType commit type
-     * @return Transaction Manager
-     */
-//  @ThreadSafe
-    public TsurugiTransactionManager createTransactionManager(TgCommitType commitType) {
-        return createTransactionManager(null, commitType);
-    }
-
-    /**
-     * create transaction manager
-     * 
-     * @param defaultTransactionOptionSupplier transaction option
-     * @param commitType                       commit type
-     * @return Transaction Manager
-     */
-//  @ThreadSafe
-    public TsurugiTransactionManager createTransactionManager(TgTxOptionSupplier defaultTransactionOptionSupplier, TgCommitType commitType) {
-        var tm = new TsurugiTransactionManager(this, defaultTransactionOptionSupplier, commitType);
+    public TsurugiTransactionManager createTransactionManager(TgTmSetting setting) {
+        var tm = new TsurugiTransactionManager(this, setting);
         return tm;
     }
 
