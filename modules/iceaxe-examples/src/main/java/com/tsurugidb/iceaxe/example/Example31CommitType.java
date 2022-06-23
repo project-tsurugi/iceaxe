@@ -1,31 +1,30 @@
 package com.tsurugidb.iceaxe.example;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 
 /**
- * specify timeout example
+ * example to specify commitType
  */
-public class Example31Timeout {
+public class Example31CommitType {
 
     private static final TgTxOptionList TX_OPTION = TgTxOptionList.of(TgTxOption.ofOCC());
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
-        timeout1(connector);
-        timeout2(connector);
-        timeout3(connector);
+        commit1(connector);
+        commit2(connector);
+        commit3(connector);
     }
 
-    void timeout1(TsurugiConnector connector) throws IOException {
+    void commit1(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
-        info.timeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
+        info.commitType(TgCommitType.STORED);
 
         try (var session = connector.createSession(info)) {
             var tm = session.createTransactionManager(TX_OPTION);
@@ -35,12 +34,11 @@ public class Example31Timeout {
         }
     }
 
-    void timeout2(TsurugiConnector connector) throws IOException {
+    void commit2(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager(TX_OPTION);
-            tm.setCommitTimeout(1, TimeUnit.HOURS);
+            var tm = session.createTransactionManager(TX_OPTION, TgCommitType.STORED);
 
             tm.execute(transaction -> {
                 // do sql
@@ -48,14 +46,13 @@ public class Example31Timeout {
         }
     }
 
-    void timeout3(TsurugiConnector connector) throws IOException {
+    void commit3(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager(TX_OPTION);
-            tm.execute(transaction -> {
-                transaction.setCommitTimeout(1, TimeUnit.HOURS);
+            var tm = session.createTransactionManager();
 
+            tm.execute(TX_OPTION, TgCommitType.STORED, transaction -> {
                 // do sql
             });
         }

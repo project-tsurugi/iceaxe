@@ -20,15 +20,31 @@ public class TsurugiTransactionManager {
 
     private final TsurugiSession ownerSession;
     private final TgTxOptionSupplier defaultTransactionOptionSupplier;
+    private final TgCommitType defaultCommitType;
 
     private TgTimeValue beginTimeout;
     private TgTimeValue commitTimeout;
     private TgTimeValue rollbackTimeout;
 
     // internal
-    public TsurugiTransactionManager(TsurugiSession session, TgTxOptionSupplier defaultTransactionOptionSupplier) {
+    public TsurugiTransactionManager(TsurugiSession session, TgTxOptionSupplier defaultTransactionOptionSupplier, TgCommitType defaultCommitType) {
         this.ownerSession = session;
         this.defaultTransactionOptionSupplier = defaultTransactionOptionSupplier;
+        this.defaultCommitType = defaultCommitType;
+    }
+
+    protected final TgTxOptionSupplier defaultTransactionOptionSupplier() {
+        if (this.defaultTransactionOptionSupplier == null) {
+            throw new IllegalStateException("defaultTransactionOptionSupplier is not specified");
+        }
+        return this.defaultTransactionOptionSupplier;
+    }
+
+    protected final TgCommitType defaultCommitType() {
+        if (this.defaultCommitType == null) {
+            throw new IllegalStateException("defaultCommitType is not specified");
+        }
+        return this.defaultCommitType;
     }
 
     /**
@@ -101,7 +117,7 @@ public class TsurugiTransactionManager {
      * @see TsurugiPreparedStatement
      */
     public void execute(TsurugiTransactionConsumer action) throws IOException {
-        execute(defaultTransactionOptionSupplier, action);
+        execute(defaultTransactionOptionSupplier(), defaultCommitType(), action);
     }
 
     /**
@@ -113,10 +129,23 @@ public class TsurugiTransactionManager {
      * @see TsurugiPreparedStatement
      */
     public void execute(TgTxOptionSupplier transactionOptionSupplier, TsurugiTransactionConsumer action) throws IOException {
+        execute(transactionOptionSupplier, defaultCommitType(), action);
+    }
+
+    /**
+     * execute transaction
+     * 
+     * @param transactionOptionSupplier transaction option
+     * @param commitType                commit type
+     * @param action                    action
+     * @throws IOException
+     * @see TsurugiPreparedStatement
+     */
+    public void execute(TgTxOptionSupplier transactionOptionSupplier, TgCommitType commitType, TsurugiTransactionConsumer action) throws IOException {
         if (action == null) {
             throw new IllegalArgumentException("action is not specified");
         }
-        execute(transactionOptionSupplier, transaction -> {
+        execute(transactionOptionSupplier, commitType, transaction -> {
             action.accept(transaction);
             return null;
         });
@@ -138,10 +167,7 @@ public class TsurugiTransactionManager {
      * @see TsurugiPreparedStatement
      */
     public <R> R execute(TsurugiTransactionFuntion<R> action) throws IOException {
-        if (defaultTransactionOptionSupplier == null) {
-            throw new IllegalStateException("defaultTransactionOptionSupplier is not specified");
-        }
-        return execute(defaultTransactionOptionSupplier, action);
+        return execute(defaultTransactionOptionSupplier(), defaultCommitType(), action);
     }
 
     /**
@@ -155,8 +181,26 @@ public class TsurugiTransactionManager {
      * @see TsurugiPreparedStatement
      */
     public <R> R execute(TgTxOptionSupplier transactionOptionSupplier, TsurugiTransactionFuntion<R> action) throws IOException {
+        return execute(transactionOptionSupplier, defaultCommitType(), action);
+    }
+
+    /**
+     * execute transaction
+     * 
+     * @param <R>                       return type
+     * @param transactionOptionSupplier transaction option
+     * @param commitType                commit type
+     * @param action                    action
+     * @return return value (null if transaction is rollbacked)
+     * @throws IOException
+     * @see TsurugiPreparedStatement
+     */
+    public <R> R execute(TgTxOptionSupplier transactionOptionSupplier, TgCommitType commitType, TsurugiTransactionFuntion<R> action) throws IOException {
         if (transactionOptionSupplier == null) {
             throw new IllegalArgumentException("transactionOptionSupplier is not specified");
+        }
+        if (commitType == null) {
+            throw new IllegalArgumentException("commitType is not specified");
         }
         if (action == null) {
             throw new IllegalArgumentException("action is not specified");
@@ -173,7 +217,7 @@ public class TsurugiTransactionManager {
                     if (transaction.isRollbacked()) {
                         return null;
                     }
-                    transaction.commit();
+                    transaction.commit(commitType);
                     return r;
                 } catch (TsurugiTransactionException e) {
                     option = transactionOptionSupplier.get(i + 1, e);

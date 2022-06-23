@@ -5,6 +5,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.nautilus_technologies.tsubakuro.channel.common.connection.Credential;
@@ -12,6 +14,7 @@ import com.nautilus_technologies.tsubakuro.channel.common.connection.UsernamePas
 import com.tsurugidb.iceaxe.result.TsurugiResult;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
@@ -37,7 +40,7 @@ public class TgSessionInfo {
      * @param password password
      * @return Session Information
      */
-    public static TgSessionInfo of(String user, String password) {
+    public static TgSessionInfo of(@Nonnull String user, @Nullable String password) {
         var credential = new UsernamePasswordCredential(user, password);
         return of(credential);
     }
@@ -48,7 +51,7 @@ public class TgSessionInfo {
      * @param credential Credential
      * @return Session Information
      */
-    public static TgSessionInfo of(Credential credential) {
+    public static TgSessionInfo of(@Nonnull Credential credential) {
         return new TgSessionInfo().credential(credential);
     }
 
@@ -88,6 +91,7 @@ public class TgSessionInfo {
 
     private Credential credential;
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
+    private TgCommitType commitType = TgCommitType.UNSPECIFIED;
 
     /**
      * Tsurugi Session Information
@@ -102,7 +106,7 @@ public class TgSessionInfo {
      * @param credential Credential
      * @return this
      */
-    public TgSessionInfo credential(Credential credential) {
+    public TgSessionInfo credential(@Nonnull Credential credential) {
         this.credential = credential;
         return this;
     }
@@ -125,7 +129,7 @@ public class TgSessionInfo {
      * 
      * @return this
      */
-    public TgSessionInfo timeout(TgTimeoutKey key, long time, TimeUnit unit) {
+    public TgSessionInfo timeout(@Nonnull TgTimeoutKey key, long time, @Nonnull TimeUnit unit) {
         timeoutMap.put(key, new TgTimeValue(time, unit));
         return this;
     }
@@ -144,8 +148,28 @@ public class TgSessionInfo {
         return timeoutMap.get(TgTimeoutKey.DEFAULT);
     }
 
+    /**
+     * set commit type
+     * 
+     * @param commitType commit type
+     * @return this
+     */
+    public TgSessionInfo commitType(@Nonnull TgCommitType commitType) {
+        this.commitType = commitType;
+        return this;
+    }
+
+    /**
+     * get commit type
+     * 
+     * @return commit type
+     */
+    public TgCommitType commitType() {
+        return this.commitType;
+    }
+
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{credential=" + credential + ", timeout=" + timeoutMap + "}";
+        return getClass().getSimpleName() + "{credential=" + credential + ", timeout=" + timeoutMap + ", commitType=" + commitType + "}";
     }
 }

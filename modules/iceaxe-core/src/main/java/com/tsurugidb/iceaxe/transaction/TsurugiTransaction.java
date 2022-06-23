@@ -38,6 +38,7 @@ public class TsurugiTransaction implements Closeable {
         this.ownerSession = session;
         this.lowTransactionFuture = lowTransactionFuture;
         session.addChild(this);
+
         var info = session.getSessionInfo();
         this.beginTimeout = new IceaxeTimeout(info, TgTimeoutKey.TRANSACTION_BEGIN);
         this.commitTimeout = new IceaxeTimeout(info, TgTimeoutKey.TRANSACTION_COMMIT);
@@ -168,10 +169,11 @@ public class TsurugiTransaction implements Closeable {
     /**
      * do commit
      * 
+     * @param commitType commit type
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    public synchronized void commit() throws IOException, TsurugiTransactionException {
+    public synchronized void commit(TgCommitType commitType) throws IOException, TsurugiTransactionException {
         if (this.committed) {
             return;
         }
@@ -179,7 +181,8 @@ public class TsurugiTransaction implements Closeable {
             throw new IllegalStateException("rollback has already been called");
         }
 
-        finish(Transaction::commit, commitTimeout);
+        var lowCommitStatus = commitType.getLowCommitStatus();
+        finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout);
         this.committed = true;
     }
 

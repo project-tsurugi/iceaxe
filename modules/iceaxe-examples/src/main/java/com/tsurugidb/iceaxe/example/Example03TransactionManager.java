@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TgTxOptionList;
 import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
@@ -42,7 +43,7 @@ public class Example03TransactionManager {
 
     void manager1(TsurugiSession session) throws IOException {
         var option = TgTxOptionList.of(OCC, LTX);
-        var tm = session.createTransactionManager(option);
+        var tm = session.createTransactionManager(option, TgCommitType.STORED);
 
         tm.execute(transaction -> {
 //          preparedStatement.execute(transaction)
@@ -50,7 +51,7 @@ public class Example03TransactionManager {
     }
 
     void manager2(TsurugiSession session) throws IOException {
-        var tm = session.createTransactionManager();
+        var tm = session.createTransactionManager(TgCommitType.STORED);
 
         var option = TgTxOptionList.of(OCC, LTX);
         tm.execute(option, transaction -> {
@@ -60,7 +61,7 @@ public class Example03TransactionManager {
 
     void managerAlways(TsurugiSession session) throws IOException {
         var option = TgTxOptionSupplier.ofAlways(OCC);
-        var tm = session.createTransactionManager(option);
+        var tm = session.createTransactionManager(option, TgCommitType.STORED);
 
         tm.execute(transaction -> {
 //          preparedStatement.execute(transaction)

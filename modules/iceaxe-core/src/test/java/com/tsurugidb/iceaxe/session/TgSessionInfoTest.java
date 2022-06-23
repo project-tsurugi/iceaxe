@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.nautilus_technologies.tsubakuro.channel.common.connection.NullCredential;
 import com.nautilus_technologies.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 
 class TgSessionInfoTest {
 
@@ -27,12 +28,19 @@ class TgSessionInfoTest {
     }
 
     @Test
+    void testCommitType() {
+        var info = new TgSessionInfo().commitType(TgCommitType.STORED);
+        assertEquals(TgCommitType.STORED, info.commitType());
+    }
+
+    @Test
     void testOf() {
         var info = TgSessionInfo.of();
         assertNull(info.credential());
         var timeout = info.timeout(TgTimeoutKey.DEFAULT);
         assertEquals(Long.MAX_VALUE, timeout.value());
         assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
+        assertEquals(TgCommitType.UNSPECIFIED, info.commitType());
     }
 
     @Test
@@ -44,14 +52,15 @@ class TgSessionInfoTest {
         var timeout = info.timeout(TgTimeoutKey.DEFAULT);
         assertEquals(Long.MAX_VALUE, timeout.value());
         assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
+        assertEquals(TgCommitType.UNSPECIFIED, info.commitType());
     }
 
     @Test
     void testToString() {
         var empty = new TgSessionInfo();
-        assertEquals("TgSessionInfo{credential=null, timeout={DEFAULT=9223372036854775807nanoseconds}}", empty.toString());
+        assertEquals("TgSessionInfo{credential=null, timeout={DEFAULT=9223372036854775807nanoseconds}, commitType=UNSPECIFIED}", empty.toString());
 
-        var info = TgSessionInfo.of("u1", "p1").timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS);
-        assertEquals("TgSessionInfo{credential=UsernamePasswordCredential(name=u1), timeout={DEFAULT=123seconds}}", info.toString());
+        var info = TgSessionInfo.of("u1", "p1").timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS).commitType(TgCommitType.STORED);
+        assertEquals("TgSessionInfo{credential=UsernamePasswordCredential(name=u1), timeout={DEFAULT=123seconds}, commitType=STORED}", info.toString());
     }
 }

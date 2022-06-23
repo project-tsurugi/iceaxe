@@ -4,6 +4,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
+
 import com.nautilus_technologies.tsubakuro.channel.common.SessionWire;
 import com.nautilus_technologies.tsubakuro.low.common.Session;
 import com.nautilus_technologies.tsubakuro.low.sql.SqlClient;
@@ -16,6 +18,7 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -221,19 +224,43 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public TsurugiTransactionManager createTransactionManager() {
-        return createTransactionManager(null);
+        return createTransactionManager((TgTxOptionSupplier) null);
     }
 
     /**
      * create transaction manager
      * 
      * @param defaultTransactionOptionSupplier transaction option
-     * 
      * @return Transaction Manager
      */
 //  @ThreadSafe
     public TsurugiTransactionManager createTransactionManager(TgTxOptionSupplier defaultTransactionOptionSupplier) {
-        var tm = new TsurugiTransactionManager(this, defaultTransactionOptionSupplier);
+        var info = getSessionInfo();
+        var commitType = info.commitType();
+        return createTransactionManager(defaultTransactionOptionSupplier, commitType);
+    }
+
+    /**
+     * create transaction manager
+     * 
+     * @param commitType commit type
+     * @return Transaction Manager
+     */
+//  @ThreadSafe
+    public TsurugiTransactionManager createTransactionManager(TgCommitType commitType) {
+        return createTransactionManager(null, commitType);
+    }
+
+    /**
+     * create transaction manager
+     * 
+     * @param defaultTransactionOptionSupplier transaction option
+     * @param commitType                       commit type
+     * @return Transaction Manager
+     */
+//  @ThreadSafe
+    public TsurugiTransactionManager createTransactionManager(TgTxOptionSupplier defaultTransactionOptionSupplier, TgCommitType commitType) {
+        var tm = new TsurugiTransactionManager(this, defaultTransactionOptionSupplier, commitType);
         return tm;
     }
 
@@ -245,7 +272,7 @@ public class TsurugiSession implements Closeable {
      * @throws IOException
      */
 //  @ThreadSafe
-    public TsurugiTransaction createTransaction(TgTxOption option) throws IOException {
+    public TsurugiTransaction createTransaction(@Nonnull TgTxOption option) throws IOException {
         var lowOption = option.toLowTransactionOption();
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
         var transaction = new TsurugiTransaction(this, lowTransactionFuture);

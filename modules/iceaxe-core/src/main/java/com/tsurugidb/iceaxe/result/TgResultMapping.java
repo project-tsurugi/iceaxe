@@ -3,6 +3,8 @@ package com.tsurugidb.iceaxe.result;
 import java.io.IOException;
 import java.util.function.Supplier;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.tsurugidb.iceaxe.util.IoFunction;
 
 /**
@@ -10,6 +12,7 @@ import com.tsurugidb.iceaxe.util.IoFunction;
  * 
  * @param <R> result type
  */
+@ThreadSafe
 public abstract class TgResultMapping<R> {
 
     /**
