@@ -12,9 +12,35 @@ ext {
     tsubakuroVersion = '0.0.1-SNAPSHOT'
 }
 
+if (hasProperty('mavenLocal')) {
+    repositories {
+        mavenLocal()
+    }
+} else {
+    repositories {
+        maven {
+            url 'https://maven.pkg.github.com/project-tsurugi/*'
+            content {
+                includeGroupByRegex 'com\\.tsurugidb.*'
+            }
+            credentials {
+                username findProperty('gpr.user') ?: System.getenv('GPR_USER')
+                password findProperty('gpr.key') ?: System.getenv('GPR_KEY')
+            }
+        }
+    }
+}
+
 repositories {
-    mavenCentral()
-    mavenLocal()
+    mavenCentral {
+        content {
+            excludeGroupByRegex 'com\\.tsurugidb.*'
+        }
+    }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 8, 'hours'
 }
 
 java {
