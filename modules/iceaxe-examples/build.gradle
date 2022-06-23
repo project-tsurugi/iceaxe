@@ -1,11 +1,8 @@
 plugins {
-    id 'iceaxe.libs-conventions'
+    id 'iceaxe.java-conventions'
 }
 
 dependencies {
     implementation project(':iceaxe-core')
     implementation 'org.slf4j:slf4j-simple:1.7.32'
 }
-
-checkstyleMain.enabled = false
-spotbugsMain.enabled = false
