@@ -18,7 +18,8 @@ jobs:
         shell: bash
     env:
       JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
-      TSUBAKURO_PATH: tsurugi/tsubakuro
+      GPR_USER: ${{ github.repository_owner }}
+      GPR_KEY: ${{ secrets.GHCR_PAT }}
 
     services:
       tsurugi:
@@ -52,20 +53,6 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GHA_PAT }}
 
-      - id: Checkout_Tsubakuro
-        name: Checkout_Tsubakuro
-        uses: actions/checkout@v2
-        with:
-          repository: project-tsurugi/tsubakuro
-          path: ${{ env.TSUBAKURO_PATH }}
-          ref: master
-          token: ${{ secrets.GHA_PAT }}
-
-      - id: Install_Tsubakuro
-        name: Install_Tsubakuro
-        run: ./gradlew -i PublishToMavenLocal
-        working-directory: ${{ env.TSUBAKURO_PATH }}
-
       - id: Assemble
         name: Assemble
         run: |
@@ -75,6 +62,12 @@ jobs:
         name: Check
         run: |
           ./gradlew -i check
+
+      - id: Publish
+        name: Publish
+        if: contains(github.ref, '/heads/master')
+        run: |
+          ./gradlew -i publish
 
       - id: Generate_Annotations
         name: Generate_Annotations
