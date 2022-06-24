@@ -54,8 +54,8 @@ public class TsurugiConnector {
     public TsurugiSession createSession(TgSessionInfo info) throws IOException {
         var lowSession = createLowSession();
         var lowCredential = info.credential();
-        var lowSessionWireFuture = lowConnector.connect(lowCredential);
-        var session = new TsurugiSession(info, lowSession, lowSessionWireFuture);
+        var lowWireFuture = lowConnector.connect(lowCredential);
+        var session = new TsurugiSession(info, lowSession, lowWireFuture);
         return session;
     }
 

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
-import com.nautilus_technologies.tsubakuro.channel.common.SessionWire;
+import com.nautilus_technologies.tsubakuro.channel.common.connection.wire.Wire;
 import com.nautilus_technologies.tsubakuro.low.common.Session;
 import com.nautilus_technologies.tsubakuro.low.sql.SqlClient;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
@@ -18,8 +18,8 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
@@ -34,7 +34,7 @@ public class TsurugiSession implements Closeable {
 
     private final TgSessionInfo sessionInfo;
     private final Session lowSession;
-    private FutureResponse<SessionWire> lowSessionWireFuture;
+    private FutureResponse<Wire> lowWireFuture;
     private boolean sessionConnected = false;
     private SqlClient lowSqlClient;
     private final IceaxeTimeout connectTimeout;
@@ -42,10 +42,10 @@ public class TsurugiSession implements Closeable {
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
 
     // internal
-    public TsurugiSession(TgSessionInfo info, Session lowSession, FutureResponse<SessionWire> lowSessionWireFuture) {
+    public TsurugiSession(TgSessionInfo info, Session lowSession, FutureResponse<Wire> lowWireFuture) {
         this.sessionInfo = info;
         this.lowSession = lowSession;
-        this.lowSessionWireFuture = lowSessionWireFuture;
+        this.lowWireFuture = lowWireFuture;
         this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
         this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CLOSE);
 
@@ -54,7 +54,7 @@ public class TsurugiSession implements Closeable {
 
     private void applyCloseTimeout() {
         closeTimeout.apply(lowSession);
-        closeTimeout.apply(lowSessionWireFuture);
+        closeTimeout.apply(lowWireFuture);
         closeTimeout.apply(lowSqlClient);
     }
 
@@ -116,12 +116,12 @@ public class TsurugiSession implements Closeable {
 //  @ThreadSafe
     protected final synchronized Session getLowSession() throws IOException {
         if (!this.sessionConnected) {
-            var lowSessionWire = IceaxeIoUtil.getFromFuture(lowSessionWireFuture, connectTimeout);
-            lowSession.connect(lowSessionWire);
+            var lowWire = IceaxeIoUtil.getFromFuture(lowWireFuture, connectTimeout);
+            lowSession.connect(lowWire);
             this.sessionConnected = true;
 
-            IceaxeIoUtil.close(lowSessionWireFuture);
-            this.lowSessionWireFuture = null;
+            IceaxeIoUtil.close(lowWireFuture);
+            this.lowWireFuture = null;
         }
         return this.lowSession;
     }
@@ -266,7 +266,7 @@ public class TsurugiSession implements Closeable {
     @Override
     public void close() throws IOException {
         IceaxeIoUtil.close(closeableSet, () -> {
-            IceaxeIoUtil.close(lowSqlClient, lowSession, lowSessionWireFuture);
+            IceaxeIoUtil.close(lowSqlClient, lowSession, lowWireFuture);
         });
     }
 }
