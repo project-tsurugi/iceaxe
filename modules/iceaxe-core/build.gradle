@@ -8,3 +8,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:1.7.32'
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 }
+
+spotbugs {
+    excludeFilter = file("$projectDir/config/spotbugs/spotbugsExclude.xml")
+}
