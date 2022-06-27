@@ -349,6 +349,14 @@ public class TgParameterListUncheck implements TgParameterList {
         lowParameterList.add(lowParameter);
     }
 
+    @Override
+    public TgParameterListUncheck add(TgParameterList otherList) {
+        for (var p : otherList.toLowParameterList()) {
+            lowParameterList.add(p);
+        }
+        return this;
+    }
+
     // internal
     @Override
     public List<Parameter> toLowParameterList() {

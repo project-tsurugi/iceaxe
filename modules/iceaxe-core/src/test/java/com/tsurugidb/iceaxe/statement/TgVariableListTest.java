@@ -135,6 +135,35 @@ class TgVariableListTest {
                 entry("c", TgDataType.CHARACTER)), variable);
     }
 
+    @Test
+    void testAddTgVariableList() {
+        var variable1 = new TgVariableList() //
+                .int4("foo") //
+                .int8("bar");
+        var variable = new TgVariableList() //
+                .character("zzz");
+        variable.add(variable1);
+
+        assertVariable(Map.ofEntries( //
+                entry("foo", TgDataType.INT4), //
+                entry("bar", TgDataType.INT8), //
+                entry("zzz", TgDataType.CHARACTER)), variable);
+        assertVariable(Map.ofEntries( //
+                entry("foo", TgDataType.INT4), //
+                entry("bar", TgDataType.INT8)), variable1);
+    }
+
+    @Test
+    void testGetSqlNames() {
+        var variable = new TgVariableList() //
+                .int4("foo") //
+                .int8("bar") //
+                .character("zzz");
+
+        assertEquals(":foo,:bar,:zzz", variable.getSqlNames());
+        assertEquals(":foo, :bar, :zzz", variable.getSqlNames(", "));
+    }
+
     private static void assertVariable(Map<String, TgDataType> expectedMap, TgVariableList actual) {
         var phList = actual.toLowPlaceHolderList();
         var actualMap = phList.stream().collect(Collectors.toMap(v -> v.getName(), v -> v.getType()));

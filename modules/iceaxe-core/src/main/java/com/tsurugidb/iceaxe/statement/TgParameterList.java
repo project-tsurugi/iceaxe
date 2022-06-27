@@ -215,6 +215,14 @@ public interface TgParameterList {
      */
     public TgParameterList zonedDateTime(String name, ZonedDateTime value);
 
+    /**
+     * add parameter
+     * 
+     * @param otherList parameter list
+     * @return this
+     */
+    public TgParameterList add(TgParameterList otherList);
+
     // internal
     public List<Parameter> toLowParameterList();
 }

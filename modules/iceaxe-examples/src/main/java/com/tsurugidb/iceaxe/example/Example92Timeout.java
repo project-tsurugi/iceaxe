@@ -1,28 +1,29 @@
 package com.tsurugidb.iceaxe.example;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.transaction.TgCommitType;
+import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 
 /**
- * example to specify commitType
+ * example to specify timeout
  */
-public class Example31CommitType {
+public class Example92Timeout {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
-        commit1(connector);
-        commit2(connector);
-        commit3(connector);
+        timeout1(connector);
+        timeout2(connector);
+        timeout3(connector);
     }
 
-    void commit1(TsurugiConnector connector) throws IOException {
+    void timeout1(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
-        info.commitType(TgCommitType.STORED);
+        info.timeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
 
         try (var session = connector.createSession(info)) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
@@ -33,11 +34,11 @@ public class Example31CommitType {
         }
     }
 
-    void commit2(TsurugiConnector connector) throws IOException {
+    void timeout2(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
 
         try (var session = connector.createSession(info)) {
-            var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitType(TgCommitType.STORED);
+            var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitTimeout(1, TimeUnit.HOURS);
             var tm = session.createTransactionManager(setting);
 
             tm.execute(transaction -> {
@@ -46,14 +47,15 @@ public class Example31CommitType {
         }
     }
 
-    void commit3(TsurugiConnector connector) throws IOException {
+    void timeout3(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
 
         try (var session = connector.createSession(info)) {
-            var tm = session.createTransactionManager();
+            var setting = TgTmSetting.of(TgTxOption.ofOCC());
+            var tm = session.createTransactionManager(setting);
+            tm.execute(transaction -> {
+                transaction.setCommitTimeout(1, TimeUnit.HOURS);
 
-            var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitType(TgCommitType.STORED);
-            tm.execute(setting, transaction -> {
                 // do sql
             });
         }

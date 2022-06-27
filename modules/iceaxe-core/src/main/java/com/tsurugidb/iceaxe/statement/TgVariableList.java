@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.nautilus_technologies.tsubakuro.low.sql.Placeholders;
 import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
@@ -242,6 +243,39 @@ public class TgVariableList {
         this.typeMap = null;
     }
 
+    /**
+     * add variable
+     * 
+     * @param otherList variable list
+     * @return this
+     */
+    public TgVariableList add(TgVariableList otherList) {
+        for (var ph : otherList.lowPlaceHolderList) {
+            lowPlaceHolderList.add(ph);
+        }
+        this.typeMap = null;
+        return this;
+    }
+
+    /**
+     * get sql names
+     * 
+     * @return sql names
+     */
+    public String getSqlNames() {
+        return getSqlNames(",");
+    }
+
+    /**
+     * get sql names
+     * 
+     * @param delimiter the delimiter to be used between each element
+     * @return sql names
+     */
+    public String getSqlNames(String delimiter) {
+        return lowPlaceHolderList.stream().map(ph -> ":" + ph.getName()).collect(Collectors.joining(delimiter));
+    }
+
     // internal
     public List<PlaceHolder> toLowPlaceHolderList() {
         return this.lowPlaceHolderList;
@@ -257,9 +291,9 @@ public class TgVariableList {
         if (this.typeMap == null) {
             synchronized (this) {
                 var map = new HashMap<String, TgDataType>();
-                for (var v : lowPlaceHolderList) {
-                    var lowName = v.getName();
-                    var lowType = v.getType();
+                for (var ph : lowPlaceHolderList) {
+                    var lowName = ph.getName();
+                    var lowType = ph.getType();
                     var type = TgDataType.of(lowType);
                     map.put(lowName, type);
                 }

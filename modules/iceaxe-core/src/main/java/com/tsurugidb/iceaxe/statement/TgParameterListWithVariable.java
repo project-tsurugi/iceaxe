@@ -220,6 +220,14 @@ public class TgParameterListWithVariable implements TgParameterList {
         lowParameterList.add(lowParameter);
     }
 
+    @Override
+    public TgParameterListWithVariable add(TgParameterList otherList) {
+        for (var p : otherList.toLowParameterList()) {
+            lowParameterList.add(p);
+        }
+        return this;
+    }
+
     // internal
     @Override
     public List<Parameter> toLowParameterList() {
