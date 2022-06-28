@@ -56,7 +56,7 @@ jobs:
       - id: Assemble
         name: Assemble
         run: |
-          ./gradlew -i clean assemble
+          ./gradlew -i iceaxe-core:showTsubakuroManifest clean assemble
 
       - id: Check
         name: Check

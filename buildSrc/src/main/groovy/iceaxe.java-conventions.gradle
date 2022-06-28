@@ -103,3 +103,13 @@ tasks.named('test') {
         exceptionFormat 'full'
     }
 }
+
+task showTsubakuroManifest {
+    doLast {
+        def tsubakuroJar = configurations["compileClasspath"].filter {
+            it.name.startsWith("tsubakuro-session")
+        }
+        def version = resources.text.fromArchiveEntry(tsubakuroJar, "META-INF/MANIFEST.MF")
+        print(version.asString())
+    }
+}
