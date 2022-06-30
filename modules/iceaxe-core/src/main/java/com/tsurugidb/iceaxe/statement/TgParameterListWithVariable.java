@@ -12,6 +12,7 @@ import com.nautilus_technologies.tsubakuro.low.sql.Parameters;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
 
+// FIXME TgParameterListWithVariableは使われない（廃止してもいい）のではないか？
 /**
  * Tsurugi Parameter for PreparedStatement
  * 

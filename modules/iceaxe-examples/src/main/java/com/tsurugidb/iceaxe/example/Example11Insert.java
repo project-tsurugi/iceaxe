@@ -11,6 +11,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgDataType;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.statement.TgVariableList;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.transaction.TgTmSetting;
@@ -70,17 +71,25 @@ public class Example11Insert {
     }
 
     void insertParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        var foo = TgVariable.ofInt4("foo");
+        var bar = TgVariable.ofInt8("foo");
+        var zzz = TgVariable.ofCharacter("zzz");
+
         var sql = "insert into TEST values(:foo, :bar, :zzz)";
+//      var sql = "insert into TEST values(" + foo + ", " + bar + ", " + zzz + ")";
 
         TgVariableList variable;
         switch (0) {
         default:
-            variable = TgVariableList.of().int4("foo").int8("bar").character("zzz");
+            variable = TgVariableList.of(foo, bar, zzz);
             break;
         case 1:
-            variable = TgVariableList.of().add("foo", TgDataType.INT4).add("bar", TgDataType.INT8).add("zzz", TgDataType.CHARACTER);
+            variable = TgVariableList.of().int4("foo").int8("bar").character("zzz");
             break;
         case 2:
+            variable = TgVariableList.of().add("foo", TgDataType.INT4).add("bar", TgDataType.INT8).add("zzz", TgDataType.CHARACTER);
+            break;
+        case 3:
             variable = TgVariableList.of().add("foo", int.class).add("bar", long.class).add("zzz", String.class);
             break;
         }
@@ -90,17 +99,20 @@ public class Example11Insert {
                 TgParameterList param;
                 switch (0) {
                 default:
+                    param = TgParameterList.of(foo.bind(123), bar.bind(456), zzz.bind("abc"));
+                    break;
+                case 1:
                     // TgParameterList.of()を使う場合、値のデータ型はvariableで指定されたデータ型と一致していなければならない
                     param = TgParameterList.of().add("foo", 123).add("bar", 456L).add("zzz", "abc");
                     break;
-                case 1:
+                case 2:
                     param = TgParameterList.of().int4("foo", 123).int8("bar", 456).character("zzz", "abc");
                     break;
-                case 2:
+                case 3:
                     // TgParameterList.of(variable)を使う場合、値はvariableで指定されたデータ型に変換される
                     param = TgParameterList.of(variable).add("foo", 123).add("bar", 456).add("zzz", "abc");
                     break;
-                case 3:
+                case 4:
                     // TgParameterList.of(variable)でデータ型名のメソッドを使う場合、variableで指定されたデータ型と一致しない場合は実行時エラー
                     param = TgParameterList.of(variable).int4("foo", 123).int8("bar", 456).character("zzz", "abc");
                     break;
