@@ -55,10 +55,12 @@ dependencies {
 
 checkstyle {
     configFile = rootProject.file('buildSrc/src/main/resources/checkstyle.xml')
+    if ('strict' == findProperty('checkMode')) {
+        maxWarnings = 0
+    }
 }
 
 spotbugsMain {
-    ignoreFailures = true
     reports {
         xml {
             enabled = true
@@ -103,9 +105,6 @@ artifacts {
 
 tasks.named('test') {
     useJUnitPlatform()
-    systemProperty('junit.jupiter.testclass.order.default', 'org.junit.jupiter.api.ClassOrderer$OrderAnnotation')
-
-    ignoreFailures = true
 
     testLogging {
         showStandardStreams true
