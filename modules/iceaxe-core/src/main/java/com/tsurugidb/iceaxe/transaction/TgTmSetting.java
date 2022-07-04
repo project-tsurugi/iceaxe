@@ -12,17 +12,46 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
  */
 public class TgTmSetting {
 
+    /**
+     * create Transaction Manager Settings
+     * 
+     * @param transactionOptionSupplier transaction option supplier
+     * @returnTransaction Manager Settings
+     */
     public static TgTmSetting of(TgTxOptionSupplier transactionOptionSupplier) {
         return new TgTmSetting().transactionOptionSupplier(transactionOptionSupplier);
     }
 
+    /**
+     * create Transaction Manager Settings
+     * 
+     * @param transactionOptionList transaction option list
+     * @return Transaction Manager Settings
+     */
     public static TgTmSetting of(TgTxOption... transactionOptionList) {
         var supplier = TgTxOptionList.of(transactionOptionList);
         return of(supplier);
     }
 
+    /**
+     * create Transaction Manager Settings
+     * 
+     * @param transactionOption transaction option
+     * @return Transaction Manager Settings
+     */
     public static TgTmSetting ofAlways(TgTxOption transactionOption) {
-        var supplier = TgTxOptionSupplier.ofAlways(transactionOption);
+        return ofAlways(transactionOption, Integer.MAX_VALUE);
+    }
+
+    /**
+     * create Transaction Manager Settings
+     * 
+     * @param transactionOption transaction option
+     * @param attemtMaxCount    attempt max count
+     * @return Transaction Manager Settings
+     */
+    public static TgTmSetting ofAlways(TgTxOption transactionOption, int attemtMaxCount) {
+        var supplier = TgTxOptionSupplier.ofAlways(transactionOption, attemtMaxCount);
         return of(supplier);
     }
 
