@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.tsurugidb.iceaxe.statement.TgDataType;
@@ -75,6 +76,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bool(BiConsumer<R, V> setter, Function<Boolean, V> converter) {
+        int index = columnConverterList.size();
+        return bool(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -87,13 +101,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bool(int index, BiConsumer<R, V> setter, Function<Boolean, V> converter) {
+        return bool(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> bool(String name, BiConsumer<R, Boolean> setter) {
         set(name, TsurugiResultRecord::nextBooleanOrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bool(String name, BiConsumer<R, V> setter, Function<Boolean, V> converter) {
+        return bool(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // int4
@@ -112,6 +158,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> int4(BiConsumer<R, V> setter, Function<Integer, V> converter) {
+        int index = columnConverterList.size();
+        return int4(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -124,13 +183,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> int4(int index, BiConsumer<R, V> setter, Function<Integer, V> converter) {
+        return int4(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> int4(String name, BiConsumer<R, Integer> setter) {
         set(name, TsurugiResultRecord::nextInt4OrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> int4(String name, BiConsumer<R, V> setter, Function<Integer, V> converter) {
+        return int4(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // int8
@@ -149,6 +240,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> int8(BiConsumer<R, V> setter, Function<Long, V> converter) {
+        int index = columnConverterList.size();
+        return int8(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -161,13 +265,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> int8(int index, BiConsumer<R, V> setter, Function<Long, V> converter) {
+        return int8(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> int8(String name, BiConsumer<R, Long> setter) {
         set(name, TsurugiResultRecord::nextInt8OrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> int8(String name, BiConsumer<R, V> setter, Function<Long, V> converter) {
+        return int8(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // float4
@@ -186,6 +322,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> float4(BiConsumer<R, V> setter, Function<Float, V> converter) {
+        int index = columnConverterList.size();
+        return float4(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -198,13 +347,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> float4(int index, BiConsumer<R, V> setter, Function<Float, V> converter) {
+        return float4(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> float4(String name, BiConsumer<R, Float> setter) {
         set(name, TsurugiResultRecord::nextFloat4OrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> float4(String name, BiConsumer<R, V> setter, Function<Float, V> converter) {
+        return float4(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // float8
@@ -223,6 +404,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> float8(BiConsumer<R, V> setter, Function<Double, V> converter) {
+        int index = columnConverterList.size();
+        return float8(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -235,13 +429,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> float8(int index, BiConsumer<R, V> setter, Function<Double, V> converter) {
+        return float8(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> float8(String name, BiConsumer<R, Double> setter) {
         set(name, TsurugiResultRecord::nextFloat8OrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> float8(String name, BiConsumer<R, V> setter, Function<Double, V> converter) {
+        return float8(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // decimal
@@ -260,6 +486,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> decimal(BiConsumer<R, V> setter, Function<BigDecimal, V> converter) {
+        int index = columnConverterList.size();
+        return decimal(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -272,13 +511,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> decimal(int index, BiConsumer<R, V> setter, Function<BigDecimal, V> converter) {
+        return decimal(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> decimal(String name, BiConsumer<R, BigDecimal> setter) {
         set(name, TsurugiResultRecord::nextDecimalOrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> decimal(String name, BiConsumer<R, V> setter, Function<BigDecimal, V> converter) {
+        return decimal(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // character
@@ -297,6 +568,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> character(BiConsumer<R, V> setter, Function<String, V> converter) {
+        int index = columnConverterList.size();
+        return character(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -309,13 +593,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> character(int index, BiConsumer<R, V> setter, Function<String, V> converter) {
+        return character(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> character(String name, BiConsumer<R, String> setter) {
         set(name, TsurugiResultRecord::nextCharacterOrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> character(String name, BiConsumer<R, V> setter, Function<String, V> converter) {
+        return character(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // byte[]
@@ -334,6 +650,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bytes(BiConsumer<R, V> setter, Function<byte[], V> converter) {
+        int index = columnConverterList.size();
+        return bytes(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -346,13 +675,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bytes(int index, BiConsumer<R, V> setter, Function<byte[], V> converter) {
+        return bytes(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> bytes(String name, BiConsumer<R, byte[]> setter) {
         set(name, TsurugiResultRecord::nextBytesOrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bytes(String name, BiConsumer<R, V> setter, Function<byte[], V> converter) {
+        return bytes(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // boolean[]
@@ -371,6 +732,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bits(BiConsumer<R, V> setter, Function<boolean[], V> converter) {
+        int index = columnConverterList.size();
+        return bits(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -383,13 +757,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bits(int index, BiConsumer<R, V> setter, Function<boolean[], V> converter) {
+        return bits(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> bits(String name, BiConsumer<R, boolean[]> setter) {
         set(name, TsurugiResultRecord::nextBitsOrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> bits(String name, BiConsumer<R, V> setter, Function<boolean[], V> converter) {
+        return bits(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // date
@@ -408,6 +814,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> date(BiConsumer<R, V> setter, Function<LocalDate, V> converter) {
+        int index = columnConverterList.size();
+        return date(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -420,13 +839,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> date(int index, BiConsumer<R, V> setter, Function<LocalDate, V> converter) {
+        return date(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> date(String name, BiConsumer<R, LocalDate> setter) {
         set(name, TsurugiResultRecord::nextDateOrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> date(String name, BiConsumer<R, V> setter, Function<LocalDate, V> converter) {
+        return date(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // time
@@ -445,6 +896,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> time(BiConsumer<R, V> setter, Function<LocalTime, V> converter) {
+        int index = columnConverterList.size();
+        return time(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -457,13 +921,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> time(int index, BiConsumer<R, V> setter, Function<LocalTime, V> converter) {
+        return time(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> time(String name, BiConsumer<R, LocalTime> setter) {
         set(name, TsurugiResultRecord::nextTimeOrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> time(String name, BiConsumer<R, V> setter, Function<LocalTime, V> converter) {
+        return time(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // instant
@@ -482,6 +978,19 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> instant(BiConsumer<R, V> setter, Function<Instant, V> converter) {
+        int index = columnConverterList.size();
+        return instant(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @return this
@@ -494,13 +1003,45 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> instant(int index, BiConsumer<R, V> setter, Function<Instant, V> converter) {
+        return instant(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @return this
      */
     public TgEntityResultMapping<R> instant(String name, BiConsumer<R, Instant> setter) {
         set(name, TsurugiResultRecord::nextInstantOrNull, setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> instant(String name, BiConsumer<R, V> setter, Function<Instant, V> converter) {
+        return instant(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // ZonedDateTime
@@ -520,6 +1061,20 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @param zone      time-zone
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> zonedDateTime(BiConsumer<R, V> setter, Function<ZonedDateTime, V> converter, ZoneId zone) {
+        int index = columnConverterList.size();
+        return zonedDateTime(index, setter, converter, zone);
+    }
+
+    /**
+     * add setter
+     * 
      * @param index  column index
      * @param setter setter to R
      * @param zone   time-zone
@@ -533,7 +1088,24 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     /**
      * add setter
      * 
-     * @param name   colum name
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @param zone      time-zone
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> zonedDateTime(int index, BiConsumer<R, V> setter, Function<ZonedDateTime, V> converter, ZoneId zone) {
+        return zonedDateTime(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        }, zone);
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
      * @param setter setter to R
      * @param zone   time-zone
      * @return this
@@ -541,6 +1113,23 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     public TgEntityResultMapping<R> zonedDateTime(String name, BiConsumer<R, ZonedDateTime> setter, ZoneId zone) {
         set(name, record -> record.nextZonedDateTimeOrNull(zone), setter);
         return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @param zone      time-zone
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> zonedDateTime(String name, BiConsumer<R, V> setter, Function<ZonedDateTime, V> converter, ZoneId zone) {
+        return zonedDateTime(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        }, zone);
     }
 
     // Object
@@ -620,8 +1209,8 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         columnConverterMap.put(name, converter);
     }
 
-    @Override
 //  @ThreadSafe
+    @Override
     protected R convert(TsurugiResultRecord record) throws IOException {
         mergeColumnConverterMap(record);
 
