@@ -52,10 +52,10 @@ public abstract class TsurugiResult implements Closeable {
         connectTimeout.set(timeout);
     }
 
-    protected final synchronized ResultOnly getLowResultOnly() throws IOException {
+    protected final synchronized ResultOnly getLowResultOnly() throws IOException, TsurugiTransactionException {
         if (this.lowResultOnly == null) {
             var lowResultOnlyFuture = getLowResultOnlyFuture();
-            this.lowResultOnly = IceaxeIoUtil.getFromFuture(lowResultOnlyFuture, connectTimeout);
+            this.lowResultOnly = IceaxeIoUtil.getFromTransactionFuture(lowResultOnlyFuture, connectTimeout);
         }
         return this.lowResultOnly;
     }
@@ -72,8 +72,9 @@ public abstract class TsurugiResult implements Closeable {
      * 
      * @return result status
      * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public TgResultStatus getResultStatus() throws IOException {
+    public TgResultStatus getResultStatus() throws IOException, TsurugiTransactionException {
         var lowResultCase = getLowResultOnly().getResultCase();
         switch (lowResultCase) {
         case SUCCESS:
