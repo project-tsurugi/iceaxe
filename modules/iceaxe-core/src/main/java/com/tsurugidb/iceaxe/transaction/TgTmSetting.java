@@ -79,6 +79,14 @@ public class TgTmSetting {
         return this;
     }
 
+    /**
+     * get transaction option
+     * 
+     * @param attempt attempt number
+     * @param e       transaction exception
+     * @return transaction option
+     * @see TgTxOptionSupplier
+     */
     public TgTxOption getTransactionOption(int attempt, TsurugiTransactionException e) {
         if (this.transactionOptionSupplier == null) {
             throw new IllegalStateException("transactionOptionSupplier is not specifed");
@@ -245,6 +253,7 @@ public class TgTmSetting {
         return this;
     }
 
+    // internal
     public void initializeTransaction(TsurugiTransaction transaction) {
         if (beginTimeout != null) {
             transaction.setBeginTimeout(beginTimeout);

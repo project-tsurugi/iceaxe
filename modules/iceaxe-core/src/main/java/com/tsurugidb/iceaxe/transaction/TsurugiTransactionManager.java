@@ -118,35 +118,41 @@ public class TsurugiTransactionManager {
                     transaction.commit(commitType);
                     return r;
                 } catch (TsurugiTransactionException e) {
+                    var prevOption = option;
                     option = setting.getTransactionOption(i + 1, e);
                     if (option != null) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ
                         rollback(transaction, null);
                         continue;
                     }
-                    var ioe = new IOException(e);
+                    var ioe = new TsurugiTransactionRetryOverIOException(i, prevOption, e);
                     rollback(transaction, ioe);
                     throw ioe;
                 } catch (TsurugiTransactionRuntimeException e) {
                     var c = e.getCause();
+                    var prevOption = option;
                     option = setting.getTransactionOption(i + 1, c);
                     if (option != null) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ
                         rollback(transaction, null);
                         continue;
                     }
-                    var ioe = new IOException(e);
+                    var ioe = new TsurugiTransactionRetryOverIOException(i, prevOption, e);
                     rollback(transaction, ioe);
                     throw ioe;
                 } catch (Exception e) {
                     var c = findTransactionException(e);
                     if (c != null) {
+                        var prevOption = option;
                         option = setting.getTransactionOption(i + 1, c);
                         if (option != null) {
                             // リトライ可能なabortの場合でもrollbackは呼ぶ
                             rollback(transaction, null);
                             continue;
                         }
+                        var ioe = new TsurugiTransactionRetryOverIOException(i, prevOption, e);
+                        rollback(transaction, ioe);
+                        throw ioe;
                     }
                     rollback(transaction, e);
                     throw e;

@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
+import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
@@ -26,8 +28,7 @@ class IceaxeIoUtilTest {
 
         @Override
         public DiagnosticCode getDiagnosticCode() {
-            fail();
-            return null;
+            return SqlServiceCode.OK;
         }
     }
 

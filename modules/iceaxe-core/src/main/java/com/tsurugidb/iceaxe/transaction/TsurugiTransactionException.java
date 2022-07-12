@@ -23,9 +23,14 @@ public class TsurugiTransactionException extends Exception {
 
     // internal
     public TsurugiTransactionException(ServerException cause) {
-        super(cause);
+        super(createMessage(cause), cause);
         this.lowError = null;
         this.lowServerException = cause;
+    }
+
+    private static String createMessage(ServerException e) {
+        var code = e.getDiagnosticCode();
+        return code.toString();
     }
 
     // TODO トランザクションがリトライ可能かどうか判定するのは別のクラスの方がいいかも

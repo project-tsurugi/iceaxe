@@ -38,7 +38,7 @@ public interface TgTxOptionSupplier {
     /**
      * get Transaction Option
      * 
-     * @param attempt attempt count
+     * @param attempt attempt number
      * @param e       transaction exception (null if attempt==0)
      * @return Transaction Option. TODO 翻訳+++: トランザクションを実行しない場合はnull
      */

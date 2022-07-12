@@ -12,8 +12,7 @@ public class TsurugiTransactionRuntimeException extends RuntimeException {
      * @param cause TsurugiTransactionException
      */
     public TsurugiTransactionRuntimeException(TsurugiTransactionException cause) {
-        super(cause);
-        assert cause != null;
+        super(cause.getMessage(), cause);
     }
 
     @Override
