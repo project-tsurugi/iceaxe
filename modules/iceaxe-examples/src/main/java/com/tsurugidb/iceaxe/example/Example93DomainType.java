@@ -27,8 +27,9 @@ public class Example93DomainType {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
 
-            var entity = new Example93Entity2();
             createTable(session, tm);
+
+            var entity = new Example93Entity2();
             switch (1) {
             case 1:
                 insert1(session, tm, entity);

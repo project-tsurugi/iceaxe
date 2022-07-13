@@ -99,16 +99,23 @@ public class TsurugiResultRecord {
     }
 
     private final ResultSet lowResultSet;
+    private final IceaxeConvertUtil convertUtil;
     private Map<String, TsurugiResultColumnValue> columnMap;
 
-    protected TsurugiResultRecord(ResultSet lowResultSet) {
+    protected TsurugiResultRecord(ResultSet lowResultSet, IceaxeConvertUtil convertUtil) {
         this.lowResultSet = lowResultSet;
+        this.convertUtil = convertUtil;
     }
 
     void reset() {
         if (this.columnMap != null) {
             columnMap.clear();
         }
+    }
+
+    // internal
+    public IceaxeConvertUtil getConvertUtil() {
+        return this.convertUtil;
     }
 
     /*
@@ -304,7 +311,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Boolean getBooleanOrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toBoolean(lowValue);
+        return convertUtil.toBoolean(lowValue);
     }
 
     // int4
@@ -362,7 +369,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Integer getInt4OrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toInt4(lowValue);
+        return convertUtil.toInt4(lowValue);
     }
 
     // int8
@@ -420,7 +427,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Long getInt8OrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toInt8(lowValue);
+        return convertUtil.toInt8(lowValue);
     }
 
     // float4
@@ -478,7 +485,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Float getFloat4OrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toFloat4(lowValue);
+        return convertUtil.toFloat4(lowValue);
     }
 
     // float8
@@ -536,7 +543,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Double getFloat8OrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toFloat8(lowValue);
+        return convertUtil.toFloat8(lowValue);
     }
 
     // decimal
@@ -595,7 +602,7 @@ public class TsurugiResultRecord {
     @Nullable
     public BigDecimal getDecimalOrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toDecimal(lowValue);
+        return convertUtil.toDecimal(lowValue);
     }
 
     // character
@@ -654,7 +661,7 @@ public class TsurugiResultRecord {
     @Nullable
     public String getCharacterOrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toCharacter(lowValue);
+        return convertUtil.toCharacter(lowValue);
     }
 
     // byte[]
@@ -713,7 +720,7 @@ public class TsurugiResultRecord {
     @Nullable
     public byte[] getBytesOrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toBytes(lowValue);
+        return convertUtil.toBytes(lowValue);
     }
 
     // boolean[]
@@ -772,7 +779,7 @@ public class TsurugiResultRecord {
     @Nullable
     public boolean[] getBitsOrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toBits(lowValue);
+        return convertUtil.toBits(lowValue);
     }
 
     // date
@@ -831,7 +838,7 @@ public class TsurugiResultRecord {
     @Nullable
     public LocalDate getDateOrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toDate(lowValue);
+        return convertUtil.toDate(lowValue);
     }
 
     // time
@@ -890,7 +897,7 @@ public class TsurugiResultRecord {
     @Nullable
     public LocalTime getTimeOrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toTime(lowValue);
+        return convertUtil.toTime(lowValue);
     }
 
     // instant
@@ -949,7 +956,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Instant getInstantOrNull(String name) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toInstant(lowValue);
+        return convertUtil.toInstant(lowValue);
     }
 
     // ZonedDateTime
@@ -1012,7 +1019,7 @@ public class TsurugiResultRecord {
     @Nullable
     public ZonedDateTime getZonedDateTimeOrNull(String name, ZoneId zone) throws IOException {
         var lowValue = getValue(name);
-        return IceaxeConvertUtil.toZonedDateTime(lowValue, zone);
+        return convertUtil.toZonedDateTime(lowValue, zone);
     }
 
     /*
@@ -1088,7 +1095,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Boolean nextBooleanOrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toBoolean(lowValue);
+        return convertUtil.toBoolean(lowValue);
     }
 
     // int4
@@ -1142,7 +1149,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Integer nextInt4OrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toInt4(lowValue);
+        return convertUtil.toInt4(lowValue);
     }
 
     // int8
@@ -1196,7 +1203,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Long nextInt8OrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toInt8(lowValue);
+        return convertUtil.toInt8(lowValue);
     }
 
     // float4
@@ -1250,7 +1257,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Float nextFloat4OrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toFloat4(lowValue);
+        return convertUtil.toFloat4(lowValue);
     }
 
     // float8
@@ -1304,7 +1311,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Double nextFloat8OrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toFloat8(lowValue);
+        return convertUtil.toFloat8(lowValue);
     }
 
     // decimal
@@ -1359,7 +1366,7 @@ public class TsurugiResultRecord {
     @Nullable
     public BigDecimal nextDecimalOrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toDecimal(lowValue);
+        return convertUtil.toDecimal(lowValue);
     }
 
     // character
@@ -1414,7 +1421,7 @@ public class TsurugiResultRecord {
     @Nullable
     public String nextCharacterOrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toCharacter(lowValue);
+        return convertUtil.toCharacter(lowValue);
     }
 
     // byte[]
@@ -1469,7 +1476,7 @@ public class TsurugiResultRecord {
     @Nullable
     public byte[] nextBytesOrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toBytes(lowValue);
+        return convertUtil.toBytes(lowValue);
     }
 
     // boolean[]
@@ -1524,7 +1531,7 @@ public class TsurugiResultRecord {
     @Nullable
     public boolean[] nextBitsOrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toBits(lowValue);
+        return convertUtil.toBits(lowValue);
     }
 
     // date
@@ -1579,7 +1586,7 @@ public class TsurugiResultRecord {
     @Nullable
     public LocalDate nextDateOrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toDate(lowValue);
+        return convertUtil.toDate(lowValue);
     }
 
     // time
@@ -1634,7 +1641,7 @@ public class TsurugiResultRecord {
     @Nullable
     public LocalTime nextTimeOrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toTime(lowValue);
+        return convertUtil.toTime(lowValue);
     }
 
     // instant
@@ -1689,7 +1696,7 @@ public class TsurugiResultRecord {
     @Nullable
     public Instant nextInstantOrNull() throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toInstant(lowValue);
+        return convertUtil.toInstant(lowValue);
     }
 
     // ZonedDateTime
@@ -1748,7 +1755,7 @@ public class TsurugiResultRecord {
     @Nullable
     public ZonedDateTime nextZonedDateTimeOrNull(@Nonnull ZoneId zone) throws IOException {
         var lowValue = nextLowValue();
-        return IceaxeConvertUtil.toZonedDateTime(lowValue, zone);
+        return convertUtil.toZonedDateTime(lowValue, zone);
     }
 
     @Override

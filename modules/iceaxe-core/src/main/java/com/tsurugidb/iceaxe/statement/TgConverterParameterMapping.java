@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.statement;
 import java.util.List;
 import java.util.function.Function;
 
+import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
 import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
 
@@ -45,7 +46,7 @@ public class TgConverterParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     @Override
-    protected List<Parameter> toLowParameterList(P parameter) {
+    protected List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil) {
         return parameterConverter.apply(parameter).toLowParameterList();
     }
 }

@@ -97,7 +97,8 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     }
 
     protected final List<Parameter> getLowParameterList(P parameter) {
-        return parameterMapping.toLowParameterList(parameter);
+        var convertUtil = getConvertUtil(parameterMapping.getConvertUtil());
+        return parameterMapping.toLowParameterList(parameter, convertUtil);
     }
 
     @Override

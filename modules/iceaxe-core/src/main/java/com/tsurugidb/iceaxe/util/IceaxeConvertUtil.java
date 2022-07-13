@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,11 +17,9 @@ import javax.annotation.Nullable;
 /**
  * convert type utility
  */
-public final class IceaxeConvertUtil {
+public class IceaxeConvertUtil {
 
-    private IceaxeConvertUtil() {
-        // do nothing
-    }
+    public static final IceaxeConvertUtil INSTANCE = new IceaxeConvertUtil();
 
     /**
      * convert to Boolean
@@ -29,10 +28,23 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static Boolean toBoolean(Object obj) {
+    public Boolean toBoolean(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertBoolean(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected Boolean convertBoolean(@Nonnull Object obj) {
         if (obj instanceof Boolean) {
             return (Boolean) obj;
         }
@@ -51,7 +63,7 @@ public final class IceaxeConvertUtil {
         if (obj instanceof BigInteger) {
             return ((BigInteger) obj).compareTo(BigInteger.ZERO) != 0;
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -61,17 +73,30 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static Integer toInt4(Object obj) {
+    public Integer toInt4(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertInteger(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected Integer convertInteger(@Nonnull Object obj) {
         if (obj instanceof Number) {
             return ((Number) obj).intValue();
         }
         if (obj instanceof String) {
             return Integer.parseInt((String) obj);
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -81,17 +106,30 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static Long toInt8(Object obj) {
+    public Long toInt8(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertLong(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected Long convertLong(@Nonnull Object obj) {
         if (obj instanceof Number) {
             return ((Number) obj).longValue();
         }
         if (obj instanceof String) {
             return Long.parseLong((String) obj);
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -101,17 +139,30 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static Float toFloat4(Object obj) {
+    public Float toFloat4(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertFloat(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected Float convertFloat(@Nonnull Object obj) {
         if (obj instanceof Number) {
             return ((Number) obj).floatValue();
         }
         if (obj instanceof String) {
             return Float.parseFloat((String) obj);
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -121,17 +172,30 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static Double toFloat8(Object obj) {
+    public Double toFloat8(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertDouble(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected Double convertDouble(@Nonnull Object obj) {
         if (obj instanceof Number) {
             return ((Number) obj).doubleValue();
         }
         if (obj instanceof String) {
             return Double.parseDouble((String) obj);
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -141,10 +205,23 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static BigDecimal toDecimal(Object obj) {
+    public BigDecimal toDecimal(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertBigDecimal(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected BigDecimal convertBigDecimal(@Nonnull Object obj) {
         if (obj instanceof BigDecimal) {
             return (BigDecimal) obj;
         }
@@ -163,7 +240,7 @@ public final class IceaxeConvertUtil {
         if (obj instanceof String) {
             return new BigDecimal((String) obj);
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -173,9 +250,25 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static String toCharacter(Object obj) {
+    public String toCharacter(Object obj) {
         if (obj == null) {
             return null;
+        }
+        try {
+            var value = convertString(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected String convertString(@Nonnull Object obj) {
+        if (obj instanceof String) {
+            return (String) obj;
         }
         if (obj instanceof BigDecimal) {
             return ((BigDecimal) obj).toPlainString();
@@ -190,14 +283,27 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static byte[] toBytes(Object obj) {
+    public byte[] toBytes(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertBytes(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected byte[] convertBytes(@Nonnull Object obj) {
         if (obj instanceof byte[]) {
             return (byte[]) obj;
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -207,14 +313,27 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static boolean[] toBits(Object obj) {
+    public boolean[] toBits(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertBits(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected boolean[] convertBits(@Nonnull Object obj) {
         if (obj instanceof boolean[]) {
             return (boolean[]) obj;
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -224,10 +343,23 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static LocalDate toDate(Object obj) {
+    public LocalDate toDate(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertLocalDate(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected LocalDate convertLocalDate(@Nonnull Object obj) {
         if (obj instanceof LocalDate) {
             return (LocalDate) obj;
         }
@@ -247,7 +379,10 @@ public final class IceaxeConvertUtil {
         if (obj instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) obj).toLocalDateTime().toLocalDate();
         }
-        throw createException(obj);
+        if (obj instanceof CharSequence) {
+            return LocalDate.parse((CharSequence) obj);
+        }
+        return null;
     }
 
     /**
@@ -257,10 +392,23 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static LocalTime toTime(Object obj) {
+    public LocalTime toTime(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertLocalTime(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected LocalTime convertLocalTime(@Nonnull Object obj) {
         if (obj instanceof LocalTime) {
             return (LocalTime) obj;
         }
@@ -280,7 +428,10 @@ public final class IceaxeConvertUtil {
         if (obj instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) obj).toLocalDateTime().toLocalTime();
         }
-        throw createException(obj);
+        if (obj instanceof CharSequence) {
+            return LocalTime.parse((CharSequence) obj);
+        }
+        return null;
     }
 
     /**
@@ -290,10 +441,23 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static Instant toInstant(Object obj) {
+    public Instant toInstant(Object obj) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertInstant(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected Instant convertInstant(@Nonnull Object obj) {
         if (obj instanceof Instant) {
             return (Instant) obj;
         }
@@ -306,7 +470,7 @@ public final class IceaxeConvertUtil {
         if (obj instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) obj).toInstant();
         }
-        throw createException(obj);
+        return null;
     }
 
     /**
@@ -317,10 +481,23 @@ public final class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public static ZonedDateTime toZonedDateTime(Object obj, @Nonnull ZoneId zone) {
+    public ZonedDateTime toZonedDateTime(Object obj, @Nonnull ZoneId zone) {
         if (obj == null) {
             return null;
         }
+        try {
+            var value = convertZonedDateTime(obj, zone);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected ZonedDateTime convertZonedDateTime(@Nonnull Object obj, @Nonnull ZoneId zone) {
         if (obj instanceof ZonedDateTime) {
             return ((ZonedDateTime) obj).withZoneSameInstant(zone);
         }
@@ -330,11 +507,14 @@ public final class IceaxeConvertUtil {
         if (obj instanceof LocalDateTime) {
             return ((LocalDateTime) obj).atZone(zone);
         }
-        var instant = toInstant(obj);
-        return ZonedDateTime.ofInstant(instant, zone);
+        var instant = convertInstant(obj);
+        if (instant != null) {
+            return ZonedDateTime.ofInstant(instant, zone);
+        }
+        return null;
     }
 
-    private static UnsupportedOperationException createException(Object obj) {
-        return new UnsupportedOperationException("unsupported type error. value=" + obj + ", class=" + obj.getClass());
+    protected RuntimeException createException(Object obj, Throwable cause) {
+        return new UnsupportedOperationException(MessageFormat.format("unsupported type error. value={0}({1})", obj, obj.getClass()), cause);
     }
 }

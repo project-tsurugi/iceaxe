@@ -17,6 +17,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.tsurugidb.iceaxe.statement.TgDataType;
+import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IoBiConsumer;
 import com.tsurugidb.iceaxe.util.IoFunction;
 
@@ -57,6 +58,17 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      */
     public TgEntityResultMapping<R> supplier(Supplier<R> entitySupplier) {
         this.entitySupplier = entitySupplier;
+        return this;
+    }
+
+    /**
+     * set convert type utility
+     * 
+     * @param convertUtil convert type utility
+     * @return this
+     */
+    public TgEntityResultMapping<R> convertUtil(IceaxeConvertUtil convertUtil) {
+        setConvertUtil(convertUtil);
         return this;
     }
 

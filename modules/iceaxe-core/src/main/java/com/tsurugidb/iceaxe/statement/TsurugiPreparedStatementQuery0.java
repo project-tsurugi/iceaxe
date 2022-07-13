@@ -44,7 +44,8 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
     public TsurugiResultSet<R> execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         var lowTransaction = transaction.getLowTransaction();
         var lowResultSetFuture = lowTransaction.executeQuery(sql);
-        var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping);
+        var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
+        var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping, convertUtil);
         return result;
     }
 

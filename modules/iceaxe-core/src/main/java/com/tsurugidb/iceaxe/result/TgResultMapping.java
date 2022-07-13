@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IoFunction;
 
 /**
@@ -46,6 +47,22 @@ public abstract class TgResultMapping<R> {
      */
     public static <R> TgEntityResultMapping<R> of(Supplier<R> entitySupplier) {
         return TgEntityResultMapping.of(entitySupplier);
+    }
+
+    private IceaxeConvertUtil convertUtil = null;
+
+    /**
+     * set convert type utility
+     * 
+     * @param convertUtil convert type utility
+     */
+    public void setConvertUtil(IceaxeConvertUtil convertUtil) {
+        this.convertUtil = convertUtil;
+    }
+
+    // internal
+    public IceaxeConvertUtil getConvertUtil() {
+        return this.convertUtil;
     }
 
     // internal

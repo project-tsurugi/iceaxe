@@ -23,6 +23,7 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
+import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -37,6 +38,7 @@ public class TsurugiSession implements Closeable {
     private FutureResponse<Wire> lowWireFuture;
     private boolean sessionConnected = false;
     private SqlClient lowSqlClient;
+    private IceaxeConvertUtil convertUtil = null;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
@@ -56,6 +58,20 @@ public class TsurugiSession implements Closeable {
         closeTimeout.apply(lowSession);
         closeTimeout.apply(lowWireFuture);
         closeTimeout.apply(lowSqlClient);
+    }
+
+    /**
+     * set convert type utility
+     * 
+     * @param convertUtil convert type utility
+     */
+    public void setConvertUtil(IceaxeConvertUtil convertUtil) {
+        this.convertUtil = convertUtil;
+    }
+
+    // internal
+    public IceaxeConvertUtil getConvertUtil() {
+        return this.convertUtil;
     }
 
     /**

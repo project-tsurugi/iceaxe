@@ -24,12 +24,24 @@ public class TgParameterListWithVariable implements TgParameterList {
 
     private final TgVariableList variable;
     private final List<Parameter> lowParameterList = new ArrayList<>();
+    private IceaxeConvertUtil convertUtil = IceaxeConvertUtil.INSTANCE;
 
     /**
      * Tsurugi Parameter for PreparedStatement
      */
     public TgParameterListWithVariable(TgVariableList variable) {
         this.variable = variable;
+    }
+
+    /**
+     * set convert type utility
+     * 
+     * @param convertUtil convert type utility
+     * @return this
+     */
+    public TgParameterListWithVariable convertUtil(IceaxeConvertUtil convertUtil) {
+        this.convertUtil = convertUtil;
+        return this;
     }
 
     protected TgDataType getType(String name) {
@@ -189,29 +201,29 @@ public class TgParameterListWithVariable implements TgParameterList {
         var type = getType(name);
         switch (type) {
         case BOOLEAN:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toBoolean(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toBoolean(value));
         case INT4:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toInt4(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toInt4(value));
         case INT8:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toInt8(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toInt8(value));
         case FLOAT4:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toFloat4(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toFloat4(value));
         case FLOAT8:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toFloat8(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toFloat8(value));
         case DECIMAL:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toDecimal(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toDecimal(value));
         case CHARACTER:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toCharacter(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toCharacter(value));
         case BYTES:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toBytes(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toBytes(value));
         case BITS:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toBits(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toBits(value));
         case DATE:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toDate(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toDate(value));
         case TIME:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toTime(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toTime(value));
         case INSTANT:
-            return IceaxeLowParameterUtil.create(name, IceaxeConvertUtil.toInstant(value));
+            return IceaxeLowParameterUtil.create(name, convertUtil.toInstant(value));
         default:
             throw new InternalError("unsupported type error. type=" + type);
         }

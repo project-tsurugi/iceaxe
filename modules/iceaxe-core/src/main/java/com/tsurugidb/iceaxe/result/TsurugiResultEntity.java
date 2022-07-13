@@ -33,6 +33,7 @@ public class TsurugiResultEntity {
      */
     public static TsurugiResultEntity of(TsurugiResultRecord record) throws IOException {
         var entity = new TsurugiResultEntity();
+        entity.setConvertUtil(record.getConvertUtil());
         while (record.moveCurrentColumnNext()) {
             var name = record.getCurrentColumnName();
             var value = record.getCurrentColumnValue();
@@ -41,8 +42,18 @@ public class TsurugiResultEntity {
         return entity;
     }
 
+    private IceaxeConvertUtil convertUtil = IceaxeConvertUtil.INSTANCE;
     /** Map&lt;name, value&gt; */
     private final Map<String, Object> valueMap = new LinkedHashMap<>();
+
+    /**
+     * set convert type utility
+     * 
+     * @param convertUtil convert type utility
+     */
+    public void setConvertUtil(IceaxeConvertUtil convertUtil) {
+        this.convertUtil = convertUtil;
+    }
 
     protected void add(String name, Object value) {
         valueMap.put(name, value);
@@ -110,7 +121,7 @@ public class TsurugiResultEntity {
     @Nullable
     public Boolean getBooleanOrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toBoolean(value);
+        return convertUtil.toBoolean(value);
     }
 
     // int4
@@ -164,7 +175,7 @@ public class TsurugiResultEntity {
     @Nullable
     public Integer getInt4OrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toInt4(value);
+        return convertUtil.toInt4(value);
     }
 
     // int8
@@ -218,7 +229,7 @@ public class TsurugiResultEntity {
     @Nullable
     public Long getInt8OrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toInt8(value);
+        return convertUtil.toInt8(value);
     }
 
     // float4
@@ -272,7 +283,7 @@ public class TsurugiResultEntity {
     @Nullable
     public Float getFloat4OrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toFloat4(value);
+        return convertUtil.toFloat4(value);
     }
 
     // float8
@@ -326,7 +337,7 @@ public class TsurugiResultEntity {
     @Nullable
     public Double getFloat8OrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toFloat8(value);
+        return convertUtil.toFloat8(value);
     }
 
     // decimal
@@ -381,7 +392,7 @@ public class TsurugiResultEntity {
     @Nullable
     public BigDecimal getDecimalOrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toDecimal(value);
+        return convertUtil.toDecimal(value);
     }
 
     // character
@@ -436,7 +447,7 @@ public class TsurugiResultEntity {
     @Nullable
     public String getCharacterOrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toCharacter(value);
+        return convertUtil.toCharacter(value);
     }
 
     // byte[]
@@ -491,7 +502,7 @@ public class TsurugiResultEntity {
     @Nullable
     public byte[] getBytesOrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toBytes(value);
+        return convertUtil.toBytes(value);
     }
 
     // boolean[]
@@ -546,7 +557,7 @@ public class TsurugiResultEntity {
     @Nullable
     public boolean[] getBitsOrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toBits(value);
+        return convertUtil.toBits(value);
     }
 
     // date
@@ -601,7 +612,7 @@ public class TsurugiResultEntity {
     @Nullable
     public LocalDate getDateOrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toDate(value);
+        return convertUtil.toDate(value);
     }
 
     // time
@@ -656,7 +667,7 @@ public class TsurugiResultEntity {
     @Nullable
     public LocalTime getTimeOrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toTime(value);
+        return convertUtil.toTime(value);
     }
 
     // instant
@@ -711,7 +722,7 @@ public class TsurugiResultEntity {
     @Nullable
     public Instant getInstantOrNull(String name) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toInstant(value);
+        return convertUtil.toInstant(value);
     }
 
     // ZonedDateTime
@@ -770,7 +781,7 @@ public class TsurugiResultEntity {
     @Nullable
     public ZonedDateTime getZonedDateTimeOrNull(String name, @Nonnull ZoneId zone) {
         var value = getValue(name);
-        return IceaxeConvertUtil.toZonedDateTime(value, zone);
+        return convertUtil.toZonedDateTime(value, zone);
     }
 
     @Override

@@ -1,9 +1,14 @@
 package com.tsurugidb.iceaxe.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -11,160 +16,247 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.Test;
 
 class IceaxeConvertUtilTest {
 
+    private final IceaxeConvertUtil target = IceaxeConvertUtil.INSTANCE;
+
     @Test
     void testToBoolean() {
-        assertNull(IceaxeConvertUtil.toBoolean(null));
-        assertEquals(true, IceaxeConvertUtil.toBoolean(true));
-        assertEquals(false, IceaxeConvertUtil.toBoolean(false));
-        assertEquals(true, IceaxeConvertUtil.toBoolean((byte) 1));
-        assertEquals(false, IceaxeConvertUtil.toBoolean((byte) 0));
-        assertEquals(true, IceaxeConvertUtil.toBoolean((short) 1));
-        assertEquals(false, IceaxeConvertUtil.toBoolean((short) 0));
-        assertEquals(true, IceaxeConvertUtil.toBoolean(1));
-        assertEquals(false, IceaxeConvertUtil.toBoolean(0));
-        assertEquals(true, IceaxeConvertUtil.toBoolean(1L));
-        assertEquals(false, IceaxeConvertUtil.toBoolean(0L));
-        assertEquals(true, IceaxeConvertUtil.toBoolean(1f));
-        assertEquals(false, IceaxeConvertUtil.toBoolean(0f));
-        assertEquals(true, IceaxeConvertUtil.toBoolean(1d));
-        assertEquals(false, IceaxeConvertUtil.toBoolean(0d));
-        assertEquals(true, IceaxeConvertUtil.toBoolean(new BigDecimal(1)));
-        assertEquals(false, IceaxeConvertUtil.toBoolean(new BigDecimal(0)));
-        assertEquals(true, IceaxeConvertUtil.toBoolean(new BigInteger("1")));
-        assertEquals(false, IceaxeConvertUtil.toBoolean(new BigInteger("0")));
-        assertEquals(true, IceaxeConvertUtil.toBoolean("true"));
-        assertEquals(false, IceaxeConvertUtil.toBoolean("false"));
+        assertNull(target.toBoolean(null));
+
+        assertEquals(true, target.toBoolean(true));
+        assertEquals(false, target.toBoolean(false));
+        assertEquals(true, target.toBoolean((byte) 1));
+        assertEquals(false, target.toBoolean((byte) 0));
+        assertEquals(true, target.toBoolean((short) 1));
+        assertEquals(false, target.toBoolean((short) 0));
+        assertEquals(true, target.toBoolean(1));
+        assertEquals(false, target.toBoolean(0));
+        assertEquals(true, target.toBoolean(1L));
+        assertEquals(false, target.toBoolean(0L));
+        assertEquals(true, target.toBoolean(1f));
+        assertEquals(false, target.toBoolean(0f));
+        assertEquals(true, target.toBoolean(1d));
+        assertEquals(false, target.toBoolean(0d));
+        assertEquals(true, target.toBoolean(new BigDecimal(1)));
+        assertEquals(false, target.toBoolean(new BigDecimal(0)));
+        assertEquals(true, target.toBoolean(new BigInteger("1")));
+        assertEquals(false, target.toBoolean(new BigInteger("0")));
+        assertEquals(true, target.toBoolean("true"));
+        assertEquals(false, target.toBoolean("false"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+            @Override
+            protected Boolean convertBoolean(Object obj) {
+                throw new RuntimeException("test");
+            }
+        }.toBoolean("true"));
+        assertEquals("test", e.getCause().getMessage());
     }
 
     @Test
     void testToInt4() {
-        assertNull(IceaxeConvertUtil.toInt4(null));
-        assertEquals(Integer.valueOf(123), IceaxeConvertUtil.toInt4((byte) 123));
-        assertEquals(Integer.valueOf(123), IceaxeConvertUtil.toInt4((short) 123));
-        assertEquals(Integer.valueOf(123), IceaxeConvertUtil.toInt4(123));
-        assertEquals(Integer.valueOf(123), IceaxeConvertUtil.toInt4(123L));
-        assertEquals(Integer.valueOf(123), IceaxeConvertUtil.toInt4(123f));
-        assertEquals(Integer.valueOf(123), IceaxeConvertUtil.toInt4(123d));
-        assertEquals(Integer.valueOf(123), IceaxeConvertUtil.toInt4(BigDecimal.valueOf(123)));
-        assertEquals(Integer.valueOf(123), IceaxeConvertUtil.toInt4("123"));
+        assertNull(target.toInt4(null));
+
+        assertEquals(Integer.valueOf(123), target.toInt4((byte) 123));
+        assertEquals(Integer.valueOf(123), target.toInt4((short) 123));
+        assertEquals(Integer.valueOf(123), target.toInt4(123));
+        assertEquals(Integer.valueOf(123), target.toInt4(123L));
+        assertEquals(Integer.valueOf(123), target.toInt4(123f));
+        assertEquals(Integer.valueOf(123), target.toInt4(123d));
+        assertEquals(Integer.valueOf(123), target.toInt4(BigDecimal.valueOf(123)));
+        assertEquals(Integer.valueOf(123), target.toInt4("123"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toInt4("abc"));
+        assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
     @Test
     void testToInt8() {
-        assertNull(IceaxeConvertUtil.toInt8(null));
-        assertEquals(Long.valueOf(123), IceaxeConvertUtil.toInt8((byte) 123));
-        assertEquals(Long.valueOf(123), IceaxeConvertUtil.toInt8((short) 123));
-        assertEquals(Long.valueOf(123), IceaxeConvertUtil.toInt8(123));
-        assertEquals(Long.valueOf(123), IceaxeConvertUtil.toInt8(123L));
-        assertEquals(Long.valueOf(123), IceaxeConvertUtil.toInt8(123f));
-        assertEquals(Long.valueOf(123), IceaxeConvertUtil.toInt8(123d));
-        assertEquals(Long.valueOf(123), IceaxeConvertUtil.toInt8(BigDecimal.valueOf(123)));
-        assertEquals(Long.valueOf(123), IceaxeConvertUtil.toInt8("123"));
+        assertNull(target.toInt8(null));
+
+        assertEquals(Long.valueOf(123), target.toInt8((byte) 123));
+        assertEquals(Long.valueOf(123), target.toInt8((short) 123));
+        assertEquals(Long.valueOf(123), target.toInt8(123));
+        assertEquals(Long.valueOf(123), target.toInt8(123L));
+        assertEquals(Long.valueOf(123), target.toInt8(123f));
+        assertEquals(Long.valueOf(123), target.toInt8(123d));
+        assertEquals(Long.valueOf(123), target.toInt8(BigDecimal.valueOf(123)));
+        assertEquals(Long.valueOf(123), target.toInt8("123"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toInt8("abc"));
+        assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
     @Test
     void testToFloat4() {
-        assertNull(IceaxeConvertUtil.toFloat4(null));
-        assertEquals(Float.valueOf(123), IceaxeConvertUtil.toFloat4(123));
-        assertEquals(Float.valueOf(123), IceaxeConvertUtil.toFloat4(123L));
-        assertEquals(Float.valueOf(123), IceaxeConvertUtil.toFloat4(123f));
-        assertEquals(Float.valueOf(123), IceaxeConvertUtil.toFloat4(123d));
-        assertEquals(Float.valueOf(123), IceaxeConvertUtil.toFloat4(BigDecimal.valueOf(123)));
-        assertEquals(Float.valueOf(123), IceaxeConvertUtil.toFloat4("123"));
+        assertNull(target.toFloat4(null));
+
+        assertEquals(Float.valueOf(123), target.toFloat4(123));
+        assertEquals(Float.valueOf(123), target.toFloat4(123L));
+        assertEquals(Float.valueOf(123), target.toFloat4(123f));
+        assertEquals(Float.valueOf(123), target.toFloat4(123d));
+        assertEquals(Float.valueOf(123), target.toFloat4(BigDecimal.valueOf(123)));
+        assertEquals(Float.valueOf(123), target.toFloat4("123"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toFloat4("abc"));
+        assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
     @Test
     void testToFloat8() {
-        assertNull(IceaxeConvertUtil.toFloat8(null));
-        assertEquals(Double.valueOf(123), IceaxeConvertUtil.toFloat8(123));
-        assertEquals(Double.valueOf(123), IceaxeConvertUtil.toFloat8(123L));
-        assertEquals(Double.valueOf(123), IceaxeConvertUtil.toFloat8(123f));
-        assertEquals(Double.valueOf(123), IceaxeConvertUtil.toFloat8(123d));
-        assertEquals(Double.valueOf(123), IceaxeConvertUtil.toFloat8(BigDecimal.valueOf(123)));
-        assertEquals(Double.valueOf(123), IceaxeConvertUtil.toFloat8("123"));
+        assertNull(target.toFloat8(null));
+
+        assertEquals(Double.valueOf(123), target.toFloat8(123));
+        assertEquals(Double.valueOf(123), target.toFloat8(123L));
+        assertEquals(Double.valueOf(123), target.toFloat8(123f));
+        assertEquals(Double.valueOf(123), target.toFloat8(123d));
+        assertEquals(Double.valueOf(123), target.toFloat8(BigDecimal.valueOf(123)));
+        assertEquals(Double.valueOf(123), target.toFloat8("123"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toFloat8("abc"));
+        assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
     @Test
     void testToDecimal() {
-        assertNull(IceaxeConvertUtil.toDecimal(null));
-        assertEquals(BigDecimal.valueOf(123), IceaxeConvertUtil.toDecimal((byte) 123));
-        assertEquals(BigDecimal.valueOf(123), IceaxeConvertUtil.toDecimal((short) 123));
-        assertEquals(BigDecimal.valueOf(123), IceaxeConvertUtil.toDecimal(123));
-        assertEquals(BigDecimal.valueOf(123), IceaxeConvertUtil.toDecimal(123L));
-        assertEquals(BigDecimal.valueOf(123.0), IceaxeConvertUtil.toDecimal(123f));
-        assertEquals(BigDecimal.valueOf(123.0), IceaxeConvertUtil.toDecimal(123d));
-        assertEquals(BigDecimal.valueOf(123), IceaxeConvertUtil.toDecimal(new BigDecimal("123")));
-        assertEquals(BigDecimal.valueOf(123), IceaxeConvertUtil.toDecimal(new BigInteger("123")));
-        assertEquals(BigDecimal.valueOf(123), IceaxeConvertUtil.toDecimal("123"));
+        assertNull(target.toDecimal(null));
+
+        assertEquals(BigDecimal.valueOf(123), target.toDecimal((byte) 123));
+        assertEquals(BigDecimal.valueOf(123), target.toDecimal((short) 123));
+        assertEquals(BigDecimal.valueOf(123), target.toDecimal(123));
+        assertEquals(BigDecimal.valueOf(123), target.toDecimal(123L));
+        assertEquals(BigDecimal.valueOf(123.0), target.toDecimal(123f));
+        assertEquals(BigDecimal.valueOf(123.0), target.toDecimal(123d));
+        assertEquals(BigDecimal.valueOf(123), target.toDecimal(new BigDecimal("123")));
+        assertEquals(BigDecimal.valueOf(123), target.toDecimal(new BigInteger("123")));
+        assertEquals(BigDecimal.valueOf(123), target.toDecimal("123"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toDecimal("abc"));
+        assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
     @Test
     void testToCharacter() {
-        assertNull(IceaxeConvertUtil.toCharacter(null));
-        assertEquals("123", IceaxeConvertUtil.toCharacter((byte) 123));
-        assertEquals("123", IceaxeConvertUtil.toCharacter((short) 123));
-        assertEquals("123", IceaxeConvertUtil.toCharacter(123));
-        assertEquals("123", IceaxeConvertUtil.toCharacter(123L));
-        assertEquals("123.0", IceaxeConvertUtil.toCharacter(123f));
-        assertEquals("123.0", IceaxeConvertUtil.toCharacter(123d));
-        assertEquals("123", IceaxeConvertUtil.toCharacter(BigDecimal.valueOf(123)));
-        assertEquals("123", IceaxeConvertUtil.toCharacter("123"));
+        assertNull(target.toCharacter(null));
+
+        assertEquals("123", target.toCharacter((byte) 123));
+        assertEquals("123", target.toCharacter((short) 123));
+        assertEquals("123", target.toCharacter(123));
+        assertEquals("123", target.toCharacter(123L));
+        assertEquals("123.0", target.toCharacter(123f));
+        assertEquals("123.0", target.toCharacter(123d));
+        assertEquals("123", target.toCharacter(BigDecimal.valueOf(123)));
+        assertEquals("123", target.toCharacter("123"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+            @Override
+            protected String convertString(Object obj) {
+                throw new RuntimeException("test");
+            }
+        }.toCharacter("123"));
+        assertEquals("test", e.getCause().getMessage());
     }
 
     @Test
     void testToBytes() {
-        assertNull(IceaxeConvertUtil.toBytes(null));
-        assertArrayEquals(new byte[] {}, IceaxeConvertUtil.toBytes(new byte[] {}));
-        assertArrayEquals(new byte[] { 1, 2, 3 }, IceaxeConvertUtil.toBytes(new byte[] { 1, 2, 3 }));
+        assertNull(target.toBytes(null));
+
+        assertArrayEquals(new byte[] {}, target.toBytes(new byte[] {}));
+        assertArrayEquals(new byte[] { 1, 2, 3 }, target.toBytes(new byte[] { 1, 2, 3 }));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+            @Override
+            protected byte[] convertBytes(Object obj) {
+                throw new RuntimeException("test");
+            }
+        }.toBytes("123"));
+        assertEquals("test", e.getCause().getMessage());
     }
 
     @Test
     void testToBits() {
-        assertNull(IceaxeConvertUtil.toBits(null));
-        assertArrayEquals(new boolean[] {}, IceaxeConvertUtil.toBits(new boolean[] {}));
-        assertArrayEquals(new boolean[] { true, false }, IceaxeConvertUtil.toBits(new boolean[] { true, false }));
+        assertNull(target.toBits(null));
+
+        assertArrayEquals(new boolean[] {}, target.toBits(new boolean[] {}));
+        assertArrayEquals(new boolean[] { true, false }, target.toBits(new boolean[] { true, false }));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+            @Override
+            protected boolean[] convertBits(Object obj) {
+                throw new RuntimeException("test");
+            }
+        }.toBits("123"));
+        assertEquals("test", e.getCause().getMessage());
     }
 
     @Test
     void testToDate() {
-        assertNull(IceaxeConvertUtil.toDate(null));
+        assertNull(target.toDate(null));
+
         var expected = LocalDate.of(2022, 6, 2);
-        assertEquals(expected, IceaxeConvertUtil.toDate(LocalDate.of(2022, 6, 2)));
-        assertEquals(expected, IceaxeConvertUtil.toDate(LocalDateTime.of(2022, 6, 2, 23, 59)));
-        assertEquals(expected, IceaxeConvertUtil.toDate(java.sql.Date.valueOf("2022-06-02")));
+        assertEquals(expected, target.toDate(LocalDate.of(2022, 6, 2)));
+        assertEquals(expected, target.toDate(LocalDateTime.of(2022, 6, 2, 23, 59)));
+        assertEquals(expected, target.toDate(java.sql.Date.valueOf("2022-06-02")));
+        assertEquals(expected, target.toDate("2022-06-02"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toDate("2022/06/02"));
+        assertInstanceOf(DateTimeParseException.class, e.getCause());
     }
 
     @Test
     void testToTime() {
-        assertNull(IceaxeConvertUtil.toTime(null));
+        assertNull(target.toTime(null));
+
         var expected = LocalTime.of(23, 30, 59);
-        assertEquals(expected, IceaxeConvertUtil.toTime(LocalTime.of(23, 30, 59)));
-        assertEquals(expected, IceaxeConvertUtil.toTime(LocalDateTime.of(2022, 6, 2, 23, 30, 59)));
-        assertEquals(expected, IceaxeConvertUtil.toTime(java.sql.Time.valueOf("23:30:59")));
+        assertEquals(expected, target.toTime(LocalTime.of(23, 30, 59)));
+        assertEquals(expected, target.toTime(LocalDateTime.of(2022, 6, 2, 23, 30, 59)));
+        assertEquals(expected, target.toTime(java.sql.Time.valueOf("23:30:59")));
+        assertEquals(expected, target.toTime("23:30:59"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toTime("23;30;59"));
+        assertInstanceOf(DateTimeParseException.class, e.getCause());
     }
 
     @Test
     void testToInstant() {
-        assertNull(IceaxeConvertUtil.toInstant(null));
+        assertNull(target.toInstant(null));
+
         var zone = ZoneId.of("Asia/Tokyo");
         var expected = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant();
-        assertEquals(expected, IceaxeConvertUtil.toInstant(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant()));
-        assertEquals(expected, IceaxeConvertUtil.toInstant(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone)));
-        assertEquals(expected, IceaxeConvertUtil.toInstant(OffsetDateTime.of(2022, 6, 2, 23, 30, 59, 999, ZoneOffset.ofHours(+9))));
+        assertEquals(expected, target.toInstant(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant()));
+        assertEquals(expected, target.toInstant(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone)));
+        assertEquals(expected, target.toInstant(OffsetDateTime.of(2022, 6, 2, 23, 30, 59, 999, ZoneOffset.ofHours(+9))));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+            @Override
+            protected Instant convertInstant(Object obj) {
+                throw new RuntimeException("test");
+            }
+        }.toInstant("123"));
+        assertEquals("test", e.getCause().getMessage());
     }
 
     @Test
     void testToZonedDateTime() {
         var zone = ZoneId.of("Asia/Tokyo");
-        assertNull(IceaxeConvertUtil.toZonedDateTime(null, zone));
+        assertNull(target.toZonedDateTime(null, zone));
+
         var expected = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone);
-        assertEquals(expected, IceaxeConvertUtil.toZonedDateTime(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant(), zone));
-        assertEquals(expected, IceaxeConvertUtil.toZonedDateTime(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone), zone));
-        assertEquals(expected, IceaxeConvertUtil.toZonedDateTime(OffsetDateTime.of(2022, 6, 2, 23, 30, 59, 999, ZoneOffset.ofHours(+9)), zone));
+        assertEquals(expected, target.toZonedDateTime(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant(), zone));
+        assertEquals(expected, target.toZonedDateTime(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone), zone));
+        assertEquals(expected, target.toZonedDateTime(OffsetDateTime.of(2022, 6, 2, 23, 30, 59, 999, ZoneOffset.ofHours(+9)), zone));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+            @Override
+            protected ZonedDateTime convertZonedDateTime(Object obj, ZoneId zone) {
+                throw new RuntimeException("test");
+            }
+        }.toZonedDateTime("123", zone));
+        assertEquals("test", e.getCause().getMessage());
     }
 }

@@ -125,6 +125,7 @@ public class TsurugiTransactionManager {
                         rollback(transaction, null);
                         continue;
                     }
+                    // TODO そもそもリトライ可能でない場合は別の例外をスローする
                     var ioe = new TsurugiTransactionRetryOverIOException(i, prevOption, e);
                     rollback(transaction, ioe);
                     throw ioe;

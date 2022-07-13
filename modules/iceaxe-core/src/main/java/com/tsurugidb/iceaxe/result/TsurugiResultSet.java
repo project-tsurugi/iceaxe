@@ -17,6 +17,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionRuntimeException;
+import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -33,15 +34,17 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private FutureResponse<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
     private final TgResultMapping<R> resultMapping;
+    private final IceaxeConvertUtil convertUtil;
     private final IceaxeTimeout rsTimeout;
     private final IceaxeTimeout closeTimeout;
     private TsurugiResultRecord record;
 
     // internal
-    public TsurugiResultSet(TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping) {
+    public TsurugiResultSet(TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil) {
         super(transaction);
         this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
+        this.convertUtil = convertUtil;
         var info = transaction.getSessionInfo();
         this.rsTimeout = new IceaxeTimeout(info, TgTimeoutKey.RS_CONNECT);
         this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CLOSE);
@@ -164,7 +167,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     protected TsurugiResultRecord getRecord() throws IOException {
         if (this.record == null) {
             var lowResultSet = getLowResultSet();
-            this.record = new TsurugiResultRecord(lowResultSet);
+            this.record = new TsurugiResultRecord(lowResultSet, convertUtil);
         }
         return this.record;
     }

@@ -7,6 +7,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 
 /**
  * Tsurugi PreparedStatement
@@ -22,6 +23,17 @@ public abstract class TsurugiPreparedStatement implements Closeable {
 
     protected final TgSessionInfo getSessionInfo() {
         return ownerSession.getSessionInfo();
+    }
+
+    protected final IceaxeConvertUtil getConvertUtil(IceaxeConvertUtil primaryConvertUtil) {
+        var convertUtil = primaryConvertUtil;
+        if (convertUtil == null) {
+            convertUtil = ownerSession.getConvertUtil();
+        }
+        if (convertUtil == null) {
+            convertUtil = IceaxeConvertUtil.INSTANCE;
+        }
+        return convertUtil;
     }
 
     @Override
