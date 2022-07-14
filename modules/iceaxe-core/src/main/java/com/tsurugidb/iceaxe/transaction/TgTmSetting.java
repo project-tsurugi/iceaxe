@@ -87,7 +87,7 @@ public class TgTmSetting {
      * @return transaction option
      * @see TgTxOptionSupplier
      */
-    public TgTxOption getTransactionOption(int attempt, TsurugiTransactionException e) {
+    public TgTxState getTransactionOption(int attempt, TsurugiTransactionException e) {
         if (this.transactionOptionSupplier == null) {
             throw new IllegalStateException("transactionOptionSupplier is not specifed");
         }

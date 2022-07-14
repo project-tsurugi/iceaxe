@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.transaction;
 
+import javax.annotation.Nonnull;
+
 /**
  * {@link TgTxOption} supplier
  */
@@ -24,14 +26,19 @@ public interface TgTxOptionSupplier {
      * @return supplier
      */
     public static TgTxOptionSupplier ofAlways(TgTxOption transactionOption, int attemtMaxCount) {
-        return (var attempt, var e) -> {
-            if (attempt >= attemtMaxCount) {
-                return null;
+        return (attempt, e) -> {
+            if (attempt == 0) {
+                return TgTxState.execute(transactionOption);
             }
-            if (attempt == 0 || e.isRetryable()) {
-                return transactionOption;
+
+            if (e.isRetryable()) {
+                if (attempt < attemtMaxCount) {
+                    return TgTxState.execute(transactionOption);
+                }
+                return TgTxState.retryOver();
             }
-            return null;
+
+            return TgTxState.notRetryable();
         };
     }
 
@@ -40,7 +47,8 @@ public interface TgTxOptionSupplier {
      * 
      * @param attempt attempt number
      * @param e       transaction exception (null if attempt==0)
-     * @return Transaction Option. TODO 翻訳+++: トランザクションを実行しない場合はnull
+     * @return Transaction Option
      */
-    public TgTxOption get(int attempt, TsurugiTransactionException e);
+    @Nonnull
+    public TgTxState get(int attempt, TsurugiTransactionException e);
 }

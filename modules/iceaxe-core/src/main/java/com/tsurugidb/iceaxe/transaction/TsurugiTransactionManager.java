@@ -102,8 +102,7 @@ public class TsurugiTransactionManager {
             throw new IllegalArgumentException("action is not specified");
         }
 
-        var option = setting.getTransactionOption(0, null);
-        assert option != null;
+        var option = setting.getTransactionOption(0, null).getOption();
         for (int i = 0;; i++) {
             try (var transaction = ownerSession.createTransaction(option)) {
                 setting.initializeTransaction(transaction);
@@ -118,42 +117,35 @@ public class TsurugiTransactionManager {
                     transaction.commit(commitType);
                     return r;
                 } catch (TsurugiTransactionException e) {
-                    var prevOption = option;
-                    option = setting.getTransactionOption(i + 1, e);
-                    if (option != null) {
+                    var state = setting.getTransactionOption(i + 1, e);
+                    if (state.isExecute()) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ
                         rollback(transaction, null);
+                        option = state.getOption();
                         continue;
                     }
-                    // TODO そもそもリトライ可能でない場合は別の例外をスローする
-                    var ioe = new TsurugiTransactionRetryOverIOException(i, prevOption, e);
-                    rollback(transaction, ioe);
-                    throw ioe;
+                    throw createException(transaction, state, i, option, e);
                 } catch (TsurugiTransactionRuntimeException e) {
                     var c = e.getCause();
-                    var prevOption = option;
-                    option = setting.getTransactionOption(i + 1, c);
-                    if (option != null) {
+                    var state = setting.getTransactionOption(i + 1, c);
+                    if (state.isExecute()) {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ
                         rollback(transaction, null);
+                        option = state.getOption();
                         continue;
                     }
-                    var ioe = new TsurugiTransactionRetryOverIOException(i, prevOption, e);
-                    rollback(transaction, ioe);
-                    throw ioe;
+                    throw createException(transaction, state, i, option, e);
                 } catch (Exception e) {
                     var c = findTransactionException(e);
                     if (c != null) {
-                        var prevOption = option;
-                        option = setting.getTransactionOption(i + 1, c);
-                        if (option != null) {
+                        var state = setting.getTransactionOption(i + 1, c);
+                        if (state.isExecute()) {
                             // リトライ可能なabortの場合でもrollbackは呼ぶ
                             rollback(transaction, null);
+                            option = state.getOption();
                             continue;
                         }
-                        var ioe = new TsurugiTransactionRetryOverIOException(i, prevOption, e);
-                        rollback(transaction, ioe);
-                        throw ioe;
+                        throw createException(transaction, state, i, option, e);
                     }
                     rollback(transaction, e);
                     throw e;
@@ -172,6 +164,17 @@ public class TsurugiTransactionManager {
             }
         }
         return null;
+    }
+
+    private IOException createException(TsurugiTransaction transaction, TgTxState state, int attemt, TgTxOption option, Exception cause) throws IOException {
+        IOException e;
+        if (state.isRetryOver()) {
+            e = new TsurugiTransactionRetryOverIOException(attemt, option, cause);
+        } else {
+            e = new TsurugiTransactionIOException(cause.getMessage(), attemt, option, cause);
+        }
+        rollback(transaction, e);
+        return e;
     }
 
     private void rollback(TsurugiTransaction transaction, Throwable save) throws IOException {

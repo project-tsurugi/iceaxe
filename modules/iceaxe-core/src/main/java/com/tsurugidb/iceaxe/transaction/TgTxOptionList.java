@@ -48,15 +48,18 @@ public class TgTxOptionList implements TgTxOptionSupplier {
     }
 
     @Override
-    public TgTxOption get(int attempt, TsurugiTransactionException e) {
+    public TgTxState get(int attempt, TsurugiTransactionException e) {
         if (attempt == 0) {
-            return transactionOptionList.get(0);
+            return TgTxState.execute(transactionOptionList.get(0));
         }
 
-        if (attempt < transactionOptionList.size() && e.isRetryable()) {
-            return transactionOptionList.get(attempt);
+        if (e.isRetryable()) {
+            if (attempt < transactionOptionList.size()) {
+                return TgTxState.execute(transactionOptionList.get(attempt));
+            }
+            return TgTxState.retryOver();
         }
 
-        return null;
+        return TgTxState.notRetryable();
     }
 }
