@@ -26,20 +26,7 @@ public interface TgTxOptionSupplier {
      * @return supplier
      */
     public static TgTxOptionSupplier ofAlways(TgTxOption transactionOption, int attemtMaxCount) {
-        return (attempt, e) -> {
-            if (attempt == 0) {
-                return TgTxState.execute(transactionOption);
-            }
-
-            if (e.isRetryable()) {
-                if (attempt < attemtMaxCount) {
-                    return TgTxState.execute(transactionOption);
-                }
-                return TgTxState.retryOver();
-            }
-
-            return TgTxState.notRetryable();
-        };
+        return TgTxOptionAlways.of(transactionOption, attemtMaxCount);
     }
 
     /**

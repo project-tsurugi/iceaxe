@@ -40,7 +40,7 @@ public class TsurugiResultCount extends TsurugiResult {
         checkResultStatus(false);
         // FIXME 更新件数取得
 //      throw new InternalError("not yet implements");
-        System.err.println("not yet implements TsurugiResultCount.getUpdateCount(), now always returns -1");
+//      System.err.println("not yet implements TsurugiResultCount.getUpdateCount(), now always returns -1");
         return -1;
     }
 

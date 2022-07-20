@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.concurrent.ThreadSafe;
 
 /**
- * TgTransactionOption list
+ * TgTxOption list
  */
 @ThreadSafe
 public class TgTxOptionList implements TgTxOptionSupplier {
