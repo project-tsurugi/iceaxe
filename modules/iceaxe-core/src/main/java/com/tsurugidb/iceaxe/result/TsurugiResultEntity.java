@@ -7,7 +7,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -57,6 +59,16 @@ public class TsurugiResultEntity {
 
     protected void add(String name, Object value) {
         valueMap.put(name, value);
+    }
+
+    /**
+     * get name list
+     * 
+     * @return list of column name
+     */
+    @Nonnull
+    public List<String> getNameList() {
+        return new ArrayList<>(valueMap.keySet());
     }
 
     @Nullable
