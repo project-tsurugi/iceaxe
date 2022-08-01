@@ -2,6 +2,8 @@ package com.tsurugidb.iceaxe.transaction;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.nautilus_technologies.tsubakuro.low.sql.Transaction;
@@ -29,6 +31,8 @@ public class TsurugiTransaction implements Closeable {
     private final IceaxeTimeout commitTimeout;
     private final IceaxeTimeout rollbackTimeout;
     private final IceaxeTimeout closeTimeout;
+    private List<Runnable> commitListenerList;
+    private List<Runnable> rollbackListenerList;
     private boolean committed = false;
     private boolean rollbacked = false;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
@@ -153,6 +157,30 @@ public class TsurugiTransaction implements Closeable {
     }
 
     /**
+     * add commit listener
+     * 
+     * @param listener listener
+     */
+    public void addCommitListener(Runnable listener) {
+        if (this.commitListenerList == null) {
+            this.commitListenerList = new ArrayList<>();
+        }
+        commitListenerList.add(listener);
+    }
+
+    /**
+     * add rollback listener
+     * 
+     * @param listener listener
+     */
+    public void addRollbackListener(Runnable listener) {
+        if (this.rollbackListenerList == null) {
+            this.rollbackListenerList = new ArrayList<>();
+        }
+        rollbackListenerList.add(listener);
+    }
+
+    /**
      * Whether transaction is available
      * 
      * @return true: available
@@ -184,6 +212,12 @@ public class TsurugiTransaction implements Closeable {
         var lowCommitStatus = commitType.getLowCommitStatus();
         finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout);
         this.committed = true;
+
+        if (commitListenerList != null) {
+            for (var listener : commitListenerList) {
+                listener.run();
+            }
+        }
     }
 
     /**
@@ -199,6 +233,12 @@ public class TsurugiTransaction implements Closeable {
 
         finish(Transaction::rollback, rollbackTimeout);
         this.rollbacked = true;
+
+        if (rollbackListenerList != null) {
+            for (var listener : rollbackListenerList) {
+                listener.run();
+            }
+        }
     }
 
     protected void finish(IoFunction<Transaction, FutureResponse<ResultOnly>> finisher, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
