@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.tsurugidb.iceaxe.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgVariableList;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 
 /**
  * example entity for 'TEST' table
@@ -61,7 +62,7 @@ public class TestEntity {
         this.zzz = zzz;
     }
 
-    public static TestEntity of(TsurugiResultRecord record) throws IOException {
+    public static TestEntity of(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
         var entity = new TestEntity();
         entity.setFoo(record.getInt4OrNull("foo"));
         entity.setBar(record.getInt8OrNull("bar"));

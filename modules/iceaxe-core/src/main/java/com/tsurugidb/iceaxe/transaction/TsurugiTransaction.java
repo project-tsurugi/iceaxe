@@ -16,7 +16,6 @@ import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.IoFunction;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
-import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 
 /**
  * Tsurugi Transaction
@@ -241,19 +240,9 @@ public class TsurugiTransaction implements Closeable {
         }
     }
 
-    protected void finish(IoFunction<Transaction, FutureResponse<ResultOnly>> finisher, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
+    protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
         var lowResultFuture = finisher.apply(getLowTransaction());
-        var lowResult = IceaxeIoUtil.getFromTransactionFuture(lowResultFuture, timeout);
-        var lowResultCase = lowResult.getResultCase();
-        switch (lowResultCase) {
-        case SUCCESS:
-            return;
-        case ERROR:
-            throw new TsurugiTransactionException(lowResult.getError());
-        default:
-            // FIXME commit/rollbackではSUCCESS,ERROR以外は返らないという想定で良いか？
-            throw new AssertionError(lowResultCase);
-        }
+        IceaxeIoUtil.getFromTransactionFuture(lowResultFuture, timeout);
     }
 
     /**

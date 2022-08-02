@@ -2,7 +2,8 @@ package com.tsurugidb.iceaxe.result;
 
 import java.io.IOException;
 
-import com.tsurugidb.iceaxe.util.IoFunction;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.TsurugiTransactionFunction;
 
 /**
  * Tsurugi Result Mapping
@@ -18,23 +19,23 @@ public class TgConverterResultMapping<R> extends TgResultMapping<R> {
      * @param resultConverter converter from TsurugiResultRecord to R
      * @return Result Mapping
      */
-    public static <R> TgConverterResultMapping<R> of(IoFunction<TsurugiResultRecord, R> resultConverter) {
+    public static <R> TgConverterResultMapping<R> of(TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter) {
         return new TgConverterResultMapping<>(resultConverter);
     }
 
-    private final IoFunction<TsurugiResultRecord, R> resultConverter;
+    private final TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter;
 
     /**
      * Tsurugi Result Mapping
      * 
      * @param resultConverter converter from TsurugiResultRecord to R
      */
-    public TgConverterResultMapping(IoFunction<TsurugiResultRecord, R> resultConverter) {
+    public TgConverterResultMapping(TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter) {
         this.resultConverter = resultConverter;
     }
 
     @Override
-    protected R convert(TsurugiResultRecord record) throws IOException {
+    protected R convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
         return resultConverter.apply(record);
     }
 }

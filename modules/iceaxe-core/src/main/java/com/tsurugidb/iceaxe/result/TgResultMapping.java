@@ -5,8 +5,9 @@ import java.util.function.Supplier;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
-import com.tsurugidb.iceaxe.util.IoFunction;
+import com.tsurugidb.iceaxe.util.TsurugiTransactionFunction;
 
 /**
  * Tsurugi Result Mapping
@@ -22,7 +23,7 @@ public abstract class TgResultMapping<R> {
     public static final TgResultMapping<TsurugiResultEntity> DEFAULT = new TgResultMapping<>() {
 
         @Override
-        protected TsurugiResultEntity convert(TsurugiResultRecord record) throws IOException {
+        protected TsurugiResultEntity convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
             return TsurugiResultEntity.of(record);
         }
     };
@@ -34,7 +35,7 @@ public abstract class TgResultMapping<R> {
      * @param resultConverter converter from TsurugiResultRecord to R
      * @return Result Mapping
      */
-    public static <R> TgResultMapping<R> of(IoFunction<TsurugiResultRecord, R> resultConverter) {
+    public static <R> TgResultMapping<R> of(TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter) {
         return TgConverterResultMapping.of(resultConverter);
     }
 
@@ -66,5 +67,5 @@ public abstract class TgResultMapping<R> {
     }
 
     // internal
-    protected abstract R convert(TsurugiResultRecord record) throws IOException;
+    protected abstract R convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException;
 }

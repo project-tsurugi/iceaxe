@@ -81,10 +81,10 @@ public class TgSessionInfo {
         /** {@link TsurugiTransaction} close */
         TRANSACTION_CLOSE,
 
-        /** {@link TsurugiResult} connect */
-        RESULT_CONNECT,
         /** {@link TsurugiResultSet} connect */
         RS_CONNECT,
+        /** {@link TsurugiResult} check */
+        RESULT_CHECK,
         /** {@link TsurugiResult} close */
         RESULT_CLOSE,
     }

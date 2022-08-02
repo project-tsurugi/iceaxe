@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
-import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
+import com.tsurugidb.jogasaki.proto.SqlRequest.Placeholder;;
 
 /**
  * Tsurugi Parameter Mapping for Entity
@@ -43,7 +43,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         return new TgEntityParameterMapping<>();
     }
 
-    private final List<PlaceHolder> lowPlaceHolderList = new ArrayList<>();
+    private final List<Placeholder> lowPlaceholderList = new ArrayList<>();
     private final List<BiFunction<P, IceaxeConvertUtil, Parameter>> parameterConverterList = new ArrayList<>();
 
     /**
@@ -634,13 +634,13 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     protected void addVariable(String name, TgDataType type) {
-        var lowVariable = PlaceHolder.newBuilder().setName(name).setType(type.getLowDataType()).build();
-        lowPlaceHolderList.add(lowVariable);
+        var lowVariable = Placeholder.newBuilder().setName(name).setAtomType(type.getLowDataType()).build();
+        lowPlaceholderList.add(lowVariable);
     }
 
     @Override
-    public List<PlaceHolder> toLowPlaceHolderList() {
-        return lowPlaceHolderList;
+    public List<Placeholder> toLowPlaceholderList() {
+        return lowPlaceholderList;
     }
 
     @Override

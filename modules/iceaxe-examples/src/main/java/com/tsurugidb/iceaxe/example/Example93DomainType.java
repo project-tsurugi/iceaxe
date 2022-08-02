@@ -13,6 +13,7 @@ import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 
 /**
@@ -161,7 +162,7 @@ public class Example93DomainType {
         }
     }
 
-    private void setEntityType(Example93Entity1 entity, TsurugiResultRecord record) throws IOException {
+    private void setEntityType(Example93Entity1 entity, TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
         String value = record.nextCharacterOrNull();
         ExampleType type = (value != null) ? ExampleType.valueOf(value) : null;
         entity.setType(type);

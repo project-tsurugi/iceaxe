@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 
 /**
@@ -32,13 +33,14 @@ public class TsurugiResultEntity {
      * @param record Tsurugi Result Record
      * @return entity
      * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public static TsurugiResultEntity of(TsurugiResultRecord record) throws IOException {
+    public static TsurugiResultEntity of(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
         var entity = new TsurugiResultEntity();
         entity.setConvertUtil(record.getConvertUtil());
         while (record.moveCurrentColumnNext()) {
             var name = record.getCurrentColumnName();
-            var value = record.getCurrentColumnValue();
+            var value = record.fetchCurrentColumnValue();
             entity.add(name, value);
         }
         return entity;

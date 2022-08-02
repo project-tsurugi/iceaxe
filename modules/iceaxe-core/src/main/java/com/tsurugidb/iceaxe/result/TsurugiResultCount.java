@@ -8,7 +8,6 @@ import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
-import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 
 /**
  * Tsurugi Result Count for PreparedStatement
@@ -16,17 +15,17 @@ import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
 @NotThreadSafe
 public class TsurugiResultCount extends TsurugiResult {
 
-    private FutureResponse<ResultOnly> lowResultOnlyFuture;
+    private FutureResponse<Void> lowResultFuture;
 
     // internal
-    public TsurugiResultCount(TsurugiTransaction transaction, FutureResponse<ResultOnly> lowResultOnlyFuture) {
+    public TsurugiResultCount(TsurugiTransaction transaction, FutureResponse<Void> lowResultFuture) {
         super(transaction);
-        this.lowResultOnlyFuture = lowResultOnlyFuture;
+        this.lowResultFuture = lowResultFuture;
     }
 
     @Override
-    protected FutureResponse<ResultOnly> getLowResultOnlyFuture() throws IOException {
-        return lowResultOnlyFuture;
+    protected FutureResponse<Void> getLowResultFuture() throws IOException {
+        return lowResultFuture;
     }
 
     /**
@@ -37,7 +36,7 @@ public class TsurugiResultCount extends TsurugiResult {
      * @throws TsurugiTransactionException
      */
     public int getUpdateCount() throws IOException, TsurugiTransactionException {
-        checkResultStatus(false);
+        checkLowResult();
         // FIXME 更新件数取得
 //      throw new InternalError("not yet implements");
 //      System.err.println("not yet implements TsurugiResultCount.getUpdateCount(), now always returns -1");
@@ -46,12 +45,8 @@ public class TsurugiResultCount extends TsurugiResult {
 
     @Override
     public void close() throws IOException {
-        // TODO checkResultStatusが廃止されたら、コメントも削除
-        // checkResultStatus(true); クローズ時にはステータスチェックは行わない
-        // 一度も更新件数を取得しない場合でも、commitでステータスチェックされる
-
         // not try-finally
-        IceaxeIoUtil.close(lowResultOnlyFuture);
+        IceaxeIoUtil.close(lowResultFuture);
         super.close();
     }
 }

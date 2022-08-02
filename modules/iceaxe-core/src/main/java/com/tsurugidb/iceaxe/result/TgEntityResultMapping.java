@@ -17,9 +17,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.tsurugidb.iceaxe.statement.TgDataType;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
-import com.tsurugidb.iceaxe.util.IoBiConsumer;
-import com.tsurugidb.iceaxe.util.IoFunction;
+import com.tsurugidb.iceaxe.util.TsurugiTransactionBiConsumer;
+import com.tsurugidb.iceaxe.util.TsurugiTransactionFunction;
 
 /**
  * Tsurugi Result Mapping for Entity
@@ -40,8 +41,8 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     private Supplier<R> entitySupplier;
-    private final List<IoBiConsumer<R, TsurugiResultRecord>> columnConverterList = new ArrayList<>();
-    private Map<String, IoBiConsumer<R, TsurugiResultRecord>> columnConverterMap;
+    private final List<TsurugiTransactionBiConsumer<R, TsurugiResultRecord>> columnConverterList = new ArrayList<>();
+    private Map<String, TsurugiTransactionBiConsumer<R, TsurugiResultRecord>> columnConverterMap;
 
     /**
      * Tsurugi Result Mapping
@@ -1146,9 +1147,9 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
 
     // Object
 
-    private static final Map<TgDataType, IoFunction<TsurugiResultRecord, Object>> RECORD_GETTER_MAP;
+    private static final Map<TgDataType, TsurugiTransactionFunction<TsurugiResultRecord, Object>> RECORD_GETTER_MAP;
     static {
-        var map = new EnumMap<TgDataType, IoFunction<TsurugiResultRecord, Object>>(TgDataType.class);
+        var map = new EnumMap<TgDataType, TsurugiTransactionFunction<TsurugiResultRecord, Object>>(TgDataType.class);
         map.put(TgDataType.BOOLEAN, TsurugiResultRecord::nextBooleanOrNull);
         map.put(TgDataType.INT4, TsurugiResultRecord::nextInt4OrNull);
         map.put(TgDataType.INT8, TsurugiResultRecord::nextInt8OrNull);
@@ -1187,34 +1188,34 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param converter converter to R
      * @return this
      */
-    public TgEntityResultMapping<R> add(IoBiConsumer<R, TsurugiResultRecord> converter) {
+    public TgEntityResultMapping<R> add(TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter) {
         int index = columnConverterList.size();
         set(index, converter);
         return this;
     }
 
-    protected <V> void set(int index, IoFunction<TsurugiResultRecord, V> recordGetter, BiConsumer<R, V> setter) {
+    protected <V> void set(int index, TsurugiTransactionFunction<TsurugiResultRecord, V> recordGetter, BiConsumer<R, V> setter) {
         set(index, (entity, record) -> {
             V value = recordGetter.apply(record);
             setter.accept(entity, value);
         });
     }
 
-    protected void set(int index, IoBiConsumer<R, TsurugiResultRecord> converter) {
+    protected void set(int index, TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter) {
         while (index >= columnConverterList.size()) {
             columnConverterList.add(null);
         }
         columnConverterList.set(index, converter);
     }
 
-    protected <V> void set(String name, IoFunction<TsurugiResultRecord, V> recordGetter, BiConsumer<R, V> setter) {
+    protected <V> void set(String name, TsurugiTransactionFunction<TsurugiResultRecord, V> recordGetter, BiConsumer<R, V> setter) {
         set(name, (entity, record) -> {
             V value = recordGetter.apply(record);
             setter.accept(entity, value);
         });
     }
 
-    protected void set(String name, IoBiConsumer<R, TsurugiResultRecord> converter) {
+    protected void set(String name, TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter) {
         if (this.columnConverterMap == null) {
             this.columnConverterMap = new HashMap<>();
         }
@@ -1223,7 +1224,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
 
 //  @ThreadSafe
     @Override
-    protected R convert(TsurugiResultRecord record) throws IOException {
+    protected R convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
         mergeColumnConverterMap(record);
 
         R entity = entitySupplier.get();
@@ -1237,7 +1238,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         return entity;
     }
 
-    protected synchronized void mergeColumnConverterMap(TsurugiResultRecord record) throws IOException {
+    protected synchronized void mergeColumnConverterMap(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
         if (this.columnConverterMap != null) {
             var nameList = record.getNameList();
             int i = 0;

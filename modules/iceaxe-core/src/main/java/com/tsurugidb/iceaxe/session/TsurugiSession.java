@@ -196,8 +196,8 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException {
-        var lowPlaceHolderList = parameterMapping.toLowPlaceHolderList();
-        var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceHolderList);
+        var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
+        var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
         var ps = new TsurugiPreparedStatementQuery1<>(this, lowPreparedStatementFuture, parameterMapping, resultMapping);
         return ps;
     }
@@ -226,8 +226,8 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public <P> TsurugiPreparedStatementUpdate1<P> createPreparedStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
-        var lowPlaceHolderList = parameterMapping.toLowPlaceHolderList();
-        var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceHolderList);
+        var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
+        var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
         var ps = new TsurugiPreparedStatementUpdate1<>(this, lowPreparedStatementFuture, parameterMapping);
         return ps;
     }

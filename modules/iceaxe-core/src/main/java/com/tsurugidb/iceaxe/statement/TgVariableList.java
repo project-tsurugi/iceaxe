@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.nautilus_technologies.tsubakuro.low.sql.Placeholders;
-import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
+import com.tsurugidb.jogasaki.proto.SqlRequest.Placeholder;
 
 /**
  * Tsurugi Variable definition for PreparedStatement
@@ -37,7 +37,7 @@ public class TgVariableList {
         return variableList;
     }
 
-    private final List<PlaceHolder> lowPlaceHolderList = new ArrayList<>();
+    private final List<Placeholder> lowPlaceholderList = new ArrayList<>();
     /** Map&lt;name, type&gt; */
     private Map<String, TgDataType> typeMap;
 
@@ -238,8 +238,8 @@ public class TgVariableList {
     }
 
     protected final void addInternal(String name, TgDataType type) {
-        var lowVariable = Placeholders.of(name, type.getLowDataType());
-        lowPlaceHolderList.add(lowVariable);
+        var lowPlaceholder = Placeholders.of(name, type.getLowDataType());
+        lowPlaceholderList.add(lowPlaceholder);
         this.typeMap = null;
     }
 
@@ -250,8 +250,8 @@ public class TgVariableList {
      * @return this
      */
     public TgVariableList add(TgVariableList otherList) {
-        for (var ph : otherList.lowPlaceHolderList) {
-            lowPlaceHolderList.add(ph);
+        for (var lowPlaceholder : otherList.lowPlaceholderList) {
+            lowPlaceholderList.add(lowPlaceholder);
         }
         this.typeMap = null;
         return this;
@@ -273,12 +273,12 @@ public class TgVariableList {
      * @return sql names
      */
     public String getSqlNames(String delimiter) {
-        return lowPlaceHolderList.stream().map(ph -> ":" + ph.getName()).collect(Collectors.joining(delimiter));
+        return lowPlaceholderList.stream().map(ph -> ":" + ph.getName()).collect(Collectors.joining(delimiter));
     }
 
     // internal
-    public List<PlaceHolder> toLowPlaceHolderList() {
-        return this.lowPlaceHolderList;
+    public List<Placeholder> toLowPlaceholderList() {
+        return this.lowPlaceholderList;
     }
 
     /**
@@ -291,9 +291,9 @@ public class TgVariableList {
         if (this.typeMap == null) {
             synchronized (this) {
                 var map = new HashMap<String, TgDataType>();
-                for (var ph : lowPlaceHolderList) {
-                    var lowName = ph.getName();
-                    var lowType = ph.getType();
+                for (var lowPlaceholder : lowPlaceholderList) {
+                    var lowName = lowPlaceholder.getName();
+                    var lowType = lowPlaceholder.getAtomType();
                     var type = TgDataType.of(lowType);
                     map.put(lowName, type);
                 }
@@ -310,6 +310,6 @@ public class TgVariableList {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + lowPlaceHolderList;
+        return getClass().getSimpleName() + lowPlaceholderList;
     }
 }

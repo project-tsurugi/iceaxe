@@ -165,8 +165,8 @@ class TgVariableListTest {
     }
 
     private static void assertVariable(Map<String, TgDataType> expectedMap, TgVariableList actual) {
-        var phList = actual.toLowPlaceHolderList();
-        var actualMap = phList.stream().collect(Collectors.toMap(v -> v.getName(), v -> v.getType()));
+        var phList = actual.toLowPlaceholderList();
+        var actualMap = phList.stream().collect(Collectors.toMap(v -> v.getName(), v -> v.getAtomType()));
         assertEquals(expectedMap.size(), actualMap.size());
         expectedMap.forEach((name, expectedType) -> {
             var actualType = actualMap.get(name);

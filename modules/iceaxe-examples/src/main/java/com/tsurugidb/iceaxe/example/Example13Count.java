@@ -12,6 +12,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 
 /**
@@ -109,7 +110,7 @@ public class Example13Count {
             this.count = count;
         }
 
-        public static CountByZzzEntity of(TsurugiResultRecord record) throws IOException {
+        public static CountByZzzEntity of(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
             var entity = new CountByZzzEntity();
             entity.setZzz(record.nextCharacter());
             entity.setCount(record.nextInt4());

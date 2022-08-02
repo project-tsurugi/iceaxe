@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
@@ -21,7 +22,7 @@ import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
-import com.tsurugidb.jogasaki.proto.SqlResponse.ResultOnly;
+import com.tsurugidb.jogasaki.proto.SqlCommon.Column;
 
 /**
  * Tsurugi Result Set for PreparedStatement
@@ -35,7 +36,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private ResultSet lowResultSet;
     private final TgResultMapping<R> resultMapping;
     private final IceaxeConvertUtil convertUtil;
-    private final IceaxeTimeout rsTimeout;
+    private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
     private TsurugiResultRecord record;
 
@@ -46,14 +47,14 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
         var info = transaction.getSessionInfo();
-        this.rsTimeout = new IceaxeTimeout(info, TgTimeoutKey.RS_CONNECT);
+        this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.RS_CONNECT);
         this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CLOSE);
 
         applyCloseTimeout();
     }
 
     private void applyCloseTimeout() {
-//      closeTimeout.apply(lowResultSet);
+        closeTimeout.apply(lowResultSet);
         closeTimeout.apply(lowResultSetFuture);
     }
 
@@ -72,7 +73,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
      * @param timeout time
      */
     public void setResultSetTimeout(TgTimeValue timeout) {
-        rsTimeout.set(timeout);
+        connectTimeout.set(timeout);
     }
 
     /**
@@ -98,7 +99,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     protected final synchronized ResultSet getLowResultSet() throws IOException {
         if (this.lowResultSet == null) {
-            this.lowResultSet = IceaxeIoUtil.getFromFuture(lowResultSetFuture, rsTimeout);
+            this.lowResultSet = IceaxeIoUtil.getFromFuture(lowResultSetFuture, connectTimeout);
             try {
                 IceaxeIoUtil.close(lowResultSetFuture);
                 this.lowResultSetFuture = null;
@@ -110,16 +111,20 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     }
 
     @Override
-    protected FutureResponse<ResultOnly> getLowResultOnlyFuture() throws IOException {
+    protected FutureResponse<Void> getLowResultFuture() throws IOException {
         return getLowResultSet().getResponse();
     }
 
     protected boolean nextLowRecord() throws IOException, TsurugiTransactionException {
         try {
             var lowResultSet = getLowResultSet();
-            boolean exists = lowResultSet.nextRecord();
-            checkResultStatus(false);
+            boolean exists = lowResultSet.nextRow();
+            if (!exists) {
+                checkLowResult();
+            }
             return exists;
+        } catch (ServerException e) {
+            throw new TsurugiTransactionException(e);
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
@@ -130,20 +135,31 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
      * 
      * @return list of column name
      * @throws IOException
+     * @throws TsurugiTransactionException
      */
-    public List<String> getNameList() throws IOException {
+    public List<String> getNameList() throws IOException, TsurugiTransactionException {
         return getNameList(getLowResultSet());
     }
 
-    static List<String> getNameList(ResultSet lowResultSet) throws IOException {
-        var lowMeta = lowResultSet.getRecordMeta();
-        var size = lowMeta.fieldCount();
+    static List<String> getNameList(ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
+        var lowColumnList = getLowColumnList(lowResultSet);
+        var size = lowColumnList.size();
         var list = new ArrayList<String>(size);
-        for (int i = 0; i < size; i++) {
-            var name = lowMeta.name(i);
-            list.add(name);
+        for (var lowColumn : lowColumnList) {
+            list.add(lowColumn.getName());
         }
         return list;
+    }
+
+    static List<? extends Column> getLowColumnList(ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
+        try {
+            var lowMetadata = lowResultSet.getMetadata();
+            return lowMetadata.getColumns();
+        } catch (ServerException e) {
+            throw new TsurugiTransactionException(e);
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
     }
 
     /**
@@ -245,6 +261,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
                 result = resultMapping.convert(record);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
+            } catch (TsurugiTransactionException e) {
+                throw new TsurugiTransactionRuntimeException(e);
             }
             this.moveNext = true;
             return result;

@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
-import com.tsurugidb.jogasaki.proto.SqlRequest.PlaceHolder;
+import com.tsurugidb.jogasaki.proto.SqlRequest.Placeholder;
 
 /**
  * Tsurugi Parameter Mapping
@@ -74,7 +74,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     // internal
-    public abstract List<PlaceHolder> toLowPlaceHolderList();
+    public abstract List<Placeholder> toLowPlaceholderList();
 
     // internal
     protected abstract List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil);
