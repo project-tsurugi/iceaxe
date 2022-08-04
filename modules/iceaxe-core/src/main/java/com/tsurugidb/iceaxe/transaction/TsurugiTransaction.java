@@ -241,8 +241,9 @@ public class TsurugiTransaction implements Closeable {
     }
 
     protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
-        var lowResultFuture = finisher.apply(getLowTransaction());
-        IceaxeIoUtil.getFromTransactionFuture(lowResultFuture, timeout);
+        var transaction = getLowTransaction();
+        var lowResultFuture = finisher.apply(transaction);
+        IceaxeIoUtil.checkAndCloseTransactionFuture(lowResultFuture, timeout, closeTimeout);
     }
 
     /**

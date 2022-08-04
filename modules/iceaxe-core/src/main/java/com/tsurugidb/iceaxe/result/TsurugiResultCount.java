@@ -24,8 +24,10 @@ public class TsurugiResultCount extends TsurugiResult {
     }
 
     @Override
-    protected FutureResponse<Void> getLowResultFuture() throws IOException {
-        return lowResultFuture;
+    protected FutureResponse<Void> getLowResultFutureOnce() throws IOException {
+        var r = this.lowResultFuture;
+        this.lowResultFuture = null;
+        return r;
     }
 
     /**
@@ -45,6 +47,8 @@ public class TsurugiResultCount extends TsurugiResult {
 
     @Override
     public void close() throws IOException {
+        // checkLowResult()を一度も呼ばなくても、commit()でチェックされるはず
+
         // not try-finally
         IceaxeIoUtil.close(lowResultFuture);
         super.close();

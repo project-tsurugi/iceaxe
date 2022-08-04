@@ -35,6 +35,7 @@ public final class IceaxeIoUtil {
         }
     }
 
+    // TODO getFromTransactionFuture()使わないなら削除
     /**
      * get value from future for transaction (commit/rollback)
      * 
@@ -45,10 +46,32 @@ public final class IceaxeIoUtil {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
+    @Deprecated(forRemoval = true)
     public static <V> V getFromTransactionFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
         var time = timeout.get();
         try {
             return future.get(time.value(), time.unit());
+        } catch (ServerException e) {
+            throw new TsurugiTransactionException(e);
+        } catch (InterruptedException | TimeoutException e) {
+            throw new IOException(e);
+        }
+    }
+
+    /**
+     * get and close future
+     * 
+     * @param future       future
+     * @param checkTimeout the maximum time to wait for get
+     * @param closeTimeout the maximum time to wait for close
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public static void checkAndCloseTransactionFuture(FutureResponse<?> future, IceaxeTimeout checkTimeout, IceaxeTimeout closeTimeout) throws IOException, TsurugiTransactionException {
+        var time = checkTimeout.get();
+        closeTimeout.apply(future);
+        try (future) {
+            future.get(time.value(), time.unit());
         } catch (ServerException e) {
             throw new TsurugiTransactionException(e);
         } catch (InterruptedException | TimeoutException e) {

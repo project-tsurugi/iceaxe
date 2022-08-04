@@ -23,14 +23,23 @@ public abstract class TsurugiResult implements Closeable {
 
     private final TsurugiTransaction ownerTransaction;
     private final IceaxeTimeout checkTimeout;
-    private boolean getResult = false;
+    private final IceaxeTimeout closeTimeout;
+    private boolean resultChecked = false;
 
     // internal
     public TsurugiResult(TsurugiTransaction transaction) {
         this.ownerTransaction = transaction;
         transaction.addChild(this);
+
         var info = transaction.getSessionInfo();
         this.checkTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CHECK);
+        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CLOSE);
+
+        applyCloseTimeout();
+    }
+
+    private void applyCloseTimeout() {
+//      closeTimeout.apply(lowResultFuture);
     }
 
     /**
@@ -51,15 +60,36 @@ public abstract class TsurugiResult implements Closeable {
         checkTimeout.set(timeout);
     }
 
+    /**
+     * set close-timeout
+     * 
+     * @param time timeout time
+     * @param unit timeout unit
+     */
+    public void setCloseTimeout(long time, TimeUnit unit) {
+        setCloseTimeout(TgTimeValue.of(time, unit));
+    }
+
+    /**
+     * set close-timeout
+     * 
+     * @param timeout time
+     */
+    public void setCloseTimeout(TgTimeValue timeout) {
+        closeTimeout.set(timeout);
+
+        applyCloseTimeout();
+    }
+
     protected final synchronized void checkLowResult() throws IOException, TsurugiTransactionException {
-        if (!this.getResult) {
-            this.getResult = true;
-            var lowResultFuture = getLowResultFuture();
-            IceaxeIoUtil.getFromTransactionFuture(lowResultFuture, checkTimeout);
+        if (!this.resultChecked) {
+            this.resultChecked = true;
+            var lowResultFuture = getLowResultFutureOnce();
+            IceaxeIoUtil.checkAndCloseTransactionFuture(lowResultFuture, checkTimeout, closeTimeout);
         }
     }
 
-    protected abstract FutureResponse<Void> getLowResultFuture() throws IOException;
+    protected abstract FutureResponse<Void> getLowResultFutureOnce() throws IOException;
 
     @Override
     @OverridingMethodsMustInvokeSuper

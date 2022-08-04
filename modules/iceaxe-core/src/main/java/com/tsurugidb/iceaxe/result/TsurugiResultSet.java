@@ -46,9 +46,10 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
+
         var info = transaction.getSessionInfo();
         this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.RS_CONNECT);
-        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CLOSE);
+        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.RS_CLOSE);
 
         applyCloseTimeout();
     }
@@ -63,8 +64,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
      * 
      * @param timeout time
      */
-    public void setResultSetTimeout(long time, TimeUnit unit) {
-        setResultSetTimeout(TgTimeValue.of(time, unit));
+    public void setRsConnectTimeout(long time, TimeUnit unit) {
+        setRsConnectTimeout(TgTimeValue.of(time, unit));
     }
 
     /**
@@ -72,26 +73,26 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
      * 
      * @param timeout time
      */
-    public void setResultSetTimeout(TgTimeValue timeout) {
+    public void setRsConnectTimeout(TgTimeValue timeout) {
         connectTimeout.set(timeout);
     }
 
     /**
-     * set close-timeout
+     * set ResetSet-close-timeout
      * 
      * @param time timeout time
      * @param unit timeout unit
      */
-    public void setCloseTimeout(long time, TimeUnit unit) {
-        setCloseTimeout(TgTimeValue.of(time, unit));
+    public void setRsCloseTimeout(long time, TimeUnit unit) {
+        setRsCloseTimeout(TgTimeValue.of(time, unit));
     }
 
     /**
-     * set close-timeout
+     * set ResetSet-close-timeout
      * 
      * @param timeout time
      */
-    public void setCloseTimeout(TgTimeValue timeout) {
+    public void setRsCloseTimeout(TgTimeValue timeout) {
         closeTimeout.set(timeout);
 
         applyCloseTimeout();
@@ -111,7 +112,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     }
 
     @Override
-    protected FutureResponse<Void> getLowResultFuture() throws IOException {
+    protected FutureResponse<Void> getLowResultFutureOnce() throws IOException {
         return getLowResultSet().getResponse();
     }
 
@@ -271,8 +272,6 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     @Override
     public void close() throws IOException {
-        // TODO checkResultStatusが廃止されたら、コメントも削除
-        // checkResultStatus(true); クローズ時にはステータスチェックは行わない
         // 一度もレコードを取得していない場合でも、commitでステータスチェックされる
 
         // not try-finally

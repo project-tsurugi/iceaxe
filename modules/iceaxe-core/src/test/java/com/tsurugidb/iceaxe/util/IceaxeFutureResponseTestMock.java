@@ -8,8 +8,16 @@ import java.util.concurrent.TimeoutException;
 
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
+import com.nautilus_technologies.tsubakuro.util.Timeout;
 
 class IceaxeFutureResponseTestMock<V> implements FutureResponse<V> {
+
+    protected Timeout closeTimeout;
+
+    @Override
+    public void setCloseTimeout(Timeout timeout) {
+        this.closeTimeout = timeout;
+    }
 
     @Override
     public boolean isDone() {

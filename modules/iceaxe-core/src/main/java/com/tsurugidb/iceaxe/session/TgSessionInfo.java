@@ -83,6 +83,8 @@ public class TgSessionInfo {
 
         /** {@link TsurugiResultSet} connect */
         RS_CONNECT,
+        /** {@link TsurugiResultSet} close */
+        RS_CLOSE,
         /** {@link TsurugiResult} check */
         RESULT_CHECK,
         /** {@link TsurugiResult} close */
