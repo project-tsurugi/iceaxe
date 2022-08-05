@@ -2,6 +2,9 @@ package com.tsurugidb.iceaxe.statement;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.TgTmSetting;
@@ -17,6 +20,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
  * </ul>
  */
 public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiPreparedStatementUpdate0.class);
 
     private final String sql;
 
@@ -36,6 +40,7 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      */
     public TsurugiResultCount execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         var lowTransaction = transaction.getLowTransaction();
+        LOG.trace("executeStatement");
         var lowResultFuture = lowTransaction.executeStatement(sql);
         var result = new TsurugiResultCount(transaction, lowResultFuture);
         return result;

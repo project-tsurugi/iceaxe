@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatement;
 
@@ -15,6 +18,7 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatement;
  */
 @ThreadSafe
 public class TsurugiTransactionManager {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransactionManager.class);
 
     private final TsurugiSession ownerSession;
     private final TgTmSetting defaultSetting;
@@ -95,6 +99,7 @@ public class TsurugiTransactionManager {
      * @see TsurugiPreparedStatement
      */
     public <R> R execute(TgTmSetting setting, TsurugiTransactionFuntion<R> action) throws IOException {
+        LOG.trace("tm.execute start");
         if (setting == null) {
             throw new IllegalArgumentException("setting is not specified");
         }
@@ -103,6 +108,7 @@ public class TsurugiTransactionManager {
         }
 
         var option = setting.getTransactionOption(0, null).getOption();
+        LOG.trace("tm.execute txOption={}", option);
         for (int i = 0;; i++) {
             try (var transaction = ownerSession.createTransaction(option)) {
                 setting.initializeTransaction(transaction);
@@ -110,11 +116,13 @@ public class TsurugiTransactionManager {
                 try {
                     var r = action.apply(transaction);
                     if (transaction.isRollbacked()) {
-                        return null;
+                        LOG.trace("tm.execute end (rollbacked)");
+                        return r;
                     }
                     var info = ownerSession.getSessionInfo();
                     var commitType = setting.getCommitType(info);
                     transaction.commit(commitType);
+                    LOG.trace("tm.execute end (committed)");
                     return r;
                 } catch (TsurugiTransactionException e) {
                     var state = setting.getTransactionOption(i + 1, e);
@@ -122,8 +130,12 @@ public class TsurugiTransactionManager {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ
                         rollback(transaction, null);
                         option = state.getOption();
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("tm.execute retry{}. txOption={}", i + 1, option);
+                        }
                         continue;
                     }
+                    LOG.trace("tm.execute error", e);
                     throw createException(transaction, state, i, option, e);
                 } catch (TsurugiTransactionRuntimeException e) {
                     var c = e.getCause();
@@ -132,8 +144,12 @@ public class TsurugiTransactionManager {
                         // リトライ可能なabortの場合でもrollbackは呼ぶ
                         rollback(transaction, null);
                         option = state.getOption();
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("tm.execute retry{}. txOption={}", i + 1, option);
+                        }
                         continue;
                     }
+                    LOG.trace("tm.execute error", e);
                     throw createException(transaction, state, i, option, e);
                 } catch (Exception e) {
                     var c = findTransactionException(e);
@@ -143,8 +159,12 @@ public class TsurugiTransactionManager {
                             // リトライ可能なabortの場合でもrollbackは呼ぶ
                             rollback(transaction, null);
                             option = state.getOption();
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("tm.execute retry{}. txOption={}", i + 1, option);
+                            }
                             continue;
                         }
+                        LOG.trace("tm.execute error", e);
                         throw createException(transaction, state, i, option, e);
                     }
                     rollback(transaction, e);

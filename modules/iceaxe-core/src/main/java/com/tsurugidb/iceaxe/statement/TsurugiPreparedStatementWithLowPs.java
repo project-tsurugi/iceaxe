@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
@@ -19,6 +22,7 @@ import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
  * @param <P> parameter type
  */
 public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPreparedStatement {
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private FutureResponse<PreparedStatement> lowPreparedStatementFuture;
     private PreparedStatement lowPreparedStatement;
@@ -85,7 +89,9 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 //  @ThreadSafe
     protected final synchronized PreparedStatement getLowPreparedStatement() throws IOException {
         if (this.lowPreparedStatement == null) {
+            log.trace("lowPreparedStatement get start");
             this.lowPreparedStatement = IceaxeIoUtil.getFromFuture(lowPreparedStatementFuture, connectTimeout);
+            log.trace("lowPreparedStatement get end");
             try {
                 IceaxeIoUtil.close(lowPreparedStatementFuture);
                 this.lowPreparedStatementFuture = null;
@@ -103,8 +109,10 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 
     @Override
     public void close() throws IOException {
+        log.trace("lowPs close start");
         // not try-finally
         IceaxeIoUtil.close(lowPreparedStatement, lowPreparedStatementFuture);
         super.close();
+        log.trace("lowPs close end");
     }
 }

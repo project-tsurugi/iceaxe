@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
@@ -14,6 +17,7 @@ import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
  */
 @NotThreadSafe
 public class TsurugiResultCount extends TsurugiResult {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiResultCount.class);
 
     private FutureResponse<Void> lowResultFuture;
 
@@ -49,8 +53,10 @@ public class TsurugiResultCount extends TsurugiResult {
     public void close() throws IOException {
         // checkLowResult()を一度も呼ばなくても、commit()でチェックされるはず
 
+        LOG.trace("result close start");
         // not try-finally
         IceaxeIoUtil.close(lowResultFuture);
         super.close();
+        LOG.trace("result close end");
     }
 }

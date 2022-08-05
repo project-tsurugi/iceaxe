@@ -17,6 +17,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.tsurugidb.iceaxe.statement.TgDataType;
@@ -84,6 +87,7 @@ import com.tsurugidb.jogasaki.proto.SqlCommon.Column;
  */
 @NotThreadSafe
 public class TsurugiResultRecord {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiResultRecord.class);
 
     protected static class TsurugiResultColumnValue { // record
         private final int index;
@@ -142,7 +146,9 @@ public class TsurugiResultRecord {
      */
     public boolean moveCurrentColumnNext() throws IOException, TsurugiTransactionException {
         try {
+            LOG.trace("nextLowColumn start");
             boolean exists = lowResultSet.nextColumn();
+            LOG.trace("nextLowColumn end. exists={}", exists);
             if (exists) {
                 this.columnIndex++;
             }
@@ -210,36 +216,50 @@ public class TsurugiResultRecord {
     @Nullable
     public Object fetchCurrentColumnValue() throws IOException, TsurugiTransactionException {
         if (lowResultSet.isNull()) {
+            LOG.trace("fetch null");
             return null;
         }
         var lowType = getCurrentColumnLowType();
         try {
             switch (lowType) {
             case BOOLEAN:
+                LOG.trace("fetch boolean");
                 return lowResultSet.fetchBooleanValue();
             case INT4:
+                LOG.trace("fetch int4");
                 return lowResultSet.fetchInt4Value();
             case INT8:
+                LOG.trace("fetch int8");
                 return lowResultSet.fetchInt8Value();
             case FLOAT4:
+                LOG.trace("fetch float4");
                 return lowResultSet.fetchFloat4Value();
             case FLOAT8:
+                LOG.trace("fetch float8");
                 return lowResultSet.fetchFloat8Value();
             case DECIMAL:
+                LOG.trace("fetch decimal");
                 return lowResultSet.fetchDecimalValue();
             case CHARACTER:
+                LOG.trace("fetch character");
                 return lowResultSet.fetchCharacterValue();
             case OCTET:
+                LOG.trace("fetch octet");
                 return lowResultSet.fetchOctetValue();
             case BIT:
+                LOG.trace("fetch bit");
                 return lowResultSet.fetchBitValue();
             case DATE:
+                LOG.trace("fetch date");
                 return lowResultSet.fetchDateValue();
             case TIME_OF_DAY:
+                LOG.trace("fetch timeOfDay");
                 return lowResultSet.fetchTimeOfDayValue();
             case TIME_POINT:
+                LOG.trace("fetch timePoint");
                 return lowResultSet.fetchTimePointValue();
             case DATETIME_INTERVAL:
+                LOG.trace("fetch datetimeInterval");
                 return lowResultSet.fetchDateTimeIntervalValue();
             default:
                 throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);

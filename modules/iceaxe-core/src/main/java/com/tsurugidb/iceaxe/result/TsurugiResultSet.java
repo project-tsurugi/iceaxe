@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
@@ -31,6 +34,7 @@ import com.tsurugidb.jogasaki.proto.SqlCommon.Column;
  */
 @NotThreadSafe
 public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiResultSet.class);
 
     private FutureResponse<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
@@ -100,7 +104,9 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     protected final synchronized ResultSet getLowResultSet() throws IOException {
         if (this.lowResultSet == null) {
+            LOG.trace("lowResultSet get start");
             this.lowResultSet = IceaxeIoUtil.getFromFuture(lowResultSetFuture, connectTimeout);
+            LOG.trace("lowResultSet get end");
             try {
                 IceaxeIoUtil.close(lowResultSetFuture);
                 this.lowResultSetFuture = null;
@@ -119,7 +125,9 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     protected boolean nextLowRecord() throws IOException, TsurugiTransactionException {
         try {
             var lowResultSet = getLowResultSet();
+            LOG.trace("nextLowRecord start");
             boolean exists = lowResultSet.nextRow();
+            LOG.trace("nextLowRecord end. exists={}", exists);
             if (!exists) {
                 checkLowResult();
             }
@@ -274,8 +282,10 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     public void close() throws IOException {
         // 一度もレコードを取得していない場合でも、commitでステータスチェックされる
 
+        LOG.trace("rs close start");
         // not try-finally
         IceaxeIoUtil.close(lowResultSet, lowResultSetFuture);
         super.close();
+        LOG.trace("rs close end");
     }
 }

@@ -2,6 +2,9 @@ package com.tsurugidb.iceaxe.statement;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
@@ -21,6 +24,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
  * @param <P> parameter type
  */
 public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatementWithLowPs<P> {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiPreparedStatementUpdate1.class);
 
     // internal
     public TsurugiPreparedStatementUpdate1(TsurugiSession session, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
@@ -40,6 +44,7 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
         var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
         var lowParameterList = getLowParameterList(parameter);
+        LOG.trace("executeStatement");
         var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterList);
         var result = new TsurugiResultCount(transaction, lowResultFuture);
         return result;

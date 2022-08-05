@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
@@ -25,6 +28,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
  * @param <R> result type
  */
 public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStatementWithLowPs<P> {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiPreparedStatementQuery1.class);
 
     private final TgResultMapping<R> resultMapping;
 
@@ -48,6 +52,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
         var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
         var lowParameterList = getLowParameterList(parameter);
+        LOG.trace("executeQuery");
         var lowResultSetFuture = lowTransaction.executeQuery(lowPs, lowParameterList);
         var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
         var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping, convertUtil);

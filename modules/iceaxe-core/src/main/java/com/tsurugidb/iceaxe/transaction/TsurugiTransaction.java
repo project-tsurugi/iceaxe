@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nautilus_technologies.tsubakuro.low.sql.Transaction;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
@@ -21,6 +24,7 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
  * Tsurugi Transaction
  */
 public class TsurugiTransaction implements Closeable {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransaction.class);
 
     private final TsurugiSession ownerSession;
     private FutureResponse<Transaction> lowTransactionFuture;
@@ -144,7 +148,9 @@ public class TsurugiTransaction implements Closeable {
     public final synchronized Transaction getLowTransaction() throws IOException {
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
+            LOG.trace("lowTransaction get start");
             this.lowTransaction = IceaxeIoUtil.getFromFuture(lowTransactionFuture, beginTimeout);
+            LOG.trace("lowTransaction get end");
             try {
                 IceaxeIoUtil.close(lowTransactionFuture);
                 this.lowTransactionFuture = null;
@@ -208,8 +214,10 @@ public class TsurugiTransaction implements Closeable {
             throw new IllegalStateException("rollback has already been called");
         }
 
+        LOG.trace("transaction commit start. commitType={}", commitType);
         var lowCommitStatus = commitType.getLowCommitStatus();
         finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout);
+        LOG.trace("transaction commit end");
         this.committed = true;
 
         if (commitListenerList != null) {
@@ -230,7 +238,9 @@ public class TsurugiTransaction implements Closeable {
             return;
         }
 
+        LOG.trace("transaction rollback start");
         finish(Transaction::rollback, rollbackTimeout);
+        LOG.trace("transaction rollback end");
         this.rollbacked = true;
 
         if (rollbackListenerList != null) {
@@ -280,10 +290,12 @@ public class TsurugiTransaction implements Closeable {
         // commitやrollbackに失敗してもcloseは呼ばれるので、ここでIllegalStateException等を発生させるのは良くない
 //      }
 
+        LOG.trace("transaction close start");
         IceaxeIoUtil.close(closeableSet, () -> {
             // not try-finally
             IceaxeIoUtil.close(lowTransaction, lowTransactionFuture);
             ownerSession.removeChild(this);
         });
+        LOG.trace("transaction close end");
     }
 }

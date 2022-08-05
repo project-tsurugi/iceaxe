@@ -7,6 +7,9 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -20,6 +23,7 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
  */
 @NotThreadSafe
 public abstract class TsurugiResult implements Closeable {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiResult.class);
 
     private final TsurugiTransaction ownerTransaction;
     private final IceaxeTimeout checkTimeout;
@@ -85,7 +89,9 @@ public abstract class TsurugiResult implements Closeable {
         if (!this.resultChecked) {
             this.resultChecked = true;
             var lowResultFuture = getLowResultFutureOnce();
+            LOG.trace("lowResult get start");
             IceaxeIoUtil.checkAndCloseTransactionFuture(lowResultFuture, checkTimeout, closeTimeout);
+            LOG.trace("lowResult get end");
         }
     }
 
