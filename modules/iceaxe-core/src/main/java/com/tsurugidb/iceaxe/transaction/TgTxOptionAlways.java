@@ -42,7 +42,7 @@ public class TgTxOptionAlways implements TgTxOptionSupplier {
             return TgTxState.execute(transactionOption);
         }
 
-        if (e.isRetryable()) {
+        if (isRetryable(e)) {
             if (attempt < attemtMaxCount) {
                 return TgTxState.execute(transactionOption);
             }

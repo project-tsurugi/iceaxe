@@ -53,7 +53,7 @@ public class TgTxOptionList implements TgTxOptionSupplier {
             return TgTxState.execute(transactionOptionList.get(0));
         }
 
-        if (e.isRetryable()) {
+        if (isRetryable(e)) {
             if (attempt < transactionOptionList.size()) {
                 return TgTxState.execute(transactionOptionList.get(attempt));
             }

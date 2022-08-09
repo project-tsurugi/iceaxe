@@ -125,51 +125,23 @@ public class TsurugiTransactionManager {
                     LOG.trace("tm.execute end (committed)");
                     return r;
                 } catch (TsurugiTransactionException e) {
-                    var state = setting.getTransactionOption(i + 1, e);
-                    if (state.isExecute()) {
-                        // リトライ可能なabortの場合でもrollbackは呼ぶ
-                        rollback(transaction, null);
-                        option = state.getOption();
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("tm.execute retry{}. txOption={}", i + 1, option);
-                        }
-                        continue;
-                    }
-                    LOG.trace("tm.execute error", e);
-                    throw createException(transaction, state, i, option, e);
+                    option = processTransactionException(setting, transaction, e, i, option, e);
+                    continue;
                 } catch (TsurugiTransactionRuntimeException e) {
                     var c = e.getCause();
-                    var state = setting.getTransactionOption(i + 1, c);
-                    if (state.isExecute()) {
-                        // リトライ可能なabortの場合でもrollbackは呼ぶ
-                        rollback(transaction, null);
-                        option = state.getOption();
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("tm.execute retry{}. txOption={}", i + 1, option);
-                        }
-                        continue;
-                    }
-                    LOG.trace("tm.execute error", e);
-                    throw createException(transaction, state, i, option, e);
+                    option = processTransactionException(setting, transaction, e, i, option, c);
+                    continue;
                 } catch (Exception e) {
                     var c = findTransactionException(e);
-                    if (c != null) {
-                        var state = setting.getTransactionOption(i + 1, c);
-                        if (state.isExecute()) {
-                            // リトライ可能なabortの場合でもrollbackは呼ぶ
-                            rollback(transaction, null);
-                            option = state.getOption();
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("tm.execute retry{}. txOption={}", i + 1, option);
-                            }
-                            continue;
-                        }
+                    if (c == null) {
                         LOG.trace("tm.execute error", e);
-                        throw createException(transaction, state, i, option, e);
+                        rollback(transaction, e);
+                        throw e;
                     }
-                    rollback(transaction, e);
-                    throw e;
+                    option = processTransactionException(setting, transaction, e, i, option, c);
+                    continue;
                 } catch (Throwable e) {
+                    LOG.trace("tm.execute error", e);
                     rollback(transaction, e);
                     throw e;
                 }
@@ -186,15 +158,48 @@ public class TsurugiTransactionManager {
         return null;
     }
 
-    private IOException createException(TsurugiTransaction transaction, TgTxState state, int attemt, TgTxOption option, Exception cause) throws IOException {
-        IOException e;
-        if (state.isRetryOver()) {
-            e = new TsurugiTransactionRetryOverIOException(attemt, option, cause);
-        } else {
-            e = new TsurugiTransactionIOException(cause.getMessage(), attemt, option, cause);
+    private TgTxOption processTransactionException(TgTmSetting setting, TsurugiTransaction transaction, Exception cause, int i, TgTxOption option, TsurugiTransactionException e) throws IOException {
+        boolean calledRollback = false;
+        try {
+            TgTxState nextState;
+            try {
+                nextState = setting.getTransactionOption(i + 1, e);
+            } catch (Throwable t) {
+                t.addSuppressed(cause);
+                throw t;
+            }
+
+            if (nextState.isExecute()) {
+                try {
+                    // リトライ可能なabortの場合でもrollbackは呼ぶ
+                    rollback(transaction, null);
+                } finally {
+                    calledRollback = true;
+                }
+
+                var nextOption = nextState.getOption();
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("tm.execute retry{}. txOption={}", i + 1, nextOption);
+                }
+                return nextOption;
+            }
+
+            LOG.trace("tm.execute error", e);
+            throw createException(nextState, i, option, cause);
+        } catch (Throwable t) {
+            if (!calledRollback) {
+                rollback(transaction, t);
+            }
+            throw t;
         }
-        rollback(transaction, e);
-        return e;
+    }
+
+    private IOException createException(TgTxState state, int attemt, TgTxOption option, Exception cause) throws IOException {
+        if (state.isRetryOver()) {
+            return new TsurugiTransactionRetryOverIOException(attemt, option, cause);
+        } else {
+            return new TsurugiTransactionIOException(cause.getMessage(), attemt, option, cause);
+        }
     }
 
     private void rollback(TsurugiTransaction transaction, Throwable save) throws IOException {

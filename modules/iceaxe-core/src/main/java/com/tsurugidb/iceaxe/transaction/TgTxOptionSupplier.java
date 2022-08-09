@@ -2,6 +2,8 @@ package com.tsurugidb.iceaxe.transaction;
 
 import javax.annotation.Nonnull;
 
+import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
+
 /**
  * {@link TgTxOption} supplier
  */
@@ -38,4 +40,18 @@ public interface TgTxOptionSupplier {
      */
     @Nonnull
     public TgTxState get(int attempt, TsurugiTransactionException e);
+
+    /**
+     * whether to retry
+     * 
+     * @param e Transaction Exception
+     * @return true: retryable
+     */
+    public default boolean isRetryable(TsurugiTransactionException e) {
+        var lowCode = e.getDiagnosticCode();
+        if (lowCode == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
+            return true;
+        }
+        return false;
+    }
 }
