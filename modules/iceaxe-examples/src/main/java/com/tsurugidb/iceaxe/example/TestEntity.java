@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.tsurugidb.iceaxe.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgVariableList;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 /**
  * example entity for 'TEST' table

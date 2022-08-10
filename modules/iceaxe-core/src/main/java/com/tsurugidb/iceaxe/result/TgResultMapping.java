@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.TsurugiTransactionFunction;
 

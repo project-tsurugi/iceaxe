@@ -3,7 +3,7 @@ package com.tsurugidb.iceaxe.util;
 import java.io.IOException;
 import java.util.function.Function;
 
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 /**
  * {@link Function} with IOException, TsurugiTransactionException

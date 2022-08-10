@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+
 /**
  * TgTxOption list
  */

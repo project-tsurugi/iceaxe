@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.transaction;
 import javax.annotation.Nonnull;
 
 import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 /**
  * {@link TgTxOption} supplier

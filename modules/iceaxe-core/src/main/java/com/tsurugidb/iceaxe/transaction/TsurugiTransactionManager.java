@@ -9,6 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatement;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 
 /**
  * Tsurugi Transaction Manager

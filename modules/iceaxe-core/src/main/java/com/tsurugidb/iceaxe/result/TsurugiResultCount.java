@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 
 /**

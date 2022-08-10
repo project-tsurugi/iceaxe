@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.transaction;
 import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**

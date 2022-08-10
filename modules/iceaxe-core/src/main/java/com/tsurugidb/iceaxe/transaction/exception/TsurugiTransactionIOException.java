@@ -1,7 +1,11 @@
-package com.tsurugidb.iceaxe.transaction;
+package com.tsurugidb.iceaxe.transaction.exception;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.Optional;
+
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TgTxOptionSupplier;
 
 /**
  * Tsurugi Transaction IOException
@@ -21,6 +25,20 @@ public class TsurugiTransactionIOException extends IOException {
 
     private static String createMessage(String message, int attempt, TgTxOption option) {
         return message + MessageFormat.format(". attempt={0}, option={1}", attempt, option);
+    }
+
+    /**
+     * get Transaction Exception
+     * 
+     * @return Transaction Exception
+     */
+    public Optional<TsurugiTransactionException> findTransactionException() {
+        for (Throwable t = getCause(); t != null; t = t.getCause()) {
+            if (t instanceof TsurugiTransactionException) {
+                return Optional.of((TsurugiTransactionException) t);
+            }
+        }
+        return Optional.empty();
     }
 
     /**

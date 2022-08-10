@@ -2,7 +2,7 @@ package com.tsurugidb.iceaxe.result;
 
 import java.io.IOException;
 
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.TsurugiTransactionFunction;
 
 /**

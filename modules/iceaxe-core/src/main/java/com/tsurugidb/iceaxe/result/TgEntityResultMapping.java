@@ -17,7 +17,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.tsurugidb.iceaxe.statement.TgDataType;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.TsurugiTransactionBiConsumer;
 import com.tsurugidb.iceaxe.util.TsurugiTransactionFunction;

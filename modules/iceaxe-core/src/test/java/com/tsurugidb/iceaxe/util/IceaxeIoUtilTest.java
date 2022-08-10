@@ -16,7 +16,7 @@ import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.nautilus_technologies.tsubakuro.util.Timeout;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 class IceaxeIoUtilTest {
 

@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.transaction;
+package com.tsurugidb.iceaxe.transaction.exception;
 
 /**
  * Tsurugi Transaction RuntimeException

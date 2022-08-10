@@ -2,6 +2,8 @@ package com.tsurugidb.iceaxe.transaction;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+
 /**
  * Always the same TgTxOption
  */

@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.transaction;
+package com.tsurugidb.iceaxe.transaction.exception;
 
 import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
