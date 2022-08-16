@@ -24,8 +24,8 @@ public class TgTxOptionAlways implements TgTxOptionSupplier {
         return new TgTxOptionAlways(transactionOption, attemtMaxCount);
     }
 
-    private final TgTxOption transactionOption;
-    private final int attemtMaxCount;
+    protected final TgTxOption transactionOption;
+    protected final int attemtMaxCount;
 
     /**
      * TgTransactionOption list
