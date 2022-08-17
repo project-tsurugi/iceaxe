@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.util;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -14,14 +13,14 @@ import javax.annotation.concurrent.ThreadSafe;
 @ThreadSafe
 public class IceaxeCloseableSet {
 
-    private final Map<Closeable, ?> closeableMap = new IdentityHashMap<>();
+    private final Map<AutoCloseable, ?> closeableMap = new IdentityHashMap<>();
 
     /**
      * add Closeable
      * 
      * @param closeable Closeable
      */
-    public synchronized void add(Closeable closeable) {
+    public synchronized void add(AutoCloseable closeable) {
         closeableMap.put(closeable, null);
     }
 
@@ -30,7 +29,7 @@ public class IceaxeCloseableSet {
      * 
      * @param closeable Closeable
      */
-    public synchronized void remove(Closeable closeable) {
+    public synchronized void remove(AutoCloseable closeable) {
         closeableMap.remove(closeable);
     }
 

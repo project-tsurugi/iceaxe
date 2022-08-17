@@ -32,7 +32,7 @@ import com.tsurugidb.jogasaki.proto.SqlCommon.Column;
  * Tsurugi Result Record for {@link TsurugiResultSet}
  * 
  * <p>
- * TODO+++翻訳: 当クラスのメソッド群は以下の3種類に分類される。ある群のメソッドを使用したら、他の群のメソッドは使用不可。
+ * TODO+++翻訳: 当クラスのメソッド群は以下の3種類に分類される。ある群のメソッドを使用したら、他の群のメソッドは基本的に使用不可。
  * </p>
  * <ul>
  * <li>current column系
@@ -148,7 +148,9 @@ public class TsurugiResultRecord {
         try {
             LOG.trace("nextLowColumn start");
             boolean exists = lowResultSet.nextColumn();
-            LOG.trace("nextLowColumn end. exists={}", exists);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("nextLowColumn end. exists={}", exists);
+            }
             if (exists) {
                 this.columnIndex++;
             }

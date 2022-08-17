@@ -102,13 +102,13 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         applyCloseTimeout();
     }
 
-    protected final synchronized ResultSet getLowResultSet() throws IOException {
+    protected final synchronized ResultSet getLowResultSet() throws IOException, TsurugiTransactionException {
         if (this.lowResultSet == null) {
             LOG.trace("lowResultSet get start");
-            this.lowResultSet = IceaxeIoUtil.getFromFuture(lowResultSetFuture, connectTimeout);
+            this.lowResultSet = IceaxeIoUtil.getFromFutureInTransaction(lowResultSetFuture, connectTimeout);
             LOG.trace("lowResultSet get end");
             try {
-                IceaxeIoUtil.close(lowResultSetFuture);
+                IceaxeIoUtil.closeInTransaction(lowResultSetFuture);
                 this.lowResultSetFuture = null;
             } finally {
                 applyCloseTimeout();
@@ -117,19 +117,13 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         return this.lowResultSet;
     }
 
-    @Override
-    protected FutureResponse<Void> getLowResultFutureOnce() throws IOException {
-        return getLowResultSet().getResponse();
-    }
-
     protected boolean nextLowRecord() throws IOException, TsurugiTransactionException {
         try {
             var lowResultSet = getLowResultSet();
             LOG.trace("nextLowRecord start");
             boolean exists = lowResultSet.nextRow();
-            LOG.trace("nextLowRecord end. exists={}", exists);
-            if (!exists) {
-                checkLowResult();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("nextLowRecord end. exists={}", exists);
             }
             return exists;
         } catch (ServerException e) {
@@ -189,7 +183,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         }
     }
 
-    protected TsurugiResultRecord getRecord() throws IOException {
+    protected TsurugiResultRecord getRecord() throws IOException, TsurugiTransactionException {
         if (this.record == null) {
             var lowResultSet = getLowResultSet();
             this.record = new TsurugiResultRecord(lowResultSet, convertUtil);
@@ -216,7 +210,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     }
 
     /**
-     * @throws TsurugiTransactionUncheckedIOException
+     * @throws UncheckedIOException
+     * @throws TsurugiTransactionRuntimeException
      */
     @Override
     public Iterator<R> iterator() {
@@ -225,6 +220,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             return new TsurugiResultSetIterator(record);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } catch (TsurugiTransactionException e) {
+            throw new TsurugiTransactionRuntimeException(e);
         }
     }
 
@@ -279,12 +276,12 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     }
 
     @Override
-    public void close() throws IOException {
-        // 一度もレコードを取得していない場合でも、commitでステータスチェックされる
+    public void close() throws IOException, TsurugiTransactionException {
+        // 一度もレコードを取得していない場合でも、closeでステータスチェックされる
 
         LOG.trace("rs close start");
         // not try-finally
-        IceaxeIoUtil.close(lowResultSet, lowResultSetFuture);
+        IceaxeIoUtil.closeInTransaction(lowResultSet, lowResultSetFuture);
         super.close();
         LOG.trace("rs close end");
     }

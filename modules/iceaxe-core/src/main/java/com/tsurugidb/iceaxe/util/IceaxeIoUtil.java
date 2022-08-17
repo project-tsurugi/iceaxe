@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -14,7 +15,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 public final class IceaxeIoUtil {
 
     private IceaxeIoUtil() {
-        // do nothing
+        // don't instantiate
     }
 
     /**
@@ -35,9 +36,8 @@ public final class IceaxeIoUtil {
         }
     }
 
-    // TODO getFromTransactionFuture()使わないなら削除
     /**
-     * get value from future for transaction (commit/rollback)
+     * get value from future in transaction
      * 
      * @param <V>     the result value type
      * @param future  future
@@ -46,8 +46,7 @@ public final class IceaxeIoUtil {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    @Deprecated(forRemoval = true)
-    public static <V> V getFromTransactionFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
+    public static <V> V getFromFutureInTransaction(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
         var time = timeout.get();
         try {
             return future.get(time.value(), time.unit());
@@ -59,7 +58,7 @@ public final class IceaxeIoUtil {
     }
 
     /**
-     * get and close future
+     * get and close future in transaction
      * 
      * @param future       future
      * @param checkTimeout the maximum time to wait for get
@@ -67,7 +66,7 @@ public final class IceaxeIoUtil {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    public static void checkAndCloseTransactionFuture(FutureResponse<?> future, IceaxeTimeout checkTimeout, IceaxeTimeout closeTimeout) throws IOException, TsurugiTransactionException {
+    public static void checkAndCloseFutureInTransaction(FutureResponse<?> future, IceaxeTimeout checkTimeout, IceaxeTimeout closeTimeout) throws IOException, TsurugiTransactionException {
         var time = checkTimeout.get();
         closeTimeout.apply(future);
         try (future) {
@@ -123,6 +122,7 @@ public final class IceaxeIoUtil {
      */
     public static void close(AutoCloseable... closeables) throws IOException {
         IOException save = null;
+
         for (var closeable : closeables) {
             if (closeable == null) {
                 continue;
@@ -147,6 +147,66 @@ public final class IceaxeIoUtil {
 
         if (save != null) {
             throw save;
+        }
+    }
+
+    /**
+     * close resources in transaction
+     * 
+     * @param closeables AutoCloseable
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public static void closeInTransaction(AutoCloseable... closeables) throws IOException, TsurugiTransactionException {
+        TsurugiTransactionException txException = null;
+        List<Throwable> saveList = null;
+
+        for (var closeable : closeables) {
+            if (closeable == null) {
+                continue;
+            }
+
+            try {
+                closeable.close();
+            } catch (ServerException e) {
+                if (txException == null) {
+                    txException = new TsurugiTransactionException(e);
+                } else {
+                    if (saveList == null) {
+                        saveList = new ArrayList<>();
+                    }
+                    saveList.add(e);
+                }
+            } catch (Exception e) {
+                if (saveList == null) {
+                    saveList = new ArrayList<>();
+                }
+                saveList.add(e);
+            }
+        }
+
+        if (txException != null) {
+            if (saveList != null) {
+                for (var save : saveList) {
+                    txException.addSuppressed(save);
+                }
+            }
+            throw txException;
+        }
+        if (saveList != null) {
+            IOException e = null;
+            for (var save : saveList) {
+                if (e == null) {
+                    if (save instanceof IOException) {
+                        e = (IOException) save;
+                    } else {
+                        e = new IOException(save);
+                    }
+                } else {
+                    e.addSuppressed(save);
+                }
+            }
+            throw e;
         }
     }
 }
