@@ -109,7 +109,7 @@ public class TsurugiResultRecord {
 
     private final ResultSet lowResultSet;
     private final IceaxeConvertUtil convertUtil;
-    private int columnIndex;
+    private int currentColumnIndex;
     private Map<String, TsurugiResultColumnValue> columnMap;
 
     protected TsurugiResultRecord(ResultSet lowResultSet, IceaxeConvertUtil convertUtil) {
@@ -119,7 +119,7 @@ public class TsurugiResultRecord {
     }
 
     void reset() {
-        this.columnIndex = -1;
+        this.currentColumnIndex = -1;
         if (this.columnMap != null) {
             columnMap.clear();
         }
@@ -152,7 +152,7 @@ public class TsurugiResultRecord {
                 LOG.trace("nextLowColumn end. exists={}", exists);
             }
             if (exists) {
-                this.columnIndex++;
+                this.currentColumnIndex++;
             }
             return exists;
         } catch (ServerException e) {
@@ -160,11 +160,6 @@ public class TsurugiResultRecord {
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
-    }
-
-    @Nonnull
-    protected Column getCurrentLowColumn() throws IOException, TsurugiTransactionException {
-        return getLowColumn(columnIndex);
     }
 
     @Nonnull
@@ -183,8 +178,8 @@ public class TsurugiResultRecord {
      */
     @Nonnull
     public String getCurrentColumnName() throws IOException, TsurugiTransactionException {
-        var lowColumn = getCurrentLowColumn();
-        return lowColumn.getName();
+        var lowColumn = getLowColumn(currentColumnIndex);
+        return TsurugiResultSet.getColumnName(lowColumn, currentColumnIndex);
     }
 
     /**
@@ -203,7 +198,7 @@ public class TsurugiResultRecord {
 
     @Nonnull
     protected AtomType getCurrentColumnLowType() throws IOException, TsurugiTransactionException {
-        var lowColumn = getCurrentLowColumn();
+        var lowColumn = getLowColumn(currentColumnIndex);
         return lowColumn.getAtomType();
     }
 
@@ -298,7 +293,7 @@ public class TsurugiResultRecord {
             while (moveCurrentColumnNext()) {
                 var name = getCurrentColumnName();
                 var value = fetchCurrentColumnValue();
-                var column = new TsurugiResultColumnValue(columnIndex, value);
+                var column = new TsurugiResultColumnValue(currentColumnIndex, value);
                 columnMap.put(name, column);
             }
         }

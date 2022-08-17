@@ -148,8 +148,10 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         var lowColumnList = getLowColumnList(lowResultSet);
         var size = lowColumnList.size();
         var list = new ArrayList<String>(size);
+        int i = 0;
         for (var lowColumn : lowColumnList) {
-            list.add(lowColumn.getName());
+            var name = getColumnName(lowColumn, i++);
+            list.add(name);
         }
         return list;
     }
@@ -163,6 +165,14 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
+    }
+
+    static String getColumnName(Column lowColumn, int index) {
+        var lowName = lowColumn.getName();
+        if (lowName == null || lowName.isEmpty()) {
+            return "$" + index;
+        }
+        return lowName;
     }
 
     /**
