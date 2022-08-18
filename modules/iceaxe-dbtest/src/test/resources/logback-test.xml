@@ -1,0 +1,50 @@
+<configuration>
+  <timestamp key="ts_sec" datePattern="yyyyMMdd-HHmmss"/>
+  <appender name="STDOUT"
+    class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>
+        %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+     </pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>TRACE</level>
+    </filter>
+  </appender>
+
+  <appender name="SUMMARY"
+    class="ch.qos.logback.core.FileAppender">
+    <file>logs/summary-${ts_sec}.log</file>
+    <append>false</append>
+    <encoder>
+      <pattern>
+        %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+     </pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+
+  <appender name="DETAIL"
+    class="ch.qos.logback.core.FileAppender">
+    <file>logs/detail-${ts_sec}.log</file>
+    <append>false</append>
+    <encoder>
+      <pattern>
+        %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+     </pattern>
+    </encoder>
+  </appender>
+
+<!--
+  <logger name="com.tsurugidb.iceaxe" level="TRACE" />
+  <logger name="com.nautilus_technologies.tsubakuro.channel.stream.StreamWire" level="TRACE" />
+-->
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="SUMMARY" />
+    <appender-ref ref="DETAIL" />
+  </root>
+</configuration>
