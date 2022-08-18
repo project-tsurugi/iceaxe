@@ -36,6 +36,7 @@ public class Example03TransactionManager {
             manager1(session);
             manager2(session);
             managerAlways(session);
+            managerOption1(session);
         }
     }
 
@@ -60,6 +61,14 @@ public class Example03TransactionManager {
     void managerAlways(TsurugiSession session) throws IOException {
         var setting = TgTmSetting.ofAlways(OCC);
         var tm = session.createTransactionManager(setting);
+
+        tm.execute(transaction -> {
+//          preparedStatement.execute(transaction)
+        });
+    }
+
+    void managerOption1(TsurugiSession session) throws IOException {
+        var tm = session.createTransactionManager(OCC);
 
         tm.execute(transaction -> {
 //          preparedStatement.execute(transaction)

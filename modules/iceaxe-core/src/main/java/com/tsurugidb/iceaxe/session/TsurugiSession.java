@@ -252,7 +252,7 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public TsurugiTransactionManager createTransactionManager() {
-        return createTransactionManager(null);
+        return createTransactionManager((TgTmSetting) null);
     }
 
     /**
@@ -265,6 +265,18 @@ public class TsurugiSession implements Closeable {
     public TsurugiTransactionManager createTransactionManager(TgTmSetting setting) {
         var tm = new TsurugiTransactionManager(this, setting);
         return tm;
+    }
+
+    /**
+     * create transaction manager
+     * 
+     * @param setting transaction manager settings
+     * @return Transaction Manager
+     */
+//  @ThreadSafe
+    public TsurugiTransactionManager createTransactionManager(TgTxOption option) {
+        var setting = TgTmSetting.ofAlways(option, 1);
+        return createTransactionManager(setting);
     }
 
     /**
