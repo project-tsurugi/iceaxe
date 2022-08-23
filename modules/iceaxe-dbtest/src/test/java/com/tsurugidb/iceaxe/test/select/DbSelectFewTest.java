@@ -44,7 +44,7 @@ class DbSelectFewTest extends DbTestTableTester {
                     try (var rs = ps.execute(transaction)) {
                         // rs.close without read
                     }
-                    transaction.commit(TgCommitType.UNSPECIFIED);
+                    transaction.commit(TgCommitType.DEFAULT);
                 }
             }
         }

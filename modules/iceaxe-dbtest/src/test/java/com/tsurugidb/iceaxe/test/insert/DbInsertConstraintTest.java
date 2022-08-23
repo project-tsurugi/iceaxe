@@ -113,9 +113,9 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     int count2 = ps.executeAndGetCount(tx2, entity);
                     assertEquals(-1, count2); // TODO 1
 
-                    tx1.commit(TgCommitType.UNSPECIFIED);
+                    tx1.commit(TgCommitType.DEFAULT);
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
-                        tx2.commit(TgCommitType.UNSPECIFIED);
+                        tx2.commit(TgCommitType.DEFAULT);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ABORTED, e); // TODO ERR_ALREADY_EXISTS
                     throw e;
@@ -144,7 +144,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
 
                     tx1.rollback();
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
-                        tx2.commit(TgCommitType.UNSPECIFIED);
+                        tx2.commit(TgCommitType.DEFAULT);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ABORTED, e); // TODO ERR_ALREADY_EXISTS ?
                     throw e;
