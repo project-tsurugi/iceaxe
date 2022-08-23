@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
@@ -17,9 +18,13 @@ import com.tsurugidb.iceaxe.test.util.TestEntity;
 class DbErrorPsExecuteTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach() throws IOException {
+    void beforeEach(TestInfo info) throws IOException {
+        LOG.debug("{} init start", info.getDisplayName());
+
         dropTestTable();
         createTestTable();
+
+        LOG.debug("{} end start", info.getDisplayName());
     }
 
     @Test

@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
 import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
@@ -21,6 +26,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager.TsurugiTransac
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 public class DbTestTableTester {
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     /** test (table name) */
     public static final String TEST = "test";
@@ -36,12 +42,24 @@ public class DbTestTableTester {
     }
 
     @AfterAll
-    static void afterAll() throws IOException {
+    static void testerAfterAll() throws IOException {
         if (staticSession != null) {
             staticSession.close();
             staticSession = null;
         }
     }
+
+    @BeforeEach
+    void tetsterBeforeEach(TestInfo info) {
+        LOG.debug("{} start", info.getDisplayName());
+    }
+
+    @AfterEach
+    void testerAfterEach(TestInfo info) {
+        LOG.debug("{} end", info.getDisplayName());
+    }
+
+    // utility
 
     protected static void dropTestTable() throws IOException {
         var sql = "drop table " + TEST;

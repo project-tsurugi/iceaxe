@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -24,9 +25,13 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 class DbInsertMultiThreadTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach() throws IOException {
+    void beforeEach(TestInfo info) throws IOException {
+        LOG.debug("{} init start", info.getDisplayName());
+
         dropTestTable();
         createTestTable();
+
+        LOG.debug("{} init end", info.getDisplayName());
     }
 
     @Test

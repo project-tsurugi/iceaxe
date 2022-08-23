@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -18,9 +19,14 @@ class DbErrorSelectMultiTest extends DbTestTableTester {
 
     @BeforeAll
     static void beforeAll() throws IOException {
+        var LOG = LoggerFactory.getLogger(DbErrorSelectMultiTest.class);
+        LOG.debug("init start");
+
         dropTestTable();
         createTestTable();
         insertTestTable(1);
+
+        LOG.debug("init end");
     }
 
     @Test

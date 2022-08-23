@@ -26,9 +26,14 @@ class DbSelectFewTest extends DbTestTableTester {
 
     @BeforeAll
     static void beforeAll() throws IOException {
+        var LOG = LoggerFactory.getLogger(DbSelectFewTest.class);
+        LOG.debug("init start");
+
         dropTestTable();
         createTestTable();
         insertTestTable(4);
+
+        LOG.debug("init end");
     }
 
     @Test

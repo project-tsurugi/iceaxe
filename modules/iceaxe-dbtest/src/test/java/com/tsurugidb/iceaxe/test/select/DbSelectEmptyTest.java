@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
@@ -21,8 +22,13 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
     @BeforeAll
     static void beforeAll() throws IOException {
+        var LOG = LoggerFactory.getLogger(DbSelectEmptyTest.class);
+        LOG.debug("init start");
+
         dropTestTable();
         createTestTable();
+
+        LOG.debug("init end");
     }
 
     @Test

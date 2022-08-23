@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -23,9 +24,13 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 public class DbInsertConstraintTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach() throws IOException {
+    void beforeEach(TestInfo info) throws IOException {
+        LOG.debug("{} init start", info.getDisplayName());
+
         dropTestTable();
         createTestTable();
+
+        LOG.debug("{} init end", info.getDisplayName());
     }
 
     @Test

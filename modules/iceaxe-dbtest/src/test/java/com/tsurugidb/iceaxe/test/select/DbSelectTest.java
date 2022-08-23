@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
@@ -24,9 +25,14 @@ class DbSelectTest extends DbTestTableTester {
 
     @BeforeAll
     static void beforeAll() throws IOException {
+        var LOG = LoggerFactory.getLogger(DbSelectTest.class);
+        LOG.debug("init start");
+
         dropTestTable();
         createTestTable();
         insertTestTable(SIZE);
+
+        LOG.debug("init end");
     }
 
     @Test
