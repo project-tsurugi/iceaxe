@@ -13,7 +13,7 @@ public enum TgCommitType {
     /**
      * rely on the database settings
      */
-    UNSPECIFIED(CommitStatus.COMMIT_STATUS_UNSPECIFIED),
+    DEFAULT(CommitStatus.COMMIT_STATUS_UNSPECIFIED),
 
     /**
      * commit operation has accepted (the transaction will never abort except system errors)

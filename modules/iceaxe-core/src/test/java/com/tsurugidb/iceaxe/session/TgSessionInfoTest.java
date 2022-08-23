@@ -40,7 +40,7 @@ class TgSessionInfoTest {
         var timeout = info.timeout(TgTimeoutKey.DEFAULT);
         assertEquals(Long.MAX_VALUE, timeout.value());
         assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
-        assertEquals(TgCommitType.UNSPECIFIED, info.commitType());
+        assertEquals(TgCommitType.DEFAULT, info.commitType());
     }
 
     @Test
@@ -52,13 +52,13 @@ class TgSessionInfoTest {
         var timeout = info.timeout(TgTimeoutKey.DEFAULT);
         assertEquals(Long.MAX_VALUE, timeout.value());
         assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
-        assertEquals(TgCommitType.UNSPECIFIED, info.commitType());
+        assertEquals(TgCommitType.DEFAULT, info.commitType());
     }
 
     @Test
     void testToString() {
         var empty = new TgSessionInfo();
-        assertEquals("TgSessionInfo{credential=null, timeout={DEFAULT=9223372036854775807nanoseconds}, commitType=UNSPECIFIED}", empty.toString());
+        assertEquals("TgSessionInfo{credential=null, timeout={DEFAULT=9223372036854775807nanoseconds}, commitType=DEFAULT}", empty.toString());
 
         var info = TgSessionInfo.of("u1", "p1").timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS).commitType(TgCommitType.STORED);
         assertEquals("TgSessionInfo{credential=UsernamePasswordCredential(name=u1), timeout={DEFAULT=123seconds}, commitType=STORED}", info.toString());

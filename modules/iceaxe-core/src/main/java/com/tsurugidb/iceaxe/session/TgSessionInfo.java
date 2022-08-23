@@ -93,7 +93,7 @@ public class TgSessionInfo {
 
     private Credential credential;
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
-    private TgCommitType commitType = TgCommitType.UNSPECIFIED;
+    private TgCommitType commitType = TgCommitType.DEFAULT;
 
     /**
      * Tsurugi Session Information
