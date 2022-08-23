@@ -44,8 +44,9 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
         var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
         var lowParameterList = getLowParameterList(parameter);
-        LOG.trace("executeStatement");
+        LOG.trace("executeStatement start");
         var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterList);
+        LOG.trace("executeStatement started");
         var result = new TsurugiResultCount(transaction, lowResultFuture);
         return result;
     }

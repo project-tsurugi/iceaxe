@@ -291,7 +291,9 @@ public class TsurugiTransaction implements Closeable {
         // commitやrollbackに失敗してもcloseは呼ばれるので、ここでIllegalStateException等を発生させるのは良くない
 //      }
 
-        LOG.trace("transaction close start");
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("transaction close start. committed={}, rollbacked={}", committed, rollbacked);
+        }
         IceaxeIoUtil.close(closeableSet, () -> {
             // not try-finally
             IceaxeIoUtil.close(lowTransaction, lowTransactionFuture);

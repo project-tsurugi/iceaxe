@@ -112,7 +112,7 @@ public class TsurugiTransactionManager {
         }
 
         var option = setting.getTransactionOption(0, null).getOption();
-        LOG.trace("tm.execute txOption={}", option);
+        LOG.trace("tm.execute tx={}", option);
         for (int i = 0;; i++) {
             try (var transaction = ownerSession.createTransaction(option)) {
                 setting.initializeTransaction(transaction);
@@ -183,7 +183,7 @@ public class TsurugiTransactionManager {
 
                 var nextOption = nextState.getOption();
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("tm.execute retry{}. txOption={}", i + 1, nextOption);
+                    LOG.trace("tm.execute retry{}. e={}, nextTx={}", i + 1, e.getMessage(), nextOption);
                 }
                 return nextOption;
             }

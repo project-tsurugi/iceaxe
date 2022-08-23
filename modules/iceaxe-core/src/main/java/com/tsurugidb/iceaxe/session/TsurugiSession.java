@@ -206,9 +206,10 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException {
-        LOG.trace("createPreparedQuery. sql={}", sql);
+        LOG.trace("createPreparedQuery start. sql={}", sql);
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
+        LOG.trace("createPreparedQuery started");
         var ps = new TsurugiPreparedStatementQuery1<>(this, lowPreparedStatementFuture, parameterMapping, resultMapping);
         return ps;
     }
@@ -238,9 +239,10 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public <P> TsurugiPreparedStatementUpdate1<P> createPreparedStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
-        LOG.trace("createPreparedStatement. sql={}", sql);
+        LOG.trace("createPreparedStatement start. sql={}", sql);
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
+        LOG.trace("createPreparedStatement started");
         var ps = new TsurugiPreparedStatementUpdate1<>(this, lowPreparedStatementFuture, parameterMapping);
         return ps;
     }
@@ -289,8 +291,9 @@ public class TsurugiSession implements Closeable {
 //  @ThreadSafe
     public TsurugiTransaction createTransaction(@Nonnull TgTxOption option) throws IOException {
         var lowOption = option.toLowTransactionOption();
-        LOG.trace("lowTransaction create. lowOption={}", lowOption);
+        LOG.trace("lowTransaction create start. lowOption={}", lowOption);
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
+        LOG.trace("lowTransaction create started");
         var transaction = new TsurugiTransaction(this, lowTransactionFuture);
         return transaction;
     }
