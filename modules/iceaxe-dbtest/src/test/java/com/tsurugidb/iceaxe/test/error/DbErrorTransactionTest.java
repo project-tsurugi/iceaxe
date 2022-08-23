@@ -19,10 +19,13 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
  */
 class DbErrorTransactionTest extends DbTestTableTester {
 
+    private static final int SIZE = 4;
+
     @BeforeEach
     void beforeEach() throws IOException {
         dropTestTable();
         createTestTable();
+        insertTestTable(SIZE);
     }
 
     @Test
@@ -41,7 +44,7 @@ class DbErrorTransactionTest extends DbTestTableTester {
         }
 
         // expected: auto rollback
-        assertEqualsTestTable();
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
@@ -58,7 +61,7 @@ class DbErrorTransactionTest extends DbTestTableTester {
         }
 
         // expected: auto rollback
-        assertEqualsTestTable();
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
@@ -75,6 +78,6 @@ class DbErrorTransactionTest extends DbTestTableTester {
         }
 
         // expected: auto rollback
-        assertEqualsTestTable();
+        assertEqualsTestTable(SIZE);
     }
 }
