@@ -14,6 +14,7 @@ import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager.TsurugiTransactionConsumer;
@@ -67,7 +68,7 @@ public class DbTestTableTester {
     }
 
     protected static void executeDdl(TsurugiSession session, String sql) throws IOException {
-        var tm = createTransactionManagerOcc(session);
+        var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedStatement(sql)) {
             ps.executeAndGetCount(tm);
         }
@@ -83,7 +84,7 @@ public class DbTestTableTester {
 
     protected static void insertTestTable(int size) throws IOException {
         var session = getSession();
-        var tm = createTransactionManagerOcc(session);
+        var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute((TsurugiTransactionConsumer) transaction -> {
                 for (int i = 0; i < size; i++) {
@@ -98,6 +99,8 @@ public class DbTestTableTester {
         return new TestEntity(i, i, Integer.toString(i));
     }
 
+    protected static final String SELECT_SQL = "select " + TEST_COLUMNS + " from " + TEST;
+
     protected static final TgEntityResultMapping<TestEntity> SELECT_MAPPING = TgResultMapping.of(TestEntity::new) //
             .int4("foo", TestEntity::setFoo) //
             .int8("bar", TestEntity::setBar) //
@@ -107,6 +110,10 @@ public class DbTestTableTester {
 
     protected static TsurugiTransactionManager createTransactionManagerOcc(TsurugiSession session) {
         return session.createTransactionManager(TgTxOption.ofOCC());
+    }
+
+    protected static TsurugiTransactionManager createTransactionManagerOcc(TsurugiSession session, int max) {
+        return session.createTransactionManager(TgTmSetting.ofAlways(TgTxOption.ofOCC(), 3));
     }
 
     // assertion
@@ -143,18 +150,17 @@ public class DbTestTableTester {
         assertEquals(expected, actual);
     }
 
+    protected void assertEqualsTestTable(int expected) throws IOException {
+        var actual = selectAllFromTest();
+        assertEquals(expected, actual.size());
+    }
+
     protected List<TestEntity> selectAllFromTest() throws IOException {
-        var sql = "select " + TEST_COLUMNS + "\n" //
-                + "from " + TEST + "\n" //
-                + "order by " + TEST_COLUMNS;
-        var resultMapping = TgResultMapping.of(TestEntity::new) //
-                .int4(TestEntity::setFoo) //
-                .int8(TestEntity::setBar) //
-                .character(TestEntity::setZzz);
+        var sql = SELECT_SQL + "\norder by " + TEST_COLUMNS;
 
         var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        var tm = createTransactionManagerOcc(session, 3);
+        try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
             return ps.executeAndGetList(tm);
         }
     }
@@ -164,7 +170,7 @@ public class DbTestTableTester {
         var resultMapping = TgResultMapping.of(record -> record.nextInt4());
 
         var session = getSession();
-        var tm = createTransactionManagerOcc(session);
+        var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
             return ps.executeAndFindRecord(tm).get();
         }
