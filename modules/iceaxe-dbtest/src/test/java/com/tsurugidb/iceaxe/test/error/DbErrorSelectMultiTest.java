@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
@@ -58,7 +57,7 @@ class DbErrorSelectMultiTest extends DbTestTableTester {
                 var rs = ps.execute(transaction);
                 // rs.close is called on ps.close
 
-                transaction.commit(TgCommitType.UNSPECIFIED);
+                // do not commit/rollback
             }
         }
     }
