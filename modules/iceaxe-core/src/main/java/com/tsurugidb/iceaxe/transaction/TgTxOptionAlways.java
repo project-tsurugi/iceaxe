@@ -2,6 +2,9 @@ package com.tsurugidb.iceaxe.transaction;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 /**
@@ -9,6 +12,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
  */
 @ThreadSafe
 public class TgTxOptionAlways implements TgTxOptionSupplier {
+    private static final Logger LOG = LoggerFactory.getLogger(TgTxOptionAlways.class);
 
     /**
      * create TgTxOptionAlways
@@ -46,11 +50,14 @@ public class TgTxOptionAlways implements TgTxOptionSupplier {
 
         if (isRetryable(e)) {
             if (attempt < attemtMaxCount) {
+                LOG.trace("tx retry. e={}", e.getMessage());
                 return TgTxState.execute(transactionOption);
             }
+            LOG.trace("tx retry over. e={}", e.getMessage());
             return TgTxState.retryOver();
         }
 
+        LOG.trace("tx not retryable. e={}", e.getMessage());
         return TgTxState.notRetryable();
     }
 }

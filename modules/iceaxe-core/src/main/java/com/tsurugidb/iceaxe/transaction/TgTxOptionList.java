@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 /**
@@ -11,6 +14,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
  */
 @ThreadSafe
 public class TgTxOptionList implements TgTxOptionSupplier {
+    private static final Logger LOG = LoggerFactory.getLogger(TgTxOptionList.class);
 
     /**
      * create TgTransactionOptionList
@@ -57,11 +61,14 @@ public class TgTxOptionList implements TgTxOptionSupplier {
 
         if (isRetryable(e)) {
             if (attempt < transactionOptionList.size()) {
+                LOG.trace("tx retry. e={}", e.getMessage());
                 return TgTxState.execute(transactionOptionList.get(attempt));
             }
+            LOG.trace("tx retry over. e={}", e.getMessage());
             return TgTxState.retryOver();
         }
 
+        LOG.trace("tx not retryable. e={}", e.getMessage());
         return TgTxState.notRetryable();
     }
 }
