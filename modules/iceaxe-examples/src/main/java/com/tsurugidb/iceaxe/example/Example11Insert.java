@@ -108,14 +108,6 @@ public class Example11Insert {
                 case 2:
                     param = TgParameterList.of().int4("foo", 123).int8("bar", 456).character("zzz", "abc");
                     break;
-                case 3:
-                    // TgParameterList.of(variable)を使う場合、値はvariableで指定されたデータ型に変換される
-                    param = TgParameterList.of(variable).add("foo", 123).add("bar", 456).add("zzz", "abc");
-                    break;
-                case 4:
-                    // TgParameterList.of(variable)でデータ型名のメソッドを使う場合、variableで指定されたデータ型と一致しない場合は実行時エラー
-                    param = TgParameterList.of(variable).int4("foo", 123).int8("bar", 456).character("zzz", "abc");
-                    break;
                 }
 
                 try (var result = ps.execute(transaction, param)) {

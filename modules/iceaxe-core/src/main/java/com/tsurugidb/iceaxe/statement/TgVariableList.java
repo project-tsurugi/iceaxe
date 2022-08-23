@@ -11,6 +11,8 @@ import com.tsurugidb.jogasaki.proto.SqlRequest.Placeholder;
 
 /**
  * Tsurugi Variable definition for PreparedStatement
+ * 
+ * @see TgParameterMapping#of(TgVariableList)
  */
 public class TgVariableList {
 
