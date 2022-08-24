@@ -144,7 +144,7 @@ class DbInsertTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 for (var entity : entityList) {
-                    int count = ps.executeAndGetCount(tm, entity);
+                    int count = ps.executeAndGetCount(transaction, entity);
                     assertEquals(-1, count); // TODO 1
                 }
             });

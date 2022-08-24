@@ -169,8 +169,12 @@ public class DbTestTableTester {
     }
 
     protected void assertEqualsTestTable(int expected) throws IOException {
-        var actual = selectAllFromTest();
-        assertEquals(expected, actual.size());
+        var actualList = selectAllFromTest();
+        assertEquals(expected, actualList.size());
+        for (int i = 0; i < expected; i++) {
+            var actual = actualList.get(i);
+            assertEquals(i, actual.getFoo());
+        }
     }
 
     protected List<TestEntity> selectAllFromTest() throws IOException {

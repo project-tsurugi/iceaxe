@@ -38,6 +38,7 @@ class DbErrorSelectMultiTest extends DbTestTableTester {
     }
 
     @Test
+    @Disabled // TODO remove Disabled
     void selectMultiSuccess() throws IOException, TsurugiTransactionException {
         selectMulti(15);
     }
