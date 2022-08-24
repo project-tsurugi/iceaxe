@@ -20,7 +20,6 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 class IceaxeIoUtilTest {
-
     @Test
     void testGetFromFuture() throws IOException {
         var future = new IceaxeFutureResponseTestMock<String>() {
