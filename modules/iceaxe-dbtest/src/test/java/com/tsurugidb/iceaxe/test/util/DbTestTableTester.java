@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
+import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.result.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
@@ -142,9 +143,17 @@ public class DbTestTableTester {
     }
 
     protected static DiagnosticCode findDiagnosticCode(Throwable t) {
-        var e = findTransactionException(t);
-        if (e != null) {
-            return e.getDiagnosticCode();
+        {
+            var e = findTransactionException(t);
+            if (e != null) {
+                return e.getDiagnosticCode();
+            }
+        }
+        {
+            var e = findLowServerException(t);
+            if (e != null) {
+                return e.getDiagnosticCode();
+            }
         }
         return null;
     }
@@ -153,6 +162,15 @@ public class DbTestTableTester {
         for (; t != null; t = t.getCause()) {
             if (t instanceof TsurugiTransactionException) {
                 return (TsurugiTransactionException) t;
+            }
+        }
+        return null;
+    }
+
+    protected static ServerException findLowServerException(Throwable t) {
+        for (; t != null; t = t.getCause()) {
+            if (t instanceof ServerException) {
+                return (ServerException) t;
             }
         }
         return null;
