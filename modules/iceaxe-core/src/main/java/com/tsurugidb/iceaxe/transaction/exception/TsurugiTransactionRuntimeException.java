@@ -1,10 +1,13 @@
 package com.tsurugidb.iceaxe.transaction.exception;
 
+import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
+import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
+
 /**
  * Tsurugi Transaction RuntimeException
  */
 @SuppressWarnings("serial")
-public class TsurugiTransactionRuntimeException extends RuntimeException {
+public class TsurugiTransactionRuntimeException extends RuntimeException implements TsurugiDiagnosticCodeProvider {
 
     /**
      * Tsurugi Transaction RuntimeException
@@ -18,5 +21,10 @@ public class TsurugiTransactionRuntimeException extends RuntimeException {
     @Override
     public TsurugiTransactionException getCause() {
         return (TsurugiTransactionException) super.getCause();
+    }
+
+    @Override
+    public DiagnosticCode getLowDiagnosticCode() {
+        return getCause().getLowDiagnosticCode();
     }
 }

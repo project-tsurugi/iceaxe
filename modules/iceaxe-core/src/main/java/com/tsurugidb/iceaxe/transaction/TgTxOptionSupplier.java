@@ -49,7 +49,7 @@ public interface TgTxOptionSupplier {
      * @return true: retryable
      */
     public default boolean isRetryable(TsurugiTransactionException e) {
-        var lowCode = e.getDiagnosticCode();
+        var lowCode = e.getLowDiagnosticCode();
         if (lowCode == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
             return true;
         }

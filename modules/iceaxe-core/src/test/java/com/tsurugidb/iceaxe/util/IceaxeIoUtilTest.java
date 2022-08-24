@@ -12,28 +12,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
-import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
-import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.nautilus_technologies.tsubakuro.util.Timeout;
+import com.tsurugidb.iceaxe.exception.IceaxeServerExceptionTestMock;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 class IceaxeIoUtilTest {
-
-    @SuppressWarnings("serial")
-    static class IceaxeServerExceptionTestMock extends ServerException {
-
-        public IceaxeServerExceptionTestMock(String message) {
-            super(message);
-        }
-
-        @Override
-        public DiagnosticCode getDiagnosticCode() {
-            return SqlServiceCode.OK;
-        }
-    }
 
     @Test
     void testGetFromFuture() throws IOException {
@@ -52,11 +38,26 @@ class IceaxeIoUtilTest {
     }
 
     @Test
+    void testGetFromFutureEx() {
+        var future = new IceaxeFutureResponseTestMock<String>() {
+            @Override
+            public String get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
+                throw new IceaxeServerExceptionTestMock("abc", "def");
+            }
+        };
+        var info = TgSessionInfo.of();
+        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var actual = assertThrows(IOException.class, () -> IceaxeIoUtil.getFromFuture(future, timeout));
+        assertEquals("def", actual.getMessage());
+        assertEquals("abc", actual.getCause().getMessage());
+    }
+
+    @Test
     void testGetFromFutureIOEx() {
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
             public String get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
-                throw new IceaxeServerExceptionTestMock("abc");
+                throw new InterruptedException("abc");
             }
         };
         var info = TgSessionInfo.of();
