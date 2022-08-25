@@ -118,6 +118,16 @@ public class DbTestTableTester {
         return new TestEntity(i, i, Integer.toString(i));
     }
 
+    protected static void insertTestTable(TestEntity entity) throws IOException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session, 3);
+        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            tm.execute((TsurugiTransactionAction) transaction -> {
+                ps.executeAndGetCount(transaction, entity);
+            });
+        }
+    }
+
     protected static final String SELECT_SQL = "select " + TEST_COLUMNS + " from " + TEST;
 
     protected static final TgEntityResultMapping<TestEntity> SELECT_MAPPING = TgResultMapping.of(TestEntity::new) //
