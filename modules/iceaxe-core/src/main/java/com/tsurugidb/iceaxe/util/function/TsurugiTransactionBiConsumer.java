@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.util;
+package com.tsurugidb.iceaxe.util.function;
 
 import java.io.IOException;
 import java.util.function.BiConsumer;

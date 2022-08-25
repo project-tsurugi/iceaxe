@@ -13,6 +13,8 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionTask;
 
 /**
  * Tsurugi Transaction Manager
@@ -40,11 +42,6 @@ public class TsurugiTransactionManager {
         return this.defaultSetting;
     }
 
-    @FunctionalInterface
-    public interface TsurugiTransactionConsumer {
-        public void accept(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException;
-    }
-
     /**
      * execute transaction
      * 
@@ -52,7 +49,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public void execute(TsurugiTransactionConsumer action) throws IOException {
+    public void execute(TsurugiTransactionAction action) throws IOException {
         execute(defaultSetting(), action);
     }
 
@@ -64,19 +61,14 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public void execute(TgTmSetting setting, TsurugiTransactionConsumer action) throws IOException {
+    public void execute(TgTmSetting setting, TsurugiTransactionAction action) throws IOException {
         if (action == null) {
             throw new IllegalArgumentException("action is not specified");
         }
         execute(setting, transaction -> {
-            action.accept(transaction);
+            action.run(transaction);
             return null;
         });
-    }
-
-    @FunctionalInterface
-    public interface TsurugiTransactionFuntion<R> {
-        public R apply(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException;
     }
 
     /**
@@ -88,7 +80,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public <R> R execute(TsurugiTransactionFuntion<R> action) throws IOException {
+    public <R> R execute(TsurugiTransactionTask<R> action) throws IOException {
         return execute(defaultSetting(), action);
     }
 
@@ -102,7 +94,7 @@ public class TsurugiTransactionManager {
      * @throws IOException
      * @see TsurugiPreparedStatement
      */
-    public <R> R execute(TgTmSetting setting, TsurugiTransactionFuntion<R> action) throws IOException {
+    public <R> R execute(TgTmSetting setting, TsurugiTransactionTask<R> action) throws IOException {
         LOG.trace("tm.execute start");
         if (setting == null) {
             throw new IllegalArgumentException("setting is not specified");
@@ -118,7 +110,7 @@ public class TsurugiTransactionManager {
                 setting.initializeTransaction(transaction);
 
                 try {
-                    var r = action.apply(transaction);
+                    var r = action.run(transaction);
                     if (transaction.isRollbacked()) {
                         LOG.trace("tm.execute end (rollbacked)");
                         return r;

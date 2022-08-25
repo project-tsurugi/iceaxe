@@ -7,7 +7,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
-import com.tsurugidb.iceaxe.util.TsurugiTransactionFunction;
+import com.tsurugidb.iceaxe.util.function.TsurugiTransactionFunction;
 
 /**
  * Tsurugi Result Mapping
