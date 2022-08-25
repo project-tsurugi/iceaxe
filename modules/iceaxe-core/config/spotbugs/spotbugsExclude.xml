@@ -18,5 +18,10 @@
     <Method name="~.*bool.*" />
     <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
   </Match>
+  <Match>
+    <Class name="com.tsurugidb.iceaxe.util.IceaxeCloseableSet" />
+    <Method name="closeInTransaction" />
+    <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE" />
+  </Match>
 
 </FindBugsFilter>

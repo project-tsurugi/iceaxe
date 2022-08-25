@@ -216,6 +216,7 @@ public class TsurugiTransaction implements Closeable {
         }
 
         LOG.trace("transaction commit start. commitType={}", commitType);
+        closeableSet.closeInTransaction();
         var lowCommitStatus = commitType.getLowCommitStatus();
         finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout);
         LOG.trace("transaction commit end");
@@ -240,6 +241,7 @@ public class TsurugiTransaction implements Closeable {
         }
 
         LOG.trace("transaction rollback start");
+        closeableSet.closeInTransaction();
         finish(Transaction::rollback, rollbackTimeout);
         LOG.trace("transaction rollback end");
         this.rollbacked = true;

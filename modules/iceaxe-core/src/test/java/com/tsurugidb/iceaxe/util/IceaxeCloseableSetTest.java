@@ -9,6 +9,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.nautilus_technologies.tsubakuro.exception.ServerException;
+import com.tsurugidb.iceaxe.exception.IceaxeServerExceptionTestMock;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
+
 class IceaxeCloseableSetTest {
 
     @Test
@@ -177,12 +182,312 @@ class IceaxeCloseableSetTest {
         assertEquals(2, result.size());
         var e0 = (IOException) result.get(0);
         var e1 = (IOException) result.get(1);
-        if ("abc".equals(e0.getMessage())) {
-            assertEquals("def", e1.getMessage());
-        } else if ("def".equals(e0.getMessage())) {
-            assertEquals("abc", e1.getMessage());
-        } else {
-            fail(e0.getMessage());
-        }
+        assertEquals("abc", e0.getMessage());
+        assertEquals("def", e1.getMessage());
+    }
+
+    @Test
+    void testCloseInTransaction0() throws IOException, TsurugiTransactionException {
+        var target = new IceaxeCloseableSet();
+        assertEquals(0, target.size());
+        target.closeInTransaction();
+        assertEquals(0, target.size());
+
+        var count = new AtomicInteger(0);
+        var closeable1 = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                count.addAndGet(1);
+                target.remove(this);
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var closeable2 = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                count.addAndGet(1);
+                target.remove(this);
+            }
+        };
+        target.add(closeable2);
+        assertEquals(2, target.size());
+
+        var closeable3 = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                count.addAndGet(1);
+                target.remove(this);
+            }
+        };
+        target.add(closeable3);
+        assertEquals(3, target.size());
+
+        closeable2.close();
+        assertEquals(1, count.get());
+        assertEquals(2, target.size());
+
+        closeable1.close();
+        assertEquals(2, count.get());
+        assertEquals(1, target.size());
+
+        closeable3.close();
+        assertEquals(3, count.get());
+        assertEquals(0, target.size());
+
+        target.closeInTransaction();
+        assertEquals(0, target.size());
+    }
+
+    @Test
+    void testCloseInTransaction() throws IOException, TsurugiTransactionException {
+        var target = new IceaxeCloseableSet();
+        assertEquals(0, target.size());
+        target.closeInTransaction();
+        assertEquals(0, target.size());
+
+        var count = new AtomicInteger(0);
+        var closeable1 = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                count.addAndGet(1);
+                target.remove(this);
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var closeable2 = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                count.addAndGet(1);
+                target.remove(this);
+            }
+        };
+        target.add(closeable2);
+        assertEquals(2, target.size());
+
+        target.closeInTransaction();
+        assertEquals(2, count.get());
+        assertEquals(0, target.size());
+    }
+
+    // 最初の例外がTsurugiTransactionException
+    @Test
+    void testCloseInTransactionEx1() {
+        var target = new IceaxeCloseableSet();
+
+        var count = new AtomicInteger(0);
+        var closeable1 = new AutoCloseable() {
+            @Override
+            public void close() throws TsurugiTransactionException {
+                count.addAndGet(1);
+                var e = new IceaxeServerExceptionTestMock("abc", "abc");
+                throw new TsurugiTransactionException(e);
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var closeable2 = new Closeable() {
+            @Override
+            public void close() {
+                count.addAndGet(1);
+                var e = new IceaxeServerExceptionTestMock("def");
+                var t = new TsurugiTransactionException(e);
+                throw new TsurugiTransactionRuntimeException(t);
+            }
+        };
+        target.add(closeable2);
+        assertEquals(2, target.size());
+
+        var closeable3 = new AutoCloseable() {
+            @Override
+            public void close() throws Exception {
+                count.addAndGet(1);
+                throw new IceaxeServerExceptionTestMock("ghi");
+            }
+        };
+        target.add(closeable3);
+        assertEquals(3, target.size());
+
+        var e = assertThrows(TsurugiTransactionException.class, () -> {
+            target.closeInTransaction();
+        });
+        assertEquals("abc", e.getMessage());
+        assertEquals(0, target.size());
+    }
+
+    // 最初の例外がTsurugiTransactionRuntimeException
+    @Test
+    void testCloseInTransactionEx2() {
+        var target = new IceaxeCloseableSet();
+        var count = new AtomicInteger(0);
+
+        var t = new TsurugiTransactionException(new IceaxeServerExceptionTestMock("", "abc"));
+        var closeable1 = new Closeable() {
+            @Override
+            public void close() {
+                count.addAndGet(1);
+                throw new TsurugiTransactionRuntimeException(t);
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var e = assertThrows(TsurugiTransactionException.class, () -> {
+            target.closeInTransaction();
+        });
+        assertSame(t, e);
+        assertEquals(0, target.size());
+    }
+
+    // 最初の例外がServerException
+    @Test
+    void testCloseInTransactionEx3() {
+        var target = new IceaxeCloseableSet();
+        var count = new AtomicInteger(0);
+
+        var t = new IceaxeServerExceptionTestMock("", "abc");
+        var closeable1 = new AutoCloseable() {
+            @Override
+            public void close() throws ServerException {
+                count.addAndGet(1);
+                throw t;
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var e = assertThrows(TsurugiTransactionException.class, () -> {
+            target.closeInTransaction();
+        });
+        assertSame(t, e.getCause());
+        assertEquals(0, target.size());
+    }
+
+    // 最初の例外がIOException
+    @Test
+    void testCloseInTransactionIOEx1() {
+        var target = new IceaxeCloseableSet();
+
+        var count = new AtomicInteger(0);
+        var closeable1 = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                count.addAndGet(1);
+                throw new IOException("abc");
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var closeable2 = new Closeable() {
+            @Override
+            public void close() {
+                count.addAndGet(1);
+                throw new RuntimeException("def");
+            }
+        };
+        target.add(closeable2);
+        assertEquals(2, target.size());
+
+        var e = assertThrows(IOException.class, () -> {
+            target.closeInTransaction();
+        });
+        assertEquals("abc", e.getMessage());
+        assertEquals(1, e.getSuppressed().length);
+        var c = e.getSuppressed()[0];
+        assertInstanceOf(RuntimeException.class, c);
+        assertEquals("def", c.getMessage());
+        assertEquals(0, target.size());
+    }
+
+    // 最初の例外がRuntimeException
+    @Test
+    void testCloseInTransactionIOEx2() {
+        var target = new IceaxeCloseableSet();
+
+        var count = new AtomicInteger(0);
+        var closeable1 = new Closeable() {
+            @Override
+            public void close() {
+                count.addAndGet(1);
+                throw new RuntimeException("abc");
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var closeable2 = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                count.addAndGet(1);
+                throw new IOException("def");
+            }
+        };
+        target.add(closeable2);
+        assertEquals(2, target.size());
+
+        var e = assertThrows(IOException.class, () -> {
+            target.closeInTransaction();
+        });
+        assertEquals("abc", e.getMessage());
+        assertEquals(1, e.getSuppressed().length);
+        var c = e.getSuppressed()[0];
+        assertInstanceOf(IOException.class, c);
+        assertEquals("def", c.getMessage());
+        assertEquals(0, target.size());
+    }
+
+    @Test
+    void testCloseInTransactionExIOEx() {
+        var target = new IceaxeCloseableSet();
+
+        var count = new AtomicInteger(0);
+        var closeable1 = new Closeable() {
+            @Override
+            public void close() {
+                count.addAndGet(1);
+                throw new RuntimeException("abc");
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var closeable2 = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                count.addAndGet(1);
+                throw new IOException("def");
+            }
+        };
+        target.add(closeable2);
+        assertEquals(2, target.size());
+
+        var closeable3 = new AutoCloseable() {
+            @Override
+            public void close() throws TsurugiTransactionException {
+                count.addAndGet(1);
+                var e = new IceaxeServerExceptionTestMock("", "ghi");
+                throw new TsurugiTransactionException(e);
+            }
+        };
+        target.add(closeable3);
+        assertEquals(3, target.size());
+
+        var e = assertThrows(TsurugiTransactionException.class, () -> {
+            target.closeInTransaction();
+        });
+        assertEquals("ghi", e.getMessage());
+        assertEquals(2, e.getSuppressed().length);
+        var c0 = e.getSuppressed()[0];
+        assertInstanceOf(RuntimeException.class, c0);
+        assertEquals("abc", c0.getMessage());
+        var c1 = e.getSuppressed()[1];
+        assertInstanceOf(IOException.class, c1);
+        assertEquals("def", c1.getMessage());
+        assertEquals(0, target.size());
     }
 }
