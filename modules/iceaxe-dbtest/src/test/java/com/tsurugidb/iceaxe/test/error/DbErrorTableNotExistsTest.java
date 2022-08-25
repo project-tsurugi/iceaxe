@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager.TsurugiTransactionConsumer;
@@ -61,9 +62,9 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             for (int i = 0; i < 30; i++) {
                 LOG.trace("i={}", i);
-                var e0 = assertThrows(IOException.class, () -> {
+                var e0 = assertThrows(TsurugiIOException.class, () -> {
                     tm.execute((TsurugiTransactionConsumer) transaction -> {
-                        var e = assertThrows(IOException.class, () -> {
+                        var e = assertThrows(TsurugiIOException.class, () -> {
                             ps.executeAndGetCount(transaction, entity);
                         });
                         assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO table_not_found

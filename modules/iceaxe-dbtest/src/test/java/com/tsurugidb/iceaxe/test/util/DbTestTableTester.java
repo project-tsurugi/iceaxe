@@ -146,7 +146,7 @@ public class DbTestTableTester {
         {
             var e = findTransactionException(t);
             if (e != null) {
-                return e.getDiagnosticCode();
+                return e.getLowDiagnosticCode();
             }
         }
         {
