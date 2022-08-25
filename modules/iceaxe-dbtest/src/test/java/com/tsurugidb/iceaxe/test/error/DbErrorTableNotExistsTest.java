@@ -13,9 +13,9 @@ import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager.TsurugiTransactionConsumer;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
 /**
  * table not exists test
@@ -40,7 +40,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(SELECT_SQL)) {
             for (int i = 0; i < 30; i++) {
                 var e0 = assertThrows(TsurugiTransactionIOException.class, () -> {
-                    tm.execute((TsurugiTransactionConsumer) transaction -> {
+                    tm.execute((TsurugiTransactionAction) transaction -> {
                         var e = assertThrows(TsurugiTransactionException.class, () -> {
                             ps.executeAndGetList(transaction);
                         });
@@ -63,7 +63,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
             for (int i = 0; i < 30; i++) {
                 LOG.trace("i={}", i);
                 var e0 = assertThrows(TsurugiIOException.class, () -> {
-                    tm.execute((TsurugiTransactionConsumer) transaction -> {
+                    tm.execute((TsurugiTransactionAction) transaction -> {
                         var e = assertThrows(TsurugiIOException.class, () -> {
                             ps.executeAndGetCount(transaction, entity);
                         });

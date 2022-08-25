@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager.TsurugiTransactionConsumer;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
 /**
  * select empty-table test
@@ -52,7 +52,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            tm.execute((TsurugiTransactionConsumer) transaction -> {
+            tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < 300; i++) {
                     List<TsurugiResultEntity> list = ps.executeAndGetList(transaction);
                     assertEquals(List.of(), list);

@@ -14,9 +14,9 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager.TsurugiTransactionConsumer;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
 /**
  * insert constraint violation test
@@ -60,7 +60,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             var e0 = assertThrows(TsurugiTransactionIOException.class, () -> {
-                tm.execute((TsurugiTransactionConsumer) transaction -> {
+                tm.execute((TsurugiTransactionAction) transaction -> {
                     int count1 = ps.executeAndGetCount(transaction, entity);
                     assertEquals(-1, count1); // TODO 1
 

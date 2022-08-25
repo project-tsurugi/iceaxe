@@ -23,8 +23,8 @@ import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager.TsurugiTransactionConsumer;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
 public class DbTestTableTester {
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -105,7 +105,7 @@ public class DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            tm.execute((TsurugiTransactionConsumer) transaction -> {
+            tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < size; i++) {
                     var entity = createTestEntity(i);
                     ps.executeAndGetCount(transaction, entity);
