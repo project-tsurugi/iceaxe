@@ -2,7 +2,9 @@ package com.tsurugidb.iceaxe.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -20,7 +22,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeExcep
 public class IceaxeCloseableSet {
     private static final Logger LOG = LoggerFactory.getLogger(IceaxeCloseableSet.class);
 
-    private final List<AutoCloseable> closeableList = new ArrayList<>();
+    private final Set<AutoCloseable> closeableSet = new LinkedHashSet<>();
 
     /**
      * add Closeable
@@ -28,7 +30,7 @@ public class IceaxeCloseableSet {
      * @param closeable Closeable
      */
     public synchronized void add(AutoCloseable closeable) {
-        closeableList.add(closeable);
+        closeableSet.add(closeable);
     }
 
     /**
@@ -37,7 +39,7 @@ public class IceaxeCloseableSet {
      * @param closeable Closeable
      */
     public synchronized void remove(AutoCloseable closeable) {
-        closeableList.remove(closeable);
+        closeableSet.remove(closeable);
     }
 
     /**
@@ -47,7 +49,7 @@ public class IceaxeCloseableSet {
      */
     public synchronized List<Throwable> close() {
         List<Throwable> result = null;
-        for (var i = closeableList.iterator(); i.hasNext();) {
+        for (var i = closeableSet.iterator(); i.hasNext();) {
             var closeable = i.next();
             i.remove();
 
@@ -71,7 +73,7 @@ public class IceaxeCloseableSet {
      * @throws TsurugiTransactionException
      */
     public synchronized void closeInTransaction() throws IOException, TsurugiTransactionException {
-        if (closeableList.isEmpty()) {
+        if (closeableSet.isEmpty()) {
             return;
         }
 
@@ -115,6 +117,6 @@ public class IceaxeCloseableSet {
     }
 
     int size() {
-        return closeableList.size();
+        return closeableSet.size();
     }
 }
