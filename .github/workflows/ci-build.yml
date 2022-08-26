@@ -61,7 +61,7 @@ jobs:
       - id: Check
         name: Check
         run: |
-          ./gradlew -i check --continue
+          ./gradlew -i check -x :iceaxe-dbtest:check  --continue
 
       - id: Publish
         name: Publish
