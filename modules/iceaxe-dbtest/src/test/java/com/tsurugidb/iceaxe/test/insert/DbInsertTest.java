@@ -15,6 +15,7 @@ import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.statement.TgVariableList;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
 /**
  * insert test
@@ -151,5 +152,42 @@ class DbInsertTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable(entityList);
+    }
+
+    @Test
+    void insertResultCheck() throws IOException {
+        insertResultCheck(true);
+    }
+
+    @Test
+    void insertResultNoCheck() throws IOException {
+        insertResultCheck(false);
+    }
+
+    private void insertResultCheck(boolean resultCheck) throws IOException {
+        int size = 100;
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            tm.execute((TsurugiTransactionAction) transaction -> {
+                for (int i = 0; i < size; i++) {
+                    var entity = createTestEntity(i);
+
+                    if (resultCheck) {
+                        try (var rc = ps.execute(transaction, entity)) {
+                            var count = rc.getUpdateCount();
+                            assertEquals(-1, count); // TODO 1
+                        }
+                    } else {
+                        @SuppressWarnings("unused")
+                        var rc = ps.execute(transaction, entity);
+                        // rc.close is called on transaction.close
+                    }
+                }
+            });
+        }
+
+        assertEqualsTestTable(size);
     }
 }
