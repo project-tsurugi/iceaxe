@@ -213,7 +213,7 @@ public class TsurugiTransactionManager {
             if (save != null) {
                 save.addSuppressed(e);
             } else {
-                throw new IOException(e);
+                throw new IOException(e.getMessage(), e);
             }
         }
     }

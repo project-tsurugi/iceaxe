@@ -158,7 +158,7 @@ public class TsurugiResultRecord {
         } catch (ServerException e) {
             throw new TsurugiTransactionException(e);
         } catch (InterruptedException e) {
-            throw new IOException(e);
+            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -264,7 +264,7 @@ public class TsurugiResultRecord {
         } catch (ServerException e) {
             throw new TsurugiTransactionException(e);
         } catch (InterruptedException e) {
-            throw new IOException(e);
+            throw new IOException(e.getMessage(), e);
         }
     }
 

@@ -36,7 +36,7 @@ public final class IceaxeIoUtil {
         } catch (ServerException e) {
             throw new TsurugiIOException(e);
         } catch (InterruptedException | TimeoutException e) {
-            throw new IOException(e);
+            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -57,7 +57,7 @@ public final class IceaxeIoUtil {
         } catch (ServerException e) {
             throw new TsurugiTransactionException(e);
         } catch (InterruptedException | TimeoutException e) {
-            throw new IOException(e);
+            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -78,7 +78,7 @@ public final class IceaxeIoUtil {
         } catch (ServerException e) {
             throw new TsurugiTransactionException(e);
         } catch (InterruptedException | TimeoutException e) {
-            throw new IOException(e);
+            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -107,7 +107,7 @@ public final class IceaxeIoUtil {
                 if (save instanceof IOException) {
                     e = (IOException) save;
                 } else {
-                    e = new IOException(save);
+                    e = new IOException(save.getMessage(), save);
                 }
             } else {
                 e.addSuppressed(save);
@@ -142,7 +142,7 @@ public final class IceaxeIoUtil {
                 }
             } catch (Exception e) {
                 if (save == null) {
-                    save = new IOException(e);
+                    save = new IOException(e.getMessage(), e);
                 } else {
                     save.addSuppressed(e);
                 }
@@ -204,7 +204,7 @@ public final class IceaxeIoUtil {
                     if (save instanceof IOException) {
                         e = (IOException) save;
                     } else {
-                        e = new IOException(save);
+                        e = new IOException(save.getMessage(), save);
                     }
                 } else {
                     e.addSuppressed(save);

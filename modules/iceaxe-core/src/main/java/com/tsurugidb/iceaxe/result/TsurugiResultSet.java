@@ -129,7 +129,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         } catch (ServerException e) {
             throw new TsurugiTransactionException(e);
         } catch (InterruptedException e) {
-            throw new IOException(e);
+            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -163,7 +163,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         } catch (ServerException e) {
             throw new TsurugiTransactionException(e);
         } catch (InterruptedException e) {
-            throw new IOException(e);
+            throw new IOException(e.getMessage(), e);
         }
     }
 

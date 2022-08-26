@@ -77,65 +77,38 @@ public class IceaxeCloseableSet {
 
         LOG.trace("close start");
 
-        List<Throwable> list1 = null;
-        List<Throwable> list2 = null;
-        for (var i = closeableList.iterator(); i.hasNext();) {
-            var closeable = i.next();
-            i.remove();
-
-            try {
-                closeable.close();
-            } catch (ServerException | TsurugiTransactionException | TsurugiTransactionRuntimeException e) {
-                if (list1 == null) {
-                    list1 = new ArrayList<>();
+        Throwable e = null;
+        var saveList = close();
+        for (var save : saveList) {
+            if (e == null) {
+                if (save instanceof IOException) {
+                    e = save;
+                } else if (save instanceof ServerException) {
+                    e = new TsurugiTransactionException((ServerException) save);
+                } else if (save instanceof TsurugiTransactionException) {
+                    e = save;
+                } else if (save instanceof TsurugiTransactionRuntimeException) {
+                    e = save.getCause();
+                } else if (save instanceof RuntimeException) {
+                    e = save;
+                } else {
+                    e = new IOException(save.getMessage(), save);
                 }
-                list1.add(e);
-            } catch (Exception e) {
-                if (list2 == null) {
-                    list2 = new ArrayList<>();
-                }
-                list2.add(e);
+            } else {
+                e.addSuppressed(save);
             }
         }
 
-        if (list1 != null) {
-            TsurugiTransactionException e = null;
-            for (var save : list1) {
-                if (e == null) {
-                    if (save instanceof ServerException) {
-                        e = new TsurugiTransactionException((ServerException) save);
-                    } else if (save instanceof TsurugiTransactionException) {
-                        e = (TsurugiTransactionException) save;
-                    } else if (save instanceof TsurugiTransactionRuntimeException) {
-                        e = ((TsurugiTransactionRuntimeException) save).getCause();
-                    } else {
-                        throw new InternalError(save);
-                    }
-                } else {
-                    e.addSuppressed(save);
-                }
+        if (e != null) {
+            if (e instanceof IOException) {
+                throw (IOException) e;
+            } else if (e instanceof TsurugiTransactionException) {
+                throw (TsurugiTransactionException) e;
+            } else if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
+                throw new AssertionError(e);
             }
-            if (list2 != null) {
-                for (var save : list2) {
-                    e.addSuppressed(save);
-                }
-            }
-            throw e;
-        }
-        if (list2 != null) {
-            IOException e = null;
-            for (var save : list2) {
-                if (e == null) {
-                    if (save instanceof IOException) {
-                        e = (IOException) save;
-                    } else {
-                        e = new IOException(save.getMessage(), save);
-                    }
-                } else {
-                    e.addSuppressed(save);
-                }
-            }
-            throw e;
         }
 
         LOG.trace("close end");
