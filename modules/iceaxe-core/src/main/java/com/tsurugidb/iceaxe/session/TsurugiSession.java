@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.session;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
@@ -13,6 +14,8 @@ import com.nautilus_technologies.tsubakuro.channel.common.connection.wire.Wire;
 import com.nautilus_technologies.tsubakuro.low.common.Session;
 import com.nautilus_technologies.tsubakuro.low.sql.SqlClient;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
+import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadata;
+import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
@@ -123,8 +126,9 @@ public class TsurugiSession implements Closeable {
         return sessionInfo;
     }
 
+    // internal
 //  @ThreadSafe
-    protected final synchronized SqlClient getLowSqlClient() throws IOException {
+    public final synchronized SqlClient getLowSqlClient() throws IOException {
         if (this.lowSqlClient == null) {
             var lowSession = getLowSession();
             LOG.trace("SqlClient.attach start");
@@ -149,6 +153,18 @@ public class TsurugiSession implements Closeable {
             this.lowWireFuture = null;
         }
         return this.lowSession;
+    }
+
+    /**
+     * get table metadata
+     * 
+     * @param tableName table name
+     * @return table metadata (empty if table not found)
+     * @throws IOException
+     */
+//  @ThreadSafe
+    public Optional<TsurugiTableMetadata> findTableMetadata(String tableName) throws IOException {
+        return TsurugiTableMetadataHelper.findTableMetadata(this, tableName);
     }
 
     /**

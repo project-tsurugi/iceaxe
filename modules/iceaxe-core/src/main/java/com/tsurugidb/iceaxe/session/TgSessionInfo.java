@@ -11,6 +11,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.nautilus_technologies.tsubakuro.channel.common.connection.Credential;
 import com.nautilus_technologies.tsubakuro.channel.common.connection.UsernamePasswordCredential;
+import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
@@ -66,6 +67,11 @@ public class TgSessionInfo {
         SESSION_CONNECT,
         /** {@link TsurugiSession} close */
         SESSION_CLOSE,
+
+        /** {@link TsurugiTableMetadataHelper} connect */
+        METADATA_CONNECT,
+        /** {@link TsurugiTableMetadataHelper} close */
+        METADATA_CLOSE,
 
         /** {@link TsurugiPreparedStatementWithLowPs} connect */
         PS_CONNECT,

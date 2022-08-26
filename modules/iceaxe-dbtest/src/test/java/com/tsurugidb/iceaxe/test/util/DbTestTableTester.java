@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
-import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.result.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -63,16 +62,16 @@ public class DbTestTableTester {
     // utility
 
     protected static void dropTestTable() throws IOException {
-        var sql = "drop table " + TEST;
-        try {
+        if (existsTable(TEST)) {
+            var sql = "drop table " + TEST;
             executeDdl(getSession(), sql);
-        } catch (IOException e) {
-            var code = findDiagnosticCode(e);
-            if (code == SqlServiceCode.ERR_TRANSLATOR_ERROR) { // table_not_found
-                return;
-            }
-            throw e;
         }
+    }
+
+    protected static boolean existsTable(String tableName) throws IOException {
+        var session = getSession();
+        var opt = session.findTableMetadata(tableName);
+        return opt.isPresent();
     }
 
     protected static void createTestTable() throws IOException {
