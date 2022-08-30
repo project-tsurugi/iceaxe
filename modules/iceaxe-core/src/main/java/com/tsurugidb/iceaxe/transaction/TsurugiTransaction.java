@@ -150,14 +150,11 @@ public class TsurugiTransaction implements Closeable {
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
             LOG.trace("lowTransaction get start");
-            this.lowTransaction = IceaxeIoUtil.getFromFuture(lowTransactionFuture, beginTimeout);
+            this.lowTransaction = IceaxeIoUtil.getAndCloseFuture(lowTransactionFuture, beginTimeout);
             LOG.trace("lowTransaction get end");
-            try {
-                IceaxeIoUtil.close(lowTransactionFuture);
-                this.lowTransactionFuture = null;
-            } finally {
-                applyCloseTimeout();
-            }
+
+            this.lowTransactionFuture = null;
+            applyCloseTimeout();
         }
         return this.lowTransaction;
     }
@@ -256,7 +253,8 @@ public class TsurugiTransaction implements Closeable {
     protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
         var transaction = getLowTransaction();
         var lowResultFuture = finisher.apply(transaction);
-        IceaxeIoUtil.checkAndCloseFutureInTransaction(lowResultFuture, timeout, closeTimeout);
+        closeTimeout.apply(lowResultFuture);
+        IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, timeout);
     }
 
     /**

@@ -21,24 +21,24 @@ class IceaxeFutureResponseTestMock<V> implements FutureResponse<V> {
 
     @Override
     public boolean isDone() {
-        fail();
+        fail("do override");
         return false;
     }
 
     @Override
     public V get() throws IOException, ServerException, InterruptedException {
-        fail();
+        fail("do override");
         return null;
     }
 
     @Override
     public V get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
-        fail();
+        fail("do override");
         return null;
     }
 
     @Override
     public void close() throws IOException, ServerException, InterruptedException {
-        fail();
+        fail("do override");
     }
 }

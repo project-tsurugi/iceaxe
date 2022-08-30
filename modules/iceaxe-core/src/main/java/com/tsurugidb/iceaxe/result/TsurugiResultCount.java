@@ -86,7 +86,7 @@ public class TsurugiResultCount extends TsurugiResult {
         if (this.lowResultFuture != null) {
             LOG.trace("lowResult get start");
             try {
-                IceaxeIoUtil.checkAndCloseFutureInTransaction(lowResultFuture, checkTimeout, closeTimeout);
+                IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout);
             } finally {
                 this.lowResultFuture = null;
                 applyCloseTimeout();

@@ -28,14 +28,15 @@ public final class TsurugiTableMetadataHelper {
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("getTableMetadata start. tableName={}", tableName);
         var lowTableMetadataFuture = lowSqlClient.getTableMetadata(tableName);
-        try {
-            LOG.trace("getTableMetadata started");
+        LOG.trace("getTableMetadata started");
+        try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {
+
             var info = session.getSessionInfo();
+            var connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.METADATA_CONNECT);
             var closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.METADATA_CLOSE);
             closeTimeout.apply(lowTableMetadataFuture);
 
-            var connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.METADATA_CONNECT);
-            var lowTableMetadata = IceaxeIoUtil.getFromFuture(lowTableMetadataFuture, connectTimeout);
+            var lowTableMetadata = IceaxeIoUtil.getAndCloseFuture(lowTableMetadataFuture, connectTimeout);
             LOG.trace("getTableMetadata end");
 
             return Optional.of(new TsurugiTableMetadata(lowTableMetadata));
@@ -46,8 +47,6 @@ public final class TsurugiTableMetadataHelper {
                 return Optional.empty();
             }
             throw e;
-        } finally {
-            IceaxeIoUtil.close(lowTableMetadataFuture);
         }
     }
 }

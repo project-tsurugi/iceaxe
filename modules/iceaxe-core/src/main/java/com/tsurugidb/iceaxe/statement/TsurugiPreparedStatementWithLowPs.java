@@ -90,14 +90,11 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     protected final synchronized PreparedStatement getLowPreparedStatement() throws IOException {
         if (this.lowPreparedStatement == null) {
             log.trace("lowPs get start");
-            this.lowPreparedStatement = IceaxeIoUtil.getFromFuture(lowPreparedStatementFuture, connectTimeout);
+            this.lowPreparedStatement = IceaxeIoUtil.getAndCloseFuture(lowPreparedStatementFuture, connectTimeout);
             log.trace("lowPs get end");
-            try {
-                IceaxeIoUtil.close(lowPreparedStatementFuture);
-                this.lowPreparedStatementFuture = null;
-            } finally {
-                applyCloseTimeout();
-            }
+
+            this.lowPreparedStatementFuture = null;
+            applyCloseTimeout();
         }
         return this.lowPreparedStatement;
     }

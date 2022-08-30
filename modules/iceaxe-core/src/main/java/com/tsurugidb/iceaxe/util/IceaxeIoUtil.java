@@ -1,9 +1,10 @@
 package com.tsurugidb.iceaxe.util;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
@@ -29,15 +30,8 @@ public final class IceaxeIoUtil {
      * @return result value
      * @throws IOException
      */
-    public static <V> V getFromFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException {
-        var time = timeout.get();
-        try {
-            return future.get(time.value(), time.unit());
-        } catch (ServerException e) {
-            throw new TsurugiIOException(e);
-        } catch (InterruptedException | TimeoutException e) {
-            throw new IOException(e.getMessage(), e);
-        }
+    public static <V> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException {
+        return getAndCloseFuture(future, timeout, TsurugiIOException::new);
     }
 
     /**
@@ -50,36 +44,62 @@ public final class IceaxeIoUtil {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    public static <V> V getFromFutureInTransaction(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
-        var time = timeout.get();
+    public static <V> V getAndCloseFutureInTransaction(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
+        return getAndCloseFuture(future, timeout, TsurugiTransactionException::new);
+    }
+
+    private static <V, E extends Exception> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout, Function<ServerException, E> serverExceptionWrapper) throws IOException, E {
+        Throwable occurred = null;
         try {
+            var time = timeout.get();
             return future.get(time.value(), time.unit());
         } catch (ServerException e) {
-            throw new TsurugiTransactionException(e);
+            E wrapper = serverExceptionWrapper.apply(e);
+            occurred = wrapper;
+            throw wrapper;
         } catch (InterruptedException | TimeoutException e) {
-            throw new IOException(e.getMessage(), e);
+            var ioe = new IOException(e.getMessage(), e);
+            occurred = ioe;
+            throw ioe;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            try {
+                future.close();
+            } catch (ServerException e) {
+                E wrapper = serverExceptionWrapper.apply(e);
+                if (occurred != null) {
+                    occurred.addSuppressed(wrapper);
+                } else {
+                    throw wrapper;
+                }
+            } catch (InterruptedException e) {
+                if (occurred != null) {
+                    occurred.addSuppressed(e);
+                } else {
+                    throw new IOException(e.getMessage(), e);
+                }
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    occurred.addSuppressed(e);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
     /**
-     * get and close future in transaction
+     * wrap with Closeable
      * 
-     * @param future       future
-     * @param checkTimeout the maximum time to wait for get
-     * @param closeTimeout the maximum time to wait for close
-     * @throws IOException
-     * @throws TsurugiTransactionException
+     * @param future future
+     * @return Closeable
      */
-    public static void checkAndCloseFutureInTransaction(FutureResponse<?> future, IceaxeTimeout checkTimeout, IceaxeTimeout closeTimeout) throws IOException, TsurugiTransactionException {
-        var time = checkTimeout.get();
-        closeTimeout.apply(future);
-        try (future) {
-            future.get(time.value(), time.unit());
-        } catch (ServerException e) {
-            throw new TsurugiTransactionException(e);
-        } catch (InterruptedException | TimeoutException e) {
-            throw new IOException(e.getMessage(), e);
-        }
+    public static Closeable closeable(FutureResponse<?> future) {
+        return () -> {
+            IceaxeIoUtil.close(future);
+        };
     }
 
     /**
@@ -96,21 +116,23 @@ public final class IceaxeIoUtil {
             runnable.run();
         } catch (Exception e) {
             for (var save : saveList) {
-                e.addSuppressed(save);
+                var s = (save instanceof ServerException) ? new TsurugiIOException((ServerException) save) : save;
+                e.addSuppressed(s);
             }
             throw e;
         }
 
         IOException e = null;
         for (var save : saveList) {
+            var s = (save instanceof ServerException) ? new TsurugiIOException((ServerException) save) : save;
             if (e == null) {
-                if (save instanceof IOException) {
-                    e = (IOException) save;
+                if (s instanceof IOException) {
+                    e = (IOException) s;
                 } else {
-                    e = new IOException(save.getMessage(), save);
+                    e = new IOException(s.getMessage(), s);
                 }
             } else {
-                e.addSuppressed(save);
+                e.addSuppressed(s);
             }
         }
         if (e != null) {
@@ -125,33 +147,7 @@ public final class IceaxeIoUtil {
      * @throws IOException
      */
     public static void close(AutoCloseable... closeables) throws IOException {
-        IOException save = null;
-
-        for (var closeable : closeables) {
-            if (closeable == null) {
-                continue;
-            }
-
-            try {
-                closeable.close();
-            } catch (IOException e) {
-                if (save == null) {
-                    save = e;
-                } else {
-                    save.addSuppressed(e);
-                }
-            } catch (Exception e) {
-                if (save == null) {
-                    save = new IOException(e.getMessage(), e);
-                } else {
-                    save.addSuppressed(e);
-                }
-            }
-        }
-
-        if (save != null) {
-            throw save;
-        }
+        close(closeables, TsurugiIOException.class, TsurugiIOException::new);
     }
 
     /**
@@ -162,8 +158,11 @@ public final class IceaxeIoUtil {
      * @throws TsurugiTransactionException
      */
     public static void closeInTransaction(AutoCloseable... closeables) throws IOException, TsurugiTransactionException {
-        TsurugiTransactionException txException = null;
-        List<Throwable> saveList = null;
+        close(closeables, TsurugiTransactionException.class, TsurugiTransactionException::new);
+    }
+
+    private static <E extends Exception> void close(AutoCloseable[] closeables, Class<E> classE, Function<ServerException, E> serverExceptionWrapper) throws IOException, E {
+        Throwable occurred = null;
 
         for (var closeable : closeables) {
             if (closeable == null) {
@@ -173,44 +172,38 @@ public final class IceaxeIoUtil {
             try {
                 closeable.close();
             } catch (ServerException e) {
-                if (txException == null) {
-                    txException = new TsurugiTransactionException(e);
+                var wrapper = serverExceptionWrapper.apply(e);
+                if (occurred == null) {
+                    occurred = wrapper;
                 } else {
-                    if (saveList == null) {
-                        saveList = new ArrayList<>();
-                    }
-                    saveList.add(e);
+                    occurred.addSuppressed(wrapper);
                 }
-            } catch (Exception e) {
-                if (saveList == null) {
-                    saveList = new ArrayList<>();
+            } catch (IOException | RuntimeException | Error e) {
+                if (occurred == null) {
+                    occurred = e;
+                } else {
+                    occurred.addSuppressed(e);
                 }
-                saveList.add(e);
+            } catch (Throwable e) {
+                if (occurred == null) {
+                    occurred = new IOException(e.getMessage(), e);
+                } else {
+                    occurred.addSuppressed(e);
+                }
             }
         }
 
-        if (txException != null) {
-            if (saveList != null) {
-                for (var save : saveList) {
-                    txException.addSuppressed(save);
-                }
+        if (occurred != null) {
+            if (classE.isInstance(occurred)) {
+                throw classE.cast(occurred);
             }
-            throw txException;
-        }
-        if (saveList != null) {
-            IOException e = null;
-            for (var save : saveList) {
-                if (e == null) {
-                    if (save instanceof IOException) {
-                        e = (IOException) save;
-                    } else {
-                        e = new IOException(save.getMessage(), save);
-                    }
-                } else {
-                    e.addSuppressed(save);
-                }
+            if (occurred instanceof RuntimeException) {
+                throw (RuntimeException) occurred;
             }
-            throw e;
+            if (occurred instanceof Error) {
+                throw (Error) occurred;
+            }
+            throw (IOException) occurred;
         }
     }
 }

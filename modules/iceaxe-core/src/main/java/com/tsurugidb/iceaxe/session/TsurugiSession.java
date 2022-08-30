@@ -143,13 +143,12 @@ public class TsurugiSession implements Closeable {
     protected final synchronized Session getLowSession() throws IOException {
         if (!this.sessionConnected) {
             LOG.trace("lowSession.wire get start");
-            var lowWire = IceaxeIoUtil.getFromFuture(lowWireFuture, connectTimeout);
+            var lowWire = IceaxeIoUtil.getAndCloseFuture(lowWireFuture, connectTimeout);
             LOG.trace("lowSession.wire connect");
             lowSession.connect(lowWire);
             LOG.trace("lowSession.wire get end");
             this.sessionConnected = true;
 
-            IceaxeIoUtil.close(lowWireFuture);
             this.lowWireFuture = null;
         }
         return this.lowSession;

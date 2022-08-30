@@ -105,14 +105,11 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     protected final synchronized ResultSet getLowResultSet() throws IOException, TsurugiTransactionException {
         if (this.lowResultSet == null) {
             LOG.trace("lowResultSet get start");
-            this.lowResultSet = IceaxeIoUtil.getFromFutureInTransaction(lowResultSetFuture, connectTimeout);
+            this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout);
             LOG.trace("lowResultSet get end");
-            try {
-                IceaxeIoUtil.closeInTransaction(lowResultSetFuture);
-                this.lowResultSetFuture = null;
-            } finally {
-                applyCloseTimeout();
-            }
+
+            this.lowResultSetFuture = null;
+            applyCloseTimeout();
         }
         return this.lowResultSet;
     }
