@@ -38,6 +38,7 @@ public class Example04Ddl {
                 + ")";
         try (var ps = session.createPreparedStatement(sql)) {
             // DDLの実行もトランザクション内で行う
+            // ただしcommit/rollbackは無効（commitしなくてもテーブルは作られるし、rollbackしても消えない）
             tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                 }
@@ -49,6 +50,7 @@ public class Example04Ddl {
         var sql = "drop table TEST";
         try (var ps = session.createPreparedStatement(sql)) {
             // DDLの実行もトランザクション内で行う
+            // ただしcommit/rollbackは無効（commitしなくてもテーブルは削除されるし、rollbackしても復活しない）
             tm.execute(transaction -> {
                 try (var result = ps.execute(transaction)) {
                 }

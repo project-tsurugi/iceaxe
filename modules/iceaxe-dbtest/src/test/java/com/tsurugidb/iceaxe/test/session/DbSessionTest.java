@@ -9,7 +9,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 
 /**
- * Session test
+ * session test
  */
 class DbSessionTest extends DbTestTableTester {
 

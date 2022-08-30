@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.table;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
@@ -26,19 +27,19 @@ class DbCreateTableTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
+    private static final String SQL = "create table " + TEST //
+            + "(" //
+            + "  foo int," //
+            + "  bar bigint," //
+            + "  zzz varchar(10)," //
+            + "  primary key(foo)" //
+            + ")";
+
     @Test
     void create() throws IOException {
-        var sql = "create table " + TEST //
-                + "(" //
-                + "  foo int," //
-                + "  bar bigint," //
-                + "  zzz varchar(10)," //
-                + "  primary key(foo)" //
-                + ")";
-
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createPreparedStatement(SQL)) {
             ps.executeAndGetCount(tm);
         }
     }
@@ -47,21 +48,31 @@ class DbCreateTableTest extends DbTestTableTester {
     void createExists() throws IOException {
         createTestTable();
 
-        var sql = "create table " + TEST //
-                + "(" //
-                + "  foo int," //
-                + "  bar bigint," //
-                + "  zzz varchar(10)," //
-                + "  primary key(foo)" //
-                + ")";
-
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createPreparedStatement(SQL)) {
             var e = assertThrows(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetCount(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO duplicate_table
         }
+    }
+
+    @Test
+    void rollback() throws IOException {
+        var session = getSession();
+        assertTrue(session.findTableMetadata(TEST).isEmpty());
+
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedStatement(SQL)) {
+            tm.execute(transaction -> {
+                ps.executeAndGetCount(transaction);
+                assertTrue(session.findTableMetadata(TEST).isPresent());
+                transaction.rollback();
+                assertTrue(session.findTableMetadata(TEST).isPresent());
+            });
+        }
+
+        assertTrue(session.findTableMetadata(TEST).isPresent());
     }
 }
