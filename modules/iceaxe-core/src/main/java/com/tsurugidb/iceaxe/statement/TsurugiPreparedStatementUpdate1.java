@@ -9,10 +9,10 @@ import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
 import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 
 /**
  * Tsurugi PreparedStatement

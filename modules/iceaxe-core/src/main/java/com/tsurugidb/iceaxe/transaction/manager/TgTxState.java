@@ -1,4 +1,6 @@
-package com.tsurugidb.iceaxe.transaction;
+package com.tsurugidb.iceaxe.transaction.manager;
+
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
 
 /**
  * Tsurugi Transaction State

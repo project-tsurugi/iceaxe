@@ -9,9 +9,9 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
-import com.tsurugidb.iceaxe.transaction.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 
 /**
  * batch example

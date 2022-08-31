@@ -16,8 +16,8 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 
 /**
  * multi thread insert test

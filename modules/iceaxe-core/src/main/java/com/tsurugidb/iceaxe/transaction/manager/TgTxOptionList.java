@@ -1,9 +1,10 @@
-package com.tsurugidb.iceaxe.transaction;
+package com.tsurugidb.iceaxe.transaction.manager;
 
 import java.util.List;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 /**
