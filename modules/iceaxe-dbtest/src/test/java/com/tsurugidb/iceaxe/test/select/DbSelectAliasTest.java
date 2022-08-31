@@ -35,51 +35,33 @@ class DbSelectAliasTest extends DbTestTableTester {
     @Test
     void selectAsName() throws IOException {
         var sql = "select count(*) as count from " + TEST;
-        var resultMapping = TgResultMapping.of(record -> {
-            List<String> nameList = record.getNameList();
-            assertEquals(List.of("count"), nameList);
-            return record.getInt4("count");
-        });
-
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            int cnt = ps.executeAndFindRecord(tm).get();
-            assertEquals(SIZE, cnt);
-        }
+        selectCount(sql, "count");
     }
 
     @Test
     void selectName() throws IOException {
-        var sql = "select count(*) as cnt from " + TEST; // TODO asを削除
-        var resultMapping = TgResultMapping.of(record -> {
-            List<String> nameList = record.getNameList();
-            assertEquals(List.of("cnt"), nameList);
-            return record.getInt4("cnt");
-        });
-
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            int cnt = ps.executeAndFindRecord(tm).get();
-            assertEquals(SIZE, cnt);
-        }
+        var sql = "select count(*) cnt from " + TEST;
+        selectCount(sql, "cnt");
     }
 
     @Test
     void selectNoName() throws IOException {
         var sql = "select count(*) from " + TEST;
+        selectCount(sql, "@#0");
+    }
+
+    private void selectCount(String sql, String name) throws IOException {
         var resultMapping = TgResultMapping.of(record -> {
             List<String> nameList = record.getNameList();
-            assertEquals(List.of("@#0"), nameList);
-            return record.getInt4("@#0");
+            assertEquals(List.of(name), nameList);
+            return record.getInt4(name);
         });
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            int cnt = ps.executeAndFindRecord(tm).get();
-            assertEquals(SIZE, cnt);
+            int count = ps.executeAndFindRecord(tm).get();
+            assertEquals(SIZE, count);
         }
     }
 
