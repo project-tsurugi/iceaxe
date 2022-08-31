@@ -71,8 +71,8 @@ class DbSelectAliasTest extends DbTestTableTester {
         var sql = "select count(*) from " + TEST;
         var resultMapping = TgResultMapping.of(record -> {
             List<String> nameList = record.getNameList();
-            assertEquals(List.of("$0"), nameList);
-            return record.getInt4("$0");
+            assertEquals(List.of("@#0"), nameList);
+            return record.getInt4("@#0");
         });
 
         var session = getSession();
@@ -88,7 +88,7 @@ class DbSelectAliasTest extends DbTestTableTester {
         var sql = "select count(*), count(foo) from " + TEST;
         var resultMapping = TgResultMapping.of(record -> {
             List<String> nameList = record.getNameList();
-            assertEquals(List.of("$0", "$1"), nameList);
+            assertEquals(List.of("@#0", "@#1"), nameList);
             return TsurugiResultEntity.of(record);
         });
 
@@ -98,10 +98,10 @@ class DbSelectAliasTest extends DbTestTableTester {
             tm.execute(transaction -> {
                 try (var rs = ps.execute(transaction)) {
                     List<String> nameList = rs.getNameList();
-                    assertEquals(List.of("$0", "$1"), nameList);
+                    assertEquals(List.of("@#0", "@#1"), nameList);
                     TsurugiResultEntity entity = rs.findRecord().get();
-                    assertEquals(SIZE, entity.getInt4("$0"));
-                    assertEquals(SIZE, entity.getInt4("$1"));
+                    assertEquals(SIZE, entity.getInt4("@#0"));
+                    assertEquals(SIZE, entity.getInt4("@#1"));
                 }
             });
         }

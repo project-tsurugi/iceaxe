@@ -167,7 +167,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     static String getColumnName(Column lowColumn, int index) {
         var lowName = lowColumn.getName();
         if (lowName == null || lowName.isEmpty()) {
-            return "$" + index;
+            return "@#" + index;
         }
         return lowName;
     }
