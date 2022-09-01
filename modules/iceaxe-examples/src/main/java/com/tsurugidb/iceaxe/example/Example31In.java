@@ -32,12 +32,12 @@ public class Example31In {
 
     void in1(TsurugiSession session, TsurugiTransactionManager tm, List<Integer> fooList) throws IOException {
         var vlist = TgVariableList.of();
-        var param = TgParameterList.of();
+        var plist = TgParameterList.of();
         int i = 0;
         for (var foo : fooList) {
-            var variable = TgVariable.ofInt4(Integer.toString(i++));
+            var variable = TgVariable.ofInt4("f" + (i++));
             vlist.add(variable);
-            param.add(variable.bind(foo));
+            plist.add(variable.bind(foo));
         }
 
         var sql = "select * from TEST where foo in(" + vlist.getSqlNames() + ")";
@@ -47,7 +47,7 @@ public class Example31In {
                 .int8(TestEntity::setBar) //
                 .character(TestEntity::setZzz);
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
-            var list = ps.executeAndGetList(tm, param);
+            var list = ps.executeAndGetList(tm, plist);
             for (var entity : list) {
                 System.out.println(entity);
             }
