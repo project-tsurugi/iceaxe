@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
@@ -32,13 +34,14 @@ class DbInsertTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    @Test
-    void insertConstant() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    void insertConstant(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
-                + "(" + TEST_COLUMNS + ")" //
-                + "values(" + entity.getFoo() + ", " + entity.getBar() + ", '" + entity.getZzz() + "')";
+                + (columns ? " (" + TEST_COLUMNS + ")" : "") //
+                + " values(" + entity.getFoo() + ", " + entity.getBar() + ", '" + entity.getZzz() + "')";
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -50,12 +53,13 @@ class DbInsertTest extends DbTestTableTester {
         assertEqualsTestTable(entity);
     }
 
-    @Test
-    void insertByVariableList() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    void insertByVariableList(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
-                + "(" + TEST_COLUMNS + ")" //
+                + (columns ? " (" + TEST_COLUMNS + ")" : "") //
                 + "values(:foo, :bar, :zzz)";
         var vlist = TgVariableList.of() //
                 .int4("foo") //
@@ -77,8 +81,9 @@ class DbInsertTest extends DbTestTableTester {
         assertEqualsTestTable(entity);
     }
 
-    @Test
-    void insertByBind() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    void insertByBind(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
         var foo = TgVariable.ofInt4("foo");
@@ -86,7 +91,7 @@ class DbInsertTest extends DbTestTableTester {
         var zzz = TgVariable.ofCharacter("zzz");
 
         var sql = "insert into " + TEST //
-                + "(" + TEST_COLUMNS + ")" //
+                + (columns ? " (" + TEST_COLUMNS + ")" : "") //
                 + "values(" + foo + ", " + bar + ", " + zzz + ")";
         var parameterMapping = TgParameterMapping.of(foo, bar, zzz);
 
@@ -104,12 +109,13 @@ class DbInsertTest extends DbTestTableTester {
         assertEqualsTestTable(entity);
     }
 
-    @Test
-    void insertByEntity() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    void insertByEntity(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
-                + "(" + TEST_COLUMNS + ")" //
+                + (columns ? " (" + TEST_COLUMNS + ")" : "") //
                 + "values(:foo, :bar, :zzz)";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
                 .int4("foo", TestEntity::getFoo) //

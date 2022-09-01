@@ -62,8 +62,12 @@ public class DbTestTableTester {
     // utility
 
     protected static void dropTestTable() throws IOException {
-        if (existsTable(TEST)) {
-            var sql = "drop table " + TEST;
+        dropTable(TEST);
+    }
+
+    protected static void dropTable(String tableName) throws IOException {
+        if (existsTable(tableName)) {
+            var sql = "drop table " + tableName;
             executeDdl(getSession(), sql);
         }
     }

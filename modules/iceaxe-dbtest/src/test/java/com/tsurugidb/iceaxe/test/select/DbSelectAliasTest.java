@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.result.TgResultMapping;
@@ -30,6 +32,24 @@ class DbSelectAliasTest extends DbTestTableTester {
         insertTestTable(SIZE);
 
         LOG.debug("init end");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " as", "" })
+    void selectTableAlias(String as) throws IOException {
+        var sql = "select t.foo, t.bar, t.zzz from " + TEST + as + " t order by t.foo";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
+            var list = ps.executeAndGetList(tm);
+            assertEquals(SIZE, list.size());
+            for (int i = 0; i < SIZE; i++) {
+                var expected = createTestEntity(i);
+                var actual = list.get(i);
+                assertEquals(expected, actual);
+            }
+        }
     }
 
     @Test
