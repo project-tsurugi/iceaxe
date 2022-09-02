@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import com.tsurugidb.tateyama.proto.SqlRequest.Parameter;
+import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
 /**
  * Tsurugi Parameter for PreparedStatement

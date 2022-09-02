@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
-import com.tsurugidb.tateyama.proto.SqlRequest.Parameter;
-import com.tsurugidb.tateyama.proto.SqlRequest.Placeholder;
+import com.tsurugidb.sql.proto.SqlRequest.Parameter;
+import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 
 /**
  * Tsurugi Parameter Mapping
