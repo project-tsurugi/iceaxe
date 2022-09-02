@@ -98,7 +98,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                 });
             });
 
-            assertEqualsCode(SqlServiceCode.ERR_UNKNOWN, e0);// TODO ERR_INACTIVE_TRANSACTION
+            assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e0);
         }
 
         assertEqualsTestTable();
