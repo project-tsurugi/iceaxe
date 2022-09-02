@@ -16,7 +16,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 /**
  * batch example
  */
-public class Example21Batch {
+public class Example81Batch {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");

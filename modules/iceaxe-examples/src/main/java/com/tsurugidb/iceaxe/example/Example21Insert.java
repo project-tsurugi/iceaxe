@@ -24,7 +24,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 /**
  * insert example
  */
-public class Example11Insert {
+public class Example21Insert {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
@@ -72,7 +72,7 @@ public class Example11Insert {
 
     void insertParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgVariable.ofInt4("foo");
-        var bar = TgVariable.ofInt8("foo");
+        var bar = TgVariable.ofInt8("bar");
         var zzz = TgVariable.ofCharacter("zzz");
 
         var sql = "insert into TEST values(:foo, :bar, :zzz)";

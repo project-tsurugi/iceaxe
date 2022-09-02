@@ -20,7 +20,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 /**
  * select example
  */
-public class Example12Select {
+public class Example31Select {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");

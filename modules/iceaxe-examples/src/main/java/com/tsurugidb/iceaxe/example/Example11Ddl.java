@@ -12,7 +12,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 /**
  * ddl example
  */
-public class Example04Ddl {
+public class Example11Ddl {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
