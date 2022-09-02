@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.jogasaki.proto.SqlCommon.AtomType;
+import com.tsurugidb.tateyama.proto.SqlCommon.AtomType;
 
 /**
  * table metadata test

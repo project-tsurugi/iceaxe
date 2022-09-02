@@ -7,14 +7,14 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nautilus_technologies.tsubakuro.low.sql.PreparedStatement;
-import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
-import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
+import com.tsurugidb.tateyama.proto.SqlRequest.Parameter;
+import com.tsurugidb.tsubakuro.sql.PreparedStatement;
+import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi PreparedStatement with Low-PreparedStatement

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
@@ -17,6 +16,7 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * insert constraint violation test
@@ -98,7 +98,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                 });
             });
 
-            assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e0);
+            assertEqualsCode(SqlServiceCode.ERR_UNKNOWN, e0);// TODO ERR_INACTIVE_TRANSACTION
         }
 
         assertEqualsTestTable();

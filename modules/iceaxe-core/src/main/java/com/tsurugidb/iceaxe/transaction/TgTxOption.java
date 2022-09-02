@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionOption;
-import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionPriority;
-import com.tsurugidb.jogasaki.proto.SqlRequest.TransactionType;
-import com.tsurugidb.jogasaki.proto.SqlRequest.WritePreserve;
+import com.tsurugidb.tateyama.proto.SqlRequest.TransactionOption;
+import com.tsurugidb.tateyama.proto.SqlRequest.TransactionPriority;
+import com.tsurugidb.tateyama.proto.SqlRequest.TransactionType;
+import com.tsurugidb.tateyama.proto.SqlRequest.WritePreserve;
 
 /**
  * Tsurugi Transaction Option

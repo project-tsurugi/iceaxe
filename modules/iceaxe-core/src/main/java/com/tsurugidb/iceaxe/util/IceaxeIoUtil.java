@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
-import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.function.IoRunnable;
+import com.tsurugidb.tsubakuro.exception.ServerException;
+import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Iceaxe I/O utility

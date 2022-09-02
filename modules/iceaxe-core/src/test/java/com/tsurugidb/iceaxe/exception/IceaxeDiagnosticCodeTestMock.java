@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.exception;
 
-import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
+import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 
 public class IceaxeDiagnosticCodeTestMock implements DiagnosticCode {
 

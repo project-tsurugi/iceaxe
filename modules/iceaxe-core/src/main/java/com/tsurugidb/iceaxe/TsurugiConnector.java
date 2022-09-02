@@ -6,11 +6,11 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nautilus_technologies.tsubakuro.channel.common.connection.Connector;
-import com.nautilus_technologies.tsubakuro.impl.low.common.SessionImpl;
-import com.nautilus_technologies.tsubakuro.low.common.Session;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
+import com.tsurugidb.tsubakuro.common.Session;
+import com.tsurugidb.tsubakuro.common.impl.SessionImpl;
 
 /**
  * Tsurugi Connector

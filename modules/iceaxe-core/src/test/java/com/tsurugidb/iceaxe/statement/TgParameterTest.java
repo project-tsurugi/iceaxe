@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.statement;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
-import com.nautilus_technologies.tsubakuro.low.sql.Parameters;
+import com.tsurugidb.tsubakuro.sql.Parameters;
 
 class TgParameterTest {
 

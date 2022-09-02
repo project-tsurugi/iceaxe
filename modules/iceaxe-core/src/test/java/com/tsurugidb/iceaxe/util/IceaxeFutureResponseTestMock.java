@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
-import com.nautilus_technologies.tsubakuro.util.FutureResponse;
-import com.nautilus_technologies.tsubakuro.util.Timeout;
+import com.tsurugidb.tsubakuro.exception.ServerException;
+import com.tsurugidb.tsubakuro.util.FutureResponse;
+import com.tsurugidb.tsubakuro.util.Timeout;
 
 class IceaxeFutureResponseTestMock<V> implements FutureResponse<V> {
 

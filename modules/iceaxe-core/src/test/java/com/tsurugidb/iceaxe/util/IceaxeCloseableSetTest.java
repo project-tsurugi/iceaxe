@@ -1,6 +1,9 @@
 package com.tsurugidb.iceaxe.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -9,10 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.tsurugidb.iceaxe.exception.IceaxeServerExceptionTestMock;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
+import com.tsurugidb.tsubakuro.exception.ServerException;
 
 class IceaxeCloseableSetTest {
 

@@ -8,13 +8,13 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
+import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi Result Count for PreparedStatement

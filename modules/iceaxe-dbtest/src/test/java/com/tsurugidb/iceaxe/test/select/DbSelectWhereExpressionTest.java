@@ -13,10 +13,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
-import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * select where expression test

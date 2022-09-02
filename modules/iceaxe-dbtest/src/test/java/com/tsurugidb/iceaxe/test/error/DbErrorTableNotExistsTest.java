@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * table not exists test

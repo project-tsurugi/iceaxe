@@ -12,12 +12,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.tsurugidb.iceaxe.exception.IceaxeServerExceptionTestMock;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.tsubakuro.exception.ServerException;
 
 class IceaxeIoUtilTest {
 

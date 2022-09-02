@@ -1,8 +1,8 @@
 package com.tsurugidb.iceaxe.exception;
 
-import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
-import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
+import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
+import com.tsurugidb.tsubakuro.exception.ServerException;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 @SuppressWarnings("serial")
 public class IceaxeServerExceptionTestMock extends ServerException {

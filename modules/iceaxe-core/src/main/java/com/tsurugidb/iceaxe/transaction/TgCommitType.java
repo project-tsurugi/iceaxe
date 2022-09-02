@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.transaction;
 
-import com.tsurugidb.jogasaki.proto.SqlRequest.CommitStatus;
+import com.tsurugidb.tateyama.proto.SqlRequest.CommitStatus;
 
 /**
  * Tsurugi Commit Type

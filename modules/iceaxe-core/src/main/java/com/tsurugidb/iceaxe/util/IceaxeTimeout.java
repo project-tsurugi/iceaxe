@@ -2,11 +2,11 @@ package com.tsurugidb.iceaxe.util;
 
 import java.util.concurrent.TimeUnit;
 
-import com.nautilus_technologies.tsubakuro.util.ServerResource;
-import com.nautilus_technologies.tsubakuro.util.Timeout;
-import com.nautilus_technologies.tsubakuro.util.Timeout.Policy;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.tsubakuro.util.ServerResource;
+import com.tsurugidb.tsubakuro.util.Timeout;
+import com.tsurugidb.tsubakuro.util.Timeout.Policy;
 
 // internal
 public class IceaxeTimeout {

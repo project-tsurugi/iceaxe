@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
-import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
+import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 class TsurugiDiagnosticCodeProviderTest {
 

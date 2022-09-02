@@ -10,7 +10,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.tsurugidb.jogasaki.proto.SqlCommon.AtomType;
+import com.tsurugidb.tateyama.proto.SqlCommon.AtomType;
 
 /**
  * Tsurugi Data Type

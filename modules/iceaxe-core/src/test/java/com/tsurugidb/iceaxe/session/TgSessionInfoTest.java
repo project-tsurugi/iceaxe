@@ -1,15 +1,16 @@
 package com.tsurugidb.iceaxe.session;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
-import com.nautilus_technologies.tsubakuro.channel.common.connection.NullCredential;
-import com.nautilus_technologies.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
+import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
+import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 
 class TgSessionInfoTest {
 

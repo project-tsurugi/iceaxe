@@ -9,9 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.nautilus_technologies.tsubakuro.exception.SqlServiceCode;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * drop table test

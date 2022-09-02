@@ -2,10 +2,10 @@ package com.tsurugidb.iceaxe.example;
 
 import java.io.IOException;
 
-import com.nautilus_technologies.tsubakuro.channel.common.connection.RememberMeCredential;
-import com.nautilus_technologies.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
+import com.tsurugidb.tsubakuro.channel.common.connection.RememberMeCredential;
+import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 
 /**
  * TsurugiSession example

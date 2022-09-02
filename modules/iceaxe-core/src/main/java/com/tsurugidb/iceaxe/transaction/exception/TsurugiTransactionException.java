@@ -1,8 +1,8 @@
 package com.tsurugidb.iceaxe.transaction.exception;
 
-import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
+import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
+import com.tsurugidb.tsubakuro.exception.ServerException;
 
 /**
  * Tsurugi Transaction Exception

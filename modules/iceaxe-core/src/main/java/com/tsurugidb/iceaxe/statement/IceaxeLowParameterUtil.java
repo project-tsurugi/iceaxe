@@ -6,8 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-import com.nautilus_technologies.tsubakuro.low.sql.Parameters;
-import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
+import com.tsurugidb.tateyama.proto.SqlRequest.Parameter;
+import com.tsurugidb.tsubakuro.sql.Parameters;
 
 // internal
 public final class IceaxeLowParameterUtil {

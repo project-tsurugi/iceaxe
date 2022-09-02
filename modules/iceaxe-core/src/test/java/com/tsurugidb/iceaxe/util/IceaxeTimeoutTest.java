@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -8,11 +9,11 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
-import com.nautilus_technologies.tsubakuro.util.ServerResource;
-import com.nautilus_technologies.tsubakuro.util.Timeout;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.tsubakuro.exception.ServerException;
+import com.tsurugidb.tsubakuro.util.ServerResource;
+import com.tsurugidb.tsubakuro.util.Timeout;
 
 class IceaxeTimeoutTest {
 

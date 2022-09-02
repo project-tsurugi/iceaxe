@@ -5,8 +5,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.nautilus_technologies.tsubakuro.low.sql.TableMetadata;
-import com.tsurugidb.jogasaki.proto.SqlCommon.Column;
+import com.tsurugidb.tateyama.proto.SqlCommon.Column;
+import com.tsurugidb.tsubakuro.sql.TableMetadata;
 
 /**
  * Tsurugi table metadata

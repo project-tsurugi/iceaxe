@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
-import com.tsurugidb.jogasaki.proto.SqlRequest.Parameter;
+import com.tsurugidb.tateyama.proto.SqlRequest.Parameter;
 
 /**
  * Tsurugi Parameter

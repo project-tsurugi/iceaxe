@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
+import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
+import com.tsurugidb.tsubakuro.exception.ServerException;
 
 /**
  * DiagnosticCode provider

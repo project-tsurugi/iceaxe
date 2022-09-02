@@ -9,17 +9,17 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nautilus_technologies.tsubakuro.low.sql.Transaction;
-import com.nautilus_technologies.tsubakuro.util.FutureResponse;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.IoFunction;
+import com.tsurugidb.tsubakuro.sql.Transaction;
+import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi Transaction

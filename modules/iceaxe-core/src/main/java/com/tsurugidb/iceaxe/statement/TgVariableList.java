@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.nautilus_technologies.tsubakuro.low.sql.Placeholders;
-import com.tsurugidb.jogasaki.proto.SqlRequest.Placeholder;
+import com.tsurugidb.tateyama.proto.SqlRequest.Placeholder;
+import com.tsurugidb.tsubakuro.sql.Placeholders;
 
 /**
  * Tsurugi Variable definition for PreparedStatement

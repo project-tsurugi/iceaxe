@@ -20,13 +20,13 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
-import com.nautilus_technologies.tsubakuro.low.sql.ResultSet;
 import com.tsurugidb.iceaxe.statement.TgDataType;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
-import com.tsurugidb.jogasaki.proto.SqlCommon.AtomType;
-import com.tsurugidb.jogasaki.proto.SqlCommon.Column;
+import com.tsurugidb.tateyama.proto.SqlCommon.AtomType;
+import com.tsurugidb.tateyama.proto.SqlCommon.Column;
+import com.tsurugidb.tsubakuro.exception.ServerException;
+import com.tsurugidb.tsubakuro.sql.ResultSet;
 
 /**
  * Tsurugi Result Record for {@link TsurugiResultSet}

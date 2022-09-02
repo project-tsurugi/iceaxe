@@ -12,8 +12,6 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nautilus_technologies.tsubakuro.exception.DiagnosticCode;
-import com.nautilus_technologies.tsubakuro.exception.ServerException;
 import com.tsurugidb.iceaxe.result.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -24,6 +22,8 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
+import com.tsurugidb.tsubakuro.exception.ServerException;
 
 public class DbTestTableTester {
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
