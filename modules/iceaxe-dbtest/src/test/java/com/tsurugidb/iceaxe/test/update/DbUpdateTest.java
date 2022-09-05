@@ -13,7 +13,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 
@@ -251,12 +253,14 @@ class DbUpdateTest extends DbTestTableTester {
         tm.execute(tranasction -> {
             // insert
             try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-                ps.executeAndGetCount(tranasction, insertEntity);
+                int count = ps.executeAndGetCount(tranasction, insertEntity);
+                assertEquals(-1, count); // TODO 1
             }
 
             // update
             try (var ps = session.createPreparedStatement(sql)) {
-                ps.executeAndGetCount(tranasction);
+                int count = ps.executeAndGetCount(tranasction);
+                assertEquals(-1, count); // TODO 1
             }
 
             // select
@@ -278,6 +282,106 @@ class DbUpdateTest extends DbTestTableTester {
         for (var entity : list) {
             if (entity.getFoo().equals(insertEntity.getFoo())) {
                 assertEquals(789L, entity.getBar());
+            } else {
+                assertEquals((long) entity.getFoo(), entity.getBar());
+            }
+        }
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled
+    void insertUpdateNoCheck() throws IOException {
+        var insertEntity = new TestEntity(123, 456, "abc");
+        var sql = "update " + TEST //
+                + " set" //
+                + "  bar = 789" //
+                + " where foo = " + insertEntity.getFoo();
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(tranasction -> {
+            // insert
+            try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+                ps.execute(tranasction, insertEntity); // not get-count
+            }
+            // executeの結果を確認せずに次のSQLを実行すると、同一トランザクション内でもSQLの実行順序が保証されないらしい
+
+            // update
+            try (var ps = session.createPreparedStatement(sql)) {
+                ps.execute(tranasction); // not get-count
+            }
+
+            // select
+            try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+                var list = ps.executeAndGetList(tranasction);
+                assertEquals(SIZE + 1, list.size());
+                for (var entity : list) {
+                    if (entity.getFoo().equals(insertEntity.getFoo())) {
+                        assertEquals(789L, entity.getBar());
+                    } else {
+                        assertEquals((long) entity.getFoo(), entity.getBar());
+                    }
+                }
+            }
+        });
+
+        var list = selectAllFromTest();
+        assertEquals(SIZE + 1, list.size());
+        for (var entity : list) {
+            if (entity.getFoo().equals(insertEntity.getFoo())) {
+                assertEquals(789L, entity.getBar());
+            } else {
+                assertEquals((long) entity.getFoo(), entity.getBar());
+            }
+        }
+    }
+
+    @Test
+    void updateUpdate() throws IOException {
+        int foo = 1;
+        var bar = TgVariable.ofInt8("bar");
+        var sql = "update " + TEST //
+                + " set" //
+                + "  bar = " + bar //
+                + " where foo = " + foo;
+        var parameterMapping = TgParameterMapping.of(bar);
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(tranasction -> {
+            // update
+            try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+                {
+                    var param = TgParameterList.of(bar.bind(101));
+                    int count = ps.executeAndGetCount(tranasction, param);
+                    assertEquals(-1, count); // TODO 1
+                }
+                {
+                    var param = TgParameterList.of(bar.bind(102));
+                    int count = ps.executeAndGetCount(tranasction, param);
+                    assertEquals(-1, count); // TODO 1
+                }
+            }
+
+            // select
+            try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+                var list = ps.executeAndGetList(tranasction);
+                assertEquals(SIZE, list.size());
+                for (var entity : list) {
+                    if (entity.getFoo().equals(foo)) {
+                        assertEquals(102L, entity.getBar());
+                    } else {
+                        assertEquals((long) entity.getFoo(), entity.getBar());
+                    }
+                }
+            }
+        });
+
+        var list = selectAllFromTest();
+        assertEquals(SIZE, list.size());
+        for (var entity : list) {
+            if (entity.getFoo().equals(foo)) {
+                assertEquals(102L, entity.getBar());
             } else {
                 assertEquals((long) entity.getFoo(), entity.getBar());
             }
