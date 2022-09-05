@@ -220,7 +220,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled
+    @Disabled // TODO remove Disabled
     void updatePKNull() throws IOException {
         var sql = "update " + TEST //
                 + " set" //
@@ -235,5 +235,52 @@ class DbUpdateTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable(SIZE);
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled
+    void insertUpdate() throws IOException {
+        var insertEntity = new TestEntity(123, 456, "abc");
+        var sql = "update " + TEST //
+                + " set" //
+                + "  bar = 789" //
+                + " where foo = " + insertEntity.getFoo();
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(tranasction -> {
+            // insert
+            try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+                ps.executeAndGetCount(tranasction, insertEntity);
+            }
+
+            // update
+            try (var ps = session.createPreparedStatement(sql)) {
+                ps.executeAndGetCount(tranasction);
+            }
+
+            // select
+            try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+                var list = ps.executeAndGetList(tranasction);
+                assertEquals(SIZE + 1, list.size());
+                for (var entity : list) {
+                    if (entity.getFoo().equals(insertEntity.getFoo())) {
+                        assertEquals(789L, entity.getBar());
+                    } else {
+                        assertEquals((long) entity.getFoo(), entity.getBar());
+                    }
+                }
+            }
+        });
+
+        var list = selectAllFromTest();
+        assertEquals(SIZE + 1, list.size());
+        for (var entity : list) {
+            if (entity.getFoo().equals(insertEntity.getFoo())) {
+                assertEquals(789L, entity.getBar());
+            } else {
+                assertEquals((long) entity.getFoo(), entity.getBar());
+            }
+        }
     }
 }

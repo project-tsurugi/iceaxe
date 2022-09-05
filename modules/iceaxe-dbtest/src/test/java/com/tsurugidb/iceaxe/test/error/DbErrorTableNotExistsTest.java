@@ -75,4 +75,44 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
             }
         }
     }
+
+    @Test
+    void update() throws IOException {
+        var sql = "update " + TEST + " set bar = 0";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedStatement(sql)) {
+            var e0 = assertThrows(TsurugiIOException.class, () -> {
+                tm.execute((TsurugiTransactionAction) transaction -> {
+                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                        ps.executeAndGetCount(transaction);
+                    });
+                    assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO table_not_found
+                    throw e;
+                });
+            });
+            assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e0); // TODO table_not_found
+        }
+    }
+
+    @Test
+    void delete() throws IOException {
+        var sql = "delete from " + TEST;
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedStatement(sql)) {
+            var e0 = assertThrows(TsurugiIOException.class, () -> {
+                tm.execute((TsurugiTransactionAction) transaction -> {
+                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                        ps.executeAndGetCount(transaction);
+                    });
+                    assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO table_not_found
+                    throw e;
+                });
+            });
+            assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e0); // TODO table_not_found
+        }
+    }
 }
