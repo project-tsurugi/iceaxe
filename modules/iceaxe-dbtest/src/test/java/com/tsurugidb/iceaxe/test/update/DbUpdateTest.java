@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -262,7 +261,6 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void insertUpdate() throws IOException {
         var insertEntity = new TestEntity(123, 456, "abc");
         var sql = "update " + TEST //
@@ -311,7 +309,6 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void insertUpdateNoCheck() throws IOException {
         var insertEntity = new TestEntity(123, 456, "abc");
         var sql = "update " + TEST //
