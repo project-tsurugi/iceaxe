@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.update;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -56,6 +57,29 @@ class DbUpdateTest extends DbTestTableTester {
         for (var entity : list) {
             assertEquals(0L, entity.getBar());
             assertEquals("aaa", entity.getZzz());
+        }
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled
+    void updateAllNull() throws IOException {
+        var sql = "update " + TEST //
+                + " set" //
+                + "  bar = null," //
+                + "  zzz = null";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedStatement(sql)) {
+            int count = ps.executeAndGetCount(tm);
+            assertEquals(-1, count); // TODO SIZE
+        }
+
+        var list = selectAllFromTest();
+        assertEquals(SIZE, list.size());
+        for (var entity : list) {
+            assertNull(entity.getBar());
+            assertNull(entity.getZzz());
         }
     }
 
