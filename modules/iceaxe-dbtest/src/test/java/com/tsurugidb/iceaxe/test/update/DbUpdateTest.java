@@ -61,7 +61,6 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void updateAllNull() throws IOException {
         var sql = "update " + TEST //
                 + " set" //
@@ -246,7 +245,6 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void updatePKNull() throws IOException {
         var sql = "update " + TEST //
                 + " set" //
