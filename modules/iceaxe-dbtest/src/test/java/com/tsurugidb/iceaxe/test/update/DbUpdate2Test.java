@@ -56,11 +56,19 @@ class DbUpdate2Test extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < SIZE; i++) {
-                    var param = TgParameterList.of(pk.bind(i), v1.bind(i + 100), v2.bind(i * 2));
+                    var param = TgParameterList.of(pk.bind(i), v1.bind(initValue1(i)), v2.bind(initValue2(i)));
                     ps.executeAndGetCount(transaction, param);
                 }
             });
         }
+    }
+
+    private static int initValue1(int i) {
+        return i + 100;
+    }
+
+    private static int initValue2(int i) {
+        return i * 2;
     }
 
     @Test
@@ -83,8 +91,8 @@ class DbUpdate2Test extends DbTestTableTester {
             assertEquals(SIZE, list.size());
             int i = 0;
             for (var entity : list) {
-                int v1 = i + 100;
-                int v2 = i * 2;
+                int v1 = initValue1(i);
+                int v2 = initValue2(i);
                 assertEquals(i, entity.getInt4("pk"));
                 assertEquals(v1 + 1, entity.getInt4("value1"));
                 assertEquals(v2 + v1, entity.getInt4("value2"));
@@ -113,8 +121,8 @@ class DbUpdate2Test extends DbTestTableTester {
             assertEquals(SIZE, list.size());
             int i = 0;
             for (var entity : list) {
-                int v1 = i + 100;
-                int v2 = i * 2;
+                int v1 = initValue1(i);
+                int v2 = initValue2(i);
                 assertEquals(i, entity.getInt4("pk"));
                 assertEquals(v2, entity.getInt4("value1"));
                 assertEquals(v1, entity.getInt4("value2"));

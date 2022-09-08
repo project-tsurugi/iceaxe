@@ -32,6 +32,24 @@ class DbInsertIrregularTest extends DbTestTableTester {
     }
 
     @Test
+    void closePsBeforeCloseRc() throws IOException {
+        var sql = "insert into " + TEST //
+                + "(" + TEST_COLUMNS + ")" //
+                + "values(123, 456, 'abc')";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(transaction -> {
+            var ps = session.createPreparedStatement(sql);
+            var rc = ps.execute(transaction);
+            ps.close();
+            int count = rc.getUpdateCount();
+            assertEquals(-1, count); // TODO 1
+            rc.close();
+        });
+    }
+
+    @Test
     void insertNullToPK() throws IOException {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
@@ -72,23 +90,5 @@ class DbInsertIrregularTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable(0);
-    }
-
-    @Test
-    void closePsBeforeCloseRc() throws IOException {
-        var sql = "insert into " + TEST //
-                + "(" + TEST_COLUMNS + ")" //
-                + "values(123, 456, 'abc')";
-
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        tm.execute(transaction -> {
-            var ps = session.createPreparedStatement(sql);
-            var rc = ps.execute(transaction);
-            ps.close();
-            int count = rc.getUpdateCount();
-            assertEquals(-1, count); // TODO 1
-            rc.close();
-        });
     }
 }

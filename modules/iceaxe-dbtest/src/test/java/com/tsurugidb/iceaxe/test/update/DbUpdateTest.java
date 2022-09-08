@@ -2,17 +2,13 @@ package com.tsurugidb.iceaxe.test.update;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
@@ -210,23 +206,6 @@ class DbUpdateTest extends DbTestTableTester {
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = { 0, SIZE / 2, SIZE * 2 })
-    void updatePKSameValue(int newPk) throws IOException {
-        var sql = "update " + TEST //
-                + " set" //
-                + "  foo = " + newPk; // primary key
-
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrows(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
-            assertEqualsCode(null, e); // TODO エラーコード
-        }
-
-        assertEqualsTestTable(SIZE);
-    }
-
     @Test
     void updatePKNoChange() throws IOException {
         var sql = "update " + TEST //
@@ -238,23 +217,6 @@ class DbUpdateTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql)) {
             int count = ps.executeAndGetCount(tm);
             assertEquals(-1, count); // TODO SIZE
-        }
-
-        assertEqualsTestTable(SIZE);
-    }
-
-    @Test
-    void updatePKNull() throws IOException {
-        var sql = "update " + TEST //
-                + " set" //
-                + "  foo = null" // primary key
-                + " where foo = 5";
-
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrows(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
-            assertEqualsCode(null, e); // TODO エラーコード
         }
 
         assertEqualsTestTable(SIZE);
