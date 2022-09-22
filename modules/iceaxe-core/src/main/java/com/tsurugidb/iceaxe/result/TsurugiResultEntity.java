@@ -2,9 +2,11 @@ package com.tsurugidb.iceaxe.result;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -684,31 +686,31 @@ public class TsurugiResultEntity {
         return convertUtil.toTime(value);
     }
 
-    // instant
+    // dateTime
 
     /**
-     * get column value as instant
+     * get column value as dateTime
      * 
      * @param name column name
      * @return column value
      * @throws NullPointerException if value is null
      */
     @Nonnull
-    public Instant getInstant(String name) {
-        var value = getInstantOrNull(name);
+    public LocalDateTime getDateTime(String name) {
+        var value = getDateTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
     }
 
     /**
-     * get column value as instant
+     * get column value as dateTime
      * 
      * @param name         column name
      * @param defaultValue value to return if column value is null
      * @return column value
      */
-    public Instant getInstant(String name, Instant defaultValue) {
-        var value = getInstantOrNull(name);
+    public LocalDateTime getDateTime(String name, LocalDateTime defaultValue) {
+        var value = getDateTimeOrNull(name);
         if (value == null) {
             return defaultValue;
         }
@@ -716,30 +718,140 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as instant
+     * get column value as dateTime
      * 
      * @param name column name
      * @return column value
      */
     @Nonnull
-    public Optional<Instant> findInstant(String name) {
-        var value = getInstantOrNull(name);
+    public Optional<LocalDateTime> findDateTime(String name) {
+        var value = getDateTimeOrNull(name);
         return Optional.ofNullable(value);
     }
 
     /**
-     * get column value as instant
+     * get column value as dateTime
      * 
      * @param name column name
      * @return column value
      */
     @Nullable
-    public Instant getInstantOrNull(String name) {
+    public LocalDateTime getDateTimeOrNull(String name) {
         var value = getValue(name);
-        return convertUtil.toInstant(value);
+        return convertUtil.toDateTime(value);
     }
 
-    // ZonedDateTime
+    // offset time
+
+    /**
+     * get column value as offset time
+     * 
+     * @param name column name
+     * @return column value
+     * @throws NullPointerException if value is null
+     */
+    @Nonnull
+    public OffsetTime getOffsetTime(String name) {
+        var value = getOffsetTimeOrNull(name);
+        Objects.requireNonNull(value);
+        return value;
+    }
+
+    /**
+     * get column value as offset time
+     * 
+     * @param name         column name
+     * @param defaultValue value to return if column value is null
+     * @return column value
+     */
+    public OffsetTime getOffsetTime(String name, OffsetTime defaultValue) {
+        var value = getOffsetTimeOrNull(name);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * get column value as offset time
+     * 
+     * @param name column name
+     * @return column value
+     */
+    @Nonnull
+    public Optional<OffsetTime> findOffsetTime(String name) {
+        var value = getOffsetTimeOrNull(name);
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get column value as offset time
+     * 
+     * @param name column name
+     * @return column value
+     */
+    @Nullable
+    public OffsetTime getOffsetTimeOrNull(String name) {
+        var value = getValue(name);
+        return convertUtil.toOffsetTime(value);
+    }
+
+    // offset dateTime
+
+    /**
+     * get column value as offset dateTime
+     * 
+     * @param name column name
+     * @return column value
+     * @throws NullPointerException if value is null
+     */
+    @Nonnull
+    public OffsetDateTime getOffsetDateTime(String name) {
+        var value = getOffsetDateTimeOrNull(name);
+        Objects.requireNonNull(value);
+        return value;
+    }
+
+    /**
+     * get column value as offset dateTime
+     * 
+     * @param name         column name
+     * @param defaultValue value to return if column value is null
+     * @return column value
+     */
+    public OffsetDateTime getOffsetDateTime(String name, OffsetDateTime defaultValue) {
+        var value = getOffsetDateTimeOrNull(name);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * get column value as offset dateTime
+     * 
+     * @param name column name
+     * @return column value
+     */
+    @Nonnull
+    public Optional<OffsetDateTime> findOffsetDateTime(String name) {
+        var value = getOffsetDateTimeOrNull(name);
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get column value as offset dateTime
+     * 
+     * @param name column name
+     * @return column value
+     */
+    @Nullable
+    public OffsetDateTime getOffsetDateTimeOrNull(String name) {
+        var value = getValue(name);
+        return convertUtil.toOffsetDateTime(value);
+    }
+
+    // zoned dateTime
 
     /**
      * get column value as ZonedDateTime

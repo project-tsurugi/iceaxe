@@ -2,9 +2,11 @@ package com.tsurugidb.iceaxe.result;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
@@ -1028,10 +1030,10 @@ public class TsurugiResultRecord {
         return convertUtil.toTime(lowValue);
     }
 
-    // instant
+    // date time
 
     /**
-     * get column value as instant
+     * get column value as dateTime
      * 
      * @param name column name
      * @return column value
@@ -1040,14 +1042,14 @@ public class TsurugiResultRecord {
      * @throws NullPointerException        if value is null
      */
     @Nonnull
-    public Instant getInstant(String name) throws IOException, TsurugiTransactionException {
-        var value = getInstantOrNull(name);
+    public LocalDateTime getDateTime(String name) throws IOException, TsurugiTransactionException {
+        var value = getDateTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
     }
 
     /**
-     * get column value as instant
+     * get column value as dateTime
      * 
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -1055,8 +1057,8 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    public Instant getInstant(String name, Instant defaultValue) throws IOException, TsurugiTransactionException {
-        var value = getInstantOrNull(name);
+    public LocalDateTime getDateTime(String name, LocalDateTime defaultValue) throws IOException, TsurugiTransactionException {
+        var value = getDateTimeOrNull(name);
         if (value == null) {
             return defaultValue;
         }
@@ -1064,7 +1066,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as instant
+     * get column value as dateTime
      * 
      * @param name column name
      * @return column value
@@ -1072,13 +1074,13 @@ public class TsurugiResultRecord {
      * @throws TsurugiTransactionException
      */
     @Nonnull
-    public Optional<Instant> findInstant(String name) throws IOException, TsurugiTransactionException {
-        var value = getInstantOrNull(name);
+    public Optional<LocalDateTime> findDateTime(String name) throws IOException, TsurugiTransactionException {
+        var value = getDateTimeOrNull(name);
         return Optional.ofNullable(value);
     }
 
     /**
-     * get column value as instant
+     * get column value as dateTime
      * 
      * @param name column name
      * @return column value
@@ -1086,12 +1088,138 @@ public class TsurugiResultRecord {
      * @throws TsurugiTransactionException
      */
     @Nullable
-    public Instant getInstantOrNull(String name) throws IOException, TsurugiTransactionException {
+    public LocalDateTime getDateTimeOrNull(String name) throws IOException, TsurugiTransactionException {
         var lowValue = getValue(name);
-        return convertUtil.toInstant(lowValue);
+        return convertUtil.toDateTime(lowValue);
     }
 
-    // ZonedDateTime
+    // offset time
+
+    /**
+     * get column value as offset time
+     * 
+     * @param name column name
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     * @throws NullPointerException        if value is null
+     */
+    @Nonnull
+    public OffsetTime getOffsetTime(String name) throws IOException, TsurugiTransactionException {
+        var value = getOffsetTimeOrNull(name);
+        Objects.requireNonNull(value);
+        return value;
+    }
+
+    /**
+     * get column value as offset time
+     * 
+     * @param name         column name
+     * @param defaultValue value to return if column value is null
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public OffsetTime getOffsetTime(String name, OffsetTime defaultValue) throws IOException, TsurugiTransactionException {
+        var value = getOffsetTimeOrNull(name);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * get column value as offset time
+     * 
+     * @param name column name
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    @Nonnull
+    public Optional<OffsetTime> findOffsetTime(String name) throws IOException, TsurugiTransactionException {
+        var value = getOffsetTimeOrNull(name);
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get column value as offset time
+     * 
+     * @param name column name
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    @Nullable
+    public OffsetTime getOffsetTimeOrNull(String name) throws IOException, TsurugiTransactionException {
+        var lowValue = getValue(name);
+        return convertUtil.toOffsetTime(lowValue);
+    }
+
+    // offset dateTime
+
+    /**
+     * get column value as offset dateTime
+     * 
+     * @param name column name
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     * @throws NullPointerException        if value is null
+     */
+    @Nonnull
+    public OffsetDateTime getOffsetDateTime(String name) throws IOException, TsurugiTransactionException {
+        var value = getOffsetDateTimeOrNull(name);
+        Objects.requireNonNull(value);
+        return value;
+    }
+
+    /**
+     * get column value as offset dateTime
+     * 
+     * @param name         column name
+     * @param defaultValue value to return if column value is null
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public OffsetDateTime getOffsetDateTime(String name, OffsetDateTime defaultValue) throws IOException, TsurugiTransactionException {
+        var value = getOffsetDateTimeOrNull(name);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * get column value as offset dateTime
+     * 
+     * @param name column name
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    @Nonnull
+    public Optional<OffsetDateTime> findOffsetDateTime(String name) throws IOException, TsurugiTransactionException {
+        var value = getOffsetDateTimeOrNull(name);
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get column value as offset dateTime
+     * 
+     * @param name column name
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    @Nullable
+    public OffsetDateTime getOffsetDateTimeOrNull(String name) throws IOException, TsurugiTransactionException {
+        var lowValue = getValue(name);
+        return convertUtil.toOffsetDateTime(lowValue);
+    }
+
+    // zoned dateTime
 
     /**
      * get column value as ZonedDateTime
@@ -1826,10 +1954,10 @@ public class TsurugiResultRecord {
         return convertUtil.toTime(lowValue);
     }
 
-    // instant
+    // dateTime
 
     /**
-     * get current column value as instant and move next column
+     * get current column value as dateTime and move next column
      * 
      * @return column value
      * @throws IOException
@@ -1837,22 +1965,22 @@ public class TsurugiResultRecord {
      * @throws NullPointerException        if value is null
      */
     @Nonnull
-    public Instant nextInstant() throws IOException, TsurugiTransactionException {
-        var value = nextInstantOrNull();
+    public LocalDateTime nextDateTime() throws IOException, TsurugiTransactionException {
+        var value = nextDateTimeOrNull();
         Objects.requireNonNull(value);
         return value;
     }
 
     /**
-     * get current column value as instant and move next column
+     * get current column value as dateTime and move next column
      * 
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    public Instant nextInstant(Instant defaultValue) throws IOException, TsurugiTransactionException {
-        var value = nextInstantOrNull();
+    public LocalDateTime nextDateTime(LocalDateTime defaultValue) throws IOException, TsurugiTransactionException {
+        var value = nextDateTimeOrNull();
         if (value == null) {
             return defaultValue;
         }
@@ -1860,32 +1988,150 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as instant and move next column
+     * get current column value as dateTime and move next column
      * 
      * @return column value
      * @throws IOException
      * @throws TsurugiTransactionException
      */
     @Nonnull
-    public Optional<Instant> nextInstantOpt() throws IOException, TsurugiTransactionException {
-        var value = nextInstantOrNull();
+    public Optional<LocalDateTime> nextDateTimeOpt() throws IOException, TsurugiTransactionException {
+        var value = nextDateTimeOrNull();
         return Optional.ofNullable(value);
     }
 
     /**
-     * get current column value as instant and move next column
+     * get current column value as dateTime and move next column
      * 
      * @return column value
      * @throws IOException
      * @throws TsurugiTransactionException
      */
     @Nullable
-    public Instant nextInstantOrNull() throws IOException, TsurugiTransactionException {
+    public LocalDateTime nextDateTimeOrNull() throws IOException, TsurugiTransactionException {
         var lowValue = nextLowValue();
-        return convertUtil.toInstant(lowValue);
+        return convertUtil.toDateTime(lowValue);
     }
 
-    // ZonedDateTime
+    // offset time
+
+    /**
+     * get current column value as offset time and move next column
+     * 
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     * @throws NullPointerException        if value is null
+     */
+    @Nonnull
+    public OffsetTime nextOffsetTime() throws IOException, TsurugiTransactionException {
+        var value = nextOffsetTimeOrNull();
+        Objects.requireNonNull(value);
+        return value;
+    }
+
+    /**
+     * get current column value as offset time and move next column
+     * 
+     * @param defaultValue value to return if column value is null
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public OffsetTime nextOffsetTime(OffsetTime defaultValue) throws IOException, TsurugiTransactionException {
+        var value = nextOffsetTimeOrNull();
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * get current column value as offset time and move next column
+     * 
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    @Nonnull
+    public Optional<OffsetTime> nextOffsetTimeOpt() throws IOException, TsurugiTransactionException {
+        var value = nextOffsetTimeOrNull();
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get current column value as offset time and move next column
+     * 
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    @Nullable
+    public OffsetTime nextOffsetTimeOrNull() throws IOException, TsurugiTransactionException {
+        var lowValue = nextLowValue();
+        return convertUtil.toOffsetTime(lowValue);
+    }
+
+    // offset dateTime
+
+    /**
+     * get current column value as offset dateTime and move next column
+     * 
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     * @throws NullPointerException        if value is null
+     */
+    @Nonnull
+    public OffsetDateTime nextOffsetDateTime() throws IOException, TsurugiTransactionException {
+        var value = nextOffsetDateTimeOrNull();
+        Objects.requireNonNull(value);
+        return value;
+    }
+
+    /**
+     * get current column value as offset dateTime and move next column
+     * 
+     * @param defaultValue value to return if column value is null
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public OffsetDateTime nextOffsetDateTime(OffsetDateTime defaultValue) throws IOException, TsurugiTransactionException {
+        var value = nextOffsetDateTimeOrNull();
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * get current column value as offset dateTime and move next column
+     * 
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    @Nonnull
+    public Optional<OffsetDateTime> nextOffsetDateTimeOpt() throws IOException, TsurugiTransactionException {
+        var value = nextOffsetDateTimeOrNull();
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get current column value as offset dateTime and move next column
+     * 
+     * @return column value
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    @Nullable
+    public OffsetDateTime nextOffsetDateTimeOrNull() throws IOException, TsurugiTransactionException {
+        var lowValue = nextLowValue();
+        return convertUtil.toOffsetDateTime(lowValue);
+    }
+
+    // zoned dateTime
 
     /**
      * get current column value as ZonedDateTime and move next column

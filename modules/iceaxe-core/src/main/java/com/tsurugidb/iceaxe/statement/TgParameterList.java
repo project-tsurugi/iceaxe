@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -246,19 +248,43 @@ public class TgParameterList {
     }
 
     /**
-     * add value(Instant)
+     * add value(dateTime)
      * 
      * @param name  name
      * @param value value
      * @return this
      */
-    public TgParameterList instant(String name, Instant value) {
+    public TgParameterList dateTime(String name, LocalDateTime value) {
         add(IceaxeLowParameterUtil.create(name, value));
         return this;
     }
 
     /**
-     * add value(ZonedDateTime)
+     * add value(offset time)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList offsetTime(String name, OffsetTime value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    /**
+     * add value(offset dateTime)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList offsetDateTime(String name, OffsetDateTime value) {
+        add(IceaxeLowParameterUtil.create(name, value));
+        return this;
+    }
+
+    /**
+     * add value(zoned dateTime)
      * 
      * @param name  name
      * @param value value
@@ -446,18 +472,40 @@ public class TgParameterList {
     }
 
     /**
-     * add value(Instant)
+     * add value(dateTime)
      * 
      * @param name  name
      * @param value value
      * @return this
      */
-    public TgParameterList add(String name, Instant value) {
-        return instant(name, value);
+    public TgParameterList add(String name, LocalDateTime value) {
+        return dateTime(name, value);
     }
 
     /**
-     * add value(ZonedDateTime)
+     * add value(offset time)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList add(String name, OffsetTime value) {
+        return offsetTime(name, value);
+    }
+
+    /**
+     * add value(offset dateTime)
+     * 
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgParameterList add(String name, OffsetDateTime value) {
+        return offsetDateTime(name, value);
+    }
+
+    /**
+     * add value(zoned dateTime)
      * 
      * @param name  name
      * @param value value

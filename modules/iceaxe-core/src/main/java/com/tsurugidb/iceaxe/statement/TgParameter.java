@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
@@ -198,7 +200,29 @@ public class TgParameter {
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, Instant value) {
+    public static TgParameter of(String name, LocalDateTime value) {
+        return new TgParameter(IceaxeLowParameterUtil.create(name, value));
+    }
+
+    /**
+     * create Tsurugi Parameter
+     * 
+     * @param name  name
+     * @param value value
+     * @return Tsurugi Parameter
+     */
+    public static TgParameter of(String name, OffsetTime value) {
+        return new TgParameter(IceaxeLowParameterUtil.create(name, value));
+    }
+
+    /**
+     * create Tsurugi Parameter
+     * 
+     * @param name  name
+     * @param value value
+     * @return Tsurugi Parameter
+     */
+    public static TgParameter of(String name, OffsetDateTime value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 

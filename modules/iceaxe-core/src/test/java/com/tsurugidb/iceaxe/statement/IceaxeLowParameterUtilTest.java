@@ -3,10 +3,13 @@ package com.tsurugidb.iceaxe.statement;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -134,13 +137,29 @@ class IceaxeLowParameterUtilTest {
     }
 
     @Test
-    void testCreateStringInstant() {
-        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (Instant) null));
+    void testCreateStringLocalDateTime() {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (LocalDateTime) null));
 
-        var zone = ZoneId.of("Asia/Tokyo");
-        var instant = ZonedDateTime.of(2022, 6, 3, 23, 30, 59, 999, zone).toInstant();
-        var parameter = IceaxeLowParameterUtil.create("foo", instant);
-        assertEquals(Parameters.of("foo", instant), parameter);
+        var parameter = IceaxeLowParameterUtil.create("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
+        assertEquals(Parameters.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), parameter);
+    }
+
+    @Test
+    void testCreateStringOffsetTime() {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (OffsetTime) null));
+
+        var offset = ZoneOffset.ofHours(9);
+        var parameter = IceaxeLowParameterUtil.create("foo", OffsetTime.of(23, 30, 59, 999, offset));
+        assertEquals(Parameters.of("foo", OffsetTime.of(23, 30, 59, 999, offset)), parameter);
+    }
+
+    @Test
+    void testCreateStringOffsetDateTime() {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (OffsetDateTime) null));
+
+        var offset = ZoneOffset.ofHours(9);
+        var parameter = IceaxeLowParameterUtil.create("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 999, offset));
+        assertEquals(Parameters.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 999, offset)), parameter);
     }
 
     @Test
@@ -150,6 +169,6 @@ class IceaxeLowParameterUtilTest {
         var zone = ZoneId.of("Asia/Tokyo");
         var dateTime = ZonedDateTime.of(2022, 6, 3, 23, 30, 59, 999, zone);
         var parameter = IceaxeLowParameterUtil.create("foo", dateTime);
-        assertEquals(Parameters.of("foo", dateTime.toInstant()), parameter);
+        assertEquals(Parameters.of("foo", dateTime.toOffsetDateTime()), parameter);
     }
 }

@@ -172,24 +172,46 @@ public class TgVariableList {
     }
 
     /**
-     * add type(instant)
+     * add type(dateTime)
      * 
      * @param name name
      * @return this
      */
-    public TgVariableList instant(String name) {
-        addInternal(name, TgDataType.INSTANT);
+    public TgVariableList dateTime(String name) {
+        addInternal(name, TgDataType.DATE_TIME);
         return this;
     }
 
     /**
-     * add type(instant)
+     * add type(offset time)
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList offsetTime(String name) {
+        addInternal(name, TgDataType.OFFSET_TIME);
+        return this;
+    }
+
+    /**
+     * add type(offset dateTime)
+     * 
+     * @param name name
+     * @return this
+     */
+    public TgVariableList offsetDateTime(String name) {
+        addInternal(name, TgDataType.OFFSET_DATE_TIME);
+        return this;
+    }
+
+    /**
+     * add type(zoned dateTime)
      * 
      * @param name name
      * @return this
      */
     public TgVariableList zonedDateTime(String name) {
-        addInternal(name, TgDataType.INSTANT);
+        addInternal(name, TgDataType.OFFSET_DATE_TIME);
         return this;
     }
 

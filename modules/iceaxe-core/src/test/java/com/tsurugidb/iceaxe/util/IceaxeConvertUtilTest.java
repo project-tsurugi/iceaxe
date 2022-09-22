@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -223,22 +223,47 @@ class IceaxeConvertUtilTest {
     }
 
     @Test
-    void testToInstant() {
-        assertNull(target.toInstant(null));
+    void testToDateTime() {
+        assertNull(target.toDateTime(null));
 
-        var zone = ZoneId.of("Asia/Tokyo");
-        var expected = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant();
-        assertEquals(expected, target.toInstant(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant()));
-        assertEquals(expected, target.toInstant(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone)));
-        assertEquals(expected, target.toInstant(OffsetDateTime.of(2022, 6, 2, 23, 30, 59, 999, ZoneOffset.ofHours(+9))));
+        var expected = LocalDateTime.of(2022, 9, 22, 23, 30, 59);
+        assertEquals(expected, target.toDateTime(LocalDateTime.of(2022, 9, 22, 23, 30, 59)));
+        assertEquals(expected, target.toDateTime(ZonedDateTime.of(2022, 9, 22, 23, 30, 59, 0, ZoneId.of("Asia/Tokyo"))));
+        assertEquals(expected, target.toDateTime(OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, ZoneOffset.ofHours(9))));
+        assertEquals(expected, target.toDateTime(java.sql.Timestamp.valueOf("2022-09-22 23:30:59")));
+        assertEquals(expected, target.toDateTime("2022-09-22T23:30:59"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
-            @Override
-            protected Instant convertInstant(Object obj) {
-                throw new RuntimeException("test");
-            }
-        }.toInstant("123"));
-        assertEquals("test", e.getCause().getMessage());
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toDateTime("2022-09-22 23:30:59"));
+        assertInstanceOf(DateTimeParseException.class, e.getCause());
+    }
+
+    @Test
+    void testToOffsetTime() {
+        assertNull(target.toOffsetTime(null));
+
+        var offset = ZoneOffset.ofHours(9);
+        var expected = OffsetTime.of(23, 30, 59, 0, offset);
+        assertEquals(expected, target.toOffsetTime(OffsetTime.of(23, 30, 59, 0, offset)));
+        assertEquals(expected, target.toOffsetTime(ZonedDateTime.of(2022, 9, 22, 23, 30, 59, 0, ZoneId.of("Asia/Tokyo"))));
+        assertEquals(expected, target.toOffsetTime(OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)));
+        assertEquals(expected, target.toOffsetTime("23:30:59+09:00"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toOffsetTime("23;30;59"));
+        assertInstanceOf(DateTimeParseException.class, e.getCause());
+    }
+
+    @Test
+    void testToOffsetDateTime() {
+        assertNull(target.toOffsetDateTime(null));
+
+        var offset = ZoneOffset.ofHours(9);
+        var expected = OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset);
+        assertEquals(expected, target.toOffsetDateTime(OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)));
+        assertEquals(expected, target.toOffsetDateTime(ZonedDateTime.of(2022, 9, 22, 23, 30, 59, 0, ZoneId.of("Asia/Tokyo"))));
+        assertEquals(expected, target.toOffsetDateTime("2022-09-22T23:30:59+09:00"));
+
+        var e = assertThrows(UnsupportedOperationException.class, () -> target.toOffsetDateTime("2022-09-22 23:30:59"));
+        assertInstanceOf(DateTimeParseException.class, e.getCause());
     }
 
     @Test
@@ -249,7 +274,7 @@ class IceaxeConvertUtilTest {
         var expected = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone);
         assertEquals(expected, target.toZonedDateTime(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant(), zone));
         assertEquals(expected, target.toZonedDateTime(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone), zone));
-        assertEquals(expected, target.toZonedDateTime(OffsetDateTime.of(2022, 6, 2, 23, 30, 59, 999, ZoneOffset.ofHours(+9)), zone));
+        assertEquals(expected, target.toZonedDateTime(OffsetDateTime.of(2022, 6, 2, 23, 30, 59, 999, ZoneOffset.ofHours(9)), zone));
 
         var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
             @Override

@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -423,8 +425,8 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param getter getter from parameter
      * @return this
      */
-    public TgEntityParameterMapping<P> instant(String name, Function<P, Instant> getter) {
-        addVariable(name, TgDataType.INSTANT);
+    public TgEntityParameterMapping<P> offsetTime(String name, Function<P, OffsetTime> getter) {
+        addVariable(name, TgDataType.OFFSET_TIME);
         parameterConverterList.add((parameter, convertUtil) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
@@ -441,8 +443,72 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param conveter converter to database data type
      * @return this
      */
-    public <V> TgEntityParameterMapping<P> instant(String name, Function<P, V> getter, Function<V, Instant> converter) {
-        return instant(name, p -> {
+    public <V> TgEntityParameterMapping<P> offsetTime(String name, Function<P, V> getter, Function<V, OffsetTime> converter) {
+        return offsetTime(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable
+     * 
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     */
+    public TgEntityParameterMapping<P> dateTime(String name, Function<P, LocalDateTime> getter) {
+        addVariable(name, TgDataType.DATE_TIME);
+        parameterConverterList.add((parameter, convertUtil) -> {
+            var value = getter.apply(parameter);
+            return IceaxeLowParameterUtil.create(name, value);
+        });
+        return this;
+    }
+
+    /**
+     * add variable
+     * 
+     * @param <V>      value type
+     * @param name     name
+     * @param getter   getter from parameter
+     * @param conveter converter to database data type
+     * @return this
+     */
+    public <V> TgEntityParameterMapping<P> dateTime(String name, Function<P, V> getter, Function<V, LocalDateTime> converter) {
+        return dateTime(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable
+     * 
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     */
+    public TgEntityParameterMapping<P> offsetDateTime(String name, Function<P, OffsetDateTime> getter) {
+        addVariable(name, TgDataType.OFFSET_DATE_TIME);
+        parameterConverterList.add((parameter, convertUtil) -> {
+            var value = getter.apply(parameter);
+            return IceaxeLowParameterUtil.create(name, value);
+        });
+        return this;
+    }
+
+    /**
+     * add variable
+     * 
+     * @param <V>      value type
+     * @param name     name
+     * @param getter   getter from parameter
+     * @param conveter converter to database data type
+     * @return this
+     */
+    public <V> TgEntityParameterMapping<P> offsetDateTime(String name, Function<P, V> getter, Function<V, OffsetDateTime> converter) {
+        return offsetDateTime(name, p -> {
             V value = getter.apply(p);
             return (value != null) ? converter.apply(value) : null;
         });
@@ -457,7 +523,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @return this
      */
     public TgEntityParameterMapping<P> zonedDateTime(String name, Function<P, ZonedDateTime> getter) {
-        addVariable(name, TgDataType.INSTANT);
+        addVariable(name, TgDataType.OFFSET_DATE_TIME);
         parameterConverterList.add((parameter, convertUtil) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
@@ -558,9 +624,21 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
-        case INSTANT:
+        case DATE_TIME:
             parameterConverterList.add((parameter, convertUtil) -> {
-                var value = convertUtil.toInstant(getter.apply(parameter));
+                var value = convertUtil.toDateTime(getter.apply(parameter));
+                return IceaxeLowParameterUtil.create(name, value);
+            });
+            return this;
+        case OFFSET_TIME:
+            parameterConverterList.add((parameter, convertUtil) -> {
+                var value = convertUtil.toOffsetTime(getter.apply(parameter));
+                return IceaxeLowParameterUtil.create(name, value);
+            });
+            return this;
+        case OFFSET_DATE_TIME:
+            parameterConverterList.add((parameter, convertUtil) -> {
+                var value = convertUtil.toOffsetDateTime(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;

@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
@@ -113,7 +115,21 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
-    public static Parameter create(String name, Instant value) {
+    public static Parameter create(String name, LocalDateTime value) {
+        if (value == null) {
+            return Parameters.ofNull(name);
+        }
+        return Parameters.of(name, value);
+    }
+
+    public static Parameter create(String name, OffsetTime value) {
+        if (value == null) {
+            return Parameters.ofNull(name);
+        }
+        return Parameters.of(name, value);
+    }
+
+    public static Parameter create(String name, OffsetDateTime value) {
         if (value == null) {
             return Parameters.ofNull(name);
         }
@@ -124,7 +140,7 @@ public final class IceaxeLowParameterUtil {
         if (value == null) {
             return Parameters.ofNull(name);
         }
-        var instant = value.toInstant();
-        return Parameters.of(name, instant);
+        var offsetDateTime = value.toOffsetDateTime();
+        return Parameters.of(name, offsetDateTime);
     }
 }

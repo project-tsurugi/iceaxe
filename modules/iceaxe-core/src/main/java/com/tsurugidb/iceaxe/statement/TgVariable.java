@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 
 /**
@@ -400,27 +402,87 @@ public abstract class TgVariable<T> {
      * @param name name
      * @return Tsurugi Variable
      */
-    public static TgVariableInstant ofInstant(String name) {
-        return new TgVariableInstant(name);
+    public static TgVariableLocalDateTime ofDateTime(String name) {
+        return new TgVariableLocalDateTime(name);
     }
 
     /**
-     * Tsurugi Variable&lt;Instant&gt;
+     * Tsurugi Variable&lt;LocalDateTime&gt;
      */
-    public static class TgVariableInstant extends TgVariable<Instant> {
+    public static class TgVariableLocalDateTime extends TgVariable<LocalDateTime> {
 
-        protected TgVariableInstant(String name) {
-            super(name, TgDataType.INSTANT);
+        protected TgVariableLocalDateTime(String name) {
+            super(name, TgDataType.DATE_TIME);
         }
 
         @Override
-        public TgParameter bind(Instant value) {
+        public TgParameter bind(LocalDateTime value) {
             return TgParameter.of(name(), value);
         }
 
         @Override
-        public TgVariableInstant copy(String name) {
-            return new TgVariableInstant(name);
+        public TgVariableLocalDateTime copy(String name) {
+            return new TgVariableLocalDateTime(name);
+        }
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariableOffsetTime ofOffsetTime(String name) {
+        return new TgVariableOffsetTime(name);
+    }
+
+    /**
+     * Tsurugi Variable&lt;OffsetTime&gt;
+     */
+    public static class TgVariableOffsetTime extends TgVariable<OffsetTime> {
+
+        protected TgVariableOffsetTime(String name) {
+            super(name, TgDataType.OFFSET_TIME);
+        }
+
+        @Override
+        public TgParameter bind(OffsetTime value) {
+            return TgParameter.of(name(), value);
+        }
+
+        @Override
+        public TgVariableOffsetTime copy(String name) {
+            return new TgVariableOffsetTime(name);
+        }
+    }
+
+    /**
+     * create Tsurugi Variable
+     * 
+     * @param name name
+     * @return Tsurugi Variable
+     */
+    public static TgVariableOffsetDateTime ofOffsetDateTime(String name) {
+        return new TgVariableOffsetDateTime(name);
+    }
+
+    /**
+     * Tsurugi Variable&lt;OffsetDateTime&gt;
+     */
+    public static class TgVariableOffsetDateTime extends TgVariable<OffsetDateTime> {
+
+        protected TgVariableOffsetDateTime(String name) {
+            super(name, TgDataType.OFFSET_DATE_TIME);
+        }
+
+        @Override
+        public TgParameter bind(OffsetDateTime value) {
+            return TgParameter.of(name(), value);
+        }
+
+        @Override
+        public TgVariableOffsetDateTime copy(String name) {
+            return new TgVariableOffsetDateTime(name);
         }
     }
 
@@ -440,7 +502,7 @@ public abstract class TgVariable<T> {
     public static class TgVariableZonedDateTime extends TgVariable<ZonedDateTime> {
 
         protected TgVariableZonedDateTime(String name) {
-            super(name, TgDataType.INSTANT);
+            super(name, TgDataType.OFFSET_DATE_TIME);
         }
 
         @Override

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -435,18 +436,18 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to Instant
+     * convert to dateTime
      * 
      * @param obj value
      * @return value
      */
     @Nullable
-    public Instant toInstant(Object obj) {
+    public LocalDateTime toDateTime(Object obj) {
         if (obj == null) {
             return null;
         }
         try {
-            var value = convertInstant(obj);
+            var value = convertDateTime(obj);
             if (value != null) {
                 return value;
             }
@@ -457,18 +458,97 @@ public class IceaxeConvertUtil {
     }
 
     @Nullable
-    protected Instant convertInstant(@Nonnull Object obj) {
-        if (obj instanceof Instant) {
-            return (Instant) obj;
+    protected LocalDateTime convertDateTime(@Nonnull Object obj) {
+        if (obj instanceof LocalDateTime) {
+            return ((LocalDateTime) obj);
         }
+        // FIXME ZonedDateTime, OffsetDateTimeからLocalDateTimeへ変換してもよいのか？
         if (obj instanceof ZonedDateTime) {
-            return ((ZonedDateTime) obj).toInstant();
+            return ((ZonedDateTime) obj).toLocalDateTime();
         }
         if (obj instanceof OffsetDateTime) {
-            return ((OffsetDateTime) obj).toInstant();
+            return ((OffsetDateTime) obj).toLocalDateTime();
         }
         if (obj instanceof java.sql.Timestamp) {
-            return ((java.sql.Timestamp) obj).toInstant();
+            return ((java.sql.Timestamp) obj).toLocalDateTime();
+        }
+        if (obj instanceof CharSequence) {
+            return LocalDateTime.parse((CharSequence) obj);
+        }
+        return null;
+    }
+
+    /**
+     * convert to offset time
+     * 
+     * @param obj value
+     * @return value
+     */
+    @Nullable
+    public OffsetTime toOffsetTime(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        try {
+            var value = convertOffsetTime(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected OffsetTime convertOffsetTime(@Nonnull Object obj) {
+        if (obj instanceof OffsetTime) {
+            return ((OffsetTime) obj);
+        }
+        if (obj instanceof ZonedDateTime) {
+            return ((ZonedDateTime) obj).toOffsetDateTime().toOffsetTime();
+        }
+        if (obj instanceof OffsetDateTime) {
+            return ((OffsetDateTime) obj).toOffsetTime();
+        }
+        if (obj instanceof CharSequence) {
+            return OffsetTime.parse((CharSequence) obj);
+        }
+        return null;
+    }
+
+    /**
+     * convert to offset dateTime
+     * 
+     * @param obj value
+     * @return value
+     */
+    @Nullable
+    public OffsetDateTime toOffsetDateTime(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        try {
+            var value = convertOffsetDateTime(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(obj, e);
+        }
+        throw createException(obj, null);
+    }
+
+    @Nullable
+    protected OffsetDateTime convertOffsetDateTime(@Nonnull Object obj) {
+        if (obj instanceof OffsetDateTime) {
+            return ((OffsetDateTime) obj);
+        }
+        if (obj instanceof ZonedDateTime) {
+            return ((ZonedDateTime) obj).toOffsetDateTime();
+        }
+        if (obj instanceof CharSequence) {
+            return OffsetDateTime.parse((CharSequence) obj);
         }
         return null;
     }
@@ -510,6 +590,17 @@ public class IceaxeConvertUtil {
         var instant = convertInstant(obj);
         if (instant != null) {
             return ZonedDateTime.ofInstant(instant, zone);
+        }
+        return null;
+    }
+
+    @Nullable
+    protected Instant convertInstant(@Nonnull Object obj) {
+        if (obj instanceof Instant) {
+            return (Instant) obj;
+        }
+        if (obj instanceof java.sql.Timestamp) {
+            return ((java.sql.Timestamp) obj).toInstant();
         }
         return null;
     }

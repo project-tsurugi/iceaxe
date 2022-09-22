@@ -2,9 +2,11 @@ package com.tsurugidb.iceaxe.result;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -975,7 +977,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         });
     }
 
-    // instant
+    // dateTime
 
     /**
      * add setter
@@ -983,9 +985,9 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter setter to R
      * @return this
      */
-    public TgEntityResultMapping<R> instant(BiConsumer<R, Instant> setter) {
+    public TgEntityResultMapping<R> dateTime(BiConsumer<R, LocalDateTime> setter) {
         int index = columnConverterList.size();
-        return instant(index, setter);
+        return dateTime(index, setter);
     }
 
     /**
@@ -996,9 +998,9 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param converter converter to V
      * @return this
      */
-    public <V> TgEntityResultMapping<R> instant(BiConsumer<R, V> setter, Function<Instant, V> converter) {
+    public <V> TgEntityResultMapping<R> dateTime(BiConsumer<R, V> setter, Function<LocalDateTime, V> converter) {
         int index = columnConverterList.size();
-        return instant(index, setter, converter);
+        return dateTime(index, setter, converter);
     }
 
     /**
@@ -1008,8 +1010,8 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter setter to R
      * @return this
      */
-    public TgEntityResultMapping<R> instant(int index, BiConsumer<R, Instant> setter) {
-        set(index, TsurugiResultRecord::nextInstantOrNull, setter);
+    public TgEntityResultMapping<R> dateTime(int index, BiConsumer<R, LocalDateTime> setter) {
+        set(index, TsurugiResultRecord::nextDateTimeOrNull, setter);
         return this;
     }
 
@@ -1022,8 +1024,8 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param converter converter to V
      * @return this
      */
-    public <V> TgEntityResultMapping<R> instant(int index, BiConsumer<R, V> setter, Function<Instant, V> converter) {
-        return instant(index, (entity, value) -> {
+    public <V> TgEntityResultMapping<R> dateTime(int index, BiConsumer<R, V> setter, Function<LocalDateTime, V> converter) {
+        return dateTime(index, (entity, value) -> {
             V v = (value != null) ? converter.apply(value) : null;
             setter.accept(entity, v);
         });
@@ -1036,8 +1038,8 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter setter to R
      * @return this
      */
-    public TgEntityResultMapping<R> instant(String name, BiConsumer<R, Instant> setter) {
-        set(name, TsurugiResultRecord::nextInstantOrNull, setter);
+    public TgEntityResultMapping<R> dateTime(String name, BiConsumer<R, LocalDateTime> setter) {
+        set(name, TsurugiResultRecord::nextDateTimeOrNull, setter);
         return this;
     }
 
@@ -1050,14 +1052,178 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param converter converter to V
      * @return this
      */
-    public <V> TgEntityResultMapping<R> instant(String name, BiConsumer<R, V> setter, Function<Instant, V> converter) {
-        return instant(name, (entity, value) -> {
+    public <V> TgEntityResultMapping<R> dateTime(String name, BiConsumer<R, V> setter, Function<LocalDateTime, V> converter) {
+        return dateTime(name, (entity, value) -> {
             V v = (value != null) ? converter.apply(value) : null;
             setter.accept(entity, v);
         });
     }
 
-    // ZonedDateTime
+    // offset time
+
+    /**
+     * add setter
+     * 
+     * @param setter setter to R
+     * @return this
+     */
+    public TgEntityResultMapping<R> offsetTime(BiConsumer<R, OffsetTime> setter) {
+        int index = columnConverterList.size();
+        return offsetTime(index, setter);
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> offsetTime(BiConsumer<R, V> setter, Function<OffsetTime, V> converter) {
+        int index = columnConverterList.size();
+        return offsetTime(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
+     * @param index  column index
+     * @param setter setter to R
+     * @return this
+     */
+    public TgEntityResultMapping<R> offsetTime(int index, BiConsumer<R, OffsetTime> setter) {
+        set(index, TsurugiResultRecord::nextOffsetTimeOrNull, setter);
+        return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> offsetTime(int index, BiConsumer<R, V> setter, Function<OffsetTime, V> converter) {
+        return offsetTime(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
+     * @param setter setter to R
+     * @return this
+     */
+    public TgEntityResultMapping<R> offsetTime(String name, BiConsumer<R, OffsetTime> setter) {
+        set(name, TsurugiResultRecord::nextOffsetTimeOrNull, setter);
+        return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> offsetTime(String name, BiConsumer<R, V> setter, Function<OffsetTime, V> converter) {
+        return offsetTime(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    // offset dateTime
+
+    /**
+     * add setter
+     * 
+     * @param setter setter to R
+     * @return this
+     */
+    public TgEntityResultMapping<R> offsetDateTime(BiConsumer<R, OffsetDateTime> setter) {
+        int index = columnConverterList.size();
+        return offsetDateTime(index, setter);
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> offsetDateTime(BiConsumer<R, V> setter, Function<OffsetDateTime, V> converter) {
+        int index = columnConverterList.size();
+        return offsetDateTime(index, setter, converter);
+    }
+
+    /**
+     * add setter
+     * 
+     * @param index  column index
+     * @param setter setter to R
+     * @return this
+     */
+    public TgEntityResultMapping<R> offsetDateTime(int index, BiConsumer<R, OffsetDateTime> setter) {
+        set(index, TsurugiResultRecord::nextOffsetDateTimeOrNull, setter);
+        return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> offsetDateTime(int index, BiConsumer<R, V> setter, Function<OffsetDateTime, V> converter) {
+        return offsetDateTime(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter
+     * 
+     * @param name   column name
+     * @param setter setter to R
+     * @return this
+     */
+    public TgEntityResultMapping<R> offsetDateTime(String name, BiConsumer<R, OffsetDateTime> setter) {
+        set(name, TsurugiResultRecord::nextOffsetDateTimeOrNull, setter);
+        return this;
+    }
+
+    /**
+     * add setter
+     * 
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     */
+    public <V> TgEntityResultMapping<R> offsetDateTime(String name, BiConsumer<R, V> setter, Function<OffsetDateTime, V> converter) {
+        return offsetDateTime(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    // zoned dateTime
 
     /**
      * add setter
@@ -1161,7 +1327,9 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         map.put(TgDataType.BITS, TsurugiResultRecord::nextBitsOrNull);
         map.put(TgDataType.DATE, TsurugiResultRecord::nextDateOrNull);
         map.put(TgDataType.TIME, TsurugiResultRecord::nextTimeOrNull);
-        map.put(TgDataType.INSTANT, TsurugiResultRecord::nextInstantOrNull);
+        map.put(TgDataType.DATE_TIME, TsurugiResultRecord::nextDateTimeOrNull);
+        map.put(TgDataType.OFFSET_TIME, TsurugiResultRecord::nextOffsetTimeOrNull);
+        map.put(TgDataType.OFFSET_DATE_TIME, TsurugiResultRecord::nextOffsetDateTimeOrNull);
         RECORD_GETTER_MAP = map;
     }
 

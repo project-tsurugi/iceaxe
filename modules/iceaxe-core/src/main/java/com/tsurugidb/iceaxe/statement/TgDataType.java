@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import java.util.EnumMap;
 import java.util.IdentityHashMap;
@@ -62,9 +64,17 @@ public enum TgDataType {
      */
     TIME(AtomType.TIME_OF_DAY, List.of(LocalTime.class)),
     /**
-     * instant
+     * dateTime
      */
-    INSTANT(AtomType.TIME_POINT, List.of(Instant.class, ZonedDateTime.class)),
+    DATE_TIME(AtomType.TIME_POINT, List.of(LocalDateTime.class)),
+    /**
+     * offset time
+     */
+    OFFSET_TIME(AtomType.TIME_OF_DAY_WITH_TIME_ZONE, List.of(OffsetTime.class)),
+    /**
+     * offset dateTime
+     */
+    OFFSET_DATE_TIME(AtomType.TIME_POINT_WITH_TIME_ZONE, List.of(OffsetDateTime.class, ZonedDateTime.class)),
     //
     ;
 

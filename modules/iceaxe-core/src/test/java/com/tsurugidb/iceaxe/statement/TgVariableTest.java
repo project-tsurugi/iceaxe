@@ -4,8 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -163,14 +167,39 @@ class TgVariableTest {
     }
 
     @Test
-    void testOfInstant() {
-        var variable = TgVariable.ofInstant("foo");
+    void testOfDateTime() {
+        var variable = TgVariable.ofDateTime("foo");
         assertEquals("foo", variable.name());
-        assertEquals(TgDataType.INSTANT, variable.type());
+        assertEquals(TgDataType.DATE_TIME, variable.type());
+        assertEquals(Parameters.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), variable.bind(LocalDateTime.of(2022, 9, 22, 23, 30, 59)).toLowParameter());
 
-        var zone = ZoneId.of("Asia/Tokyo");
-        var instant = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone).toInstant();
-        assertEquals(Parameters.of("foo", instant), variable.bind(instant).toLowParameter());
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
+    }
+
+    @Test
+    void testOfOffsetTime() {
+        var variable = TgVariable.ofOffsetTime("foo");
+        assertEquals("foo", variable.name());
+        assertEquals(TgDataType.OFFSET_TIME, variable.type());
+        var offset = ZoneOffset.ofHours(9);
+        assertEquals(Parameters.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), variable.bind(OffsetTime.of(23, 30, 59, 0, offset)).toLowParameter());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
+    }
+
+    @Test
+    void testOfOffsetDateTime() {
+        var variable = TgVariable.ofOffsetDateTime("foo");
+        assertEquals("foo", variable.name());
+        assertEquals(TgDataType.OFFSET_DATE_TIME, variable.type());
+        var offset = ZoneOffset.ofHours(9);
+        assertEquals(Parameters.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), variable.bind(OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)).toLowParameter());
 
         var copy = variable.copy("bar");
         assertEquals(variable.getClass(), copy.getClass());
@@ -182,11 +211,11 @@ class TgVariableTest {
     void testOfZonedDateTime() {
         var variable = TgVariable.ofZonedDateTime("foo");
         assertEquals("foo", variable.name());
-        assertEquals(TgDataType.INSTANT, variable.type());
+        assertEquals(TgDataType.OFFSET_DATE_TIME, variable.type());
 
         var zone = ZoneId.of("Asia/Tokyo");
         var dateTime = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone);
-        assertEquals(Parameters.of("foo", dateTime.toInstant()), variable.bind(dateTime).toLowParameter());
+        assertEquals(Parameters.of("foo", dateTime.toOffsetDateTime()), variable.bind(dateTime).toLowParameter());
 
         var copy = variable.copy("bar");
         assertEquals(variable.getClass(), copy.getClass());

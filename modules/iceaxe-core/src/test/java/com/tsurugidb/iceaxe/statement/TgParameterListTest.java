@@ -1,12 +1,15 @@
 package com.tsurugidb.iceaxe.statement;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -170,13 +173,32 @@ class TgParameterListTest {
     }
 
     @Test
-    void testInstant() {
-        var instant = ZonedDateTime.of(2022, 6, 30, 23, 30, 59, 999, ZoneId.of("Asia/Tokyo")).toInstant();
+    void testDateTime() {
         var list = TgParameterList.of();
-        list.instant("foo", instant);
-        list.instant("bar", null);
+        list.dateTime("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
+        list.dateTime("bar", null);
 
-        assertParameterList(TgParameter.of("foo", instant), TgParameter.of("bar", (Instant) null), list);
+        assertParameterList(TgParameter.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), TgParameter.of("bar", (LocalDateTime) null), list);
+    }
+
+    @Test
+    void testOffsetTime() {
+        var offset = ZoneOffset.ofHours(9);
+        var list = TgParameterList.of();
+        list.offsetTime("foo", OffsetTime.of(23, 30, 59, 0, offset));
+        list.offsetTime("bar", null);
+
+        assertParameterList(TgParameter.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), TgParameter.of("bar", (OffsetTime) null), list);
+    }
+
+    @Test
+    void testOffsetDateTime() {
+        var offset = ZoneOffset.ofHours(9);
+        var list = TgParameterList.of();
+        list.offsetDateTime("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
+        list.offsetDateTime("bar", null);
+
+        assertParameterList(TgParameter.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), TgParameter.of("bar", (OffsetTime) null), list);
     }
 
     @Test
@@ -329,13 +351,32 @@ class TgParameterListTest {
     }
 
     @Test
-    void testAddStringInstant() {
-        var instant = ZonedDateTime.of(2022, 6, 30, 23, 30, 59, 999, ZoneId.of("Asia/Tokyo")).toInstant();
+    void testAddStringLocalDateTime() {
         var list = TgParameterList.of();
-        list.add("foo", instant);
-        list.add("bar", (Instant) null);
+        list.add("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
+        list.add("bar", (LocalDateTime) null);
 
-        assertParameterList(TgParameter.of("foo", instant), TgParameter.of("bar", (Instant) null), list);
+        assertParameterList(TgParameter.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), TgParameter.of("bar", (LocalDateTime) null), list);
+    }
+
+    @Test
+    void testAddStringOffsetTime() {
+        var offset = ZoneOffset.ofHours(9);
+        var list = TgParameterList.of();
+        list.add("foo", OffsetTime.of(23, 30, 59, 0, offset));
+        list.add("bar", (OffsetTime) null);
+
+        assertParameterList(TgParameter.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), TgParameter.of("bar", (OffsetTime) null), list);
+    }
+
+    @Test
+    void testAddStringOffsetDateTime() {
+        var offset = ZoneOffset.ofHours(9);
+        var list = TgParameterList.of();
+        list.add("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
+        list.add("bar", (OffsetDateTime) null);
+
+        assertParameterList(TgParameter.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), TgParameter.of("bar", (OffsetDateTime) null), list);
     }
 
     @Test

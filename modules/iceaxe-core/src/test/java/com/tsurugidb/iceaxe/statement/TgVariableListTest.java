@@ -84,15 +84,27 @@ class TgVariableListTest {
     }
 
     @Test
-    void testInstant() {
-        var variable = new TgVariableList().instant("foo");
-        assertVariable(Map.of("foo", TgDataType.INSTANT), variable);
+    void testDateTime() {
+        var variable = new TgVariableList().dateTime("foo");
+        assertVariable(Map.of("foo", TgDataType.DATE_TIME), variable);
+    }
+
+    @Test
+    void testOffsetTime() {
+        var variable = new TgVariableList().offsetTime("foo");
+        assertVariable(Map.of("foo", TgDataType.OFFSET_TIME), variable);
+    }
+
+    @Test
+    void testOffsetDateTime() {
+        var variable = new TgVariableList().offsetDateTime("foo");
+        assertVariable(Map.of("foo", TgDataType.OFFSET_DATE_TIME), variable);
     }
 
     @Test
     void testZonedDateTime() {
         var variable = new TgVariableList().zonedDateTime("foo");
-        assertVariable(Map.of("foo", TgDataType.INSTANT), variable);
+        assertVariable(Map.of("foo", TgDataType.OFFSET_DATE_TIME), variable);
     }
 
     @Test
