@@ -38,7 +38,7 @@ public class DbErrorConnectTest {
         var connector = TsurugiConnector.createConnector(endpoint);
 
         var info = TgSessionInfo.of();
-        info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
+        info.timeout(TgTimeoutKey.DEFAULT, 4, TimeUnit.SECONDS);
         try (var session = connector.createSession(info); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
         }
@@ -54,6 +54,7 @@ public class DbErrorConnectTest {
 
         @Override
         public void run() {
+            // クライアントから接続された後、何も返さずにクローズする
             try (var socket = server.accept()) {
                 TimeUnit.SECONDS.sleep(2);
                 // don't respond
