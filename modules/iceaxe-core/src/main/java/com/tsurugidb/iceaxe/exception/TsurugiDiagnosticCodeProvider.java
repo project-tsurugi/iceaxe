@@ -54,7 +54,12 @@ public interface TsurugiDiagnosticCodeProvider {
      */
     @Nullable
     public static String createMessage(ServerException e) {
-        return createMessage(e.getDiagnosticCode());
+        var code = e.getDiagnosticCode();
+        if (code != null) {
+            return code.name() + ": " + e.getMessage();
+        } else {
+            return e.getMessage();
+        }
     }
 
     /**

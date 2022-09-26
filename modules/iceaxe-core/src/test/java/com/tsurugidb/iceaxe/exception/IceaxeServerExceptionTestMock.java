@@ -2,21 +2,19 @@ package com.tsurugidb.iceaxe.exception;
 
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 @SuppressWarnings("serial")
 public class IceaxeServerExceptionTestMock extends ServerException {
 
     private final DiagnosticCode code;
 
-    public IceaxeServerExceptionTestMock(String message) {
+    public IceaxeServerExceptionTestMock(String message, DiagnosticCode code) {
         super(message);
-        this.code = SqlServiceCode.OK;
+        this.code = code;
     }
 
-    public IceaxeServerExceptionTestMock(String message, String code) {
-        super(message);
-        this.code = new IceaxeDiagnosticCodeTestMock(code);
+    public IceaxeServerExceptionTestMock(String message, int codeNumber) {
+        this(message, new IceaxeDiagnosticCodeTestMock(codeNumber));
     }
 
     @Override

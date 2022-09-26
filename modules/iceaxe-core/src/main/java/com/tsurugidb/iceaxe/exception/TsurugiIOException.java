@@ -15,8 +15,8 @@ public class TsurugiIOException extends IOException implements TsurugiDiagnostic
         super(message, cause);
     }
 
-    public TsurugiIOException(ServerException e) {
-        super(TsurugiDiagnosticCodeProvider.createMessage(e), e);
+    public TsurugiIOException(ServerException cause) {
+        super(TsurugiDiagnosticCodeProvider.createMessage(cause), cause);
     }
 
     @Override

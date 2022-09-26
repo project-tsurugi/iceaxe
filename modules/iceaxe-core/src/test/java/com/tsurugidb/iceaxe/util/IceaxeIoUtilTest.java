@@ -50,7 +50,7 @@ class IceaxeIoUtilTest {
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
             public String get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
-                throw new IceaxeServerExceptionTestMock("abc", "def");
+                throw new IceaxeServerExceptionTestMock("abc", 123);
             }
 
             @Override
@@ -61,7 +61,7 @@ class IceaxeIoUtilTest {
         var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrows(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
-        assertEquals("def", actual.getMessage());
+        assertEquals("MOCK_123: abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
         assertEquals(1, count.get());
     }
@@ -124,13 +124,13 @@ class IceaxeIoUtilTest {
 
             @Override
             public void close() throws IOException, ServerException, InterruptedException {
-                throw new IceaxeServerExceptionTestMock("abc", "def");
+                throw new IceaxeServerExceptionTestMock("abc", 123);
             }
         };
         var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrows(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
-        assertEquals("def", actual.getMessage());
+        assertEquals("MOCK_123: abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
     }
 
@@ -192,7 +192,7 @@ class IceaxeIoUtilTest {
 
             @Override
             public void close() throws IOException, ServerException, InterruptedException {
-                throw new IceaxeServerExceptionTestMock("def", "ghi");
+                throw new IceaxeServerExceptionTestMock("def", 456);
             }
         };
         var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
@@ -201,7 +201,7 @@ class IceaxeIoUtilTest {
         assertEquals("abc", actual.getMessage());
         var s0 = actual.getSuppressed()[0];
         assertInstanceOf(TsurugiIOException.class, s0);
-        assertEquals("ghi", s0.getMessage());
+        assertEquals("MOCK_456: def", s0.getMessage());
         assertEquals("def", s0.getCause().getMessage());
     }
 
@@ -278,7 +278,7 @@ class IceaxeIoUtilTest {
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
             public String get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
-                throw new IceaxeServerExceptionTestMock("abc", "def");
+                throw new IceaxeServerExceptionTestMock("abc", 123);
             }
 
             @Override
@@ -289,7 +289,7 @@ class IceaxeIoUtilTest {
         var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrows(TsurugiTransactionException.class, () -> IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout));
-        assertEquals("def", actual.getMessage());
+        assertEquals("MOCK_123: abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
         assertEquals(1, count.get());
     }
@@ -308,13 +308,13 @@ class IceaxeIoUtilTest {
 
             @Override
             public void close() throws IOException, ServerException, InterruptedException {
-                throw new IceaxeServerExceptionTestMock("abc", "def");
+                throw new IceaxeServerExceptionTestMock("abc", 123);
             }
         };
         var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrows(TsurugiTransactionException.class, () -> IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout));
-        assertEquals("def", actual.getMessage());
+        assertEquals("MOCK_123: abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
     }
 
@@ -396,10 +396,10 @@ class IceaxeIoUtilTest {
         {
             var closeableSet = new IceaxeCloseableSet();
             closeableSet.add(() -> {
-                throw new IceaxeServerExceptionTestMock("", "abc");
+                throw new IceaxeServerExceptionTestMock("abc", 123);
             });
             closeableSet.add(() -> {
-                throw new IceaxeServerExceptionTestMock("", "def");
+                throw new IceaxeServerExceptionTestMock("def", 456);
             });
 
             var count = new AtomicInteger(0);
@@ -408,10 +408,10 @@ class IceaxeIoUtilTest {
             }));
             assertEquals(1, count.get());
 
-            assertEquals("abc", e.getMessage());
+            assertEquals("MOCK_123: abc", e.getMessage());
             var s0 = e.getSuppressed()[0];
             assertInstanceOf(TsurugiIOException.class, s0);
-            assertEquals("def", s0.getMessage());
+            assertEquals("MOCK_456: def", s0.getMessage());
         }
     }
 
@@ -468,7 +468,7 @@ class IceaxeIoUtilTest {
         {
             var closeableSet = new IceaxeCloseableSet();
             closeableSet.add(() -> {
-                throw new IceaxeServerExceptionTestMock("", "def");
+                throw new IceaxeServerExceptionTestMock("def", 456);
             });
 
             var e = assertThrows(IOException.class, () -> IceaxeIoUtil.close(closeableSet, () -> {
@@ -478,7 +478,7 @@ class IceaxeIoUtilTest {
             assertEquals("abc", e.getMessage());
             var s0 = e.getSuppressed()[0];
             assertInstanceOf(TsurugiIOException.class, s0);
-            assertEquals("def", s0.getMessage());
+            assertEquals("MOCK_456: def", s0.getMessage());
         }
     }
 
@@ -526,16 +526,16 @@ class IceaxeIoUtilTest {
     @Test
     void testCloseEx() {
         AutoCloseable close1 = () -> {
-            throw new IceaxeServerExceptionTestMock("", "abc");
+            throw new IceaxeServerExceptionTestMock("abc", 123);
         };
         AutoCloseable close2 = () -> {
-            throw new IceaxeServerExceptionTestMock("", "def");
+            throw new IceaxeServerExceptionTestMock("def", 456);
         };
         var e = assertThrows(TsurugiIOException.class, () -> IceaxeIoUtil.close(close1, close2));
-        assertEquals("abc", e.getMessage());
+        assertEquals("MOCK_123: abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(TsurugiIOException.class, s0);
-        assertEquals("def", s0.getMessage());
+        assertEquals("MOCK_456: def", s0.getMessage());
     }
 
     @Test
@@ -624,15 +624,15 @@ class IceaxeIoUtilTest {
     @Test
     void testCloseInTransactionEx() {
         AutoCloseable close1 = () -> {
-            throw new IceaxeServerExceptionTestMock("", "abc");
+            throw new IceaxeServerExceptionTestMock("abc", 123);
         };
         AutoCloseable close2 = () -> {
-            throw new IceaxeServerExceptionTestMock("", "def");
+            throw new IceaxeServerExceptionTestMock("def", 456);
         };
         var e = assertThrows(TsurugiTransactionException.class, () -> IceaxeIoUtil.closeInTransaction(close1, close2));
-        assertEquals("abc", e.getMessage());
+        assertEquals("MOCK_123: abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(TsurugiTransactionException.class, s0);
-        assertEquals("def", s0.getMessage());
+        assertEquals("MOCK_456: def", s0.getMessage());
     }
 }

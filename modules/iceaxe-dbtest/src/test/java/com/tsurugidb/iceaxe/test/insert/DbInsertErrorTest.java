@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.insert;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
@@ -41,7 +42,7 @@ class DbInsertErrorTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql)) {
             var e = assertThrows(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            // TODO エラー詳細情報の確認
+            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(0);
@@ -67,7 +68,7 @@ class DbInsertErrorTest extends DbTestTableTester {
                 ps.executeAndGetCount(tm, entity);
             });
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            // TODO エラー詳細情報の確認
+            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(0);

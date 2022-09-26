@@ -22,20 +22,21 @@ class TsurugiDiagnosticCodeProviderTest {
             assertSame(e, actual.get());
         }
         {
-            var e = new IceaxeServerExceptionTestMock("ignore", "abc");
+            var e = new IceaxeServerExceptionTestMock("ignore", 123);
             var actual = TsurugiDiagnosticCodeProvider.findDiagnosticCodeProvider(e);
-            assertEquals("abc", actual.get().getLowDiagnosticCode().toString());
+            assertEquals("TEST-00123 (MOCK_123)", actual.get().getLowDiagnosticCode().toString());
         }
         {
-            var e = new Exception(new IceaxeServerExceptionTestMock("ignore", "abc"));
+            var e = new Exception(new IceaxeServerExceptionTestMock("ignore", 123));
             var actual = TsurugiDiagnosticCodeProvider.findDiagnosticCodeProvider(e);
-            assertEquals("abc", actual.get().getLowDiagnosticCode().toString());
+            assertEquals("TEST-00123 (MOCK_123)", actual.get().getLowDiagnosticCode().toString());
         }
     }
 
     @Test
     void testCreateMessageServerException() {
-        assertEquals("abc", TsurugiDiagnosticCodeProvider.createMessage(new IceaxeServerExceptionTestMock("ignore", "abc")));
+        assertEquals("message", TsurugiDiagnosticCodeProvider.createMessage(new IceaxeServerExceptionTestMock("message", null)));
+        assertEquals("MOCK_123: message", TsurugiDiagnosticCodeProvider.createMessage(new IceaxeServerExceptionTestMock("message", 123)));
     }
 
     @Test

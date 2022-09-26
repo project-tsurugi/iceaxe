@@ -319,7 +319,7 @@ class IceaxeCloseableSetTest {
         var closeable1 = new AutoCloseable() {
             @Override
             public void close() throws TsurugiTransactionException {
-                var e = new IceaxeServerExceptionTestMock("", "abc");
+                var e = new IceaxeServerExceptionTestMock("abc", 123);
                 throw new TsurugiTransactionException(e);
             }
         };
@@ -329,7 +329,7 @@ class IceaxeCloseableSetTest {
         var closeable2 = new Closeable() {
             @Override
             public void close() {
-                var e = new IceaxeServerExceptionTestMock("", "def");
+                var e = new IceaxeServerExceptionTestMock("def", 456);
                 var t = new TsurugiTransactionException(e);
                 throw new TsurugiTransactionRuntimeException(t);
             }
@@ -340,7 +340,7 @@ class IceaxeCloseableSetTest {
         var closeable3 = new AutoCloseable() {
             @Override
             public void close() throws Exception {
-                throw new IceaxeServerExceptionTestMock("ghi");
+                throw new IceaxeServerExceptionTestMock("ghi", 789);
             }
         };
         target.add(closeable3);
@@ -349,11 +349,11 @@ class IceaxeCloseableSetTest {
         var e = assertThrows(TsurugiTransactionException.class, () -> {
             target.closeInTransaction();
         });
-        assertEquals("abc", e.getMessage());
+        assertEquals("MOCK_123: abc", e.getMessage());
         assertEquals(2, e.getSuppressed().length);
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(TsurugiTransactionRuntimeException.class, s0);
-        assertEquals("def", s0.getMessage());
+        assertEquals("MOCK_456: def", s0.getMessage());
         var s1 = e.getSuppressed()[1];
         assertInstanceOf(ServerException.class, s1);
         assertEquals("ghi", s1.getMessage());
@@ -365,7 +365,7 @@ class IceaxeCloseableSetTest {
     void testCloseInTransactionEx2() {
         var target = new IceaxeCloseableSet();
 
-        var t = new TsurugiTransactionException(new IceaxeServerExceptionTestMock("", "abc"));
+        var t = new TsurugiTransactionException(new IceaxeServerExceptionTestMock("abc", 123));
         var closeable1 = new Closeable() {
             @Override
             public void close() {
@@ -387,7 +387,7 @@ class IceaxeCloseableSetTest {
     void testCloseInTransactionEx3() {
         var target = new IceaxeCloseableSet();
 
-        var t = new IceaxeServerExceptionTestMock("", "abc");
+        var t = new IceaxeServerExceptionTestMock("abc", 123);
         var closeable1 = new AutoCloseable() {
             @Override
             public void close() throws ServerException {

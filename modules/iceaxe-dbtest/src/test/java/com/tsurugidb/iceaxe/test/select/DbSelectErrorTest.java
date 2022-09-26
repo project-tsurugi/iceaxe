@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
@@ -41,8 +42,8 @@ class DbSelectErrorTest extends DbTestTableTester {
             var e = assertThrows(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetList(tm);
             });
-            assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e);
-            // TODO エラー詳細情報の確認
+            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
         }
     }
 }

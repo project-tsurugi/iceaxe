@@ -54,7 +54,8 @@ class DbCreateTableTest extends DbTestTableTester {
             var e = assertThrows(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetCount(tm);
             });
-            assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO duplicate_table
+            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+            assertTrue(e.getMessage().contains("duplicate_table table `test' is already defined."), () -> "actual=" + e.getMessage());
         }
     }
 

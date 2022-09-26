@@ -4,29 +4,29 @@ import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 
 public class IceaxeDiagnosticCodeTestMock implements DiagnosticCode {
 
-    private final String message;
+    private final int number;
 
-    public IceaxeDiagnosticCodeTestMock(String message) {
-        this.message = message;
+    public IceaxeDiagnosticCodeTestMock(int number) {
+        this.number = number;
     }
 
     @Override
     public String getStructuredCode() {
-        throw new UnsupportedOperationException();
+        return String.format("TEST-%05d", getCodeNumber());
     }
 
     @Override
     public int getCodeNumber() {
-        throw new UnsupportedOperationException();
+        return this.number;
     }
 
     @Override
     public String name() {
-        throw new UnsupportedOperationException();
+        return "MOCK_" + number;
     }
 
     @Override
     public String toString() {
-        return this.message;
+        return String.format("%s (%s)", getStructuredCode(), name());
     }
 }

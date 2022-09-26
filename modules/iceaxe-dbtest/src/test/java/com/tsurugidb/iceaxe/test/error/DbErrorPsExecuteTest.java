@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
@@ -83,7 +84,7 @@ class DbErrorPsExecuteTest extends DbTestTableTester {
                 ps.executeAndGetCount(tm, plist);
             });
             assertEqualsCode(SqlServiceCode.ERR_UNRESOLVED_HOST_VARIABLE, e);
-            // TODO エラー詳細情報の確認
+            assertTrue(e.getMessage().contains("Value is not assigned for host variable 'zzz'."), () -> "actual=" + e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -107,7 +108,7 @@ class DbErrorPsExecuteTest extends DbTestTableTester {
                 ps.executeAndGetCount(tm, plist);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            // TODO エラー詳細情報の確認
+            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(SIZE);

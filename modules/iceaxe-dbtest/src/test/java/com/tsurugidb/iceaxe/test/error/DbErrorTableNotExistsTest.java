@@ -1,11 +1,11 @@
 package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,6 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO change Disabled to Timeout
     void select() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -44,11 +43,12 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                         var e = assertThrows(TsurugiTransactionException.class, () -> {
                             ps.executeAndGetList(transaction);
                         });
-                        assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO table_not_found
+                        assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                         throw e;
                     });
                 });
-                assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e0); // TODO table_not_found
+                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
+                assertTrue(e0.getMessage().contains("table_not_found test."), () -> "actual=" + e0.getMessage());
             }
         }
     }
@@ -67,11 +67,12 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                         var e = assertThrows(TsurugiIOException.class, () -> {
                             ps.executeAndGetCount(transaction, entity);
                         });
-                        assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO table_not_found
+                        assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                         throw e;
                     });
                 });
-                assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e0); // TODO table_not_found
+                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
+                assertTrue(e0.getMessage().contains("table_not_found table `test' is not found"), () -> "actual=" + e0.getMessage());
             }
         }
     }
@@ -88,11 +89,12 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         ps.executeAndGetCount(transaction);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO table_not_found
+                    assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                     throw e;
                 });
             });
-            assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e0); // TODO table_not_found
+            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
+            assertTrue(e0.getMessage().contains("table_not_found test."), () -> "actual=" + e0.getMessage());
         }
     }
 
@@ -108,11 +110,12 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         ps.executeAndGetCount(transaction);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e); // TODO table_not_found
+                    assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                     throw e;
                 });
             });
-            assertEqualsCode(SqlServiceCode.ERR_TRANSLATOR_ERROR, e0); // TODO table_not_found
+            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
+            assertTrue(e0.getMessage().contains("table_not_found test."), () -> "actual=" + e0.getMessage());
         }
     }
 }
