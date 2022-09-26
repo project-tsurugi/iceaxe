@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.error;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,8 +30,8 @@ public class DbErrorConnectTest {
             var thread = new ServerThtread(server);
             thread.start();
 
-            // TODO not NPE
-            assertThrows(NullPointerException.class, () -> connect(port));
+            var e = assertThrows(IOException.class, () -> connect(port));
+            assertInstanceOf(TimeoutException.class, e.getCause());
         }
     }
 
@@ -38,7 +40,7 @@ public class DbErrorConnectTest {
         var connector = TsurugiConnector.createConnector(endpoint);
 
         var info = TgSessionInfo.of();
-        info.timeout(TgTimeoutKey.DEFAULT, 4, TimeUnit.SECONDS);
+        info.timeout(TgTimeoutKey.DEFAULT, 2, TimeUnit.SECONDS);
         try (var session = connector.createSession(info); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
         }
@@ -56,7 +58,7 @@ public class DbErrorConnectTest {
         public void run() {
             // クライアントから接続された後、何も返さずにクローズする
             try (var socket = server.accept()) {
-                TimeUnit.SECONDS.sleep(2);
+                TimeUnit.SECONDS.sleep(1);
                 // don't respond
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
