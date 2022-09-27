@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.util;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
@@ -52,7 +53,9 @@ public final class IceaxeIoUtil {
         Throwable occurred = null;
         try {
             var time = timeout.get();
-            return future.get(time.value(), time.unit());
+            long value = time.value();
+            TimeUnit unit = time.unit();
+            return future.get(value, unit);
         } catch (ServerException e) {
             E wrapper = serverExceptionWrapper.apply(e);
             occurred = wrapper;

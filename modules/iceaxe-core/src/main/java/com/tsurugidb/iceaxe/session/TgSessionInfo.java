@@ -71,7 +71,7 @@ public class TgSessionInfo {
         /** {@link TsurugiTableMetadataHelper} connect */
         METADATA_CONNECT,
         /** {@link TsurugiTableMetadataHelper} close */
-        METADATA_CLOSE,
+        METADATA_CLOSE, // no effect? in tsubakuro
 
         /** {@link TsurugiPreparedStatementWithLowPs} connect */
         PS_CONNECT,
@@ -90,11 +90,11 @@ public class TgSessionInfo {
         /** {@link TsurugiResultSet} connect */
         RS_CONNECT,
         /** {@link TsurugiResultSet} close */
-        RS_CLOSE,
+        RS_CLOSE, // no effect? in tsubakuro
         /** {@link TsurugiResultCount} check */
         RESULT_CHECK,
         /** {@link TsurugiResultCount} close */
-        RESULT_CLOSE,
+        RESULT_CLOSE, // no effect? in tsubakuro
     }
 
     private Credential credential;

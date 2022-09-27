@@ -11,23 +11,22 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
+import com.tsurugidb.tsubakuro.sql.SqlClient;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
+import com.tsurugidb.tsubakuro.sql.TableMetadata;
+import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi table metadata helper
  */
-public final class TsurugiTableMetadataHelper {
+public class TsurugiTableMetadataHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTableMetadataHelper.class);
 
-    private TsurugiTableMetadataHelper() {
-        // don't instantiate
-    }
-
     // internal
-    public static Optional<TsurugiTableMetadata> findTableMetadata(TsurugiSession session, String tableName) throws IOException {
+    public Optional<TsurugiTableMetadata> findTableMetadata(TsurugiSession session, String tableName) throws IOException {
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("getTableMetadata start. tableName={}", tableName);
-        var lowTableMetadataFuture = lowSqlClient.getTableMetadata(tableName);
+        var lowTableMetadataFuture = getLowTableMetadata(lowSqlClient, tableName);
         LOG.trace("getTableMetadata started");
         try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {
 
@@ -48,5 +47,9 @@ public final class TsurugiTableMetadataHelper {
             }
             throw e;
         }
+    }
+
+    protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
+        return lowSqlClient.getTableMetadata(tableName);
     }
 }

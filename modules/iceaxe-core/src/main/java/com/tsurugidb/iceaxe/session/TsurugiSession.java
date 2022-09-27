@@ -45,6 +45,7 @@ public class TsurugiSession implements Closeable {
     private FutureResponse<Wire> lowWireFuture;
     private boolean sessionConnected = false;
     private SqlClient lowSqlClient;
+    private TsurugiTableMetadataHelper tableMetadataHelper = null;
     private IceaxeConvertUtil convertUtil = null;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
@@ -163,7 +164,10 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public Optional<TsurugiTableMetadata> findTableMetadata(String tableName) throws IOException {
-        return TsurugiTableMetadataHelper.findTableMetadata(this, tableName);
+        if (this.tableMetadataHelper == null) {
+            this.tableMetadataHelper = new TsurugiTableMetadataHelper();
+        }
+        return tableMetadataHelper.findTableMetadata(this, tableName);
     }
 
     /**
