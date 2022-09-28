@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.test.error;
+package com.tsurugidb.iceaxe.test.connector;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;

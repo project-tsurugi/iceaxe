@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.test.error;
+package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
