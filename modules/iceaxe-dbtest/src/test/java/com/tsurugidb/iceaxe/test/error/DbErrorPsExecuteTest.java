@@ -91,10 +91,10 @@ class DbErrorPsExecuteTest extends DbTestTableTester {
     }
 
     @Test
-    void insertParameterTypeUnmatch() throws IOException {
-        var foo = TgVariable.ofInt8("foo"); // INT4
-        var bar = TgVariable.ofInt4("bar"); // INT8
-        var zzz = TgVariable.ofInt4("zzz"); // CHARACTER
+    void insertParameterTypeMismatch() throws IOException {
+        var foo = TgVariable.ofInt8("foo"); // INT4 <-> Int8
+        var bar = TgVariable.ofInt4("bar"); // INT8 <-> Int4
+        var zzz = TgVariable.ofInt4("zzzi"); // CHARACTER <-> Int4
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(" + foo + ", " + bar + ", " + zzz + ")";
