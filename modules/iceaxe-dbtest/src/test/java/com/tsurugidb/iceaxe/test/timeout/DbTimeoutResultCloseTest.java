@@ -1,14 +1,9 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -21,7 +16,6 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 /**
  * Result close timeout test
  */
-@Disabled
 public class DbTimeoutResultCloseTest extends DbTimetoutTest {
 
     @BeforeEach
@@ -71,20 +65,22 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
 
             try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(0);
-                try (var rs = ps.execute(transaction, entity)) {
-                    modifier.modifyResult(rs);
+                var result = ps.execute(transaction, entity);
+                modifier.modifyResult(result);
 
-                    pipeServer.setSend(false);
-                    try {
-                        rs.close();
-                    } catch (IOException e) {
-                        assertInstanceOf(TimeoutException.class, e.getCause());
-                        return;
-                    } finally {
-                        pipeServer.setSend(true);
-                    }
-                    fail("didn't time out");
+                pipeServer.setPipeWrite(false);
+                try {
+                    result.close();
+                } catch (IOException e) {
+                    // RESULT_CLOSEはタイムアウトするような通信処理が無い
+//                  assertInstanceOf(TimeoutException.class, e.getCause());
+//                  LOG.trace("timeout success");
+//                  return;
+                    throw e;
+                } finally {
+                    pipeServer.setPipeWrite(true);
                 }
+//              fail("didn't time out");
             }
         }
     }

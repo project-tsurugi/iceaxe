@@ -21,7 +21,7 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 /**
  * Result check timeout test
  */
-@Disabled // want to remove Disabled
+@Disabled // TODO remove Disabled
 public class DbTimeoutResultCheckTest extends DbTimetoutTest {
 
     @BeforeEach
@@ -71,17 +71,19 @@ public class DbTimeoutResultCheckTest extends DbTimetoutTest {
 
             try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(0);
+
+                pipeServer.setPipeWrite(false);
                 try (var rs = ps.execute(transaction, entity)) {
                     modifier.modifyResult(rs);
 
-                    pipeServer.setSend(false);
                     try {
                         rs.getUpdateCount();
                     } catch (IOException e) {
                         assertInstanceOf(TimeoutException.class, e.getCause());
+                        LOG.trace("timeout success");
                         return;
                     } finally {
-                        pipeServer.setSend(true);
+                        pipeServer.setPipeWrite(true);
                     }
                     fail("didn't time out");
                 }

@@ -18,7 +18,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 /**
  * session connect timeout test
  */
-@Disabled // want to remove Disabled
+@Disabled // TODO remove Disabled （tetayama-serverが落ちるので、他のテストが実行できなくなる）
 public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
 
     @Test
@@ -53,7 +53,7 @@ public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
 
     @Override
     protected TsurugiConnector getTsurugiConnector(PipeServerThtread pipeServer) {
-        pipeServer.setSend(false);
+        pipeServer.setPipeWrite(false);
         return super.getTsurugiConnector(pipeServer);
     }
 
@@ -63,9 +63,10 @@ public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
             session.getLowSqlClient();
         } catch (IOException e) {
             assertInstanceOf(TimeoutException.class, e.getCause());
+            LOG.trace("timeout success");
             return;
         } finally {
-            pipeServer.setSend(true);
+            pipeServer.setPipeWrite(true);
         }
         fail("didn't time out");
     }

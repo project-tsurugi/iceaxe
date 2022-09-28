@@ -61,14 +61,15 @@ public class DbTimeoutTransactionCloseTest extends DbTimetoutTest {
 
         transaction.getLowTransaction();
 
-        pipeServer.setSend(false);
+        pipeServer.setPipeWrite(false);
         try {
             transaction.close();
         } catch (IOException e) {
             assertInstanceOf(TimeoutException.class, e.getCause());
+            LOG.trace("timeout success");
             return;
         } finally {
-            pipeServer.setSend(true);
+            pipeServer.setPipeWrite(true);
         }
         fail("didn't time out");
     }

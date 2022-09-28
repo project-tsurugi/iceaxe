@@ -1,28 +1,22 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 
 /**
- * PreparedStatement close timeout test
+ * ResultSet close timeout test
  */
-@Disabled // TODO remove Disabled
-public class DbTimeoutPsCloseTest extends DbTimetoutTest {
+public class DbTimeoutRsCloseTest extends DbTimetoutTest {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws IOException {
@@ -49,7 +43,7 @@ public class DbTimeoutPsCloseTest extends DbTimetoutTest {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.PS_CLOSE, 1, TimeUnit.SECONDS);
+                info.timeout(TgTimeoutKey.RS_CLOSE, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -58,8 +52,8 @@ public class DbTimeoutPsCloseTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyPs(TsurugiPreparedStatementWithLowPs<?> ps) {
-                ps.setCloseTimeout(1, TimeUnit.SECONDS);
+            public void modifyResultSet(TsurugiResultSet<?> rs) {
+                rs.setRsCloseTimeout(1, TimeUnit.SECONDS);
             }
         });
     }
@@ -69,24 +63,26 @@ public class DbTimeoutPsCloseTest extends DbTimetoutTest {
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             transaction.getLowTransaction();
 
-            var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING);
-            modifier.modifyPs(ps);
+            try (var ps = session.createPreparedQuery(SELECT_SQL)) {
+                var rs = ps.execute(transaction);
+                modifier.modifyResultSet(rs);
 
-            var entity = createTestEntity(0);
-            try (var result = ps.execute(transaction, entity)) {
-            }
+                // rs.getRecordList();
 
-            pipeServer.setPipeWrite(false);
-            try {
-                ps.close();
-            } catch (IOException e) {
-                assertInstanceOf(TimeoutException.class, e.getCause());
-                LOG.trace("timeout success");
-                return;
-            } finally {
-                pipeServer.setPipeWrite(true);
+                pipeServer.setPipeWrite(false);
+                try {
+                    rs.close();
+                } catch (IOException e) {
+                    // RS_CLOSEはタイムアウトするような通信処理が無い
+//                  assertInstanceOf(TimeoutException.class, e.getCause());
+//                  LOG.trace("timeout success");
+//                  return;
+                    throw e;
+                } finally {
+                    pipeServer.setPipeWrite(true);
+                }
+//              fail("didn't time out");
             }
-            fail("didn't time out");
         }
     }
 }

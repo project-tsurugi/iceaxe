@@ -49,7 +49,7 @@ public class DbTimeoutTableMetadataConnectTest extends DbTimetoutTest {
         var helper = new TsurugiTableMetadataHelper() {
             @Override
             protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
-                pipeServer.setSend(false);
+                pipeServer.setPipeWrite(false);
                 return super.getLowTableMetadata(lowSqlClient, tableName);
             }
         };
@@ -59,14 +59,15 @@ public class DbTimeoutTableMetadataConnectTest extends DbTimetoutTest {
             session.findTableMetadata(TEST);
         } catch (IOException e) {
             assertInstanceOf(TimeoutException.class, e.getCause());
+            LOG.trace("timeout success");
             return;
         } finally {
-            pipeServer.setSend(true);
+            pipeServer.setPipeWrite(true);
         }
         fail("didn't time out");
     }
 
-    private static void setHelper(TsurugiSession session, TsurugiTableMetadataHelper helper) {
+    static void setHelper(TsurugiSession session, TsurugiTableMetadataHelper helper) {
         try {
             var field = session.getClass().getDeclaredField("tableMetadataHelper");
             field.setAccessible(true);

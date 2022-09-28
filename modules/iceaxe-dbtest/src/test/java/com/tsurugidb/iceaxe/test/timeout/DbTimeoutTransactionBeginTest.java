@@ -56,7 +56,7 @@ public class DbTimeoutTransactionBeginTest extends DbTimetoutTest {
     protected void clientTask(PipeServerThtread pipeServer, TsurugiSession session, TimeoutModifier modifier) throws Exception {
         session.getLowSqlClient();
 
-        pipeServer.setSend(false);
+        pipeServer.setPipeWrite(false);
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             modifier.modifyTransaction(transaction);
 
@@ -64,9 +64,10 @@ public class DbTimeoutTransactionBeginTest extends DbTimetoutTest {
                 transaction.getLowTransaction();
             } catch (IOException e) {
                 assertInstanceOf(TimeoutException.class, e.getCause());
+                LOG.trace("timeout success");
                 return;
             } finally {
-                pipeServer.setSend(true);
+                pipeServer.setPipeWrite(true);
             }
             fail("didn't time out");
         }

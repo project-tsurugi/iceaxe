@@ -70,7 +70,7 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
             transaction.getLowTransaction();
 
             try (var ps = session.createPreparedQuery(SELECT_SQL)) {
-                pipeServer.setSend(false);
+                pipeServer.setPipeWrite(false);
                 try (var rs = ps.execute(transaction)) {
                     modifier.modifyResultSet(rs);
 
@@ -78,9 +78,10 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
                         rs.getRecordList();
                     } catch (IOException e) {
                         assertInstanceOf(TimeoutException.class, e.getCause());
+                        LOG.trace("timeout success");
                         return;
                     } finally {
-                        pipeServer.setSend(true);
+                        pipeServer.setPipeWrite(true);
                     }
                     fail("didn't time out");
                 }

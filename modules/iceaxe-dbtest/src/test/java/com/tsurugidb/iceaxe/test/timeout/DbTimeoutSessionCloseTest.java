@@ -20,6 +20,10 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 @Disabled // TODO remove Disabled
 public class DbTimeoutSessionCloseTest extends DbTimetoutTest {
 
+    public DbTimeoutSessionCloseTest() {
+        super(false);
+    }
+
     @Test
     void timeoutDefault() throws IOException {
         testTimeout(new TimeoutModifier() {
@@ -52,16 +56,17 @@ public class DbTimeoutSessionCloseTest extends DbTimetoutTest {
 
     @Override
     protected void clientTask(PipeServerThtread pipeServer, TsurugiSession session, TimeoutModifier modifier) throws Exception {
-        session.getLowSqlClient(); // close on session.close()
+        session.getLowSqlClient();
 
-        pipeServer.setSend(false);
+        pipeServer.setPipeWrite(false);
         try {
             session.close();
         } catch (IOException e) {
             assertInstanceOf(TimeoutException.class, e.getCause());
+            LOG.trace("timeout success");
             return;
         } finally {
-            pipeServer.setSend(true);
+            pipeServer.setPipeWrite(true);
         }
         fail("didn't time out");
     }

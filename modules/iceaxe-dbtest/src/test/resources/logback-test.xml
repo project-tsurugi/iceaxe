@@ -39,7 +39,7 @@
 
 <!--
   <logger name="com.tsurugidb.iceaxe" level="TRACE" />
-  <logger name="com.nautilus_technologies.tsubakuro.channel.stream.StreamWire" level="TRACE" />
+  <logger name="com.tsurugidb.tsubakuro.channel.stream.StreamLink" level="TRACE" />
 -->
 
   <root level="INFO">

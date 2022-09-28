@@ -69,7 +69,7 @@ public class DbTimeoutPsConnectTest extends DbTimetoutTest {
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             transaction.getLowTransaction();
 
-            pipeServer.setSend(false);
+            pipeServer.setPipeWrite(false);
             try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
                 modifier.modifyPs(ps);
 
@@ -78,9 +78,10 @@ public class DbTimeoutPsConnectTest extends DbTimetoutTest {
                     ps.execute(transaction, entity);
                 } catch (IOException e) {
                     assertInstanceOf(TimeoutException.class, e.getCause());
+                    LOG.trace("timeout success");
                     return;
                 } finally {
-                    pipeServer.setSend(true);
+                    pipeServer.setPipeWrite(true);
                 }
                 fail("didn't time out");
             }
