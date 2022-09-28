@@ -38,4 +38,13 @@ class DbSessionTest extends DbTestTableTester {
             }
         }
     }
+
+    @Test
+    void closeTwice() throws IOException {
+        try (var session = DbTestConnector.createSession()) {
+            session.getLowSqlClient();
+
+            session.close();
+        }
+    }
 }
