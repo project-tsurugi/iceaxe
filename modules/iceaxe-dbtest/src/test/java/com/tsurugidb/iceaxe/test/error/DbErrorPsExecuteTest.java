@@ -108,7 +108,7 @@ class DbErrorPsExecuteTest extends DbTestTableTester {
                 ps.executeAndGetCount(tm, plist);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+            assertTrue(e.getMessage().contains("inconsistent_type int4() (expected: {character_string})"), () -> "actual=" + e.getMessage()); // TODO カラム名の確認
         }
 
         assertEqualsTestTable(SIZE);
