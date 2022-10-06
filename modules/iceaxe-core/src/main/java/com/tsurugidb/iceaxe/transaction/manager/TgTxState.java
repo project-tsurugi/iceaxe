@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.transaction.manager;
 
+import javax.annotation.Nonnull;
+
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 
 /**
@@ -12,17 +14,17 @@ public final class TgTxState {
 
     /**
      * create Transaction State
-     * 
+     *
      * @param option transaction option
      * @return state
      */
-    public static TgTxState execute(TgTxOption option) {
+    public static TgTxState execute(@Nonnull TgTxOption option) {
         return new TgTxState(false, option);
     }
 
     /**
      * returns Transaction State for retry over
-     * 
+     *
      * @return state
      */
     public static TgTxState retryOver() {
@@ -31,7 +33,7 @@ public final class TgTxState {
 
     /**
      * returns Transaction State for not retryable
-     * 
+     *
      * @return state
      */
     public static TgTxState notRetryable() {
@@ -48,7 +50,7 @@ public final class TgTxState {
 
     /**
      * get executable
-     * 
+     *
      * @return true: executable
      */
     public boolean isExecute() {
@@ -57,7 +59,7 @@ public final class TgTxState {
 
     /**
      * get retry over
-     * 
+     *
      * @return true: retry over
      */
     public boolean isRetryOver() {
@@ -66,7 +68,7 @@ public final class TgTxState {
 
     /**
      * get transaction option
-     * 
+     *
      * @return transaction option
      */
     public TgTxOption getOption() {

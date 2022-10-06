@@ -16,13 +16,14 @@ public class Example92Timeout {
 
     void main() throws IOException {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
-        timeout1(connector);
-        timeout2(connector);
-        timeout3(connector);
+        timeoutBySessionInfo(connector);
+        timeoutByTmSetting(connector);
+        timeoutByDirect(connector);
     }
 
-    void timeout1(TsurugiConnector connector) throws IOException {
+    void timeoutBySessionInfo(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
+        info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
         info.timeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
 
         try (var session = connector.createSession(info)) {
@@ -34,8 +35,9 @@ public class Example92Timeout {
         }
     }
 
-    void timeout2(TsurugiConnector connector) throws IOException {
+    void timeoutByTmSetting(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
+        info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
 
         try (var session = connector.createSession(info)) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitTimeout(1, TimeUnit.HOURS);
@@ -47,8 +49,9 @@ public class Example92Timeout {
         }
     }
 
-    void timeout3(TsurugiConnector connector) throws IOException {
+    void timeoutByDirect(TsurugiConnector connector) throws IOException {
         var info = TgSessionInfo.of("user", "password");
+        info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
 
         try (var session = connector.createSession(info)) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
