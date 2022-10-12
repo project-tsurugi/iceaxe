@@ -10,7 +10,8 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadata;
+import com.tsurugidb.iceaxe.explain.TsurugiExplainHelper;
+import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
@@ -46,6 +47,7 @@ public class TsurugiSession implements Closeable {
     private boolean sessionConnected = false;
     private SqlClient lowSqlClient;
     private TsurugiTableMetadataHelper tableMetadataHelper = null;
+    private TsurugiExplainHelper explainHelper = null;
     private IceaxeConvertUtil convertUtil = null;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
@@ -70,7 +72,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * set convert type utility
-     * 
+     *
      * @param convertUtil convert type utility
      */
     public void setConvertUtil(IceaxeConvertUtil convertUtil) {
@@ -84,7 +86,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * set connect-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -94,7 +96,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * set connect-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setConnectTimeout(TgTimeValue timeout) {
@@ -103,7 +105,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * set close-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -113,7 +115,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * set close-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setCloseTimeout(TgTimeValue timeout) {
@@ -156,23 +158,63 @@ public class TsurugiSession implements Closeable {
     }
 
     /**
+     * set TableMetadataHelper.
+     *
+     * @param helper TableMetadataHelper
+     */
+    public void setTableMetadataHelper(TsurugiTableMetadataHelper helper) {
+        this.tableMetadataHelper = helper;
+    }
+
+    /**
+     * get TableMetadataHelper.
+     *
+     * @return TableMetadataHelper
+     */
+    public TsurugiTableMetadataHelper getTableMetadataHelper() {
+        if (this.tableMetadataHelper == null) {
+            this.tableMetadataHelper = new TsurugiTableMetadataHelper();
+        }
+        return this.tableMetadataHelper;
+    }
+
+    /**
      * get table metadata
-     * 
+     *
      * @param tableName table name
      * @return table metadata (empty if table not found)
      * @throws IOException
      */
 //  @ThreadSafe
-    public Optional<TsurugiTableMetadata> findTableMetadata(String tableName) throws IOException {
-        if (this.tableMetadataHelper == null) {
-            this.tableMetadataHelper = new TsurugiTableMetadataHelper();
+    public Optional<TgTableMetadata> findTableMetadata(String tableName) throws IOException {
+        var helper = getTableMetadataHelper();
+        return helper.findTableMetadata(this, tableName);
+    }
+
+    /**
+     * set ExplainHelper.
+     *
+     * @param helper ExplainHelper
+     */
+    public void setExplainHelper(TsurugiExplainHelper helper) {
+        this.explainHelper = helper;
+    }
+
+    /**
+     * get ExplainHelper.
+     *
+     * @return ExplainHelper
+     */
+    public TsurugiExplainHelper getExplainHelper() {
+        if (this.explainHelper == null) {
+            this.explainHelper = new TsurugiExplainHelper();
         }
-        return tableMetadataHelper.findTableMetadata(this, tableName);
+        return this.explainHelper;
     }
 
     /**
      * create PreparedStatement
-     * 
+     *
      * @param sql SQL
      * @return PreparedStatement
      * @throws IOException
@@ -184,7 +226,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * create PreparedStatement
-     * 
+     *
      * @param <R>           result type
      * @param sql           SQL
      * @param resultMapping result mapping
@@ -200,7 +242,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * create PreparedStatement
-     * 
+     *
      * @param <P>              parameter type
      * @param sql              SQL
      * @param parameterMapping parameter mapping
@@ -214,7 +256,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * create PreparedStatement
-     * 
+     *
      * @param <P>              parameter type
      * @param <R>              result type
      * @param sql              SQL
@@ -229,13 +271,13 @@ public class TsurugiSession implements Closeable {
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
         LOG.trace("createPreparedQuery started");
-        var ps = new TsurugiPreparedStatementQuery1<>(this, lowPreparedStatementFuture, parameterMapping, resultMapping);
+        var ps = new TsurugiPreparedStatementQuery1<>(this, sql, lowPreparedStatementFuture, parameterMapping, resultMapping);
         return ps;
     }
 
     /**
      * create PreparedStatement
-     * 
+     *
      * @param sql SQL
      * @return PreparedStatement
      * @throws IOException
@@ -249,7 +291,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * create PreparedStatement
-     * 
+     *
      * @param <P>              parameter type
      * @param sql              SQL
      * @param parameterMapping parameter mapping
@@ -262,13 +304,13 @@ public class TsurugiSession implements Closeable {
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
         LOG.trace("createPreparedStatement started");
-        var ps = new TsurugiPreparedStatementUpdate1<>(this, lowPreparedStatementFuture, parameterMapping);
+        var ps = new TsurugiPreparedStatementUpdate1<>(this, sql, lowPreparedStatementFuture, parameterMapping);
         return ps;
     }
 
     /**
      * create transaction manager
-     * 
+     *
      * @return Transaction Manager
      */
 //  @ThreadSafe
@@ -278,7 +320,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * create transaction manager
-     * 
+     *
      * @param setting transaction manager settings
      * @return Transaction Manager
      */
@@ -290,7 +332,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * create transaction manager
-     * 
+     *
      * @param setting transaction manager settings
      * @return Transaction Manager
      */
@@ -302,7 +344,7 @@ public class TsurugiSession implements Closeable {
 
     /**
      * create Transaction
-     * 
+     *
      * @param option transaction option
      * @return Transaction
      * @throws IOException

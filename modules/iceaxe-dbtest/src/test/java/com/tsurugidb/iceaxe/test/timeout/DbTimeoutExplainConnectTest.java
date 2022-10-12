@@ -4,25 +4,30 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
+import com.tsurugidb.iceaxe.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.statement.TgParameterList;
+import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.sql.proto.SqlRequest.Parameter;
+import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.sql.SqlClient;
-import com.tsurugidb.tsubakuro.sql.TableMetadata;
+import com.tsurugidb.tsubakuro.sql.StatementMetadata;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * table metadata connect timeout test
+ * explain connect timeout test
  */
 @Disabled // TODO remove Disabled
-public class DbTimeoutTableMetadataConnectTest extends DbTimetoutTest {
+public class DbTimeoutExplainConnectTest extends DbTimetoutTest {
 
     @Test
     void timeoutDefault() throws IOException {
@@ -39,30 +44,35 @@ public class DbTimeoutTableMetadataConnectTest extends DbTimetoutTest {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.METADATA_CONNECT, 1, TimeUnit.SECONDS);
+                info.timeout(TgTimeoutKey.EXPLAIN_CONNECT, 1, TimeUnit.SECONDS);
             }
         });
     }
 
     @Override
     protected void clientTask(PipeServerThtread pipeServer, TsurugiSession session, TimeoutModifier modifier) throws Exception {
-        var helper = new TsurugiTableMetadataHelper() {
+        var helper = new TsurugiExplainHelper() {
             @Override
-            protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
+            protected FutureResponse<StatementMetadata> explainLow(SqlClient lowSqlClient, PreparedStatement lowPs, List<Parameter> lowParameter) throws IOException {
                 pipeServer.setPipeWrite(false);
-                return super.getLowTableMetadata(lowSqlClient, tableName);
+                return super.explainLow(lowSqlClient, lowPs, lowParameter);
             }
         };
-        session.setTableMetadataHelper(helper);
+        session.setExplainHelper(helper);
 
-        try {
-            session.findTableMetadata(TEST);
-        } catch (IOException e) {
-            assertInstanceOf(TimeoutException.class, e.getCause());
-            LOG.trace("timeout success");
-            return;
-        } finally {
-            pipeServer.setPipeWrite(true);
+        var sql = "select * from " + TEST;
+        var parameterMapping = TgParameterMapping.of();
+        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+            var parameter = TgParameterList.of();
+            try {
+                ps.explain(parameter);
+            } catch (IOException e) {
+                assertInstanceOf(TimeoutException.class, e.getCause());
+                LOG.trace("timeout success");
+                return;
+            } finally {
+                pipeServer.setPipeWrite(true);
+            }
         }
         fail("didn't time out");
     }

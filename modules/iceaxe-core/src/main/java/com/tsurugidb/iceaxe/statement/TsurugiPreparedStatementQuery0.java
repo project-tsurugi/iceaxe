@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -21,25 +22,23 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
  * <li>TODO+++翻訳: クエリー系SQL</li>
  * <li>TODO+++翻訳: SQLのパラメーターなし</li>
  * </ul>
- * 
+ *
  * @param <R> result type
  */
 public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiPreparedStatementQuery0.class);
 
-    private final String sql;
     private final TgResultMapping<R> resultMapping;
 
     // internal
     public TsurugiPreparedStatementQuery0(TsurugiSession session, String sql, TgResultMapping<R> resultMapping) {
-        super(session);
-        this.sql = sql;
+        super(session, sql);
         this.resultMapping = resultMapping;
     }
 
     /**
      * execute query
-     * 
+     *
      * @param transaction Transaction
      * @return Result Set
      * @throws IOException
@@ -57,7 +56,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
 
     /**
      * execute query
-     * 
+     *
      * @param transaction Transaction
      * @return record
      * @throws IOException
@@ -71,7 +70,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
 
     /**
      * execute query
-     * 
+     *
      * @param tm Transaction Manager
      * @return record
      * @throws IOException
@@ -84,7 +83,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
 
     /**
      * execute query
-     * 
+     *
      * @param tm      Transaction Manager
      * @param setting transaction manager settings
      * @return record
@@ -98,7 +97,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
 
     /**
      * execute query
-     * 
+     *
      * @param transaction Transaction
      * @return list of record
      * @throws IOException
@@ -112,7 +111,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
 
     /**
      * execute query
-     * 
+     *
      * @param tm Transaction Manager
      * @return list of record
      * @throws IOException
@@ -125,7 +124,7 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
 
     /**
      * execute query
-     * 
+     *
      * @param tm      Transaction Manager
      * @param setting transaction manager settings
      * @return list of record
@@ -135,5 +134,17 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
         return tm.execute(setting, transaction -> {
             return executeAndGetList(transaction);
         });
+    }
+
+    /**
+     * Retrieves execution plan of the statement.
+     *
+     * @return statement metadata
+     * @throws IOException
+     */
+    public TgStatementMetadata explain() throws IOException {
+        var session = getSession();
+        var helper = session.getExplainHelper();
+        return helper.explain(session, sql);
     }
 }

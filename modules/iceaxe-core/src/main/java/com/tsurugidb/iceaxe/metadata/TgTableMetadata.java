@@ -11,18 +11,22 @@ import com.tsurugidb.tsubakuro.sql.TableMetadata;
 /**
  * Tsurugi table metadata
  */
-public class TsurugiTableMetadata {
+public class TgTableMetadata {
 
-    private final TableMetadata lowTableMetadata;
+    protected final TableMetadata lowTableMetadata;
 
-    // internal
-    public TsurugiTableMetadata(TableMetadata lowTableMetadata) {
+    /**
+     * Creates a new instance.
+     *
+     * @param lowTableMetadata low TableMetadata
+     */
+    public TgTableMetadata(TableMetadata lowTableMetadata) {
         this.lowTableMetadata = lowTableMetadata;
     }
 
     /**
      * get database name
-     * 
+     *
      * @return database name
      */
     @Nullable
@@ -32,7 +36,7 @@ public class TsurugiTableMetadata {
 
     /**
      * get schema name
-     * 
+     *
      * @return schema name
      */
     @Nullable
@@ -42,7 +46,7 @@ public class TsurugiTableMetadata {
 
     /**
      * get table name
-     * 
+     *
      * @return table name
      */
     @Nonnull
@@ -52,7 +56,7 @@ public class TsurugiTableMetadata {
 
     /**
      * get column list
-     * 
+     *
      * @return column list
      */
     public List<? extends Column> getLowColumnList() {

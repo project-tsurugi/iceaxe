@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -18,7 +19,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi PreparedStatement with Low-PreparedStatement
- * 
+ *
  * @param <P> parameter type
  */
 public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPreparedStatement {
@@ -30,8 +31,8 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
 
-    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
-        super(session);
+    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
+        super(session, sql);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
         this.parameterMapping = parameterMapping;
         var info = session.getSessionInfo();
@@ -48,7 +49,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 
     /**
      * set connect-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -58,7 +59,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 
     /**
      * set connect-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setConnectTimeout(TgTimeValue timeout) {
@@ -67,7 +68,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 
     /**
      * set close-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -77,7 +78,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 
     /**
      * set close-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setCloseTimeout(TgTimeValue timeout) {
@@ -102,6 +103,22 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     protected final List<Parameter> getLowParameterList(P parameter) {
         var convertUtil = getConvertUtil(parameterMapping.getConvertUtil());
         return parameterMapping.toLowParameterList(parameter, convertUtil);
+    }
+
+    /**
+     * Retrieves execution plan of the statement.
+     *
+     * @param parameter SQL parameter
+     * @return statement metadata
+     * @throws IOException
+     */
+    public TgStatementMetadata explain(P parameter) throws IOException {
+        var session = getSession();
+        var lowPs = getLowPreparedStatement();
+        var lowParameterList = getLowParameterList(parameter);
+
+        var helper = session.getExplainHelper();
+        return helper.explain(session, sql, lowPs, lowParameterList);
     }
 
     @Override

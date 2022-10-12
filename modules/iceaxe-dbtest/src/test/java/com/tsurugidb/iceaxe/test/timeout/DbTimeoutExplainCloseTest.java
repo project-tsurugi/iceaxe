@@ -1,24 +1,29 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
-import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
+import com.tsurugidb.iceaxe.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.statement.TgParameterList;
+import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.exception.ServerException;
+import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.sql.SqlClient;
-import com.tsurugidb.tsubakuro.sql.TableMetadata;
+import com.tsurugidb.tsubakuro.sql.StatementMetadata;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * table metadata close timeout test
+ * explain close timeout test
  */
-public class DbTimeoutTableMetadataCloseTest extends DbTimetoutTest {
+public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
 
     @Test
     void timeoutDefault() throws IOException {
@@ -35,30 +40,30 @@ public class DbTimeoutTableMetadataCloseTest extends DbTimetoutTest {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.METADATA_CLOSE, 1, TimeUnit.SECONDS);
+                info.timeout(TgTimeoutKey.EXPLAIN_CLOSE, 1, TimeUnit.SECONDS);
             }
         });
     }
 
     @Override
     protected void clientTask(PipeServerThtread pipeServer, TsurugiSession session, TimeoutModifier modifier) throws Exception {
-        var helper = new TsurugiTableMetadataHelper() {
+        var helper = new TsurugiExplainHelper() {
             @Override
-            protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
-                var future = super.getLowTableMetadata(lowSqlClient, tableName);
-                return new FutureResponse<TableMetadata>() {
+            protected FutureResponse<StatementMetadata> explainLow(SqlClient lowSqlClient, PreparedStatement lowPs, List<Parameter> lowParameter) throws IOException {
+                var future = super.explainLow(lowSqlClient, lowPs, lowParameter);
+                return new FutureResponse<StatementMetadata>() {
                     @Override
                     public boolean isDone() {
                         return future.isDone();
                     }
 
                     @Override
-                    public TableMetadata get() throws IOException, ServerException, InterruptedException {
+                    public StatementMetadata get() throws IOException, ServerException, InterruptedException {
                         throw new UnsupportedOperationException("do not use");
                     }
 
                     @Override
-                    public TableMetadata get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
+                    public StatementMetadata get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
                         return future.get(timeout, unit);
                     }
 
@@ -74,16 +79,21 @@ public class DbTimeoutTableMetadataCloseTest extends DbTimetoutTest {
                 };
             }
         };
-        session.setTableMetadataHelper(helper);
+        session.setExplainHelper(helper);
 
-        try {
-            session.findTableMetadata(TEST);
-        } catch (IOException e) {
-            // METADATA_CLOSEはタイムアウトするような通信処理が無い
-//          assertInstanceOf(TimeoutException.class, e.getCause());
-//          LOG.trace("timeout success");
-//          return;
-            throw e;
+        var sql = "select * from " + TEST;
+        var parameterMapping = TgParameterMapping.of();
+        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+            var parameter = TgParameterList.of();
+            try {
+                ps.explain(parameter);
+            } catch (IOException e) {
+                // EXPLAIN_CLOSEはタイムアウトするような通信処理が無い
+//              assertInstanceOf(TimeoutException.class, e.getCause());
+//              LOG.trace("timeout success");
+//              return;
+                throw e;
+            }
         }
 //      fail("didn't time out");
     }

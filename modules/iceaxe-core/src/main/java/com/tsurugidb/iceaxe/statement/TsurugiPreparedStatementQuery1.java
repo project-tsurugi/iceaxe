@@ -23,7 +23,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
  * <li>TODO+++翻訳: クエリー系SQL</li>
  * <li>TODO+++翻訳: SQLのパラメーターあり</li>
  * </ul>
- * 
+ *
  * @param <P> parameter type
  * @param <R> result type
  */
@@ -33,15 +33,15 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
     private final TgResultMapping<R> resultMapping;
 
     // internal
-    public TsurugiPreparedStatementQuery1(TsurugiSession session, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping,
+    public TsurugiPreparedStatementQuery1(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping,
             TgResultMapping<R> resultMapping) {
-        super(session, lowPreparedStatementFuture, parameterMapping);
+        super(session, sql, lowPreparedStatementFuture, parameterMapping);
         this.resultMapping = resultMapping;
     }
 
     /**
      * execute query
-     * 
+     *
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return Result Set
@@ -62,7 +62,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
 
     /**
      * execute query
-     * 
+     *
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return record
@@ -77,7 +77,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
 
     /**
      * execute query
-     * 
+     *
      * @param tm        Transaction Manager
      * @param parameter SQL parameter
      * @return record
@@ -91,7 +91,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
 
     /**
      * execute query
-     * 
+     *
      * @param tm        Transaction Manager
      * @param setting   transaction manager settings
      * @param parameter SQL parameter
@@ -106,7 +106,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
 
     /**
      * execute query
-     * 
+     *
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return list of record
@@ -121,7 +121,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
 
     /**
      * execute query
-     * 
+     *
      * @param tm        Transaction Manager
      * @param parameter SQL parameter
      * @return list of record
@@ -135,7 +135,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
 
     /**
      * execute query
-     * 
+     *
      * @param tm        Transaction Manager
      * @param setting   transaction manager settings
      * @param parameter SQL parameter

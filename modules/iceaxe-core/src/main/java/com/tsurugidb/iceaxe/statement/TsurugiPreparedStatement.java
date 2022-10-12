@@ -15,10 +15,16 @@ import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 public abstract class TsurugiPreparedStatement implements Closeable {
 
     private final TsurugiSession ownerSession;
+    protected final String sql;
 
-    protected TsurugiPreparedStatement(TsurugiSession session) {
+    protected TsurugiPreparedStatement(TsurugiSession session, String sql) {
         this.ownerSession = session;
+        this.sql = sql;
         session.addChild(this);
+    }
+
+    protected final TsurugiSession getSession() {
+        return this.ownerSession;
     }
 
     protected final TgSessionInfo getSessionInfo() {

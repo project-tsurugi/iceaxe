@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
@@ -27,7 +28,7 @@ public class TgSessionInfo {
 
     /**
      * create Session Information
-     * 
+     *
      * @return Session Information
      */
     public static TgSessionInfo of() {
@@ -36,7 +37,7 @@ public class TgSessionInfo {
 
     /**
      * create Session Information
-     * 
+     *
      * @param user     user id
      * @param password password
      * @return Session Information
@@ -48,7 +49,7 @@ public class TgSessionInfo {
 
     /**
      * create Session Information
-     * 
+     *
      * @param credential Credential
      * @return Session Information
      */
@@ -72,6 +73,11 @@ public class TgSessionInfo {
         METADATA_CONNECT,
         /** {@link TsurugiTableMetadataHelper} close */
         METADATA_CLOSE,
+
+        /** {@link TsurugiExplainHelper} connect */
+        EXPLAIN_CONNECT,
+        /** {@link TsurugiExplainHelper} close */
+        EXPLAIN_CLOSE,
 
         /** {@link TsurugiPreparedStatementWithLowPs} connect */
         PS_CONNECT,
@@ -110,7 +116,7 @@ public class TgSessionInfo {
 
     /**
      * set credential
-     * 
+     *
      * @param credential Credential
      * @return this
      */
@@ -121,7 +127,7 @@ public class TgSessionInfo {
 
     /**
      * get credential
-     * 
+     *
      * @return Credential
      */
     public Credential credential() {
@@ -130,11 +136,11 @@ public class TgSessionInfo {
 
     /**
      * set timeout
-     * 
+     *
      * @param key  timeout key
      * @param time timeout time
      * @param unit timeout unit
-     * 
+     *
      * @return this
      */
     public TgSessionInfo timeout(@Nonnull TgTimeoutKey key, long time, @Nonnull TimeUnit unit) {
@@ -144,7 +150,7 @@ public class TgSessionInfo {
 
     /**
      * get timeout time
-     * 
+     *
      * @param key timeout key
      * @return time
      */
@@ -158,7 +164,7 @@ public class TgSessionInfo {
 
     /**
      * set commit type
-     * 
+     *
      * @param commitType commit type
      * @return this
      */
@@ -169,7 +175,7 @@ public class TgSessionInfo {
 
     /**
      * get commit type
-     * 
+     *
      * @return commit type
      */
     public TgCommitType commitType() {

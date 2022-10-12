@@ -22,12 +22,27 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class TsurugiTableMetadataHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTableMetadataHelper.class);
 
-    // internal
-    public Optional<TsurugiTableMetadata> findTableMetadata(TsurugiSession session, String tableName) throws IOException {
+    /**
+     * get table metadata.
+     *
+     * @param session   tsurugi session
+     * @param tableName table name
+     * @return table metadata
+     * @throws IOException
+     */
+    public Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName) throws IOException {
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("getTableMetadata start. tableName={}", tableName);
         var lowTableMetadataFuture = getLowTableMetadata(lowSqlClient, tableName);
         LOG.trace("getTableMetadata started");
+        return findTableMetadata(session, tableName, lowTableMetadataFuture);
+    }
+
+    protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
+        return lowSqlClient.getTableMetadata(tableName);
+    }
+
+    protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException {
         try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {
 
             var info = session.getSessionInfo();
@@ -38,7 +53,7 @@ public class TsurugiTableMetadataHelper {
             var lowTableMetadata = IceaxeIoUtil.getAndCloseFuture(lowTableMetadataFuture, connectTimeout);
             LOG.trace("getTableMetadata end");
 
-            return Optional.of(new TsurugiTableMetadata(lowTableMetadata));
+            return Optional.of(newTableMetadata(lowTableMetadata));
         } catch (TsurugiIOException e) {
             var code = e.getLowDiagnosticCode();
             if (code == SqlServiceCode.ERR_NOT_FOUND) {
@@ -49,7 +64,7 @@ public class TsurugiTableMetadataHelper {
         }
     }
 
-    protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
-        return lowSqlClient.getTableMetadata(tableName);
+    protected TgTableMetadata newTableMetadata(TableMetadata lowTableMetadata) {
+        return new TgTableMetadata(lowTableMetadata);
     }
 }

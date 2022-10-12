@@ -20,20 +20,20 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
  * <li>TODO+++翻訳: 更新系SQL</li>
  * <li>TODO+++翻訳: SQLのパラメーターあり</li>
  * </ul>
- * 
+ *
  * @param <P> parameter type
  */
 public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatementWithLowPs<P> {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiPreparedStatementUpdate1.class);
 
     // internal
-    public TsurugiPreparedStatementUpdate1(TsurugiSession session, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
-        super(session, lowPreparedStatementFuture, parameterMapping);
+    public TsurugiPreparedStatementUpdate1(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
+        super(session, sql, lowPreparedStatementFuture, parameterMapping);
     }
 
     /**
      * execute statement
-     * 
+     *
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return result
@@ -53,7 +53,7 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
 
     /**
      * execute statement
-     * 
+     *
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return row count
@@ -68,7 +68,7 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
 
     /**
      * execute statement
-     * 
+     *
      * @param tm        Transaction Manager
      * @param parameter SQL parameter
      * @return row count
@@ -82,7 +82,7 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
 
     /**
      * execute statement
-     * 
+     *
      * @param tm        Transaction Manager
      * @param setting   transaction manager setting
      * @param parameter SQL parameter
