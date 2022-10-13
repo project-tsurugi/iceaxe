@@ -8,6 +8,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
 
 /**
  * example to specify timeout
@@ -15,14 +16,14 @@ import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 public class Example92Timeout {
 
     void main() throws IOException {
-        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
+        var connector = Example01Connector.createConnector();
         timeoutBySessionInfo(connector);
         timeoutByTmSetting(connector);
         timeoutByDirect(connector);
     }
 
     void timeoutBySessionInfo(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of("user", "password");
+        var info = TgSessionInfo.of(NullCredential.INSTANCE);
         info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
         info.timeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
 
@@ -36,7 +37,7 @@ public class Example92Timeout {
     }
 
     void timeoutByTmSetting(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of("user", "password");
+        var info = TgSessionInfo.of(NullCredential.INSTANCE);
         info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
 
         try (var session = connector.createSession(info)) {
@@ -50,7 +51,7 @@ public class Example92Timeout {
     }
 
     void timeoutByDirect(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of("user", "password");
+        var info = TgSessionInfo.of(NullCredential.INSTANCE);
         info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
 
         try (var session = connector.createSession(info)) {

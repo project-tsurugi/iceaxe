@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgDataType;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
@@ -49,9 +47,7 @@ public class Example94TypeConvert {
     }
 
     void main() throws IOException {
-        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
-        var info = TgSessionInfo.of("user", "password");
-        try (var session = connector.createSession(info)) {
+        try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
             createTable(session, tm);
@@ -60,13 +56,13 @@ public class Example94TypeConvert {
         var entity = new Example94Entity();
         entity.setKey(1);
         entity.setDate(LocalDate.of(2022, 7, 13));
-        insert1(connector, entity);
+        insert1(entity);
         entity.setKey(2);
-        insert2(connector, entity);
+        insert2(entity);
 
-        select1(connector);
-        select2(connector);
-        select3(connector);
+        select1();
+        select2();
+        select3();
     }
 
     void createTable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
@@ -109,9 +105,8 @@ public class Example94TypeConvert {
         }
     }
 
-    void insert1(TsurugiConnector connector, Example94Entity entity) throws IOException {
-        var info = TgSessionInfo.of("user", "password");
-        try (var session = connector.createSession(info)) {
+    void insert1(Example94Entity entity) throws IOException {
+        try (var session = Example02Session.createSession()) {
             session.setConvertUtil(CONVERT_UTIL); // set session
 
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
@@ -130,9 +125,8 @@ public class Example94TypeConvert {
         }
     }
 
-    void insert2(TsurugiConnector connector, Example94Entity entity) throws IOException {
-        var info = TgSessionInfo.of("user", "password");
-        try (var session = connector.createSession(info)) {
+    void insert2(Example94Entity entity) throws IOException {
+        try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
 
@@ -150,9 +144,8 @@ public class Example94TypeConvert {
         }
     }
 
-    void select1(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of("user", "password");
-        try (var session = connector.createSession(info)) {
+    void select1() throws IOException {
+        try (var session = Example02Session.createSession()) {
             session.setConvertUtil(CONVERT_UTIL); // set session
 
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
@@ -169,9 +162,8 @@ public class Example94TypeConvert {
         }
     }
 
-    void select2(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of("user", "password");
-        try (var session = connector.createSession(info)) {
+    void select2() throws IOException {
+        try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
 
@@ -187,9 +179,8 @@ public class Example94TypeConvert {
         }
     }
 
-    void select3(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of("user", "password");
-        try (var session = connector.createSession(info)) {
+    void select3() throws IOException {
+        try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
 

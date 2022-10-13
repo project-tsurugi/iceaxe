@@ -6,18 +6,26 @@ import com.tsurugidb.iceaxe.TsurugiConnector;
 
 /**
  * TsurugiConnector example
+ *
+ * @see Example02Session
  */
-@SuppressWarnings("unused")
 public class Example01Connector {
 
-    void connectorString() {
+    static TsurugiConnector createConnector() {
         var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
-//      connector.createSession()
+        return connector;
     }
 
-    void connectorUri() {
+    static TsurugiConnector createConnectorUri() {
         var endpoint = URI.create("tcp://localhost:12345");
         var connector = TsurugiConnector.createConnector(endpoint);
-//      connector.createSession()
+        return connector;
+    }
+
+    static TsurugiConnector createConnectorIpc() {
+        String databaseName = "tateyama";
+        var endpoint = "ipc:" + databaseName;
+        var connector = TsurugiConnector.createConnector(endpoint);
+        return connector;
     }
 }

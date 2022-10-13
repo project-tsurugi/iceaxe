@@ -2,8 +2,6 @@ package com.tsurugidb.iceaxe.example;
 
 import java.io.IOException;
 
-import com.tsurugidb.iceaxe.TsurugiConnector;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
@@ -15,8 +13,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 public class Example11Ddl {
 
     void main() throws IOException {
-        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
-        try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
+        try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
             var tm = session.createTransactionManager(setting);
 

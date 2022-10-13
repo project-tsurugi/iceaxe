@@ -4,10 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
-import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
@@ -23,8 +21,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 public class Example31Select {
 
     void main() throws IOException {
-        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
-        try (var session = connector.createSession(TgSessionInfo.of("user", "password"))) {
+        try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
             var tm = session.createTransactionManager(setting);
 

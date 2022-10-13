@@ -42,6 +42,7 @@ public class TgSessionInfo {
      * @param password password
      * @return Session Information
      */
+    @Deprecated(forRemoval = true) // TODO remove TgSessionInfo.of(user, password)
     public static TgSessionInfo of(@Nonnull String user, @Nullable String password) {
         var credential = new UsernamePasswordCredential(user, password);
         return of(credential);
