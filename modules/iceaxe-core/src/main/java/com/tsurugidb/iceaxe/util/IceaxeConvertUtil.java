@@ -24,12 +24,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to Boolean
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public Boolean toBoolean(Object obj) {
+    public Boolean toBoolean(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -69,12 +69,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to Integer
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public Integer toInt4(Object obj) {
+    public Integer toInt4(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -102,12 +102,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to Long
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public Long toInt8(Object obj) {
+    public Long toInt8(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -135,12 +135,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to Float
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public Float toFloat4(Object obj) {
+    public Float toFloat4(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -168,12 +168,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to Double
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public Double toFloat8(Object obj) {
+    public Double toFloat8(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -201,12 +201,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to BigDecimal
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public BigDecimal toDecimal(Object obj) {
+    public BigDecimal toDecimal(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -246,12 +246,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to String
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public String toCharacter(Object obj) {
+    public String toCharacter(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -279,12 +279,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to byte[]
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public byte[] toBytes(Object obj) {
+    public byte[] toBytes(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -309,12 +309,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to boolean[]
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public boolean[] toBits(Object obj) {
+    public boolean[] toBits(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -339,12 +339,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to date
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public LocalDate toDate(Object obj) {
+    public LocalDate toDate(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -388,12 +388,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to time
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public LocalTime toTime(Object obj) {
+    public LocalTime toTime(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -437,12 +437,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to dateTime
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public LocalDateTime toDateTime(Object obj) {
+    public LocalDateTime toDateTime(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -480,12 +480,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to offset time
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public OffsetTime toOffsetTime(Object obj) {
+    public OffsetTime toOffsetTime(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -519,12 +519,12 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to offset dateTime
-     * 
+     *
      * @param obj value
      * @return value
      */
     @Nullable
-    public OffsetDateTime toOffsetDateTime(Object obj) {
+    public OffsetDateTime toOffsetDateTime(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -555,13 +555,13 @@ public class IceaxeConvertUtil {
 
     /**
      * convert to ZonedDateTime
-     * 
+     *
      * @param obj  value
      * @param zone time-zone
      * @return value
      */
     @Nullable
-    public ZonedDateTime toZonedDateTime(Object obj, @Nonnull ZoneId zone) {
+    public ZonedDateTime toZonedDateTime(@Nullable Object obj, @Nonnull ZoneId zone) {
         if (obj == null) {
             return null;
         }

@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.statement;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -15,6 +16,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import com.tsurugidb.iceaxe.statement.TgVariable.TgVariableBigDecimal;
 
 class TgParameterListTest {
 
@@ -125,6 +130,30 @@ class TgParameterListTest {
         list.decimal("bar", null);
 
         assertParameterList(TgParameter.of("foo", BigDecimal.valueOf(123)), TgParameter.of("bar", (BigDecimal) null), list);
+    }
+
+    @Test
+    void testDecimalScale() {
+        var list = TgParameterList.of();
+        list.decimal("p", new BigDecimal("1.01"), 1);
+        list.decimal("m", new BigDecimal("-1.01"), 1);
+        list.decimal("bar", null, 1);
+
+        var mode = TgVariableBigDecimal.DEFAULT_ROUNDING_MODE;
+        assertParameterList(TgParameter.of("p", new BigDecimal("1.01").setScale(1, mode)), TgParameter.of("m", new BigDecimal("-1.01").setScale(1, mode)), TgParameter.of("bar", (BigDecimal) null),
+                list);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "FLOOR", "DOWN", "HALF_UP" })
+    void testDecimalRoundingMode(RoundingMode mode) {
+        var list = TgParameterList.of();
+        list.decimal("p", new BigDecimal("1.05"), 1, mode);
+        list.decimal("m", new BigDecimal("-1.05"), 1, mode);
+        list.decimal("bar", null, 1, mode);
+
+        assertParameterList(TgParameter.of("p", new BigDecimal("1.05").setScale(1, mode)), TgParameter.of("m", new BigDecimal("-1.05").setScale(1, mode)), TgParameter.of("bar", (BigDecimal) null),
+                list);
     }
 
     @Test
@@ -306,6 +335,30 @@ class TgParameterListTest {
     }
 
     @Test
+    void testAddStringBigDecimalScale() {
+        var list = TgParameterList.of();
+        list.add("p", new BigDecimal("1.15"), 1);
+        list.add("m", new BigDecimal("-1.15"), 1);
+        list.add("bar", (BigDecimal) null, 1);
+
+        var mode = TgVariableBigDecimal.DEFAULT_ROUNDING_MODE;
+        assertParameterList(TgParameter.of("p", new BigDecimal("1.15").setScale(1, mode)), TgParameter.of("m", new BigDecimal("-1.15").setScale(1, mode)), TgParameter.of("bar", (BigDecimal) null),
+                list);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "FLOOR", "DOWN", "HALF_UP" })
+    void testAddStringBigDecimalRoundingMode(RoundingMode mode) {
+        var list = TgParameterList.of();
+        list.add("p", new BigDecimal("1.15"), 1, mode);
+        list.add("m", new BigDecimal("-1.15"), 1, mode);
+        list.add("bar", (BigDecimal) null, 1, mode);
+
+        assertParameterList(TgParameter.of("p", new BigDecimal("1.15").setScale(1, mode)), TgParameter.of("m", new BigDecimal("-1.15").setScale(1, mode)), TgParameter.of("bar", (BigDecimal) null),
+                list);
+    }
+
+    @Test
     void testAddStringString() {
         var list = TgParameterList.of();
         list.add("foo", "abc");
@@ -420,6 +473,10 @@ class TgParameterListTest {
 
     private void assertParameterList(TgParameter expected1, TgParameter expected2, TgParameterList actual) {
         assertParameterList(List.of(expected1, expected2), actual);
+    }
+
+    private void assertParameterList(TgParameter expected1, TgParameter expected2, TgParameter expected3, TgParameterList actual) {
+        assertParameterList(List.of(expected1, expected2, expected3), actual);
     }
 
     private void assertParameterList(List<TgParameter> expected, TgParameterList actual) {

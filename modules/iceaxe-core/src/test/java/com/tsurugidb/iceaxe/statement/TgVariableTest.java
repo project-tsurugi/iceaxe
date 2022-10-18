@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.statement;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -13,7 +14,10 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import com.tsurugidb.iceaxe.statement.TgVariable.TgVariableBigDecimal;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
 class TgVariableTest {
@@ -94,11 +98,53 @@ class TgVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.DECIMAL, variable.type());
         assertEquals(Parameters.of("foo", BigDecimal.valueOf(123)), variable.bind(BigDecimal.valueOf(123)).toLowParameter());
+        assertEquals(":foo/*DECIMAL*/", variable.toString());
 
         var copy = variable.copy("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "1.01", "1.05", "-1.01", "-1.05", "" })
+    void testOfDecimalScale(String value) {
+        int scale = 1;
+        var variable = TgVariable.ofDecimal("foo", scale);
+        testOfDecimal(variable, value, scale, TgVariableBigDecimal.DEFAULT_ROUNDING_MODE);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "1.01", "1.05", "-1.01", "-1.05", "" })
+    void testOfDecimalRoundingMode(String value) {
+        int scale = 1;
+        var mode = RoundingMode.HALF_UP;
+        var variable = TgVariable.ofDecimal("foo", scale, mode);
+        testOfDecimal(variable, value, scale, mode);
+    }
+
+    private void testOfDecimal(TgVariableBigDecimal variable, String s, int scale, RoundingMode mode) {
+        var value = s.isEmpty() ? null : new BigDecimal(s);
+        var expected = (value != null) ? value.setScale(scale, mode) : null;
+
+        assertEquals("foo", variable.name());
+        assertEquals(TgDataType.DECIMAL, variable.type());
+        assertEquals(IceaxeLowParameterUtil.create("foo", expected), variable.bind(value).toLowParameter());
+        assertEquals(String.format(":foo/*DECIMAL<%s %d>*/", mode, scale), variable.toString());
+
+        var copy = variable.copy("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
+        assertEquals(IceaxeLowParameterUtil.create("bar", expected), copy.bind(value).toLowParameter());
+    }
+
+    @Test
+    void testDecimalBind() {
+        var variable = TgVariable.ofDecimal("foo");
+
+        assertEquals(Parameters.of("foo", BigDecimal.valueOf(123)), variable.bind(123).toLowParameter());
+        assertEquals(Parameters.of("foo", BigDecimal.valueOf(123.4)), variable.bind(123.4).toLowParameter());
     }
 
     @Test

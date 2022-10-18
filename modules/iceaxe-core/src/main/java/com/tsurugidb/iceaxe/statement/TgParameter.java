@@ -8,232 +8,235 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
 /**
  * Tsurugi Parameter
- * 
+ *
  * @see TgParameterList#of(TgParameter...)
  */
 public class TgParameter {
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, boolean value) {
+    public static TgParameter of(@Nonnull String name, boolean value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, Boolean value) {
+    public static TgParameter of(@Nonnull String name, @Nullable Boolean value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, int value) {
+    public static TgParameter of(@Nonnull String name, int value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, Integer value) {
+    public static TgParameter of(@Nonnull String name, @Nullable Integer value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, long value) {
+    public static TgParameter of(@Nonnull String name, long value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, Long value) {
+    public static TgParameter of(@Nonnull String name, @Nullable Long value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, float value) {
+    public static TgParameter of(@Nonnull String name, float value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, Float value) {
+    public static TgParameter of(@Nonnull String name, @Nullable Float value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, double value) {
+    public static TgParameter of(@Nonnull String name, double value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, Double value) {
+    public static TgParameter of(@Nonnull String name, @Nullable Double value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, BigDecimal value) {
+    public static TgParameter of(@Nonnull String name, @Nullable BigDecimal value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, String value) {
+    public static TgParameter of(@Nonnull String name, @Nullable String value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, byte[] value) {
+    public static TgParameter of(@Nonnull String name, @Nullable byte[] value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, boolean[] value) {
+    public static TgParameter of(@Nonnull String name, @Nullable boolean[] value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, LocalDate value) {
+    public static TgParameter of(@Nonnull String name, @Nullable LocalDate value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, LocalTime value) {
+    public static TgParameter of(@Nonnull String name, @Nullable LocalTime value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, LocalDateTime value) {
+    public static TgParameter of(@Nonnull String name, @Nullable LocalDateTime value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, OffsetTime value) {
+    public static TgParameter of(@Nonnull String name, @Nullable OffsetTime value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, OffsetDateTime value) {
+    public static TgParameter of(@Nonnull String name, @Nullable OffsetDateTime value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 
     /**
      * create Tsurugi Parameter
-     * 
+     *
      * @param name  name
      * @param value value
      * @return Tsurugi Parameter
      */
-    public static TgParameter of(String name, ZonedDateTime value) {
+    public static TgParameter of(@Nonnull String name, @Nullable ZonedDateTime value) {
         return new TgParameter(IceaxeLowParameterUtil.create(name, value));
     }
 

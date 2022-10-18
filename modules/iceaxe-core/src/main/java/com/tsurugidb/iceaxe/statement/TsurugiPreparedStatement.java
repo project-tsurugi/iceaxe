@@ -63,7 +63,7 @@ public abstract class TsurugiPreparedStatement implements Closeable {
     @Override
     public String toString() {
         var name = getClass().getSimpleName();
-        if (name == null) {
+        if (name.isEmpty()) {
             name = TsurugiPreparedStatement.class.getSimpleName();
         }
         return name + "[" + sql + "]"; //$NON-NLS-1$ //$NON-NLS-2$
