@@ -17,6 +17,7 @@ import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 
 /**
  * select few record test
@@ -37,14 +38,23 @@ class DbSelectFewTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void selectZero() throws IOException, TsurugiTransactionException {
+        selectZero(ResponseBox.responseBoxSize() - 1);
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled
+    void selectZeroSlotMax() throws IOException, TsurugiTransactionException {
+        selectZero(ResponseBox.responseBoxSize());
+    }
+
+    private void selectZero(int size) throws IOException, TsurugiTransactionException {
         var sql = "select * from " + TEST;
         LOG.info(sql);
 
         var session = getSession();
         try (var ps = session.createPreparedQuery(sql)) {
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < size; i++) {
                 try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                     try (var rs = ps.execute(transaction)) {
                         // rs.close without read
