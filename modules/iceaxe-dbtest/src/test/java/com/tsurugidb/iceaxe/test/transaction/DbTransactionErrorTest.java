@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -18,7 +19,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 /**
  * Transaction error test
  */
-class DbErrorTransactionTest extends DbTestTableTester {
+class DbTransactionErrorTest extends DbTestTableTester {
 
     private static final int SIZE = 4;
 
@@ -84,5 +85,15 @@ class DbErrorTransactionTest extends DbTestTableTester {
 
         // expected: auto rollback
         assertEqualsTestTable(SIZE);
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled （tateyama-severが落ちる （落ちるのにテストが成功することもある））
+    void doNothing() throws IOException {
+        var session = getSession();
+        for (int i = 0; i < 300; i++) {
+            try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
+            }
+        }
     }
 }
