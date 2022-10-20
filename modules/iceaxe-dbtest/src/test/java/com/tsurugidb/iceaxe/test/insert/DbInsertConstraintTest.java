@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
@@ -16,6 +18,7 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -102,6 +105,41 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable();
+    }
+
+    @Test
+    void insertSameTxLazyCheck() throws IOException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            for (int i = 0; i < 10; i++) {
+                insertSameTxLazyCheck(tm, ps);
+            }
+        }
+    }
+
+    private void insertSameTxLazyCheck(TsurugiTransactionManager tm, TsurugiPreparedStatementUpdate1<TestEntity> ps) throws IOException {
+        var e0 = assertThrows(TsurugiIOException.class, () -> {
+            tm.execute((TsurugiTransactionAction) transaction -> {
+                var entity = createTestEntity(1);
+                var r1 = ps.execute(transaction, entity);
+                var r2 = ps.execute(transaction, entity);
+                try (r1; r2) {
+                    int count1 = r1.getUpdateCount();
+                    assertEquals(-1, count1); // TODO 1
+
+                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                        r2.getUpdateCount();
+                    });
+                    assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
+                    throw e;
+                }
+            });
+        });
+        assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e0);
+//      assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+
+        assertEqualsTestTable(0);
     }
 
     @Test
