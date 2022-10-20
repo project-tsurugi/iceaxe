@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +16,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
@@ -31,6 +35,9 @@ public class TsurugiTransaction implements Closeable {
     private FutureResponse<Transaction> lowTransactionFuture;
     private Transaction lowTransaction;
     private boolean calledGetLowTransaction = false;
+    private final TgTxOption txOption;
+    private TsurugiTransactionManager txManager = null;
+    private int attempt = 0;
     private final IceaxeTimeout beginTimeout;
     private final IceaxeTimeout commitTimeout;
     private final IceaxeTimeout rollbackTimeout;
@@ -42,9 +49,10 @@ public class TsurugiTransaction implements Closeable {
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
 
     // internal
-    public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture) {
+    public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption option) {
         this.ownerSession = session;
         this.lowTransactionFuture = lowTransactionFuture;
+        this.txOption = option;
         session.addChild(this);
 
         var info = session.getSessionInfo();
@@ -62,8 +70,48 @@ public class TsurugiTransaction implements Closeable {
     }
 
     /**
+     * get transaction option.
+     *
+     * @return transaction option
+     */
+    @Nonnull
+    public TgTxOption getTransactionOption() {
+        return this.txOption;
+    }
+
+    /**
+     * set owner information.
+     *
+     * @param tm      owner transaction manager
+     * @param attempt attempt number
+     */
+    public void setOwner(TsurugiTransactionManager tm, int attempt) {
+        this.txManager = tm;
+        this.attempt = attempt;
+    }
+
+    /**
+     * get transaction manager.
+     *
+     * @return transaction manager, null if this transaction is not created by transaction manager
+     */
+    @Nullable
+    public TsurugiTransactionManager getTransactionManager() {
+        return this.txManager;
+    }
+
+    /**
+     * get attempt number.
+     *
+     * @return attempt number, 0 if this transaction is not created by transaction manager
+     */
+    public int getAttempt() {
+        return this.attempt;
+    }
+
+    /**
      * set transaction-begin-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -73,7 +121,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * set transaction-begin-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setBeginTimeout(TgTimeValue timeout) {
@@ -82,7 +130,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * set transaction-commit-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -92,7 +140,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * set transaction-commit-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setCommitTimeout(TgTimeValue timeout) {
@@ -101,7 +149,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * set transaction-rollback-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -111,7 +159,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * set transaction-rollback-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setRollbackTimeout(TgTimeValue timeout) {
@@ -120,7 +168,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * set transaction-close-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -130,7 +178,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * set transaction-close-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setCloseTimeout(TgTimeValue timeout) {
@@ -161,7 +209,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * add commit listener
-     * 
+     *
      * @param listener listener
      */
     public void addCommitListener(Runnable listener) {
@@ -173,7 +221,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * add rollback listener
-     * 
+     *
      * @param listener listener
      */
     public void addRollbackListener(Runnable listener) {
@@ -185,7 +233,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * Whether transaction is available
-     * 
+     *
      * @return true: available
      * @throws IOException
      */
@@ -199,7 +247,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * do commit
-     * 
+     *
      * @param commitType commit type
      * @throws IOException
      * @throws TsurugiTransactionException
@@ -228,7 +276,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * do rollback
-     * 
+     *
      * @throws IOException
      * @throws TsurugiTransactionException
      */
@@ -259,7 +307,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * get committed
-     * 
+     *
      * @return true: committed
      */
     public synchronized boolean isCommitted() {
@@ -268,7 +316,7 @@ public class TsurugiTransaction implements Closeable {
 
     /**
      * get rollbacked
-     * 
+     *
      * @return true: rollbacked
      */
     public synchronized boolean isRollbacked() {

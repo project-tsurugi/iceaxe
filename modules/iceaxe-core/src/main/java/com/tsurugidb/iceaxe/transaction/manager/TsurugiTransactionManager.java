@@ -46,7 +46,7 @@ public class TsurugiTransactionManager {
 
     /**
      * execute transaction
-     * 
+     *
      * @param action action
      * @throws IOException
      * @see TsurugiPreparedStatement
@@ -57,7 +57,7 @@ public class TsurugiTransactionManager {
 
     /**
      * execute transaction
-     * 
+     *
      * @param setting transaction manager settings
      * @param action  action
      * @throws IOException
@@ -75,7 +75,7 @@ public class TsurugiTransactionManager {
 
     /**
      * execute transaction
-     * 
+     *
      * @param <R>    return type
      * @param action action
      * @return return value (null if transaction is rollbacked)
@@ -88,7 +88,7 @@ public class TsurugiTransactionManager {
 
     /**
      * execute transaction
-     * 
+     *
      * @param <R>     return type
      * @param setting transaction manager settings
      * @param action  action
@@ -109,6 +109,7 @@ public class TsurugiTransactionManager {
         LOG.trace("tm.execute tx={}", option);
         for (int i = 0;; i++) {
             try (var transaction = ownerSession.createTransaction(option)) {
+                transaction.setOwner(this, i);
                 setting.initializeTransaction(transaction);
 
                 try {

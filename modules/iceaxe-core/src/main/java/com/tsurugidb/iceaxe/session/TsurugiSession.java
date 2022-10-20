@@ -355,7 +355,7 @@ public class TsurugiSession implements Closeable {
         LOG.trace("lowTransaction create start. lowOption={}", lowOption);
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
         LOG.trace("lowTransaction create started");
-        var transaction = new TsurugiTransaction(this, lowTransactionFuture);
+        var transaction = new TsurugiTransaction(this, lowTransactionFuture, option);
         return transaction;
     }
 
