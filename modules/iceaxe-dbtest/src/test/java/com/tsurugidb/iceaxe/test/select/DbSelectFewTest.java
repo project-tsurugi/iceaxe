@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -23,7 +21,8 @@ import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
  * select few record test
  */
 class DbSelectFewTest extends DbTestTableTester {
-    private static final Logger LOG = LoggerFactory.getLogger(DbSelectFewTest.class);
+
+    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 200;
 
     @BeforeAll
     static void beforeAll() throws IOException {
@@ -39,22 +38,11 @@ class DbSelectFewTest extends DbTestTableTester {
 
     @Test
     void selectZero() throws IOException, TsurugiTransactionException {
-        selectZero(ResponseBox.responseBoxSize() - 1);
-    }
-
-    @Test
-    @Disabled // TODO remove Disabled
-    void selectZeroSlotMax() throws IOException, TsurugiTransactionException {
-        selectZero(ResponseBox.responseBoxSize());
-    }
-
-    private void selectZero(int size) throws IOException, TsurugiTransactionException {
         var sql = "select * from " + TEST;
-        LOG.info(sql);
 
         var session = getSession();
         try (var ps = session.createPreparedQuery(sql)) {
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                     try (var rs = ps.execute(transaction)) {
                         // rs.close without read
@@ -73,7 +61,7 @@ class DbSelectFewTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
-            for (int i = 0; i < 300; i++) {
+            for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 Optional<TestEntity> entity = ps.executeAndFindRecord(tm);
                 assertEquals(expected, entity.get());
             }
@@ -89,7 +77,7 @@ class DbSelectFewTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
-                for (int i = 0; i < 300; i++) {
+                for (int i = 0; i < ATTEMPT_SIZE; i++) {
                     Optional<TestEntity> entity = ps.executeAndFindRecord(transaction);
                     assertEquals(expected, entity.get());
                 }
