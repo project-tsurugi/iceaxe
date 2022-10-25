@@ -24,7 +24,7 @@ public class TsurugiTransactionRuntimeException extends RuntimeException impleme
     }
 
     @Override
-    public DiagnosticCode getLowDiagnosticCode() {
-        return getCause().getLowDiagnosticCode();
+    public DiagnosticCode getDiagnosticCode() {
+        return getCause().getDiagnosticCode();
     }
 }

@@ -21,7 +21,7 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
     }
 
     @Override
-    public DiagnosticCode getLowDiagnosticCode() {
+    public DiagnosticCode getDiagnosticCode() {
         return getCause().getDiagnosticCode();
     }
 }

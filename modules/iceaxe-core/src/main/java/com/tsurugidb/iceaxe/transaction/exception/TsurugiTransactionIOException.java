@@ -28,7 +28,7 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
 
     /**
      * get attempt number
-     * 
+     *
      * @return attempt number
      * @see TgTxOptionSupplier#get(int, TsurugiTransactionException)
      */
@@ -38,7 +38,7 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
 
     /**
      * get transaction option
-     * 
+     *
      * @return transaction option
      */
     public TgTxOption getTransactionOption() {

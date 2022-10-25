@@ -10,7 +10,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
@@ -95,5 +98,47 @@ class DbTransactionErrorTest extends DbTestTableTester {
             try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
             }
         }
+    }
+
+    @Test
+    void commitAfterClose() throws IOException {
+        var session = getSession();
+        var transaction = session.createTransaction(TgTxOption.ofOCC());
+        transaction.close();
+        var e = assertThrows(TsurugiIOException.class, () -> transaction.commit(TgCommitType.DEFAULT));
+        assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
+    }
+
+    @Test
+    void rollbackAfterClose() throws IOException {
+        var session = getSession();
+        var transaction = session.createTransaction(TgTxOption.ofOCC());
+        transaction.close();
+        var e = assertThrows(TsurugiIOException.class, () -> transaction.rollback());
+        assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
+    }
+
+    @Test
+    void addChildAfterClose() throws IOException {
+        var session = getSession();
+        var transaction = session.createTransaction(TgTxOption.ofOCC());
+        transaction.close();
+        var e = assertThrows(TsurugiIOException.class, () -> {
+            transaction.addChild(() -> {
+                // dummy
+            });
+        });
+        assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
+    }
+
+    @Test
+    void getLowAfterClose() throws IOException {
+        var session = getSession();
+        var transaction = session.createTransaction(TgTxOption.ofOCC());
+        transaction.close();
+        var e = assertThrows(TsurugiTransactionException.class, () -> {
+            transaction.getLowTransaction();
+        });
+        assertEqualsCode(null, e); // TODO エラーコード
     }
 }

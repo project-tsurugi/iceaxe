@@ -12,6 +12,8 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -47,6 +49,7 @@ public class TsurugiTransaction implements Closeable {
     private boolean committed = false;
     private boolean rollbacked = false;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
+    private boolean closed = false;
 
     // internal
     public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption option) {
@@ -195,6 +198,8 @@ public class TsurugiTransaction implements Closeable {
     // internal
 //  @ThreadSafe
     public final synchronized Transaction getLowTransaction() throws IOException {
+//TODO        checkClose();
+
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
             LOG.trace("lowTransaction get start");
@@ -239,6 +244,9 @@ public class TsurugiTransaction implements Closeable {
      */
 //  @ThreadSafe
     public final synchronized boolean available() throws IOException {
+        if (isClosed()) {
+            return false;
+        }
         if (!this.calledGetLowTransaction) {
             getLowTransaction();
         }
@@ -253,6 +261,7 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public synchronized void commit(TgCommitType commitType) throws IOException, TsurugiTransactionException {
+        checkClose();
         if (this.committed) {
             return;
         }
@@ -281,6 +290,7 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public synchronized void rollback() throws IOException, TsurugiTransactionException {
+        checkClose();
         if (this.committed || this.rollbacked) {
             return;
         }
@@ -324,7 +334,8 @@ public class TsurugiTransaction implements Closeable {
     }
 
     // internal
-    public void addChild(AutoCloseable closeable) {
+    public void addChild(AutoCloseable closeable) throws IOException {
+        checkClose();
         closeableSet.add(closeable);
     }
 
@@ -347,6 +358,23 @@ public class TsurugiTransaction implements Closeable {
             IceaxeIoUtil.close(lowTransaction, lowTransactionFuture);
             ownerSession.removeChild(this);
         });
+        this.closed = true;
         LOG.trace("transaction close end");
+    }
+
+    /**
+     * Returns the closed state of the prepared statement.
+     *
+     * @return true if the prepared statement has been closed
+     * @see #close()
+     */
+    public boolean isClosed() {
+        return this.closed;
+    }
+
+    protected void checkClose() throws IOException {
+        if (isClosed()) {
+            throw new TsurugiIOException(IceaxeErrorCode.TX_ALREADY_CLOSED);
+        }
     }
 }

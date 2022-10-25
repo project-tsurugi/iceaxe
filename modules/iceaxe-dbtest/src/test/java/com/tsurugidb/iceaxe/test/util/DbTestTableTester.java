@@ -12,13 +12,13 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.result.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
@@ -157,9 +157,9 @@ public class DbTestTableTester {
 
     protected static DiagnosticCode findDiagnosticCode(Throwable t) {
         {
-            var e = findTransactionException(t);
+            var e = findTsurugiDiagnosticCodeProvider(t);
             if (e != null) {
-                return e.getLowDiagnosticCode();
+                return e.getDiagnosticCode();
             }
         }
         {
@@ -171,10 +171,10 @@ public class DbTestTableTester {
         return null;
     }
 
-    protected static TsurugiTransactionException findTransactionException(Throwable t) {
+    protected static TsurugiDiagnosticCodeProvider findTsurugiDiagnosticCodeProvider(Throwable t) {
         for (; t != null; t = t.getCause()) {
-            if (t instanceof TsurugiTransactionException) {
-                return (TsurugiTransactionException) t;
+            if (t instanceof TsurugiDiagnosticCodeProvider) {
+                return (TsurugiDiagnosticCodeProvider) t;
             }
         }
         return null;

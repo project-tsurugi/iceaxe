@@ -15,7 +15,7 @@ public abstract class TsurugiResult implements AutoCloseable {
     private final TsurugiTransaction ownerTransaction;
 
     // internal
-    public TsurugiResult(TsurugiTransaction transaction) {
+    public TsurugiResult(TsurugiTransaction transaction) throws IOException {
         this.ownerTransaction = transaction;
         transaction.addChild(this);
     }

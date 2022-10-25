@@ -28,7 +28,7 @@ public class TsurugiResultCount extends TsurugiResult {
     private final IceaxeTimeout closeTimeout;
 
     // internal
-    public TsurugiResultCount(TsurugiTransaction transaction, FutureResponse<Void> lowResultFuture) {
+    public TsurugiResultCount(TsurugiTransaction transaction, FutureResponse<Void> lowResultFuture) throws IOException {
         super(transaction);
         this.lowResultFuture = lowResultFuture;
 
@@ -45,7 +45,7 @@ public class TsurugiResultCount extends TsurugiResult {
 
     /**
      * set check-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setCheckTimeout(long time, TimeUnit unit) {
@@ -54,7 +54,7 @@ public class TsurugiResultCount extends TsurugiResult {
 
     /**
      * set check-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setCheckTimeout(TgTimeValue timeout) {
@@ -63,7 +63,7 @@ public class TsurugiResultCount extends TsurugiResult {
 
     /**
      * set close-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -73,7 +73,7 @@ public class TsurugiResultCount extends TsurugiResult {
 
     /**
      * set close-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setCloseTimeout(TgTimeValue timeout) {
@@ -97,7 +97,7 @@ public class TsurugiResultCount extends TsurugiResult {
 
     /**
      * get count
-     * 
+     *
      * @return the row count for SQL Data Manipulation Language (DML) statements
      * @throws IOException
      * @throws TsurugiTransactionException

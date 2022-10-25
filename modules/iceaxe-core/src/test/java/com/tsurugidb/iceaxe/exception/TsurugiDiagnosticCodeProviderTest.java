@@ -24,12 +24,12 @@ class TsurugiDiagnosticCodeProviderTest {
         {
             var e = new IceaxeServerExceptionTestMock("ignore", 123);
             var actual = TsurugiDiagnosticCodeProvider.findDiagnosticCodeProvider(e);
-            assertEquals("TEST-00123 (MOCK_123)", actual.get().getLowDiagnosticCode().toString());
+            assertEquals("TEST-00123 (MOCK_123)", actual.get().getDiagnosticCode().toString());
         }
         {
             var e = new Exception(new IceaxeServerExceptionTestMock("ignore", 123));
             var actual = TsurugiDiagnosticCodeProvider.findDiagnosticCodeProvider(e);
-            assertEquals("TEST-00123 (MOCK_123)", actual.get().getLowDiagnosticCode().toString());
+            assertEquals("TEST-00123 (MOCK_123)", actual.get().getDiagnosticCode().toString());
         }
     }
 

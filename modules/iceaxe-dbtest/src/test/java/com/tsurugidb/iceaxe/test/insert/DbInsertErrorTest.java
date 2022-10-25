@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.insert;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,10 +9,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.statement.exception.TsurugiPreparedStatementIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
+import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -86,10 +87,10 @@ class DbInsertErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         var ps = session.createPreparedStatement(sql);
         ps.close();
-        var e = assertThrows(TsurugiPreparedStatementIOException.class, () -> {
+        var e = assertThrows(TsurugiIOException.class, () -> {
             ps.executeAndGetCount(tm);
         });
-        assertEquals(TsurugiPreparedStatementIOException.MESSAGE_ALREADY_CLOSED, e.getMessage());
+        assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
     }
 
     @Test
@@ -99,9 +100,26 @@ class DbInsertErrorTest extends DbTestTableTester {
         var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING);
         ps.close();
         var entity = createTestEntity(1);
-        var e = assertThrows(TsurugiPreparedStatementIOException.class, () -> {
+        var e = assertThrows(TsurugiIOException.class, () -> {
             ps.executeAndGetCount(tm, entity);
         });
-        assertEquals(TsurugiPreparedStatementIOException.MESSAGE_ALREADY_CLOSED, e.getMessage());
+        assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
+    }
+
+    @Test
+    void ps0ExecuteAfterTxClose() throws IOException {
+        var sql = "insert into " + TEST //
+                + "(" + TEST_COLUMNS + ")" //
+                + "values(1, 1, '1')";
+
+        var session = getSession();
+        try (var ps = session.createPreparedStatement(sql)) {
+            var transaction = session.createTransaction(TgTxOption.ofOCC());
+            transaction.close();
+            var e = assertThrows(TsurugiTransactionException.class, () -> {
+                ps.executeAndGetCount(transaction);
+            });
+            assertEqualsCode(null, e); // TODO エラーコード
+        }
     }
 }

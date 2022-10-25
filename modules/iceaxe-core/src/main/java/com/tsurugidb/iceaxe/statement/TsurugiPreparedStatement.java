@@ -7,9 +7,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.exception.TsurugiPreparedStatementIOException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 
 /**
@@ -45,22 +46,6 @@ public abstract class TsurugiPreparedStatement implements Closeable {
         return this.sql;
     }
 
-    /**
-     * Returns the closed state of the prepared statement.
-     *
-     * @return true if the prepared statement has been closed
-     * @see #close()
-     */
-    public boolean isClosed() {
-        return this.closed;
-    }
-
-    protected void checkClose() throws IOException {
-        if (isClosed()) {
-            throw new TsurugiPreparedStatementIOException(TsurugiPreparedStatementIOException.MESSAGE_ALREADY_CLOSED);
-        }
-    }
-
     protected final IceaxeConvertUtil getConvertUtil(@Nullable IceaxeConvertUtil primaryConvertUtil) {
         var convertUtil = primaryConvertUtil;
         if (convertUtil == null) {
@@ -77,6 +62,22 @@ public abstract class TsurugiPreparedStatement implements Closeable {
     public void close() throws IOException {
         ownerSession.removeChild(this);
         this.closed = true;
+    }
+
+    /**
+     * Returns the closed state of the prepared statement.
+     *
+     * @return true if the prepared statement has been closed
+     * @see #close()
+     */
+    public boolean isClosed() {
+        return this.closed;
+    }
+
+    protected void checkClose() throws IOException {
+        if (isClosed()) {
+            throw new TsurugiIOException(IceaxeErrorCode.PS_ALREADY_CLOSED);
+        }
     }
 
     @Override

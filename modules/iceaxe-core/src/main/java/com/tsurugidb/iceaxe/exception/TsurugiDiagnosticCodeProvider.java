@@ -18,7 +18,7 @@ public interface TsurugiDiagnosticCodeProvider {
      * @return DiagnosticCode (null if not found)
      */
     @Nullable
-    public DiagnosticCode getLowDiagnosticCode();
+    public DiagnosticCode getDiagnosticCode();
 
     // utility
 
@@ -37,7 +37,7 @@ public interface TsurugiDiagnosticCodeProvider {
                 var serverException = (ServerException) t;
                 return Optional.of(new TsurugiDiagnosticCodeProvider() {
                     @Override
-                    public DiagnosticCode getLowDiagnosticCode() {
+                    public DiagnosticCode getDiagnosticCode() {
                         return serverException.getDiagnosticCode();
                     }
                 });

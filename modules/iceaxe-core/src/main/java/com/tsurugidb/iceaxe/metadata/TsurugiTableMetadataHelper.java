@@ -55,7 +55,7 @@ public class TsurugiTableMetadataHelper {
 
             return Optional.of(newTableMetadata(lowTableMetadata));
         } catch (TsurugiIOException e) {
-            var code = e.getLowDiagnosticCode();
+            var code = e.getDiagnosticCode();
             if (code == SqlServiceCode.ERR_NOT_FOUND) {
                 LOG.trace("getTableMetadata end (tableName={} not found)", tableName);
                 return Optional.empty();

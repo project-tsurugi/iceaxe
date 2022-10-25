@@ -29,7 +29,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi Result Set for PreparedStatement
- * 
+ *
  * @param <R> result type
  */
 @NotThreadSafe
@@ -45,7 +45,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private TsurugiResultRecord record;
 
     // internal
-    public TsurugiResultSet(TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil) {
+    public TsurugiResultSet(TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil) throws IOException {
         super(transaction);
         this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
@@ -65,7 +65,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     /**
      * set ResetSet-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setRsConnectTimeout(long time, TimeUnit unit) {
@@ -74,7 +74,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     /**
      * set ResetSet-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setRsConnectTimeout(TgTimeValue timeout) {
@@ -83,7 +83,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     /**
      * set ResetSet-close-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -93,7 +93,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     /**
      * set ResetSet-close-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setRsCloseTimeout(TgTimeValue timeout) {
@@ -132,7 +132,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     /**
      * get name list
-     * 
+     *
      * @return list of column name
      * @throws IOException
      * @throws TsurugiTransactionException
@@ -174,7 +174,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     /**
      * get one record
-     * 
+     *
      * @return record
      * @throws IOException
      * @throws TsurugiTransactionException
@@ -200,7 +200,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     /**
      * get record list
-     * 
+     *
      * @return list of record
      * @throws IOException
      * @throws TsurugiTransactionException
