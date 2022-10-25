@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.insert;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.statement.exception.TsurugiPreparedStatementIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -72,5 +74,34 @@ class DbInsertErrorTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable(0);
+    }
+
+    @Test
+    void ps0ExecuteAfterClose() throws IOException {
+        var sql = "insert into " + TEST //
+                + "(" + TEST_COLUMNS + ")" //
+                + "values(1, 1, '1')";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        var ps = session.createPreparedStatement(sql);
+        ps.close();
+        var e = assertThrows(TsurugiPreparedStatementIOException.class, () -> {
+            ps.executeAndGetCount(tm);
+        });
+        assertEquals(TsurugiPreparedStatementIOException.MESSAGE_ALREADY_CLOSED, e.getMessage());
+    }
+
+    @Test
+    void ps1ExecuteAfterClose() throws IOException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING);
+        ps.close();
+        var entity = createTestEntity(1);
+        var e = assertThrows(TsurugiPreparedStatementIOException.class, () -> {
+            ps.executeAndGetCount(tm, entity);
+        });
+        assertEquals(TsurugiPreparedStatementIOException.MESSAGE_ALREADY_CLOSED, e.getMessage());
     }
 }

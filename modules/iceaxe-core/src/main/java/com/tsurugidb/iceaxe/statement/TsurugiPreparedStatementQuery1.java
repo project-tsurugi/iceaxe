@@ -49,6 +49,8 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @throws TsurugiTransactionException
      */
     public TsurugiResultSet<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
+        checkClose();
+
         var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
         var lowParameterList = getLowParameterList(parameter);

@@ -37,6 +37,8 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      * @throws TsurugiTransactionException
      */
     public TsurugiResultCount execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+        checkClose();
+
         var lowTransaction = transaction.getLowTransaction();
         LOG.trace("executeStatement start");
         var lowResultFuture = lowTransaction.executeStatement(sql);
