@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.test.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -227,5 +229,21 @@ public class DbTestTableTester {
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
             return ps.executeAndFindRecord(tm).get();
         }
+    }
+
+    protected static void assertContains(String expected, String actual) {
+        assertNotNull(actual);
+        if (actual.contains(expected)) {
+            return; // success
+        }
+        assertEquals(expected, actual, "not contains");
+    }
+
+    protected static void assertMatches(String expectedRegexp, String actual) {
+        assertNotNull(actual);
+        if (Pattern.matches(expectedRegexp, actual)) {
+            return; // success
+        }
+        assertEquals(expectedRegexp, actual, "unmatched");
     }
 }

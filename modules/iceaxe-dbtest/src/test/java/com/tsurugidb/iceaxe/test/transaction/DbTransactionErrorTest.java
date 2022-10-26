@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -132,13 +133,35 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void getLowAfterClose() throws IOException {
+    void getLowAfterFutureClose() throws IOException {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrows(TsurugiTransactionException.class, () -> {
+        var e = assertThrows(IOException.class, () -> {
             transaction.getLowTransaction();
         });
-        assertEqualsCode(null, e); // TODO エラーコード
+        assertMatches("Future .+ is already closed", e.getMessage());
+    }
+
+    @Test
+    void getLowAfterClose() throws IOException {
+        var session = getSession();
+        var transaction = session.createTransaction(TgTxOption.ofOCC());
+        var lowTx = transaction.getLowTransaction();
+        transaction.close();
+        assertSame(lowTx, transaction.getLowTransaction());
+    }
+
+    @Test
+    void executeAfterClose() throws IOException {
+        var session = getSession();
+        var transaction = session.createTransaction(TgTxOption.ofOCC());
+        transaction.close();
+        var e = assertThrows(TsurugiIOException.class, () -> {
+            transaction.executeLow(lowTx -> {
+                return null; // dummy
+            });
+        });
+        assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
     }
 }

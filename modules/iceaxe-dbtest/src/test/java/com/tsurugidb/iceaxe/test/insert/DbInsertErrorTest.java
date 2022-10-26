@@ -14,7 +14,6 @@ import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -107,7 +106,16 @@ class DbInsertErrorTest extends DbTestTableTester {
     }
 
     @Test
+    void ps0ExecuteAfterTxFutureClose() throws IOException {
+        ps0ExecuteAfterTxClose(false, "Future is already closed");
+    }
+
+    @Test
     void ps0ExecuteAfterTxClose() throws IOException {
+        ps0ExecuteAfterTxClose(true, "already closed");
+    }
+
+    private void ps0ExecuteAfterTxClose(boolean getLow, String expected) throws IOException {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(1, 1, '1')";
@@ -115,11 +123,15 @@ class DbInsertErrorTest extends DbTestTableTester {
         var session = getSession();
         try (var ps = session.createPreparedStatement(sql)) {
             var transaction = session.createTransaction(TgTxOption.ofOCC());
+            if (getLow) {
+                transaction.getLowTransaction();
+            }
             transaction.close();
-            var e = assertThrows(TsurugiTransactionException.class, () -> {
+            var e = assertThrows(TsurugiIOException.class, () -> {
                 ps.executeAndGetCount(transaction);
             });
-            assertEqualsCode(null, e); // TODO エラーコード
+            assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
+//          assertEquals(expected, e.getMessage());
         }
     }
 }

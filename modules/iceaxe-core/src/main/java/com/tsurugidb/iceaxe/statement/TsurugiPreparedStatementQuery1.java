@@ -51,11 +51,10 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
     public TsurugiResultSet<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
         checkClose();
 
-        var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
         var lowParameterList = getLowParameterList(parameter);
         LOG.trace("executeQuery start");
-        var lowResultSetFuture = lowTransaction.executeQuery(lowPs, lowParameterList);
+        var lowResultSetFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeQuery(lowPs, lowParameterList));
         LOG.trace("executeQuery started");
         var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
         var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping, convertUtil);

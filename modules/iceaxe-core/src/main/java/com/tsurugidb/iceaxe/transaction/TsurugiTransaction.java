@@ -198,8 +198,6 @@ public class TsurugiTransaction implements Closeable {
     // internal
 //  @ThreadSafe
     public final synchronized Transaction getLowTransaction() throws IOException {
-//TODO        checkClose();
-
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
             LOG.trace("lowTransaction get start");
@@ -210,6 +208,18 @@ public class TsurugiTransaction implements Closeable {
             applyCloseTimeout();
         }
         return this.lowTransaction;
+    }
+
+    // internal
+    @FunctionalInterface
+    public interface LowTransactionTask<R> {
+        R run(Transaction lowTransaction) throws IOException;
+    }
+
+    // internal
+    public <R> R executeLow(LowTransactionTask<R> task) throws IOException {
+        checkClose();
+        return task.run(getLowTransaction());
     }
 
     /**
@@ -346,6 +356,8 @@ public class TsurugiTransaction implements Closeable {
 
     @Override
     public void close() throws IOException {
+        this.closed = true;
+
 //      if (!(this.committed || this.rollbacked)) {
         // commitやrollbackに失敗してもcloseは呼ばれるので、ここでIllegalStateException等を発生させるのは良くない
 //      }
@@ -358,7 +370,6 @@ public class TsurugiTransaction implements Closeable {
             IceaxeIoUtil.close(lowTransaction, lowTransactionFuture);
             ownerSession.removeChild(this);
         });
-        this.closed = true;
         LOG.trace("transaction close end");
     }
 

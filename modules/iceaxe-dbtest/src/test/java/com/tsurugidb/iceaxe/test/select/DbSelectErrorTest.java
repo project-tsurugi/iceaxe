@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.select;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -89,17 +90,30 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
+    void ps0ExecuteAfterTxFutureClose() throws IOException {
+        ps0ExecuteAfterTxClose(false, "Future is already closed");
+    }
+
+    @Test
     void ps0ExecuteAfterTxClose() throws IOException {
+        ps0ExecuteAfterTxClose(true, "already closed");
+    }
+
+    private void ps0ExecuteAfterTxClose(boolean getLow, String expected) throws IOException {
         var sql = "select * from " + TEST;
 
         var session = getSession();
         try (var ps = session.createPreparedQuery(sql)) {
             var transaction = session.createTransaction(TgTxOption.ofOCC());
+            if (getLow) {
+                transaction.getLowTransaction();
+            }
             transaction.close();
-            var e = assertThrows(TsurugiTransactionException.class, () -> {
+            var e = assertThrows(TsurugiIOException.class, () -> {
                 ps.executeAndGetList(transaction);
             });
-            assertEqualsCode(null, e); // TODO エラーコード
+            assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
+//          assertEquals(expected, e.getMessage());
         }
     }
 
@@ -114,10 +128,29 @@ class DbSelectErrorTest extends DbTestTableTester {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                 rs = ps.execute(transaction);
             }
-            var e = assertThrows(TsurugiTransactionException.class, () -> {
+            var e = assertThrows(IOException.class, () -> {
                 rs.getRecordList();
             });
-            assertEqualsCode(null, e); // TODO エラーコード
+            assertEquals("Future is already closed", e.getMessage());
+        }
+    }
+
+    @Test
+    void selectInTransactionClose() throws IOException, TsurugiTransactionException {
+        var sql = "select * from " + TEST;
+
+        var session = getSession();
+        try (var ps = session.createPreparedQuery(sql)) {
+            try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+                try (var rs = ps.execute(transaction)) {
+                    var i = rs.iterator();
+                    i.next();
+                    transaction.close();
+                    while (i.hasNext()) {
+                        i.next();
+                    }
+                }
+            }
         }
     }
 }

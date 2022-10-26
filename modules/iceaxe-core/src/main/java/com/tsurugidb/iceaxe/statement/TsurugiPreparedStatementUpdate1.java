@@ -43,11 +43,10 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
     public TsurugiResultCount execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
         checkClose();
 
-        var lowTransaction = transaction.getLowTransaction();
         var lowPs = getLowPreparedStatement();
         var lowParameterList = getLowParameterList(parameter);
         LOG.trace("executeStatement start");
-        var lowResultFuture = lowTransaction.executeStatement(lowPs, lowParameterList);
+        var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeStatement(lowPs, lowParameterList));
         LOG.trace("executeStatement started");
         var result = new TsurugiResultCount(transaction, lowResultFuture);
         return result;
