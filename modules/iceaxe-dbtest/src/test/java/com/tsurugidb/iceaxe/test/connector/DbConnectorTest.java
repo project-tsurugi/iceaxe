@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.test.connector;
 
 import java.io.IOException;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
@@ -11,7 +10,6 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 /**
  * connector test
  */
-@Disabled // TODO remove Disabled
 class DbConnectorTest extends DbTestTableTester {
 
     @Test
