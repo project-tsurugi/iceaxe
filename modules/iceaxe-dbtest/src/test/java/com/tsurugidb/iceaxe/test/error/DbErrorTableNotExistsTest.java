@@ -1,12 +1,10 @@
 package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,6 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void select() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -54,7 +51,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     });
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
-//              assertTrue(e0.getMessage().contains("table_not_found test."), () -> "actual=" + e0.getMessage()); // TODO エラー詳細情報の確認
+//              assertContains("table_not_found test.", e0.getMessage()); // TODO エラー詳細情報の確認
             }
         }
     }
@@ -78,7 +75,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     });
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
-                assertTrue(e0.getMessage().contains("table_not_found table `test' is not found"), () -> "actual=" + e0.getMessage());
+                assertContains("table_not_found table `test' is not found", e0.getMessage());
             }
         }
     }
@@ -101,7 +98,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     });
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
-                assertTrue(e0.getMessage().contains("table_not_found test."), () -> "actual=" + e0.getMessage());
+                assertContains("table_not_found test.", e0.getMessage());
             }
         }
     }
@@ -124,7 +121,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     });
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
-                assertTrue(e0.getMessage().contains("table_not_found test."), () -> "actual=" + e0.getMessage());
+                assertContains("table_not_found test.", e0.getMessage());
             }
         }
     }
