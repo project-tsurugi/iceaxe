@@ -26,7 +26,12 @@ public class TsurugiIOException extends IOException implements TsurugiDiagnostic
 
     // internal
     public TsurugiIOException(IceaxeErrorCode code) {
-        super(code.getMessage());
+        this(code, null);
+    }
+
+    // internal
+    public TsurugiIOException(IceaxeErrorCode code, Throwable cause) {
+        super(code.getMessage(), cause);
         this.diagnosticCode = Optional.of(code);
     }
 

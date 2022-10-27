@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -26,6 +28,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private FutureResponse<PreparedStatement> lowPreparedStatementFuture;
+    private Throwable lowFutureException = null;
     private PreparedStatement lowPreparedStatement;
     private final TgParameterMapping<P> parameterMapping;
     private final IceaxeTimeout connectTimeout;
@@ -90,8 +93,17 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
 //  @ThreadSafe
     protected final synchronized PreparedStatement getLowPreparedStatement() throws IOException {
         if (this.lowPreparedStatement == null) {
+            if (lowFutureException != null) {
+                throw new TsurugiIOException(IceaxeErrorCode.PS_LOW_ERROR, lowFutureException);
+            }
+
             log.trace("lowPs get start");
-            this.lowPreparedStatement = IceaxeIoUtil.getAndCloseFuture(lowPreparedStatementFuture, connectTimeout);
+            try {
+                this.lowPreparedStatement = IceaxeIoUtil.getAndCloseFuture(lowPreparedStatementFuture, connectTimeout);
+            } catch (Throwable e) {
+                this.lowFutureException = e;
+                throw e;
+            }
             log.trace("lowPs get end");
 
             this.lowPreparedStatementFuture = null;

@@ -11,6 +11,8 @@ public enum IceaxeErrorCode implements DiagnosticCode {
 
     /** prepared statement already closed */
     PS_ALREADY_CLOSED(IceaxeErrorCodeBlock.STATEMENT + 1, "prepared statement already closed"),
+    /** low prepared statement error */
+    PS_LOW_ERROR(IceaxeErrorCodeBlock.STATEMENT + 2, "low prepared statement error"),
 
     //
     ;

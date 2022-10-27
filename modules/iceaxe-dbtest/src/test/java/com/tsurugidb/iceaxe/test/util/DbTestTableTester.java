@@ -152,7 +152,7 @@ public class DbTestTableTester {
 
     // assertion
 
-    protected void assertEqualsCode(DiagnosticCode expected, Exception actual) {
+    protected void assertEqualsCode(DiagnosticCode expected, Throwable actual) {
         var code = findDiagnosticCode(actual);
         assertEquals(expected, code);
     }
