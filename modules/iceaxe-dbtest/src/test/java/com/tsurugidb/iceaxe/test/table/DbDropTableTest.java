@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.test.table;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -45,11 +45,11 @@ class DbDropTableTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL)) {
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetCount(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            assertTrue(e.getMessage().contains("table_not_found table `test' is not found"), () -> "actual=" + e.getMessage());
+            assertContains("table_not_found table `test' is not found", e.getMessage());
         }
     }
 

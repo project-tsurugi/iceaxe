@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.test.error;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -45,9 +45,9 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(SELECT_SQL)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 LOG.trace("i={}", i);
-                var e0 = assertThrows(TsurugiTransactionIOException.class, () -> {
+                var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                     tm.execute((TsurugiTransactionAction) transaction -> {
-                        var e = assertThrows(TsurugiTransactionException.class, () -> {
+                        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             ps.executeAndGetList(transaction);
                         });
                         assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
@@ -86,9 +86,9 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
-                var e0 = assertThrows(TsurugiIOException.class, () -> {
+                var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                     tm.execute((TsurugiTransactionAction) transaction -> {
-                        var e = assertThrows(TsurugiTransactionException.class, () -> {
+                        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             ps.executeAndGetCount(transaction);
                         });
                         assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
@@ -112,7 +112,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var parameter = TgParameterList.of(foo.bind(1));
-                var e = assertThrows(TsurugiIOException.class, () -> {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     ps.executeAndGetList(transaction, parameter);
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
@@ -120,7 +120,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
             });
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var parameter = TgParameterList.of(foo.bind(1));
-                var e = assertThrows(TsurugiIOException.class, () -> {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     ps.executeAndGetList(transaction, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);
@@ -161,14 +161,14 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
-                var e = assertThrows(TsurugiIOException.class, () -> {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     ps.executeAndGetCount(transaction, parameter);
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                 assertContains(expected, e.getMessage());
             });
             tm.execute((TsurugiTransactionAction) transaction -> {
-                var e = assertThrows(TsurugiIOException.class, () -> {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     ps.executeAndGetCount(transaction, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);

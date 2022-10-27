@@ -1,7 +1,7 @@
 package com.tsurugidb.iceaxe.test.connector;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -30,7 +30,7 @@ public class DbErrorConnectTest {
             var thread = new ServerThtread(server);
             thread.start();
 
-            var e = assertThrows(IOException.class, () -> connect(port));
+            var e = assertThrowsExactly(IOException.class, () -> connect(port));
             assertInstanceOf(TimeoutException.class, e.getCause());
         }
     }

@@ -1,7 +1,7 @@
 package com.tsurugidb.iceaxe.test.table;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -54,7 +54,7 @@ class DbCreateTableExplainTest extends DbTestTableTester {
     }
 
     private static void assertExplain(TgStatementMetadata actual) throws Exception {
-        assertThrows(PlanGraphException.class, () -> {
+        assertThrowsExactly(PlanGraphException.class, () -> {
             actual.getLowPlanGraph();
         });
 

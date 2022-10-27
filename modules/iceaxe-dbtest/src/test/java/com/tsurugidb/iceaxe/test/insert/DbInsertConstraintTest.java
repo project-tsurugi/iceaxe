@@ -1,7 +1,7 @@
 package com.tsurugidb.iceaxe.test.insert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
@@ -46,7 +45,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             int count1 = ps.executeAndGetCount(tm, entity);
             assertEquals(-1, count1); // TODO 1
 
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetCount(tm, entity);
             });
             assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
@@ -62,12 +61,12 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e0 = assertThrows(TsurugiTransactionIOException.class, () -> {
+            var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.execute((TsurugiTransactionAction) transaction -> {
                     int count1 = ps.executeAndGetCount(transaction, entity);
                     assertEquals(-1, count1); // TODO 1
 
-                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         ps.executeAndGetCount(transaction, entity);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
@@ -88,12 +87,12 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e0 = assertThrows(TsurugiTransactionIOException.class, () -> {
+            var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.execute(transaction -> {
                     int count1 = ps.executeAndGetCount(transaction, entity);
                     assertEquals(-1, count1); // TODO 1
 
-                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         ps.executeAndGetCount(transaction, entity);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
@@ -119,7 +118,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     }
 
     private void insertSameTxLazyCheck(TsurugiTransactionManager tm, TsurugiPreparedStatementUpdate1<TestEntity> ps) throws IOException {
-        var e0 = assertThrows(TsurugiIOException.class, () -> {
+        var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var entity = createTestEntity(1);
                 var r1 = ps.execute(transaction, entity);
@@ -128,7 +127,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     int count1 = r1.getUpdateCount();
                     assertEquals(-1, count1); // TODO 1
 
-                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         r2.getUpdateCount();
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
@@ -137,7 +136,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             });
         });
         assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e0);
-//      assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+//      assertContains("TODO", e0.getMessage()); // TODO エラー詳細情報の確認
 
         assertEqualsTestTable(0);
     }
@@ -148,7 +147,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
 
         var session = getSession();
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e0 = assertThrows(TsurugiTransactionException.class, () -> {
+            var e0 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                 try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
                         var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
                     int count1 = ps.executeAndGetCount(tx1, entity);
@@ -157,7 +156,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     assertEquals(-1, count2); // TODO 1
 
                     tx1.commit(TgCommitType.DEFAULT);
-                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         tx2.commit(TgCommitType.DEFAULT);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ABORTED, e); // TODO ERR_ALREADY_EXISTS
@@ -177,7 +176,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
 
         var session = getSession();
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e0 = assertThrows(TsurugiTransactionException.class, () -> {
+            var e0 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                 try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
                         var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
                     int count1 = ps.executeAndGetCount(tx1, entity);
@@ -186,7 +185,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     assertEquals(-1, count2); // TODO 1
 
                     tx1.rollback();
-                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         tx2.commit(TgCommitType.DEFAULT);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ABORTED, e); // TODO ERR_ALREADY_EXISTS ?

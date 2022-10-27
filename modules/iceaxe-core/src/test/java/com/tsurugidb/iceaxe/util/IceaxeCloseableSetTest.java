@@ -3,7 +3,7 @@ package com.tsurugidb.iceaxe.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -300,7 +300,7 @@ class IceaxeCloseableSetTest {
         target.add(closeable2);
         assertEquals(2, target.size());
 
-        var e = assertThrows(IOException.class, () -> {
+        var e = assertThrowsExactly(IOException.class, () -> {
             target.closeInTransaction();
         });
         assertEquals("abc", e.getMessage());
@@ -346,7 +346,7 @@ class IceaxeCloseableSetTest {
         target.add(closeable3);
         assertEquals(3, target.size());
 
-        var e = assertThrows(TsurugiTransactionException.class, () -> {
+        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
             target.closeInTransaction();
         });
         assertEquals("MOCK_123: abc", e.getMessage());
@@ -375,7 +375,7 @@ class IceaxeCloseableSetTest {
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var e = assertThrows(TsurugiTransactionException.class, () -> {
+        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
             target.closeInTransaction();
         });
         assertSame(t, e);
@@ -397,7 +397,7 @@ class IceaxeCloseableSetTest {
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var e = assertThrows(TsurugiTransactionException.class, () -> {
+        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
             target.closeInTransaction();
         });
         assertSame(t, e.getCause());
@@ -418,7 +418,7 @@ class IceaxeCloseableSetTest {
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var e = assertThrows(RuntimeException.class, () -> {
+        var e = assertThrowsExactly(RuntimeException.class, () -> {
             target.closeInTransaction();
         });
         assertEquals("abc", e.getMessage());
@@ -440,7 +440,7 @@ class IceaxeCloseableSetTest {
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var e = assertThrows(IOException.class, () -> {
+        var e = assertThrowsExactly(IOException.class, () -> {
             target.closeInTransaction();
         });
         assertEquals("abc", e.getMessage());

@@ -1,7 +1,6 @@
 package com.tsurugidb.iceaxe.test.insert;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -42,9 +41,9 @@ class DbInsertErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrows(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(0);
@@ -65,12 +64,12 @@ class DbInsertErrorTest extends DbTestTableTester {
 
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e = assertThrows(TsurugiIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                 var entity = new TestEntity(123, null, null);
                 ps.executeAndGetCount(tm, entity);
             });
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(0);
@@ -86,7 +85,7 @@ class DbInsertErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         var ps = session.createPreparedStatement(sql);
         ps.close();
-        var e = assertThrows(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             ps.executeAndGetCount(tm);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
@@ -99,7 +98,7 @@ class DbInsertErrorTest extends DbTestTableTester {
         var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING);
         ps.close();
         var entity = createTestEntity(1);
-        var e = assertThrows(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             ps.executeAndGetCount(tm, entity);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
@@ -127,7 +126,7 @@ class DbInsertErrorTest extends DbTestTableTester {
                 transaction.getLowTransaction();
             }
             transaction.close();
-            var e = assertThrows(TsurugiIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                 ps.executeAndGetCount(transaction);
             });
             assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);

@@ -1,7 +1,6 @@
 package com.tsurugidb.iceaxe.test.update;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -13,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -45,7 +45,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrows(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
             assertEqualsCode(null, e); // TODO エラーコード
         }
 
@@ -62,7 +62,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrows(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
             assertEqualsCode(null, e); // TODO エラーコード
         }
 
@@ -90,11 +90,11 @@ class DbUpdateErrorTest extends DbTestTableTester {
 
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrows(TsurugiIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetCount(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(SIZE);

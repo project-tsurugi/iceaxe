@@ -1,8 +1,6 @@
 package com.tsurugidb.iceaxe.test.select;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -50,11 +48,11 @@ class DbSelectErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetList(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
     }
 
@@ -66,7 +64,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         var ps = session.createPreparedQuery(sql);
         ps.close();
-        var e = assertThrows(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             ps.executeAndGetList(tm);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
@@ -83,7 +81,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var ps = session.createPreparedQuery(sql, parameterMapping);
         ps.close();
         var parameter = TgParameterList.of(foo.bind(1));
-        var e = assertThrows(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             ps.executeAndGetList(tm, parameter);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
@@ -109,7 +107,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                 transaction.getLowTransaction();
             }
             transaction.close();
-            var e = assertThrows(TsurugiIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                 ps.executeAndGetList(transaction);
             });
             assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
@@ -128,10 +126,10 @@ class DbSelectErrorTest extends DbTestTableTester {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                 rs = ps.execute(transaction);
             }
-            var e = assertThrows(IOException.class, () -> {
+            var e = assertThrowsExactly(IOException.class, () -> {
                 rs.getRecordList();
             });
-            assertEquals("Future is already closed", e.getMessage());
+            assertMatches("Future .+ is already closed", e.getMessage());
         }
     }
 

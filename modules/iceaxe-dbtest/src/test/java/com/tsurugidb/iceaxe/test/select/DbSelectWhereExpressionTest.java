@@ -1,8 +1,7 @@
 package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,9 +46,9 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var e = assertThrows(TsurugiIOException.class, () -> ps.executeAndGetList(tm));
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetList(tm));
             assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
-            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
     }
 

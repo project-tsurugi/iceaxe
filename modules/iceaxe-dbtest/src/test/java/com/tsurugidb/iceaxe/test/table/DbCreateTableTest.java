@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.test.table;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -51,11 +51,11 @@ class DbCreateTableTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL)) {
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetCount(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            assertTrue(e.getMessage().contains("duplicate_table table `test' is already defined."), () -> "actual=" + e.getMessage());
+            assertContains("duplicate_table table `test' is already defined.", e.getMessage());
         }
     }
 

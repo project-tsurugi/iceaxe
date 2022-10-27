@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,7 +49,7 @@ class IceaxeConvertUtilTest {
         assertEquals(true, target.toBoolean("true"));
         assertEquals(false, target.toBoolean("false"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
             @Override
             protected Boolean convertBoolean(Object obj) {
                 throw new RuntimeException("test");
@@ -71,7 +71,7 @@ class IceaxeConvertUtilTest {
         assertEquals(Integer.valueOf(123), target.toInt4(BigDecimal.valueOf(123)));
         assertEquals(Integer.valueOf(123), target.toInt4("123"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toInt4("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toInt4("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
@@ -88,7 +88,7 @@ class IceaxeConvertUtilTest {
         assertEquals(Long.valueOf(123), target.toInt8(BigDecimal.valueOf(123)));
         assertEquals(Long.valueOf(123), target.toInt8("123"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toInt8("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toInt8("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
@@ -103,7 +103,7 @@ class IceaxeConvertUtilTest {
         assertEquals(Float.valueOf(123), target.toFloat4(BigDecimal.valueOf(123)));
         assertEquals(Float.valueOf(123), target.toFloat4("123"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toFloat4("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toFloat4("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
@@ -118,7 +118,7 @@ class IceaxeConvertUtilTest {
         assertEquals(Double.valueOf(123), target.toFloat8(BigDecimal.valueOf(123)));
         assertEquals(Double.valueOf(123), target.toFloat8("123"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toFloat8("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toFloat8("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
@@ -136,7 +136,7 @@ class IceaxeConvertUtilTest {
         assertEquals(BigDecimal.valueOf(123), target.toDecimal(new BigInteger("123")));
         assertEquals(BigDecimal.valueOf(123), target.toDecimal("123"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toDecimal("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toDecimal("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
@@ -153,7 +153,7 @@ class IceaxeConvertUtilTest {
         assertEquals("123", target.toCharacter(BigDecimal.valueOf(123)));
         assertEquals("123", target.toCharacter("123"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
             @Override
             protected String convertString(Object obj) {
                 throw new RuntimeException("test");
@@ -169,7 +169,7 @@ class IceaxeConvertUtilTest {
         assertArrayEquals(new byte[] {}, target.toBytes(new byte[] {}));
         assertArrayEquals(new byte[] { 1, 2, 3 }, target.toBytes(new byte[] { 1, 2, 3 }));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
             @Override
             protected byte[] convertBytes(Object obj) {
                 throw new RuntimeException("test");
@@ -185,7 +185,7 @@ class IceaxeConvertUtilTest {
         assertArrayEquals(new boolean[] {}, target.toBits(new boolean[] {}));
         assertArrayEquals(new boolean[] { true, false }, target.toBits(new boolean[] { true, false }));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
             @Override
             protected boolean[] convertBits(Object obj) {
                 throw new RuntimeException("test");
@@ -204,7 +204,7 @@ class IceaxeConvertUtilTest {
         assertEquals(expected, target.toDate(java.sql.Date.valueOf("2022-06-02")));
         assertEquals(expected, target.toDate("2022-06-02"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toDate("2022/06/02"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toDate("2022/06/02"));
         assertInstanceOf(DateTimeParseException.class, e.getCause());
     }
 
@@ -218,7 +218,7 @@ class IceaxeConvertUtilTest {
         assertEquals(expected, target.toTime(java.sql.Time.valueOf("23:30:59")));
         assertEquals(expected, target.toTime("23:30:59"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toTime("23;30;59"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toTime("23;30;59"));
         assertInstanceOf(DateTimeParseException.class, e.getCause());
     }
 
@@ -233,7 +233,7 @@ class IceaxeConvertUtilTest {
         assertEquals(expected, target.toDateTime(java.sql.Timestamp.valueOf("2022-09-22 23:30:59")));
         assertEquals(expected, target.toDateTime("2022-09-22T23:30:59"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toDateTime("2022-09-22 23:30:59"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toDateTime("2022-09-22 23:30:59"));
         assertInstanceOf(DateTimeParseException.class, e.getCause());
     }
 
@@ -248,7 +248,7 @@ class IceaxeConvertUtilTest {
         assertEquals(expected, target.toOffsetTime(OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)));
         assertEquals(expected, target.toOffsetTime("23:30:59+09:00"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toOffsetTime("23;30;59"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toOffsetTime("23;30;59"));
         assertInstanceOf(DateTimeParseException.class, e.getCause());
     }
 
@@ -262,7 +262,7 @@ class IceaxeConvertUtilTest {
         assertEquals(expected, target.toOffsetDateTime(ZonedDateTime.of(2022, 9, 22, 23, 30, 59, 0, ZoneId.of("Asia/Tokyo"))));
         assertEquals(expected, target.toOffsetDateTime("2022-09-22T23:30:59+09:00"));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> target.toOffsetDateTime("2022-09-22 23:30:59"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toOffsetDateTime("2022-09-22 23:30:59"));
         assertInstanceOf(DateTimeParseException.class, e.getCause());
     }
 
@@ -276,7 +276,7 @@ class IceaxeConvertUtilTest {
         assertEquals(expected, target.toZonedDateTime(ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone), zone));
         assertEquals(expected, target.toZonedDateTime(OffsetDateTime.of(2022, 6, 2, 23, 30, 59, 999, ZoneOffset.ofHours(9)), zone));
 
-        var e = assertThrows(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
             @Override
             protected ZonedDateTime convertZonedDateTime(Object obj, ZoneId zone) {
                 throw new RuntimeException("test");

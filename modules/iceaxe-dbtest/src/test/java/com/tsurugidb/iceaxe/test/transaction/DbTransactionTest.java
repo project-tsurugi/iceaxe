@@ -1,7 +1,7 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -94,7 +94,7 @@ class DbTransactionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            assertThrows(IOException.class, () -> {
+            assertThrowsExactly(IOException.class, () -> {
                 tm.execute((TsurugiTransactionAction) transaction -> {
                     assertSelect(SIZE, session, transaction);
 

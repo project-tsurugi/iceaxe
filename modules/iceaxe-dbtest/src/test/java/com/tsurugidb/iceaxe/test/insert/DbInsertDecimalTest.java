@@ -1,8 +1,7 @@
 package com.tsurugidb.iceaxe.test.insert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -79,9 +78,9 @@ class DbInsertDecimalTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL, mapping)) {
             var parameter = TgParameterList.of(variable.bind(value));
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> ps.executeAndGetCount(tm, parameter));
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> ps.executeAndGetCount(tm, parameter));
             assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
-            assertTrue(e.getMessage().contains("TODO"), () -> "actual=" + e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
     }
 

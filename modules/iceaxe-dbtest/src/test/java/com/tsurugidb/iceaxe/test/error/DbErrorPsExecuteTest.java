@@ -1,8 +1,7 @@
 package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -45,7 +44,7 @@ class DbErrorPsExecuteTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 ps.executeAndGetList(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
@@ -79,12 +78,12 @@ class DbErrorPsExecuteTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 var plist = TgParameterList.of(foo.bind(123), bar.bind(456) /* ,zzz */);
                 ps.executeAndGetCount(tm, plist);
             });
             assertEqualsCode(SqlServiceCode.ERR_UNRESOLVED_HOST_VARIABLE, e);
-            assertTrue(e.getMessage().contains("Value is not assigned for host variable 'zzz'."), () -> "actual=" + e.getMessage());
+            assertContains("Value is not assigned for host variable 'zzz'.", e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -103,12 +102,12 @@ class DbErrorPsExecuteTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            var e = assertThrows(TsurugiIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                 var plist = TgParameterList.of(foo.bind(123), bar.bind(456), zzz.bind(789));
                 ps.executeAndGetCount(tm, plist);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            assertTrue(e.getMessage().contains("inconsistent_type int4() (expected: {character_string})"), () -> "actual=" + e.getMessage()); // TODO カラム名の確認
+            assertContains("inconsistent_type int4() (expected: {character_string})", e.getMessage());; // TODO カラム名の確認
         }
 
         assertEqualsTestTable(SIZE);

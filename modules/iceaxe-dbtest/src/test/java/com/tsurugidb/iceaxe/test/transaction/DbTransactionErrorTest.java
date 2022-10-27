@@ -2,7 +2,7 @@ package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -66,7 +66,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofRTX());
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> ps.executeAndGetCount(tm));
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> ps.executeAndGetCount(tm));
             assertEqualsCode(SqlServiceCode.ERR_UNSUPPORTED, e);
         }
 
@@ -83,7 +83,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofLTX()); // no WritePreserve
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrows(TsurugiTransactionIOException.class, () -> ps.executeAndGetCount(tm));
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> ps.executeAndGetCount(tm));
             assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
         }
 
@@ -106,7 +106,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrows(TsurugiIOException.class, () -> transaction.commit(TgCommitType.DEFAULT));
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> transaction.commit(TgCommitType.DEFAULT));
         assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
     }
 
@@ -115,7 +115,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrows(TsurugiIOException.class, () -> transaction.rollback());
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> transaction.rollback());
         assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
     }
 
@@ -124,7 +124,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrows(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             transaction.addChild(() -> {
                 // dummy
             });
@@ -137,7 +137,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrows(IOException.class, () -> {
+        var e = assertThrowsExactly(IOException.class, () -> {
             transaction.getLowTransaction();
         });
         assertMatches("Future .+ is already closed", e.getMessage());
@@ -157,7 +157,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrows(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             transaction.executeLow(lowTx -> {
                 return null; // dummy
             });
