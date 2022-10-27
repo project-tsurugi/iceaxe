@@ -8,6 +8,8 @@ import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 public enum IceaxeErrorCode implements DiagnosticCode {
     /** transaction already closed */
     TX_ALREADY_CLOSED(IceaxeErrorCodeBlock.TRANSACTION + 1, "transaction already closed"),
+    /** low transaction error */
+    TX_LOW_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 2, "low transaction error"),
 
     /** prepared statement already closed */
     PS_ALREADY_CLOSED(IceaxeErrorCodeBlock.STATEMENT + 1, "prepared statement already closed"),

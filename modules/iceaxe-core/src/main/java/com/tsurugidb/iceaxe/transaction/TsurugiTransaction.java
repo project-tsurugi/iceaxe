@@ -35,6 +35,7 @@ public class TsurugiTransaction implements Closeable {
 
     private final TsurugiSession ownerSession;
     private FutureResponse<Transaction> lowTransactionFuture;
+    private Throwable lowFutureException = null;
     private Transaction lowTransaction;
     private boolean calledGetLowTransaction = false;
     private final TgTxOption txOption;
@@ -200,8 +201,17 @@ public class TsurugiTransaction implements Closeable {
     public final synchronized Transaction getLowTransaction() throws IOException {
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
+            if (lowFutureException != null) {
+                throw new TsurugiIOException(IceaxeErrorCode.TX_LOW_ERROR, lowFutureException);
+            }
+
             LOG.trace("lowTransaction get start");
-            this.lowTransaction = IceaxeIoUtil.getAndCloseFuture(lowTransactionFuture, beginTimeout);
+            try {
+                this.lowTransaction = IceaxeIoUtil.getAndCloseFuture(lowTransactionFuture, beginTimeout);
+            } catch (Throwable e) {
+                this.lowFutureException = e;
+                throw e;
+            }
             LOG.trace("lowTransaction get end");
 
             this.lowTransactionFuture = null;
