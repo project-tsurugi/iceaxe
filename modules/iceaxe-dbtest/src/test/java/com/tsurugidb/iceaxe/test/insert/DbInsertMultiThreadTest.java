@@ -7,9 +7,10 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -49,16 +50,10 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
         insertMultiTx(1000, 30, TgTxOption.ofOCC());
     }
 
-    @Test
-    @Disabled // TODO remove Disabled
-    void insertMultiTxLtx2() throws IOException, InterruptedException {
-        insertMultiTx(100, 2, TgTxOption.ofLTX(TEST));
-    }
-
-    @Test
-    @Disabled // TODO remove Disabled
-    void insertMultiTxLtx3() throws IOException, InterruptedException {
-        insertMultiTx(100, 3, TgTxOption.ofLTX(TEST));
+    @ParameterizedTest
+    @ValueSource(ints = { 2, 3, 8, 30 })
+    void insertMultiTxLtx(int threadSize) throws IOException, InterruptedException {
+        insertMultiTx(1000, threadSize, TgTxOption.ofLTX(TEST));
     }
 
     /**
