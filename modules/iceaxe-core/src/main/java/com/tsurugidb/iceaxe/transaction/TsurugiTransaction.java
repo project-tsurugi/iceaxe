@@ -384,9 +384,9 @@ public class TsurugiTransaction implements Closeable {
     }
 
     /**
-     * Returns the closed state of the prepared statement.
+     * Returns the closed state of the transaction.
      *
-     * @return true if the prepared statement has been closed
+     * @return {@code true} if the transaction has been closed
      * @see #close()
      */
     public boolean isClosed() {

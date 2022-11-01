@@ -67,7 +67,7 @@ public abstract class TsurugiPreparedStatement implements Closeable {
     /**
      * Returns the closed state of the prepared statement.
      *
-     * @return true if the prepared statement has been closed
+     * @return {@code true} if the prepared statement has been closed
      * @see #close()
      */
     public boolean isClosed() {
