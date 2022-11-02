@@ -221,7 +221,11 @@ public class DbTestTableTester {
     }
 
     protected int selectCountFromTest() throws IOException {
-        var sql = "select count(*) from " + TEST;
+        return selectCount(TEST);
+    }
+
+    protected int selectCount(String tableName) throws IOException {
+        var sql = "select count(*) from " + tableName;
         var resultMapping = TgResultMapping.of(record -> record.nextInt4());
 
         var session = getSession();
