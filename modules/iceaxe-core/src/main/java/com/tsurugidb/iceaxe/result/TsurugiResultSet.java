@@ -38,6 +38,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     private FutureResponse<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
+    private boolean calledGetLowResultSet = false;
     private final TgResultMapping<R> resultMapping;
     private final IceaxeConvertUtil convertUtil;
     private final IceaxeTimeout connectTimeout;
@@ -103,6 +104,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     }
 
     protected final synchronized ResultSet getLowResultSet() throws IOException, TsurugiTransactionException {
+        this.calledGetLowResultSet = true;
         if (this.lowResultSet == null) {
             LOG.trace("lowResultSet get start");
             this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout);
@@ -284,12 +286,30 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     @Override
     public void close() throws IOException, TsurugiTransactionException {
-        // 一度もレコードを取得していない場合でも、closeでステータスチェックされる
-
         LOG.trace("rs close start");
-        // not try-finally
-        IceaxeIoUtil.closeInTransaction(lowResultSet, lowResultSetFuture);
-        super.close();
+
+        Throwable occurred = null;
+        try {
+            if (!this.calledGetLowResultSet) {
+                getLowResultSet();
+            }
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            try {
+                // not try-finally
+                IceaxeIoUtil.closeInTransaction(lowResultSet, lowResultSetFuture);
+                super.close();
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    occurred.addSuppressed(e);
+                } else {
+                    throw e;
+                }
+            }
+        }
+
         LOG.trace("rs close end");
     }
 }

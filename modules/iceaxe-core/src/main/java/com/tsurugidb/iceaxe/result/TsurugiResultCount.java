@@ -105,6 +105,7 @@ public class TsurugiResultCount extends TsurugiResult {
     public int getUpdateCount() throws IOException, TsurugiTransactionException {
         checkLowResult();
         // FIXME 更新件数取得
+        // 件数を保持し、何度呼ばれても返せるようにする
 //      throw new InternalError("not yet implements");
 //      System.err.println("not yet implements TsurugiResultCount.getUpdateCount(), now always returns -1");
         return -1;
@@ -112,12 +113,28 @@ public class TsurugiResultCount extends TsurugiResult {
 
     @Override
     public void close() throws IOException, TsurugiTransactionException {
-        // checkLowResult()を一度も呼ばなくても、closeでステータスチェックされるはず
-
         LOG.trace("result close start");
-        // not try-finally
-        IceaxeIoUtil.closeInTransaction(lowResultFuture);
-        super.close();
+
+        Throwable occurred = null;
+        try {
+            checkLowResult();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            try {
+                // not try-finally
+                IceaxeIoUtil.closeInTransaction(lowResultFuture);
+                super.close();
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    occurred.addSuppressed(e);
+                } else {
+                    throw e;
+                }
+            }
+        }
+
         LOG.trace("result close end");
     }
 }
