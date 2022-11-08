@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.test.error;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,11 +12,14 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 
 /**
  * multiplex insert error test
  */
 class DbErrorMultiplexInsertTest extends DbTestTableTester {
+
+    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeEach
     void beforeEach() throws IOException {
@@ -33,7 +35,7 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
 
     @Test
     void isnertMultiCheck1() throws IOException, TsurugiTransactionException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < ATTEMPT_SIZE; i++) {
             isnertMulti(1, ExecuteType.RESULT_CHECK);
         }
     }
@@ -45,31 +47,28 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void isnertMultiClose1() throws IOException, TsurugiTransactionException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < ATTEMPT_SIZE; i++) {
             isnertMulti(1, ExecuteType.CLOSE_ONLY);
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    @Disabled // TODO remove Disabled
     void isnertMultiCloseN(int size) throws IOException, TsurugiTransactionException {
         isnertMulti(size, ExecuteType.CLOSE_ONLY);
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void isnertMulti1() throws IOException, TsurugiTransactionException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < ATTEMPT_SIZE; i++) {
             isnertMulti(1, ExecuteType.EXEUTE_ONLY);
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    @Disabled // TODO remove Disabled
+//    @Disabled // TODO remove Disabled
     void isnertMultiN(int size) throws IOException, TsurugiTransactionException {
         isnertMulti(size, ExecuteType.EXEUTE_ONLY);
     }
