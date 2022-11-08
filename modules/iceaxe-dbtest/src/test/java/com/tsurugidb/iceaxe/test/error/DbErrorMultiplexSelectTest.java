@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.test.error;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,11 +12,14 @@ import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 
 /**
  * multiplex select error test
  */
 class DbErrorMultiplexSelectTest extends DbTestTableTester {
+
+    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeAll
     static void beforeAll() throws IOException {
@@ -33,7 +35,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
 
     @Test
     public void selectMultiRead1() throws IOException, TsurugiTransactionException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < ATTEMPT_SIZE; i++) {
             selectMulti(1, ExecuteType.READ_ALL);
         }
     }
@@ -45,39 +47,29 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     public void selectMultiClose1() throws IOException, TsurugiTransactionException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < ATTEMPT_SIZE; i++) {
             selectMulti(1, ExecuteType.CLOSE_ONLY);
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    @Disabled // TODO remove Disabled
     public void selectMultiCloseN(int size) throws IOException, TsurugiTransactionException {
         selectMulti(size, ExecuteType.CLOSE_ONLY);
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void selectMulti1() throws IOException, TsurugiTransactionException {
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < ATTEMPT_SIZE; i++) {
             selectMulti(1, ExecuteType.EXEUTE_ONLY);
         }
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 15 })
-    @Disabled // TODO remove Disabled
+    @ValueSource(ints = { 15, 16, 255, 256 })
     void selectMultiN(int size) throws IOException, TsurugiTransactionException {
         selectMulti(size, ExecuteType.EXEUTE_ONLY);
-    }
-
-    @Test
-    @Disabled // TODO change Disabled to Timeout
-    void selectMulti16() throws IOException, TsurugiTransactionException {
-        selectMulti(16, ExecuteType.EXEUTE_ONLY);
     }
 
     private enum ExecuteType {

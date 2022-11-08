@@ -68,7 +68,6 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-//    @Disabled // TODO remove Disabled
     void isnertMultiN(int size) throws IOException, TsurugiTransactionException {
         isnertMulti(size, ExecuteType.EXEUTE_ONLY);
     }
