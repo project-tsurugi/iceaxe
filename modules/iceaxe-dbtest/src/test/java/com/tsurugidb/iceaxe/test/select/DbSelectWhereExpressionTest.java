@@ -13,9 +13,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -46,7 +46,9 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetList(tm));
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                ps.executeAndGetList(tm);
+            });
             assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
             assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
