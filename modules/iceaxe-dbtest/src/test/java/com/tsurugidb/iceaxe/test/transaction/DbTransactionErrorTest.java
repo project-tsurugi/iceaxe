@@ -8,11 +8,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
@@ -94,30 +96,32 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
+    @Disabled // TODO remove Disabled "no available response box"が発生し、後続のテストがトランザクションを作れなくなって失敗する
     void doNothing() throws IOException {
-        var session = getSession();
-        for (int i = 0; i < ATTEMPT_SIZE; i++) {
-            try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
+        try (var session = DbTestConnector.createSession()) {
+            for (int i = 0; i < ATTEMPT_SIZE; i++) {
+                try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
+                }
             }
         }
     }
 
     @Test
     void limitOver() throws IOException {
-        var session = getSession();
-        for (int i = 0; i < 300; i++) {
-            LOG.trace("i={}", i);
-            var tx = session.createTransaction(TgTxOption.ofOCC());
-            try {
-                tx.getLowTransaction();
-            } catch (TsurugiIOException e) {
-                assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
-                assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
-                assertEquals(260, i);
-                return;
+        try (var session = DbTestConnector.createSession()) {
+            for (int i = 0; i < 1000; i++) {
+                LOG.trace("i={}", i);
+                var tx = session.createTransaction(TgTxOption.ofOCC());
+                try {
+                    tx.getLowTransaction();
+                } catch (TsurugiIOException e) {
+                    assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
+                    assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
+                    return;
+                }
             }
+            fail("err_resource_limit_reached did not occur");
         }
-        fail("err_resource_limit_reached did not occur");
     }
 
     @Test
