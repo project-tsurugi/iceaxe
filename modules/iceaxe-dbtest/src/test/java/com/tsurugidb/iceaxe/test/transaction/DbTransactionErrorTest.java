@@ -3,11 +3,11 @@ package com.tsurugidb.iceaxe.test.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -18,6 +18,7 @@ import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -26,6 +27,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbTransactionErrorTest extends DbTestTableTester {
 
     private static final int SIZE = 4;
+    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 200;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws IOException {
@@ -92,13 +94,30 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled （tateyama-severが落ちる （落ちるのにテストが成功することもある））
     void doNothing() throws IOException {
         var session = getSession();
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < ATTEMPT_SIZE; i++) {
             try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
             }
         }
+    }
+
+    @Test
+    void limitOver() throws IOException {
+        var session = getSession();
+        for (int i = 0; i < 300; i++) {
+            LOG.trace("i={}", i);
+            var tx = session.createTransaction(TgTxOption.ofOCC());
+            try {
+                tx.getLowTransaction();
+            } catch (TsurugiIOException e) {
+                assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
+                assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
+                assertEquals(260, i);
+                return;
+            }
+        }
+        fail("err_resource_limit_reached did not occur");
     }
 
     @Test
