@@ -26,7 +26,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
  */
 class DbDeleteTest extends DbTestTableTester {
 
-    private static final int SIZE = 4;
+    static final int SIZE = 4;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws IOException {
