@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -29,7 +30,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbTransactionErrorTest extends DbTestTableTester {
 
     private static final int SIZE = 4;
-    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 200;
+    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws IOException {
@@ -95,8 +96,8 @@ class DbTransactionErrorTest extends DbTestTableTester {
         assertEqualsTestTable(SIZE);
     }
 
-    @Test
-    @Disabled // TODO remove Disabled "no available response box"が発生し、後続のテストがトランザクションを作れなくなって失敗する
+    @RepeatedTest(8)
+    @Disabled // TODO remove Disabled 何度か実行するとERR_RESOURCE_LIMIT_REACHEDが発生し、後続のテストも失敗するようになる
     void doNothing() throws IOException {
         try (var session = DbTestConnector.createSession()) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
