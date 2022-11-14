@@ -8,6 +8,7 @@ import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
@@ -109,6 +110,26 @@ class DbSelectAggregateTest extends DbTestTableTester {
                 i++;
             }
         }
+    }
+
+    @Test
+    void selectCountWhereEmpty() throws IOException {
+        new DbSelectEmptyTest().selectCount(" where foo<0");
+    }
+
+    @Test
+    void selectSumWhereEmpty() throws IOException {
+        new DbSelectEmptyTest().selectSum(" where foo<0");
+    }
+
+    @Test
+    void selectKeyCountWhereEmpty() throws IOException {
+        new DbSelectEmptyTest().selectKeyCount(" where foo<0");
+    }
+
+    @Test
+    void selectKeySumWhereEmpty() throws IOException {
+        new DbSelectEmptyTest().selectKeySum(" where foo<0");
     }
 
     @ParameterizedTest

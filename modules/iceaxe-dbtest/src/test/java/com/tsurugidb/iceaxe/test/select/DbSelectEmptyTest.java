@@ -66,7 +66,11 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
     @Test
     void selectCount() throws IOException {
-        var sql = "select count(*) from " + TEST;
+        selectCount("");
+    }
+
+    void selectCount(String where) throws IOException {
+        var sql = "select count(*) from " + TEST + where;
         var resultMapping = TgResultMapping.of(record -> record.nextInt4());
 
         var session = getSession();
@@ -79,7 +83,11 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
     @Test
     void selectSum() throws IOException {
-        var sql = "select sum(bar) as sum, min(zzz) as zzz from " + TEST;
+        selectSum("");
+    }
+
+    void selectSum(String where) throws IOException {
+        var sql = "select sum(bar) as sum, min(zzz) as zzz from " + TEST + where;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -92,7 +100,13 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
     @Test
     void selectKeyCount() throws IOException {
-        var sql = "select foo, count(*) from " + TEST + " group by foo";
+        selectKeyCount("");
+    }
+
+    void selectKeyCount(String where) throws IOException {
+        var sql = "select foo, count(*) from " + TEST //
+                + where //
+                + " group by foo";
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -104,7 +118,13 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
     @Test
     void selectKeySum() throws IOException {
-        var sql = "select foo, sum(bar) as sum, min(zzz) as zzz from " + TEST + " group by foo";
+        selectKeySum("");
+    }
+
+    void selectKeySum(String where) throws IOException {
+        var sql = "select foo, sum(bar) as sum, min(zzz) as zzz from " + TEST //
+                + where //
+                + " group by foo";
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
