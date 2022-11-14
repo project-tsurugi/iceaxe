@@ -14,11 +14,14 @@ import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 
 /**
  * select empty-table test
  */
 class DbSelectEmptyTest extends DbTestTableTester {
+
+    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeAll
     static void beforeAll() throws IOException {
@@ -38,7 +41,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            for (int i = 0; i < 300; i++) {
+            for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
                 assertEquals(List.of(), list);
             }
@@ -53,7 +56,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
-                for (int i = 0; i < 300; i++) {
+                for (int i = 0; i < ATTEMPT_SIZE; i++) {
                     List<TsurugiResultEntity> list = ps.executeAndGetList(transaction);
                     assertEquals(List.of(), list);
                 }
@@ -84,6 +87,30 @@ class DbSelectEmptyTest extends DbTestTableTester {
             TsurugiResultEntity entity = ps.executeAndFindRecord(tm).get();
             assertNull(entity.getInt4OrNull("sum"));
             assertNull(entity.getCharacterOrNull("zzz"));
+        }
+    }
+
+    @Test
+    void selectKeyCount() throws IOException {
+        var sql = "select foo, count(*) from " + TEST + " group by foo";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedQuery(sql)) {
+            var list = ps.executeAndGetList(tm);
+            assertEquals(0, list.size());
+        }
+    }
+
+    @Test
+    void selectKeySum() throws IOException {
+        var sql = "select foo, sum(bar) as sum, min(zzz) as zzz from " + TEST + " group by foo";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedQuery(sql)) {
+            var list = ps.executeAndGetList(tm);
+            assertEquals(0, list.size());
         }
     }
 }

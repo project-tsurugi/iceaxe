@@ -57,6 +57,22 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
+    void aggregateWithoutGroupBy() throws IOException {
+        var sql = "select foo, sum(bar) as bar from " + TEST;
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedQuery(sql)) {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                ps.executeAndGetList(tm);
+            });
+            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+            e.printStackTrace();
+            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
+        }
+    }
+
+    @Test
     void ps0ExecuteAfterClose() throws IOException {
         var sql = "select * from " + TEST;
 

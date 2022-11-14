@@ -132,7 +132,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
             }
         }
 
-        var actual = selectCount(TEST2);
+        var actual = selectCountFrom(TEST2);
         assertEquals(recordSize * threadSize, actual);
     }
 
