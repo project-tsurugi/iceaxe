@@ -9,6 +9,7 @@ import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
+import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
@@ -51,6 +52,8 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
     }
 
     protected void testTimeout(TimeoutModifier modifier) throws IOException {
+        DbTestConnector.assumeEndpointTcp();
+
         try (var pipeServer = new PipeServerThtread()) {
             pipeServer.start();
 

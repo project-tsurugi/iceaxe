@@ -67,7 +67,6 @@ class DbSelectErrorTest extends DbTestTableTester {
                 ps.executeAndGetList(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            e.printStackTrace();
             assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
     }

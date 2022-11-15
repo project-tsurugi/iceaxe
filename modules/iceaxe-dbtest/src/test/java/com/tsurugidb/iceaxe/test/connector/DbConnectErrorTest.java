@@ -20,7 +20,7 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 /**
  * connect error test
  */
-public class DbErrorConnectTest {
+public class DbConnectErrorTest {
 
     @Test
     void connectError() throws IOException, InterruptedException {
