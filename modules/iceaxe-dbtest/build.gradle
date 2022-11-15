@@ -7,3 +7,17 @@ dependencies {
     implementation "ch.qos.logback:logback-classic:1.2.3"
     implementation 'org.slf4j:slf4j-simple:1.7.32'
 }
+
+tasks.named('test') {
+    systemProperty 'tsurugi.dbtest.endpoint', findProperty('dbtest.endpoint') ?: 'tcp://localhost:12345'
+}
+
+if (hasProperty("dbtest.ci")) {
+    test {
+        filter {
+            excludeTestsMatching "com.tsurugidb.iceaxe.test.timeout.*"
+            excludeTestsMatching "com.tsurugidb.iceaxe.test.connector.DbErrorConnectTest"
+        }
+    }
+}
+

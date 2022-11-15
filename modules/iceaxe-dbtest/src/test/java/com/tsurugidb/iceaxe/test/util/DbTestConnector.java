@@ -16,8 +16,13 @@ public class DbTestConnector {
     private static final String DB_HOST = "localhost";
     private static final int DB_PORT = 12345;
 
+    private static final String SYSPROP_DBTEST_ENDPOINT = "tsurugi.dbtest.endpoint";
+
     public static TsurugiConnector createConnector() {
-        var endpoint = URI.create("tcp://" + DB_HOST + ":" + DB_PORT);
+        String endpointString = System.getProperty(
+            SYSPROP_DBTEST_ENDPOINT, "tcp://" + DB_HOST + ":" + DB_PORT
+        );
+        var endpoint = URI.create(endpointString);
         return TsurugiConnector.createConnector(endpoint);
     }
 
