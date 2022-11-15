@@ -24,13 +24,6 @@ jobs:
       GPR_USER: ${{ github.repository_owner }}
       GPR_KEY: ${{ secrets.GHCR_PAT }}
 
-    services:
-      tsurugi:
-        image: ghcr.io/project-tsurugi/tsurugi:latest
-        credentials:
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_PAT }}
-
     steps:
       - id: Setup_Java
         name: Setup_Java
