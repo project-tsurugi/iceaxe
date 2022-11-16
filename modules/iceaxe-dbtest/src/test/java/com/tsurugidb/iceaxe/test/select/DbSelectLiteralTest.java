@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -40,7 +39,6 @@ class DbSelectLiteralTest extends DbTestTableTester {
     private static final String COLUMN = "c";
 
     @Test
-    @Disabled // TODO remove Disabled
     void nullLiteral() throws IOException {
         test("null", entity -> {
             assertNull(entity.getCharacterOrNull(COLUMN));
@@ -89,7 +87,6 @@ class DbSelectLiteralTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    @Disabled // TODO remove Disabled
     void booleanLiteral(boolean literal) throws IOException {
         test(Boolean.toString(literal), entity -> {
             assertEquals(literal, entity.getBoolean(COLUMN));
