@@ -15,11 +15,11 @@ import com.tsurugidb.sql.proto.SqlRequest.WritePreserve;
  * Tsurugi Transaction Option
  */
 @ThreadSafe
-public class TgTxOption {
+public class TgTxOption implements Cloneable {
 
     /**
      * create transaction option
-     * 
+     *
      * @return transaction option
      */
     public static TgTxOption of() {
@@ -28,7 +28,7 @@ public class TgTxOption {
 
     /**
      * create transaction option for OCC
-     * 
+     *
      * @return transaction option
      */
     public static TgTxOption ofOCC() {
@@ -37,7 +37,7 @@ public class TgTxOption {
 
     /**
      * create transaction option for long transaction
-     * 
+     *
      * @param writePreserveTableNames table name to Write Preserve
      * @return transaction option
      */
@@ -52,7 +52,7 @@ public class TgTxOption {
 
     /**
      * create transaction option for long transaction
-     * 
+     *
      * @param writePreserveTableNames table name to Write Preserve
      * @return transaction option
      */
@@ -66,7 +66,7 @@ public class TgTxOption {
 
     /**
      * create transaction option for read only transaction
-     * 
+     *
      * @return transaction option
      */
     public static TgTxOption ofRTX() {
@@ -88,7 +88,7 @@ public class TgTxOption {
 
     /**
      * set transaction type
-     * 
+     *
      * @param type transaction type
      * @return this
      */
@@ -100,7 +100,7 @@ public class TgTxOption {
 
     /**
      * get transaction type
-     * 
+     *
      * @return transaction type
      */
     public synchronized TransactionType type() {
@@ -109,7 +109,7 @@ public class TgTxOption {
 
     /**
      * add write preserve
-     * 
+     *
      * @param tableName table name
      * @return this
      */
@@ -124,7 +124,7 @@ public class TgTxOption {
 
     /**
      * get write preserve
-     * 
+     *
      * @return list of table name
      */
     public synchronized List<String> writePreserve() {
@@ -136,7 +136,7 @@ public class TgTxOption {
 
     /**
      * set label
-     * 
+     *
      * @param label label
      * @return this
      */
@@ -148,7 +148,7 @@ public class TgTxOption {
 
     /**
      * get label
-     * 
+     *
      * @return label
      */
     public synchronized String label() {
@@ -157,7 +157,7 @@ public class TgTxOption {
 
     /**
      * set priority
-     * 
+     *
      * @param priority priority
      * @return this
      */
@@ -169,7 +169,7 @@ public class TgTxOption {
 
     /**
      * get priority
-     * 
+     *
      * @return priority
      */
     public synchronized TransactionPriority priority() {
@@ -206,6 +206,23 @@ public class TgTxOption {
         if (lowPriority != null) {
             lowBuilder.setPriority(lowPriority);
         }
+    }
+
+    @Override
+    public TgTxOption clone() {
+        TgTxOption option;
+        try {
+            option = (TgTxOption) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError(e);
+        }
+
+        if (option.writePreserveList != null) {
+            option.writePreserveList = new ArrayList<>(option.writePreserveList);
+        }
+
+        option.reset();
+        return option;
     }
 
     @Override
