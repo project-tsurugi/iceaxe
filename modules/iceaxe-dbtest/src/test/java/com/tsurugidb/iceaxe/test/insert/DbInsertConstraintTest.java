@@ -159,43 +159,44 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         tx2.commit(TgCommitType.DEFAULT);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ABORTED, e); // TODO ERR_ALREADY_EXISTS
-                    throw e;
+                    assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
+
+                    try (var tx3 = session.createTransaction(TgTxOption.ofOCC())) {
+                        int count3 = ps.executeAndGetCount(tx3, entity);
+                        assertEquals(-1, count3); // TODO 1
+                        var e3 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                            tx3.commit(TgCommitType.DEFAULT);
+                        });
+                        assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e3);
+                        throw e3;
+                    }
                 }
             });
 
-            assertEqualsCode(SqlServiceCode.ERR_ABORTED, e0);
+            assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e0);
         }
 
         assertEqualsTestTable(entity);
     }
 
     @Test
-    void insertParallelTxRollback() throws IOException {
+    void insertParallelTxRollback() throws IOException, TsurugiTransactionException {
         var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e0 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
-                        var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
-                    int count1 = ps.executeAndGetCount(tx1, entity);
-                    assertEquals(-1, count1); // TODO 1
-                    int count2 = ps.executeAndGetCount(tx2, entity);
-                    assertEquals(-1, count2); // TODO 1
+            try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
+                    var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
+                int count1 = ps.executeAndGetCount(tx1, entity);
+                assertEquals(-1, count1); // TODO 1
+                int count2 = ps.executeAndGetCount(tx2, entity);
+                assertEquals(-1, count2); // TODO 1
 
-                    tx1.rollback();
-                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                        tx2.commit(TgCommitType.DEFAULT);
-                    });
-                    assertEqualsCode(SqlServiceCode.ERR_ABORTED, e); // TODO ERR_ALREADY_EXISTS ?
-                    throw e;
-                }
-            });
-
-            assertEqualsCode(SqlServiceCode.ERR_ABORTED, e0);
+                tx1.rollback();
+                tx2.commit(TgCommitType.DEFAULT);
+            }
         }
 
-        assertEqualsTestTable();
+        assertEqualsTestTable(entity);
     }
 }

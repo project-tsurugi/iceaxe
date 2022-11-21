@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,8 +51,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 8 /* 2, 3, 8, 30 */ })
-    @Disabled // TODO remove Disabled
+    @ValueSource(ints = { 2, 3, 8, 30 })
     void insertMultiTxLtx(int threadSize) throws IOException, InterruptedException {
         insertMultiTx(100, threadSize, TgTxOption.ofLTX(TEST2));
     }
