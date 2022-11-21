@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.test.update;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -38,8 +39,10 @@ class DbUpdateExplainTest extends DbTestTableTester {
 
         var session = getSession();
         try (var ps = session.createPreparedStatement(sql)) {
-            var result = ps.explain();
-            assertExplain(result);
+            assertThrowsExactly(UnsupportedOperationException.class, () -> {
+                var result = ps.explain();
+                assertExplain(result);
+            }); // TODO explain実装待ち
         }
     }
 

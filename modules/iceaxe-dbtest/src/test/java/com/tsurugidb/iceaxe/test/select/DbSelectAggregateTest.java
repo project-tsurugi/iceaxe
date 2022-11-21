@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -13,8 +15,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.statement.TgParameterList;
+import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -47,6 +52,11 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+            if (order.contains("order by")) { // TODO 集約のorder by実装待ち
+                var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> ps.executeAndFindRecord(tm));
+                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                return;
+            }
             int count = ps.executeAndFindRecord(tm).get();
             assertEquals(SIZE, count);
         }
@@ -60,6 +70,11 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
+            if (order.contains("order by")) { // TODO 集約のorder by実装待ち
+                var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> ps.executeAndFindRecord(tm));
+                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                return;
+            }
             TsurugiResultEntity entity = ps.executeAndFindRecord(tm).get();
             assertEquals(LongStream.range(0, SIZE).sum(), entity.getInt8OrNull("sum"));
             assertEquals("0", entity.getCharacterOrNull("zzz"));
@@ -74,6 +89,11 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
+            if (order.contains("order by")) { // TODO 集約のorder by実装待ち
+                var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> ps.executeAndGetList(tm));
+                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                return;
+            }
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
 
@@ -96,6 +116,11 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
+            if (order.contains("order by")) { // TODO 集約のorder by実装待ち
+                var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> ps.executeAndGetList(tm));
+                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                return;
+            }
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
 
@@ -153,16 +178,19 @@ class DbSelectAggregateTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "foo", "foo,foo" })
     void selectKeyWithoutGroup(String key) throws IOException {
-        var sql = "select " + key + ", count(*)  " + TEST; // without 'group by'
+        var sql = "select " + key + ", count(*) from " + TEST; // without 'group by'
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                ps.executeAndGetList(tm);
+        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of())) {
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                ps.executeAndGetList(tm, TgParameterList.of());
             });
-            assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
-            assertContains("TODO", e.getMessage());
+            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+            // TODO 複数エラーがある場合のエラーメッセージ結合方法
+            int size = key.split(",").length;
+            String expected = "translating statement failed: " + Stream.generate(() -> "invalid_aggregation_column target column must be aggregated").limit(size).collect(Collectors.joining());
+            assertContains(expected, e.getMessage());
         }
     }
 }

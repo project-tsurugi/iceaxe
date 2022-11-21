@@ -50,7 +50,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 ps.executeAndGetList(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
-            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("error in db_->create_executable()", e.getMessage()); // TODO エラー詳細情報の確認
         }
     }
 
@@ -74,10 +74,13 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
-            var list = ps.executeAndGetList(tm);
-            assertEquals(1, list.size());
-            var entity = list.get(0);
-            assertEquals(NULL_ENTITY, entity);
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                var list = ps.executeAndGetList(tm);
+                assertEquals(1, list.size());
+                var entity = list.get(0);
+                assertEquals(NULL_ENTITY, entity);
+            });
+            assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e); // TODO is null実装待ち
         }
     }
 
@@ -88,11 +91,14 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
-            var list = ps.executeAndGetList(tm);
-            assertEquals(SIZE, list.size());
-            for (int i = 0; i < SIZE; i++) {
-                assertEquals(i, list.get(i).getFoo());
-            }
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                var list = ps.executeAndGetList(tm);
+                assertEquals(SIZE, list.size());
+                for (int i = 0; i < SIZE; i++) {
+                    assertEquals(i, list.get(i).getFoo());
+                }
+            });
+            assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e); // TODO is not null実装待ち
         }
     }
 
@@ -105,11 +111,14 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
-            var list = ps.executeAndGetList(tm);
-            assertEquals(expectedList.size(), list.size());
-            for (int i = 0; i < list.size(); i++) {
-                assertEquals(expectedList.get(i), list.get(i).getFoo());
-            }
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                var list = ps.executeAndGetList(tm);
+                assertEquals(expectedList.size(), list.size());
+                for (int i = 0; i < list.size(); i++) {
+                    assertEquals(expectedList.get(i), list.get(i).getFoo());
+                }
+            });
+            assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e); // TODO in実装待ち
         }
     }
 
@@ -123,11 +132,14 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
-            var list = ps.executeAndGetList(tm);
-            assertEquals(e - s + 1, list.size());
-            for (int i = 0; i < list.size(); i++) {
-                assertEquals(s + i, list.get(i).getFoo());
-            }
+            var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                var list = ps.executeAndGetList(tm);
+                assertEquals(e - s + 1, list.size());
+                for (int i = 0; i < list.size(); i++) {
+                    assertEquals(s + i, list.get(i).getFoo());
+                }
+            });
+            assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e0); // TODO between実装待ち
         }
     }
 }

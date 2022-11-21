@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.test.update;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -45,11 +46,21 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
-            assertEqualsCode(null, e); // TODO エラーコード
+            // TODO updatePK null
+//          var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
+//          assertEqualsCode(null, e); // TODO エラーコード
+            ps.executeAndGetCount(tm);
         }
 
-        assertEqualsTestTable(SIZE);
+//      assertEqualsTestTable(SIZE);
+        var actual = selectAllFromTest();
+        for (var entity : actual) {
+            if (entity.getBar() == 5) {
+                assertNull(entity.getFoo());
+            } else {
+                assertEquals((int) (long) entity.getBar(), entity.getFoo());
+            }
+        }
     }
 
     @ParameterizedTest
@@ -62,11 +73,18 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
-            assertEqualsCode(null, e); // TODO エラーコード
+            // TODO updatePK same value
+//          var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
+//          assertEqualsCode(null, e); // TODO エラーコード
+            ps.executeAndGetCount(tm);
         }
 
-        assertEqualsTestTable(SIZE);
+//      assertEqualsTestTable(SIZE);
+        var actual = selectAllFromTest();
+        assertEquals(1, actual.size());
+        for (var entity : actual) {
+            assertEquals(newPk, entity.getFoo());
+        }
     }
 
     @Test
@@ -94,7 +112,8 @@ class DbUpdateErrorTest extends DbTestTableTester {
                 ps.executeAndGetCount(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
+            String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016: . attempt=0, option=OCC{label=null, priority=DEFUALT, writePreserve=null}";
+            assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(SIZE);

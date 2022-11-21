@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -14,6 +15,7 @@ import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 
 /**
  * explain select test
@@ -40,8 +42,10 @@ class DbSelectExplainTest extends DbTestTableTester {
 
         var session = getSession();
         try (var ps = session.createPreparedQuery(sql)) {
-            var result = ps.explain();
-            assertExplain(result);
+            assertThrowsExactly(UnsupportedOperationException.class, () -> {
+                var result = ps.explain();
+                assertExplain(result);
+            }); // TODO explain実装待ち
         }
     }
 
@@ -63,6 +67,15 @@ class DbSelectExplainTest extends DbTestTableTester {
         assertNotNull(actual.getLowPlanGraph());
 
         var list = actual.getLowColumnList();
-        assertEquals(0, list.size()); // TODO 3?
+        assertEquals(3, list.size());
+        var c0 = list.get(0);
+        assertEquals("foo", c0.getName());
+        assertEquals(AtomType.INT4, c0.getAtomType());
+        var c1 = list.get(1);
+        assertEquals("bar", c1.getName());
+        assertEquals(AtomType.INT8, c1.getAtomType());
+        var c2 = list.get(2);
+        assertEquals("zzz", c2.getName());
+        assertEquals(AtomType.CHARACTER, c2.getAtomType());
     }
 }

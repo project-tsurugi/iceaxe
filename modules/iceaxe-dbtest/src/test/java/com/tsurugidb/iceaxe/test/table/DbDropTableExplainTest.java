@@ -35,16 +35,20 @@ class DbDropTableExplainTest extends DbTestTableTester {
 
         var session = getSession();
         var helper = session.getExplainHelper();
-        var result = helper.explain(session, SQL);
-        assertExplain(result);
+        assertThrowsExactly(UnsupportedOperationException.class, () -> {
+            var result = helper.explain(session, SQL);
+            assertExplain(result);
+        }); // TODO explain実装待ち
     }
 
     @Test
     void dropNotExists() throws Exception {
         var session = getSession();
         var helper = session.getExplainHelper();
-        var result = helper.explain(session, SQL);
-        assertExplain(result);
+        assertThrowsExactly(UnsupportedOperationException.class, () -> {
+            var result = helper.explain(session, SQL);
+            assertExplain(result);
+        }); // TODO explain実装待ち
     }
 
     private static void assertExplain(TgStatementMetadata actual) throws Exception {

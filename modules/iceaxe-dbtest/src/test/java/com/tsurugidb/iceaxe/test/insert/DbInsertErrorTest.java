@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.insert;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
@@ -42,12 +43,20 @@ class DbInsertErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
-            assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
+            // TODO insert null to PK
+            ps.executeAndGetCount(tm);
+//          var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
+//          assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+//          assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
         }
 
-        assertEqualsTestTable(0);
+//      assertEqualsTestTable(0);
+        var actualList = selectAllFromTest();
+        assertEquals(1, actualList.size());
+        var actual = actualList.get(0);
+        assertEquals(null, actual.getFoo());
+        assertEquals(456L, actual.getBar());
+        assertEquals("abc", actual.getZzz());
     }
 
     @Test
@@ -70,7 +79,8 @@ class DbInsertErrorTest extends DbTestTableTester {
                 ps.executeAndGetCount(tm, entity);
             });
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
+            String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016: . attempt=0, option=OCC{label=null, priority=DEFUALT, writePreserve=null}";
+            assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(0);

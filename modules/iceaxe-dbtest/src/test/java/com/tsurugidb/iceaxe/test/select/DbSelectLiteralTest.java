@@ -74,7 +74,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
             });
         });
         assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
-        assertContains("TODO", e.getMessage()); // TODO エラー詳細情報の確認
+        assertContains("error in db_->create_executable()", e.getMessage()); // TODO エラー詳細情報の確認
     }
 
     @Test

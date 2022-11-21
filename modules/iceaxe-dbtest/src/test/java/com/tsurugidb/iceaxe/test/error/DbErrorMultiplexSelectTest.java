@@ -8,11 +8,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * multiplex select error test
@@ -77,6 +79,23 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     }
 
     private void selectMulti(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
+        int threshold = 255;
+        try {
+            selectMultiMain(size, type);
+        } catch (TsurugiIOException e) {
+            if (size < threshold) {
+                throw e;
+            }
+            assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
+            assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
+            return;
+        }
+        if (size >= threshold) {
+            LOG.warn("err_resource_limit_reached did not occur. size={}, type={}", size, type);
+        }
+    }
+
+    private void selectMultiMain(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
         var sql = "select * from " + TEST;
 
         try (var session = DbTestConnector.createSession()) {

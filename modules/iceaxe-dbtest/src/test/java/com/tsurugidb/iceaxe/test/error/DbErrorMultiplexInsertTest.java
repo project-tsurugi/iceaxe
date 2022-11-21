@@ -7,12 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * multiplex insert error test
@@ -77,6 +79,23 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
     }
 
     private void isnertMulti(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
+        int threshold = 255;
+        try {
+            isnertMultiMain(size, type);
+        } catch (TsurugiIOException e) {
+            if (size < threshold) {
+                throw e;
+            }
+            assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
+            assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
+            return;
+        }
+        if (size >= threshold) {
+            LOG.warn("err_resource_limit_reached did not occur. size={}, type={}", size, type);
+        }
+    }
+
+    private void isnertMultiMain(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
         try (var session = DbTestConnector.createSession()) {
             for (int i = 0; i < size; i++) {
                 var transaction = session.createTransaction(TgTxOption.ofOCC());

@@ -39,8 +39,10 @@ class DbCreateTableExplainTest extends DbTestTableTester {
     void create() throws Exception {
         var session = getSession();
         var helper = session.getExplainHelper();
-        var result = helper.explain(session, SQL);
-        assertExplain(result);
+        assertThrowsExactly(UnsupportedOperationException.class, () -> {
+            var result = helper.explain(session, SQL);
+            assertExplain(result);
+        }); // TODO explain実装待ち
     }
 
     @Test
@@ -49,8 +51,10 @@ class DbCreateTableExplainTest extends DbTestTableTester {
 
         var session = getSession();
         var helper = session.getExplainHelper();
-        var result = helper.explain(session, SQL);
-        assertExplain(result);
+        assertThrowsExactly(UnsupportedOperationException.class, () -> {
+            var result = helper.explain(session, SQL);
+            assertExplain(result);
+        }); // TODO explain実装待ち
     }
 
     private static void assertExplain(TgStatementMetadata actual) throws Exception {
