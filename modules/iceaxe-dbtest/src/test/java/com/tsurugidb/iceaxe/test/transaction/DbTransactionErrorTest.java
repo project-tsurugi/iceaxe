@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -97,7 +96,6 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @RepeatedTest(8)
-    @Disabled // TODO remove Disabled 何度か実行するとERR_RESOURCE_LIMIT_REACHEDが発生し、後続のテストも失敗するようになる
     void doNothing() throws IOException {
         try (var session = DbTestConnector.createSession()) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
