@@ -34,7 +34,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
 
     // internal
     public TsurugiPreparedStatementQuery1(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping,
-            TgResultMapping<R> resultMapping) {
+            TgResultMapping<R> resultMapping) throws IOException {
         super(session, sql, lowPreparedStatementFuture, parameterMapping);
         this.resultMapping = resultMapping;
     }

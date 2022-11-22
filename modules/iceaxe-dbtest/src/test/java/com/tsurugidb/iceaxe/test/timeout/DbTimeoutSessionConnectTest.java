@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -7,7 +8,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
@@ -18,7 +18,6 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 /**
  * session connect timeout test
  */
-@Disabled // TODO remove Disabled （tetayama-serverが落ちるので、他のテストが実行できなくなる）
 public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
 
     @Test
@@ -64,6 +63,7 @@ public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
         } catch (IOException e) {
             assertInstanceOf(TimeoutException.class, e.getCause());
             LOG.trace("timeout success");
+            assertFalse(session.isAlive());
             return;
         } finally {
             pipeServer.setPipeWrite(true);

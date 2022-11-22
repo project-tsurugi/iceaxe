@@ -53,7 +53,7 @@ public class TsurugiTransaction implements Closeable {
     private boolean closed = false;
 
     // internal
-    public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption option) {
+    public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption option) throws IOException {
         this.ownerSession = session;
         this.lowTransactionFuture = lowTransactionFuture;
         this.txOption = option;
@@ -201,7 +201,7 @@ public class TsurugiTransaction implements Closeable {
     public final synchronized Transaction getLowTransaction() throws IOException {
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
-            if (lowFutureException != null) {
+            if (this.lowFutureException != null) {
                 throw new TsurugiIOException(IceaxeErrorCode.TX_LOW_ERROR, lowFutureException);
             }
 

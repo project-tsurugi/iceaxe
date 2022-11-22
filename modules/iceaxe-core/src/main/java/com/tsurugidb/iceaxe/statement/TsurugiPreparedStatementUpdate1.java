@@ -27,7 +27,8 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiPreparedStatement
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiPreparedStatementUpdate1.class);
 
     // internal
-    public TsurugiPreparedStatementUpdate1(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
+    public TsurugiPreparedStatementUpdate1(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping)
+            throws IOException {
         super(session, sql, lowPreparedStatementFuture, parameterMapping);
     }
 

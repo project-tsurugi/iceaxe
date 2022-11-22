@@ -22,7 +22,7 @@ import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 /**
  * slot limit test
  */
-@Disabled // TODO remove Disabled
+@Disabled // TODO remove Disabled ResultSet.close()タイムアウト実装待ち
 public class DbSlotLimitTest extends DbTimetoutTest {
 
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;

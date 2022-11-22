@@ -22,7 +22,7 @@ public abstract class TsurugiPreparedStatement implements Closeable {
     protected final String sql;
     private boolean closed = false;
 
-    protected TsurugiPreparedStatement(@Nonnull TsurugiSession session, @Nonnull String sql) {
+    protected TsurugiPreparedStatement(@Nonnull TsurugiSession session, @Nonnull String sql) throws IOException {
         this.ownerSession = session;
         this.sql = sql;
         session.addChild(this);

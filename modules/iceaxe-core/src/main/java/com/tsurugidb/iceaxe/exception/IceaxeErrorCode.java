@@ -6,6 +6,11 @@ import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
  * Iceaxe diagnostic code.
  */
 public enum IceaxeErrorCode implements DiagnosticCode {
+    /** session already closed */
+    SESSION_ALREADY_CLOSED(IceaxeErrorCodeBlock.SESSION + 1, "session already closed"),
+    /** low session error */
+    SESSION_LOW_ERROR(IceaxeErrorCodeBlock.SESSION + 2, "low session error"),
+
     /** transaction already closed */
     TX_ALREADY_CLOSED(IceaxeErrorCodeBlock.TRANSACTION + 1, "transaction already closed"),
     /** low transaction error */

@@ -34,7 +34,8 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
 
-    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) {
+    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping)
+            throws IOException {
         super(session, sql);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
         this.parameterMapping = parameterMapping;
