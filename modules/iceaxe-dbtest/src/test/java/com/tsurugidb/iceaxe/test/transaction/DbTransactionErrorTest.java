@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -20,7 +19,6 @@ import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -29,7 +27,6 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbTransactionErrorTest extends DbTestTableTester {
 
     private static final int SIZE = 4;
-    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws IOException {
@@ -93,16 +90,6 @@ class DbTransactionErrorTest extends DbTestTableTester {
 
         // expected: auto rollback
         assertEqualsTestTable(SIZE);
-    }
-
-    @RepeatedTest(8)
-    void doNothing() throws IOException {
-        try (var session = DbTestConnector.createSession()) {
-            for (int i = 0; i < ATTEMPT_SIZE; i++) {
-                try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
-                }
-            }
-        }
     }
 
     @Test

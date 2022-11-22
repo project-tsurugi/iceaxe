@@ -6,16 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 
 /**
  * transaction test
@@ -23,6 +26,7 @@ import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 class DbTransactionTest extends DbTestTableTester {
 
     private static final int SIZE = 2;
+    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws IOException {
@@ -33,6 +37,17 @@ class DbTransactionTest extends DbTestTableTester {
         insertTestTable(SIZE);
 
         LOG.debug("{} init end", info.getDisplayName());
+    }
+
+    @RepeatedTest(6)
+    void doNothing() throws IOException {
+        try (var session = DbTestConnector.createSession()) {
+            for (int i = 0; i < ATTEMPT_SIZE; i++) {
+                try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
+                    // do nothing
+                }
+            }
+        }
     }
 
     @Test
