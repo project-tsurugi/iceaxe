@@ -58,7 +58,7 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
             pipeServer.start();
 
             var connector = getTsurugiConnector(pipeServer);
-            var session = createSession(connector, modifier);
+            var session = createSession(pipeServer, connector, modifier);
             Closeable sessionCloser = () -> {
                 if (closeSession) {
                     session.close();
@@ -83,7 +83,7 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
         return pipeServer.getTsurugiConnector();
     }
 
-    private TsurugiSession createSession(TsurugiConnector connector, TimeoutModifier modifier) throws IOException {
+    protected TsurugiSession createSession(PipeServerThtread pipeServer, TsurugiConnector connector, TimeoutModifier modifier) throws IOException {
         var info = TgSessionInfo.of();
         modifier.modifySessionInfo(info);
 
