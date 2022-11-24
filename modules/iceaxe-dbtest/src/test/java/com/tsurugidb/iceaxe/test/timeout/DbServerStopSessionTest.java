@@ -1,13 +1,13 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
+import org.opentest4j.AssertionFailedError;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
@@ -22,7 +22,7 @@ public class DbServerStopSessionTest extends DbTimetoutTest {
     private static final int EXPECTED_TIMEOUT = 1;
 
     // サーバーが停止した場合に即座にエラーが返ることを確認するテスト
-    @Test
+    @RepeatedTest(6)
 //  @Timeout(value = EXPECTED_TIMEOUT, unit = TimeUnit.SECONDS) // TODO apply Timeout
     void serverStop() throws IOException {
         testTimeout(new TimeoutModifier() {
@@ -46,6 +46,10 @@ public class DbServerStopSessionTest extends DbTimetoutTest {
         var e = assertThrowsExactly(IOException.class, () -> {
             session.getLowSqlClient();
         });
-        assertInstanceOf(TimeoutException.class, e.getCause());
+        try {
+            assertEquals("Server crashed", e.getMessage());
+        } catch (AssertionFailedError t) {
+            throw e;
+        }
     }
 }
