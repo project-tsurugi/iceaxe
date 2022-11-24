@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Timeout;
 import org.opentest4j.AssertionFailedError;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
@@ -23,7 +24,7 @@ public class DbServerStopSessionTest extends DbTimetoutTest {
 
     // サーバーが停止した場合に即座にエラーが返ることを確認するテスト
     @RepeatedTest(6)
-//  @Timeout(value = EXPECTED_TIMEOUT, unit = TimeUnit.SECONDS) // TODO apply Timeout
+    @Timeout(value = EXPECTED_TIMEOUT, unit = TimeUnit.SECONDS)
     void serverStop() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override

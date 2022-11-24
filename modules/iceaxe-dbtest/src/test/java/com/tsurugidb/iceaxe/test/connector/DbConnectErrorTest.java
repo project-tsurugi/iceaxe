@@ -1,7 +1,6 @@
 package com.tsurugidb.iceaxe.test.connector;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
@@ -9,12 +8,9 @@ import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
@@ -25,7 +21,6 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
  * connect error test
  */
 public class DbConnectErrorTest {
-    private static final Logger LOG = LoggerFactory.getLogger(DbConnectErrorTest.class);
 
     @Test
     void connectError() throws IOException {
@@ -38,16 +33,8 @@ public class DbConnectErrorTest {
             var e = assertThrowsExactly(IOException.class, () -> connect(port));
             try {
                 assertEquals("Server crashed", e.getMessage());
-                LOG.debug("connectError: Server crashed");
             } catch (AssertionFailedError t) {
-                // TODO expected: "Server crashed" only
-                // {@link DbServerStopSessionTest}が解決すればこちらも直せるはず
-                try {
-                    assertInstanceOf(TimeoutException.class, e.getCause());
-                    LOG.warn("FIXME connectError: timeout");
-                } catch (AssertionFailedError t2) {
-                    throw e;
-                }
+                throw e;
             }
         }
     }
