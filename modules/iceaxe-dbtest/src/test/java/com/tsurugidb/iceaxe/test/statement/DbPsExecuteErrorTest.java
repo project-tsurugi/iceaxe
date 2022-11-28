@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.test.error;
+package com.tsurugidb.iceaxe.test.statement;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -20,7 +20,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 /**
  * PreparedStatement execute error test
  */
-class DbErrorPsExecuteTest extends DbTestTableTester {
+class DbPsExecuteErrorTest extends DbTestTableTester {
 
     private static final int SIZE = 4;
 
