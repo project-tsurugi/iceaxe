@@ -34,7 +34,7 @@ class DbInsertVarcharTest extends DbTestTableTester {
 
     @Test
     void insertOK() throws IOException {
-        var list = List.of("0123456789", "あいう", "あいう0");
+        var list = List.of("0123456789", "あいう", "あいう0", "\0\1\uffff");
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
