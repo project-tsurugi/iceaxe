@@ -127,7 +127,6 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(sql)) {
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
-            System.out.println(list);
             int i = 0;
             for (var entity : list) {
                 // TODO cで件数が取得されるべき

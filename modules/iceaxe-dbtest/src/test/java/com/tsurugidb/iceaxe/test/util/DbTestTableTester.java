@@ -19,7 +19,9 @@ import com.tsurugidb.iceaxe.result.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgEntityParameterMapping;
+import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
@@ -33,6 +35,7 @@ public class DbTestTableTester {
     /** test (table name) */
     public static final String TEST = "test";
     public static final String TEST_COLUMNS = "foo, bar, zzz";
+    public static final int ZZZ_SIZE = 10;
 
     private static TsurugiSession staticSession;
 
@@ -85,7 +88,7 @@ public class DbTestTableTester {
                 + "(" //
                 + "  foo int," //
                 + "  bar bigint," //
-                + "  zzz varchar(10)," //
+                + "  zzz varchar(" + ZZZ_SIZE + ")," //
                 + "  primary key(foo)" //
                 + ")";
         executeDdl(getSession(), sql);
@@ -217,6 +220,17 @@ public class DbTestTableTester {
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
             return ps.executeAndGetList(tm);
+        }
+    }
+
+    protected TestEntity selectFromTest(int foo) throws IOException {
+        var where1 = TgVariable.ofInt4("foo");
+        var sql = SELECT_SQL + " where foo=" + where1;
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session, 3);
+        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(where1), SELECT_MAPPING)) {
+            var parameter = TgParameterList.of(where1.bind(foo));
+            return ps.executeAndFindRecord(tm, parameter).orElse(null);
         }
     }
 
