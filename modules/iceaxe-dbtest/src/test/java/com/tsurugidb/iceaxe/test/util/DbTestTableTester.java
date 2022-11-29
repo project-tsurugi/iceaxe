@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -23,6 +24,7 @@ import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
@@ -97,7 +99,26 @@ public class DbTestTableTester {
     protected static void executeDdl(TsurugiSession session, String sql) throws IOException {
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedStatement(sql)) {
-            ps.executeAndGetCount(tm);
+            for (int i = 1;; i++) {
+                try {
+                    ps.executeAndGetCount(tm);
+                    return;
+                } catch (TsurugiTransactionIOException e) {
+                    // TODO duplicate_table（ERR_PHANTOM）が発生しなくなったら、リトライ処理を削除
+                    if (e.getMessage().contains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: duplicate_table table `test' is already defined")) {
+                        var line = Arrays.stream(e.getStackTrace()).filter(elem -> {
+                            String fullName = elem.getClassName();
+                            return fullName.startsWith("com.tsurugidb.iceaxe.test.") && fullName.endsWith("Test");
+                        }).findFirst().orElse(null);
+                        var log = LoggerFactory.getLogger(DbTestTableTester.class);
+                        log.warn("executeDdl duplicate_table retry{} at {}", i, line);
+
+                        dropTestTable();
+                        continue;
+                    }
+                    throw e;
+                }
+            }
         }
     }
 
