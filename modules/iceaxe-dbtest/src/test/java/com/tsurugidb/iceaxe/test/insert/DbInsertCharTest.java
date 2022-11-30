@@ -17,18 +17,28 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
- * insert varchar test
+ * insert char test
  */
-class DbInsertVarcharTest extends DbTestTableTester {
+class DbInsertCharTest extends DbTestTableTester {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws IOException {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
-        createTestTable();
+        createTable();
 
         LOG.debug("{} init end", info.getDisplayName());
+    }
+
+    private static void createTable() throws IOException {
+        var sql = "create table " + TEST //
+                + "(" //
+                + "  foo int primary key," //
+                + "  bar bigint," //
+                + "  zzz char(" + ZZZ_SIZE + ")" //
+                + ")";
+        executeDdl(getSession(), sql);
     }
 
     @Test
@@ -61,14 +71,28 @@ class DbInsertVarcharTest extends DbTestTableTester {
                 assertEquals(-1, count); // TODO 1
 
                 var actual = selectFromTest(entity.getFoo());
-                assertEquals(entity, actual);
+                assertEquals(entity.getFoo(), actual.getFoo());
+                assertEquals(entity.getBar(), actual.getBar());
+                assertEquals(fillTail(entity.getZzz()), actual.getZzz());
             }
         }
     }
 
+    private static String fillTail(String s) {
+        int length = s.getBytes(StandardCharsets.UTF_8).length;
+        if (length >= ZZZ_SIZE) {
+            return s;
+        }
+        var sb = new StringBuilder(s);
+        for (int i = 0; i < ZZZ_SIZE - length; i++) {
+            sb.append(" ");
+        }
+        return sb.toString();
+    }
+
     @Test
     void insertError() throws IOException {
-        // UTF-8でのバイト数がvarcharのサイズを超えるとエラー
+        // UTF-8でのバイト数がcharのサイズを超えるとエラー
         var list = List.of("0123456789A", "あいうえ", "あいう01");
 
         var session = getSession();
