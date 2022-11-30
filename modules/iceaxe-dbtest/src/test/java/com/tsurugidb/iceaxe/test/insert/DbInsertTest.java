@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.insert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.util.List;
@@ -195,5 +196,26 @@ class DbInsertTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable(size);
+    }
+
+    @Test
+    void insertPart() throws IOException {
+        int key = 1;
+        var foo = TgVariable.ofInt4("foo");
+        var sql = "insert into " + TEST + "(foo) values(" + foo + ")";
+        var parameterMapping = TgParameterMapping.of(foo);
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+            var parameter = TgParameterList.of(foo.bind(key));
+            int count = ps.executeAndGetCount(tm, parameter);
+            assertEquals(-1, count); // TODO 1
+        }
+
+        var actual = selectFromTest(key);
+        assertEquals(key, actual.getFoo());
+        assertNull(actual.getBar());
+        assertNull(actual.getZzz());
     }
 }
