@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -21,7 +20,6 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 /**
  * PreparedStatement close timeout test
  */
-@Disabled // TODO remove Disabled
 public class DbTimeoutPsCloseTest extends DbTimetoutTest {
 
     @BeforeEach

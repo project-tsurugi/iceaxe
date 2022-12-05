@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
@@ -21,7 +20,6 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 /**
  * table metadata connect timeout test
  */
-@Disabled // TODO remove Disabled
 public class DbTimeoutTableMetadataConnectTest extends DbTimetoutTest {
 
     @Test

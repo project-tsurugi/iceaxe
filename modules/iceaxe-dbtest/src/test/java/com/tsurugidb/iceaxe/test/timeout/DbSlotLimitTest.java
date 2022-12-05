@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -18,11 +17,11 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 
 /**
  * slot limit test
  */
-@Disabled // TODO remove Disabled ResultSet.close()タイムアウト実装待ち
 public class DbSlotLimitTest extends DbTimetoutTest {
 
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
@@ -44,7 +43,9 @@ public class DbSlotLimitTest extends DbTimetoutTest {
 
     @Override
     protected void clientTask(PipeServerThtread pipeServer, TsurugiSession session, TimeoutModifier modifier) throws Exception {
-        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+        var transaction = session.createTransaction(TgTxOption.ofOCC());
+        try {
+            transaction.setCloseTimeout(1, TimeUnit.SECONDS); // TODO 本来はトランザクションはタイムアウトせず正常にクローズできて欲しい
             transaction.getLowTransaction();
 
             try (var ps = session.createPreparedQuery(SELECT_SQL)) {
@@ -60,9 +61,20 @@ public class DbSlotLimitTest extends DbTimetoutTest {
                 int i = 0;
                 for (var rs : rsList) {
                     LOG.trace("close i={}", i);
-                    rs.close(); // FIXME Tsubakuroのタイムアウトが未実装なので、ここで待ちに入る
+                    try {
+                        rs.close();
+                    } catch (ResponseTimeoutException e) {
+                        // success
+                    }
                     i++;
                 }
+            }
+        } finally {
+            try {
+                transaction.close();
+            } catch (ResponseTimeoutException e) {
+                // TODO 本来はタイムアウトせず正常にクローズできて欲しい
+                LOG.warn("transaction.close() {}", e.getClass().getName());
             }
         }
     }

@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,6 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 /**
  * explain connect timeout test
  */
-@Disabled // TODO remove Disabled
 public class DbTimeoutExplainConnectTest extends DbTimetoutTest {
 
     @BeforeAll

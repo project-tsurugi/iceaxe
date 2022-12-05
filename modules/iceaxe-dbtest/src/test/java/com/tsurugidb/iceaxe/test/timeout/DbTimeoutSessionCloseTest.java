@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
@@ -17,7 +16,6 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 /**
  * session close timeout test
  */
-@Disabled // TODO remove Disabled
 public class DbTimeoutSessionCloseTest extends DbTimetoutTest {
 
     public DbTimeoutSessionCloseTest() {
