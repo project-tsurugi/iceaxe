@@ -14,18 +14,19 @@ import java.util.function.Function;
 
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
-import com.tsurugidb.sql.proto.SqlRequest.Placeholder;;
+import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
+import com.tsurugidb.tsubakuro.sql.Placeholders;;
 
 /**
  * Tsurugi Parameter Mapping for Entity
- * 
+ *
  * @param <P> parameter type (e.g. Entity)
  */
 public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * create Parameter Mapping
-     * 
+     *
      * @param <P>   parameter type
      * @param clazz parameter class
      * @return Tsurugi Parameter Mapping
@@ -36,7 +37,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * create Parameter Mapping
-     * 
+     *
      * @param <P>   parameter type
      * @param clazz parameter class
      * @return Tsurugi Parameter Mapping
@@ -57,7 +58,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * set convert type utility
-     * 
+     *
      * @param convertUtil convert type utility
      * @return this
      */
@@ -68,7 +69,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -84,7 +85,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -100,7 +101,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -116,7 +117,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -132,7 +133,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -148,7 +149,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -164,7 +165,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -180,7 +181,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -196,7 +197,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -212,7 +213,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -228,7 +229,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -244,7 +245,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -260,7 +261,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -276,7 +277,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -292,7 +293,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -308,7 +309,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -324,7 +325,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -340,7 +341,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -356,7 +357,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -372,7 +373,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -388,7 +389,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -404,7 +405,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -420,7 +421,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -436,7 +437,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -452,7 +453,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -468,7 +469,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -484,7 +485,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @return this
@@ -500,7 +501,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -516,7 +517,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param getter getter from parameter
      * @param offset time-offset
@@ -533,7 +534,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param name     name
      * @param getter   getter from parameter
@@ -549,7 +550,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name   name
      * @param type   type
      * @param getter getter from parameter
@@ -649,7 +650,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name      name
      * @param type      type
      * @param getter    getter from parameter
@@ -665,7 +666,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>    value type
      * @param name   name
      * @param type   type
@@ -679,7 +680,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param name      name
      * @param type      type
      * @param getter    getter from parameter
@@ -695,7 +696,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
      * add variable
-     * 
+     *
      * @param <V>      value type
      * @param variable variable
      * @param getter   getter from parameter
@@ -712,8 +713,8 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     protected void addVariable(String name, TgDataType type) {
-        var lowVariable = Placeholder.newBuilder().setName(name).setAtomType(type.getLowDataType()).build();
-        lowPlaceholderList.add(lowVariable);
+        var lowPlaceholder = Placeholders.of(name, type.getLowDataType());
+        lowPlaceholderList.add(lowPlaceholder);
     }
 
     @Override
