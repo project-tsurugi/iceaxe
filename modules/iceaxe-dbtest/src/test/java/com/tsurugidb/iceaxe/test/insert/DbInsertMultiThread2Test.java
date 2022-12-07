@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -24,6 +23,8 @@ import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 
 /**
@@ -43,17 +44,6 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
         createTest2Table();
 
         LOG.debug("{} init end", info.getDisplayName());
-    }
-
-    @Test
-    void insertMultiTxOcc() throws IOException, InterruptedException {
-        insertMultiTx(100, 30, TgTxOption.ofOCC());
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = { 2, 3, 8, 30 })
-    void insertMultiTxLtx(int threadSize) throws IOException, InterruptedException {
-        insertMultiTx(100, threadSize, TgTxOption.ofLTX(TEST2));
     }
 
     private static void createTest2Table() throws IOException {
@@ -99,7 +89,36 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
         }
     }
 
-    private void insertMultiTx(int recordSize, int threadSize, TgTxOption tx) throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void insertMultiTxOcc1(boolean prepare) throws IOException, InterruptedException {
+//      insertMultiTx(100, 1, TgTmSetting.of(TgTxOption.ofOCC()), prepare);
+        insertMultiTxOcc(1, prepare);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void insertMultiTxOcc30(boolean prepare) throws IOException, InterruptedException {
+        insertMultiTxOcc(30, prepare);
+    }
+
+    private void insertMultiTxOcc(int threadSize, boolean prepare) throws IOException, InterruptedException {
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 3);
+        setting.getTransactionOptionSupplier().setStateListener((attempt, e, state) -> {
+            if (attempt > 0) {
+                LOG.info("insertMultiTxOcc({}, {}) OCC retry {}", threadSize, prepare, attempt);
+            }
+        });
+        insertMultiTx(100, threadSize, setting, prepare);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void insertMultiTxLtx(boolean prepare) throws IOException, InterruptedException {
+        insertMultiTx(100, 30, TgTmSetting.of(TgTxOption.ofLTX(TEST2)), prepare);
+    }
+
+    private void insertMultiTx(int recordSize, int threadSize, TgTmSetting setting, boolean prepare) throws IOException {
         var key1 = TgVariable.ofInt4("key1");
         var deleteSql = "delete from " + TEST2 + " where key1=" + key1;
         var deleteMapping = TgParameterMapping.of(key1);
@@ -111,10 +130,22 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
                 .character("value1", Test2Entity::getValue1);
 
         var session = getSession();
-        var tm = session.createTransactionManager(tx);
         try (var selectPs = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING); //
                 var deletePs = session.createPreparedStatement(deleteSql, deleteMapping); //
                 var insertPs = session.createPreparedStatement(insertSql, insertMapping)) {
+            if (prepare) {
+                var tm = session.createTransactionManager(TgTmSetting.of(TgTxOption.ofLTX(TEST2)));
+                tm.execute((TsurugiTransactionAction) transaction -> {
+                    for (int i = 0; i < threadSize; i++) {
+                        for (int j = 0; j < 2; j++) {
+                            var entity = new Test2Entity(i, 1 + j);
+                            insertPs.executeAndGetCount(transaction, entity);
+                        }
+                    }
+                });
+            }
+
+            var tm = session.createTransactionManager(setting);
             var list = new ArrayList<InsertMultiTxThread>(threadSize);
             for (int i = 0; i < threadSize; i++) {
                 var thread = new InsertMultiTxThread(selectPs, deletePs, insertPs, i, recordSize, tm);
