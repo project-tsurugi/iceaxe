@@ -7,18 +7,21 @@ import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionList;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi Transaction Manager Settings
- * 
+ *
  * @see TsurugiTransactionManager
  */
 public class TgTmSetting {
 
     /**
      * create Transaction Manager Settings
-     * 
+     *
      * @param transactionOptionSupplier transaction option supplier
      * @returnTransaction Manager Settings
      */
@@ -28,7 +31,7 @@ public class TgTmSetting {
 
     /**
      * create Transaction Manager Settings
-     * 
+     *
      * @param transactionOptionList transaction option list
      * @return Transaction Manager Settings
      */
@@ -39,7 +42,7 @@ public class TgTmSetting {
 
     /**
      * create Transaction Manager Settings
-     * 
+     *
      * @param transactionOption transaction option
      * @return Transaction Manager Settings
      */
@@ -49,7 +52,7 @@ public class TgTmSetting {
 
     /**
      * create Transaction Manager Settings
-     * 
+     *
      * @param transactionOption transaction option
      * @param attemtMaxCount    attempt max count
      * @return Transaction Manager Settings
@@ -74,7 +77,7 @@ public class TgTmSetting {
 
     /**
      * set transaction option supplier
-     * 
+     *
      * @param transactionOptionSupplier transaction option supplier
      * @return this
      */
@@ -84,8 +87,17 @@ public class TgTmSetting {
     }
 
     /**
+     * get transaction option supplier
+     *
+     * @return transaction option supplier
+     */
+    public TgTxOptionSupplier getTransactionOptionSupplier() {
+        return this.transactionOptionSupplier;
+    }
+
+    /**
      * get transaction option
-     * 
+     *
      * @param attempt attempt number
      * @param e       transaction exception
      * @return transaction option
@@ -100,7 +112,7 @@ public class TgTmSetting {
 
     /**
      * set commit type
-     * 
+     *
      * @param commitType commit type
      */
     public void setCommitType(TgCommitType commitType) {
@@ -109,7 +121,7 @@ public class TgTmSetting {
 
     /**
      * set commit type
-     * 
+     *
      * @param commitType commit type
      * @return this
      */
@@ -120,7 +132,7 @@ public class TgTmSetting {
 
     /**
      * get commit type
-     * 
+     *
      * @param info Session information
      * @return commit type
      */
@@ -133,7 +145,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-begin-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -143,7 +155,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-begin-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setBeginTimeout(TgTimeValue timeout) {
@@ -152,7 +164,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-begin-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      * @return this
@@ -164,7 +176,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-begin-timeout
-     * 
+     *
      * @param timeout time
      * @return this
      */
@@ -175,7 +187,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-commit-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -185,7 +197,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-commit-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setCommitTimeout(TgTimeValue timeout) {
@@ -194,7 +206,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-commit-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      * @return this
@@ -206,7 +218,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-commit-timeout
-     * 
+     *
      * @param timeout time
      * @return this
      */
@@ -217,7 +229,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-rollback-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      */
@@ -227,7 +239,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-rollback-timeout
-     * 
+     *
      * @param timeout time
      */
     public void setRollbackTimeout(TgTimeValue timeout) {
@@ -236,7 +248,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-rollback-timeout
-     * 
+     *
      * @param time timeout time
      * @param unit timeout unit
      * @return this
@@ -248,7 +260,7 @@ public class TgTmSetting {
 
     /**
      * set transaction-rollback-timeout
-     * 
+     *
      * @param timeout time
      * @return this
      */

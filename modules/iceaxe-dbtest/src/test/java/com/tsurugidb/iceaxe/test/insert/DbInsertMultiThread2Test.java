@@ -129,6 +129,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
                 .date("key3", Test2Entity::getKey3) //
                 .character("value1", Test2Entity::getValue1);
 
+        var excptionList = new ArrayList<Exception>();
         var session = getSession();
         try (var selectPs = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING); //
                 var deletePs = session.createPreparedStatement(deleteSql, deleteMapping); //
@@ -158,11 +159,22 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+                var exception = thread.getException();
+                if (exception != null) {
+                    excptionList.add(exception);
+                }
             }
         }
 
         var actual = selectCountFrom(TEST2);
-        assertEquals(recordSize * threadSize, actual);
+        try {
+            assertEquals(recordSize * threadSize, actual);
+        } catch (Throwable t) {
+            for (var e : excptionList) {
+                t.addSuppressed(e);
+            }
+            throw t;
+        }
     }
 
     private static class InsertMultiTxThread extends Thread {
@@ -172,6 +184,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
         private final int number;
         private final int recordSize;
         private final TsurugiTransactionManager tm;
+        private Exception exception;
 
         public InsertMultiTxThread(TsurugiPreparedStatementQuery0<TestEntity> selectPs, TsurugiPreparedStatementUpdate1<TgParameterList> deletePs,
                 TsurugiPreparedStatementUpdate1<Test2Entity> insertPs, int number, int recordSize, TsurugiTransactionManager tm) {
@@ -190,7 +203,8 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
                     runInTransaction(transaction);
                 });
             } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                this.exception = e;
+                throw new UncheckedIOException(e.getMessage(), e);
             }
         }
 
@@ -204,6 +218,10 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
                 var entity = new Test2Entity(number, i);
                 insertPs.executeAndGetCount(transaction, entity);
             }
+        }
+
+        public Exception getException() {
+            return this.exception;
         }
     }
 }

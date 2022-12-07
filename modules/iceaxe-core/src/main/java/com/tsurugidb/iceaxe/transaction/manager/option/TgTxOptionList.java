@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.transaction.manager;
+package com.tsurugidb.iceaxe.transaction.manager.option;
 
 import java.util.List;
 
@@ -11,11 +11,11 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
  * TgTxOption list
  */
 @ThreadSafe
-public class TgTxOptionList implements TgTxOptionSupplier {
+public class TgTxOptionList extends TgTxOptionSupplier {
 
     /**
      * create TgTransactionOptionList
-     * 
+     *
      * @param transactionOptionList options
      * @return TgTransactionOptionList
      */
@@ -28,7 +28,7 @@ public class TgTxOptionList implements TgTxOptionSupplier {
 
     /**
      * create TgTransactionOptionList
-     * 
+     *
      * @param transactionOptionList options
      * @return TgTransactionOptionList
      */
@@ -43,7 +43,7 @@ public class TgTxOptionList implements TgTxOptionSupplier {
 
     /**
      * TgTransactionOption list
-     * 
+     *
      * @param transactionOptionList options
      */
     public TgTxOptionList(List<TgTxOption> transactionOptionList) {
@@ -51,18 +51,15 @@ public class TgTxOptionList implements TgTxOptionSupplier {
     }
 
     @Override
-    public TgTxState get(int attempt, TsurugiTransactionException e) {
-        if (attempt == 0) {
-            return TgTxState.execute(transactionOptionList.get(0));
-        }
+    protected TgTxState computeFirstTransactionState() {
+        return TgTxState.execute(transactionOptionList.get(0));
+    }
 
-        if (isRetryable(e)) {
-            if (attempt < transactionOptionList.size()) {
-                return TgTxState.execute(transactionOptionList.get(attempt));
-            }
-            return TgTxState.retryOver();
+    @Override
+    protected TgTxState computeRetryTransactionState(int attempt, TsurugiTransactionException e) {
+        if (attempt < transactionOptionList.size()) {
+            return TgTxState.execute(transactionOptionList.get(attempt));
         }
-
-        return TgTxState.notRetryable();
+        return TgTxState.retryOver();
     }
 }

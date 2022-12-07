@@ -3,8 +3,8 @@ package com.tsurugidb.iceaxe.example;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
-import com.tsurugidb.iceaxe.transaction.manager.TgTxOptionSupplier;
-import com.tsurugidb.iceaxe.transaction.manager.TgTxState;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
 
 /**
  * TgTmSetting example.
@@ -84,22 +84,37 @@ public class Example04TmSetting {
     void supplierCustom(TgTxOption firstOption, TgTxOption laterOption) {
         var supplier = new TgTxOptionSupplier() {
             @Override
-            public TgTxState get(int attempt, TsurugiTransactionException e) {
+            protected TgTxState computeFirstTransactionState() {
                 // 初回はfirstOptionでトランザクション実行
-                if (attempt == 0) {
-                    return TgTxState.execute(firstOption);
-                }
+                return TgTxState.execute(firstOption);
+            }
 
+            @Override
+            protected TgTxState computeRetryTransactionState(int attempt, TsurugiTransactionException e) {
                 // 2回目以降でリトライ可能な場合はlaterOptionでトランザクション実行
-                if (isRetryable(e)) {
-                    return TgTxState.execute(laterOption);
-                }
-
-                // リトライ不能な場合
-                return TgTxState.notRetryable();
+                return TgTxState.execute(laterOption);
             }
         };
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
+    }
+
+    void supplierLog(TgTxOption option) {
+        var supplier = TgTxOptionSupplier.ofAlways(option, Integer.MAX_VALUE);
+        supplier.setStateListener((attempt, e, state) -> {
+            if (attempt > 0 && state.isExecute()) {
+                System.out.println("retry " + attempt);
+            }
+        });
+        var setting = TgTmSetting.of(supplier);
+    }
+
+    void supplierLogFromSetting(TgTxOption option) {
+        var setting = TgTmSetting.ofAlways(option);
+        setting.getTransactionOptionSupplier().setStateListener((attempt, e, state) -> {
+            if (attempt > 0 && state.isExecute()) {
+                System.out.println("retry " + attempt);
+            }
+        });
     }
 }

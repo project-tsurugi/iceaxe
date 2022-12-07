@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.transaction.manager;
+package com.tsurugidb.iceaxe.transaction.manager.option;
 
 import javax.annotation.Nonnull;
 
@@ -73,5 +73,16 @@ public final class TgTxState {
      */
     public TgTxOption getOption() {
         return this.option;
+    }
+
+    @Override
+    public String toString() {
+        if (this.isRetryOver) {
+            return "RETRY_OVER";
+        }
+        if (this.option == null) {
+            return "NOT_RETRYABLE";
+        }
+        return option.toString();
     }
 }

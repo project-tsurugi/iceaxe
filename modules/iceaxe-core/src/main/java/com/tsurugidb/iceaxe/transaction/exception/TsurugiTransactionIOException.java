@@ -4,7 +4,7 @@ import java.text.MessageFormat;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.manager.TgTxOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
 
 /**
  * Tsurugi Transaction IOException

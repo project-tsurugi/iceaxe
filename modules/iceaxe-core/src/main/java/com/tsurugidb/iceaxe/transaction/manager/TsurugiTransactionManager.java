@@ -17,6 +17,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOE
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionTask;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
 
 /**
  * Tsurugi Transaction Manager
