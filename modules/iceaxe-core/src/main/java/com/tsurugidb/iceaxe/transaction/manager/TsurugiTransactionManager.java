@@ -1,7 +1,9 @@
 package com.tsurugidb.iceaxe.transaction.manager;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.slf4j.Logger;
@@ -29,8 +31,41 @@ import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
 public class TsurugiTransactionManager {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransactionManager.class);
 
+    /**
+     * Listener called when retrying
+     */
+    @FunctionalInterface
+    public interface TsurugiTransactionManagerRetryListener {
+        /**
+         * Listener called when retrying
+         *
+         * @param transaction transaction
+         * @param e           exception
+         * @param nextOption  next transaction option
+         */
+        void accept(TsurugiTransaction transaction, Exception e, TgTxOption nextOption);
+    }
+
+    /**
+     * Listener called on finish
+     */
+    @FunctionalInterface
+    public interface TsurugiTransactionManagerFinishListener {
+        /**
+         * Listener called on finish
+         *
+         * @param transaction transaction
+         * @param committed   {@code true} committed, {@code false} rollbacked
+         * @param returnValue action return value
+         */
+        void accept(TsurugiTransaction transaction, boolean committed, Object returnValue);
+    }
+
     private final TsurugiSession ownerSession;
     private final TgTmSetting defaultSetting;
+    private Consumer<TsurugiTransaction> startHook;
+    private TsurugiTransactionManagerRetryListener retryListener;
+    private TsurugiTransactionManagerFinishListener finishListener;
 
     // internal
     public TsurugiTransactionManager(TsurugiSession session, TgTmSetting defaultSetting) {
@@ -43,6 +78,33 @@ public class TsurugiTransactionManager {
             throw new IllegalStateException("defaultSetting is not specified");
         }
         return this.defaultSetting;
+    }
+
+    /**
+     * set start hook
+     *
+     * @param hook start hook
+     */
+    public void setStartHook(@Nullable Consumer<TsurugiTransaction> hook) {
+        this.startHook = hook;
+    }
+
+    /**
+     * set retry listener
+     *
+     * @param listener retry listener
+     */
+    public void setRetryListener(@Nullable TsurugiTransactionManagerRetryListener listener) {
+        this.retryListener = listener;
+    }
+
+    /**
+     * set finish listener
+     *
+     * @param listener finish listener
+     */
+    public void setFinishListener(@Nullable TsurugiTransactionManagerFinishListener listener) {
+        this.finishListener = listener;
     }
 
     /**
@@ -106,23 +168,34 @@ public class TsurugiTransactionManager {
             throw new IllegalArgumentException("action is not specified");
         }
 
-        var option = setting.getTransactionOption(0, null).getOption();
+        var state = setting.getTransactionOption(0, null);
+        assert state.isExecute();
+        var option = state.getOption();
         LOG.trace("tm.execute tx={}", option);
         for (int i = 0;; i++) {
             try (var transaction = ownerSession.createTransaction(option)) {
                 transaction.setOwner(this, i);
                 setting.initializeTransaction(transaction);
+                if (this.startHook != null) {
+                    startHook.accept(transaction);
+                }
 
                 try {
-                    var r = action.run(transaction);
+                    R r = action.run(transaction);
                     if (transaction.isRollbacked()) {
                         LOG.trace("tm.execute end (rollbacked)");
+                        if (this.finishListener != null) {
+                            finishListener.accept(transaction, false, r);
+                        }
                         return r;
                     }
                     var info = ownerSession.getSessionInfo();
                     var commitType = setting.getCommitType(info);
                     transaction.commit(commitType);
                     LOG.trace("tm.execute end (committed)");
+                    if (this.finishListener != null) {
+                        finishListener.accept(transaction, true, r);
+                    }
                     return r;
                 } catch (TsurugiTransactionException e) {
                     option = processTransactionException(setting, transaction, e, i, option, e);
@@ -180,6 +253,9 @@ public class TsurugiTransactionManager {
                 var nextOption = nextState.getOption();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("tm.execute retry{}. e={}, nextTx={}", i + 1, e.getMessage(), nextOption);
+                }
+                if (this.retryListener != null) {
+                    retryListener.accept(transaction, cause, nextOption);
                 }
                 return nextOption;
             }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,8 +46,8 @@ public class TsurugiTransaction implements Closeable {
     private final IceaxeTimeout commitTimeout;
     private final IceaxeTimeout rollbackTimeout;
     private final IceaxeTimeout closeTimeout;
-    private List<Runnable> commitListenerList;
-    private List<Runnable> rollbackListenerList;
+    private List<Consumer<TsurugiTransaction>> commitListenerList;
+    private List<Consumer<TsurugiTransaction>> rollbackListenerList;
     private boolean committed = false;
     private boolean rollbacked = false;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
@@ -237,7 +238,7 @@ public class TsurugiTransaction implements Closeable {
      *
      * @param listener listener
      */
-    public void addCommitListener(Runnable listener) {
+    public void addCommitListener(Consumer<TsurugiTransaction> listener) {
         if (this.commitListenerList == null) {
             this.commitListenerList = new ArrayList<>();
         }
@@ -249,7 +250,7 @@ public class TsurugiTransaction implements Closeable {
      *
      * @param listener listener
      */
-    public void addRollbackListener(Runnable listener) {
+    public void addRollbackListener(Consumer<TsurugiTransaction> listener) {
         if (this.rollbackListenerList == null) {
             this.rollbackListenerList = new ArrayList<>();
         }
@@ -298,7 +299,7 @@ public class TsurugiTransaction implements Closeable {
 
         if (commitListenerList != null) {
             for (var listener : commitListenerList) {
-                listener.run();
+                listener.accept(this);
             }
         }
     }
@@ -323,7 +324,7 @@ public class TsurugiTransaction implements Closeable {
 
         if (rollbackListenerList != null) {
             for (var listener : rollbackListenerList) {
-                listener.run();
+                listener.accept(this);
             }
         }
     }
