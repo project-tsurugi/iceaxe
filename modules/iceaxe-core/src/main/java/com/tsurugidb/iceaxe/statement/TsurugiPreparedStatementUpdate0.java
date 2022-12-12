@@ -96,6 +96,6 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
     public TgStatementMetadata explain() throws IOException {
         var session = getSession();
         var helper = session.getExplainHelper();
-        return helper.explain(session, sql);
+        return helper.explain(session, sql, getExplainConnectTimeout(), getExplainCloseTimeout());
     }
 }

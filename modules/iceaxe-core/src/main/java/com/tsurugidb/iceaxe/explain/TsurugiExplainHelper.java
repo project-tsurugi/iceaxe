@@ -31,11 +31,28 @@ public class TsurugiExplainHelper {
      * @throws IOException
      */
     public TgStatementMetadata explain(TsurugiSession session, String source) throws IOException {
+        var info = session.getSessionInfo();
+        var connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CONNECT);
+        var closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CLOSE);
+        return explain(session, source, connectTimeout, closeTimeout);
+    }
+
+    /**
+     * Retrieves execution plan of the statement.
+     *
+     * @param session        tsurugi session
+     * @param source         SQL statement
+     * @param connectTimeout connect timeout
+     * @param closeTimeout   close timeout
+     * @return statement metadata
+     * @throws IOException
+     */
+    public TgStatementMetadata explain(TsurugiSession session, String source, IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout) throws IOException {
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("explain start. source={}", source);
         var lowStatementMetadataFuture = explainLow(lowSqlClient, source);
         LOG.trace("explain started");
-        return getStatementMetadata(session, source, lowStatementMetadataFuture);
+        return getStatementMetadata(session, source, lowStatementMetadataFuture, connectTimeout, closeTimeout);
     }
 
     protected FutureResponse<StatementMetadata> explainLow(SqlClient lowSqlClient, String source) throws IOException {
@@ -45,31 +62,31 @@ public class TsurugiExplainHelper {
     /**
      * Retrieves execution plan of the statement.
      *
-     * @param session      tsurugi session
-     * @param source       SQL statement
-     * @param lowPs        PreparedStatement
-     * @param lowParameter list of Parameter
+     * @param session        tsurugi session
+     * @param source         SQL statement
+     * @param lowPs          PreparedStatement
+     * @param lowParameter   list of Parameter
+     * @param connectTimeout connect timeout
+     * @param closeTimeout   close timeout
      * @return statement metadata
      * @throws IOException
      */
-    public TgStatementMetadata explain(TsurugiSession session, String source, PreparedStatement lowPs, List<Parameter> lowParameter) throws IOException {
+    public TgStatementMetadata explain(TsurugiSession session, String source, PreparedStatement lowPs, List<Parameter> lowParameter, IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout)
+            throws IOException {
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("explain start. source={}", source);
         var lowStatementMetadataFuture = explainLow(lowSqlClient, lowPs, lowParameter);
         LOG.trace("explain started");
-        return getStatementMetadata(session, source, lowStatementMetadataFuture);
+        return getStatementMetadata(session, source, lowStatementMetadataFuture, connectTimeout, closeTimeout);
     }
 
     protected FutureResponse<StatementMetadata> explainLow(SqlClient lowSqlClient, PreparedStatement lowPs, List<Parameter> lowParameter) throws IOException {
         return lowSqlClient.explain(lowPs, lowParameter);
     }
 
-    protected TgStatementMetadata getStatementMetadata(TsurugiSession session, String source, FutureResponse<StatementMetadata> lowStatementMetadataFuture) throws IOException {
+    protected TgStatementMetadata getStatementMetadata(TsurugiSession session, String source, FutureResponse<StatementMetadata> lowStatementMetadataFuture, IceaxeTimeout connectTimeout,
+            IceaxeTimeout closeTimeout) throws IOException {
         try (var closeable = IceaxeIoUtil.closeable(lowStatementMetadataFuture)) {
-
-            var info = session.getSessionInfo();
-            var connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CONNECT);
-            var closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CLOSE);
             closeTimeout.apply(lowStatementMetadataFuture);
 
             var lowStatementMetadata = IceaxeIoUtil.getAndCloseFuture(lowStatementMetadataFuture, connectTimeout);

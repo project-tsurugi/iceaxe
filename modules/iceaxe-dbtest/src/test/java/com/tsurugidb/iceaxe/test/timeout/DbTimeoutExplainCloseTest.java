@@ -15,6 +15,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
@@ -58,6 +59,16 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
         });
     }
 
+    @Test
+    void timeoutSet() throws IOException {
+        testTimeout(new TimeoutModifier() {
+            @Override
+            public void modifyPs(TsurugiPreparedStatementWithLowPs<?> ps) {
+                ps.setExplainCloseTimeout(1, TimeUnit.SECONDS);
+            }
+        });
+    }
+
     @Override
     protected void clientTask(PipeServerThtread pipeServer, TsurugiSession session, TimeoutModifier modifier) throws Exception {
         var helper = new TsurugiExplainHelper() {
@@ -97,6 +108,8 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
         var sql = "select * from " + TEST;
         var parameterMapping = TgParameterMapping.of();
         try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+            session.setExplainHelper(helper);
+
             var parameter = TgParameterList.of();
             try {
                 ps.explain(parameter);

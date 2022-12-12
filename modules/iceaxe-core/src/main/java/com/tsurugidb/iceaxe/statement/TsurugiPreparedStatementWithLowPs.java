@@ -131,7 +131,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
         var lowParameterList = getLowParameterList(parameter);
 
         var helper = session.getExplainHelper();
-        return helper.explain(session, sql, lowPs, lowParameterList);
+        return helper.explain(session, sql, lowPs, lowParameterList, getExplainConnectTimeout(), getExplainCloseTimeout());
     }
 
     @Override
