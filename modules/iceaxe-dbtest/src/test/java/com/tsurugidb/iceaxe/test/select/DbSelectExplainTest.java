@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.sql.proto.SqlCommon.AtomType;
+import com.tsurugidb.tsubakuro.explain.PlanGraphException;
 
 /**
  * explain select test
@@ -77,5 +80,16 @@ class DbSelectExplainTest extends DbTestTableTester {
         var c2 = list.get(2);
         assertEquals("zzz", c2.getName());
         assertEquals(AtomType.CHARACTER, c2.getAtomType());
+    }
+
+    @Test
+    void largeResult() throws IOException, PlanGraphException {
+        var sql = "select * from " + Stream.generate(() -> TEST).limit(6).collect(Collectors.joining(","));
+
+        var session = getSession();
+        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of())) {
+            var result = ps.explain(TgParameterList.of());
+            assertNotNull(result.getLowPlanGraph());
+        }
     }
 }
