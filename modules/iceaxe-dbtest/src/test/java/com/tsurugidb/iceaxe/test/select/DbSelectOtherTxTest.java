@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +43,6 @@ class DbSelectOtherTxTest extends DbTestTableTester {
     }
 
     @RepeatedTest(8)
-    @Disabled // TODO remove Disabled WARN_CONFLICT_ON_WRITE_PRESERVEでtateyama-serverがクラッシュすることがある
     void select1() throws IOException, TsurugiTransactionException {
         var selectSql = "select * from " + TEST + " where foo=1";
         var bar = TgVariable.ofInt8("bar");
@@ -56,7 +54,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
             update(session, updatePs, bar, 111);
 
             try (var tx = session.createTransaction(TgTxOption.ofLTX(TEST))) {
-//              var entity1 = select(tx, selectPs);
+//              var entity1 = select(tx, selectPs); // do not call
 //              assertEquals(111L, entity1.getBar());
 
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
