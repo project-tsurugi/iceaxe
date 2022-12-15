@@ -221,6 +221,17 @@ public class TsurugiTransaction implements Closeable {
         return this.lowTransaction;
     }
 
+    /**
+     * Provides transaction id that is unique to for the duration of the database server's lifetime
+     *
+     * @return the id String for this transaction
+     * @throws IOException
+     */
+    public String getTransactionId() throws IOException {
+        var transaction = getLowTransaction();
+        return transaction.getTransactionId();
+    }
+
     // internal
     @FunctionalInterface
     public interface LowTransactionTask<R> {

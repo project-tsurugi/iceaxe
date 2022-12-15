@@ -1,6 +1,8 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
@@ -37,6 +39,16 @@ class DbTransactionTest extends DbTestTableTester {
         insertTestTable(SIZE);
 
         LOG.debug("{} init end", info.getDisplayName());
+    }
+
+    @Test
+    void transactionId() throws IOException {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            var id = transaction.getTransactionId();
+            assertNotNull(id);
+            assertFalse(id.isEmpty());
+        }
     }
 
     @RepeatedTest(6)
