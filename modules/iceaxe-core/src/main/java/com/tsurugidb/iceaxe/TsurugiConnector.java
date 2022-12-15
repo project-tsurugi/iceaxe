@@ -20,37 +20,47 @@ public class TsurugiConnector {
 
     /**
      * create Tsurugi Connector
-     * 
+     *
      * @param endpoint the end-point URI
      * @return Tsurugi Connector
      */
     public static TsurugiConnector createConnector(String endpoint) {
-        var lowConnector = Connector.create(endpoint);
-        var connector = new TsurugiConnector(lowConnector);
-        return connector;
+        var uri = URI.create(endpoint);
+        return createConnector(uri);
     }
 
     /**
      * create Tsurugi Connector
-     * 
+     *
      * @param endpoint the end-point URI
      * @return Tsurugi Connector
      */
     public static TsurugiConnector createConnector(URI endpoint) {
         var lowConnector = Connector.create(endpoint);
-        var connector = new TsurugiConnector(lowConnector);
+        var connector = new TsurugiConnector(endpoint, lowConnector);
         return connector;
     }
 
+    private final URI endpoint;
     private final Connector lowConnector;
 
-    protected TsurugiConnector(Connector lowConnector) {
+    protected TsurugiConnector(URI endpoint, Connector lowConnector) {
+        this.endpoint = endpoint;
         this.lowConnector = lowConnector;
     }
 
     /**
+     * get end-point
+     *
+     * @return end-point URI
+     */
+    public URI getEndpoint() {
+        return this.endpoint;
+    }
+
+    /**
      * create Tsurugi Session
-     * 
+     *
      * @param info Session Information
      * @return Tsurugi Session
      * @throws IOException
