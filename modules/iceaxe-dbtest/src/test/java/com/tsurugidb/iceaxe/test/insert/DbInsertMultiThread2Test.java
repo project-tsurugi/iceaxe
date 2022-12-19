@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -100,6 +102,12 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     @ValueSource(booleans = { false, true })
     void insertMultiTxOcc30(boolean prepare) throws IOException, InterruptedException {
         insertMultiTxOcc(30, prepare);
+    }
+
+    @RepeatedTest(4)
+    @Disabled // remove Disabled たまにtateyama-serverでstd::bad_allocが発生する
+    void insertMultiTxOcc30False() throws IOException, InterruptedException {
+        insertMultiTxOcc(30, false);
     }
 
     private void insertMultiTxOcc(int threadSize, boolean prepare) throws IOException, InterruptedException {
