@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.transaction.manager;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -71,6 +72,16 @@ public class TsurugiTransactionManager {
     public TsurugiTransactionManager(TsurugiSession session, TgTmSetting defaultSetting) {
         this.ownerSession = session;
         this.defaultSetting = defaultSetting;
+    }
+
+    /**
+     * get session
+     *
+     * @return session
+     */
+    @Nonnull
+    public TsurugiSession getSession() {
+        return this.ownerSession;
     }
 
     protected final TgTmSetting defaultSetting() {

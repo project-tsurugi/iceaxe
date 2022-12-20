@@ -75,6 +75,16 @@ public class TsurugiTransaction implements Closeable {
     }
 
     /**
+     * get session
+     *
+     * @return session
+     */
+    @Nonnull
+    public TsurugiSession getSession() {
+        return this.ownerSession;
+    }
+
+    /**
      * get transaction option.
      *
      * @return transaction option
