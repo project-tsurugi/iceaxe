@@ -15,6 +15,22 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
         super(TsurugiDiagnosticCodeProvider.createMessage(cause), cause);
     }
 
+    /**
+     * Creates a new instance.
+     *
+     * @param message the detail message
+     * @param code    diagnostic code
+     * @param cause   the cause
+     */
+    public TsurugiTransactionException(String message, DiagnosticCode code, Throwable cause) {
+        super(message, new ServerException(TsurugiDiagnosticCodeProvider.createMessage(code), cause) {
+            @Override
+            public DiagnosticCode getDiagnosticCode() {
+                return code;
+            }
+        });
+    }
+
     @Override
     public ServerException getCause() {
         return (ServerException) super.getCause();
