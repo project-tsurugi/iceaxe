@@ -1,10 +1,13 @@
 package com.tsurugidb.iceaxe.transaction.manager.option;
 
-import javax.annotation.Nonnull;
+import java.util.function.Predicate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * {@link TgTxOption} supplier
@@ -47,14 +50,43 @@ public abstract class TgTxOptionSupplier {
         public void accept(int attempt, TsurugiTransactionException e, TgTxState state);
     }
 
+    private Predicate<TsurugiDiagnosticCodeProvider> retryPredicate;
     private TgTxStateListener stateListener;
+
+    /**
+     * Creates a new instance.
+     */
+    public TgTxOptionSupplier() {
+        this(new TsurugiDefaultRetryPredicate());
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param predicate retry predicate
+     */
+    public TgTxOptionSupplier(Predicate<TsurugiDiagnosticCodeProvider> predicate) {
+        setRetryPredicate(predicate);
+    }
+
+    /**
+     * set retry predicate
+     *
+     * @param predicate retry predicate
+     */
+    public void setRetryPredicate(@Nonnull Predicate<TsurugiDiagnosticCodeProvider> predicate) {
+        if (predicate == null) {
+            throw new IllegalArgumentException("predicate is null");
+        }
+        this.retryPredicate = predicate;
+    }
 
     /**
      * set state listener
      *
      * @param listener state listener
      */
-    public void setStateListener(TgTxStateListener listener) {
+    public void setStateListener(@Nullable TgTxStateListener listener) {
         this.stateListener = listener;
     }
 
@@ -97,10 +129,6 @@ public abstract class TgTxOptionSupplier {
      * @return true: retryable
      */
     protected boolean isRetryable(TsurugiTransactionException e) {
-        var lowCode = e.getDiagnosticCode();
-        if (lowCode == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
-            return true;
-        }
-        return false;
+        return retryPredicate.test(e);
     }
 }
