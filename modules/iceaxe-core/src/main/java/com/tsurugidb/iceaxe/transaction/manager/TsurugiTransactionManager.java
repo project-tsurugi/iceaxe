@@ -179,7 +179,7 @@ public class TsurugiTransactionManager {
             throw new IllegalArgumentException("action is not specified");
         }
 
-        var state = setting.getTransactionOption(0, null);
+        var state = setting.getTransactionOption(0, null, null);
         assert state.isExecute();
         var option = state.getOption();
         LOG.trace("tm.execute tx={}", option);
@@ -247,7 +247,7 @@ public class TsurugiTransactionManager {
         try {
             TgTxState nextState;
             try {
-                nextState = setting.getTransactionOption(i + 1, e);
+                nextState = setting.getTransactionOption(i + 1, transaction, e);
             } catch (Throwable t) {
                 t.addSuppressed(cause);
                 throw t;

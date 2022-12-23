@@ -98,16 +98,17 @@ public class TgTmSetting {
     /**
      * get transaction option
      *
-     * @param attempt attempt number
-     * @param e       transaction exception
+     * @param attempt     attempt number
+     * @param transaction transaction
+     * @param e           transaction exception
      * @return transaction option
      * @see TgTxOptionSupplier
      */
-    public TgTxState getTransactionOption(int attempt, TsurugiTransactionException e) {
+    public TgTxState getTransactionOption(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
         if (this.transactionOptionSupplier == null) {
             throw new IllegalStateException("transactionOptionSupplier is not specifed");
         }
-        return transactionOptionSupplier.get(attempt, e);
+        return transactionOptionSupplier.get(attempt, transaction, e);
     }
 
     /**

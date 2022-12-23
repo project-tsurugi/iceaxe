@@ -1,12 +1,13 @@
 package com.tsurugidb.iceaxe.transaction.manager.option;
 
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 /**
@@ -50,7 +51,7 @@ public abstract class TgTxOptionSupplier {
         public void accept(int attempt, TsurugiTransactionException e, TgTxState state);
     }
 
-    private Predicate<TsurugiDiagnosticCodeProvider> retryPredicate;
+    private BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> retryPredicate;
     private TgTxStateListener stateListener;
 
     /**
@@ -65,7 +66,7 @@ public abstract class TgTxOptionSupplier {
      *
      * @param predicate retry predicate
      */
-    public TgTxOptionSupplier(Predicate<TsurugiDiagnosticCodeProvider> predicate) {
+    public TgTxOptionSupplier(BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> predicate) {
         setRetryPredicate(predicate);
     }
 
@@ -74,7 +75,7 @@ public abstract class TgTxOptionSupplier {
      *
      * @param predicate retry predicate
      */
-    public void setRetryPredicate(@Nonnull Predicate<TsurugiDiagnosticCodeProvider> predicate) {
+    public void setRetryPredicate(@Nonnull BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> predicate) {
         if (predicate == null) {
             throw new IllegalArgumentException("predicate is null");
         }
@@ -93,25 +94,26 @@ public abstract class TgTxOptionSupplier {
     /**
      * get Transaction Option
      *
-     * @param attempt attempt number
-     * @param e       transaction exception (null if attempt==0)
+     * @param attempt     attempt number
+     * @param transaction transaction (null if attempt==0)
+     * @param e           transaction exception (null if attempt==0)
      * @return Transaction Option
      */
     @Nonnull
-    public final TgTxState get(int attempt, TsurugiTransactionException e) {
-        var state = computeTransactionState(attempt, e);
+    public final TgTxState get(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+        var state = computeTransactionState(attempt, transaction, e);
         if (this.stateListener != null) {
             stateListener.accept(attempt, e, state);
         }
         return state;
     }
 
-    protected TgTxState computeTransactionState(int attempt, TsurugiTransactionException e) {
+    protected TgTxState computeTransactionState(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
         if (attempt == 0) {
             return computeFirstTransactionState();
         }
 
-        if (isRetryable(e)) {
+        if (isRetryable(transaction, e)) {
             return computeRetryTransactionState(attempt, e);
         }
 
@@ -125,10 +127,11 @@ public abstract class TgTxOptionSupplier {
     /**
      * whether to retry
      *
-     * @param e Transaction Exception
+     * @param transaction transaction
+     * @param e           Transaction Exception
      * @return true: retryable
      */
-    protected boolean isRetryable(TsurugiTransactionException e) {
-        return retryPredicate.test(e);
+    protected boolean isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) {
+        return retryPredicate.test(transaction, e);
     }
 }
