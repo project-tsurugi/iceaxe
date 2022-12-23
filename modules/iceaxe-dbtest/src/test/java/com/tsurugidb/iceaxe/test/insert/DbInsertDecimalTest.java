@@ -60,11 +60,8 @@ class DbInsertDecimalTest extends DbTestTableTester {
             assertEquals(-1, count); // TODO 1
         }
 
-        try (var ps = session.createPreparedQuery("select value from " + TEST)) {
-            var entity = ps.executeAndFindRecord(tm).get();
-            var actual = entity.getDecimal("value");
-            assertEquals(value.setScale(2), actual);
-        }
+        var actual = selectValue();
+        assertEquals(value.setScale(2), actual);
     }
 
     @ParameterizedTest
@@ -100,11 +97,17 @@ class DbInsertDecimalTest extends DbTestTableTester {
             assertEquals(-1, count); // TODO 1
         }
 
+        var actual = selectValue();
+        var expected = value.setScale(2, TgVariableBigDecimal.DEFAULT_ROUNDING_MODE);
+        assertEquals(expected, actual);
+    }
+
+    private BigDecimal selectValue() throws IOException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery("select value from " + TEST)) {
             var entity = ps.executeAndFindRecord(tm).get();
-            var actual = entity.getDecimal("value");
-            var expected = value.setScale(2, TgVariableBigDecimal.DEFAULT_ROUNDING_MODE);
-            assertEquals(expected, actual);
+            return entity.getDecimal(VNAME);
         }
     }
 }
