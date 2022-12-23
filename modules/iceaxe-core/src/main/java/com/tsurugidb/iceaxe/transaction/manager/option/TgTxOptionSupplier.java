@@ -57,7 +57,7 @@ public abstract class TgTxOptionSupplier {
      * Creates a new instance.
      */
     public TgTxOptionSupplier() {
-        this(new TsurugiDefaultRetryPredicate());
+        this(TsurugiDefaultRetryPredicate.getInstance());
     }
 
     /**
