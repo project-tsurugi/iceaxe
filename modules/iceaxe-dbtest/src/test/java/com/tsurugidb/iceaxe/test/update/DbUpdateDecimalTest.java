@@ -10,12 +10,14 @@ import java.math.RoundingMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -44,28 +46,38 @@ class DbUpdateDecimalTest extends DbTestTableTester {
     private static final String VNAME = "value";
     private static final String SQL = "insert into " + TEST + "(value) values(:" + VNAME + ")";
 
-    @Test
-    void div2() throws IOException {
-        div(2, true);
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    void div2(boolean cast) throws IOException {
+        div(2, cast, true);
     }
 
     @Test
     void div3() throws IOException {
-        div(3, false); // TODO 1/3も正常にupdateしたい
+        div(3, false, false);
     }
 
-    private void div(int divValue, boolean success) throws IOException {
+    @Test
+    void div3Cast() throws IOException {
+        div(3, true, true);
+    }
+
+    private void div(int divValue, boolean cast, boolean expectedSuccess) throws IOException {
         insert(BigDecimal.ONE);
 
         var div = TgVariable.ofDecimal("div");
-        var sql = "update " + TEST + " set value = value / " + div;
+        String expression = "value / " + div;
+        if (cast) {
+            expression = "cast(" + expression + " as decimal(5,2))";
+        }
+        var sql = "update " + TEST + " set value = " + expression;
         var mapping = TgParameterMapping.of(div);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, mapping)) {
             var parameter = TgParameterList.of(div.bind(divValue));
-            if (success) {
+            if (expectedSuccess) {
                 int count = ps.executeAndGetCount(tm, parameter);
                 assertEquals(-1, count); // TODO 1
 
@@ -73,10 +85,17 @@ class DbUpdateDecimalTest extends DbTestTableTester {
                 var expected = BigDecimal.ONE.divide(BigDecimal.valueOf(divValue), 2, RoundingMode.DOWN);
                 assertEquals(expected, actual);
             } else {
-                var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                    ps.executeAndGetCount(tm, parameter);
+                tm.execute(transaction -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                        ps.executeAndGetCount(transaction, parameter);
+                    });
+                    assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
+
+                    try (var selectPs = session.createPreparedQuery("select value from " + TEST)) {
+                        var list = selectPs.executeAndGetList(transaction);
+                        assertEquals(0, list.size()); // TODO 1 (even if ERR_EXPRESSION_EVALUATION_FAILURE)
+                    }
                 });
-                assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
             }
         }
     }
