@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.transaction.manager;
 
 import java.io.IOException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -67,6 +68,7 @@ public class TsurugiTransactionManager {
     private Consumer<TsurugiTransaction> startHook;
     private TsurugiTransactionManagerRetryListener retryListener;
     private TsurugiTransactionManagerFinishListener finishListener;
+    private BiConsumer<TsurugiTransaction, Throwable> rollbackListener;
 
     // internal
     public TsurugiTransactionManager(TsurugiSession session, TgTmSetting defaultSetting) {
@@ -116,6 +118,15 @@ public class TsurugiTransactionManager {
      */
     public void setFinishListener(@Nullable TsurugiTransactionManagerFinishListener listener) {
         this.finishListener = listener;
+    }
+
+    /**
+     * set rollback listener
+     *
+     * @param listener rollback listener
+     */
+    public void setRollbackListener(@Nullable BiConsumer<TsurugiTransaction, Throwable> listener) {
+        this.rollbackListener = listener;
     }
 
     /**
@@ -293,6 +304,9 @@ public class TsurugiTransactionManager {
         try {
             if (transaction.available()) {
                 transaction.rollback();
+                if (this.rollbackListener != null) {
+                    rollbackListener.accept(transaction, save);
+                }
             }
         } catch (IOException | RuntimeException | Error e) {
             if (save != null) {
