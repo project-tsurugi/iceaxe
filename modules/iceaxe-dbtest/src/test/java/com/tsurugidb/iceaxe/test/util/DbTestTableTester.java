@@ -66,6 +66,18 @@ public class DbTestTableTester {
         LOG.debug("{} end", info.getDisplayName());
     }
 
+    // property
+
+    protected static String getSystemProperty(String key, String defaultValue) {
+        String property = System.getProperty(key);
+        return (property != null) ? property : defaultValue;
+    }
+
+    protected static int getSystemProperty(String key, int defaultValue) {
+        String property = getSystemProperty(key, (String) null);
+        return (property != null) ? Integer.parseInt(property) : defaultValue;
+    }
+
     // utility
 
     protected static void dropTestTable() throws IOException {

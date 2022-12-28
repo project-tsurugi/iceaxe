@@ -1,13 +1,21 @@
 package com.tsurugidb.iceaxe.test.session;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -19,9 +27,9 @@ import com.tsurugidb.iceaxe.transaction.TgTxOption;
 class DbMultiSessionTest extends DbTestTableTester {
 
     private static final int ATTEMPT_SIZE = 260;
+    private static final int EXPECTED_SESSION_SIZE = getSystemProperty("expected.session.size", 100);
 
     @Test
-    @Disabled // TODO remove Disabled (many session)
     void limit() throws IOException {
         var list = new ArrayList<TsurugiSession>();
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
@@ -29,32 +37,46 @@ class DbMultiSessionTest extends DbTestTableTester {
             list.add(session);
         }
 
-        for (var session : list) {
-            // DBサーバー側の同時トランザクション数の上限はセッション数とは無関係
-            // そのため、トランザクションをcloseしないと、トランザクション数の制限でエラーになる
-            try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
-                tx.getLowTransaction();
+        try {
+            limit(list);
+        } finally {
+            for (var session : list) {
+                session.close();
             }
         }
+    }
 
+    private void limit(List<TsurugiSession> list) {
+        int count = 0;
         for (var session : list) {
-            session.close();
+            if (session.isAlive()) {
+                count++;
+            } else {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                    session.getLowSqlClient();
+                });
+                assertEqualsCode(IceaxeErrorCode.SESSION_LOW_ERROR, e);
+                var c = e.getCause();
+                assertEquals("the server has declined the connection request", c.getMessage());
+            }
+        }
+        if (count < EXPECTED_SESSION_SIZE) {
+            fail(MessageFormat.format("less session.size expected: {1} but was: {0}", count, EXPECTED_SESSION_SIZE));
         }
     }
 
     @Test
+    @Disabled // TODO remove Disabled (sessionクローズ時にリソースが解放されておらず、後続のmanySession2でセッション数が足りなくなる(セッション数の上限が100程度の場合))
     void manySession1() throws IOException {
         manySession(false, false);
     }
 
     @Test
-    @Disabled // TODO remove Disabled (many session)
     void manySession2() throws IOException {
         manySession(true, false);
     }
 
     @Test
-    @Disabled // TODO remove Disabled (many session)
     void manySession3() throws IOException {
         manySession(false, true);
     }
