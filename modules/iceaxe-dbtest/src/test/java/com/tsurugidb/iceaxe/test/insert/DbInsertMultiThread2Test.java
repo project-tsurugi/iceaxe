@@ -105,13 +105,13 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     }
 
     @RepeatedTest(4)
-    @Disabled // remove Disabled たまにtateyama-serverでstd::bad_allocが発生する
+    @Disabled // TODO remove Disabled たまにtateyama-serverでstd::bad_allocが発生する
     void insertMultiTxOcc30False() throws IOException, InterruptedException {
         insertMultiTxOcc(30, false);
     }
 
     private void insertMultiTxOcc(int threadSize, boolean prepare) throws IOException, InterruptedException {
-        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 3);
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 3); // TODO リトライ無しにしたい
         setting.getTransactionOptionSupplier().setStateListener((attempt, e, state) -> {
             if (attempt > 0) {
                 LOG.info("insertMultiTxOcc({}, {}) OCC retry {}", threadSize, prepare, attempt);

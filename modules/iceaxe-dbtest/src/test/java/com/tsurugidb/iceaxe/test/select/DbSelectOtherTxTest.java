@@ -2,12 +2,14 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
@@ -51,16 +53,21 @@ class DbSelectOtherTxTest extends DbTestTableTester {
         var session = getSession();
         try (var selectPs = session.createPreparedQuery(selectSql, SELECT_MAPPING); //
                 var updatePs = session.createPreparedStatement(updateSql, TgParameterMapping.of(bar))) {
-            update(session, updatePs, bar, 111);
+            updateOtherTxOcc(session, updatePs, bar, 111);
 
             try (var tx = session.createTransaction(TgTxOption.ofLTX(TEST))) {
 //              var entity1 = select(tx, selectPs); // do not call
 //              assertEquals(111L, entity1.getBar());
 
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                    update(session, updatePs, bar, 222);
+                    updateOtherTxOcc(session, updatePs, bar, 222);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE, e);
+//              assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e); // TODO ERR_CONFLICT_ON_WRITE_PRESERVEは無くなるかも
+                var code = findDiagnosticCode(e);
+                var expectedCode = List.of(SqlServiceCode.ERR_ABORTED_RETRYABLE, SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE);
+                if (!expectedCode.contains(code)) {
+                    fail(MessageFormat.format("expected: {1} but was: <{0}>", code, expectedCode));
+                }
 
                 var entity2 = select(tx, selectPs);
                 assertEquals(111L, entity2.getBar());
@@ -77,7 +84,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
         }
     }
 
-    @Test
+    @RepeatedTest(4)
     void select2() throws IOException, TsurugiTransactionException {
         var selectSql = "select * from " + TEST + " where foo=1";
         var bar = TgVariable.ofInt8("bar");
@@ -86,16 +93,16 @@ class DbSelectOtherTxTest extends DbTestTableTester {
         var session = getSession();
         try (var selectPs = session.createPreparedQuery(selectSql, SELECT_MAPPING); //
                 var updatePs = session.createPreparedStatement(updateSql, TgParameterMapping.of(bar))) {
-            update(session, updatePs, bar, 111);
+            updateOtherTxOcc(session, updatePs, bar, 111);
 
             try (var tx = session.createTransaction(TgTxOption.ofLTX(TEST))) {
                 var entity1 = select(tx, selectPs);
                 assertEquals(111L, entity1.getBar());
 
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                    update(session, updatePs, bar, 222);
+                    updateOtherTxOcc(session, updatePs, bar, 222);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE, e);
+                assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
 
                 var entity2 = select(tx, selectPs);
                 assertEquals(111L, entity2.getBar());
@@ -112,7 +119,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
         }
     }
 
-    private void update(TsurugiSession session, TsurugiPreparedStatementUpdate1<TgParameterList> updatePs, TgVariableLong bar, long value) throws IOException, TsurugiTransactionException {
+    private void updateOtherTxOcc(TsurugiSession session, TsurugiPreparedStatementUpdate1<TgParameterList> updatePs, TgVariableLong bar, long value) throws IOException, TsurugiTransactionException {
         try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
             var parameter = TgParameterList.of(bar.bind(value));
             int count = updatePs.executeAndGetCount(tx, parameter);
