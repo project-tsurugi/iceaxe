@@ -1,11 +1,13 @@
 package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -127,12 +129,17 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(sql)) {
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
-            int i = 0;
+            HashSet<Long> expectedSet = new HashSet<>();
+            long i = 0;
+            for (var entity : list) {
+                expectedSet.add(++i);
+            }
             for (var entity : list) {
                 // TODO cで件数が取得されるべき
 //              assertEquals(1, entity.getInt4("c"));
-                assertEquals(++i, entity.getInt8("c"));
+                assertTrue(expectedSet.remove(entity.getInt8("c")));
             }
+            assertTrue(expectedSet.isEmpty());
         }
     }
 
