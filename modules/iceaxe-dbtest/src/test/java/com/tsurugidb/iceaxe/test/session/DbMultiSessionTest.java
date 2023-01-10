@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
@@ -66,7 +65,6 @@ class DbMultiSessionTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled (sessionクローズ時にリソースが解放されておらず、後続のmanySession2でセッション数が足りなくなる(セッション数の上限が100程度の場合))
     void manySession1() throws IOException {
         manySession(false, false);
     }
