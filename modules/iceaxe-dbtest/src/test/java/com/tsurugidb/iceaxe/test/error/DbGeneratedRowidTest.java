@@ -2,11 +2,13 @@ package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -142,26 +144,22 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-//    @RepeatedTest(200) // 大量に繰り返すと、稀にfailする
     void selectGroupBy() throws IOException {
         var sql = "select " + GENERATED_KEY + ", count(*) as c from " + TEST + " group by " + GENERATED_KEY;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
+        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
-            int i = 0;
+            var expectedSet = LongStream.rangeClosed(1, list.size()).boxed().collect(Collectors.toSet());
             for (var entity : list) {
-                // TODO cで件数が取得されるべき
+                // TODO generated_rowidが使えるならば、cで件数が取得されるべき
 //              assertEquals(1, entity.getInt4("c"));
-                try {
-                    assertEquals(++i, entity.getInt8("c"));
-                } catch (Throwable t) {
-                    LOG.warn("selectGroupBy.list={}", list);
-                    throw t;
-                }
+                assertTrue(expectedSet.remove(entity.getInt8("c")));
             }
+            assertEquals(Set.of(), expectedSet);
         }
     }
 
@@ -229,7 +227,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 //          int i = 0;
             for (var entity : list) {
 //TODO          assertEquals(i++, entity.getInt4(GENERATED_KEY));
-                // 現状、generated_rowidで始まるカラムは取得できない
+                // 現状、generated_rowidで始まる別名は取得できない
                 var e = assertThrowsExactly(IllegalArgumentException.class, () -> {
                     entity.getInt4(GENERATED_KEY);
                 });
