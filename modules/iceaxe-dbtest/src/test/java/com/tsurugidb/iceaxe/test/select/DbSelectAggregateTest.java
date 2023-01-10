@@ -193,4 +193,19 @@ class DbSelectAggregateTest extends DbTestTableTester {
             assertContains(expected, e.getMessage());
         }
     }
+
+    @Test
+    void errorGroupNameNotFound() throws IOException {
+        var sql = "select foo as k, count(*) as cnt from " + TEST + " group by k";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedQuery(sql)) {
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                ps.executeAndGetList(tm);
+            });
+            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+//TODO      assertContains("translating statement failed: variable_not_found k)", e.getMessage());
+        }
+    }
 }
