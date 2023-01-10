@@ -1,13 +1,14 @@
 package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.HashSet;
+import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,8 @@ import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 /**
  * generated rowid test
  */
+// プライマリキーが無いテーブルでは暗黙にgenerated_rowidカラムが作られる
+//TODO generated_rowidが見えてはいけない
 class DbGeneratedRowidTest extends DbTestTableTester {
 
     private static final String GENERATED_KEY = "__generated_rowid___" + TEST;
@@ -53,9 +56,9 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var metadata = session.findTableMetadata(TEST).get();
         var actualSet = metadata.getLowColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
+        // TODO TableMetadataでgenerated_rowidは取得できないべき
         var expectedSet = Set.of("foo", "bar", "zzz", GENERATED_KEY);
         assertEquals(expectedSet, actualSet);
-        // TODO TableMetadataでgenerated_rowidが取得できるのは正しいか？
 
         var key = metadata.getLowColumnList().stream().filter(c -> c.getName().equals(GENERATED_KEY)).findAny().get();
         assertEquals(AtomType.INT8, key.getAtomType());
@@ -63,11 +66,13 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
     @Test
     void explain() throws IOException {
+        var sql = "select * from " + TEST;
+
         var session = getSession();
-        try (var ps = session.createPreparedQuery(SELECT_SQL, TgParameterMapping.of())) {
+        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of())) {
             var result = ps.explain(TgParameterList.of());
             var actualSet = result.getLowColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
-            var expectedSet = Set.of("foo", "bar", "zzz");
+            var expectedSet = Set.of("foo", "bar", "zzz"); // 「select *」ではgenerated_rowidは出てこない
             assertEquals(expectedSet, actualSet);
         }
     }
@@ -78,11 +83,11 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
+        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
             for (var entity : list) {
-                // TODO 値が取得できること
                 assertEquals(List.of(), entity.getNameList());
             }
         }
@@ -94,6 +99,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
+        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
@@ -110,6 +116,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
+        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
@@ -121,25 +128,38 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
+    void selectGroupBy0() throws IOException {
+        var sql = "select " + GENERATED_KEY + "+0, count(*) as c from " + TEST + " group by " + GENERATED_KEY;
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        // TODO generated_rowidが（見えなくて）エラーになるべき
+        try (var ps = session.createPreparedQuery(sql)) {
+            var list = ps.executeAndGetList(tm);
+            assertEquals(SIZE, list.size());
+            for (var entity : list) {
+                assertEquals(1, entity.getInt4("c"));
+            }
+        }
+    }
+
+    @Test
     void selectGroupBy() throws IOException {
         var sql = "select " + GENERATED_KEY + ", count(*) as c from " + TEST + " group by " + GENERATED_KEY;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
+        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
-            HashSet<Long> expectedSet = new HashSet<>();
-            long i = 0;
+            var expectedSet = LongStream.rangeClosed(1, list.size()).boxed().collect(Collectors.toSet());
             for (var entity : list) {
-                expectedSet.add(++i);
-            }
-            for (var entity : list) {
-                // TODO cで件数が取得されるべき
+                // TODO generated_rowidが使えるならば、cで件数が取得されるべき
 //              assertEquals(1, entity.getInt4("c"));
                 assertTrue(expectedSet.remove(entity.getInt8("c")));
             }
-            assertTrue(expectedSet.isEmpty());
+            assertEquals(Set.of(), expectedSet);
         }
     }
 
@@ -150,6 +170,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
+        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
             int count = ps.executeAndGetCount(tm);
             assertEquals(-1, count); // TODO 1
@@ -173,10 +194,11 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
+        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
-            // TODO duplicate key
+            // generated_rowidが使えるならば、duplicate keyが発生すべき
             int count = ps.executeAndGetCount(tm);
-            assertEquals(-1, count); // TODO 1
+            assertEquals(-1, count);
         }
 
         var list = selectAllFromTest();
@@ -186,6 +208,30 @@ class DbGeneratedRowidTest extends DbTestTableTester {
                 assertEquals(11L, entity.getBar());
             } else {
                 assertEquals(entity.getFoo().longValue(), entity.getBar());
+            }
+        }
+    }
+
+    @Test
+    void selectAsGeneratedRowid() throws IOException {
+        dropTestTable();
+        createTestTable();
+        insertTestTable(SIZE);
+
+        var sql = "select foo as " + GENERATED_KEY + " from " + TEST + " order by foo";
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedQuery(sql)) {
+            var list = ps.executeAndGetList(tm);
+            assertEquals(SIZE, list.size());
+//          int i = 0;
+            for (var entity : list) {
+//TODO          assertEquals(i++, entity.getInt4(GENERATED_KEY));
+                // 現状、generated_rowidで始まる別名は取得できない
+                var e = assertThrowsExactly(IllegalArgumentException.class, () -> {
+                    entity.getInt4(GENERATED_KEY);
+                });
+                assertEquals("not found column. name=__generated_rowid___test", e.getMessage());
             }
         }
     }
