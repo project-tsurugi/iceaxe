@@ -1,10 +1,10 @@
 package com.tsurugidb.iceaxe.example;
 
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * TgTmSetting example.

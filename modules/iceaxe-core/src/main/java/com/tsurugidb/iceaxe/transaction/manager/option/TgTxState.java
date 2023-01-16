@@ -2,7 +2,7 @@ package com.tsurugidb.iceaxe.transaction.manager.option;
 
 import javax.annotation.Nonnull;
 
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * Tsurugi Transaction State

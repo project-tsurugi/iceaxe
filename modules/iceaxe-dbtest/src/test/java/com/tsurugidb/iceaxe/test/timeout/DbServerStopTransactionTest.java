@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Timeout;
 
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 
 /**
  * server stop (transaction) test

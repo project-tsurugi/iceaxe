@@ -13,8 +13,8 @@ import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -79,7 +79,7 @@ class DbInsertErrorTest extends DbTestTableTester {
                 ps.executeAndGetCount(tm, entity);
             });
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016: . attempt=0, option=OCC{label=null, priority=DEFUALT, writePreserve=null}";
+            String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016: . attempt=0, option=OCC{}";
             assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
         }
 

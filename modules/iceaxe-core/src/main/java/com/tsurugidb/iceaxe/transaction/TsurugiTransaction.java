@@ -20,6 +20,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;

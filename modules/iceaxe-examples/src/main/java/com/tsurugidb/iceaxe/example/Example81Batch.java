@@ -7,9 +7,9 @@ import java.util.List;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * batch example

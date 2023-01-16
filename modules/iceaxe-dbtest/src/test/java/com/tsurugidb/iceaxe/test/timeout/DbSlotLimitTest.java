@@ -13,9 +13,9 @@ import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 

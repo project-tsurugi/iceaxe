@@ -14,8 +14,8 @@ import org.junit.jupiter.api.TestInfo;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 
 /**
  * ResultSet connect timeout test

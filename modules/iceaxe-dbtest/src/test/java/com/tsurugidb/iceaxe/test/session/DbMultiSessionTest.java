@@ -18,7 +18,7 @@ import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * multiple session test

@@ -2,7 +2,7 @@ package com.tsurugidb.iceaxe.example;
 
 import java.util.List;
 
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * TgTxOption example.

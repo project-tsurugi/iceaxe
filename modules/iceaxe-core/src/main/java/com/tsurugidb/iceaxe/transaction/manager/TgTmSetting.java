@@ -4,12 +4,12 @@ import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionList;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**

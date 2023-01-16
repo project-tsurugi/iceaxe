@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatement;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
@@ -22,6 +21,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeExcep
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionTask;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * Tsurugi Transaction Manager

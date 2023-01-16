@@ -22,12 +22,12 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * multi thread insert test
@@ -111,7 +111,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     }
 
     private void insertMultiTxOcc(int threadSize, boolean prepare) throws IOException, InterruptedException {
-        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 8); // TODO リトライ無しにしたい
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 20); // TODO リトライ無しにしたい
         setting.getTransactionOptionSupplier().setStateListener((attempt, e, state) -> {
             if (attempt > 0) {
                 LOG.info("insertMultiTxOcc({}, {}) OCC retry {}", threadSize, prepare, attempt);

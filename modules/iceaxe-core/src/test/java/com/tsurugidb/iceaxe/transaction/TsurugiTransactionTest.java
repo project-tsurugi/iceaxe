@@ -14,6 +14,7 @@ import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.Transaction;
 import com.tsurugidb.tsubakuro.util.FutureResponse;

@@ -3,9 +3,9 @@ package com.tsurugidb.iceaxe.example;
 import java.io.IOException;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * ddl example

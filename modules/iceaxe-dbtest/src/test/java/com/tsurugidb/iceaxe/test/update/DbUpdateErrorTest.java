@@ -112,7 +112,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
                 ps.executeAndGetCount(tm);
             });
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016: . attempt=0, option=OCC{label=null, priority=DEFUALT, writePreserve=null}";
+            String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016: . attempt=0, option=OCC{}";
             assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
         }
 

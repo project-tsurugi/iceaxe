@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
 
 /**

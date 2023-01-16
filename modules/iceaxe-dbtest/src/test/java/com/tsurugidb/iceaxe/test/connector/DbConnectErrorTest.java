@@ -15,7 +15,7 @@ import org.opentest4j.AssertionFailedError;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * connect error test

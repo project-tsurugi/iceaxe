@@ -6,9 +6,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * {@link TgTxOption} supplier

@@ -15,7 +15,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * PreparedStatement close timeout test

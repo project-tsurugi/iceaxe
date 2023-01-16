@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 

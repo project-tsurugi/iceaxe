@@ -1,0 +1,70 @@
+package com.tsurugidb.iceaxe.transaction.option;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.concurrent.ThreadSafe;
+
+import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
+import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
+import com.tsurugidb.sql.proto.SqlRequest.WritePreserve;
+
+/**
+ * Tsurugi Transaction Option (LTX)
+ */
+@ThreadSafe
+public class TgTxOptionLtx extends TgTxOptionCommon<TgTxOptionLtx> {
+
+    private List<String> writePreserveList = new ArrayList<>();
+
+    @Override
+    public String typeName() {
+        return "LTX";
+    }
+
+    @Override
+    public TransactionType type() {
+        return TransactionType.LONG;
+    }
+
+    /**
+     * add write preserve
+     *
+     * @param tableName table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addWritePreserve(String tableName) {
+        writePreserveList.add(tableName);
+        reset();
+        return this;
+    }
+
+    /**
+     * get write preserve
+     *
+     * @return list of table name
+     */
+    public List<String> writePreserve() {
+        return this.writePreserveList;
+    }
+
+    @Override
+    protected void initializeLowTransactionOption(TransactionOption.Builder lowBuilder) {
+        for (String name : writePreserveList) {
+            var value = WritePreserve.newBuilder().setTableName(name).build();
+            lowBuilder.addWritePreserves(value);
+        }
+    }
+
+    @Override
+    public TgTxOptionLtx clone() {
+        var option = super.clone();
+        option.writePreserveList = new ArrayList<>(this.writePreserveList);
+        return option;
+    }
+
+    @Override
+    protected void toString(StringBuilder sb) {
+        appendString(sb, "writePreserve", writePreserveList);
+    }
+}

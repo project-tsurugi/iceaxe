@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.transaction.exception;
 
-import com.tsurugidb.iceaxe.transaction.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * Tsurugi Transaction Retry Over Exception
