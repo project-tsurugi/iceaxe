@@ -90,6 +90,13 @@ public abstract class TgTxOptionCommon<T extends TgTxOptionCommon<?>> implements
     }
 
     @Override
+    public T clone(String label) {
+        T option = clone();
+        option.label(label);
+        return option;
+    }
+
+    @Override
     public String toString() {
         var sb = new StringBuilder(128);
         sb.append(typeName());

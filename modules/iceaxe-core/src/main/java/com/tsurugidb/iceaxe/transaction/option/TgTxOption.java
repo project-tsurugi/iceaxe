@@ -115,7 +115,20 @@ public interface TgTxOption extends Cloneable {
      */
     public TransactionPriority priority();
 
+    /**
+     * clone option
+     *
+     * @return new option
+     */
     public TgTxOption clone();
+
+    /**
+     * clone option
+     *
+     * @param label label
+     * @return new option
+     */
+    public TgTxOption clone(String label);
 
     // internal
     public TransactionOption toLowTransactionOption();

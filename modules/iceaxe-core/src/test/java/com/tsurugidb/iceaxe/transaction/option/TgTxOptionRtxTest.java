@@ -40,7 +40,7 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
     }
 
     @Test
-    void testClone() {
+    void clone0() {
         TgTxOptionRtx option = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
         TgTxOptionRtx clone = option.clone();
 
@@ -50,6 +50,19 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
 
         String expected = "RTX{label=abc, priority=INTERRUPT}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, //
+                clone);
+    }
+
+    @Test
+    void cloneLabel() {
+        TgTxOptionRtx option = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionRtx clone = option.clone("def");
+
+        assertOption("RTX{label=abc, priority=INTERRUPT}", "abc", TransactionPriority.INTERRUPT, //
+                option);
+
+        String expected = "RTX{label=def, priority=INTERRUPT}";
+        assertOption(expected, "def", TransactionPriority.INTERRUPT, //
                 clone);
     }
 

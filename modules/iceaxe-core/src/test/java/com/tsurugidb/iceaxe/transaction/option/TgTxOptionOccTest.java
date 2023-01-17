@@ -40,7 +40,7 @@ class TgTxOptionOccTest extends TgTxOptionTester {
     }
 
     @Test
-    void testClone() {
+    void clone0() {
         TgTxOptionOcc option = TgTxOption.ofOCC().label("abc").priority(TransactionPriority.INTERRUPT);
         TgTxOptionOcc clone = option.clone();
 
@@ -50,6 +50,19 @@ class TgTxOptionOccTest extends TgTxOptionTester {
 
         String expected = "OCC{label=abc, priority=INTERRUPT}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, //
+                clone);
+    }
+
+    @Test
+    void cloneLabel() {
+        TgTxOptionOcc option = TgTxOption.ofOCC().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionOcc clone = option.clone("def");
+
+        assertOption("OCC{label=abc, priority=INTERRUPT}", "abc", TransactionPriority.INTERRUPT, //
+                option);
+
+        String expected = "OCC{label=def, priority=INTERRUPT}";
+        assertOption(expected, "def", TransactionPriority.INTERRUPT, //
                 clone);
     }
 
