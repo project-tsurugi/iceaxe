@@ -47,6 +47,7 @@ public class TsurugiTransaction implements Closeable {
     private final IceaxeTimeout commitTimeout;
     private final IceaxeTimeout rollbackTimeout;
     private final IceaxeTimeout closeTimeout;
+    private List<Consumer<TsurugiTransaction>> beforeCommitListenerList;
     private List<Consumer<TsurugiTransaction>> commitListenerList;
     private List<Consumer<TsurugiTransaction>> rollbackListenerList;
     private boolean committed = false;
@@ -256,6 +257,18 @@ public class TsurugiTransaction implements Closeable {
     }
 
     /**
+     * add before-commit listener
+     *
+     * @param listener listener
+     */
+    public void addBeforeCommitListener(Consumer<TsurugiTransaction> listener) {
+        if (this.beforeCommitListenerList == null) {
+            this.beforeCommitListenerList = new ArrayList<>();
+        }
+        beforeCommitListenerList.add(listener);
+    }
+
+    /**
      * add commit listener
      *
      * @param listener listener
@@ -313,6 +326,12 @@ public class TsurugiTransaction implements Closeable {
         }
 
         LOG.trace("transaction commit start. commitType={}", commitType);
+        if (beforeCommitListenerList != null) {
+            for (var listener : beforeCommitListenerList) {
+                listener.accept(this);
+            }
+        }
+
         closeableSet.closeInTransaction();
         var lowCommitStatus = commitType.getLowCommitStatus();
         finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout);

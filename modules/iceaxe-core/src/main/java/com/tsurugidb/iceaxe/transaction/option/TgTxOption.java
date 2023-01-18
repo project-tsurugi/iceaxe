@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
-import com.tsurugidb.sql.proto.SqlRequest.TransactionPriority;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 
 /**
@@ -99,21 +98,6 @@ public interface TgTxOption extends Cloneable {
      * @return label
      */
     public String label();
-
-    /**
-     * set priority
-     *
-     * @param priority priority
-     * @return this
-     */
-    public TgTxOption priority(TransactionPriority priority);
-
-    /**
-     * get priority
-     *
-     * @return priority
-     */
-    public TransactionPriority priority();
 
     /**
      * clone option

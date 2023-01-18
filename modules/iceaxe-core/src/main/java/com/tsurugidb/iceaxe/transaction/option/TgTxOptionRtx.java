@@ -8,7 +8,7 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
  * Tsurugi Transaction Option (RTX)
  */
 @ThreadSafe
-public class TgTxOptionRtx extends TgTxOptionCommon<TgTxOptionRtx> {
+public class TgTxOptionRtx extends AbstractTgTxOptionLong<TgTxOptionRtx> {
 
     @Override
     public String typeName() {

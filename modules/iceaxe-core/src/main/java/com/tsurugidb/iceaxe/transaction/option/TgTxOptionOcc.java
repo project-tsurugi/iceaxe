@@ -8,7 +8,7 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
  * Tsurugi Transaction Option (OCC)
  */
 @ThreadSafe
-public class TgTxOptionOcc extends TgTxOptionCommon<TgTxOptionOcc> {
+public class TgTxOptionOcc extends AbstractTgTxOption<TgTxOptionOcc> {
 
     @Override
     public String typeName() {

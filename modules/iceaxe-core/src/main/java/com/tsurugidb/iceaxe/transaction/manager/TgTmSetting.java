@@ -1,11 +1,15 @@
 package com.tsurugidb.iceaxe.transaction.manager;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionList;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
@@ -63,10 +67,12 @@ public class TgTmSetting {
     }
 
     private TgTxOptionSupplier transactionOptionSupplier;
+    private String transactionLabel = null;
     private TgCommitType commitType;
     private TgTimeValue beginTimeout;
     private TgTimeValue commitTimeout;
     private TgTimeValue rollbackTimeout;
+    private final List<TgTmEventListener> eventListenerList = new ArrayList<>();
 
     /**
      * Tsurugi Transaction Manager Settings
@@ -96,19 +102,63 @@ public class TgTmSetting {
     }
 
     /**
+     * set transaction label
+     *
+     * @param label label
+     * @return this
+     */
+    public TgTmSetting transactionLabel(String label) {
+        this.transactionLabel = label;
+        return this;
+    }
+
+    /**
+     * get transaction label
+     *
+     * @return label
+     */
+    public String transactionLabel() {
+        return this.transactionLabel;
+    }
+
+    /**
+     * get first transaction option
+     *
+     * @return transaction option
+     */
+    public TgTxOption getFirstTransactionOption() {
+        var state = getTransactionOption(0, null, null);
+        var option = state.getOption();
+        if (option == null) {
+            throw new IllegalStateException(MessageFormat.format("transaction state is not execute. state={0}", state));
+        }
+        if (option.label() == null && this.transactionLabel != null) {
+            return option.clone(transactionLabel);
+        }
+        return option;
+    }
+
+    /**
      * get transaction option
      *
      * @param attempt     attempt number
      * @param transaction transaction
      * @param e           transaction exception
-     * @return transaction option
+     * @return transaction option state
      * @see TgTxOptionSupplier
      */
     public TgTxState getTransactionOption(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
         if (this.transactionOptionSupplier == null) {
             throw new IllegalStateException("transactionOptionSupplier is not specifed");
         }
-        return transactionOptionSupplier.get(attempt, transaction, e);
+        var state = transactionOptionSupplier.get(attempt, transaction, e);
+        if (state.isExecute()) {
+            var option = state.getOption();
+            if (option.label() == null && this.transactionLabel != null) {
+                state = TgTxState.execute(option.clone(transactionLabel));
+            }
+        }
+        return state;
     }
 
     /**
@@ -268,6 +318,26 @@ public class TgTmSetting {
     public TgTmSetting rollbackTimeout(TgTimeValue timeout) {
         setRollbackTimeout(timeout);
         return this;
+    }
+
+    /**
+     * add event listener
+     *
+     * @param listener event listener
+     * @return this
+     */
+    public TgTmSetting addEventListener(TgTmEventListener listener) {
+        eventListenerList.add(listener);
+        return this;
+    }
+
+    /**
+     * get event listener
+     *
+     * @return event listener
+     */
+    public List<TgTmEventListener> getEventListener() {
+        return this.eventListenerList;
     }
 
     // internal

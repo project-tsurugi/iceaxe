@@ -1,9 +1,9 @@
 package com.tsurugidb.iceaxe.transaction.option;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
-import com.tsurugidb.sql.proto.SqlRequest.TransactionPriority;
 
 /**
  * Tsurugi Transaction Option (common)
@@ -11,10 +11,9 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionPriority;
  * @param <T> concrete class
  */
 @ThreadSafe
-public abstract class TgTxOptionCommon<T extends TgTxOptionCommon<?>> implements TgTxOption {
+public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<?>> implements TgTxOption {
 
     private String label = null;
-    private TransactionPriority lowPriority = null;
 
     private TransactionOption lowTransactionOption;
 
@@ -31,19 +30,6 @@ public abstract class TgTxOptionCommon<T extends TgTxOptionCommon<?>> implements
         return this.label;
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public synchronized T priority(TransactionPriority priority) {
-        this.lowPriority = priority;
-        reset();
-        return (T) this;
-    }
-
-    @Override
-    public synchronized TransactionPriority priority() {
-        return this.lowPriority;
-    }
-
     protected final void reset() {
         this.lowTransactionOption = null;
     }
@@ -52,27 +38,20 @@ public abstract class TgTxOptionCommon<T extends TgTxOptionCommon<?>> implements
     public synchronized TransactionOption toLowTransactionOption() {
         if (this.lowTransactionOption == null) {
             var lowBuilder = TransactionOption.newBuilder();
-            initializeLowTransactionOptionCommon(lowBuilder);
             initializeLowTransactionOption(lowBuilder);
             this.lowTransactionOption = lowBuilder.build();
         }
         return this.lowTransactionOption;
     }
 
-    private void initializeLowTransactionOptionCommon(TransactionOption.Builder lowBuilder) {
+    @OverridingMethodsMustInvokeSuper
+    protected void initializeLowTransactionOption(TransactionOption.Builder lowBuilder) {
         var lowType = type();
         lowBuilder.setType(lowType);
 
-        if (label != null) {
+        if (this.label != null) {
             lowBuilder.setLabel(label);
         }
-        if (lowPriority != null) {
-            lowBuilder.setPriority(lowPriority);
-        }
-    }
-
-    protected void initializeLowTransactionOption(TransactionOption.Builder lowBuilder) {
-        // do override
     }
 
     @Override
@@ -102,16 +81,15 @@ public abstract class TgTxOptionCommon<T extends TgTxOptionCommon<?>> implements
         sb.append(typeName());
         sb.append("{");
 
-        appendString(sb, "label", label);
-        appendString(sb, "priority", getTransactionPriorityName(lowPriority));
         toString(sb);
 
         sb.append("}");
         return sb.toString();
     }
 
+    @OverridingMethodsMustInvokeSuper
     protected void toString(StringBuilder sb) {
-        // do override
+        appendString(sb, "label", label);
     }
 
     protected final void appendString(StringBuilder sb, String name, Object value) {
@@ -122,18 +100,6 @@ public abstract class TgTxOptionCommon<T extends TgTxOptionCommon<?>> implements
             sb.append(name);
             sb.append('=');
             sb.append(value);
-        }
-    }
-
-    private static String getTransactionPriorityName(TransactionPriority lowPriority) {
-        if (lowPriority == null) {
-            return null;
-        }
-        switch (lowPriority) {
-        case TRANSACTION_PRIORITY_UNSPECIFIED:
-            return "DEFAULT";
-        default:
-            return lowPriority.name();
         }
     }
 }

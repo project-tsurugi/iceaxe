@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
@@ -13,7 +14,7 @@ import com.tsurugidb.sql.proto.SqlRequest.WritePreserve;
  * Tsurugi Transaction Option (LTX)
  */
 @ThreadSafe
-public class TgTxOptionLtx extends TgTxOptionCommon<TgTxOptionLtx> {
+public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
 
     private List<String> writePreserveList = new ArrayList<>();
 
@@ -49,7 +50,10 @@ public class TgTxOptionLtx extends TgTxOptionCommon<TgTxOptionLtx> {
     }
 
     @Override
+    @OverridingMethodsMustInvokeSuper
     protected void initializeLowTransactionOption(TransactionOption.Builder lowBuilder) {
+        super.initializeLowTransactionOption(lowBuilder);
+
         for (String name : writePreserveList) {
             var value = WritePreserve.newBuilder().setTableName(name).build();
             lowBuilder.addWritePreserves(value);
@@ -64,7 +68,10 @@ public class TgTxOptionLtx extends TgTxOptionCommon<TgTxOptionLtx> {
     }
 
     @Override
+    @OverridingMethodsMustInvokeSuper
     protected void toString(StringBuilder sb) {
+        super.toString(sb);
+
         appendString(sb, "writePreserve", writePreserveList);
     }
 }

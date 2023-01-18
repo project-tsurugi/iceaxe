@@ -1,11 +1,11 @@
 package com.tsurugidb.iceaxe.transaction.manager;
 
 import java.io.IOException;
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.slf4j.Logger;
@@ -20,6 +20,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOE
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionTask;
+import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
@@ -33,42 +34,9 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 public class TsurugiTransactionManager {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransactionManager.class);
 
-    /**
-     * Listener called when retrying
-     */
-    @FunctionalInterface
-    public interface TsurugiTransactionManagerRetryListener {
-        /**
-         * Listener called when retrying
-         *
-         * @param transaction transaction
-         * @param e           exception
-         * @param nextOption  next transaction option
-         */
-        void accept(TsurugiTransaction transaction, Exception e, TgTxOption nextOption);
-    }
-
-    /**
-     * Listener called on finish
-     */
-    @FunctionalInterface
-    public interface TsurugiTransactionManagerFinishListener {
-        /**
-         * Listener called on finish
-         *
-         * @param transaction transaction
-         * @param committed   {@code true} committed, {@code false} rollbacked
-         * @param returnValue action return value
-         */
-        void accept(TsurugiTransaction transaction, boolean committed, Object returnValue);
-    }
-
     private final TsurugiSession ownerSession;
     private final TgTmSetting defaultSetting;
-    private Consumer<TsurugiTransaction> startHook;
-    private TsurugiTransactionManagerRetryListener retryListener;
-    private TsurugiTransactionManagerFinishListener finishListener;
-    private BiConsumer<TsurugiTransaction, Throwable> rollbackListener;
+    private final List<TgTmEventListener> eventListenerList = new ArrayList<>();
 
     // internal
     public TsurugiTransactionManager(TsurugiSession session, TgTmSetting defaultSetting) {
@@ -94,39 +62,14 @@ public class TsurugiTransactionManager {
     }
 
     /**
-     * set start hook
+     * add event listener
      *
-     * @param hook start hook
+     * @param listener event listener
+     * @return this
      */
-    public void setStartHook(@Nullable Consumer<TsurugiTransaction> hook) {
-        this.startHook = hook;
-    }
-
-    /**
-     * set retry listener
-     *
-     * @param listener retry listener
-     */
-    public void setRetryListener(@Nullable TsurugiTransactionManagerRetryListener listener) {
-        this.retryListener = listener;
-    }
-
-    /**
-     * set finish listener
-     *
-     * @param listener finish listener
-     */
-    public void setFinishListener(@Nullable TsurugiTransactionManagerFinishListener listener) {
-        this.finishListener = listener;
-    }
-
-    /**
-     * set rollback listener
-     *
-     * @param listener rollback listener
-     */
-    public void setRollbackListener(@Nullable BiConsumer<TsurugiTransaction, Throwable> listener) {
-        this.rollbackListener = listener;
+    public TsurugiTransactionManager addEventListener(TgTmEventListener listener) {
+        eventListenerList.add(listener);
+        return this;
     }
 
     /**
@@ -190,56 +133,71 @@ public class TsurugiTransactionManager {
             throw new IllegalArgumentException("action is not specified");
         }
 
-        var state = setting.getTransactionOption(0, null, null);
-        assert state.isExecute();
-        var option = state.getOption();
-        LOG.trace("tm.execute tx={}", option);
-        for (int i = 0;; i++) {
+        var option = setting.getFirstTransactionOption();
+        {
+            var finalOption = option;
+            event(setting, null, listener -> listener.executeStart(finalOption));
+        }
+        for (int attempt = 0;; attempt++) {
+            LOG.trace("tm.execute attempt={}, tx={}", attempt, option);
+            {
+                int finalAttempt = attempt;
+                var finalOption = option;
+                event(setting, null, listener -> listener.transactionBefore(finalAttempt, finalOption));
+            }
+
+            TsurugiTransaction lastTransaction = null;
             try (var transaction = ownerSession.createTransaction(option)) {
-                transaction.setOwner(this, i);
+                lastTransaction = transaction;
+                transaction.setOwner(this, attempt);
                 setting.initializeTransaction(transaction);
-                if (this.startHook != null) {
-                    startHook.accept(transaction);
-                }
+                event(setting, null, listener -> listener.transactionCreated(transaction));
 
                 try {
                     R r = action.run(transaction);
                     if (transaction.isRollbacked()) {
                         LOG.trace("tm.execute end (rollbacked)");
-                        if (this.finishListener != null) {
-                            finishListener.accept(transaction, false, r);
-                        }
+                        event(setting, null, listener -> listener.executeEndSuccess(transaction, false, r));
                         return r;
                     }
                     var info = ownerSession.getSessionInfo();
                     var commitType = setting.getCommitType(info);
                     transaction.commit(commitType);
                     LOG.trace("tm.execute end (committed)");
-                    if (this.finishListener != null) {
-                        finishListener.accept(transaction, true, r);
-                    }
+                    event(setting, null, listener -> listener.executeEndSuccess(transaction, true, r));
                     return r;
                 } catch (TsurugiTransactionException e) {
-                    option = processTransactionException(setting, transaction, e, i, option, e);
+                    event(setting, e, listener -> listener.transactionException(transaction, e));
+                    option = processTransactionException(setting, transaction, e, attempt, option, e);
                     continue;
                 } catch (TsurugiTransactionRuntimeException e) {
+                    event(setting, e, listener -> listener.transactionException(transaction, e));
                     var c = e.getCause();
-                    option = processTransactionException(setting, transaction, e, i, option, c);
+                    option = processTransactionException(setting, transaction, e, attempt, option, c);
                     continue;
                 } catch (Exception e) {
+                    event(setting, e, listener -> listener.transactionException(transaction, e));
                     var c = findTransactionException(e);
                     if (c == null) {
                         LOG.trace("tm.execute error", e);
-                        rollback(transaction, e);
+                        rollback(setting, transaction, e);
                         throw e;
                     }
-                    option = processTransactionException(setting, transaction, e, i, option, c);
+                    option = processTransactionException(setting, transaction, e, attempt, option, c);
                     continue;
                 } catch (Throwable e) {
                     LOG.trace("tm.execute error", e);
-                    rollback(transaction, e);
+                    event(setting, e, listener -> listener.transactionException(transaction, e));
+                    rollback(setting, transaction, e);
                     throw e;
                 }
+            } catch (Throwable e) {
+                {
+                    var finalOption = option;
+                    var finalTransaction = lastTransaction;
+                    event(setting, e, listener -> listener.executeEndFail(finalOption, finalTransaction, e));
+                }
+                throw e;
             }
         }
     }
@@ -253,12 +211,13 @@ public class TsurugiTransactionManager {
         return null;
     }
 
-    private TgTxOption processTransactionException(TgTmSetting setting, TsurugiTransaction transaction, Exception cause, int i, TgTxOption option, TsurugiTransactionException e) throws IOException {
+    private TgTxOption processTransactionException(TgTmSetting setting, TsurugiTransaction transaction, Exception cause, int attempt, TgTxOption option, TsurugiTransactionException e)
+            throws IOException {
         boolean calledRollback = false;
         try {
             TgTxState nextState;
             try {
-                nextState = setting.getTransactionOption(i + 1, transaction, e);
+                nextState = setting.getTransactionOption(attempt + 1, transaction, e);
             } catch (Throwable t) {
                 t.addSuppressed(cause);
                 throw t;
@@ -267,46 +226,39 @@ public class TsurugiTransactionManager {
             if (nextState.isExecute()) {
                 try {
                     // リトライ可能なabortの場合でもrollbackは呼ぶ
-                    rollback(transaction, null);
+                    rollback(setting, transaction, null);
                 } finally {
                     calledRollback = true;
                 }
 
                 var nextOption = nextState.getOption();
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("tm.execute retry{}. e={}, nextTx={}", i + 1, e.getMessage(), nextOption);
+                    LOG.trace("tm.execute retry{}. e={}, nextTx={}", attempt + 1, e.getMessage(), nextOption);
                 }
-                if (this.retryListener != null) {
-                    retryListener.accept(transaction, cause, nextOption);
-                }
+                event(setting, cause, listener -> listener.transactionRetry(transaction, cause, nextOption));
                 return nextOption;
             }
 
             LOG.trace("tm.execute error", e);
-            throw createException(nextState, i, option, cause);
+            if (nextState.isRetryOver()) {
+                event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause));
+                throw new TsurugiTransactionRetryOverIOException(attempt, option, cause);
+            } else {
+                throw new TsurugiTransactionIOException(cause.getMessage(), attempt, option, cause);
+            }
         } catch (Throwable t) {
             if (!calledRollback) {
-                rollback(transaction, t);
+                rollback(setting, transaction, t);
             }
             throw t;
         }
     }
 
-    private IOException createException(TgTxState state, int attemt, TgTxOption option, Exception cause) throws IOException {
-        if (state.isRetryOver()) {
-            return new TsurugiTransactionRetryOverIOException(attemt, option, cause);
-        } else {
-            return new TsurugiTransactionIOException(cause.getMessage(), attemt, option, cause);
-        }
-    }
-
-    private void rollback(TsurugiTransaction transaction, Throwable save) throws IOException {
+    private void rollback(TgTmSetting setting, TsurugiTransaction transaction, Throwable save) throws IOException {
         try {
             if (transaction.available()) {
                 transaction.rollback();
-                if (this.rollbackListener != null) {
-                    rollbackListener.accept(transaction, save);
-                }
+                event(setting, null, listener -> listener.transactionRollbacked(transaction, save));
             }
         } catch (IOException | RuntimeException | Error e) {
             if (save != null) {
@@ -320,6 +272,22 @@ public class TsurugiTransactionManager {
             } else {
                 throw new IOException(e.getMessage(), e);
             }
+        }
+    }
+
+    private void event(TgTmSetting setting, Throwable occurred, Consumer<TgTmEventListener> action) {
+        try {
+            for (var listener : eventListenerList) {
+                action.accept(listener);
+            }
+            for (var listener : setting.getEventListener()) {
+                action.accept(listener);
+            }
+        } catch (Throwable e) {
+            if (occurred != null) {
+                e.addSuppressed(occurred);
+            }
+            throw e;
         }
     }
 }
