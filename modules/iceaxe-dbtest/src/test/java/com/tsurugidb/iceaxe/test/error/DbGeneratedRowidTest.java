@@ -17,13 +17,14 @@ import org.junit.jupiter.api.TestInfo;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 
 /**
  * generated rowid test
+ *
+ * <ul>
+ * <li>プライマリキーが無いテーブルでは、暗黙に「__generated_rowid___テーブル名」というカラムが作られるが、このカラムはユーザーからは見えない。</li>
+ * </ul>
  */
-// プライマリキーが無いテーブルでは暗黙にgenerated_rowidカラムが作られる
-//TODO generated_rowidが見えてはいけない
 class DbGeneratedRowidTest extends DbTestTableTester {
 
     private static final String GENERATED_KEY = "__generated_rowid___" + TEST;
@@ -56,12 +57,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var metadata = session.findTableMetadata(TEST).get();
         var actualSet = metadata.getLowColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
-        // TODO TableMetadataでgenerated_rowidは取得できないべき
-        var expectedSet = Set.of("foo", "bar", "zzz", GENERATED_KEY);
+        var expectedSet = Set.of("foo", "bar", "zzz");
         assertEquals(expectedSet, actualSet);
-
-        var key = metadata.getLowColumnList().stream().filter(c -> c.getName().equals(GENERATED_KEY)).findAny().get();
-        assertEquals(AtomType.INT8, key.getAtomType());
     }
 
     @Test
@@ -196,7 +193,6 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
-            // generated_rowidが使えるならば、duplicate keyが発生すべき
             int count = ps.executeAndGetCount(tm);
             assertEquals(-1, count);
         }
@@ -218,15 +214,14 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         createTestTable();
         insertTestTable(SIZE);
 
+        // TODO アンダースコア2個で始まるカラム名はシステム予約でありユーザーが使用できないので、使ったらエラーになるべき
         var sql = "select foo as " + GENERATED_KEY + " from " + TEST + " order by foo";
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
             var list = ps.executeAndGetList(tm);
             assertEquals(SIZE, list.size());
-//          int i = 0;
             for (var entity : list) {
-//TODO          assertEquals(i++, entity.getInt4(GENERATED_KEY));
                 // 現状、generated_rowidで始まる別名は取得できない
                 var e = assertThrowsExactly(IllegalArgumentException.class, () -> {
                     entity.getInt4(GENERATED_KEY);
