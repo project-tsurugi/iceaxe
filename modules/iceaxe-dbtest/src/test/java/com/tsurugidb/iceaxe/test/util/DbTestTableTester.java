@@ -109,6 +109,20 @@ public class DbTestTableTester {
     }
 
     protected static void executeDdl(TsurugiSession session, String sql) throws IOException {
+        boolean workaround = false;
+        if (workaround) {
+            executeDdlWorkaround(session, sql);
+            return;
+        }
+
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createPreparedStatement(sql)) {
+            ps.executeAndGetCount(tm);
+        }
+    }
+
+    @Deprecated(forRemoval = true)
+    private static void executeDdlWorkaround(TsurugiSession session, String sql) throws IOException {
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedStatement(sql)) {
             for (int i = 1;; i++) {
@@ -116,7 +130,7 @@ public class DbTestTableTester {
                     ps.executeAndGetCount(tm);
                     return;
                 } catch (TsurugiTransactionIOException e) {
-                    // TODO duplicate_table（ERR_PHANTOM）が発生しなくなったら、リトライ処理を削除
+                    // duplicate_table（ERR_PHANTOM）が発生したら、リトライ
                     if (e.getMessage().contains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: duplicate_table table `test' is already defined")) {
                         var line = Arrays.stream(e.getStackTrace()).filter(elem -> {
                             String fullName = elem.getClassName();
