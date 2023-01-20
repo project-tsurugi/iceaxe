@@ -2,8 +2,8 @@ package com.tsurugidb.iceaxe.example;
 
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
-import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
-import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -52,7 +52,7 @@ public class Example04TmSetting {
     void supplier1(TgTxOption option) {
         // same as TgTmSetting.of(option)
 
-        var supplier = TgTxOptionSupplier.of(option);
+        var supplier = TgTmTxOptionSupplier.of(option);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
@@ -60,7 +60,7 @@ public class Example04TmSetting {
     void supplier2(TgTxOption... optionList) {
         // same as TgTmSetting.of(optionList)
 
-        var supplier = TgTxOptionSupplier.of(optionList);
+        var supplier = TgTmTxOptionSupplier.of(optionList);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
@@ -68,7 +68,7 @@ public class Example04TmSetting {
     void supplierAlways(TgTxOption option) {
         // same as TgTmSetting.ofAlways(option)
 
-        var supplier = TgTxOptionSupplier.ofAlways(option, Integer.MAX_VALUE);
+        var supplier = TgTmTxOptionSupplier.ofAlways(option, Integer.MAX_VALUE);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
@@ -76,23 +76,23 @@ public class Example04TmSetting {
     void supplierAlwaysLimit(TgTxOption option) {
         // same as TgTmSetting.ofAlways(option, 3)
 
-        var supplier = TgTxOptionSupplier.ofAlways(option, 3);
+        var supplier = TgTmTxOptionSupplier.ofAlways(option, 3);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
 
     void supplierCustom(TgTxOption firstOption, TgTxOption laterOption) {
-        var supplier = new TgTxOptionSupplier() {
+        var supplier = new TgTmTxOptionSupplier() {
             @Override
-            protected TgTxState computeFirstTransactionState() {
+            protected TgTmTxOption computeFirstTmOption() {
                 // 初回はfirstOptionでトランザクション実行
-                return TgTxState.execute(firstOption);
+                return TgTmTxOption.execute(firstOption);
             }
 
             @Override
-            protected TgTxState computeRetryTransactionState(int attempt, TsurugiTransactionException e) {
+            protected TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e) {
                 // 2回目以降でリトライ可能な場合はlaterOptionでトランザクション実行
-                return TgTxState.execute(laterOption);
+                return TgTmTxOption.execute(laterOption);
             }
         };
         var setting = TgTmSetting.of(supplier);
@@ -100,9 +100,9 @@ public class Example04TmSetting {
     }
 
     void supplierLog(TgTxOption option) {
-        var supplier = TgTxOptionSupplier.ofAlways(option, Integer.MAX_VALUE);
-        supplier.setStateListener((attempt, e, state) -> {
-            if (attempt > 0 && state.isExecute()) {
+        var supplier = TgTmTxOptionSupplier.ofAlways(option, Integer.MAX_VALUE);
+        supplier.setTmOptionListener((attempt, e, tmOption) -> {
+            if (attempt > 0 && tmOption.isExecute()) {
                 System.out.println("retry " + attempt);
             }
         });
@@ -111,8 +111,8 @@ public class Example04TmSetting {
 
     void supplierLogFromSetting(TgTxOption option) {
         var setting = TgTmSetting.ofAlways(option);
-        setting.getTransactionOptionSupplier().setStateListener((attempt, e, state) -> {
-            if (attempt > 0 && state.isExecute()) {
+        setting.getTransactionOptionSupplier().setTmOptionListener((attempt, e, tmOption) -> {
+            if (attempt > 0 && tmOption.isExecute()) {
                 System.out.println("retry " + attempt);
             }
         });

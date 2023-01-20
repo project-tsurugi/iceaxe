@@ -2,48 +2,49 @@ package com.tsurugidb.iceaxe.transaction.manager.option;
 
 import javax.annotation.Nonnull;
 
+import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * Tsurugi Transaction State
+ * Tsurugi transaction option for {@link TsurugiTransactionManager}
  */
-public final class TgTxState {
+public final class TgTmTxOption {
 
-    private static final TgTxState RETRY_OVER = new TgTxState(true, null);
-    private static final TgTxState NOT_RETRYABLE = new TgTxState(false, null);
+    private static final TgTmTxOption RETRY_OVER = new TgTmTxOption(true, null);
+    private static final TgTmTxOption NOT_RETRYABLE = new TgTmTxOption(false, null);
 
     /**
-     * create Transaction State
+     * Creates a new instance.
      *
      * @param option transaction option
-     * @return state
+     * @return tm option
      */
-    public static TgTxState execute(@Nonnull TgTxOption option) {
-        return new TgTxState(false, option);
+    public static TgTmTxOption execute(@Nonnull TgTxOption option) {
+        return new TgTmTxOption(false, option);
     }
 
     /**
-     * returns Transaction State for retry over
+     * returns tm option for retry over
      *
-     * @return state
+     * @return tm option
      */
-    public static TgTxState retryOver() {
+    public static TgTmTxOption retryOver() {
         return RETRY_OVER;
     }
 
     /**
-     * returns Transaction State for not retryable
+     * returns tm option for not retryable
      *
-     * @return state
+     * @return tm option
      */
-    public static TgTxState notRetryable() {
+    public static TgTmTxOption notRetryable() {
         return NOT_RETRYABLE;
     }
 
     private final boolean isRetryOver;
     private final TgTxOption option;
 
-    private TgTxState(boolean isRetryOver, TgTxOption option) {
+    private TgTmTxOption(boolean isRetryOver, TgTxOption option) {
         this.isRetryOver = isRetryOver;
         this.option = option;
     }

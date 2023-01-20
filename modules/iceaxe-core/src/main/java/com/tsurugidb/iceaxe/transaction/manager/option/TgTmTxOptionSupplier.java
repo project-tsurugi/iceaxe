@@ -13,7 +13,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 /**
  * {@link TgTxOption} supplier
  */
-public abstract class TgTxOptionSupplier {
+public abstract class TgTmTxOptionSupplier {
 
     /**
      * create TsurugiTransactionOptionSupplier
@@ -21,8 +21,8 @@ public abstract class TgTxOptionSupplier {
      * @param transactionOptionList options
      * @return supplier
      */
-    public static TgTxOptionSupplier of(TgTxOption... transactionOptionList) {
-        return TgTxOptionList.of(transactionOptionList);
+    public static TgTmTxOptionSupplier of(TgTxOption... transactionOptionList) {
+        return TgTmTxOptionList.of(transactionOptionList);
     }
 
     /**
@@ -32,32 +32,32 @@ public abstract class TgTxOptionSupplier {
      * @param attemtMaxCount    attempt max count
      * @return supplier
      */
-    public static TgTxOptionSupplier ofAlways(TgTxOption transactionOption, int attemtMaxCount) {
-        return TgTxOptionAlways.of(transactionOption, attemtMaxCount);
+    public static TgTmTxOptionSupplier ofAlways(TgTxOption transactionOption, int attemtMaxCount) {
+        return TgTmTxOptionAlways.of(transactionOption, attemtMaxCount);
     }
 
     /**
-     * {@link TgTxState} listener
+     * {@link TgTmTxOption} listener
      */
     @FunctionalInterface
-    public interface TgTxStateListener {
+    public interface TgTmOptionListener {
         /**
          * accept.
          *
-         * @param attempt attempt number
-         * @param e       transaction exception (null if attempt==0)
-         * @param state   transaction state
+         * @param attempt  attempt number
+         * @param e        transaction exception (null if attempt==0)
+         * @param tmOption tm option
          */
-        public void accept(int attempt, TsurugiTransactionException e, TgTxState state);
+        public void accept(int attempt, TsurugiTransactionException e, TgTmTxOption tmOption);
     }
 
     private BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> retryPredicate;
-    private TgTxStateListener stateListener;
+    private TgTmOptionListener tmOptionListener;
 
     /**
      * Creates a new instance.
      */
-    public TgTxOptionSupplier() {
+    public TgTmTxOptionSupplier() {
         this(TsurugiDefaultRetryPredicate.getInstance());
     }
 
@@ -66,7 +66,7 @@ public abstract class TgTxOptionSupplier {
      *
      * @param predicate retry predicate
      */
-    public TgTxOptionSupplier(BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> predicate) {
+    public TgTmTxOptionSupplier(BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> predicate) {
         setRetryPredicate(predicate);
     }
 
@@ -83,16 +83,16 @@ public abstract class TgTxOptionSupplier {
     }
 
     /**
-     * set state listener
+     * set tm option listener
      *
-     * @param listener state listener
+     * @param listener tm option listener
      */
-    public void setStateListener(@Nullable TgTxStateListener listener) {
-        this.stateListener = listener;
+    public void setTmOptionListener(@Nullable TgTmOptionListener listener) {
+        this.tmOptionListener = listener;
     }
 
     /**
-     * get Transaction Option
+     * get tm option
      *
      * @param attempt     attempt number
      * @param transaction transaction (null if attempt==0)
@@ -100,29 +100,29 @@ public abstract class TgTxOptionSupplier {
      * @return Transaction Option
      */
     @Nonnull
-    public final TgTxState get(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
-        var state = computeTransactionState(attempt, transaction, e);
-        if (this.stateListener != null) {
-            stateListener.accept(attempt, e, state);
+    public final TgTmTxOption get(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+        var tmOption = computeTmOption(attempt, transaction, e);
+        if (this.tmOptionListener != null) {
+            tmOptionListener.accept(attempt, e, tmOption);
         }
-        return state;
+        return tmOption;
     }
 
-    protected TgTxState computeTransactionState(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmTxOption computeTmOption(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
         if (attempt == 0) {
-            return computeFirstTransactionState();
+            return computeFirstTmOption();
         }
 
         if (isRetryable(transaction, e)) {
-            return computeRetryTransactionState(attempt, e);
+            return computeRetryTmOption(attempt, e);
         }
 
-        return TgTxState.notRetryable();
+        return TgTmTxOption.notRetryable();
     }
 
-    protected abstract TgTxState computeFirstTransactionState();
+    protected abstract TgTmTxOption computeFirstTmOption();
 
-    protected abstract TgTxState computeRetryTransactionState(int attempt, TsurugiTransactionException e);
+    protected abstract TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e);
 
     /**
      * whether to retry

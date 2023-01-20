@@ -11,32 +11,32 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  * TgTxOption list
  */
 @ThreadSafe
-public class TgTxOptionList extends TgTxOptionSupplier {
+public class TgTmTxOptionList extends TgTmTxOptionSupplier {
 
     /**
-     * create TgTransactionOptionList
+     * create TgTmTxOptionList
      *
      * @param transactionOptionList options
-     * @return TgTransactionOptionList
+     * @return TgTmTxOptionList
      */
-    public static TgTxOptionList of(TgTxOption... transactionOptionList) {
+    public static TgTmTxOptionList of(TgTxOption... transactionOptionList) {
         if (transactionOptionList == null || transactionOptionList.length == 0) {
             throw new IllegalArgumentException("transactionOptionList is null or empty");
         }
-        return new TgTxOptionList(List.of(transactionOptionList));
+        return new TgTmTxOptionList(List.of(transactionOptionList));
     }
 
     /**
-     * create TgTransactionOptionList
+     * create TgTmTxOptionList
      *
      * @param transactionOptionList options
-     * @return TgTransactionOptionList
+     * @return TgTmTxOptionList
      */
-    public static TgTxOptionList of(List<TgTxOption> transactionOptionList) {
+    public static TgTmTxOptionList of(List<TgTxOption> transactionOptionList) {
         if (transactionOptionList == null || transactionOptionList.isEmpty()) {
             throw new IllegalArgumentException("transactionOptionList is null or empty");
         }
-        return new TgTxOptionList(transactionOptionList);
+        return new TgTmTxOptionList(transactionOptionList);
     }
 
     private final List<TgTxOption> transactionOptionList;
@@ -46,20 +46,20 @@ public class TgTxOptionList extends TgTxOptionSupplier {
      *
      * @param transactionOptionList options
      */
-    public TgTxOptionList(List<TgTxOption> transactionOptionList) {
+    public TgTmTxOptionList(List<TgTxOption> transactionOptionList) {
         this.transactionOptionList = transactionOptionList;
     }
 
     @Override
-    protected TgTxState computeFirstTransactionState() {
-        return TgTxState.execute(transactionOptionList.get(0));
+    protected TgTmTxOption computeFirstTmOption() {
+        return TgTmTxOption.execute(transactionOptionList.get(0));
     }
 
     @Override
-    protected TgTxState computeRetryTransactionState(int attempt, TsurugiTransactionException e) {
+    protected TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e) {
         if (attempt < transactionOptionList.size()) {
-            return TgTxState.execute(transactionOptionList.get(attempt));
+            return TgTmTxOption.execute(transactionOptionList.get(attempt));
         }
-        return TgTxState.retryOver();
+        return TgTmTxOption.retryOver();
     }
 }

@@ -10,9 +10,9 @@ import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
-import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionList;
-import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
-import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionList;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
@@ -29,7 +29,7 @@ public class TgTmSetting {
      * @param transactionOptionSupplier transaction option supplier
      * @returnTransaction Manager Settings
      */
-    public static TgTmSetting of(TgTxOptionSupplier transactionOptionSupplier) {
+    public static TgTmSetting of(TgTmTxOptionSupplier transactionOptionSupplier) {
         return new TgTmSetting().transactionOptionSupplier(transactionOptionSupplier);
     }
 
@@ -40,7 +40,7 @@ public class TgTmSetting {
      * @return Transaction Manager Settings
      */
     public static TgTmSetting of(TgTxOption... transactionOptionList) {
-        var supplier = TgTxOptionList.of(transactionOptionList);
+        var supplier = TgTmTxOptionList.of(transactionOptionList);
         return of(supplier);
     }
 
@@ -62,11 +62,11 @@ public class TgTmSetting {
      * @return Transaction Manager Settings
      */
     public static TgTmSetting ofAlways(TgTxOption transactionOption, int attemtMaxCount) {
-        var supplier = TgTxOptionSupplier.ofAlways(transactionOption, attemtMaxCount);
+        var supplier = TgTmTxOptionSupplier.ofAlways(transactionOption, attemtMaxCount);
         return of(supplier);
     }
 
-    private TgTxOptionSupplier transactionOptionSupplier;
+    private TgTmTxOptionSupplier transactionOptionSupplier;
     private String transactionLabel = null;
     private TgCommitType commitType;
     private TgTimeValue beginTimeout;
@@ -87,7 +87,7 @@ public class TgTmSetting {
      * @param transactionOptionSupplier transaction option supplier
      * @return this
      */
-    public TgTmSetting transactionOptionSupplier(TgTxOptionSupplier transactionOptionSupplier) {
+    public TgTmSetting transactionOptionSupplier(TgTmTxOptionSupplier transactionOptionSupplier) {
         this.transactionOptionSupplier = transactionOptionSupplier;
         return this;
     }
@@ -97,7 +97,7 @@ public class TgTmSetting {
      *
      * @return transaction option supplier
      */
-    public TgTxOptionSupplier getTransactionOptionSupplier() {
+    public TgTmTxOptionSupplier getTransactionOptionSupplier() {
         return this.transactionOptionSupplier;
     }
 
@@ -127,10 +127,10 @@ public class TgTmSetting {
      * @return transaction option
      */
     public TgTxOption getFirstTransactionOption() {
-        var state = getTransactionOption(0, null, null);
-        var option = state.getOption();
+        var tmOption = getTransactionOption(0, null, null);
+        var option = tmOption.getOption();
         if (option == null) {
-            throw new IllegalStateException(MessageFormat.format("transaction state is not execute. state={0}", state));
+            throw new IllegalStateException(MessageFormat.format("tm-option is not execute. tmOption={0}", tmOption));
         }
         if (option.label() == null && this.transactionLabel != null) {
             return option.clone(transactionLabel);
@@ -144,21 +144,21 @@ public class TgTmSetting {
      * @param attempt     attempt number
      * @param transaction transaction
      * @param e           transaction exception
-     * @return transaction option state
-     * @see TgTxOptionSupplier
+     * @return tm option
+     * @see TgTmTxOptionSupplier
      */
-    public TgTxState getTransactionOption(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+    public TgTmTxOption getTransactionOption(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
         if (this.transactionOptionSupplier == null) {
             throw new IllegalStateException("transactionOptionSupplier is not specifed");
         }
-        var state = transactionOptionSupplier.get(attempt, transaction, e);
-        if (state.isExecute()) {
-            var option = state.getOption();
+        var tmOption = transactionOptionSupplier.get(attempt, transaction, e);
+        if (tmOption.isExecute()) {
+            var option = tmOption.getOption();
             if (option.label() == null && this.transactionLabel != null) {
-                state = TgTxState.execute(option.clone(transactionLabel));
+                tmOption = TgTmTxOption.execute(option.clone(transactionLabel));
             }
         }
-        return state;
+        return tmOption;
     }
 
     /**

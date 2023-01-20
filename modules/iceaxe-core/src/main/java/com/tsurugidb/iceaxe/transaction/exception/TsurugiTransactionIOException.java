@@ -3,7 +3,7 @@ package com.tsurugidb.iceaxe.transaction.exception;
 import java.text.MessageFormat;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.transaction.manager.option.TgTxOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -30,7 +30,7 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
      * get attempt number
      *
      * @return attempt number
-     * @see TgTxOptionSupplier#get(int, TsurugiTransactionException)
+     * @see TgTmTxOptionSupplier#get(int, TsurugiTransactionException)
      */
     public int getAttempt() {
         return this.attempt;

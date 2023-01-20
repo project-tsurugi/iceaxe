@@ -21,7 +21,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeExcep
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionTask;
 import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
-import com.tsurugidb.iceaxe.transaction.manager.option.TgTxState;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -215,15 +215,15 @@ public class TsurugiTransactionManager {
             throws IOException {
         boolean calledRollback = false;
         try {
-            TgTxState nextState;
+            TgTmTxOption nextTmOption;
             try {
-                nextState = setting.getTransactionOption(attempt + 1, transaction, e);
+                nextTmOption = setting.getTransactionOption(attempt + 1, transaction, e);
             } catch (Throwable t) {
                 t.addSuppressed(cause);
                 throw t;
             }
 
-            if (nextState.isExecute()) {
+            if (nextTmOption.isExecute()) {
                 try {
                     // リトライ可能なabortの場合でもrollbackは呼ぶ
                     rollback(setting, transaction, null);
@@ -231,7 +231,7 @@ public class TsurugiTransactionManager {
                     calledRollback = true;
                 }
 
-                var nextOption = nextState.getOption();
+                var nextOption = nextTmOption.getOption();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("tm.execute retry{}. e={}, nextTx={}", attempt + 1, e.getMessage(), nextOption);
                 }
@@ -240,7 +240,7 @@ public class TsurugiTransactionManager {
             }
 
             LOG.trace("tm.execute error", e);
-            if (nextState.isRetryOver()) {
+            if (nextTmOption.isRetryOver()) {
                 event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause));
                 throw new TsurugiTransactionRetryOverIOException(attempt, option, cause);
             } else {
