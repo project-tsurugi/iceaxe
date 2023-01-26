@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.error;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgVariable;
 import com.tsurugidb.iceaxe.statement.TgVariable.TgVariableInteger;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
-import com.tsurugidb.iceaxe.test.util.DbTestConnector;
+import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -72,7 +71,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
         int batchSize = 10;
         int onlineSize = 20;
 
-        try (var sessions = new Sessions()) {
+        try (var sessions = new DbTestSessions()) {
             var batchList = new ArrayList<BatchTask>(batchSize);
             for (int i = 0; i < batchSize; i++) {
                 var task = new BatchTask(sessions.createSession(), i);
@@ -102,27 +101,6 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
             }
             if (save != null) {
                 throw save;
-            }
-        }
-    }
-
-    private class Sessions implements Closeable {
-        private final List<TsurugiSession> sessionList = new ArrayList<>();
-
-        public TsurugiSession createSession() throws IOException {
-            var session = DbTestConnector.createSession();
-            sessionList.add(session);
-            return session;
-        }
-
-        @Override
-        public void close() throws IOException {
-            for (var session : sessionList) {
-                try {
-                    session.close();
-                } catch (Exception e) {
-                    LOG.warn("session close error", e.getMessage());
-                }
             }
         }
     }
