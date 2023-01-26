@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,20 @@ public class TgVariableList {
      * @return Tsurugi Variable
      */
     public static TgVariableList of(TgVariable<?>... variables) {
+        var variableList = new TgVariableList();
+        for (var variable : variables) {
+            variableList.add(variable);
+        }
+        return variableList;
+    }
+
+    /**
+     * create Tsurugi Variable
+     *
+     * @param variables variable
+     * @return Tsurugi Variable
+     */
+    public static TgVariableList of(Collection<? extends TgVariable<?>> variables) {
         var variableList = new TgVariableList();
         for (var variable : variables) {
             variableList.add(variable);

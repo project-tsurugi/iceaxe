@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.statement;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -9,14 +10,14 @@ import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 
 /**
  * Tsurugi Parameter Mapping
- * 
+ *
  * @param <P> parameter type
  */
 public abstract class TgParameterMapping<P> {
 
     /**
      * create Parameter Mapping
-     * 
+     *
      * @param <P>   parameter type
      * @param clazz parameter class
      * @return Tsurugi Parameter Mapping
@@ -27,7 +28,7 @@ public abstract class TgParameterMapping<P> {
 
     /**
      * create Parameter Mapping
-     * 
+     *
      * @param variableList variable definition
      * @return Tsurugi Parameter Mapping
      */
@@ -37,7 +38,17 @@ public abstract class TgParameterMapping<P> {
 
     /**
      * create Parameter Mapping
-     * 
+     *
+     * @param variableList variable definition
+     * @return Tsurugi Parameter Mapping
+     */
+    public static TgParameterMapping<TgParameterList> of(Collection<? extends TgVariable<?>> variableList) {
+        return of(TgVariableList.of(variableList));
+    }
+
+    /**
+     * create Parameter Mapping
+     *
      * @param variableList variable definition
      * @return Tsurugi Parameter Mapping
      */
@@ -47,7 +58,7 @@ public abstract class TgParameterMapping<P> {
 
     /**
      * create Parameter Mapping
-     * 
+     *
      * @param <P>                parameter type
      * @param variableList       variable definition
      * @param parameterConverter converter from P to Parameter
@@ -61,7 +72,7 @@ public abstract class TgParameterMapping<P> {
 
     /**
      * set convert type utility
-     * 
+     *
      * @param convertUtil convert type utility
      */
     public void setConvertUtil(IceaxeConvertUtil convertUtil) {
