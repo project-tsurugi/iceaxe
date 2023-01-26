@@ -62,6 +62,11 @@ public class TestEntity {
         this.zzz = zzz;
     }
 
+    @Override
+    public String toString() {
+        return "TestEntity(foo=" + foo + ", bar=" + bar + ", zzz=" + zzz + ")";
+    }
+
     public static TestEntity of(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
         var entity = new TestEntity();
         entity.setFoo(record.getInt4OrNull("foo"));
