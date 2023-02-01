@@ -54,7 +54,7 @@ public class Example21Insert {
     void insert0_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.execute(transaction -> {
-                return ps.executeAndGetCount(transaction);
+                return transaction.executeAndGetCount(ps);
             });
             System.out.println(count);
         }
@@ -62,9 +62,14 @@ public class Example21Insert {
 
     void insert0_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedStatement("insert into TEST values(123, 456, 'abc')")) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             System.out.println(count);
         }
+    }
+
+    void insert0_execTmDirect(TsurugiTransactionManager tm) throws IOException {
+        int count = tm.executeAndGetCount("insert into TEST values(123, 456, 'abc')");
+        System.out.println(count);
     }
 
     void insertParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
@@ -93,21 +98,21 @@ public class Example21Insert {
 
         try (var ps = session.createPreparedStatement(sql, TgParameterMapping.of(variable))) {
             tm.execute(transaction -> {
-                TgParameterList param;
+                TgParameterList parameter;
                 switch (0) {
                 default:
-                    param = TgParameterList.of(foo.bind(123), bar.bind(456), zzz.bind("abc"));
+                    parameter = TgParameterList.of(foo.bind(123), bar.bind(456), zzz.bind("abc"));
                     break;
                 case 1:
                     // TgParameterList.of()を使う場合、値のデータ型はvariableで指定されたデータ型と一致していなければならない
-                    param = TgParameterList.of().add("foo", 123).add("bar", 456L).add("zzz", "abc");
+                    parameter = TgParameterList.of().add("foo", 123).add("bar", 456L).add("zzz", "abc");
                     break;
                 case 2:
-                    param = TgParameterList.of().int4("foo", 123).int8("bar", 456).character("zzz", "abc");
+                    parameter = TgParameterList.of().int4("foo", 123).int8("bar", 456).character("zzz", "abc");
                     break;
                 }
 
-                try (var result = ps.execute(transaction, param)) {
+                try (var result = ps.execute(transaction, parameter)) {
                     System.out.println(result.getUpdateCount());
                 }
             });

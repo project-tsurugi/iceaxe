@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.result.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
+import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
@@ -97,15 +98,16 @@ public class DbTestTableTester {
         return opt.isPresent();
     }
 
+    protected static final String CREATE_TEST_SQL = "create table " + TEST //
+            + "(" //
+            + "  foo int," //
+            + "  bar bigint," //
+            + "  zzz varchar(" + ZZZ_SIZE + ")," //
+            + "  primary key(foo)" //
+            + ")";
+
     protected static void createTestTable() throws IOException {
-        var sql = "create table " + TEST //
-                + "(" //
-                + "  foo int," //
-                + "  bar bigint," //
-                + "  zzz varchar(" + ZZZ_SIZE + ")," //
-                + "  primary key(foo)" //
-                + ")";
-        executeDdl(getSession(), sql);
+        executeDdl(getSession(), CREATE_TEST_SQL);
     }
 
     protected static void executeDdl(TsurugiSession session, String sql) throws IOException {
@@ -116,9 +118,7 @@ public class DbTestTableTester {
         }
 
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
-            ps.executeAndGetCount(tm);
-        }
+        tm.executeDdl(sql);
     }
 
     @Deprecated(forRemoval = true)
@@ -127,7 +127,7 @@ public class DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql)) {
             for (int i = 1;; i++) {
                 try {
-                    ps.executeAndGetCount(tm);
+                    tm.executeAndGetCount(ps);
                     return;
                 } catch (TsurugiTransactionIOException e) {
                     // duplicate_table（ERR_PHANTOM）が発生したら、リトライ
@@ -163,7 +163,7 @@ public class DbTestTableTester {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < size; i++) {
                     var entity = createTestEntity(i);
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
                 }
             });
         }
@@ -178,7 +178,7 @@ public class DbTestTableTester {
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
-                ps.executeAndGetCount(transaction, entity);
+                transaction.executeAndGetCount(ps, entity);
             });
         }
     }
@@ -241,58 +241,69 @@ public class DbTestTableTester {
         return null;
     }
 
-    protected void assertEqualsTestTable(TestEntity... expected) throws IOException {
+    protected static void assertEqualsTestTable(TestEntity... expected) throws IOException {
         var expectedList = List.of(expected);
         assertEqualsTestTable(expectedList);
     }
 
-    protected void assertEqualsTestTable(List<TestEntity> expected) throws IOException {
+    protected static void assertEqualsTestTable(List<TestEntity> expected) throws IOException {
         var actual = selectAllFromTest();
         assertEquals(expected, actual);
     }
 
-    protected void assertEqualsTestTable(int expected) throws IOException {
+    protected static void assertEqualsTestTable(int expectedSize) throws IOException {
         var actualList = selectAllFromTest();
-        assertEquals(expected, actualList.size());
-        for (int i = 0; i < expected; i++) {
+        assertEqualsTestTable(expectedSize, actualList);
+    }
+
+    protected static void assertEqualsTestTable(int expectedSize, List<TestEntity> actualList) {
+        assertEquals(expectedSize, actualList.size());
+        for (int i = 0; i < expectedSize; i++) {
+            var expected = createTestEntity(i);
             var actual = actualList.get(i);
-            assertEquals(i, actual.getFoo());
+            assertEquals(expected, actual);
         }
     }
 
-    protected List<TestEntity> selectAllFromTest() throws IOException {
+    protected static void assertEqualsResultEntity(TestEntity expected, TsurugiResultEntity actual) {
+        assertEquals(expected.getFoo(), actual.getInt4OrNull("foo"));
+        assertEquals(expected.getBar(), actual.getInt8OrNull("bar"));
+        assertEquals(expected.getZzz(), actual.getCharacterOrNull("zzz"));
+    }
+
+    protected static List<TestEntity> selectAllFromTest() throws IOException {
         var sql = SELECT_SQL + "\norder by " + TEST_COLUMNS;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
-            return ps.executeAndGetList(tm);
+            return tm.executeAndGetList(ps);
         }
     }
 
-    protected TestEntity selectFromTest(int foo) throws IOException {
+    protected static TestEntity selectFromTest(int foo) throws IOException {
         var where1 = TgVariable.ofInt4("foo");
         var sql = SELECT_SQL + " where foo=" + where1;
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(where1), SELECT_MAPPING)) {
             var parameter = TgParameterList.of(where1.bind(foo));
-            return ps.executeAndFindRecord(tm, parameter).orElse(null);
+            return tm.executeAndFindRecord(ps, parameter).orElse(null);
         }
     }
 
-    protected int selectCountFromTest() throws IOException {
+    protected static int selectCountFromTest() throws IOException {
         return selectCountFrom(TEST);
     }
 
-    protected int selectCountFrom(String tableName) throws IOException {
+    protected static int selectCountFrom(String tableName) throws IOException {
         var sql = "select count(*) from " + tableName;
         var resultMapping = TgResultMapping.of(record -> record.nextInt4());
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            return ps.executeAndFindRecord(tm).get();
+            return tm.executeAndFindRecord(ps).get();
         }
     }
 

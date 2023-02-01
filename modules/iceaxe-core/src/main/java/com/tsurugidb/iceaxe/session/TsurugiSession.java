@@ -371,7 +371,7 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public TsurugiTransactionManager createTransactionManager(TgTxOption option) {
-        var setting = TgTmSetting.ofAlways(option, 1);
+        var setting = TgTmSetting.of(option);
         return createTransactionManager(setting);
     }
 

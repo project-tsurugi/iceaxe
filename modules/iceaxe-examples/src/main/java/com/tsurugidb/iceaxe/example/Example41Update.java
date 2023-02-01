@@ -29,9 +29,14 @@ public class Example41Update {
 
     void update0(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedStatement("update TEST set bar = 0")) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             System.out.println(count);
         }
+    }
+
+    void update0Direct(TsurugiTransactionManager tm) throws IOException {
+        int count = tm.executeAndGetCount("update TEST set bar = 0");
+        System.out.println(count);
     }
 
     void updateParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
@@ -44,7 +49,7 @@ public class Example41Update {
         try (var ps = session.createPreparedStatement(sql, TgParameterMapping.of(vlist))) {
             tm.execute(transaction -> {
                 var plist = TgParameterList.of(foo.bind(123), add.bind(1));
-                int count = ps.executeAndGetCount(transaction, plist);
+                int count = transaction.executeAndGetCount(ps, plist);
                 System.out.println(count);
             });
         }
@@ -63,7 +68,7 @@ public class Example41Update {
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 var entity = new TestEntity(123, 456L, "abc");
-                int count = ps.executeAndGetCount(transaction, entity);
+                int count = transaction.executeAndGetCount(ps, entity);
                 System.out.println(count);
             });
         }

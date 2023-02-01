@@ -45,7 +45,7 @@ class DbSelectAliasTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             for (int i = 0; i < SIZE; i++) {
                 var expected = createTestEntity(i);
@@ -86,7 +86,7 @@ class DbSelectAliasTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            int count = ps.executeAndFindRecord(tm).get();
+            int count = tm.executeAndFindRecord(ps).get();
             assertEquals(SIZE, count);
         }
     }

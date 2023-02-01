@@ -101,7 +101,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var entity = ps.executeAndFindRecord(tm).get();
+            var entity = tm.executeAndFindRecord(ps).get();
             assertion.accept(entity);
         }
     }

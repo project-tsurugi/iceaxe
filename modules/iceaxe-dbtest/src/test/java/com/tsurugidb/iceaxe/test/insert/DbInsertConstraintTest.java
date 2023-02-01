@@ -42,11 +42,11 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-            int count1 = ps.executeAndGetCount(tm, entity);
+            int count1 = tm.executeAndGetCount(ps, entity);
             assertEquals(-1, count1); // TODO 1
 
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                ps.executeAndGetCount(tm, entity);
+                tm.executeAndGetCount(ps, entity);
             });
             assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
         }
@@ -63,11 +63,11 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.execute((TsurugiTransactionAction) transaction -> {
-                    int count1 = ps.executeAndGetCount(transaction, entity);
+                    int count1 = transaction.executeAndGetCount(ps, entity);
                     assertEquals(-1, count1); // TODO 1
 
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                        ps.executeAndGetCount(transaction, entity);
+                        transaction.executeAndGetCount(ps, entity);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
                     throw e;
@@ -89,11 +89,11 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.execute(transaction -> {
-                    int count1 = ps.executeAndGetCount(transaction, entity);
+                    int count1 = transaction.executeAndGetCount(ps, entity);
                     assertEquals(-1, count1); // TODO 1
 
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                        ps.executeAndGetCount(transaction, entity);
+                        transaction.executeAndGetCount(ps, entity);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
                     // throw e; // ignore exception
@@ -150,9 +150,9 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             var e0 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                 try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
                         var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
-                    int count1 = ps.executeAndGetCount(tx1, entity);
+                    int count1 = tx1.executeAndGetCount(ps, entity);
                     assertEquals(-1, count1); // TODO 1
-                    int count2 = ps.executeAndGetCount(tx2, entity);
+                    int count2 = tx2.executeAndGetCount(ps, entity);
                     assertEquals(-1, count2); // TODO 1
 
                     tx1.commit(TgCommitType.DEFAULT);
@@ -162,7 +162,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
 
                     try (var tx3 = session.createTransaction(TgTxOption.ofOCC())) {
-                        int count3 = ps.executeAndGetCount(tx3, entity);
+                        int count3 = tx3.executeAndGetCount(ps, entity);
                         assertEquals(-1, count3); // TODO 1
                         var e3 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             tx3.commit(TgCommitType.DEFAULT);
@@ -187,9 +187,9 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
                     var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
-                int count1 = ps.executeAndGetCount(tx1, entity);
+                int count1 = tx1.executeAndGetCount(ps, entity);
                 assertEquals(-1, count1); // TODO 1
-                int count2 = ps.executeAndGetCount(tx2, entity);
+                int count2 = tx2.executeAndGetCount(ps, entity);
                 assertEquals(-1, count2); // TODO 1
 
                 tx1.rollback();

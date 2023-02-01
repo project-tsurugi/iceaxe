@@ -49,7 +49,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                ps.executeAndGetList(tm);
+                tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
             assertContains("error in db_->create_executable()", e.getMessage()); // TODO エラー詳細情報の確認
@@ -64,7 +64,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                ps.executeAndGetList(tm);
+                tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
             assertContains("error in db_->create_executable()", e.getMessage()); // TODO エラー詳細情報の確認
@@ -80,7 +80,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var ps = session.createPreparedQuery(sql);
         ps.close();
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-            ps.executeAndGetList(tm);
+            tm.executeAndGetList(ps);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
     }
@@ -97,7 +97,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         ps.close();
         var parameter = TgParameterList.of(foo.bind(1));
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-            ps.executeAndGetList(tm, parameter);
+            tm.executeAndGetList(ps, parameter);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
     }
@@ -123,7 +123,7 @@ class DbSelectErrorTest extends DbTestTableTester {
             }
             transaction.close();
             var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-                ps.executeAndGetList(transaction);
+                transaction.executeAndGetList(ps);
             });
             assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
 //          assertEquals(expected, e.getMessage());

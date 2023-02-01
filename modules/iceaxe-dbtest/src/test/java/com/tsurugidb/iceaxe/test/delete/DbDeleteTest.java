@@ -46,7 +46,7 @@ class DbDeleteTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
@@ -62,7 +62,7 @@ class DbDeleteTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -82,7 +82,7 @@ class DbDeleteTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             var plist = TgParameterList.of(foo.bind(number));
-            int count = ps.executeAndGetCount(tm, plist);
+            int count = tm.executeAndGetCount(ps, plist);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -98,10 +98,10 @@ class DbDeleteTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count1 = ps.executeAndGetCount(tm);
+            int count1 = tm.executeAndGetCount(ps);
             assertEquals(-1, count1); // TODO 1
 
-            int count2 = ps.executeAndGetCount(tm);
+            int count2 = tm.executeAndGetCount(ps);
             assertEquals(-1, count2); // TODO 0
         }
 
@@ -118,11 +118,11 @@ class DbDeleteTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             tm.execute(transaction -> {
-                int count1 = ps.executeAndGetCount(transaction);
+                int count1 = transaction.executeAndGetCount(ps);
                 assertEquals(-1, count1); // TODO 1
                 assertNothingInTx(session, transaction, number);
 
-                int count2 = ps.executeAndGetCount(transaction);
+                int count2 = transaction.executeAndGetCount(ps);
                 assertEquals(-1, count2); // TODO 0
                 assertNothingInTx(session, transaction, number);
             });
@@ -141,12 +141,12 @@ class DbDeleteTest extends DbTestTableTester {
         try (var ps1 = session.createPreparedStatement(sql1); //
                 var ps2 = session.createPreparedStatement(sql2)) {
             tm.execute(transaction -> {
-                int count1 = ps1.executeAndGetCount(transaction);
+                int count1 = transaction.executeAndGetCount(ps1);
                 assertEquals(-1, count1); // TODO 2
                 assertNothingInTx(session, transaction, 1);
                 assertNothingInTx(session, transaction, 2);
 
-                int count2 = ps2.executeAndGetCount(transaction);
+                int count2 = transaction.executeAndGetCount(ps2);
                 assertEquals(-1, count2); // TODO 1
                 assertNothingInTx(session, transaction, 2);
                 assertNothingInTx(session, transaction, 3);
@@ -166,13 +166,13 @@ class DbDeleteTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var deletePs = session.createPreparedStatement(sql)) {
             tm.execute(transaction -> {
-                int count1 = deletePs.executeAndGetCount(transaction);
+                int count1 = transaction.executeAndGetCount(deletePs);
                 assertEquals(-1, count1); // TODO 1
                 assertNothingInTx(session, transaction, number);
 
                 var entity = createTestEntity(number);
                 try (var insertPs = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-                    int count2 = insertPs.executeAndGetCount(transaction, entity);
+                    int count2 = transaction.executeAndGetCount(insertPs, entity);
                     assertEquals(-1, count2); // TODO 1
                 }
                 assertEqualsInTx(session, transaction, entity);
@@ -204,18 +204,18 @@ class DbDeleteTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var deletePs = session.createPreparedStatement(sql)) {
             tm.execute(transaction -> {
-                int count1 = deletePs.executeAndGetCount(transaction);
+                int count1 = transaction.executeAndGetCount(deletePs);
                 assertEquals(-1, count1); // TODO expected1
                 assertNothingInTx(session, transaction, number);
 
                 var entity = createTestEntity(number);
                 try (var insertPs = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-                    int count2 = insertPs.executeAndGetCount(transaction, entity);
+                    int count2 = transaction.executeAndGetCount(insertPs, entity);
                     assertEquals(-1, count2); // TODO 1
                 }
                 assertEqualsInTx(session, transaction, entity);
 
-                int count3 = deletePs.executeAndGetCount(transaction);
+                int count3 = transaction.executeAndGetCount(deletePs);
                 assertEquals(-1, count3); // TODO 1
                 assertNothingInTx(session, transaction, number);
             });
@@ -233,12 +233,12 @@ class DbDeleteTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var insertPs = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
-                int count1 = insertPs.executeAndGetCount(transaction, entity);
+                int count1 = transaction.executeAndGetCount(insertPs, entity);
                 assertEquals(-1, count1); // TODO 1
                 assertEqualsInTx(session, transaction, entity);
 
                 try (var deletePs = session.createPreparedStatement(sql)) {
-                    int count2 = deletePs.executeAndGetCount(transaction);
+                    int count2 = transaction.executeAndGetCount(deletePs);
                     assertEquals(-1, count2); // TODO 1
                 }
                 assertNothingInTx(session, transaction, entity.getFoo());
@@ -258,17 +258,17 @@ class DbDeleteTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var insertPs = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
-                int count1 = insertPs.executeAndGetCount(transaction, entity1);
+                int count1 = transaction.executeAndGetCount(insertPs, entity1);
                 assertEquals(-1, count1); // TODO 1
                 assertEqualsInTx(session, transaction, entity1);
 
                 try (var deletePs = session.createPreparedStatement(sql)) {
-                    int count2 = deletePs.executeAndGetCount(transaction);
+                    int count2 = transaction.executeAndGetCount(deletePs);
                     assertEquals(-1, count2); // TODO 1
                 }
                 assertNothingInTx(session, transaction, entity1.getFoo());
 
-                int count3 = insertPs.executeAndGetCount(transaction, entity2);
+                int count3 = transaction.executeAndGetCount(insertPs, entity2);
                 assertEquals(-1, count3); // TODO 1
                 assertEqualsInTx(session, transaction, entity2);
             });
@@ -286,7 +286,7 @@ class DbDeleteTest extends DbTestTableTester {
     private void assertNothingInTx(TsurugiSession session, TsurugiTransaction transaction, int foo) throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo = " + foo;
         try (var ps = session.createPreparedQuery(sql)) {
-            var actual = ps.executeAndFindRecord(transaction);
+            var actual = transaction.executeAndFindRecord(ps);
             assertTrue(actual.isEmpty());
         }
     }
@@ -294,7 +294,7 @@ class DbDeleteTest extends DbTestTableTester {
     private void assertEqualsInTx(TsurugiSession session, TsurugiTransaction transaction, TestEntity expected) throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo = " + expected.getFoo();
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
-            var actual = ps.executeAndFindRecord(transaction).get();
+            var actual = transaction.executeAndFindRecord(ps).get();
             assertEquals(expected, actual);
         }
     }

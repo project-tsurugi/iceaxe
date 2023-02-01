@@ -122,13 +122,13 @@ class DbSelectOtherTxTest extends DbTestTableTester {
     private void updateOtherTxOcc(TsurugiSession session, TsurugiPreparedStatementUpdate1<TgParameterList> updatePs, TgVariableLong bar, long value) throws IOException, TsurugiTransactionException {
         try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
             var parameter = TgParameterList.of(bar.bind(value));
-            int count = updatePs.executeAndGetCount(tx, parameter);
+            int count = tx.executeAndGetCount(updatePs, parameter);
             assertEquals(-1, count); // TODO 1
             tx.commit(TgCommitType.DEFAULT);
         }
     }
 
     private TestEntity select(TsurugiTransaction tx, TsurugiPreparedStatementQuery0<TestEntity> selectPs) throws IOException, TsurugiTransactionException {
-        return selectPs.executeAndFindRecord(tx).get();
+        return tx.executeAndFindRecord(selectPs).get();
     }
 }

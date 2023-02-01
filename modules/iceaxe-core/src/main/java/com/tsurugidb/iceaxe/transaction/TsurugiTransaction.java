@@ -2,8 +2,10 @@ package com.tsurugidb.iceaxe.transaction;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -15,10 +17,17 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.result.TsurugiResultCount;
+import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
+import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
+import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
+import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
@@ -26,6 +35,7 @@ import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.IoFunction;
+import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
 import com.tsurugidb.tsubakuro.sql.Transaction;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -244,6 +254,224 @@ public class TsurugiTransaction implements Closeable {
         return transaction.getTransactionId();
     }
 
+    // execute statement
+
+    /**
+     * execute ddl.
+     *
+     * @param sql DDL
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public void executeDdl(String sql) throws IOException, TsurugiTransactionException {
+        try (var ps = ownerSession.createPreparedStatement(sql)) {
+            executeAndGetCount(ps);
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R> result type
+     * @param ps  PreparedStatement
+     * @return ResultSet ({@link java.io.Closeable})
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     * @see #executeForEach(TsurugiPreparedStatementQuery0, TsurugiTransactionConsumer)
+     * @see #executeAndFindRecord(TsurugiPreparedStatementQuery0)
+     * @see #executeAndGetList(TsurugiPreparedStatementQuery0)
+     */
+    public <R> TsurugiResultSet<R> executeQuery(TsurugiPreparedStatementQuery0<R> ps) throws IOException, TsurugiTransactionException {
+        return ps.execute(this);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @return ResultSet ({@link java.io.Closeable})
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     * @see #executeForEach(TsurugiPreparedStatementQuery1, P, TsurugiTransactionConsumer)
+     * @see #executeAndFindRecord(TsurugiPreparedStatementQuery1, P)
+     * @see #executeAndGetList(TsurugiPreparedStatementQuery1, P)
+     */
+    public <P, R> TsurugiResultSet<R> executeQuery(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+        return ps.execute(this, parameter);
+    }
+
+    /**
+     * execute statement.
+     *
+     * @param ps PreparedStatement
+     * @return result ({@link java.io.Closeable})
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     * @see #executeAndGetCount(TsurugiPreparedStatementUpdate0)
+     */
+    public TsurugiResultCount executeStatement(TsurugiPreparedStatementUpdate0 ps) throws IOException, TsurugiTransactionException {
+        return ps.execute(this);
+    }
+
+    /**
+     * execute statement.
+     *
+     * @param <P>       parameter type
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @return result ({@link java.io.Closeable})
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     * @see #executeAndGetCount(TsurugiPreparedStatementUpdate1, P)
+     */
+    public <P> TsurugiResultCount executeStatement(TsurugiPreparedStatementUpdate1<P> ps, P parameter) throws IOException, TsurugiTransactionException {
+        return ps.execute(this, parameter);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>       result type
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @param action    The action to be performed for each record
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <R> void executeForEach(TsurugiPreparedStatementQuery0<R> ps, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+        try (var rs = ps.execute(this)) {
+            for (var i = rs.iterator(); i.hasNext();) {
+                R record = i.next();
+                action.accept(record);
+            }
+        } catch (UncheckedIOException e) {
+            throw e.getCause();
+        } catch (TsurugiTransactionRuntimeException e) {
+            throw e.getCause();
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @param action    The action to be performed for each record
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <P, R> void executeForEach(TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+        try (var rs = ps.execute(this, parameter)) {
+            for (var i = rs.iterator(); i.hasNext();) {
+                R record = i.next();
+                action.accept(record);
+            }
+        } catch (UncheckedIOException e) {
+            throw e.getCause();
+        } catch (TsurugiTransactionRuntimeException e) {
+            throw e.getCause();
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R> result type
+     * @param ps  PreparedStatement
+     * @return record
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery0<R> ps) throws IOException, TsurugiTransactionException {
+        try (var rs = ps.execute(this)) {
+            return rs.findRecord();
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @return record
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <P, R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+        try (var rs = ps.execute(this, parameter)) {
+            return rs.findRecord();
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R> result type
+     * @param ps  PreparedStatement
+     * @return list of record
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <R> List<R> executeAndGetList(TsurugiPreparedStatementQuery0<R> ps) throws IOException, TsurugiTransactionException {
+        try (var rs = ps.execute(this)) {
+            return rs.getRecordList();
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @return list of record
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <P, R> List<R> executeAndGetList(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+        try (var rs = ps.execute(this, parameter)) {
+            return rs.getRecordList();
+        }
+    }
+
+    /**
+     * execute statement.
+     *
+     * @param ps PreparedStatement
+     * @return row count
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public int executeAndGetCount(TsurugiPreparedStatementUpdate0 ps) throws IOException, TsurugiTransactionException {
+        try (var rc = ps.execute(this)) {
+            return rc.getUpdateCount();
+        }
+    }
+
+    /**
+     * execute statement.
+     *
+     * @param <P>       parameter type
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @return row count
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <P> int executeAndGetCount(TsurugiPreparedStatementUpdate1<P> ps, P parameter) throws IOException, TsurugiTransactionException {
+        try (var rc = ps.execute(this, parameter)) {
+            return rc.getUpdateCount();
+        }
+    }
+
     // internal
     @FunctionalInterface
     public interface LowTransactionTask<R> {
@@ -255,6 +483,8 @@ public class TsurugiTransaction implements Closeable {
         checkClose();
         return task.run(getLowTransaction());
     }
+
+    // commit, rollback
 
     /**
      * add before-commit listener

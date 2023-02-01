@@ -106,7 +106,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
                 switch (type) {
                 default:
                 case READ_ALL:
-                    ps.executeAndGetList(transaction);
+                    transaction.executeAndGetList(ps);
                     break;
                 case CLOSE_ONLY:
                     try (var rs = ps.execute(transaction)) {

@@ -45,6 +45,7 @@ class TgSessionInfoTest {
     }
 
     @Test
+    @Deprecated(forRemoval = true)
     void testOfUser() {
         var info = TgSessionInfo.of("u1", "p1");
         var credential = (UsernamePasswordCredential) info.credential();
@@ -61,7 +62,7 @@ class TgSessionInfoTest {
         var empty = new TgSessionInfo();
         assertEquals("TgSessionInfo{credential=null, timeout={DEFAULT=9223372036854775807nanoseconds}, commitType=DEFAULT}", empty.toString());
 
-        var info = TgSessionInfo.of("u1", "p1").timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS).commitType(TgCommitType.STORED);
+        var info = TgSessionInfo.of(new UsernamePasswordCredential("u1", "p1")).timeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS).commitType(TgCommitType.STORED);
         assertEquals("TgSessionInfo{credential=UsernamePasswordCredential(name=u1), timeout={DEFAULT=123seconds}, commitType=STORED}", info.toString());
     }
 }

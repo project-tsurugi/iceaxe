@@ -160,14 +160,14 @@ class DbInsertDuplicateTest extends DbTestTableTester {
 
         private void execute(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<TsurugiResultEntity> maxPs, TsurugiPreparedStatementUpdate1<TestEntity> insertPs,
                 TsurugiPreparedStatementUpdate1<TgParameterList> insert2Ps) throws IOException, TsurugiTransactionException {
-            var max = maxPs.executeAndFindRecord(transaction).get();
+            var max = transaction.executeAndFindRecord(maxPs).get();
             int foo = max.getInt4("foo");
 
             var entity = new TestEntity(foo, foo, Integer.toString(foo));
-            insertPs.executeAndGetCount(transaction, entity);
+            transaction.executeAndGetCount(insertPs, entity);
 
             var parameter = TgParameterList.of(vKey1.bind(foo), vKey2.bind(foo / 2), vZzz2.bind(Integer.toString(foo)));
-            insert2Ps.executeAndGetCount(transaction, parameter);
+            transaction.executeAndGetCount(insert2Ps, parameter);
         }
     }
 }

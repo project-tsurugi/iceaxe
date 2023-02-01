@@ -42,8 +42,8 @@ public class Example81Batch {
 
             tm.execute(transaction -> {
                 for (var entity : entityList) {
-                    deletePs.executeAndGetCount(transaction, entity);
-                    insertPs.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(deletePs, entity);
+                    transaction.executeAndGetCount(insertPs, entity);
                 }
             });
         }
@@ -81,8 +81,8 @@ public class Example81Batch {
         public void execute(List<TestEntity> entityList) throws IOException {
             transactionManager.execute(transaction -> {
                 for (var entity : entityList) {
-                    deletePs.executeAndGetCount(transaction, entity);
-                    insertPs.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(deletePs, entity);
+                    transaction.executeAndGetCount(insertPs, entity);
                 }
             });
         }

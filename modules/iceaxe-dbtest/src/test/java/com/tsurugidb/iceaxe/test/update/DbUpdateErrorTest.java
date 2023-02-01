@@ -47,9 +47,9 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             // TODO updatePK null
-//          var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
+//          var e = assertThrowsExactly(TsurugiIOException.class, () -> tm.executeAndGetCount(ps));
 //          assertEqualsCode(null, e); // TODO エラーコード
-            ps.executeAndGetCount(tm);
+            tm.executeAndGetCount(ps);
         }
 
 //      assertEqualsTestTable(SIZE);
@@ -74,9 +74,9 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             // TODO updatePK same value
-//          var e = assertThrowsExactly(TsurugiIOException.class, () -> ps.executeAndGetCount(tm));
+//          var e = assertThrowsExactly(TsurugiIOException.class, () -> tm.executeAndGetCount(ps));
 //          assertEqualsCode(null, e); // TODO エラーコード
-            ps.executeAndGetCount(tm);
+            tm.executeAndGetCount(ps);
         }
 
 //      assertEqualsTestTable(SIZE);
@@ -109,7 +109,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                ps.executeAndGetCount(tm);
+                tm.executeAndGetCount(ps);
             });
             assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
             String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016: . attempt=0, option=OCC{}";

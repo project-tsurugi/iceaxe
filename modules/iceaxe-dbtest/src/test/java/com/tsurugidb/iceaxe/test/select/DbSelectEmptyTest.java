@@ -42,7 +42,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
-                List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
+                List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
                 assertEquals(List.of(), list);
             }
         }
@@ -57,7 +57,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(sql)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < ATTEMPT_SIZE; i++) {
-                    List<TsurugiResultEntity> list = ps.executeAndGetList(transaction);
+                    List<TsurugiResultEntity> list = transaction.executeAndGetList(ps);
                     assertEquals(List.of(), list);
                 }
             });
@@ -76,7 +76,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            int count = ps.executeAndFindRecord(tm).get();
+            int count = tm.executeAndFindRecord(ps).get();
             assertEquals(0, count);
         }
     }
@@ -92,7 +92,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            TsurugiResultEntity entity = ps.executeAndFindRecord(tm).get();
+            TsurugiResultEntity entity = tm.executeAndFindRecord(ps).get();
             assertNull(entity.getInt4OrNull("sum"));
             assertNull(entity.getCharacterOrNull("zzz"));
         }
@@ -111,7 +111,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(0, list.size());
         }
     }
@@ -129,7 +129,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(0, list.size());
         }
     }

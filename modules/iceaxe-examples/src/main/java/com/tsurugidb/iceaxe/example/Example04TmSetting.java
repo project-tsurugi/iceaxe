@@ -68,7 +68,7 @@ public class Example04TmSetting {
     void supplierAlways(TgTxOption option) {
         // same as TgTmSetting.ofAlways(option)
 
-        var supplier = TgTmTxOptionSupplier.ofAlways(option, Integer.MAX_VALUE);
+        var supplier = TgTmTxOptionSupplier.ofAlways(option);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }

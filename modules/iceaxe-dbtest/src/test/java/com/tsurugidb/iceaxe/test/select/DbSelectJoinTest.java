@@ -88,12 +88,12 @@ class DbSelectJoinTest extends DbTestTableTester {
         tm.execute(transaction -> {
             try (var ps = session.createPreparedStatement(MASTER_INSERT_SQL, MASTER_MAPPING)) {
                 for (var entity : MASTER_LIST) {
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
                 }
             }
             try (var ps = session.createPreparedStatement(DETAIL_INSERT_SQL, DETAIL_MAPPING)) {
                 for (var entity : DETAIL_LIST) {
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
                 }
             }
         });
@@ -173,7 +173,7 @@ class DbSelectJoinTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
+            List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             assertEqualsMasterDetail(expectedList, list);
         }
     }
@@ -195,7 +195,7 @@ class DbSelectJoinTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
+            List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             assertEqualsMasterDetail(expectedList, list);
         }
     }
@@ -215,7 +215,7 @@ class DbSelectJoinTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
+            List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             assertEquals(4, list.size()); // TODO left join実装待ち
 //          assertEqualsMasterDetail(expectedList, list);
         }

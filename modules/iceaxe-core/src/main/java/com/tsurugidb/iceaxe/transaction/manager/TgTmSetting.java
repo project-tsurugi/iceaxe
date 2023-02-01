@@ -51,7 +51,8 @@ public class TgTmSetting {
      * @return Transaction Manager Settings
      */
     public static TgTmSetting ofAlways(TgTxOption transactionOption) {
-        return ofAlways(transactionOption, Integer.MAX_VALUE);
+        var supplier = TgTmTxOptionSupplier.ofAlways(transactionOption);
+        return of(supplier);
     }
 
     /**

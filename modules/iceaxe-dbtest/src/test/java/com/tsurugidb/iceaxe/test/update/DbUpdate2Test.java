@@ -57,7 +57,7 @@ class DbUpdate2Test extends DbTestTableTester {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < SIZE; i++) {
                     var param = TgParameterList.of(pk.bind(i), v1.bind(initValue1(i)), v2.bind(initValue2(i)));
-                    ps.executeAndGetCount(transaction, param);
+                    transaction.executeAndGetCount(ps, param);
                 }
             });
         }
@@ -81,13 +81,13 @@ class DbUpdate2Test extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
         var selectSql = "select * from " + TEST + " order by pk";
         try (var ps = session.createPreparedQuery(selectSql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             int i = 0;
             for (var entity : list) {
@@ -111,13 +111,13 @@ class DbUpdate2Test extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
         var selectSql = "select * from " + TEST + " order by pk";
         try (var ps = session.createPreparedQuery(selectSql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             int i = 0;
             for (var entity : list) {

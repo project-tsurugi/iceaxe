@@ -60,7 +60,7 @@ class DbBindVariableTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             var entity = createTestEntity(SIZE);
-            ps.executeAndGetCount(tm, entity);
+            tm.executeAndGetCount(ps, entity);
         }
 
         assertEqualsTestTable(SIZE + 1);
@@ -91,7 +91,7 @@ class DbBindVariableTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(sql, parameterMapping, SELECT_MAPPING)) {
             int key = 2;
             var parameter = TgParameterList.of(bar.bind(key));
-            var list = ps.executeAndGetList(tm, parameter);
+            var list = tm.executeAndGetList(ps, parameter);
 
             if (b.equals("bar")) {
                 assertEquals(SIZE, list.size());

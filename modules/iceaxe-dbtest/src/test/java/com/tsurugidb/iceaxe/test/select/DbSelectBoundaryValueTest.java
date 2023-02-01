@@ -134,7 +134,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 for (var entity : TEST_ENTITY_LIST) {
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
                 }
             });
         }
@@ -206,7 +206,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
             var param = TgParameterList.of(variable.bind(value));
-            var actual = ps.executeAndGetList(tm, param);
+            var actual = tm.executeAndGetList(ps, param);
             assertEquals(expected, actual);
         }
     }

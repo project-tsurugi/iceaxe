@@ -105,7 +105,7 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
                 switch (type) {
                 case RESULT_CHECK:
                 default:
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
                     break;
                 case CLOSE_ONLY:
                     try (var rs = ps.execute(transaction, entity)) {

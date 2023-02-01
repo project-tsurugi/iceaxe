@@ -56,13 +56,13 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(insertSql, insertMapping)) {
             var param = TgParameterList.of(variable.bind(value));
-            ps.executeAndGetCount(tm, param);
+            tm.executeAndGetCount(ps, param);
         }
 
         var selectSql = "select " + name + " from " + TEST;
         var selectMapping = TgResultMapping.of(record -> record.nextInt4());
         try (var ps = session.createPreparedQuery(selectSql, selectMapping)) {
-            var actual = ps.executeAndFindRecord(tm).get();
+            var actual = tm.executeAndFindRecord(ps).get();
             assertEquals(value, actual);
         }
     }
@@ -82,13 +82,13 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(insertSql, insertMapping)) {
             var param = TgParameterList.of(variable.bind(value));
-            ps.executeAndGetCount(tm, param);
+            tm.executeAndGetCount(ps, param);
         }
 
         var selectSql = "select " + name + " from " + TEST;
         var selectMapping = TgResultMapping.of(record -> record.nextInt8());
         try (var ps = session.createPreparedQuery(selectSql, selectMapping)) {
-            var actual = ps.executeAndFindRecord(tm).get();
+            var actual = tm.executeAndFindRecord(ps).get();
             assertEquals(value, actual);
         }
     }
@@ -108,13 +108,13 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(insertSql, insertMapping)) {
             var param = TgParameterList.of(variable.bind(value));
-            ps.executeAndGetCount(tm, param);
+            tm.executeAndGetCount(ps, param);
         }
 
         var selectSql = "select " + name + " from " + TEST;
         var selectMapping = TgResultMapping.of(record -> record.nextFloat4());
         try (var ps = session.createPreparedQuery(selectSql, selectMapping)) {
-            var actual = ps.executeAndFindRecord(tm).get();
+            var actual = tm.executeAndFindRecord(ps).get();
             assertEquals(value, actual);
         }
     }
@@ -134,13 +134,13 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(insertSql, insertMapping)) {
             var param = TgParameterList.of(variable.bind(value));
-            ps.executeAndGetCount(tm, param);
+            tm.executeAndGetCount(ps, param);
         }
 
         var selectSql = "select " + name + " from " + TEST;
         var selectMapping = TgResultMapping.of(record -> record.nextFloat8());
         try (var ps = session.createPreparedQuery(selectSql, selectMapping)) {
-            var actual = ps.executeAndFindRecord(tm).get();
+            var actual = tm.executeAndFindRecord(ps).get();
             assertEquals(value, actual);
         }
     }

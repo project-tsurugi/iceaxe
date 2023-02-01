@@ -148,7 +148,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
                     for (int i = 0; i < threadSize; i++) {
                         for (int j = 0; j < 2; j++) {
                             var entity = new Test2Entity(i, 1 + j);
-                            insertPs.executeAndGetCount(transaction, entity);
+                            transaction.executeAndGetCount(insertPs, entity);
                         }
                     }
                 });
@@ -218,13 +218,13 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
 
         private void runInTransaction(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
             var parameter = TgParameterList.of(TgParameter.of("key1", number));
-            deletePs.executeAndGetCount(transaction, parameter);
+            transaction.executeAndGetCount(deletePs, parameter);
 
             for (int i = 0; i < recordSize; i++) {
-                selectPs.executeAndGetList(transaction);
+                transaction.executeAndGetList(selectPs);
 
                 var entity = new Test2Entity(number, i);
-                insertPs.executeAndGetCount(transaction, entity);
+                transaction.executeAndGetCount(insertPs, entity);
             }
         }
 

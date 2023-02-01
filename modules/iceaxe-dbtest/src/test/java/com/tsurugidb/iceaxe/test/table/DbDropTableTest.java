@@ -36,7 +36,7 @@ class DbDropTableTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL)) {
-            ps.executeAndGetCount(tm);
+            tm.executeAndGetCount(ps);
         }
     }
 
@@ -46,7 +46,7 @@ class DbDropTableTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                ps.executeAndGetCount(tm);
+                tm.executeAndGetCount(ps);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
             assertContains("table_not_found table `test' is not found", e.getMessage());
@@ -63,7 +63,7 @@ class DbDropTableTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL)) {
             tm.execute(transaction -> {
-                ps.executeAndGetCount(transaction);
+                transaction.executeAndGetCount(ps);
                 assertTrue(session.findTableMetadata(TEST).isEmpty());
                 transaction.rollback();
                 assertTrue(session.findTableMetadata(TEST).isEmpty());

@@ -48,7 +48,7 @@ public class Example32Count {
     void countAll0_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
             int count = tm.execute(transaction -> {
-                Optional<TsurugiResultEntity> recordOpt = ps.executeAndFindRecord(transaction);
+                Optional<TsurugiResultEntity> recordOpt = transaction.executeAndFindRecord(ps);
                 return recordOpt.get().getInt4("count");
             });
             System.out.println(count);
@@ -57,10 +57,16 @@ public class Example32Count {
 
     void countAll0_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select count(*) count from TEST")) {
-            Optional<TsurugiResultEntity> recordOpt = ps.executeAndFindRecord(tm);
+            Optional<TsurugiResultEntity> recordOpt = tm.executeAndFindRecord(ps);
             int count = recordOpt.get().getInt4("count");
             System.out.println(count);
         }
+    }
+
+    void countAll0_execTmDirect(TsurugiTransactionManager tm) throws IOException {
+        Optional<TsurugiResultEntity> recordOpt = tm.executeAndFindRecord("select count(*) count from TEST");
+        int count = recordOpt.get().getInt4("count");
+        System.out.println(count);
     }
 
     void countAllAsInteger(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {

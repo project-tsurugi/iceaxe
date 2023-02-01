@@ -45,7 +45,6 @@ public class Example00 {
      * @see Example11Ddl
      */
     private static void executeCreateTable(TsurugiSession session) throws IOException {
-        // DDLはトランザクションの影響を受けない（ロールバックできない）が、トランザクション内で実行する必要がある。
         // DDLの場合は、LTXであってもwritePreserveを指定する必要は無い。
         var setting = TgTmSetting.of(TgTxOption.ofLTX());
         var tm = session.createTransactionManager(setting);
@@ -53,9 +52,7 @@ public class Example00 {
         Optional<TgTableMetadata> metadata = session.findTableMetadata(TABLE_NAME);
         if (metadata.isPresent()) {
             var sql = "drop table " + TABLE_NAME;
-            try (var ps = session.createPreparedStatement(sql)) {
-                ps.executeAndGetCount(tm);
-            }
+            tm.executeDdl(sql);
         }
 
         var sql = "create table " + TABLE_NAME + " (\n" //
@@ -63,9 +60,7 @@ public class Example00 {
                 + "  bar bigint,\n" //
                 + "  zzz varchar(10)\n" //
                 + ")";
-        try (var ps = session.createPreparedStatement(sql)) {
-            ps.executeAndGetCount(tm);
-        }
+        tm.executeDdl(sql);
     }
 
     /**
@@ -85,7 +80,7 @@ public class Example00 {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < 10; i++) {
                     var entity = new TestEntity(i, Long.valueOf(i), "z" + i);
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
                 }
             });
         }
@@ -107,7 +102,7 @@ public class Example00 {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < 10; i += 2) {
                     var parameter = TgParameterList.of(foo.bind(i), bar.bind(i + 1));
-                    ps.executeAndGetCount(transaction, parameter);
+                    transaction.executeAndGetCount(ps, parameter);
                 }
             });
         }
@@ -127,7 +122,7 @@ public class Example00 {
                 .character("zzz", TestEntity::setZzz);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
             tm.execute(transaction -> {
-                List<TestEntity> list = ps.executeAndGetList(transaction);
+                List<TestEntity> list = transaction.executeAndGetList(ps);
                 for (var entity : list) {
                     System.out.println(entity);
                 }

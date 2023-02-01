@@ -24,7 +24,7 @@ public class Example93DomainType {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
 
-            createTable(session, tm);
+            createTable(tm);
 
             var entity = new Example93Entity2();
             switch (1) {
@@ -45,15 +45,13 @@ public class Example93DomainType {
         }
     }
 
-    void createTable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void createTable(TsurugiTransactionManager tm) throws IOException {
         var sql = "create table example93 (" //
                 + "key1 int," //
                 + "type varchar," // @see ExampleType
                 + "primary key(key1)" //
                 + ")";
-        try (var ps = session.createPreparedStatement(sql)) {
-            ps.executeAndGetCount(tm);
-        }
+        tm.executeDdl(sql);
     }
 
     /**
@@ -103,7 +101,7 @@ public class Example93DomainType {
                 .int4("key", Example93Entity2::getKey) //
                 .character("type", Example93Entity2::getTypeAsString); // getter as String
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            ps.executeAndGetCount(tm, entity);
+            tm.executeAndGetCount(ps, entity);
         }
     }
 
@@ -115,7 +113,7 @@ public class Example93DomainType {
                 .add(key, Example93Entity1::getKey) //
                 .add(type, Example93Entity1::getType);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            ps.executeAndGetCount(tm, entity);
+            tm.executeAndGetCount(ps, entity);
         }
     }
 
@@ -143,7 +141,7 @@ public class Example93DomainType {
                 .int4("key", Example93Entity1::getKey) //
                 .character("type", Example93Entity1::getType, ExampleType::name); // getter with converter
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            ps.executeAndGetCount(tm, entity);
+            tm.executeAndGetCount(ps, entity);
         }
     }
 
@@ -153,7 +151,7 @@ public class Example93DomainType {
                 .int4(Example93Entity1::setKey) //
                 .add(this::setEntityType); // converter
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             System.out.println(list);
         }
     }
@@ -170,7 +168,7 @@ public class Example93DomainType {
                 .int4(Example93Entity2::setKey) //
                 .character(Example93Entity2::setTypeAsString); // setter as String
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             System.out.println(list);
         }
     }
@@ -181,7 +179,7 @@ public class Example93DomainType {
                 .int4(Example93Entity1::setKey) //
                 .character(Example93Entity1::setType, ExampleType::valueOf); // setter with converter
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             System.out.println(list);
         }
     }

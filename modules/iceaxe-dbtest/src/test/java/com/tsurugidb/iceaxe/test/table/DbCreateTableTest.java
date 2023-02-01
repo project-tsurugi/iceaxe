@@ -39,9 +39,7 @@ class DbCreateTableTest extends DbTestTableTester {
     void create() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL)) {
-            ps.executeAndGetCount(tm);
-        }
+        tm.executeDdl(SQL);
     }
 
     @Test
@@ -50,13 +48,11 @@ class DbCreateTableTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                ps.executeAndGetCount(tm);
-            });
-            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            assertContains("duplicate_table table `test' is already defined.", e.getMessage());
-        }
+        var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            tm.executeDdl(SQL);
+        });
+        assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+        assertContains("duplicate_table table `test' is already defined.", e.getMessage());
     }
 
     @Test
@@ -67,7 +63,7 @@ class DbCreateTableTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL)) {
             tm.execute(transaction -> {
-                ps.executeAndGetCount(transaction);
+                transaction.executeAndGetCount(ps);
                 assertTrue(session.findTableMetadata(TEST).isPresent());
                 transaction.rollback();
                 assertTrue(session.findTableMetadata(TEST).isPresent());

@@ -35,6 +35,7 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      * @return result
      * @throws IOException
      * @throws TsurugiTransactionException
+     * @see TsurugiTransaction#executeStatement(TsurugiPreparedStatementUpdate0)
      */
     public TsurugiResultCount execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         checkClose();
@@ -54,10 +55,9 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
+    @Deprecated(forRemoval = true)
     public int executeAndGetCount(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
-        try (var result = execute(transaction)) {
-            return result.getUpdateCount();
-        }
+        return transaction.executeAndGetCount(this);
     }
 
     /**
@@ -67,10 +67,9 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      * @return row count
      * @throws IOException
      */
+    @Deprecated(forRemoval = true)
     public int executeAndGetCount(TsurugiTransactionManager tm) throws IOException {
-        return tm.execute(transaction -> {
-            return executeAndGetCount(transaction);
-        });
+        return tm.executeAndGetCount(this);
     }
 
     /**
@@ -81,10 +80,9 @@ public class TsurugiPreparedStatementUpdate0 extends TsurugiPreparedStatement {
      * @return row count
      * @throws IOException
      */
+    @Deprecated(forRemoval = true)
     public int executeAndGetCount(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException {
-        return tm.execute(setting, transaction -> {
-            return executeAndGetCount(transaction);
-        });
+        return tm.executeAndGetCount(setting, this);
     }
 
     /**

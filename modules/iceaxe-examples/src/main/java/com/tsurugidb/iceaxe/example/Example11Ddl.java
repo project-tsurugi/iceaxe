@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.example;
 import java.io.IOException;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
@@ -14,18 +13,20 @@ public class Example11Ddl {
 
     void main() throws IOException {
         try (var session = Example02Session.createSession()) {
-            var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
-            var tm = session.createTransactionManager(setting);
-
-            createTable(session, tm);
-            dropTable(session, tm);
+            // TsurugiTransactionManagerのexecuteDdlメソッドを使う場合、
+            // TgTmSettingが指定されていなかったら、暗黙にLTXとして実行する。
+            var tm = session.createTransactionManager();
+            createTable(tm);
+            dropTable(tm);
 
             existsTable(session);
             getTableMetadata(session);
+
+            dropAndCreateTable(session);
         }
     }
 
-    void createTable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void createTable(TsurugiTransactionManager tm) throws IOException {
         var sql = "create table TEST" //
                 + "(" //
                 + "  foo int," // INT4
@@ -33,26 +34,12 @@ public class Example11Ddl {
                 + "  zzz varchar(10)," // CHARACTER
                 + "  primary key(foo)" //
                 + ")";
-        try (var ps = session.createPreparedStatement(sql)) {
-            // DDLの実行もトランザクション内で行う
-            // ただしcommit/rollbackは無効（commitしなくてもテーブルは作られるし、rollbackしても消えない）
-            tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
-                }
-            });
-        }
+        tm.executeDdl(sql);
     }
 
-    void dropTable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void dropTable(TsurugiTransactionManager tm) throws IOException {
         var sql = "drop table TEST";
-        try (var ps = session.createPreparedStatement(sql)) {
-            // DDLの実行もトランザクション内で行う
-            // ただしcommit/rollbackは無効（commitしなくてもテーブルは削除されるし、rollbackしても復活しない）
-            tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
-                }
-            });
-        }
+        tm.executeDdl(sql);
     }
 
     void existsTable(TsurugiSession session) throws IOException {
@@ -73,5 +60,22 @@ public class Example11Ddl {
             System.out.println(metadata.getTableName());
             System.out.println(metadata.getLowColumnList());
         }
+    }
+
+    void dropAndCreateTable(TsurugiSession session) throws IOException {
+        // DDLをLTXで実行する場合は、writePreserveには何も指定しなくてよい。
+        var tm = session.createTransactionManager(TgTxOption.ofLTX());
+        tm.execute(transaction -> {
+            if (transaction.getSession().findTableMetadata("TEST").isPresent()) {
+                transaction.executeDdl("drop table TEST");
+            }
+            transaction.executeDdl("create table TEST" //
+                    + "(" //
+                    + "  foo int," // INT4
+                    + "  bar bigint," // INT8
+                    + "  zzz varchar(10)," // CHARACTER
+                    + "  primary key(foo)" //
+                    + ")");
+        });
     }
 }

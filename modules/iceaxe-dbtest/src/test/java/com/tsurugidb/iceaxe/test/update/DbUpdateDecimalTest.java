@@ -78,7 +78,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql, mapping)) {
             var parameter = TgParameterList.of(div.bind(divValue));
             if (expectedSuccess) {
-                int count = ps.executeAndGetCount(tm, parameter);
+                int count = tm.executeAndGetCount(ps, parameter);
                 assertEquals(-1, count); // TODO 1
 
                 var actual = selectValue();
@@ -87,12 +87,12 @@ class DbUpdateDecimalTest extends DbTestTableTester {
             } else {
                 tm.execute(transaction -> {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                        ps.executeAndGetCount(transaction, parameter);
+                        transaction.executeAndGetCount(ps, parameter);
                     });
                     assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
 
                     try (var selectPs = session.createPreparedQuery("select value from " + TEST)) {
-                        var list = selectPs.executeAndGetList(transaction);
+                        var list = transaction.executeAndGetList(selectPs);
                         assertEquals(0, list.size()); // TODO 1 (even if ERR_EXPRESSION_EVALUATION_FAILURE)
                     }
                 });
@@ -108,7 +108,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL, mapping)) {
             var parameter = TgParameterList.of(variable.bind(value));
-            int count = ps.executeAndGetCount(tm, parameter);
+            int count = tm.executeAndGetCount(ps, parameter);
             assertEquals(-1, count); // TODO 1
         }
     }
@@ -117,7 +117,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery("select value from " + TEST)) {
-            var entity = ps.executeAndFindRecord(tm).get();
+            var entity = tm.executeAndFindRecord(ps).get();
             return entity.getDecimal(VNAME);
         }
     }

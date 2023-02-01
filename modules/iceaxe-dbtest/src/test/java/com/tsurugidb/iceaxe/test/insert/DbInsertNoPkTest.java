@@ -92,7 +92,7 @@ class DbInsertNoPkTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql)) {
             for (int i = 0; i < size; i++) {
                 tm.execute(transaction -> {
-                    int count = ps.executeAndGetCount(transaction);
+                    int count = transaction.executeAndGetCount(ps);
                     assertEquals(-1, count); // TODO 1
                 });
             }

@@ -29,6 +29,16 @@ public abstract class TgTmTxOptionSupplier {
      * create TsurugiTransactionOptionSupplier
      *
      * @param transactionOption option
+     * @return supplier
+     */
+    public static TgTmTxOptionSupplier ofAlways(TgTxOption transactionOption) {
+        return TgTmTxOptionAlways.of(transactionOption, Integer.MAX_VALUE);
+    }
+
+    /**
+     * create TsurugiTransactionOptionSupplier
+     *
+     * @param transactionOption option
      * @param attemtMaxCount    attempt max count
      * @return supplier
      */

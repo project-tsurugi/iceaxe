@@ -144,7 +144,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
                             value1.bind(i + 100), //
                             value2.bind(i + 200) //
                     );
-                    ps.executeAndGetCount(transaction, parameter);
+                    transaction.executeAndGetCount(ps, parameter);
                 }
             }
         }
@@ -196,7 +196,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
 
         private void execute(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<TgParameterList, TsurugiResultEntity> ps, int groupId) throws IOException, TsurugiTransactionException {
             var parameter = TgParameterList.of(vGruopId.bind(groupId));
-            ps.executeAndGetList(transaction, parameter);
+            transaction.executeAndGetList(ps, parameter);
         }
     }
 }

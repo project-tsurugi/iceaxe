@@ -82,7 +82,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             for (var entity : list) {
                 assertEquals(List.of(), entity.getNameList());
@@ -98,7 +98,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             int i = 0;
             for (var entity : list) {
@@ -115,7 +115,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             int i = 0;
             for (var entity : list) {
@@ -132,7 +132,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             for (var entity : list) {
                 assertEquals(1, entity.getInt4("c"));
@@ -148,7 +148,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             var expectedSet = LongStream.rangeClosed(1, list.size()).boxed().collect(Collectors.toSet());
             for (var entity : list) {
@@ -169,7 +169,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -193,7 +193,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count);
         }
 
@@ -219,7 +219,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             for (var entity : list) {
                 // 現状、generated_rowidで始まる別名は取得できない

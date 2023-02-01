@@ -46,7 +46,7 @@ class DbSelectCountTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            int count = ps.executeAndFindRecord(tm).get();
+            int count = tm.executeAndFindRecord(ps).get();
             assertEquals(size, count);
         }
     }

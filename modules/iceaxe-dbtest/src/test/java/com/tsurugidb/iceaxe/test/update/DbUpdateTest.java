@@ -43,7 +43,7 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
@@ -65,7 +65,7 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
@@ -88,7 +88,7 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
@@ -118,7 +118,7 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO 0
         }
 
@@ -142,7 +142,7 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            int count = ps.executeAndGetCount(tm, updateEntity);
+            int count = tm.executeAndGetCount(ps, updateEntity);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -169,7 +169,7 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
@@ -192,7 +192,7 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
@@ -217,7 +217,7 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO SIZE
         }
 
@@ -237,19 +237,19 @@ class DbUpdateTest extends DbTestTableTester {
         tm.execute(tranasction -> {
             // insert
             try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
-                int count = ps.executeAndGetCount(tranasction, insertEntity);
+                int count = tranasction.executeAndGetCount(ps, insertEntity);
                 assertEquals(-1, count); // TODO 1
             }
 
             // update
             try (var ps = session.createPreparedStatement(sql)) {
-                int count = ps.executeAndGetCount(tranasction);
+                int count = tranasction.executeAndGetCount(ps);
                 assertEquals(-1, count); // TODO 1
             }
 
             // select
             try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
-                var list = ps.executeAndGetList(tranasction);
+                var list = tranasction.executeAndGetList(ps);
                 assertEquals(SIZE + 1, list.size());
                 for (var entity : list) {
                     if (entity.getFoo().equals(insertEntity.getFoo())) {
@@ -296,7 +296,7 @@ class DbUpdateTest extends DbTestTableTester {
 
             // select
             try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
-                var list = ps.executeAndGetList(tranasction);
+                var list = tranasction.executeAndGetList(ps);
                 assertEquals(SIZE + 1, list.size());
                 for (var entity : list) {
                     if (entity.getFoo().equals(insertEntity.getFoo())) {
@@ -336,19 +336,19 @@ class DbUpdateTest extends DbTestTableTester {
             try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
                 {
                     var param = TgParameterList.of(bar.bind(101));
-                    int count = ps.executeAndGetCount(tranasction, param);
+                    int count = tranasction.executeAndGetCount(ps, param);
                     assertEquals(-1, count); // TODO 1
                 }
                 {
                     var param = TgParameterList.of(bar.bind(102));
-                    int count = ps.executeAndGetCount(tranasction, param);
+                    int count = tranasction.executeAndGetCount(ps, param);
                     assertEquals(-1, count); // TODO 1
                 }
             }
 
             // select
             try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
-                var list = ps.executeAndGetList(tranasction);
+                var list = tranasction.executeAndGetList(ps);
                 assertEquals(SIZE, list.size());
                 for (var entity : list) {
                     if (entity.getFoo().equals(foo)) {

@@ -115,7 +115,7 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
             for (int i = 0; i < recordSize; i++) {
                 if (i % threadSize == number) {
                     var entity = createTestEntity(i);
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
                 }
             }
         }
@@ -178,7 +178,7 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
             for (int i = 0; i < recordSize; i++) {
                 if (i % threadSize == number) {
                     var entity = createTestEntity(i);
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
                 }
             }
         }

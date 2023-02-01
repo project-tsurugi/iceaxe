@@ -207,12 +207,12 @@ class DbManagerCounterTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql, mapping)) {
             tm.execute(setting1, tx1 -> {
                 var param1 = TgParameterList.of(bar.bind(111));
-                ps.executeAndGetCount(tx1, param1);
+                tx1.executeAndGetCount(ps, param1);
 
                 var e = assertThrowsExactly(TsurugiTransactionRetryOverIOException.class, () -> {
                     tm.execute(setting2, tx2 -> {
                         var param2 = TgParameterList.of(bar.bind(222));
-                        ps.executeAndGetCount(tx2, param2);
+                        tx2.executeAndGetCount(ps, param2);
                     });
                 });
                 assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
@@ -226,7 +226,7 @@ class DbManagerCounterTest extends DbTestTableTester {
                 tm.execute(setting4, tx4 -> {
                     if (tx4.getAttempt() < 2) {
                         var param4 = TgParameterList.of(bar.bind(333));
-                        ps.executeAndGetCount(tx4, param4);
+                        tx4.executeAndGetCount(ps, param4);
                     }
                 });
 

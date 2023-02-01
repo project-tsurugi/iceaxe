@@ -77,4 +77,9 @@ public class TsurugiConnector {
     protected Session createLowSession() {
         return new SessionImpl();
     }
+
+    @Override
+    public String toString() {
+        return "TsurugiConnector(" + endpoint + ")";
+    }
 }

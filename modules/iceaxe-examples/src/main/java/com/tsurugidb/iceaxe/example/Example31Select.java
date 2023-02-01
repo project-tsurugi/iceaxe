@@ -74,7 +74,7 @@ public class Example31Select {
     void selectAsList_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
-                return ps.executeAndGetList(transaction);
+                return transaction.executeAndGetList(ps);
             });
             System.out.println(list);
         }
@@ -82,9 +82,14 @@ public class Example31Select {
 
     void selectAsList_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createPreparedQuery("select * from TEST")) {
-            List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
+            List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             System.out.println(list);
         }
+    }
+
+    void selectAsList_execTmDirect(TsurugiTransactionManager tm) throws IOException {
+        List<TsurugiResultEntity> list = tm.executeAndGetList("select * from TEST");
+        System.out.println(list);
     }
 
     void selectAsUserEntityLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
@@ -162,8 +167,8 @@ public class Example31Select {
         var variable = TgVariableList.of().int4("foo").int8("bar");
         try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
-                var param = TgParameterList.of().add("foo", 123).add("bar", 456L);
-                try (var result = ps.execute(transaction, param)) {
+                var parameter = TgParameterList.of().add("foo", 123).add("bar", 456L);
+                try (var result = ps.execute(transaction, parameter)) {
                     return result.getRecordList();
                 }
             });
@@ -179,8 +184,8 @@ public class Example31Select {
         var variable = TgVariableList.of(foo, bar);
         try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
-                var param = TgParameterList.of(foo.bind(123), bar.bind(456));
-                try (var result = ps.execute(transaction, param)) {
+                var parameter = TgParameterList.of(foo.bind(123), bar.bind(456));
+                try (var result = ps.execute(transaction, parameter)) {
                     return result.getRecordList();
                 }
             });
@@ -197,8 +202,8 @@ public class Example31Select {
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
-                var param = TgParameterList.of(foo.bind(123), bar.bind(456));
-                try (var result = ps.execute(transaction, param)) {
+                var parameter = TgParameterList.of(foo.bind(123), bar.bind(456));
+                try (var result = ps.execute(transaction, parameter)) {
                     return result.getRecordList();
                 }
             });
@@ -215,8 +220,8 @@ public class Example31Select {
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
-                var param = TgParameterList.of(foo.bind(123), bar.bind(456));
-                return ps.executeAndGetList(transaction, param);
+                var parameter = TgParameterList.of(foo.bind(123), bar.bind(456));
+                return transaction.executeAndGetList(ps, parameter);
             });
             System.out.println(list);
         }
@@ -230,8 +235,8 @@ public class Example31Select {
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
-            var param = TgParameterList.of(foo.bind(123), bar.bind(456));
-            List<TestEntity> list = ps.executeAndGetList(tm, param);
+            var parameter = TgParameterList.of(foo.bind(123), bar.bind(456));
+            List<TestEntity> list = tm.executeAndGetList(ps, parameter);
             System.out.println(list);
         }
     }

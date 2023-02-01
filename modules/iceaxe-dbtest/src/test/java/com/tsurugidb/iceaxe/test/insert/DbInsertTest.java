@@ -47,7 +47,7 @@ class DbInsertTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = ps.executeAndGetCount(tm);
+            int count = tm.executeAndGetCount(ps);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -75,7 +75,7 @@ class DbInsertTest extends DbTestTableTester {
                     .int4("foo", entity.getFoo()) //
                     .int8("bar", entity.getBar()) //
                     .character("zzz", entity.getZzz());
-            int count = ps.executeAndGetCount(tm, plist);
+            int count = tm.executeAndGetCount(ps, plist);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -103,7 +103,7 @@ class DbInsertTest extends DbTestTableTester {
                     foo.bind(entity.getFoo()), //
                     bar.bind(entity.getBar()), //
                     zzz.bind(entity.getZzz()));
-            int count = ps.executeAndGetCount(tm, plist);
+            int count = tm.executeAndGetCount(ps, plist);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -126,7 +126,7 @@ class DbInsertTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            int count = ps.executeAndGetCount(tm, entity);
+            int count = tm.executeAndGetCount(ps, entity);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -152,7 +152,7 @@ class DbInsertTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 for (var entity : entityList) {
-                    int count = ps.executeAndGetCount(transaction, entity);
+                    int count = transaction.executeAndGetCount(ps, entity);
                     assertEquals(-1, count); // TODO 1
                 }
             });
@@ -209,7 +209,7 @@ class DbInsertTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             var parameter = TgParameterList.of(foo.bind(key));
-            int count = ps.executeAndGetCount(tm, parameter);
+            int count = tm.executeAndGetCount(ps, parameter);
             assertEquals(-1, count); // TODO 1
         }
 

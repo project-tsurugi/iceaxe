@@ -56,7 +56,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL, mapping)) {
             var parameter = TgParameterList.of(variable.bind(value));
-            int count = ps.executeAndGetCount(tm, parameter);
+            int count = tm.executeAndGetCount(ps, parameter);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -75,7 +75,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL, mapping)) {
             var parameter = TgParameterList.of(variable.bind(value));
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> ps.executeAndGetCount(tm, parameter));
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> tm.executeAndGetCount(ps, parameter));
             assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
             String expected = "ERR_EXPRESSION_EVALUATION_FAILURE: SQL--0017: . attempt=0, option=OCC{}";
             assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
@@ -93,7 +93,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(SQL, mapping)) {
             var parameter = TgParameterList.of(variable.bind(value));
-            int count = ps.executeAndGetCount(tm, parameter);
+            int count = tm.executeAndGetCount(ps, parameter);
             assertEquals(-1, count); // TODO 1
         }
 
@@ -106,7 +106,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery("select value from " + TEST)) {
-            var entity = ps.executeAndFindRecord(tm).get();
+            var entity = tm.executeAndFindRecord(ps).get();
             return entity.getDecimal(VNAME);
         }
     }

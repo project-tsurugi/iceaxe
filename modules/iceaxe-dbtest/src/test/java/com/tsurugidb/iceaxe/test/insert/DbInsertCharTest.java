@@ -48,7 +48,7 @@ class DbInsertCharTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             var entity = new TestEntity(1, 1, null);
-            int count = ps.executeAndGetCount(tm, entity);
+            int count = tm.executeAndGetCount(ps, entity);
             assertEquals(-1, count); // TODO 1
 
             var actual = selectFromTest(entity.getFoo());
@@ -72,7 +72,7 @@ class DbInsertCharTest extends DbTestTableTester {
                 assert zzz.getBytes(StandardCharsets.UTF_8).length <= ZZZ_SIZE;
 
                 var entity = new TestEntity(++i, i, zzz);
-                int count = ps.executeAndGetCount(tm, entity);
+                int count = tm.executeAndGetCount(ps, entity);
                 assertEquals(-1, count); // TODO 1
 
                 var actual = selectFromTest(entity.getFoo());
@@ -97,7 +97,7 @@ class DbInsertCharTest extends DbTestTableTester {
 
                 var entity = new TestEntity(++i, i, zzz);
                 var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                    ps.executeAndGetCount(tm, entity);
+                    tm.executeAndGetCount(ps, entity);
                 });
                 assertEqualsCode(SqlServiceCode.ERR_TYPE_MISMATCH, e);
                 assertContains("SQL--0019: .", e.getMessage()); // TODO エラー詳細情報の確認
@@ -118,13 +118,13 @@ class DbInsertCharTest extends DbTestTableTester {
             for (int i = 1; i <= size; i++) {
                 var entity = new TestEntity(i, i, nulCharText(i));
 
-                int count = ps.executeAndGetCount(tm, entity);
+                int count = tm.executeAndGetCount(ps, entity);
                 assertEquals(-1, count); // TODO 1
             }
         }
 
         try (var ps = session.createPreparedQuery(SELECT_SQL + " order by zzz", SELECT_MAPPING)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(size, list.size());
             // int i = size;
             for (var entity : list) {

@@ -42,7 +42,7 @@ class DbSelectTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            List<TsurugiResultEntity> list = ps.executeAndGetList(tm);
+            List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             assertResultEntity(list);
         }
     }
@@ -70,7 +70,7 @@ class DbSelectTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            List<TestEntity> list = ps.executeAndGetList(tm);
+            List<TestEntity> list = tm.executeAndGetList(ps);
             assertTestEntity(list);
         }
     }
@@ -86,7 +86,7 @@ class DbSelectTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            List<TestEntity> list = ps.executeAndGetList(tm);
+            List<TestEntity> list = tm.executeAndGetList(ps);
             assertTestEntity(list);
         }
     }
@@ -109,7 +109,7 @@ class DbSelectTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            List<Integer> list = ps.executeAndGetList(tm);
+            List<Integer> list = tm.executeAndGetList(ps);
             assertColumn(list);
         }
     }

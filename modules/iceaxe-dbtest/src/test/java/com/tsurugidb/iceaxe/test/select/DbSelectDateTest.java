@@ -52,7 +52,7 @@ class DbSelectDateTest extends DbTestTableTester {
                 for (int i = 0; i < size; i++) {
                     var date = LocalDate.of(2022, 10, 1 + i);
                     var parameter = TgParameterList.of(variable.bind(date));
-                    ps.executeAndGetCount(transaction, parameter);
+                    transaction.executeAndGetCount(ps, parameter);
                 }
             });
         }
@@ -69,7 +69,7 @@ class DbSelectDateTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(sql, mapping)) {
             var date = LocalDate.of(2022, 10, 2);
             var parameter = TgParameterList.of(variable.bind(date));
-            var entity = ps.executeAndFindRecord(tm, parameter).get();
+            var entity = tm.executeAndFindRecord(ps, parameter).get();
             assertEquals(date, entity.getDate("value"));
         }
     }
@@ -85,7 +85,7 @@ class DbSelectDateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, mapping)) {
             var parameter = TgParameterList.of(start.bind(LocalDate.of(2022, 10, 2)), end.bind(LocalDate.of(2022, 10, 3)));
-            var list = ps.executeAndGetList(tm, parameter);
+            var list = tm.executeAndGetList(ps, parameter);
             assertEquals(2, list.size());
             assertEquals(LocalDate.of(2022, 10, 2), list.get(0).getDate("value"));
             assertEquals(LocalDate.of(2022, 10, 3), list.get(1).getDate("value"));

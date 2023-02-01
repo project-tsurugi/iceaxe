@@ -62,7 +62,7 @@ class DbSelectFewTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
-                Optional<TestEntity> entity = ps.executeAndFindRecord(tm);
+                Optional<TestEntity> entity = tm.executeAndFindRecord(ps);
                 assertEquals(expected, entity.get());
             }
         }
@@ -78,7 +78,7 @@ class DbSelectFewTest extends DbTestTableTester {
         try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < ATTEMPT_SIZE; i++) {
-                    Optional<TestEntity> entity = ps.executeAndFindRecord(transaction);
+                    Optional<TestEntity> entity = transaction.executeAndFindRecord(ps);
                     assertEquals(expected, entity.get());
                 }
             });

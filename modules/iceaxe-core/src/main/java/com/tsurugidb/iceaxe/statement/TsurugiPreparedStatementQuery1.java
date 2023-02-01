@@ -47,6 +47,7 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @return Result Set
      * @throws IOException
      * @throws TsurugiTransactionException
+     * @see TsurugiTransaction#executeQuery(TsurugiPreparedStatementQuery1, P)
      */
     public TsurugiResultSet<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
         checkClose();
@@ -70,10 +71,9 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @throws IOException
      * @throws TsurugiTransactionException
      */
+    @Deprecated(forRemoval = true)
     public Optional<R> executeAndFindRecord(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
-        try (var rs = execute(transaction, parameter)) {
-            return rs.findRecord();
-        }
+        return transaction.executeAndFindRecord(this, parameter);
     }
 
     /**
@@ -84,10 +84,9 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @return record
      * @throws IOException
      */
+    @Deprecated(forRemoval = true)
     public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, P parameter) throws IOException {
-        return tm.execute(transaction -> {
-            return executeAndFindRecord(transaction, parameter);
-        });
+        return tm.executeAndFindRecord(this, parameter);
     }
 
     /**
@@ -99,10 +98,9 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @return record
      * @throws IOException
      */
+    @Deprecated(forRemoval = true)
     public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException {
-        return tm.execute(setting, transaction -> {
-            return executeAndFindRecord(transaction, parameter);
-        });
+        return tm.executeAndFindRecord(setting, this, parameter);
     }
 
     /**
@@ -114,10 +112,9 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @throws IOException
      * @throws TsurugiTransactionException
      */
+    @Deprecated(forRemoval = true)
     public List<R> executeAndGetList(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
-        try (var rs = execute(transaction, parameter)) {
-            return rs.getRecordList();
-        }
+        return transaction.executeAndGetList(this, parameter);
     }
 
     /**
@@ -128,10 +125,9 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @return list of record
      * @throws IOException
      */
+    @Deprecated(forRemoval = true)
     public List<R> executeAndGetList(TsurugiTransactionManager tm, P parameter) throws IOException {
-        return tm.execute(transaction -> {
-            return executeAndGetList(transaction, parameter);
-        });
+        return tm.executeAndGetList(this, parameter);
     }
 
     /**
@@ -143,9 +139,8 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
      * @return list of record
      * @throws IOException
      */
+    @Deprecated(forRemoval = true)
     public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException {
-        return tm.execute(setting, transaction -> {
-            return executeAndGetList(transaction, parameter);
-        });
+        return tm.executeAndGetList(setting, this, parameter);
     }
 }

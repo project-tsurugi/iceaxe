@@ -48,7 +48,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                     tm.execute((TsurugiTransactionAction) transaction -> {
                         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                            ps.executeAndGetList(transaction);
+                            transaction.executeAndGetList(ps);
                         });
                         assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                         throw e;
@@ -89,7 +89,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                     tm.execute((TsurugiTransactionAction) transaction -> {
                         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                            ps.executeAndGetCount(transaction);
+                            transaction.executeAndGetCount(ps);
                         });
                         assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                         throw e;
@@ -113,7 +113,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var parameter = TgParameterList.of(foo.bind(1));
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-                    ps.executeAndGetList(transaction, parameter);
+                    transaction.executeAndGetList(ps, parameter);
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                 assertContains("table_not_found test", e.getMessage());
@@ -121,7 +121,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var parameter = TgParameterList.of(foo.bind(1));
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-                    ps.executeAndGetList(transaction, parameter);
+                    transaction.executeAndGetList(ps, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e.getCause());
@@ -162,14 +162,14 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-                    ps.executeAndGetCount(transaction, parameter);
+                    transaction.executeAndGetCount(ps, parameter);
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                 assertContains(expected, e.getMessage());
             });
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-                    ps.executeAndGetCount(transaction, parameter);
+                    transaction.executeAndGetCount(ps, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e.getCause());

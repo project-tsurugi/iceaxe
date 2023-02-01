@@ -70,7 +70,7 @@ class DbTransactionTest extends DbTestTableTester {
             assertSelect(SIZE, session, transaction);
 
             var entity = createTestEntity(SIZE);
-            ps.executeAndGetCount(transaction, entity);
+            transaction.executeAndGetCount(ps, entity);
 
             assertSelect(SIZE + 1, session, transaction);
 
@@ -89,7 +89,7 @@ class DbTransactionTest extends DbTestTableTester {
                 assertSelect(SIZE, session, transaction);
 
                 var entity = createTestEntity(SIZE);
-                ps.executeAndGetCount(transaction, entity);
+                transaction.executeAndGetCount(ps, entity);
 
                 assertSelect(SIZE + 1, session, transaction);
             });
@@ -106,7 +106,7 @@ class DbTransactionTest extends DbTestTableTester {
             assertSelect(SIZE, session, transaction);
 
             var entity = createTestEntity(SIZE);
-            ps.executeAndGetCount(transaction, entity);
+            transaction.executeAndGetCount(ps, entity);
 
             assertSelect(SIZE + 1, session, transaction);
 
@@ -126,7 +126,7 @@ class DbTransactionTest extends DbTestTableTester {
                     assertSelect(SIZE, session, transaction);
 
                     var entity = createTestEntity(SIZE);
-                    ps.executeAndGetCount(transaction, entity);
+                    transaction.executeAndGetCount(ps, entity);
 
                     assertSelect(SIZE + 1, session, transaction);
 
@@ -147,7 +147,7 @@ class DbTransactionTest extends DbTestTableTester {
                 assertSelect(SIZE, session, transaction);
 
                 var entity = createTestEntity(SIZE);
-                ps.executeAndGetCount(transaction, entity);
+                transaction.executeAndGetCount(ps, entity);
 
                 assertSelect(SIZE + 1, session, transaction);
 
@@ -160,7 +160,7 @@ class DbTransactionTest extends DbTestTableTester {
 
     private static void assertSelect(int expected, TsurugiSession session, TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         try (var ps = session.createPreparedQuery(SELECT_SQL)) {
-            var list = ps.executeAndGetList(transaction);
+            var list = transaction.executeAndGetList(ps);
             assertEquals(expected, list.size());
         }
     }

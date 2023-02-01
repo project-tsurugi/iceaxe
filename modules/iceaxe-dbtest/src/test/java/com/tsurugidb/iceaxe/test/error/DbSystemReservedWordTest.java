@@ -65,7 +65,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = ps.executeAndGetList(tm);
+            var list = tm.executeAndGetList(ps);
             assertEquals(size, list.size());
             int i = 0;
             for (var entity : list) {

@@ -49,7 +49,7 @@ class DbStatementCommentTest extends DbTestTableTester {
         var entity = createTestEntity(0);
         if (prepared) {
             try (var ps = session.createPreparedStatement(sql, INSERT_MAPPING)) {
-                int count = ps.executeAndGetCount(tm, entity);
+                int count = tm.executeAndGetCount(ps, entity);
                 assertEquals(-1, count); // TODO 1
             }
         } else {
@@ -57,7 +57,7 @@ class DbStatementCommentTest extends DbTestTableTester {
                     .replace(":bar", Long.toString(entity.getBar())) //
                     .replace(":zzz", "'" + entity.getZzz() + "'");
             try (var ps = session.createPreparedStatement(sqlr)) {
-                int count = ps.executeAndGetCount(tm);
+                int count = tm.executeAndGetCount(ps);
                 assertEquals(-1, count); // TODO 1
             }
         }

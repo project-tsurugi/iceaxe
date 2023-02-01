@@ -44,7 +44,7 @@ public class Example71In {
                 .int8(TestEntity::setBar) //
                 .character(TestEntity::setZzz);
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
-            var list = ps.executeAndGetList(tm, plist);
+            var list = tm.executeAndGetList(ps, plist);
             for (var entity : list) {
                 System.out.println(entity);
             }
