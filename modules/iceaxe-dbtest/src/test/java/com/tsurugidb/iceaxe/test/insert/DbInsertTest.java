@@ -48,7 +48,7 @@ class DbInsertTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         assertEqualsTestTable(entity);
@@ -76,7 +76,7 @@ class DbInsertTest extends DbTestTableTester {
                     .int8("bar", entity.getBar()) //
                     .character("zzz", entity.getZzz());
             int count = tm.executeAndGetCount(ps, plist);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         assertEqualsTestTable(entity);
@@ -104,7 +104,7 @@ class DbInsertTest extends DbTestTableTester {
                     bar.bind(entity.getBar()), //
                     zzz.bind(entity.getZzz()));
             int count = tm.executeAndGetCount(ps, plist);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         assertEqualsTestTable(entity);
@@ -127,7 +127,7 @@ class DbInsertTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             int count = tm.executeAndGetCount(ps, entity);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         assertEqualsTestTable(entity);
@@ -153,7 +153,7 @@ class DbInsertTest extends DbTestTableTester {
             tm.execute(transaction -> {
                 for (var entity : entityList) {
                     int count = transaction.executeAndGetCount(ps, entity);
-                    assertEquals(-1, count); // TODO 1
+                    assertUpdateCount(1, count);
                 }
             });
         }
@@ -184,7 +184,7 @@ class DbInsertTest extends DbTestTableTester {
                     if (resultCheck) {
                         try (var rc = ps.execute(transaction, entity)) {
                             var count = rc.getUpdateCount();
-                            assertEquals(-1, count); // TODO 1
+                            assertUpdateCount(1, count);
                         }
                     } else {
                         @SuppressWarnings("unused")
@@ -210,7 +210,7 @@ class DbInsertTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             var parameter = TgParameterList.of(foo.bind(key));
             int count = tm.executeAndGetCount(ps, parameter);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         var actual = selectFromTest(key);

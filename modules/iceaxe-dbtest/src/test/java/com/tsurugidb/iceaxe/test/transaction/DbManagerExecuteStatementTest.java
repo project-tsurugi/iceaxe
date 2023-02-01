@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +44,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
 
         int result = tm.executeAndGetCount(SQL);
 
-        assertEquals(-1, result); // TODO 1
+        assertUpdateCount(1, result);
         assertEqualsTestTable(SIZE + 1);
     }
 
@@ -58,7 +56,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
 
         int result = tm.executeAndGetCount(setting, SQL);
 
-        assertEquals(-1, result); // TODO 1
+        assertUpdateCount(1, result);
         assertEqualsTestTable(SIZE + 1);
     }
 
@@ -71,7 +69,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
 
         int result = tm.executeAndGetCount(INSERT_SQL, INSERT_MAPPING, entity);
 
-        assertEquals(-1, result); // TODO 1
+        assertUpdateCount(1, result);
         assertEqualsTestTable(SIZE + 1);
     }
 
@@ -85,7 +83,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
 
         int result = tm.executeAndGetCount(setting, INSERT_SQL, INSERT_MAPPING, entity);
 
-        assertEquals(-1, result); // TODO 1
+        assertUpdateCount(1, result);
         assertEqualsTestTable(SIZE + 1);
     }
 
@@ -97,7 +95,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(SQL)) {
             int result = tm.executeAndGetCount(ps);
 
-            assertEquals(-1, result); // TODO 1
+            assertUpdateCount(1, result);
         }
 
         assertEqualsTestTable(SIZE + 1);
@@ -112,7 +110,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(SQL)) {
             int result = tm.executeAndGetCount(setting, ps);
 
-            assertEquals(-1, result); // TODO 1
+            assertUpdateCount(1, result);
         }
 
         assertEqualsTestTable(SIZE + 1);
@@ -128,7 +126,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             int result = tm.executeAndGetCount(ps, entity);
 
-            assertEquals(-1, result); // TODO 1
+            assertUpdateCount(1, result);
         }
 
         assertEqualsTestTable(SIZE + 1);
@@ -145,7 +143,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             int result = tm.executeAndGetCount(setting, ps, entity);
 
-            assertEquals(-1, result); // TODO 1
+            assertUpdateCount(1, result);
         }
 
         assertEqualsTestTable(SIZE + 1);

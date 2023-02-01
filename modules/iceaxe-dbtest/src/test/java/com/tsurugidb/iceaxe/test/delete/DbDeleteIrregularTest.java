@@ -42,7 +42,7 @@ class DbDeleteIrregularTest extends DbTestTableTester {
             var rc = ps.execute(transaction);
             ps.close();
             int count = rc.getUpdateCount();
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
             rc.close();
         });
 

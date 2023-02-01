@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +40,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             try (var rc = transaction.executeStatement(ps)) {
-                assertEquals(-1, rc.getUpdateCount()); // TODO 1
+                assertUpdateCount(1, rc.getUpdateCount());
 
                 transaction.commit(TgCommitType.DEFAULT);
             }
@@ -58,7 +56,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             var entity = createTestEntity(SIZE);
             try (var rc = transaction.executeStatement(ps, entity)) {
-                assertEquals(-1, rc.getUpdateCount()); // TODO 1
+                assertUpdateCount(1, rc.getUpdateCount());
 
                 transaction.commit(TgCommitType.DEFAULT);
             }
@@ -79,7 +77,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             int result = transaction.executeAndGetCount(ps);
 
-            assertEquals(-1, result); // TODO 1
+            assertUpdateCount(1, result);
 
             transaction.commit(TgCommitType.DEFAULT);
         }
@@ -95,7 +93,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
             var entity = createTestEntity(SIZE);
             int result = transaction.executeAndGetCount(ps, entity);
 
-            assertEquals(-1, result); // TODO 1
+            assertUpdateCount(1, result);
 
             transaction.commit(TgCommitType.DEFAULT);
         }

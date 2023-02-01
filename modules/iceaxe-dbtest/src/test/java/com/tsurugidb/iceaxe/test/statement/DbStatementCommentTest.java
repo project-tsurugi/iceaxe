@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.test.statement;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -50,7 +48,7 @@ class DbStatementCommentTest extends DbTestTableTester {
         if (prepared) {
             try (var ps = session.createPreparedStatement(sql, INSERT_MAPPING)) {
                 int count = tm.executeAndGetCount(ps, entity);
-                assertEquals(-1, count); // TODO 1
+                assertUpdateCount(1, count);
             }
         } else {
             var sqlr = sql.replace(":foo", Integer.toString(entity.getFoo())) //
@@ -58,7 +56,7 @@ class DbStatementCommentTest extends DbTestTableTester {
                     .replace(":zzz", "'" + entity.getZzz() + "'");
             try (var ps = session.createPreparedStatement(sqlr)) {
                 int count = tm.executeAndGetCount(ps);
-                assertEquals(-1, count); // TODO 1
+                assertUpdateCount(1, count);
             }
         }
         assertEqualsTestTable(1);

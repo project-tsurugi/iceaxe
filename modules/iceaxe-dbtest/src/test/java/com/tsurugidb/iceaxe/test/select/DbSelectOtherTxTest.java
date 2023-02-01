@@ -123,7 +123,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
         try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
             var parameter = TgParameterList.of(bar.bind(value));
             int count = tx.executeAndGetCount(updatePs, parameter);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
             tx.commit(TgCommitType.DEFAULT);
         }
     }

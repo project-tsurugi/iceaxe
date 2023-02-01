@@ -170,7 +170,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         var list = selectAllFromTest();
@@ -194,7 +194,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count);
+            assertUpdateCount(1, count);
         }
 
         var list = selectAllFromTest();

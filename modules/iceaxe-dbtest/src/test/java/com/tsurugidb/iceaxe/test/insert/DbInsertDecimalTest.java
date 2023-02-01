@@ -57,7 +57,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(SQL, mapping)) {
             var parameter = TgParameterList.of(variable.bind(value));
             int count = tm.executeAndGetCount(ps, parameter);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         var actual = selectValue();
@@ -94,7 +94,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(SQL, mapping)) {
             var parameter = TgParameterList.of(variable.bind(value));
             int count = tm.executeAndGetCount(ps, parameter);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         var actual = selectValue();

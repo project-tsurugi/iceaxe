@@ -322,4 +322,8 @@ public class DbTestTableTester {
         }
         assertEquals(expectedRegexp, actual, "unmatched");
     }
+
+    protected static void assertUpdateCount(int expected, int actual) {
+        assertEquals(-1, actual); // TODO use expected (for updateCount)
+    }
 }

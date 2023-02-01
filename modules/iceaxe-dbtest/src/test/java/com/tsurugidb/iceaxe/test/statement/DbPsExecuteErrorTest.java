@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.statement;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
@@ -61,7 +60,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO 0?
+            assertUpdateCount(0, count); // TODO 0?
         }
     }
 

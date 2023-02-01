@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.insert;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             int count1 = tm.executeAndGetCount(ps, entity);
-            assertEquals(-1, count1); // TODO 1
+            assertUpdateCount(1, count1);
 
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetCount(ps, entity);
@@ -64,7 +63,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.execute((TsurugiTransactionAction) transaction -> {
                     int count1 = transaction.executeAndGetCount(ps, entity);
-                    assertEquals(-1, count1); // TODO 1
+                    assertUpdateCount(1, count1);
 
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         transaction.executeAndGetCount(ps, entity);
@@ -90,7 +89,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.execute(transaction -> {
                     int count1 = transaction.executeAndGetCount(ps, entity);
-                    assertEquals(-1, count1); // TODO 1
+                    assertUpdateCount(1, count1);
 
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         transaction.executeAndGetCount(ps, entity);
@@ -125,7 +124,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                 var r2 = ps.execute(transaction, entity);
                 try (r1; r2) {
                     int count1 = r1.getUpdateCount();
-                    assertEquals(-1, count1); // TODO 1
+                    assertUpdateCount(1, count1);
 
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         r2.getUpdateCount();
@@ -151,9 +150,9 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                 try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
                         var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
                     int count1 = tx1.executeAndGetCount(ps, entity);
-                    assertEquals(-1, count1); // TODO 1
+                    assertUpdateCount(1, count1);
                     int count2 = tx2.executeAndGetCount(ps, entity);
-                    assertEquals(-1, count2); // TODO 1
+                    assertUpdateCount(1, count2);
 
                     tx1.commit(TgCommitType.DEFAULT);
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
@@ -163,7 +162,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
 
                     try (var tx3 = session.createTransaction(TgTxOption.ofOCC())) {
                         int count3 = tx3.executeAndGetCount(ps, entity);
-                        assertEquals(-1, count3); // TODO 1
+                        assertUpdateCount(1, count3);
                         var e3 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             tx3.commit(TgCommitType.DEFAULT);
                         });
@@ -188,9 +187,9 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
                     var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
                 int count1 = tx1.executeAndGetCount(ps, entity);
-                assertEquals(-1, count1); // TODO 1
+                assertUpdateCount(1, count1);
                 int count2 = tx2.executeAndGetCount(ps, entity);
-                assertEquals(-1, count2); // TODO 1
+                assertUpdateCount(1, count2);
 
                 tx1.rollback();
                 tx2.commit(TgCommitType.DEFAULT);

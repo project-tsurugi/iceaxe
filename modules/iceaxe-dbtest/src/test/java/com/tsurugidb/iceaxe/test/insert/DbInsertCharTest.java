@@ -49,7 +49,7 @@ class DbInsertCharTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
             var entity = new TestEntity(1, 1, null);
             int count = tm.executeAndGetCount(ps, entity);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
 
             var actual = selectFromTest(entity.getFoo());
             assertEquals(entity, actual);
@@ -73,7 +73,7 @@ class DbInsertCharTest extends DbTestTableTester {
 
                 var entity = new TestEntity(++i, i, zzz);
                 int count = tm.executeAndGetCount(ps, entity);
-                assertEquals(-1, count); // TODO 1
+                assertUpdateCount(1, count);
 
                 var actual = selectFromTest(entity.getFoo());
                 assertEquals(entity.getFoo(), actual.getFoo());
@@ -119,7 +119,7 @@ class DbInsertCharTest extends DbTestTableTester {
                 var entity = new TestEntity(i, i, nulCharText(i));
 
                 int count = tm.executeAndGetCount(ps, entity);
-                assertEquals(-1, count); // TODO 1
+                assertUpdateCount(1, count);
             }
         }
 

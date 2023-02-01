@@ -82,7 +82,7 @@ class DbUpdate2Test extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO SIZE
+            assertUpdateCount(SIZE, count);
         }
 
         var selectSql = "select * from " + TEST + " order by pk";
@@ -112,7 +112,7 @@ class DbUpdate2Test extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO SIZE
+            assertUpdateCount(SIZE, count);
         }
 
         var selectSql = "select * from " + TEST + " order by pk";

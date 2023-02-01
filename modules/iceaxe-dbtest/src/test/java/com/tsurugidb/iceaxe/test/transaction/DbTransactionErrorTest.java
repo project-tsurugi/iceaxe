@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -49,7 +48,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(sql); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             int count = transaction.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
 
             // do not commit,rollback
         }

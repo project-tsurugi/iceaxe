@@ -44,7 +44,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO SIZE
+            assertUpdateCount(SIZE, count);
         }
 
         var list = selectAllFromTest();
@@ -66,7 +66,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO SIZE
+            assertUpdateCount(SIZE, count);
         }
 
         var list = selectAllFromTest();
@@ -89,7 +89,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO SIZE
+            assertUpdateCount(SIZE, count);
         }
 
         var list = selectAllFromTest();
@@ -119,7 +119,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO 0
+            assertUpdateCount(0, count);
         }
 
         assertEqualsTestTable(SIZE);
@@ -143,7 +143,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
             int count = tm.executeAndGetCount(ps, updateEntity);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
 
         var list = selectAllFromTest();
@@ -170,7 +170,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO SIZE
+            assertUpdateCount(SIZE, count);
         }
 
         var list = selectAllFromTest();
@@ -193,7 +193,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO SIZE
+            assertUpdateCount(SIZE, count);
         }
 
         var list = selectAllFromTest();
@@ -218,7 +218,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createPreparedStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertEquals(-1, count); // TODO SIZE
+            assertUpdateCount(SIZE, count);
         }
 
         assertEqualsTestTable(SIZE);
@@ -238,13 +238,13 @@ class DbUpdateTest extends DbTestTableTester {
             // insert
             try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
                 int count = tranasction.executeAndGetCount(ps, insertEntity);
-                assertEquals(-1, count); // TODO 1
+                assertUpdateCount(1, count);
             }
 
             // update
             try (var ps = session.createPreparedStatement(sql)) {
                 int count = tranasction.executeAndGetCount(ps);
-                assertEquals(-1, count); // TODO 1
+                assertUpdateCount(1, count);
             }
 
             // select
@@ -337,12 +337,12 @@ class DbUpdateTest extends DbTestTableTester {
                 {
                     var param = TgParameterList.of(bar.bind(101));
                     int count = tranasction.executeAndGetCount(ps, param);
-                    assertEquals(-1, count); // TODO 1
+                    assertUpdateCount(1, count);
                 }
                 {
                     var param = TgParameterList.of(bar.bind(102));
                     int count = tranasction.executeAndGetCount(ps, param);
-                    assertEquals(-1, count); // TODO 1
+                    assertUpdateCount(1, count);
                 }
             }
 

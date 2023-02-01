@@ -79,7 +79,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
             var parameter = TgParameterList.of(div.bind(divValue));
             if (expectedSuccess) {
                 int count = tm.executeAndGetCount(ps, parameter);
-                assertEquals(-1, count); // TODO 1
+                assertUpdateCount(1, count);
 
                 var actual = selectValue();
                 var expected = BigDecimal.ONE.divide(BigDecimal.valueOf(divValue), 2, RoundingMode.DOWN);
@@ -109,7 +109,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
         try (var ps = session.createPreparedStatement(SQL, mapping)) {
             var parameter = TgParameterList.of(variable.bind(value));
             int count = tm.executeAndGetCount(ps, parameter);
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
         }
     }
 

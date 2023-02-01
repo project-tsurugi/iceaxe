@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.test.insert;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +36,7 @@ class DbInsertIrregularTest extends DbTestTableTester {
             var rc = ps.execute(transaction);
             ps.close();
             int count = rc.getUpdateCount();
-            assertEquals(-1, count); // TODO 1
+            assertUpdateCount(1, count);
             rc.close();
         });
     }
