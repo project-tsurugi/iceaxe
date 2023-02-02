@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -77,10 +78,23 @@ class DbInsertDuplicateTest extends DbTestTableTester {
         test(TgTxOption.ofLTX(TEST, TEST2));
     }
 
+    // TODO remove this test case
+    // tateyama-serverでWAITING_CC_COMMITが発生して終わらなくなる
+    // デバッグビルド版のtateyama-server相手に実行すると顕著
+    @Test
+    @Disabled
+    void ltxWithoutTimeout() throws Exception {
+        test(TgTxOption.ofLTX(TEST, TEST2), new DbTestSessions(Long.MAX_VALUE, TimeUnit.NANOSECONDS));
+    }
+
     private void test(TgTxOption option) throws Exception {
+        test(option, new DbTestSessions());
+    }
+
+    private void test(TgTxOption option, DbTestSessions sessions) throws Exception {
         int onlineSize = 40;
 
-        try (var sessions = new DbTestSessions()) {
+        try (sessions) {
             var onlineList = new ArrayList<OnlineTask>(onlineSize);
             for (int i = 0; i < onlineSize; i++) {
                 var task = new OnlineTask(sessions.createSession(), option);

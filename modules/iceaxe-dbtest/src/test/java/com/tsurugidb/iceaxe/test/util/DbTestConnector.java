@@ -40,8 +40,12 @@ public class DbTestConnector {
     }
 
     public static TsurugiSession createSession() throws IOException {
+        return createSession(20, TimeUnit.SECONDS);
+    }
+
+    public static TsurugiSession createSession(long time, TimeUnit unit) throws IOException {
         var info = TgSessionInfo.of();
-        info.timeout(TgTimeoutKey.DEFAULT, 20, TimeUnit.SECONDS);
+        info.timeout(TgTimeoutKey.DEFAULT, time, unit);
 
         var connector = createConnector();
         return connector.createSession(info);
