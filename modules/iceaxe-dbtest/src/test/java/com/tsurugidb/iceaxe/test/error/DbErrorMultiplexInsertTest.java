@@ -36,52 +36,52 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
     }
 
     @Test
-    void isnertMultiCheck1() throws IOException, TsurugiTransactionException {
+    void insertMultiCheck1() throws IOException, TsurugiTransactionException {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
-            isnertMulti(1, ExecuteType.RESULT_CHECK);
+            insertMulti(1, ExecuteType.RESULT_CHECK);
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    void isnertMultiCheckN(int size) throws IOException, TsurugiTransactionException {
-        isnertMulti(size, ExecuteType.RESULT_CHECK);
+    void insertMultiCheckN(int size) throws IOException, TsurugiTransactionException {
+        insertMulti(size, ExecuteType.RESULT_CHECK);
     }
 
     @Test
-    void isnertMultiClose1() throws IOException, TsurugiTransactionException {
+    void insertMultiClose1() throws IOException, TsurugiTransactionException {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
-            isnertMulti(1, ExecuteType.CLOSE_ONLY);
+            insertMulti(1, ExecuteType.CLOSE_ONLY);
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    void isnertMultiCloseN(int size) throws IOException, TsurugiTransactionException {
-        isnertMulti(size, ExecuteType.CLOSE_ONLY);
+    void insertMultiCloseN(int size) throws IOException, TsurugiTransactionException {
+        insertMulti(size, ExecuteType.CLOSE_ONLY);
     }
 
     @Test
-    void isnertMulti1() throws IOException, TsurugiTransactionException {
+    void insertMulti1() throws IOException, TsurugiTransactionException {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
-            isnertMulti(1, ExecuteType.EXEUTE_ONLY);
+            insertMulti(1, ExecuteType.EXEUTE_ONLY);
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    void isnertMultiN(int size) throws IOException, TsurugiTransactionException {
-        isnertMulti(size, ExecuteType.EXEUTE_ONLY);
+    void insertMultiN(int size) throws IOException, TsurugiTransactionException {
+        insertMulti(size, ExecuteType.EXEUTE_ONLY);
     }
 
     private enum ExecuteType {
         RESULT_CHECK, CLOSE_ONLY, EXEUTE_ONLY
     }
 
-    private void isnertMulti(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
+    private void insertMulti(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
         int threshold = 255;
         try {
-            isnertMultiMain(size, type);
+            insertMultiMain(size, type);
         } catch (TsurugiIOException e) {
             if (size < threshold) {
                 throw e;
@@ -92,7 +92,7 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
         }
     }
 
-    private void isnertMultiMain(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
+    private void insertMultiMain(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
         try (var session = DbTestConnector.createSession()) {
             for (int i = 0; i < size; i++) {
                 var transaction = session.createTransaction(TgTxOption.ofOCC());
