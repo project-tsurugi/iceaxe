@@ -18,7 +18,7 @@ import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
+import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.sql.SqlClient;
@@ -65,7 +65,7 @@ public class DbTimeoutExplainConnectTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyPs(TsurugiPreparedStatementWithLowPs<?> ps) {
+            public void modifyPs(TsurugiSqlPrepared<?> ps) {
                 ps.setExplainConnectTimeout(1, TimeUnit.SECONDS);
             }
         });

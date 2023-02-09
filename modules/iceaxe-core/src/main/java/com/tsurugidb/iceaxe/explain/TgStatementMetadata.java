@@ -47,6 +47,15 @@ public class TgStatementMetadata {
     }
 
     /**
+     * get metadata contents.
+     *
+     * @return contents
+     */
+    public String getMetadataContents() {
+        return lowStatementMetadata.getContents();
+    }
+
+    /**
      * get column list.
      *
      * @return column list

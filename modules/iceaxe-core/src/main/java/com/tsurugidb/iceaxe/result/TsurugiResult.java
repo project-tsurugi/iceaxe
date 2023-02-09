@@ -8,7 +8,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 /**
- * Tsurugi Result for PreparedStatement
+ * Tsurugi SQL result
  */
 public abstract class TsurugiResult implements AutoCloseable {
 

@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionList;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionSupplier;
@@ -73,7 +75,7 @@ public class TgTmSetting {
     private TgTimeValue beginTimeout;
     private TgTimeValue commitTimeout;
     private TgTimeValue rollbackTimeout;
-    private final List<TgTmEventListener> eventListenerList = new ArrayList<>();
+    private List<TsurugiTmEventListener> eventListenerList = null;
 
     /**
      * Tsurugi Transaction Manager Settings
@@ -327,7 +329,10 @@ public class TgTmSetting {
      * @param listener event listener
      * @return this
      */
-    public TgTmSetting addEventListener(TgTmEventListener listener) {
+    public TgTmSetting addEventListener(TsurugiTmEventListener listener) {
+        if (this.eventListenerList == null) {
+            this.eventListenerList = new ArrayList<>();
+        }
         eventListenerList.add(listener);
         return this;
     }
@@ -337,7 +342,7 @@ public class TgTmSetting {
      *
      * @return event listener
      */
-    public List<TgTmEventListener> getEventListener() {
+    public @Nullable List<TsurugiTmEventListener> getEventListener() {
         return this.eventListenerList;
     }
 

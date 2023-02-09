@@ -1,13 +1,17 @@
 package com.tsurugidb.iceaxe.result;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.result.event.TsurugiResultCountEventListener;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -26,6 +30,7 @@ public class TsurugiResultCount extends TsurugiResult {
     private FutureResponse<Void> lowResultFuture;
     private final IceaxeTimeout checkTimeout;
     private final IceaxeTimeout closeTimeout;
+    private List<TsurugiResultCountEventListener> eventListenerList = null;
 
     // internal
     public TsurugiResultCount(TsurugiTransaction transaction, FutureResponse<Void> lowResultFuture) throws IOException {
@@ -82,14 +87,50 @@ public class TsurugiResultCount extends TsurugiResult {
         applyCloseTimeout();
     }
 
+    /**
+     * add event listener
+     *
+     * @param listener event listener
+     * @return this
+     */
+    public TsurugiResult addEventListener(TsurugiResultCountEventListener listener) {
+        if (this.eventListenerList == null) {
+            this.eventListenerList = new ArrayList<>();
+        }
+        eventListenerList.add(listener);
+        return this;
+    }
+
+    private void event(Throwable occurred, Consumer<TsurugiResultCountEventListener> action) {
+        if (this.eventListenerList != null) {
+            try {
+                for (var listener : eventListenerList) {
+                    action.accept(listener);
+                }
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    e.addSuppressed(occurred);
+                }
+                throw e;
+            }
+        }
+    }
+
     protected final synchronized void checkLowResult() throws IOException, TsurugiTransactionException {
         if (this.lowResultFuture != null) {
             LOG.trace("lowResult get start");
+            Throwable occurred = null;
             try {
                 IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout);
+            } catch (Throwable e) {
+                occurred = e;
+                throw e;
             } finally {
                 this.lowResultFuture = null;
                 applyCloseTimeout();
+
+                var finalOccurred = occurred;
+                event(occurred, listener -> listener.endResult(this, finalOccurred));
             }
             LOG.trace("lowResult get end");
         }
@@ -130,8 +171,12 @@ public class TsurugiResultCount extends TsurugiResult {
                 if (occurred != null) {
                     occurred.addSuppressed(e);
                 } else {
+                    occurred = e;
                     throw e;
                 }
+            } finally {
+                var finalOccurred = occurred;
+                event(occurred, listener -> listener.closeResult(this, finalOccurred));
             }
         }
 

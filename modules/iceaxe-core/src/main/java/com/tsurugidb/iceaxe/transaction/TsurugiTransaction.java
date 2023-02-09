@@ -26,6 +26,7 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
@@ -51,15 +52,14 @@ public class TsurugiTransaction implements Closeable {
     private Transaction lowTransaction;
     private boolean calledGetLowTransaction = false;
     private final TgTxOption txOption;
-    private TsurugiTransactionManager txManager = null;
-    private int attempt = 0;
+    private TsurugiTransactionManager ownerTm = null;
+    private int tmExecuteId = 0;
+    private int tmAttempt = 0;
     private final IceaxeTimeout beginTimeout;
     private final IceaxeTimeout commitTimeout;
     private final IceaxeTimeout rollbackTimeout;
     private final IceaxeTimeout closeTimeout;
-    private List<Consumer<TsurugiTransaction>> beforeCommitListenerList;
-    private List<Consumer<TsurugiTransaction>> commitListenerList;
-    private List<Consumer<TsurugiTransaction>> rollbackListenerList;
+    private List<TsurugiTransactionEventListener> eventListenerList = null;
     private boolean committed = false;
     private boolean rollbacked = false;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
@@ -109,12 +109,14 @@ public class TsurugiTransaction implements Closeable {
     /**
      * set owner information.
      *
-     * @param tm      owner transaction manager
-     * @param attempt attempt number
+     * @param tm        owner transaction manager
+     * @param executeId execute id
+     * @param attempt   attempt number
      */
-    public void setOwner(TsurugiTransactionManager tm, int attempt) {
-        this.txManager = tm;
-        this.attempt = attempt;
+    public void setOwner(TsurugiTransactionManager tm, int executeId, int attempt) {
+        this.ownerTm = tm;
+        this.tmExecuteId = executeId;
+        this.tmAttempt = attempt;
     }
 
     /**
@@ -124,7 +126,16 @@ public class TsurugiTransaction implements Closeable {
      */
     @Nullable
     public TsurugiTransactionManager getTransactionManager() {
-        return this.txManager;
+        return this.ownerTm;
+    }
+
+    /**
+     * get execute id.
+     *
+     * @return execute id, 0 if this transaction is not created by transaction manager
+     */
+    public int getExecuteId() {
+        return this.tmExecuteId;
     }
 
     /**
@@ -133,7 +144,7 @@ public class TsurugiTransaction implements Closeable {
      * @return attempt number, 0 if this transaction is not created by transaction manager
      */
     public int getAttempt() {
-        return this.attempt;
+        return this.tmAttempt;
     }
 
     /**
@@ -214,6 +225,35 @@ public class TsurugiTransaction implements Closeable {
         applyCloseTimeout();
     }
 
+    /**
+     * add event listener
+     *
+     * @param listener event listener
+     * @return this
+     */
+    public TsurugiTransaction addEventListener(TsurugiTransactionEventListener listener) {
+        if (this.eventListenerList == null) {
+            this.eventListenerList = new ArrayList<>();
+        }
+        eventListenerList.add(listener);
+        return this;
+    }
+
+    private void event(Throwable occurred, Consumer<TsurugiTransactionEventListener> action) {
+        if (this.eventListenerList != null) {
+            try {
+                for (var listener : eventListenerList) {
+                    action.accept(listener);
+                }
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    e.addSuppressed(occurred);
+                }
+                throw e;
+            }
+        }
+    }
+
     // internal
     public final TgSessionInfo getSessionInfo() {
         return ownerSession.getSessionInfo();
@@ -239,6 +279,8 @@ public class TsurugiTransaction implements Closeable {
 
             this.lowTransactionFuture = null;
             applyCloseTimeout();
+
+            event(null, listener -> listener.gotTransactionId(this, lowTransaction.getTransactionId()));
         }
         return this.lowTransaction;
     }
@@ -282,7 +324,17 @@ public class TsurugiTransaction implements Closeable {
      * @see #executeAndGetList(TsurugiPreparedStatementQuery0)
      */
     public <R> TsurugiResultSet<R> executeQuery(TsurugiPreparedStatementQuery0<R> ps) throws IOException, TsurugiTransactionException {
-        return ps.execute(this);
+        event(null, listener -> listener.executeStart(this, ps, null));
+        Throwable occurred = null;
+        try {
+            return ps.execute(this);
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, null, finalOccurred));
+        }
     }
 
     /**
@@ -300,7 +352,17 @@ public class TsurugiTransaction implements Closeable {
      * @see #executeAndGetList(TsurugiPreparedStatementQuery1, P)
      */
     public <P, R> TsurugiResultSet<R> executeQuery(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
-        return ps.execute(this, parameter);
+        event(null, listener -> listener.executeStart(this, ps, parameter));
+        Throwable occurred = null;
+        try {
+            return ps.execute(this, parameter);
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, parameter, finalOccurred));
+        }
     }
 
     /**
@@ -313,7 +375,17 @@ public class TsurugiTransaction implements Closeable {
      * @see #executeAndGetCount(TsurugiPreparedStatementUpdate0)
      */
     public TsurugiResultCount executeStatement(TsurugiPreparedStatementUpdate0 ps) throws IOException, TsurugiTransactionException {
-        return ps.execute(this);
+        event(null, listener -> listener.executeStart(this, ps, null));
+        Throwable occurred = null;
+        try {
+            return ps.execute(this);
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, null, finalOccurred));
+        }
     }
 
     /**
@@ -328,7 +400,17 @@ public class TsurugiTransaction implements Closeable {
      * @see #executeAndGetCount(TsurugiPreparedStatementUpdate1, P)
      */
     public <P> TsurugiResultCount executeStatement(TsurugiPreparedStatementUpdate1<P> ps, P parameter) throws IOException, TsurugiTransactionException {
-        return ps.execute(this, parameter);
+        event(null, listener -> listener.executeStart(this, ps, parameter));
+        Throwable occurred = null;
+        try {
+            return ps.execute(this, parameter);
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, parameter, finalOccurred));
+        }
     }
 
     /**
@@ -342,15 +424,25 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public <R> void executeForEach(TsurugiPreparedStatementQuery0<R> ps, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+        event(null, listener -> listener.executeStart(this, ps, null));
+        Throwable occurred = null;
         try (var rs = ps.execute(this)) {
             for (var i = rs.iterator(); i.hasNext();) {
                 R record = i.next();
                 action.accept(record);
             }
         } catch (UncheckedIOException e) {
+            occurred = e;
             throw e.getCause();
         } catch (TsurugiTransactionRuntimeException e) {
+            occurred = e;
             throw e.getCause();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, null, finalOccurred));
         }
     }
 
@@ -366,15 +458,25 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public <P, R> void executeForEach(TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+        event(null, listener -> listener.executeStart(this, ps, parameter));
+        Throwable occurred = null;
         try (var rs = ps.execute(this, parameter)) {
             for (var i = rs.iterator(); i.hasNext();) {
                 R record = i.next();
                 action.accept(record);
             }
         } catch (UncheckedIOException e) {
+            occurred = e;
             throw e.getCause();
         } catch (TsurugiTransactionRuntimeException e) {
+            occurred = e;
             throw e.getCause();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, parameter, finalOccurred));
         }
     }
 
@@ -388,8 +490,16 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public <R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery0<R> ps) throws IOException, TsurugiTransactionException {
+        event(null, listener -> listener.executeStart(this, ps, null));
+        Throwable occurred = null;
         try (var rs = ps.execute(this)) {
             return rs.findRecord();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, null, finalOccurred));
         }
     }
 
@@ -405,8 +515,16 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public <P, R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+        event(null, listener -> listener.executeStart(this, ps, parameter));
+        Throwable occurred = null;
         try (var rs = ps.execute(this, parameter)) {
             return rs.findRecord();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, parameter, finalOccurred));
         }
     }
 
@@ -420,8 +538,16 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public <R> List<R> executeAndGetList(TsurugiPreparedStatementQuery0<R> ps) throws IOException, TsurugiTransactionException {
+        event(null, listener -> listener.executeStart(this, ps, null));
+        Throwable occurred = null;
         try (var rs = ps.execute(this)) {
             return rs.getRecordList();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, null, finalOccurred));
         }
     }
 
@@ -437,8 +563,16 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public <P, R> List<R> executeAndGetList(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+        event(null, listener -> listener.executeStart(this, ps, parameter));
+        Throwable occurred = null;
         try (var rs = ps.execute(this, parameter)) {
             return rs.getRecordList();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, parameter, finalOccurred));
         }
     }
 
@@ -451,8 +585,16 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public int executeAndGetCount(TsurugiPreparedStatementUpdate0 ps) throws IOException, TsurugiTransactionException {
+        event(null, listener -> listener.executeStart(this, ps, null));
+        Throwable occurred = null;
         try (var rc = ps.execute(this)) {
             return rc.getUpdateCount();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, null, finalOccurred));
         }
     }
 
@@ -467,8 +609,16 @@ public class TsurugiTransaction implements Closeable {
      * @throws TsurugiTransactionException
      */
     public <P> int executeAndGetCount(TsurugiPreparedStatementUpdate1<P> ps, P parameter) throws IOException, TsurugiTransactionException {
+        event(null, listener -> listener.executeStart(this, ps, parameter));
+        Throwable occurred = null;
         try (var rc = ps.execute(this, parameter)) {
             return rc.getUpdateCount();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, ps, parameter, finalOccurred));
         }
     }
 
@@ -491,11 +641,14 @@ public class TsurugiTransaction implements Closeable {
      *
      * @param listener listener
      */
+    @Deprecated(forRemoval = true)
     public void addBeforeCommitListener(Consumer<TsurugiTransaction> listener) {
-        if (this.beforeCommitListenerList == null) {
-            this.beforeCommitListenerList = new ArrayList<>();
-        }
-        beforeCommitListenerList.add(listener);
+        addEventListener(new TsurugiTransactionEventListener() {
+            @Override
+            public void commitStart(TsurugiTransaction transaction, TgCommitType commitType) {
+                listener.accept(transaction);
+            }
+        });
     }
 
     /**
@@ -503,11 +656,16 @@ public class TsurugiTransaction implements Closeable {
      *
      * @param listener listener
      */
+    @Deprecated(forRemoval = true)
     public void addCommitListener(Consumer<TsurugiTransaction> listener) {
-        if (this.commitListenerList == null) {
-            this.commitListenerList = new ArrayList<>();
-        }
-        commitListenerList.add(listener);
+        addEventListener(new TsurugiTransactionEventListener() {
+            @Override
+            public void commitEnd(TsurugiTransaction transaction, TgCommitType commitType, Throwable occurred) {
+                if (occurred == null) {
+                    listener.accept(transaction);
+                }
+            }
+        });
     }
 
     /**
@@ -515,11 +673,16 @@ public class TsurugiTransaction implements Closeable {
      *
      * @param listener listener
      */
+    @Deprecated(forRemoval = true)
     public void addRollbackListener(Consumer<TsurugiTransaction> listener) {
-        if (this.rollbackListenerList == null) {
-            this.rollbackListenerList = new ArrayList<>();
-        }
-        rollbackListenerList.add(listener);
+        addEventListener(new TsurugiTransactionEventListener() {
+            @Override
+            public void rollbackEnd(TsurugiTransaction transaction, Throwable occurred) {
+                if (occurred == null) {
+                    listener.accept(transaction);
+                }
+            }
+        });
     }
 
     /**
@@ -556,23 +719,23 @@ public class TsurugiTransaction implements Closeable {
         }
 
         LOG.trace("transaction commit start. commitType={}", commitType);
-        if (beforeCommitListenerList != null) {
-            for (var listener : beforeCommitListenerList) {
-                listener.accept(this);
-            }
+        event(null, listener -> listener.commitStart(this, commitType));
+
+        Throwable occurred = null;
+        try {
+            closeableSet.closeInTransaction();
+            var lowCommitStatus = commitType.getLowCommitStatus();
+            finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout);
+            this.committed = true;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.commitEnd(this, commitType, finalOccurred));
         }
 
-        closeableSet.closeInTransaction();
-        var lowCommitStatus = commitType.getLowCommitStatus();
-        finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout);
         LOG.trace("transaction commit end");
-        this.committed = true;
-
-        if (commitListenerList != null) {
-            for (var listener : commitListenerList) {
-                listener.accept(this);
-            }
-        }
     }
 
     /**
@@ -588,16 +751,22 @@ public class TsurugiTransaction implements Closeable {
         }
 
         LOG.trace("transaction rollback start");
-        closeableSet.closeInTransaction();
-        finish(Transaction::rollback, rollbackTimeout);
-        LOG.trace("transaction rollback end");
-        this.rollbacked = true;
+        event(null, listener -> listener.rollbackStart(this));
 
-        if (rollbackListenerList != null) {
-            for (var listener : rollbackListenerList) {
-                listener.accept(this);
-            }
+        Throwable occurred = null;
+        try {
+            closeableSet.closeInTransaction();
+            finish(Transaction::rollback, rollbackTimeout);
+            this.rollbacked = true;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.rollbackEnd(this, finalOccurred));
         }
+
+        LOG.trace("transaction rollback end");
     }
 
     protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
@@ -647,11 +816,20 @@ public class TsurugiTransaction implements Closeable {
         if (LOG.isTraceEnabled()) {
             LOG.trace("transaction close start. committed={}, rollbacked={}", committed, rollbacked);
         }
-        IceaxeIoUtil.close(closeableSet, () -> {
-            // not try-finally
-            IceaxeIoUtil.close(lowTransaction, lowTransactionFuture);
-            ownerSession.removeChild(this);
-        });
+        Throwable occurred = null;
+        try {
+            IceaxeIoUtil.close(closeableSet, () -> {
+                // not try-finally
+                IceaxeIoUtil.close(lowTransaction, lowTransactionFuture);
+                ownerSession.removeChild(this);
+            });
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.closeTransaction(this, finalOccurred));
+        }
         LOG.trace("transaction close end");
     }
 
@@ -669,5 +847,10 @@ public class TsurugiTransaction implements Closeable {
         if (isClosed()) {
             throw new TsurugiIOException(IceaxeErrorCode.TX_ALREADY_CLOSED);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "TsurugiTransaction(" + txOption + ", executeId=" + tmExecuteId + ", attempt=" + tmAttempt + ")";
     }
 }

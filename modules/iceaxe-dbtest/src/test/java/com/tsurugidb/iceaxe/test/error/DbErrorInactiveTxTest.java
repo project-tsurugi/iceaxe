@@ -27,7 +27,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
-import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -172,7 +172,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
             try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
                 var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
                 var tm = session.createTransactionManager(setting);
-                tm.addEventListener(new TgTmEventListener() {
+                tm.addEventListener(new TsurugiTmEventListener() {
                     @Override
                     public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextOption) {
 //                      LOG.info("OCC retry: " + cause.getMessage());

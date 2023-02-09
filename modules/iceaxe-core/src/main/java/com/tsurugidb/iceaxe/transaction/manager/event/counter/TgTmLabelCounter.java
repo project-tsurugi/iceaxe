@@ -6,44 +6,57 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
-import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * {@link TsurugiTransactionManager} label counter
  */
 @ThreadSafe
-public class TgTmLabelCounter extends TgTmEventListener {
+public class TgTmLabelCounter implements TsurugiTmEventListener {
 
     private final Map<String, TgTmCountAtomic> counter = new ConcurrentHashMap<>();
 
     @Override
-    public void executeStart(TgTxOption option) {
+    public void executeStart(TsurugiTransactionManager tm, int executeId, TgTxOption option) {
         String label = label(option);
         getOrCreate(label).incrementExecuteCount();
     }
 
     @Override
-    public void transactionBefore(int attempt, TgTxOption option) {
+    public void transactionStart(TsurugiTransactionManager tm, int executeId, int attempt, TgTxOption option) {
         String label = label(option);
         getOrCreate(label).incrementTransactionCount();
     }
 
     @Override
-    public void transactionCreated(TsurugiTransaction transaction) {
-        transaction.addBeforeCommitListener(tx -> {
-            String label = label(tx);
-            getOrCreate(label).incrementBeforeCommitCount();
-        });
-        transaction.addCommitListener(tx -> {
-            String label = label(tx);
-            getOrCreate(label).incrementCommitCount();
-        });
-        transaction.addRollbackListener(tx -> {
-            String label = label(tx);
-            getOrCreate(label).incrementRollbackCount();
+    public void transactionStarted(TsurugiTransaction transaction) {
+        transaction.addEventListener(new TsurugiTransactionEventListener() {
+            @Override
+            public void commitStart(TsurugiTransaction transaction, TgCommitType commitType) {
+                String label = label(transaction);
+                getOrCreate(label).incrementBeforeCommitCount();
+            }
+
+            @Override
+            public void commitEnd(TsurugiTransaction transaction, TgCommitType commitType, Throwable occurred) {
+                if (occurred == null) {
+                    String label = label(transaction);
+                    getOrCreate(label).incrementCommitCount();
+                }
+            }
+
+            @Override
+            public void rollbackEnd(TsurugiTransaction transaction, Throwable occurred) {
+                if (occurred == null) {
+                    String label = label(transaction);
+                    getOrCreate(label).incrementRollbackCount();
+                }
+            }
         });
     }
 
@@ -76,7 +89,7 @@ public class TgTmLabelCounter extends TgTmEventListener {
     }
 
     @Override
-    public void executeEndFail(TgTxOption option, TsurugiTransaction transaction, Throwable e) {
+    public void executeEndFail(TsurugiTransactionManager tm, int executeId, TgTxOption option, TsurugiTransaction transaction, Throwable e) {
         String label;
         if (transaction != null) {
             label = label(transaction);

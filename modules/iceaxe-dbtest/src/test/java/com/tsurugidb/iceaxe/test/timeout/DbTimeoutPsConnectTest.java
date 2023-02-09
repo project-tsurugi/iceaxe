@@ -14,7 +14,7 @@ import org.junit.jupiter.api.TestInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
+import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -56,7 +56,7 @@ public class DbTimeoutPsConnectTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyPs(TsurugiPreparedStatementWithLowPs<?> ps) {
+            public void modifyPs(TsurugiSqlPrepared<?> ps) {
                 ps.setConnectTimeout(1, TimeUnit.SECONDS);
             }
         });

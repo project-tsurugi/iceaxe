@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -16,11 +17,11 @@ import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatement;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.statement.TsurugiSql;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
@@ -28,7 +29,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOE
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionTask;
-import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
@@ -42,9 +43,11 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 public class TsurugiTransactionManager {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransactionManager.class);
 
+    private static final AtomicInteger EXECUTE_COUNT = new AtomicInteger(0);
+
     private final TsurugiSession ownerSession;
     private final TgTmSetting defaultSetting;
-    private final List<TgTmEventListener> eventListenerList = new ArrayList<>();
+    private List<TsurugiTmEventListener> eventListenerList = null;
 
     // internal
     public TsurugiTransactionManager(TsurugiSession session, TgTmSetting defaultSetting) {
@@ -75,9 +78,33 @@ public class TsurugiTransactionManager {
      * @param listener event listener
      * @return this
      */
-    public TsurugiTransactionManager addEventListener(TgTmEventListener listener) {
+    public TsurugiTransactionManager addEventListener(TsurugiTmEventListener listener) {
+        if (this.eventListenerList == null) {
+            this.eventListenerList = new ArrayList<>();
+        }
         eventListenerList.add(listener);
         return this;
+    }
+
+    private void event(TgTmSetting setting, Throwable occurred, Consumer<TsurugiTmEventListener> action) {
+        try {
+            if (this.eventListenerList != null) {
+                for (var listener : eventListenerList) {
+                    action.accept(listener);
+                }
+            }
+            var settingListener = setting.getEventListener();
+            if (settingListener != null) {
+                for (var listener : settingListener) {
+                    action.accept(listener);
+                }
+            }
+        } catch (Throwable e) {
+            if (occurred != null) {
+                e.addSuppressed(occurred);
+            }
+            throw e;
+        }
     }
 
     /**
@@ -85,7 +112,7 @@ public class TsurugiTransactionManager {
      *
      * @param action action
      * @throws IOException
-     * @see TsurugiPreparedStatement
+     * @see TsurugiSql
      */
     public void execute(TsurugiTransactionAction action) throws IOException {
         execute(defaultSetting(), action);
@@ -97,7 +124,7 @@ public class TsurugiTransactionManager {
      * @param setting transaction manager settings
      * @param action  action
      * @throws IOException
-     * @see TsurugiPreparedStatement
+     * @see TsurugiSql
      */
     public void execute(TgTmSetting setting, TsurugiTransactionAction action) throws IOException {
         if (action == null) {
@@ -116,7 +143,7 @@ public class TsurugiTransactionManager {
      * @param action action
      * @return return value (null if transaction is rollbacked)
      * @throws IOException
-     * @see TsurugiPreparedStatement
+     * @see TsurugiSql
      */
     public <R> R execute(TsurugiTransactionTask<R> action) throws IOException {
         return execute(defaultSetting(), action);
@@ -130,7 +157,7 @@ public class TsurugiTransactionManager {
      * @param action  action
      * @return return value (null if transaction is rollbacked)
      * @throws IOException
-     * @see TsurugiPreparedStatement
+     * @see TsurugiSql
      */
     public <R> R execute(TgTmSetting setting, TsurugiTransactionTask<R> action) throws IOException {
         LOG.trace("tm.execute start");
@@ -141,25 +168,29 @@ public class TsurugiTransactionManager {
             throw new IllegalArgumentException("action is not specified");
         }
 
+        final int executeId = EXECUTE_COUNT.incrementAndGet();
+
         var option = setting.getFirstTransactionOption();
         {
             var finalOption = option;
-            event(setting, null, listener -> listener.executeStart(finalOption));
+            event(setting, null, listener -> listener.executeStart(this, executeId, finalOption));
         }
         for (int attempt = 0;; attempt++) {
-            LOG.trace("tm.execute attempt={}, tx={}", attempt, option);
-            {
-                int finalAttempt = attempt;
-                var finalOption = option;
-                event(setting, null, listener -> listener.transactionBefore(finalAttempt, finalOption));
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("tm.execute executeId={}, attempt={}, tx={}", executeId, attempt, option);
             }
 
+            final int finalAttempt = attempt;
+            final var finalOption = option;
+            event(setting, null, listener -> listener.transactionStart(this, executeId, finalAttempt, finalOption));
+
             TsurugiTransaction lastTransaction = null;
-            try (var transaction = ownerSession.createTransaction(option)) {
+            try (var transaction = ownerSession.createTransaction(option, tx -> {
+                tx.setOwner(this, executeId, finalAttempt);
+                setting.initializeTransaction(tx);
+            })) {
                 lastTransaction = transaction;
-                transaction.setOwner(this, attempt);
-                setting.initializeTransaction(transaction);
-                event(setting, null, listener -> listener.transactionCreated(transaction));
+                event(setting, null, listener -> listener.transactionStarted(transaction));
 
                 try {
                     R r = action.run(transaction);
@@ -201,9 +232,8 @@ public class TsurugiTransactionManager {
                 }
             } catch (Throwable e) {
                 {
-                    var finalOption = option;
                     var finalTransaction = lastTransaction;
-                    event(setting, e, listener -> listener.executeEndFail(finalOption, finalTransaction, e));
+                    event(setting, e, listener -> listener.executeEndFail(this, executeId, finalOption, finalTransaction, e));
                 }
                 throw e;
             }
@@ -280,22 +310,6 @@ public class TsurugiTransactionManager {
             } else {
                 throw new IOException(e.getMessage(), e);
             }
-        }
-    }
-
-    private void event(TgTmSetting setting, Throwable occurred, Consumer<TgTmEventListener> action) {
-        try {
-            for (var listener : eventListenerList) {
-                action.accept(listener);
-            }
-            for (var listener : setting.getEventListener()) {
-                action.accept(listener);
-            }
-        } catch (Throwable e) {
-            if (occurred != null) {
-                e.addSuppressed(occurred);
-            }
-            throw e;
         }
     }
 

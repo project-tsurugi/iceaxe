@@ -20,11 +20,11 @@ import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi PreparedStatement with Low-PreparedStatement
+ * Tsurugi SQL prepared statement
  *
  * @param <P> parameter type
  */
-public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPreparedStatement {
+public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private FutureResponse<PreparedStatement> lowPreparedStatementFuture;
@@ -34,8 +34,7 @@ public abstract class TsurugiPreparedStatementWithLowPs<P> extends TsurugiPrepar
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
 
-    protected TsurugiPreparedStatementWithLowPs(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping)
-            throws IOException {
+    protected TsurugiSqlPrepared(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) throws IOException {
         super(session, sql);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
         this.parameterMapping = parameterMapping;

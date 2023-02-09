@@ -2,10 +2,14 @@ package com.tsurugidb.iceaxe.session;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +22,7 @@ import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
@@ -54,6 +59,7 @@ public class TsurugiSession implements Closeable {
     private IceaxeConvertUtil convertUtil = null;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
+    private List<TsurugiSessionEventListener> eventListenerList = null;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
     private boolean closed = false;
 
@@ -131,6 +137,35 @@ public class TsurugiSession implements Closeable {
     // internal
     public final TgSessionInfo getSessionInfo() {
         return sessionInfo;
+    }
+
+    /**
+     * add event listener
+     *
+     * @param listener event listener
+     * @return this
+     */
+    public TsurugiSession addEventListener(TsurugiSessionEventListener listener) {
+        if (this.eventListenerList == null) {
+            this.eventListenerList = new ArrayList<>();
+        }
+        eventListenerList.add(listener);
+        return this;
+    }
+
+    private void event(Throwable occurred, Consumer<TsurugiSessionEventListener> action) {
+        if (this.eventListenerList != null) {
+            try {
+                for (var listener : eventListenerList) {
+                    action.accept(listener);
+                }
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    e.addSuppressed(occurred);
+                }
+                throw e;
+            }
+        }
     }
 
     // internal
@@ -267,6 +302,7 @@ public class TsurugiSession implements Closeable {
         checkClose();
         LOG.trace("createPreparedQuery. sql={}", sql);
         var ps = new TsurugiPreparedStatementQuery0<>(this, sql, resultMapping);
+        event(null, listener -> listener.createQuery(ps));
         return ps;
     }
 
@@ -303,6 +339,7 @@ public class TsurugiSession implements Closeable {
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
         LOG.trace("createPreparedQuery started");
         var ps = new TsurugiPreparedStatementQuery1<>(this, sql, lowPreparedStatementFuture, parameterMapping, resultMapping);
+        event(null, listener -> listener.createQuery(ps));
         return ps;
     }
 
@@ -318,6 +355,7 @@ public class TsurugiSession implements Closeable {
         checkClose();
         LOG.trace("createPreparedStatement. sql={}", sql);
         var ps = new TsurugiPreparedStatementUpdate0(this, sql);
+        event(null, listener -> listener.createStatement(ps));
         return ps;
     }
 
@@ -338,6 +376,7 @@ public class TsurugiSession implements Closeable {
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
         LOG.trace("createPreparedStatement started");
         var ps = new TsurugiPreparedStatementUpdate1<>(this, sql, lowPreparedStatementFuture, parameterMapping);
+        event(null, listener -> listener.createStatement(ps));
         return ps;
     }
 
@@ -360,6 +399,7 @@ public class TsurugiSession implements Closeable {
 //  @ThreadSafe
     public TsurugiTransactionManager createTransactionManager(TgTmSetting setting) {
         var tm = new TsurugiTransactionManager(this, setting);
+        event(null, listener -> listener.createTransactionManager(tm));
         return tm;
     }
 
@@ -384,6 +424,19 @@ public class TsurugiSession implements Closeable {
      */
 //  @ThreadSafe
     public TsurugiTransaction createTransaction(@Nonnull TgTxOption option) throws IOException {
+        return createTransaction(option, null);
+    }
+
+    /**
+     * create Transaction
+     *
+     * @param option      transaction option
+     * @param initializer transaction initializer
+     * @return Transaction
+     * @throws IOException
+     */
+//  @ThreadSafe
+    public TsurugiTransaction createTransaction(@Nonnull TgTxOption option, @Nullable Consumer<TsurugiTransaction> initializer) throws IOException {
         checkClose();
 
         var lowOption = option.toLowTransactionOption();
@@ -391,6 +444,10 @@ public class TsurugiSession implements Closeable {
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
         LOG.trace("lowTransaction create started");
         var transaction = new TsurugiTransaction(this, lowTransactionFuture, option);
+        if (initializer != null) {
+            initializer.accept(transaction);
+        }
+        event(null, listener -> listener.createTransaction(transaction));
         return transaction;
     }
 
@@ -410,9 +467,18 @@ public class TsurugiSession implements Closeable {
         this.closed = true;
 
         LOG.trace("session close start");
-        IceaxeIoUtil.close(closeableSet, () -> {
-            IceaxeIoUtil.close(lowSqlClient, lowSession, lowWireFuture);
-        });
+        Throwable occurred = null;
+        try {
+            IceaxeIoUtil.close(closeableSet, () -> {
+                IceaxeIoUtil.close(lowSqlClient, lowSession, lowWireFuture);
+            });
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.closeSession(this, finalOccurred));
+        }
         LOG.trace("session close end");
     }
 

@@ -12,42 +12,42 @@ public interface TgTmCount {
      *
      * @return execute count
      */
-    public int executeCount();
+    int executeCount();
 
     /**
      * get transaction count
      *
      * @return transaction count
      */
-    public int transactionCount();
+    int transactionCount();
 
     /**
      * get exception count
      *
      * @return exception count
      */
-    public int execptionCount();
+    int execptionCount();
 
     /**
      * get retry count
      *
      * @return retry count
      */
-    public int retryCount();
+    int retryCount();
 
     /**
      * get retry-over count
      *
      * @return retry-over count
      */
-    public int retryOverCount();
+    int retryOverCount();
 
     /**
      * get retryable-abort count
      *
      * @return retryable-abort count
      */
-    public default int retryableAbortCount() {
+    default int retryableAbortCount() {
         return retryCount() + retryOverCount();
     }
 
@@ -56,42 +56,42 @@ public interface TgTmCount {
      *
      * @return before-commit count
      */
-    public int beforeCommitCount();
+    int beforeCommitCount();
 
     /**
      * get commit count
      *
      * @return commit count
      */
-    public int commitCount();
+    int commitCount();
 
     /**
      * get rollback count
      *
      * @return rollback count
      */
-    public int rollbackCount();
+    int rollbackCount();
 
     /**
      * get success(commit) count
      *
      * @return success(commit) count
      */
-    public int successCommitCount();
+    int successCommitCount();
 
     /**
      * get success(rollback) count
      *
      * @return success(rollback) count
      */
-    public int successRollbackCount();
+    int successRollbackCount();
 
     /**
      * get success count
      *
      * @return success count
      */
-    public default int successCount() {
+    default int successCount() {
         return successCommitCount() + successRollbackCount();
     }
 
@@ -100,5 +100,5 @@ public interface TgTmCount {
      *
      * @return fail count
      */
-    public int failCount();
+    int failCount();
 }

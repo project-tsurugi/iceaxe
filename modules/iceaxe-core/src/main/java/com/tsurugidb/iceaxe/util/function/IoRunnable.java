@@ -7,5 +7,5 @@ import java.io.IOException;
  */
 @FunctionalInterface
 public interface IoRunnable {
-    public void run() throws IOException;
+    void run() throws IOException;
 }

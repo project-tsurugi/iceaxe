@@ -13,7 +13,6 @@ import com.tsurugidb.iceaxe.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementWithLowPs;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.util.TgTimeValue;

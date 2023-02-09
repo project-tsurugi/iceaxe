@@ -8,5 +8,5 @@ import java.util.function.Function;
  */
 @FunctionalInterface
 public interface IoFunction<T, R> {
-    public R apply(T t) throws IOException;
+    R apply(T t) throws IOException;
 }

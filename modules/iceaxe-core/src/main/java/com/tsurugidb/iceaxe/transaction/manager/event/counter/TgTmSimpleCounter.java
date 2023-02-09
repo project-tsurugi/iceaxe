@@ -2,39 +2,52 @@ package com.tsurugidb.iceaxe.transaction.manager.event.counter;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
-import com.tsurugidb.iceaxe.transaction.manager.event.TgTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * {@link TsurugiTransactionManager} simple counter
  */
 @ThreadSafe
-public class TgTmSimpleCounter extends TgTmEventListener {
+public class TgTmSimpleCounter implements TsurugiTmEventListener {
 
     private final TgTmCountAtomic counter = new TgTmCountAtomic();
 
     @Override
-    public void executeStart(TgTxOption option) {
+    public void executeStart(TsurugiTransactionManager tm, int executeId, TgTxOption option) {
         counter.incrementExecuteCount();
     }
 
     @Override
-    public void transactionBefore(int attempt, TgTxOption option) {
+    public void transactionStart(TsurugiTransactionManager tm, int executeId, int attempt, TgTxOption option) {
         counter.incrementTransactionCount();
     }
 
     @Override
-    public void transactionCreated(TsurugiTransaction transaction) {
-        transaction.addBeforeCommitListener(tx -> {
-            counter.incrementBeforeCommitCount();
-        });
-        transaction.addCommitListener(tx -> {
-            counter.incrementCommitCount();
-        });
-        transaction.addRollbackListener(tx -> {
-            counter.incrementRollbackCount();
+    public void transactionStarted(TsurugiTransaction transaction) {
+        transaction.addEventListener(new TsurugiTransactionEventListener() {
+            @Override
+            public void commitStart(TsurugiTransaction transaction, TgCommitType commitType) {
+                counter.incrementBeforeCommitCount();
+            }
+
+            @Override
+            public void commitEnd(TsurugiTransaction transaction, TgCommitType commitType, Throwable occurred) {
+                if (occurred == null) {
+                    counter.incrementCommitCount();
+                }
+            }
+
+            @Override
+            public void rollbackEnd(TsurugiTransaction transaction, Throwable occurred) {
+                if (occurred == null) {
+                    counter.incrementRollbackCount();
+                }
+            }
         });
     }
 
@@ -63,7 +76,7 @@ public class TgTmSimpleCounter extends TgTmEventListener {
     }
 
     @Override
-    public void executeEndFail(TgTxOption option, TsurugiTransaction transaction, Throwable e) {
+    public void executeEndFail(TsurugiTransactionManager tm, int executeId, TgTxOption option, TsurugiTransaction transaction, Throwable e) {
         counter.incrementFailCount();
     }
 

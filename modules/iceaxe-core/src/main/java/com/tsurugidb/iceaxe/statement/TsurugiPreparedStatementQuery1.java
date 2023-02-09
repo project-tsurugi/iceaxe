@@ -1,8 +1,10 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.statement.event.TsurugiSqlPreparedQueryEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
@@ -18,25 +21,45 @@ import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi PreparedStatement
- * <ul>
- * <li>TODO+++翻訳: クエリー系SQL</li>
- * <li>TODO+++翻訳: SQLのパラメーターあり</li>
- * </ul>
+ * Tsurugi SQL prepared query (select)
  *
  * @param <P> parameter type
  * @param <R> result type
  */
-public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStatementWithLowPs<P> {
+//TODO rename to TsurugiSqlPreparedQuery
+public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiSqlPrepared<P> {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiPreparedStatementQuery1.class);
 
     private final TgResultMapping<R> resultMapping;
+    private List<TsurugiSqlPreparedQueryEventListener<P, R>> eventListenerList = null;
 
     // internal
     public TsurugiPreparedStatementQuery1(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping,
             TgResultMapping<R> resultMapping) throws IOException {
         super(session, sql, lowPreparedStatementFuture, parameterMapping);
         this.resultMapping = resultMapping;
+    }
+
+    /**
+     * add event listener
+     *
+     * @param listener event listener
+     * @return this
+     */
+    public TsurugiSql addEventListener(TsurugiSqlPreparedQueryEventListener<P, R> listener) {
+        if (this.eventListenerList == null) {
+            this.eventListenerList = new ArrayList<>();
+        }
+        eventListenerList.add(listener);
+        return this;
+    }
+
+    protected final void event(Consumer<TsurugiSqlPreparedQueryEventListener<P, R>> action) {
+        if (this.eventListenerList != null) {
+            for (var listener : eventListenerList) {
+                action.accept(listener);
+            }
+        }
     }
 
     /**
@@ -55,10 +78,12 @@ public class TsurugiPreparedStatementQuery1<P, R> extends TsurugiPreparedStateme
         var lowPs = getLowPreparedStatement();
         var lowParameterList = getLowParameterList(parameter);
         LOG.trace("executeQuery start");
+        event(listener -> listener.executeQueryStart(transaction, this, parameter));
         var lowResultSetFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeQuery(lowPs, lowParameterList));
         LOG.trace("executeQuery started");
         var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
         var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping, convertUtil);
+        event(listener -> listener.executeQueryStarted(transaction, this, parameter, result));
         return result;
     }
 

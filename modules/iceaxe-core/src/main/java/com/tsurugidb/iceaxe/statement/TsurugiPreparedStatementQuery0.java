@@ -1,39 +1,61 @@
 package com.tsurugidb.iceaxe.statement;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.statement.event.TsurugiSqlQueryEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 
 /**
- * Tsurugi PreparedStatement
- * <ul>
- * <li>TODO+++翻訳: クエリー系SQL</li>
- * <li>TODO+++翻訳: SQLのパラメーターなし</li>
- * </ul>
+ * Tsurugi SQL query (select)
  *
  * @param <R> result type
  */
-public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement {
+// TODO rename to TsurugiSqlQuery
+public class TsurugiPreparedStatementQuery0<R> extends TsurugiSqlDirect {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiPreparedStatementQuery0.class);
 
     private final TgResultMapping<R> resultMapping;
+    private List<TsurugiSqlQueryEventListener<R>> eventListenerList = null;
 
     // internal
     public TsurugiPreparedStatementQuery0(TsurugiSession session, String sql, TgResultMapping<R> resultMapping) throws IOException {
         super(session, sql);
         this.resultMapping = resultMapping;
+    }
+
+    /**
+     * add event listener
+     *
+     * @param listener event listener
+     * @return this
+     */
+    public TsurugiSql addEventListener(TsurugiSqlQueryEventListener<R> listener) {
+        if (this.eventListenerList == null) {
+            this.eventListenerList = new ArrayList<>();
+        }
+        eventListenerList.add(listener);
+        return this;
+    }
+
+    protected final void event(Consumer<TsurugiSqlQueryEventListener<R>> action) {
+        if (this.eventListenerList != null) {
+            for (var listener : eventListenerList) {
+                action.accept(listener);
+            }
+        }
     }
 
     /**
@@ -49,10 +71,12 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
         checkClose();
 
         LOG.trace("executeQuery start");
+        event(listener -> listener.executeQueryStart(transaction, this));
         var lowResultSetFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeQuery(sql));
         LOG.trace("executeQuery started");
         var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
         var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping, convertUtil);
+        event(listener -> listener.executeQueryStarted(transaction, this, result));
         return result;
     }
 
@@ -130,17 +154,5 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiPreparedStatement 
     @Deprecated(forRemoval = true)
     public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException {
         return tm.executeAndGetList(setting, this);
-    }
-
-    /**
-     * Retrieves execution plan of the statement.
-     *
-     * @return statement metadata
-     * @throws IOException
-     */
-    public TgStatementMetadata explain() throws IOException {
-        var session = getSession();
-        var helper = session.getExplainHelper();
-        return helper.explain(session, sql, getExplainConnectTimeout(), getExplainCloseTimeout());
     }
 }

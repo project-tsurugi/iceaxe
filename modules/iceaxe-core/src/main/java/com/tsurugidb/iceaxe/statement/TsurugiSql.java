@@ -18,9 +18,9 @@ import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
- * Tsurugi PreparedStatement
+ * Tsurugi SQL statement
  */
-public abstract class TsurugiPreparedStatement implements Closeable {
+public abstract class TsurugiSql implements Closeable {
 
     private final TsurugiSession ownerSession;
     protected final String sql;
@@ -28,7 +28,7 @@ public abstract class TsurugiPreparedStatement implements Closeable {
     private IceaxeTimeout explainCloseTimeout;
     private boolean closed = false;
 
-    protected TsurugiPreparedStatement(@Nonnull TsurugiSession session, @Nonnull String sql) throws IOException {
+    protected TsurugiSql(@Nonnull TsurugiSession session, @Nonnull String sql) throws IOException {
         this.ownerSession = session;
         this.sql = sql;
         session.addChild(this);
@@ -144,7 +144,7 @@ public abstract class TsurugiPreparedStatement implements Closeable {
     public String toString() {
         var name = getClass().getSimpleName();
         if (name.isEmpty()) {
-            name = TsurugiPreparedStatement.class.getSimpleName();
+            name = TsurugiSql.class.getSimpleName();
         }
         return name + "[" + sql + "]"; //$NON-NLS-1$ //$NON-NLS-2$
     }

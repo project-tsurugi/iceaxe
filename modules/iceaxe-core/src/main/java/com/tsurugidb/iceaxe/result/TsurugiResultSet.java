@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.result.event.TsurugiResultSetEventListener;
 import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -43,7 +45,10 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private final IceaxeConvertUtil convertUtil;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
+    private List<TsurugiResultSetEventListener<R>> eventListenerList = null;
     private TsurugiResultRecord record;
+    private Optional<Boolean> hasNextRow = Optional.empty();
+    private boolean calledEndEvent = false;
 
     // internal
     public TsurugiResultSet(TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil) throws IOException {
@@ -103,6 +108,35 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         applyCloseTimeout();
     }
 
+    /**
+     * add event listener
+     *
+     * @param listener event listener
+     * @return this
+     */
+    public TsurugiResult addEventListener(TsurugiResultSetEventListener<R> listener) {
+        if (this.eventListenerList == null) {
+            this.eventListenerList = new ArrayList<>();
+        }
+        eventListenerList.add(listener);
+        return this;
+    }
+
+    private void event(Throwable occurred, Consumer<TsurugiResultSetEventListener<R>> action) {
+        if (this.eventListenerList != null) {
+            try {
+                for (var listener : eventListenerList) {
+                    action.accept(listener);
+                }
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    e.addSuppressed(occurred);
+                }
+                throw e;
+            }
+        }
+    }
+
     protected final synchronized ResultSet getLowResultSet() throws IOException, TsurugiTransactionException {
         this.calledGetLowResultSet = true;
         if (this.lowResultSet == null) {
@@ -124,12 +158,36 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("nextLowRecord end. exists={}", exists);
             }
+            if (this.hasNextRow.isEmpty() || hasNextRow.get().booleanValue() != exists) {
+                this.hasNextRow = Optional.of(exists);
+            }
+            if (!exists) {
+                callEndEvent();
+            }
             return exists;
         } catch (ServerException e) {
+            event(e, listener -> listener.readException(this, e));
             throw new TsurugiTransactionException(e);
         } catch (InterruptedException e) {
+            event(e, listener -> listener.readException(this, e));
             throw new IOException(e.getMessage(), e);
+        } catch (Throwable e) {
+            event(e, listener -> listener.readException(this, e));
+            throw e;
         }
+    }
+
+    private void callEndEvent() {
+        if (this.calledEndEvent) {
+            return;
+        }
+        this.calledEndEvent = true;
+
+        event(null, listener -> listener.endResult(this));
+    }
+
+    public Optional<Boolean> getHasNextRow() {
+        return this.hasNextRow;
     }
 
     /**
@@ -140,7 +198,12 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
      * @throws TsurugiTransactionException
      */
     public List<String> getNameList() throws IOException, TsurugiTransactionException {
-        return getNameList(getLowResultSet());
+        try {
+            return getNameList(getLowResultSet());
+        } catch (Throwable e) {
+            event(e, listener -> listener.readException(this, e));
+            throw e;
+        }
     }
 
     static List<String> getNameList(ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
@@ -185,7 +248,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         if (nextLowRecord()) {
             var record = getRecord();
             record.reset();
-            var result = resultMapping.convert(record);
+            R result = convertRecord(record);
+            event(null, listener -> listener.readRecord(this, result));
             return Optional.of(result);
         } else {
             return Optional.empty();
@@ -194,10 +258,24 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
     protected TsurugiResultRecord getRecord() throws IOException, TsurugiTransactionException {
         if (this.record == null) {
-            var lowResultSet = getLowResultSet();
-            this.record = new TsurugiResultRecord(lowResultSet, convertUtil);
+            try {
+                var lowResultSet = getLowResultSet();
+                this.record = new TsurugiResultRecord(lowResultSet, convertUtil);
+            } catch (Throwable e) {
+                event(e, listener -> listener.readException(this, e));
+                throw e;
+            }
         }
         return this.record;
+    }
+
+    protected R convertRecord(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+        try {
+            return resultMapping.convert(record);
+        } catch (Throwable e) {
+            event(e, listener -> listener.readException(this, e));
+            throw e;
+        }
     }
 
     /**
@@ -212,7 +290,8 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         var record = getRecord();
         while (nextLowRecord()) {
             record.reset();
-            var result = resultMapping.convert(record);
+            R result = convertRecord(record);
+            event(null, listener -> listener.readRecord(this, result));
             list.add(result);
         }
         return list;
@@ -273,12 +352,13 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
 
             R result;
             try {
-                result = resultMapping.convert(record);
+                result = convertRecord(record);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             } catch (TsurugiTransactionException e) {
                 throw new TsurugiTransactionRuntimeException(e);
             }
+            event(null, listener -> listener.readRecord(TsurugiResultSet.this, result));
             this.moveNext = true;
             return result;
         }
@@ -293,6 +373,7 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
             if (!this.calledGetLowResultSet) {
                 getLowResultSet();
             }
+            callEndEvent();
         } catch (Throwable e) {
             occurred = e;
             throw e;
@@ -305,8 +386,12 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
                 if (occurred != null) {
                     occurred.addSuppressed(e);
                 } else {
+                    occurred = e;
                     throw e;
                 }
+            } finally {
+                var finalOccurred = occurred;
+                event(occurred, listener -> listener.closeResult(this, finalOccurred));
             }
         }
 
