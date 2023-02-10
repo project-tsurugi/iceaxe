@@ -14,23 +14,23 @@ public interface TsurugiTmEventListener {
     /**
      * called when execute start
      *
-     * @param tm        transaction manager
-     * @param executeId execute id
-     * @param option    transaction option
+     * @param tm                transaction manager
+     * @param iceaxeTmExecuteId iceaxe tm executeId
+     * @param option            transaction option
      */
-    default void executeStart(TsurugiTransactionManager tm, int executeId, TgTxOption option) {
+    default void executeStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option) {
         // do override
     }
 
     /**
      * called when before start transaction
      *
-     * @param tm        transaction manager
-     * @param executeId execute id
-     * @param attempt   attempt number
-     * @param option    transaction option
+     * @param tm                transaction manager
+     * @param iceaxeTmExecuteId iceaxe tm executeId
+     * @param attempt           attempt number
+     * @param option            transaction option
      */
-    default void transactionStart(TsurugiTransactionManager tm, int executeId, int attempt, TgTxOption option) {
+    default void transactionStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, int attempt, TgTxOption option) {
         // do override
     }
 
@@ -98,13 +98,13 @@ public interface TsurugiTmEventListener {
     /**
      * called when execute fail end
      *
-     * @param tm          transaction manager
-     * @param executeId   execute id
-     * @param option      transaction option
-     * @param transaction transaction
-     * @param e           exception
+     * @param tm                transaction manager
+     * @param iceaxeTmExecuteId iceaxe tm executeId
+     * @param option            transaction option
+     * @param transaction       transaction
+     * @param e                 exception
      */
-    default void executeEndFail(TsurugiTransactionManager tm, int executeId, TgTxOption option, @Nullable TsurugiTransaction transaction, Throwable e) {
+    default void executeEndFail(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option, @Nullable TsurugiTransaction transaction, Throwable e) {
         // do override
     }
 }

@@ -168,25 +168,25 @@ public class TsurugiTransactionManager {
             throw new IllegalArgumentException("action is not specified");
         }
 
-        final int executeId = EXECUTE_COUNT.incrementAndGet();
+        final int tmExecuteId = EXECUTE_COUNT.incrementAndGet();
 
         var option = setting.getFirstTransactionOption();
         {
             var finalOption = option;
-            event(setting, null, listener -> listener.executeStart(this, executeId, finalOption));
+            event(setting, null, listener -> listener.executeStart(this, tmExecuteId, finalOption));
         }
         for (int attempt = 0;; attempt++) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("tm.execute executeId={}, attempt={}, tx={}", executeId, attempt, option);
+                LOG.trace("tm.execute iceaxeTmExecuteId={}, attempt={}, tx={}", tmExecuteId, attempt, option);
             }
 
             final int finalAttempt = attempt;
             final var finalOption = option;
-            event(setting, null, listener -> listener.transactionStart(this, executeId, finalAttempt, finalOption));
+            event(setting, null, listener -> listener.transactionStart(this, tmExecuteId, finalAttempt, finalOption));
 
             TsurugiTransaction lastTransaction = null;
             try (var transaction = ownerSession.createTransaction(option, tx -> {
-                tx.setOwner(this, executeId, finalAttempt);
+                tx.setOwner(this, tmExecuteId, finalAttempt);
                 setting.initializeTransaction(tx);
             })) {
                 lastTransaction = transaction;
@@ -233,7 +233,7 @@ public class TsurugiTransactionManager {
             } catch (Throwable e) {
                 {
                     var finalTransaction = lastTransaction;
-                    event(setting, e, listener -> listener.executeEndFail(this, executeId, finalOption, finalTransaction, e));
+                    event(setting, e, listener -> listener.executeEndFail(this, tmExecuteId, finalOption, finalTransaction, e));
                 }
                 throw e;
             }
@@ -279,12 +279,11 @@ public class TsurugiTransactionManager {
             }
 
             LOG.trace("tm.execute error", e);
-            int executeId = transaction.getIceaxeExecuteId();
             if (nextTmOption.isRetryOver()) {
                 event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause));
-                throw new TsurugiTransactionRetryOverIOException(executeId, attempt, option, cause);
+                throw new TsurugiTransactionRetryOverIOException(transaction, cause);
             } else {
-                throw new TsurugiTransactionIOException(cause.getMessage(), executeId, attempt, option, cause);
+                throw new TsurugiTransactionIOException(cause.getMessage(), transaction, cause);
             }
         } catch (Throwable t) {
             if (!calledRollback) {

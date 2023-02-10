@@ -18,12 +18,12 @@ public class TgTmSimpleCounter implements TsurugiTmEventListener {
     private final TgTmCountAtomic counter = new TgTmCountAtomic();
 
     @Override
-    public void executeStart(TsurugiTransactionManager tm, int executeId, TgTxOption option) {
+    public void executeStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option) {
         counter.incrementExecuteCount();
     }
 
     @Override
-    public void transactionStart(TsurugiTransactionManager tm, int executeId, int attempt, TgTxOption option) {
+    public void transactionStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, int attempt, TgTxOption option) {
         counter.incrementTransactionCount();
     }
 
@@ -76,7 +76,7 @@ public class TgTmSimpleCounter implements TsurugiTmEventListener {
     }
 
     @Override
-    public void executeEndFail(TsurugiTransactionManager tm, int executeId, TgTxOption option, TsurugiTransaction transaction, Throwable e) {
+    public void executeEndFail(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option, TsurugiTransaction transaction, Throwable e) {
         counter.incrementFailCount();
     }
 

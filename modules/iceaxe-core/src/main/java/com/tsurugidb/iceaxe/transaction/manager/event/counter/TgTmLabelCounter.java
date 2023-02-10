@@ -22,13 +22,13 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     private final Map<String, TgTmCountAtomic> counter = new ConcurrentHashMap<>();
 
     @Override
-    public void executeStart(TsurugiTransactionManager tm, int executeId, TgTxOption option) {
+    public void executeStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option) {
         String label = label(option);
         getOrCreate(label).incrementExecuteCount();
     }
 
     @Override
-    public void transactionStart(TsurugiTransactionManager tm, int executeId, int attempt, TgTxOption option) {
+    public void transactionStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, int attempt, TgTxOption option) {
         String label = label(option);
         getOrCreate(label).incrementTransactionCount();
     }
@@ -89,7 +89,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     }
 
     @Override
-    public void executeEndFail(TsurugiTransactionManager tm, int executeId, TgTxOption option, TsurugiTransaction transaction, Throwable e) {
+    public void executeEndFail(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option, TsurugiTransaction transaction, Throwable e) {
         String label;
         if (transaction != null) {
             label = label(transaction);

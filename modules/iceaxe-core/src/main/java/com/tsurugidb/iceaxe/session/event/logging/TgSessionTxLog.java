@@ -21,6 +21,7 @@ public class TgSessionTxLog {
     private final Map<Integer, TgSessionSqlLog> sqlLogMap = new ConcurrentHashMap<>();
 
     private ZonedDateTime startTime;
+    private final Map<Integer, TgSessionTxExecuteLog> timeMap = new ConcurrentHashMap<>();
     private ZonedDateTime commitStartTime;
     private ZonedDateTime commitEndTime;
     private ZonedDateTime rollbackStartTime;
@@ -145,6 +146,97 @@ public class TgSessionTxLog {
      */
     public ZonedDateTime getStartTime() {
         return this.startTime;
+    }
+
+    /**
+     * Tsurugi transaction SQL execute log
+     */
+    public static class TgSessionTxExecuteLog {
+        private int iceaxeTxExecuteId;
+        private ZonedDateTime startTime;
+        private ZonedDateTime endTime;
+
+        /**
+         * set iceaxe tx executeId
+         *
+         * @param iceaxeTxExecuteId iceaxe tx executeId
+         */
+        public void setIceaxeTxExecuteId(int iceaxeTxExecuteId) {
+            this.iceaxeTxExecuteId = iceaxeTxExecuteId;
+        }
+
+        /**
+         * get iceaxe tx executeId
+         *
+         * @return iceaxe tx executeId
+         */
+        public int getIceaxeTxExecuteId() {
+            return this.iceaxeTxExecuteId;
+        }
+
+        /**
+         * set start time
+         *
+         * @param time start time
+         */
+        public void setStartTime(ZonedDateTime time) {
+            this.startTime = time;
+        }
+
+        /**
+         * get start time
+         *
+         * @return start time
+         */
+        public ZonedDateTime getStartTime() {
+            return this.startTime;
+        }
+
+        /**
+         * set end time
+         *
+         * @param time end time
+         */
+        public void setEndTime(ZonedDateTime time) {
+            this.endTime = time;
+        }
+
+        /**
+         * get end time
+         *
+         * @return end time
+         */
+        public ZonedDateTime getEndTime() {
+            return this.endTime;
+        }
+    }
+
+    /**
+     * get new transaction SQL execute log
+     *
+     * @param iceaxeTxExecuteId iceaxe tx executeId
+     * @return transaction SQL execute log
+     */
+    public TgSessionTxExecuteLog getNewTxExecuteLog(int iceaxeTxExecuteId) {
+        var exLog = createTxExecutLog();
+        exLog.setIceaxeTxExecuteId(iceaxeTxExecuteId);
+
+        timeMap.put(iceaxeTxExecuteId, exLog);
+        return exLog;
+    }
+
+    protected TgSessionTxExecuteLog createTxExecutLog() {
+        return new TgSessionTxExecuteLog();
+    }
+
+    /**
+     * get and remove transaction SQL execute log
+     *
+     * @param iceaxeTxExecuteId iceaxe tx executeId
+     * @return transaction SQL execute log
+     */
+    public TgSessionTxExecuteLog removeTxExecuteLog(int iceaxeTxExecuteId) {
+        return timeMap.remove(iceaxeTxExecuteId);
     }
 
     /**

@@ -13,6 +13,7 @@ import com.tsurugidb.iceaxe.result.TsurugiResult;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
+import com.tsurugidb.iceaxe.session.event.logging.TgSessionTxLog.TgSessionTxExecuteLog;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
@@ -25,6 +26,7 @@ import com.tsurugidb.iceaxe.statement.event.TsurugiSqlQueryResultEventListener;
 import com.tsurugidb.iceaxe.statement.event.TsurugiSqlStatementResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxExecuteMethod;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
@@ -37,12 +39,12 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSessionTxLogger.class);
 
     private final Map<Integer, TgSessionTmLog> tmLogMap = new ConcurrentHashMap<>();
-    private final Map<TsurugiTransaction, TgSessionTxLog> txLogMap = new ConcurrentHashMap<>();
+    private final Map<Integer, TgSessionTxLog> txLogMap = new ConcurrentHashMap<>();
 
     private final TsurugiTmEventListener tmLogger = new TsurugiTmEventListener() {
         @Override
-        public void executeStart(TsurugiTransactionManager tm, int executeId, TgTxOption option) {
-            doLogTmExecuteStart(executeId);
+        public void executeStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option) {
+            doLogTmExecuteStart(iceaxeTmExecuteId);
         }
 
         @Override
@@ -62,13 +64,13 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
 
         @Override
         public void executeEndSuccess(TsurugiTransaction transaction, boolean committed, Object returnValue) {
-            var executeId = transaction.getIceaxeExecuteId();
-            doLogTmExecuteEnd(executeId, transaction, committed, returnValue, null);
+            var tmExecuteId = transaction.getIceaxeTmExecuteId();
+            doLogTmExecuteEnd(tmExecuteId, transaction, committed, returnValue, null);
         }
 
         @Override
-        public void executeEndFail(TsurugiTransactionManager tm, int executeId, TgTxOption option, @Nullable TsurugiTransaction transaction, Throwable occurred) {
-            doLogTmExecuteEnd(executeId, transaction, false, null, occurred);
+        public void executeEndFail(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option, @Nullable TsurugiTransaction transaction, Throwable occurred) {
+            doLogTmExecuteEnd(iceaxeTmExecuteId, transaction, false, null, occurred);
         }
     };
 
@@ -79,13 +81,13 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void executeStart(TsurugiTransaction transaction, TsurugiSql ps, Object parameter) {
-            doLogTransactionSqlStart(transaction, ps, parameter);
+        public void executeStart(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, Object parameter) {
+            doLogTransactionSqlStart(transaction, method, iceaxeTxExecuteId, ps, parameter);
         }
 
         @Override
-        public void executeEnd(TsurugiTransaction transaction, TsurugiSql ps, Object parameter, @Nullable Throwable occurred) {
-            doLogTransactionSqlEnd(transaction, ps, parameter, occurred);
+        public void executeEnd(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, Object parameter, TsurugiResult result, @Nullable Throwable occurred) {
+            doLogTransactionSqlEnd(transaction, method, iceaxeTxExecuteId, ps, parameter, result, occurred);
         }
 
         @Override
@@ -287,13 +289,13 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         doLogTransactionStart(transaction, startTime);
     }
 
-    protected void doLogTmExecuteStart(int executeId) {
+    protected void doLogTmExecuteStart(int iceaxeTmExecuteId) {
         var satrtTime = ZonedDateTime.now();
 
         var tmLog = createTmLog();
-        tmLog.setExecuteId(executeId);
+        tmLog.setIceaxeTmExecuteId(iceaxeTmExecuteId);
         tmLog.setStartTime(satrtTime);
-        tmLogMap.put(executeId, tmLog);
+        tmLogMap.put(iceaxeTmExecuteId, tmLog);
 
         logTmExecuteStart(tmLog);
     }
@@ -302,8 +304,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         return new TgSessionTmLog();
     }
 
-    protected TgSessionTmLog getTmLog(int executeId) {
-        return tmLogMap.get(executeId);
+    protected TgSessionTmLog getTmLog(int iceaxeTmExecuteId) {
+        return tmLogMap.get(iceaxeTmExecuteId);
     }
 
     /**
@@ -319,9 +321,9 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         var txLog = createTxLog();
         txLog.setTransaction(transaction);
         txLog.setStartTime(startTime);
-        txLogMap.put(transaction, txLog);
+        txLogMap.put(transaction.getIceaxeTransactionId(), txLog);
 
-        var tmLog = getTmLog(transaction.getIceaxeExecuteId());
+        var tmLog = getTmLog(transaction.getIceaxeTmExecuteId());
         if (tmLog != null) {
             tmLog.setCurrentTxLog(txLog);
             txLog.setTmLog(tmLog);
@@ -335,7 +337,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     }
 
     protected TgSessionTxLog getTxLog(TsurugiTransaction transaction) {
-        var txLog = txLogMap.get(transaction);
+        var txLog = txLogMap.get(transaction.getIceaxeTransactionId());
         if (txLog == null) {
             LOG.debug("transaction not found in txLogMap. {}", transaction);
         }
@@ -372,23 +374,60 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         // do override
     }
 
-    protected void doLogTransactionSqlStart(TsurugiTransaction transaction, TsurugiSql ps, Object parameter) {
+    protected void doLogTransactionSqlStart(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, Object parameter) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
         }
 
-        logTransactionSqlStart(txLog, ps, parameter);
+        var exLog = txLog.getNewTxExecuteLog(iceaxeTxExecuteId);
+        exLog.setStartTime(ZonedDateTime.now());
+
+        logTransactionSqlStart(method, txLog, exLog, ps, parameter);
     }
 
     /**
      * called when start execute sql
      *
+     * @param method    execute method
      * @param txLog     transaction log
+     * @param exLog     transaction SQL execute log
      * @param ps        SQL statement
      * @param parameter SQL parameter
      */
-    protected void logTransactionSqlStart(TgSessionTxLog txLog, TsurugiSql ps, Object parameter) {
+    protected void logTransactionSqlStart(TgTxExecuteMethod method, TgSessionTxLog txLog, TgSessionTxExecuteLog exLog, TsurugiSql ps, Object parameter) {
+        // do override
+    }
+
+    protected void doLogTransactionSqlEnd(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, Object parameter, @Nullable TsurugiResult result,
+            @Nullable Throwable occurred) {
+        var txLog = getTxLog(transaction);
+        if (txLog == null) {
+            return;
+        }
+        var exLog = txLog.removeTxExecuteLog(iceaxeTxExecuteId);
+        if (exLog == null) {
+            return;
+        }
+
+        exLog.setEndTime(ZonedDateTime.now());
+
+        logTransactionSqlEnd(method, txLog, exLog, ps, parameter, result, occurred);
+    }
+
+    /**
+     * called when end execute sql
+     *
+     * @param method    execute method
+     * @param txLog     transaction log
+     * @param exLog     transaction SQL execute log
+     * @param ps        SQL statement
+     * @param parameter SQL parameter
+     * @param result    SQL result
+     * @param occurred  exception
+     */
+    protected void logTransactionSqlEnd(TgTxExecuteMethod method, TgSessionTxLog txLog, TgSessionTxExecuteLog exLog, TsurugiSql ps, Object parameter, @Nullable TsurugiResult result,
+            @Nullable Throwable occurred) {
         // do override
     }
 
@@ -566,27 +605,6 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         // do override
     }
 
-    protected void doLogTransactionSqlEnd(TsurugiTransaction transaction, TsurugiSql ps, Object parameter, @Nullable Throwable occurred) {
-        var txLog = getTxLog(transaction);
-        if (txLog == null) {
-            return;
-        }
-
-        logTransactionSqlEnd(txLog, ps, parameter, occurred);
-    }
-
-    /**
-     * called when end execute sql
-     *
-     * @param txLog     transaction log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param occurred  exception
-     */
-    protected void logTransactionSqlEnd(TgSessionTxLog txLog, TsurugiSql ps, Object parameter, @Nullable Throwable occurred) {
-        // do override
-    }
-
     protected void doLogTransactionCommitStart(TsurugiTransaction transaction, TgCommitType commitType) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
@@ -711,7 +729,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     }
 
     protected void doLogTransactionClose(TsurugiTransaction transaction, @Nullable Throwable occurred) {
-        var txLog = txLogMap.remove(transaction);
+        var txLog = txLogMap.remove(transaction.getIceaxeTransactionId());
         if (txLog == null) {
             LOG.debug("tranaction already closed {}", transaction);
             return;
@@ -737,8 +755,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         // do override
     }
 
-    protected void doLogTmExecuteEnd(int executeId, @Nullable TsurugiTransaction transaction, boolean committed, @Nullable Object returnValue, @Nullable Throwable occurred) {
-        var tmLog = tmLogMap.remove(executeId);
+    protected void doLogTmExecuteEnd(int iceaxeTmExecuteId, @Nullable TsurugiTransaction transaction, boolean committed, @Nullable Object returnValue, @Nullable Throwable occurred) {
+        var tmLog = tmLogMap.remove(iceaxeTmExecuteId);
         if (tmLog == null) {
             return;
         }

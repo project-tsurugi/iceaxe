@@ -3,32 +3,32 @@ package com.tsurugidb.iceaxe.session.event.logging;
 import java.time.ZonedDateTime;
 
 /**
- * Tsurugi transaction manager log
+ * Tsurugi transaction manager execute log
  */
 public class TgSessionTmLog {
 
-    private int executeId;
+    private int iceaxeTmExecuteId;
     private TgSessionTxLog txLog;
 
     private ZonedDateTime startTime;
     private ZonedDateTime endTime;
 
     /**
-     * set transaction manager executeId
+     * set iceaxe tm executeId
      *
-     * @param executeId executeId
+     * @param iceaxeTmExecuteId iceaxe tm executeId
      */
-    public void setExecuteId(int executeId) {
-        this.executeId = executeId;
+    public void setIceaxeTmExecuteId(int iceaxeTmExecuteId) {
+        this.iceaxeTmExecuteId = iceaxeTmExecuteId;
     }
 
     /**
-     * get transaction manager executeId
+     * get iceaxe tm executeId
      *
-     * @return executeId
+     * @return iceaxe tm executeId
      */
-    public int getExecuteId() {
-        return this.executeId;
+    public int getIceaxeTmExecuteId() {
+        return this.iceaxeTmExecuteId;
     }
 
     /**

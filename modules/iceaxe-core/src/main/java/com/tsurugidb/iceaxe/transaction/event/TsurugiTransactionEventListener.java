@@ -2,9 +2,11 @@ package com.tsurugidb.iceaxe.transaction.event;
 
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.result.TsurugiResult;
 import com.tsurugidb.iceaxe.statement.TsurugiSql;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxExecuteMethod;
 
 /**
  * {@link TsurugiTransaction} event listener
@@ -24,23 +26,29 @@ public interface TsurugiTransactionEventListener {
     /**
      * called when execute start
      *
-     * @param transaction transaction
-     * @param ps          SQL statement
-     * @param parameter   SQL parameter
+     * @param transaction       transaction
+     * @param method            execute method
+     * @param iceaxeTxExecuteId iceaxe tx executeId
+     * @param ps                SQL statement
+     * @param parameter         SQL parameter
      */
-    default void executeStart(TsurugiTransaction transaction, TsurugiSql ps, @Nullable Object parameter) {
+    default void executeStart(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter) {
         // do override
     }
 
     /**
      * called when execute end
      *
-     * @param transaction transaction
-     * @param ps          SQL statement
-     * @param parameter   SQL parameter
-     * @param occurred    exception
+     * @param transaction       transaction
+     * @param method            execute method
+     * @param iceaxeTxExecuteId iceaxe tx executeId
+     * @param ps                SQL statement
+     * @param parameter         SQL parameter
+     * @param result            SQL result
+     * @param occurred          exception
      */
-    default void executeEnd(TsurugiTransaction transaction, TsurugiSql ps, @Nullable Object parameter, @Nullable Throwable occurred) {
+    default void executeEnd(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter, @Nullable TsurugiResult result,
+            @Nullable Throwable occurred) {
         // do override
     }
 
