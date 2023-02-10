@@ -9,7 +9,6 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +65,6 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled: ERR_INACTIVE_TRANSACTIONが発生しなくなったらDisabledを削除
     void test() throws IOException, InterruptedException {
         int batchSize = 10;
         int onlineSize = 20;
