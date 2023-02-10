@@ -33,8 +33,8 @@ public class TsurugiResultCount extends TsurugiResult {
     private List<TsurugiResultCountEventListener> eventListenerList = null;
 
     // internal
-    public TsurugiResultCount(TsurugiTransaction transaction, FutureResponse<Void> lowResultFuture) throws IOException {
-        super(transaction);
+    public TsurugiResultCount(int sqlExecuteId, TsurugiTransaction transaction, FutureResponse<Void> lowResultFuture) throws IOException {
+        super(sqlExecuteId, transaction);
         this.lowResultFuture = lowResultFuture;
 
         var info = transaction.getSessionInfo();

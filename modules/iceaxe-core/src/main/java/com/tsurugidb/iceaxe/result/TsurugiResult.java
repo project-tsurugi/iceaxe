@@ -12,12 +12,23 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
  */
 public abstract class TsurugiResult implements AutoCloseable {
 
+    private final int iceaxeSqlExecuteId;
     private final TsurugiTransaction ownerTransaction;
 
     // internal
-    public TsurugiResult(TsurugiTransaction transaction) throws IOException {
+    public TsurugiResult(int sqlExecuteId, TsurugiTransaction transaction) throws IOException {
+        this.iceaxeSqlExecuteId = sqlExecuteId;
         this.ownerTransaction = transaction;
         transaction.addChild(this);
+    }
+
+    /**
+     * get iceaxe SQL executeId
+     *
+     * @return iceaxe SQL executeId
+     */
+    public int getIceaxeSqlExecuteId() {
+        return this.iceaxeSqlExecuteId;
     }
 
     @Override

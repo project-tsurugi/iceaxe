@@ -46,13 +46,15 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
     private List<TsurugiResultSetEventListener<R>> eventListenerList = null;
+    private int readCount = 0;
     private TsurugiResultRecord record;
     private Optional<Boolean> hasNextRow = Optional.empty();
     private boolean calledEndEvent = false;
 
     // internal
-    public TsurugiResultSet(TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil) throws IOException {
-        super(transaction);
+    public TsurugiResultSet(int sqlExecuteId, TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil)
+            throws IOException {
+        super(sqlExecuteId, transaction);
         this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
@@ -270,12 +272,24 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
     }
 
     protected R convertRecord(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+        R result;
         try {
-            return resultMapping.convert(record);
+            result = resultMapping.convert(record);
         } catch (Throwable e) {
             event(e, listener -> listener.readException(this, e));
             throw e;
         }
+        this.readCount++;
+        return result;
+    }
+
+    /**
+     * get number of read
+     *
+     * @return number of read
+     */
+    public int getReadCount() {
+        return this.readCount;
     }
 
     /**

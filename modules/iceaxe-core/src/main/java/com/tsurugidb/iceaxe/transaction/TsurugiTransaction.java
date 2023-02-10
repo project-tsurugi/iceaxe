@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -46,6 +47,9 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class TsurugiTransaction implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransaction.class);
 
+    private static final AtomicInteger TRANSACTION_COUNT = new AtomicInteger(0);
+
+    private final int iceaxeTransactionId;
     private final TsurugiSession ownerSession;
     private FutureResponse<Transaction> lowTransactionFuture;
     private Throwable lowFutureException = null;
@@ -53,8 +57,8 @@ public class TsurugiTransaction implements Closeable {
     private boolean calledGetLowTransaction = false;
     private final TgTxOption txOption;
     private TsurugiTransactionManager ownerTm = null;
-    private int tmExecuteId = 0;
-    private int tmAttempt = 0;
+    private int iceaxeExecuteId = 0;
+    private int attempt = 0;
     private final IceaxeTimeout beginTimeout;
     private final IceaxeTimeout commitTimeout;
     private final IceaxeTimeout rollbackTimeout;
@@ -67,6 +71,7 @@ public class TsurugiTransaction implements Closeable {
 
     // internal
     public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption option) throws IOException {
+        this.iceaxeTransactionId = TRANSACTION_COUNT.incrementAndGet();
         this.ownerSession = session;
         this.lowTransactionFuture = lowTransactionFuture;
         this.txOption = option;
@@ -84,6 +89,15 @@ public class TsurugiTransaction implements Closeable {
     private void applyCloseTimeout() {
         closeTimeout.apply(lowTransaction);
         closeTimeout.apply(lowTransactionFuture);
+    }
+
+    /**
+     * get iceaxe transactionId
+     *
+     * @return iceaxe transactionId
+     */
+    public int getIceaxeTransactionId() {
+        return this.iceaxeTransactionId;
     }
 
     /**
@@ -109,14 +123,14 @@ public class TsurugiTransaction implements Closeable {
     /**
      * set owner information.
      *
-     * @param tm        owner transaction manager
-     * @param executeId execute id
-     * @param attempt   attempt number
+     * @param tm              owner transaction manager
+     * @param iceaxeExecuteId iceaxe executeId
+     * @param attempt         attempt number
      */
-    public void setOwner(TsurugiTransactionManager tm, int executeId, int attempt) {
+    public void setOwner(TsurugiTransactionManager tm, int iceaxeExecuteId, int attempt) {
         this.ownerTm = tm;
-        this.tmExecuteId = executeId;
-        this.tmAttempt = attempt;
+        this.iceaxeExecuteId = iceaxeExecuteId;
+        this.attempt = attempt;
     }
 
     /**
@@ -130,12 +144,12 @@ public class TsurugiTransaction implements Closeable {
     }
 
     /**
-     * get execute id.
+     * get iceaxe executeId.
      *
-     * @return execute id, 0 if this transaction is not created by transaction manager
+     * @return iceaxe executeId, 0 if this transaction is not created by transaction manager
      */
-    public int getExecuteId() {
-        return this.tmExecuteId;
+    public int getIceaxeExecuteId() {
+        return this.iceaxeExecuteId;
     }
 
     /**
@@ -144,7 +158,7 @@ public class TsurugiTransaction implements Closeable {
      * @return attempt number, 0 if this transaction is not created by transaction manager
      */
     public int getAttempt() {
-        return this.tmAttempt;
+        return this.attempt;
     }
 
     /**
@@ -851,6 +865,6 @@ public class TsurugiTransaction implements Closeable {
 
     @Override
     public String toString() {
-        return "TsurugiTransaction(" + txOption + ", executeId=" + tmExecuteId + ", attempt=" + tmAttempt + ")";
+        return "TsurugiTransaction(iceaxeExecuteId=" + iceaxeExecuteId + ", attempt=" + attempt + ", tx=" + txOption + ")";
     }
 }

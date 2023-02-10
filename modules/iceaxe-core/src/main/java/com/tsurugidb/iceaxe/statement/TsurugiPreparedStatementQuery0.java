@@ -50,10 +50,17 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiSqlDirect {
         return this;
     }
 
-    protected final void event(Consumer<TsurugiSqlQueryEventListener<R>> action) {
+    private void event(Throwable occurred, Consumer<TsurugiSqlQueryEventListener<R>> action) {
         if (this.eventListenerList != null) {
-            for (var listener : eventListenerList) {
-                action.accept(listener);
+            try {
+                for (var listener : eventListenerList) {
+                    action.accept(listener);
+                }
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    e.addSuppressed(occurred);
+                }
+                throw e;
             }
         }
     }
@@ -71,13 +78,23 @@ public class TsurugiPreparedStatementQuery0<R> extends TsurugiSqlDirect {
         checkClose();
 
         LOG.trace("executeQuery start");
-        event(listener -> listener.executeQueryStart(transaction, this));
-        var lowResultSetFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeQuery(sql));
-        LOG.trace("executeQuery started");
-        var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
-        var result = new TsurugiResultSet<>(transaction, lowResultSetFuture, resultMapping, convertUtil);
-        event(listener -> listener.executeQueryStarted(transaction, this, result));
-        return result;
+        int sqlExecuteId = getNewIceaxeSqlExecuteId();
+        event(null, listener -> listener.executeQueryStart(transaction, this, sqlExecuteId));
+
+        TsurugiResultSet<R> rs;
+        try {
+            var lowResultSetFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeQuery(sql));
+            LOG.trace("executeQuery started");
+
+            var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
+            rs = new TsurugiResultSet<>(sqlExecuteId, transaction, lowResultSetFuture, resultMapping, convertUtil);
+        } catch (Throwable e) {
+            event(e, listener -> listener.executeQueryStartException(transaction, this, sqlExecuteId, e));
+            throw e;
+        }
+
+        event(null, listener -> listener.executeQueryStarted(transaction, this, rs));
+        return rs;
     }
 
     /**

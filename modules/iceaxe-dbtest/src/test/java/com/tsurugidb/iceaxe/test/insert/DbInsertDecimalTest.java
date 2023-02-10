@@ -77,7 +77,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
             var parameter = TgParameterList.of(variable.bind(value));
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> tm.executeAndGetCount(ps, parameter));
             assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
-            String expected = "ERR_EXPRESSION_EVALUATION_FAILURE: SQL--0017: . attempt=0, option=OCC{}";
+            String expected = "ERR_EXPRESSION_EVALUATION_FAILURE: SQL--0017: .";
             assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
         }
     }

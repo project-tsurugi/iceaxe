@@ -88,7 +88,7 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
      * @throws IOException
      */
     public void writeExplain(int sqlId, String contents) throws IOException {
-        String fileName = String.format("explain%05d.json", sqlId);
+        String fileName = String.format("sql-%d.explain.json", sqlId);
         Files.writeString(outputDir.resolve(fileName), contents, StandardCharsets.UTF_8);
     }
 

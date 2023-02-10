@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.session.event.logging;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
@@ -19,8 +18,6 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.statement.TsurugiSql;
-import com.tsurugidb.iceaxe.statement.TsurugiSqlDirect;
-import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.statement.event.TsurugiSqlPreparedQueryResultEventListener;
 import com.tsurugidb.iceaxe.statement.event.TsurugiSqlPreparedStatementResultEventListener;
 import com.tsurugidb.iceaxe.statement.event.TsurugiSqlQueryEventListener;
@@ -65,7 +62,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
 
         @Override
         public void executeEndSuccess(TsurugiTransaction transaction, boolean committed, Object returnValue) {
-            var executeId = transaction.getExecuteId();
+            var executeId = transaction.getIceaxeExecuteId();
             doLogTmExecuteEnd(executeId, transaction, committed, returnValue, null);
         }
 
@@ -119,89 +116,133 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
 
     private final TsurugiSqlQueryResultEventListener<Object> queryLogger = new TsurugiSqlQueryResultEventListener<>() {
         @Override
-        public void executeQueryStart(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<Object> ps) {
-            doLogSqlStart(transaction, ps);
+        public void executeQueryStart(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<Object> ps, int iceaxeSqlExecuteId) {
+            doLogSqlStart(transaction, iceaxeSqlExecuteId, ps, null);
+        }
+
+        @Override
+        public void executeQueryStartException(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<Object> ps, int iceaxeSqlExecuteId, Throwable occurred) {
+            doLogSqlStartException(transaction, iceaxeSqlExecuteId, occurred);
+        }
+
+        @Override
+        public void executeQueryStarted(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<Object> ps, TsurugiResultSet<Object> rs) {
+            TsurugiSqlQueryResultEventListener.super.executeQueryStarted(transaction, ps, rs);
+            doLogSqlStarted(transaction, rs);
         }
 
         @Override
         public void executeQueryRead(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<Object> ps, TsurugiResultSet<Object> rs, Object record) {
-            doLogSqlRead(transaction, ps, rs, record);
+            doLogSqlRead(transaction, rs, record);
         }
 
         @Override
         public void executeQueryException(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<Object> ps, TsurugiResultSet<Object> rs, Throwable occurred) {
-            doLogSqlReadException(transaction, ps, rs, occurred);
+            doLogSqlReadException(transaction, rs, occurred);
         }
 
         @Override
         public void executeQueryEnd(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<Object> ps, TsurugiResultSet<Object> rs) {
-            doLogSqlEnd(transaction, ps, rs);
+            doLogSqlEnd(transaction, rs, null);
         }
 
         @Override
         public void executeQueryClose(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<Object> ps, TsurugiResultSet<Object> rs, Throwable occurred) {
-            doLogSqlClose(transaction, ps, rs, occurred);
+            doLogSqlClose(transaction, rs, occurred);
         }
     };
 
     private final TsurugiSqlPreparedQueryResultEventListener<Object, Object> preparedQueryLogger = new TsurugiSqlPreparedQueryResultEventListener<>() {
         @Override
-        public void executeQueryStart(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<Object, Object> ps, Object parameter) {
-            doLogSqlStart(transaction, ps, parameter);
+        public void executeQueryStart(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<Object, Object> ps, Object parameter, int iceaxeSqlExecuteId) {
+            doLogSqlStart(transaction, iceaxeSqlExecuteId, ps, parameter);
+        }
+
+        @Override
+        public void executeQueryStartException(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<Object, Object> ps, Object parameter, int iceaxeSqlExecuteId, Throwable occurred) {
+            doLogSqlStartException(transaction, iceaxeSqlExecuteId, occurred);
+        }
+
+        @Override
+        public void executeQueryStarted(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<Object, Object> ps, Object parameter, TsurugiResultSet<Object> rs) {
+            TsurugiSqlPreparedQueryResultEventListener.super.executeQueryStarted(transaction, ps, parameter, rs);
+            doLogSqlStarted(transaction, rs);
         }
 
         @Override
         public void executeQueryRead(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<Object, Object> ps, Object parameter, TsurugiResultSet<Object> rs, Object record) {
-            doLogSqlRead(transaction, ps, parameter, rs, record);
+            doLogSqlRead(transaction, rs, record);
         }
 
         @Override
         public void executeQueryException(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<Object, Object> ps, Object parameter, TsurugiResultSet<Object> rs, Throwable occurred) {
-            doLogSqlReadException(transaction, ps, parameter, rs, occurred);
+            doLogSqlReadException(transaction, rs, occurred);
         }
 
         @Override
         public void executeQueryEnd(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<Object, Object> ps, Object parameter, TsurugiResultSet<Object> rs) {
-            doLogSqlEnd(transaction, ps, parameter, rs);
+            doLogSqlEnd(transaction, rs, null);
         }
 
         @Override
         public void executeQueryClose(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<Object, Object> ps, Object parameter, TsurugiResultSet<Object> rs, Throwable occurred) {
-            doLogSqlClose(transaction, ps, parameter, rs, occurred);
+            doLogSqlClose(transaction, rs, occurred);
         }
     };
 
     private final TsurugiSqlStatementResultEventListener statementLogger = new TsurugiSqlStatementResultEventListener() {
         @Override
-        public void executeStatementStart(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps) {
-            doLogSqlStart(transaction, ps);
+        public void executeStatementStart(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps, int iceaxeSqlExecuteId) {
+            doLogSqlStart(transaction, iceaxeSqlExecuteId, ps, null);
+        }
+
+        @Override
+        public void executeStatementStartException(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps, int iceaxeSqlExecuteId, Throwable occurred) {
+            doLogSqlStartException(transaction, iceaxeSqlExecuteId, occurred);
+        }
+
+        @Override
+        public void executeStatementStarted(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps, TsurugiResultCount rc) {
+            TsurugiSqlStatementResultEventListener.super.executeStatementStarted(transaction, ps, rc);
+            doLogSqlStarted(transaction, rc);
         }
 
         @Override
         public void executeStatementEnd(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps, TsurugiResultCount rc, Throwable occurred) {
-            doLogSqlEnd(transaction, ps, rc, occurred);
+            doLogSqlEnd(transaction, rc, occurred);
         }
 
         @Override
         public void executeStatementClose(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps, TsurugiResultCount rc, Throwable occurred) {
-            doLogSqlClose(transaction, ps, rc, occurred);
+            doLogSqlClose(transaction, rc, occurred);
         }
     };
 
     private final TsurugiSqlPreparedStatementResultEventListener<Object> preparedStatementLogger = new TsurugiSqlPreparedStatementResultEventListener<>() {
         @Override
-        public void executeStatementStart(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<Object> ps, Object parameter) {
-            doLogSqlStart(transaction, ps, parameter);
+        public void executeStatementStart(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<Object> ps, Object parameter, int iceaxeSqlExecuteId) {
+            doLogSqlStart(transaction, iceaxeSqlExecuteId, ps, parameter);
+        }
+
+        @Override
+        public void executeStatementStartException(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<Object> ps, Object parameter, int iceaxeSqlExecuteId, Throwable occurred) {
+            doLogSqlStartException(transaction, iceaxeSqlExecuteId, occurred);
+        }
+
+        @Override
+        public void executeStatementStarted(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<Object> ps, Object parameter, TsurugiResultCount rc) {
+            TsurugiSqlPreparedStatementResultEventListener.super.executeStatementStarted(transaction, ps, parameter, rc);
+            doLogSqlStarted(transaction, rc);
         }
 
         @Override
         public void executeStatementEnd(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<Object> ps, Object parameter, TsurugiResultCount rc, Throwable occurred) {
-            logSqlEnd(transaction, ps, parameter, rc, occurred);
+            doLogSqlEnd(transaction, rc, occurred);
         }
 
         @Override
         public void executeStatementClose(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<Object> ps, Object parameter, TsurugiResultCount rc, Throwable occurred) {
-            doLogSqlClose(transaction, ps, parameter, rc, occurred);
+            doLogSqlClose(transaction, rc, occurred);
         }
     };
 
@@ -280,7 +321,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         txLog.setStartTime(startTime);
         txLogMap.put(transaction, txLog);
 
-        var tmLog = getTmLog(transaction.getExecuteId());
+        var tmLog = getTmLog(transaction.getIceaxeExecuteId());
         if (tmLog != null) {
             tmLog.setCurrentTxLog(txLog);
             txLog.setTmLog(tmLog);
@@ -351,60 +392,16 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         // do override
     }
 
-    protected <R> void doLogSqlStart(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<R> ps) {
-        Object parameter = null;
-        doLogSqlStartMain(transaction, ps, parameter, (t, s) -> logSqlStart(t, s, ps));
-    }
-
-    protected <P, R> void doLogSqlStart(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<P, R> ps, P parameter) {
-        doLogSqlStartMain(transaction, ps, parameter, (t, s) -> logSqlStart(t, s, ps, parameter));
-    }
-
-    protected void doLogSqlStart(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps) {
-        Object parameter = null;
-        doLogSqlStartMain(transaction, ps, parameter, (t, s) -> logSqlStart(t, s, ps));
-    }
-
-    protected <P> void doLogSqlStart(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<P> ps, P parameter) {
-        doLogSqlStartMain(transaction, ps, parameter, (t, s) -> logSqlStart(t, s, ps, parameter));
-    }
-
-    protected void doLogSqlStartMain(TsurugiTransaction transaction, TsurugiSql ps, Object parameter, BiConsumer<TgSessionTxLog, TgSessionSqlLog> action) {
+    protected void doLogSqlStart(TsurugiTransaction transaction, int iceaxeSqlExecuteId, TsurugiSql ps, Object parameter) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
         }
-        var sqlLog = txLog.getNewSqlLog(ps, parameter);
+        var sqlLog = txLog.getNewSqlLog(iceaxeSqlExecuteId);
 
-        action.accept(txLog, sqlLog);
-    }
+        sqlLog.setSqlStatement(ps, parameter);
 
-    /**
-     * called when start sql
-     *
-     * @param <R>    result type
-     * @param txLog  transaction log
-     * @param sqlLog SQL log
-     * @param ps     SQL statement
-     */
-    protected <R> void logSqlStart(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery0<R> ps) {
-        // do override
-        logSqlStartDirect(txLog, sqlLog, ps);
-    }
-
-    /**
-     * called when start sql
-     *
-     * @param <P>       parameter type
-     * @param <R>       result type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     */
-    protected <P, R> void logSqlStart(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery1<P, R> ps, P parameter) {
-        // do override
-        logSqlStartPrepared(txLog, sqlLog, ps, parameter);
+        logSqlStart(txLog, sqlLog);
     }
 
     /**
@@ -412,92 +409,71 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      *
      * @param txLog  transaction log
      * @param sqlLog SQL log
-     * @param ps     SQL statement
      */
-    protected void logSqlStart(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementUpdate0 ps) {
-        // do override
-        logSqlStartDirect(txLog, sqlLog, ps);
-    }
-
-    /**
-     * called when start sql
-     *
-     * @param <P>       parameter type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     */
-    protected <P> void logSqlStart(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementUpdate1<P> ps, P parameter) {
-        // do override
-        logSqlStartPrepared(txLog, sqlLog, ps, parameter);
-    }
-
-    /**
-     * called when start sql
-     *
-     * @param txLog  transaction log
-     * @param sqlLog SQL log
-     * @param ps     SQL statement
-     */
-    protected void logSqlStartDirect(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSqlDirect ps) {
-        // do override
-        Object parameter = null;
-        logSqlStartCommon(txLog, sqlLog, ps, parameter);
-    }
-
-    /**
-     * called when start sql
-     *
-     * @param <P>       parameter type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     */
-    protected <P> void logSqlStartPrepared(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSqlPrepared<P> ps, P parameter) {
-        // do override
-        logSqlStartCommon(txLog, sqlLog, ps, parameter);
-    }
-
-    /**
-     * called when start sql
-     *
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     */
-    protected void logSqlStartCommon(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter) {
+    protected void logSqlStart(TgSessionTxLog txLog, TgSessionSqlLog sqlLog) {
         // do override
     }
 
-    protected <R> void doLogSqlRead(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs, R record) {
-        Object parameter = null;
-        doLogSqlReadMain(transaction, ps, parameter, rs, (t, s) -> logSqlRead(t, s, ps, rs, record));
-    }
-
-    protected <P, R> void doLogSqlRead(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs, R record) {
-        doLogSqlReadMain(transaction, ps, parameter, rs, (t, s) -> logSqlRead(t, s, ps, parameter, rs, record));
-    }
-
-    protected <R> void doLogSqlReadMain(TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TsurugiResultSet<R> rs, BiConsumer<TgSessionTxLog, TgSessionSqlLog> action) {
+    protected void doLogSqlStartException(TsurugiTransaction transaction, int iceaxeSqlExecuteId, Throwable occurred) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
         }
-        var sqlLog = txLog.getSqlLog(rs);
+        var sqlLog = txLog.getSqlLog(iceaxeSqlExecuteId);
         if (sqlLog == null) {
-            sqlLog = txLog.getSqlLog(ps, parameter);
-            if (sqlLog == null) {
-                return;
-            }
-            txLog.putSqlLog(rs, sqlLog);
+            return;
         }
 
-        sqlLog.incrementReadCount();
+        logSqlStartException(txLog, sqlLog, occurred);
+    }
 
-        action.accept(txLog, sqlLog);
+    /**
+     * called when occurs exception start sql
+     *
+     * @param txLog    transaction log
+     * @param sqlLog   SQL log
+     * @param occurred exception
+     */
+    protected void logSqlStartException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, Throwable occurred) {
+        // do override
+    }
+
+    protected void doLogSqlStarted(TsurugiTransaction transaction, TsurugiResult result) {
+        var txLog = getTxLog(transaction);
+        if (txLog == null) {
+            return;
+        }
+        var sqlLog = txLog.getSqlLog(result.getIceaxeSqlExecuteId());
+        if (sqlLog == null) {
+            return;
+        }
+
+        sqlLog.setSqlResult(result);
+
+        logSqlStarted(txLog, sqlLog);
+    }
+
+    /**
+     * called when started sql
+     *
+     * @param txLog  transaction log
+     * @param sqlLog SQL log
+     */
+    protected void logSqlStarted(TgSessionTxLog txLog, TgSessionSqlLog sqlLog) {
+        // do override
+    }
+
+    protected <R> void doLogSqlRead(TsurugiTransaction transaction, TsurugiResultSet<R> rs, R record) {
+        var txLog = getTxLog(transaction);
+        if (txLog == null) {
+            return;
+        }
+        var sqlLog = txLog.getSqlLog(rs.getIceaxeSqlExecuteId());
+        if (sqlLog == null) {
+            return;
+        }
+
+        logSqlRead(txLog, sqlLog, record);
     }
 
     /**
@@ -510,176 +486,47 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param rs     ResultSet
      * @param record record
      */
-    protected <R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs, R record) {
-        // do override
-        Object parameter = null;
-        logSqlReadCommon(txLog, sqlLog, ps, parameter, rs, record);
-    }
-
-    /**
-     * called when read record
-     *
-     * @param <P>       parameter type
-     * @param <R>       result type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param rs        ResultSet
-     * @param record    record
-     */
-    protected <P, R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs, R record) {
-        // do override
-        logSqlReadCommon(txLog, sqlLog, ps, parameter, rs, record);
-    }
-
-    /**
-     * called when read record
-     *
-     * @param <R>       result type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param rs        ResultSet
-     * @param record    record
-     */
-    protected <R> void logSqlReadCommon(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter, TsurugiResultSet<R> rs, R record) {
+    protected <R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, R record) {
         // do override
     }
 
-    protected <R> void doLogSqlReadException(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs, Throwable occurred) {
-        Object parameter = null;
-        doLogSqlReadExceptionMain(transaction, ps, parameter, rs, (t, s) -> logSqlReadException(t, s, ps, rs, occurred));
-    }
-
-    protected <P, R> void doLogSqlReadException(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs, Throwable occurred) {
-        doLogSqlReadExceptionMain(transaction, ps, parameter, rs, (t, s) -> logSqlReadException(t, s, ps, parameter, rs, occurred));
-    }
-
-    protected <R> void doLogSqlReadExceptionMain(TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TsurugiResultSet<R> rs, BiConsumer<TgSessionTxLog, TgSessionSqlLog> action) {
+    protected <R> void doLogSqlReadException(TsurugiTransaction transaction, TsurugiResultSet<R> rs, Throwable occurred) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
         }
-        var sqlLog = txLog.getSqlLog(ps, parameter);
+        var sqlLog = txLog.getSqlLog(rs.getIceaxeSqlExecuteId());
         if (sqlLog == null) {
             return;
         }
 
-        action.accept(txLog, sqlLog);
+        logSqlReadException(txLog, sqlLog, occurred);
     }
 
     /**
      * called when occurs read exception
      *
-     * @param <R>      result type
      * @param txLog    transaction log
      * @param sqlLog   SQL log
-     * @param ps       SQL statement
-     * @param rs       ResultSet
      * @param occurred exception
      */
-    protected <R> void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs, Throwable occurred) {
-        // do override
-        Object parameter = null;
-        logSqlReadExceptionCommon(txLog, sqlLog, ps, parameter, rs, occurred);
-    }
-
-    /**
-     * called when occurs read exception
-     *
-     * @param <P>       parameter type
-     * @param <R>       result type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param rs        ResultSet
-     * @param occurred  exception
-     */
-    protected <P, R> void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs, Throwable occurred) {
-        // do override
-        logSqlReadExceptionCommon(txLog, sqlLog, ps, parameter, rs, occurred);
-    }
-
-    /**
-     * called when occurs read exception
-     *
-     * @param <R>
-     * @param <R>       result type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param rs        ResultSet
-     * @param occurred  exception
-     */
-    protected <R> void logSqlReadExceptionCommon(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter, TsurugiResultSet<R> rs, Throwable occurred) {
+    protected void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, Throwable occurred) {
         // do override
     }
 
-    protected <R> void doLogSqlEnd(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs) {
-        Object parameter = null;
-        doLogSqlEndMain(transaction, ps, parameter, (t, s) -> logSqlEnd(t, s, ps, rs));
-    }
-
-    protected <P, R> void doLogSqlEnd(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs) {
-        doLogSqlEndMain(transaction, ps, parameter, (t, s) -> logSqlEnd(t, s, ps, parameter, rs));
-    }
-
-    protected void doLogSqlEnd(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps, TsurugiResultCount rc, @Nullable Throwable occurred) {
-        Object parameter = null;
-        doLogSqlEndMain(transaction, ps, parameter, (t, s) -> logSqlEnd(t, s, ps, rc, occurred));
-    }
-
-    protected <P> void logSqlEnd(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<P> ps, P parameter, TsurugiResultCount rc, @Nullable Throwable occurred) {
-        doLogSqlEndMain(transaction, ps, parameter, (t, s) -> logSqlEnd(t, s, ps, parameter, rc, occurred));
-    }
-
-    protected <R> void doLogSqlEndMain(TsurugiTransaction transaction, TsurugiSql ps, Object parameter, BiConsumer<TgSessionTxLog, TgSessionSqlLog> action) {
+    protected void doLogSqlEnd(TsurugiTransaction transaction, TsurugiResult result, @Nullable Throwable occurred) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
         }
-        var sqlLog = txLog.getSqlLog(ps, parameter);
+        var sqlLog = txLog.getSqlLog(result.getIceaxeSqlExecuteId());
         if (sqlLog == null) {
             return;
         }
 
         sqlLog.setEndTime(ZonedDateTime.now());
 
-        action.accept(txLog, sqlLog);
-    }
-
-    /**
-     * called when end sql
-     *
-     * @param <R>    result type
-     * @param txLog  transaction log
-     * @param sqlLog SQL log
-     * @param ps     SQL statement
-     * @param rs     ResultSet
-     */
-    protected <R> void logSqlEnd(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs) {
-        // do override
-        logSqlEndDirect(txLog, sqlLog, ps, rs, null);
-    }
-
-    /**
-     * called when end sql
-     *
-     * @param <P>       parameter type
-     * @param <R>       result type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param rs        ResultSet
-     */
-    protected <P, R> void logSqlEnd(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs) {
-        // do override
-        logSqlEndPrepared(txLog, sqlLog, ps, parameter, rs, null);
+        logSqlEnd(txLog, sqlLog, occurred);
     }
 
     /**
@@ -687,212 +534,35 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      *
      * @param txLog    transaction log
      * @param sqlLog   SQL log
-     * @param ps       SQL statement
-     * @param rc       ResultCount
      * @param occurred exception
      */
-    protected void logSqlEnd(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementUpdate0 ps, TsurugiResultCount rc, @Nullable Throwable occurred) {
-        // do override
-        logSqlEndDirect(txLog, sqlLog, ps, rc, occurred);
-    }
-
-    /**
-     * called when end sql
-     *
-     * @param <P>       parameter type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param rc        ResultCount
-     * @param occurred  exception
-     */
-    protected <P> void logSqlEnd(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementUpdate1<P> ps, P parameter, TsurugiResultCount rc, @Nullable Throwable occurred) {
-        // do override
-        logSqlEndPrepared(txLog, sqlLog, ps, parameter, rc, occurred);
-    }
-
-    /**
-     * called when end sql
-     *
-     * @param txLog    transaction log
-     * @param sqlLog   SQL log
-     * @param ps       SQL statement
-     * @param result   SQL result
-     * @param occurred exception
-     */
-    protected void logSqlEndDirect(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSqlDirect ps, TsurugiResult result, @Nullable Throwable occurred) {
-        // do override
-        Object parameter = null;
-        logSqlEndCommon(txLog, sqlLog, ps, parameter, result, occurred);
-    }
-
-    /**
-     * called when end sql
-     *
-     * @param <P>       parameter type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param result    SQL result
-     * @param occurred  exception
-     */
-    protected <P> void logSqlEndPrepared(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSqlPrepared<P> ps, P parameter, TsurugiResult result, @Nullable Throwable occurred) {
-        // do override
-        logSqlEndCommon(txLog, sqlLog, ps, parameter, result, occurred);
-    }
-
-    /**
-     * called when end sql
-     *
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param result    SQL result
-     * @param occurred  exception
-     */
-    protected void logSqlEndCommon(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter, TsurugiResult result, @Nullable Throwable occurred) {
+    protected void logSqlEnd(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, @Nullable Throwable occurred) {
         // do override
     }
 
-    protected <R> void doLogSqlClose(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs, Throwable occurred) {
-        Object parameter = null;
-        doLogSqlCloseMain(transaction, ps, parameter, rs, (t, s) -> logSqlClose(t, s, ps, rs, occurred));
-    }
-
-    protected <P, R> void doLogSqlClose(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs, Throwable occurred) {
-        doLogSqlCloseMain(transaction, ps, parameter, rs, (t, s) -> logSqlClose(t, s, ps, parameter, rs, occurred));
-    }
-
-    protected void doLogSqlClose(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate0 ps, TsurugiResultCount rc, Throwable occurred) {
-        Object parameter = null;
-        doLogSqlCloseMain(transaction, ps, parameter, rc, (t, s) -> logSqlClose(t, s, ps, rc, occurred));
-    }
-
-    protected <P> void doLogSqlClose(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<P> ps, P parameter, TsurugiResultCount rc, Throwable occurred) {
-        doLogSqlCloseMain(transaction, ps, parameter, rc, (t, s) -> logSqlClose(t, s, ps, parameter, rc, occurred));
-    }
-
-    protected void doLogSqlCloseMain(TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TsurugiResult result, BiConsumer<TgSessionTxLog, TgSessionSqlLog> action) {
+    protected void doLogSqlClose(TsurugiTransaction transaction, TsurugiResult result, @Nullable Throwable occurred) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
         }
-        var sqlLog = txLog.removeSqlLog(ps, parameter, result);
+        var sqlLog = txLog.removeSqlLog(result.getIceaxeSqlExecuteId());
         if (sqlLog == null) {
             return;
         }
 
         sqlLog.setCloseTime(ZonedDateTime.now());
 
-        action.accept(txLog, sqlLog);
+        logSqlClose(txLog, sqlLog, occurred);
     }
 
     /**
      * called when close ResultSet
      *
-     * @param <R>      result type
      * @param txLog    transaction log
      * @param sqlLog   SQL log
-     * @param ps       SQL statement
-     * @param rs       ResultSet
      * @param occurred exception
      */
-    protected <R> void logSqlClose(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs, Throwable occurred) {
-        // do override
-        logSqlCloseDirect(txLog, sqlLog, ps, rs, occurred);
-    }
-
-    /**
-     * called when close ResultSet
-     *
-     * @param <P>       parameter type
-     * @param <R>       result type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param rs        ResultSet
-     * @param occurred  exception
-     */
-    protected <P, R> void logSqlClose(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs, Throwable occurred) {
-        // do override
-        logSqlClosePrepared(txLog, sqlLog, ps, parameter, rs, occurred);
-    }
-
-    /**
-     * called when close ResultCount
-     *
-     * @param txLog    transaction log
-     * @param sqlLog   SQL log
-     * @param ps       SQL statement
-     * @param rc       ResultCount
-     * @param occurred exception
-     */
-    protected void logSqlClose(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementUpdate0 ps, TsurugiResultCount rc, Throwable occurred) {
-        // do override
-        logSqlCloseDirect(txLog, sqlLog, ps, rc, occurred);
-    }
-
-    /**
-     * called when close ResultClose
-     *
-     * @param <P>       parameter type
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param rc        ResultCount
-     * @param occurred  exception
-     */
-    protected <P> void logSqlClose(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiPreparedStatementUpdate1<P> ps, P parameter, TsurugiResultCount rc, Throwable occurred) {
-        // do override
-        logSqlClosePrepared(txLog, sqlLog, ps, parameter, rc, occurred);
-    }
-
-    /**
-     * called when close SQL result
-     *
-     * @param txLog    transaction log
-     * @param sqlLog   SQL log
-     * @param ps       SQL statement
-     * @param result   SQL result
-     * @param occurred exception
-     */
-    protected void logSqlCloseDirect(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, TsurugiResult result, Throwable occurred) {
-        // do override
-        Object parameter = null;
-        logSqlCloseCommon(txLog, sqlLog, ps, parameter, result, occurred);
-    }
-
-    /**
-     * called when close SQL result
-     *
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param result    SQL result
-     * @param occurred  exception
-     */
-    protected void logSqlClosePrepared(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter, TsurugiResult result, Throwable occurred) {
-        // do override
-        logSqlCloseCommon(txLog, sqlLog, ps, parameter, result, occurred);
-    }
-
-    /**
-     * called when close SQL result
-     *
-     * @param txLog     transaction log
-     * @param sqlLog    SQL log
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param result    SQL result
-     * @param occurred  exception
-     */
-    protected void logSqlCloseCommon(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter, TsurugiResult result, Throwable occurred) {
+    protected void logSqlClose(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, @Nullable Throwable occurred) {
         // do override
     }
 
@@ -901,7 +571,6 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         if (txLog == null) {
             return;
         }
-//      var sqlLog = txLog.getSqlLog(ps, parameter); // sqlLogは doLogSqlCloseMainで txLogから削除されている
 
         logTransactionSqlEnd(txLog, ps, parameter, occurred);
     }

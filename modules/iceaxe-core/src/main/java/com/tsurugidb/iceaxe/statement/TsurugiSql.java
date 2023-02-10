@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.statement;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,6 +23,10 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
  */
 public abstract class TsurugiSql implements Closeable {
 
+    private static final AtomicInteger SQL_STATEMENT_COUNT = new AtomicInteger(0);
+    private static final AtomicInteger SQL_EXECUTE_COUNT = new AtomicInteger(0);
+
+    private final int iceaxeSqlId;
     private final TsurugiSession ownerSession;
     protected final String sql;
     private IceaxeTimeout explainConnectTimeout;
@@ -29,9 +34,26 @@ public abstract class TsurugiSql implements Closeable {
     private boolean closed = false;
 
     protected TsurugiSql(@Nonnull TsurugiSession session, @Nonnull String sql) throws IOException {
+        this.iceaxeSqlId = SQL_STATEMENT_COUNT.incrementAndGet();
         this.ownerSession = session;
         this.sql = sql;
         session.addChild(this);
+    }
+
+    /**
+     * is prepared
+     *
+     * @return true: prepared
+     */
+    public abstract boolean isPrepared();
+
+    /**
+     * get iceaxe sqlId
+     *
+     * @return iceaxe sqlId
+     */
+    public int getIceaxeSqlId() {
+        return this.iceaxeSqlId;
     }
 
     protected final TsurugiSession getSession() {
@@ -104,6 +126,10 @@ public abstract class TsurugiSql implements Closeable {
             this.explainCloseTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CLOSE);
         }
         return this.explainCloseTimeout;
+    }
+
+    protected final int getNewIceaxeSqlExecuteId() {
+        return SQL_EXECUTE_COUNT.incrementAndGet();
     }
 
     protected final IceaxeConvertUtil getConvertUtil(@Nullable IceaxeConvertUtil primaryConvertUtil) {

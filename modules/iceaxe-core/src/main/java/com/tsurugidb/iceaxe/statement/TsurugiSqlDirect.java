@@ -8,10 +8,15 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 /**
  * Tsurugi SQL (not prepared) statement
  */
-public class TsurugiSqlDirect extends TsurugiSql {
+public abstract class TsurugiSqlDirect extends TsurugiSql {
 
     protected TsurugiSqlDirect(TsurugiSession session, String sql) throws IOException {
         super(session, sql);
+    }
+
+    @Override
+    public final boolean isPrepared() {
+        return false;
     }
 
     /**

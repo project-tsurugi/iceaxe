@@ -2,28 +2,30 @@ package com.tsurugidb.iceaxe.session.event.logging;
 
 import java.time.ZonedDateTime;
 
-import com.tsurugidb.iceaxe.session.event.logging.TgSessionTxLog.TgSqlLogKey;
+import com.tsurugidb.iceaxe.result.TsurugiResult;
+import com.tsurugidb.iceaxe.statement.TsurugiSql;
 
 /**
- * Tsurugi SQL statement log
+ * Tsurugi SQL execute log
  */
 public class TgSessionSqlLog {
 
-    private int sqlId;
-    private TgSqlLogKey key;
-    private int readCount = 0;
+    private int iceaxeSqlExecuteId;
+    private TsurugiSql sqlStatement;
+    private Object sqlParameter;
+    private TsurugiResult result;
 
     private ZonedDateTime startTime;
     private ZonedDateTime endTime;
     private ZonedDateTime closeTime;
 
     /**
-     * set sqlId
+     * set iceaxe SQL executeId
      *
-     * @param sqlId sqlId
+     * @param iceaxeSqlExecuteId iceaxe SQL executeId
      */
-    public void setSqlId(int sqlId) {
-        this.sqlId = sqlId;
+    public void setIceaxeSqExecutelId(int iceaxeSqlExecuteId) {
+        this.iceaxeSqlExecuteId = iceaxeSqlExecuteId;
     }
 
     /**
@@ -31,42 +33,55 @@ public class TgSessionSqlLog {
      *
      * @return sqlId
      */
-    public int getSqlId() {
-        return this.sqlId;
+    public int getIceaxeSqlExecuteId() {
+        return this.iceaxeSqlExecuteId;
     }
 
     /**
-     * set sqlLog key
+     * set SQL statement
      *
-     * @param key sqlLog key
+     * @param ps        SQL statement
+     * @param parameter SQL parameter
      */
-    public void setSqlLogKey(TgSqlLogKey key) {
-        this.key = key;
+    public void setSqlStatement(TsurugiSql ps, Object parameter) {
+        this.sqlStatement = ps;
+        this.sqlParameter = parameter;
     }
 
     /**
-     * get sqlLog key
+     * get SQL statement
      *
-     * @return sqlLog key
+     * @return SQL statement
      */
-    public TgSqlLogKey getSqlLogKey() {
-        return this.key;
+    public TsurugiSql getSqlStatement() {
+        return this.sqlStatement;
     }
 
     /**
-     * increment read count
-     */
-    public void incrementReadCount() {
-        this.readCount++;
-    }
-
-    /**
-     * get read count
+     * get SQL parameter
      *
-     * @return read count
+     * @return SQL parameter
      */
-    public int getReadCount() {
-        return this.readCount;
+    public Object getSqlParameter() {
+        return this.sqlParameter;
+    }
+
+    /**
+     * set result
+     *
+     * @param result SQL result
+     */
+    public void setSqlResult(TsurugiResult result) {
+        this.result = result;
+    }
+
+    /**
+     * get SQL result
+     *
+     * @return SQL result
+     */
+    public TsurugiResult getSqlResult() {
+        return this.result;
     }
 
     /**

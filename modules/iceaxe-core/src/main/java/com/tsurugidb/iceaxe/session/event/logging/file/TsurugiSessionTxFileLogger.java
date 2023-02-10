@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
-import com.tsurugidb.iceaxe.result.TsurugiResult;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.logging.TgSessionSqlLog;
@@ -68,10 +67,10 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         writerMap.put(txLog, writer);
 
         var transaction = txLog.getTransaction();
-        var executeId = transaction.getExecuteId();
+        var executeId = transaction.getIceaxeExecuteId();
         var attempt = transaction.getAttempt();
         var txOption = transaction.getTransactionOption();
-        writer.println("transaction start %s %s\nexecuteId=%d, attempt=%d, tx=%s", startTime, threadName, executeId, attempt, txOption);
+        writer.println("transaction start %s %s\niceaxeExecuteId=%d, attempt=%d, tx=%s", startTime, threadName, executeId, attempt, txOption);
     }
 
     protected TsurugiSessionTxFileLogWriter getWriter(TgSessionTxLog txLog) {
@@ -89,27 +88,27 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     protected void logTransactionSqlStart(TgSessionTxLog txLog, TsurugiSql ps, Object parameter) {
         var writer = getWriter(txLog);
 
-        writer.println("execute(sql) start");
+        writer.println("tx.execute(sql) start");
     }
 
     @Override
-    protected void logSqlStartDirect(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSqlDirect ps) {
+    protected void logSqlStart(TgSessionTxLog txLog, TgSessionSqlLog sqlLog) {
         var writer = getWriter(txLog);
 
-        int sqlId = sqlLog.getSqlId();
-        writer.println("sql-%05d start\n%s", sqlId, ps.getSql());
+        int sqlId = sqlLog.getIceaxeSqlExecuteId();
+        var ps = sqlLog.getSqlStatement();
+        writer.println("sql-%d start\n%s", sqlId, ps.getSql());
 
-        logSqlExplain(sqlId, writer, ps::explain);
-    }
+        if (!ps.isPrepared()) {
+            logSqlExplain(sqlId, writer, ((TsurugiSqlDirect) ps)::explain);
+        } else {
+            var parameter = sqlLog.getSqlParameter();
+            writer.println("sql-%d args=%s", sqlId, parameter);
 
-    @Override
-    protected <P> void logSqlStartPrepared(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSqlPrepared<P> ps, P parameter) {
-        var writer = getWriter(txLog);
-
-        int sqlId = sqlLog.getSqlId();
-        writer.println("sql-%05d start\n%s\nargs=%s", sqlId, ps.getSql(), parameter);
-
-        logSqlExplain(sqlId, writer, () -> ps.explain(parameter));
+            @SuppressWarnings("unchecked")
+            var prepared = (TsurugiSqlPrepared<Object>) ps;
+            logSqlExplain(sqlId, writer, () -> prepared.explain(parameter));
+        }
     }
 
     protected void logSqlExplain(int sqlId, TsurugiSessionTxFileLogWriter writer, IoSupplier<TgStatementMetadata> explainSupplier) {
@@ -135,38 +134,49 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected <R> void logSqlReadExceptionCommon(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter, TsurugiResultSet<R> rs, Throwable occurred) {
+    protected void logSqlStartException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, Throwable occurred) {
         var writer = getWriter(txLog);
 
-        int sqlId = sqlLog.getSqlId();
-        writer.println("sql-%05d read error", sqlId);
+        int sqlId = sqlLog.getIceaxeSqlExecuteId();
+        writer.println("sql-%d start error", sqlId);
         writer.println(occurred);
     }
 
     @Override
-    protected void logSqlEndCommon(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter, TsurugiResult result, @Nullable Throwable occurred) {
+    protected void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, Throwable occurred) {
         var writer = getWriter(txLog);
 
-        int sqlId = sqlLog.getSqlId();
+        int sqlId = sqlLog.getIceaxeSqlExecuteId();
+        writer.println("sql-%d read error", sqlId);
+        writer.println(occurred);
+    }
+
+    @Override
+    protected void logSqlEnd(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, @Nullable Throwable occurred) {
+        var writer = getWriter(txLog);
+
+        int sqlId = sqlLog.getIceaxeSqlExecuteId();
         var time = elapsed(sqlLog.getStartTime(), sqlLog.getEndTime());
+        var result = sqlLog.getSqlResult();
         if (result instanceof TsurugiResultSet) {
-            writer.println("sql-%05d readCount=%d", sqlId, sqlLog.getReadCount());
+            var rs = (TsurugiResultSet<?>) result;
+            writer.println("sql-%d readCount=%d, hasNextRow=%s", sqlId, rs.getReadCount(), rs.getHasNextRow().map(b -> b.toString()).orElse("unread"));
         }
         if (occurred == null) {
-            writer.println("sql-%05d end. %d[ms]", sqlId, time);
+            writer.println("sql-%d end. %d[ms]", sqlId, time);
         } else {
-            writer.println("sql-%05d error. %d[ms]", sqlId, time);
+            writer.println("sql-%d error. %d[ms]", sqlId, time);
             writer.println(occurred);
         }
     }
 
     @Override
-    protected void logSqlCloseCommon(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiSql ps, Object parameter, TsurugiResult result, Throwable occurred) {
+    protected void logSqlClose(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, Throwable occurred) {
         var writer = getWriter(txLog);
 
-        int sqlId = sqlLog.getSqlId();
+        int sqlId = sqlLog.getIceaxeSqlExecuteId();
         var time = elapsed(sqlLog.getEndTime(), sqlLog.getCloseTime());
-        writer.println("sql-%05d close. %d[ms]", sqlId, time);
+        writer.println("sql-%d close. %d[ms]", sqlId, time);
         writer.println(occurred);
     }
 
@@ -175,9 +185,9 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         if (occurred == null) {
-            writer.println("execute(sql) end");
+            writer.println("tx.execute(sql) end");
         } else {
-            writer.println("execute(sql) error");
+            writer.println("tx.execute(sql) error");
             writer.println(occurred);
         }
     }
@@ -235,9 +245,9 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         var transaction = txLog.getTransaction();
-        var executeId = transaction.getExecuteId();
+        var executeId = transaction.getIceaxeExecuteId();
         var attempt = transaction.getAttempt();
-        writer.println("tm.execute(executeId=%d, attempt=%d) retry. nextOption=%s", executeId, attempt, nextOption);
+        writer.println("tm.execute(iceaxeExecuteId=%d, attempt=%d) retry. nextTx=%s", executeId, attempt, nextOption);
     }
 
     @Override

@@ -49,10 +49,17 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiSqlPrepared<P> {
         return this;
     }
 
-    protected final void event(Consumer<TsurugiSqlPreparedStatementEventListener<P>> action) {
+    private void event(Throwable occurred, Consumer<TsurugiSqlPreparedStatementEventListener<P>> action) {
         if (this.eventListenerList != null) {
-            for (var listener : eventListenerList) {
-                action.accept(listener);
+            try {
+                for (var listener : eventListenerList) {
+                    action.accept(listener);
+                }
+            } catch (Throwable e) {
+                if (occurred != null) {
+                    e.addSuppressed(occurred);
+                }
+                throw e;
             }
         }
     }
@@ -70,15 +77,25 @@ public class TsurugiPreparedStatementUpdate1<P> extends TsurugiSqlPrepared<P> {
     public TsurugiResultCount execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
         checkClose();
 
-        var lowPs = getLowPreparedStatement();
-        var lowParameterList = getLowParameterList(parameter);
         LOG.trace("executeStatement start");
-        event(listener -> listener.executeStatementStart(transaction, this, parameter));
-        var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeStatement(lowPs, lowParameterList));
-        LOG.trace("executeStatement started");
-        var result = new TsurugiResultCount(transaction, lowResultFuture);
-        event(listener -> listener.executeStatementStarted(transaction, this, parameter, result));
-        return result;
+        int sqlExecuteId = getNewIceaxeSqlExecuteId();
+        event(null, listener -> listener.executeStatementStart(transaction, this, parameter, sqlExecuteId));
+
+        TsurugiResultCount rc;
+        try {
+            var lowPs = getLowPreparedStatement();
+            var lowParameterList = getLowParameterList(parameter);
+            var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeStatement(lowPs, lowParameterList));
+            LOG.trace("executeStatement started");
+
+            rc = new TsurugiResultCount(sqlExecuteId, transaction, lowResultFuture);
+        } catch (Throwable e) {
+            event(e, listener -> listener.executeStatementStartException(transaction, this, parameter, sqlExecuteId, e));
+            throw e;
+        }
+
+        event(null, listener -> listener.executeStatementStarted(transaction, this, parameter, rc));
+        return rc;
     }
 
     /**

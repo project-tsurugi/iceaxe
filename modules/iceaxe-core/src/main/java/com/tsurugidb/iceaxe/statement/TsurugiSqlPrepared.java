@@ -45,6 +45,11 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         applyCloseTimeout();
     }
 
+    @Override
+    public final boolean isPrepared() {
+        return true;
+    }
+
     private void applyCloseTimeout() {
         closeTimeout.apply(lowPreparedStatement);
         closeTimeout.apply(lowPreparedStatementFuture);

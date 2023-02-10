@@ -3,15 +3,10 @@ package com.tsurugidb.iceaxe.session.event.logging;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TsurugiResult;
-import com.tsurugidb.iceaxe.statement.TsurugiSql;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
@@ -20,67 +15,10 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 public class TgSessionTxLog {
     private static final Logger LOG = LoggerFactory.getLogger(TgSessionTxLog.class);
 
-    /**
-     * Tsurugi sqlLog key
-     */
-    public static final class TgSqlLogKey { // record
-
-        private final TsurugiSql ps;
-        private final Object parameter;
-
-        /**
-         * Creates a new instance.
-         *
-         * @param ps        SQL statement
-         * @param parameter SQL parameter
-         */
-        public TgSqlLogKey(TsurugiSql ps, @Nullable Object parameter) {
-            this.ps = ps;
-            this.parameter = parameter;
-        }
-
-        /**
-         * get SQL statement
-         *
-         * @return SQL statement
-         */
-        public TsurugiSql ps() {
-            return this.ps;
-        }
-
-        /**
-         * get SQL parameter
-         *
-         * @return SQL parameter
-         */
-        public Object parameter() {
-            return this.parameter;
-        }
-
-        @Override
-        public int hashCode() {
-            return System.identityHashCode(ps) ^ System.identityHashCode(parameter);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof TgSqlLogKey) {
-                var that = (TgSqlLogKey) obj;
-                return that.ps == this.ps && that.parameter == this.parameter;
-            }
-            return false;
-        }
-    }
-
     private TsurugiTransaction transaction;
     private String transactionId;
     private TgSessionTmLog tmLog;
-    private final AtomicInteger sqlCount = new AtomicInteger(0);
-    private final Map<TgSqlLogKey, TgSessionSqlLog> sqlIdMap = new ConcurrentHashMap<>();
-    private final Map<TsurugiResult, TgSessionSqlLog> resultMap = new ConcurrentHashMap<>();
+    private final Map<Integer, TgSessionSqlLog> sqlLogMap = new ConcurrentHashMap<>();
 
     private ZonedDateTime startTime;
     private ZonedDateTime commitStartTime;
@@ -144,82 +82,51 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get new SQL statement log
+     * get new SQL execute log
      *
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @return SQL statement log
+     * @param iceaxeSqlExecuteId iceaxe SQL executeId
+     * @return SQL execute log
      */
-    public TgSessionSqlLog getNewSqlLog(TsurugiSql ps, Object parameter) {
+    public TgSessionSqlLog getNewSqlLog(int iceaxeSqlExecuteId) {
         var log = createSqlLog();
         log.setStartTime(ZonedDateTime.now());
+        log.setIceaxeSqExecutelId(iceaxeSqlExecuteId);
 
-        int sqlId = sqlCount.incrementAndGet();
-        log.setSqlId(sqlId);
-
-        var key = new TgSqlLogKey(ps, parameter);
-        log.setSqlLogKey(key);
-
-        sqlIdMap.put(key, log);
+        sqlLogMap.put(iceaxeSqlExecuteId, log);
         return log;
     }
 
     /**
-     * Creates a new SQL statement log instance
+     * Creates a new SQL execute log instance
      *
-     * @return SQL statement log
+     * @return SQL execute log
      */
     protected TgSessionSqlLog createSqlLog() {
         return new TgSessionSqlLog();
     }
 
     /**
-     * get SQL statement log
+     * get SQL execute log
      *
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @return SQL statement log
+     * @param iceaxeSqlExecuteId iceaxe SQL executeId
+     * @return SQL execute log
      */
-    public TgSessionSqlLog getSqlLog(TsurugiSql ps, Object parameter) {
-        var log = sqlIdMap.get(new TgSqlLogKey(ps, parameter));
+    public TgSessionSqlLog getSqlLog(int iceaxeSqlExecuteId) {
+        var log = sqlLogMap.get(iceaxeSqlExecuteId);
         if (log == null) {
-            LOG.debug("sqlLog not found in sqlIdMap. {}, {}", ps, parameter);
+            LOG.debug("sqlLog not found in sqlIdMap. iceaxeSqlExecuteId={}", iceaxeSqlExecuteId);
         }
         return log;
     }
 
     /**
-     * put SQL statement log
+     * get and remove SQL execute log
      *
-     * @param result SQL result
-     * @param sqlLog SQL statement log
+     * @param iceaxeSqlExecuteId iceaxe SQL executeId
+     * @return SQL execute log
      */
-    public void putSqlLog(TsurugiResult result, TgSessionSqlLog sqlLog) {
-        resultMap.put(result, sqlLog);
-    }
-
-    /**
-     * get SQL statement log
-     *
-     * @param result SQL result
-     * @return SQL statement log
-     */
-    public TgSessionSqlLog getSqlLog(TsurugiResult result) {
-        return resultMap.get(result);
-    }
-
-    /**
-     * get and remove SQL statement log
-     *
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @param result    SQL result
-     * @return SQL statement log
-     */
-    public TgSessionSqlLog removeSqlLog(TsurugiSql ps, Object parameter, TsurugiResult result) {
-        var sqlLog = sqlIdMap.remove(new TgSqlLogKey(ps, parameter));
-        resultMap.remove(result);
-        return sqlLog;
+    public TgSessionSqlLog removeSqlLog(int iceaxeSqlExecuteId) {
+        return sqlLogMap.remove(iceaxeSqlExecuteId);
     }
 
     /**

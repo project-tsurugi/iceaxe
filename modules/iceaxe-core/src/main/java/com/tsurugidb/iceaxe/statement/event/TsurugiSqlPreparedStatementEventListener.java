@@ -14,11 +14,25 @@ public interface TsurugiSqlPreparedStatementEventListener<P> {
     /**
      * called when execute statement start
      *
-     * @param transaction transaction
-     * @param ps          SQL statement
-     * @param parameter   SQL parameter
+     * @param transaction        transaction
+     * @param ps                 SQL statement
+     * @param parameter          SQL parameter
+     * @param iceaxeSqlExecuteId iceaxe SQL executeId
      */
-    default void executeStatementStart(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<P> ps, P parameter) {
+    default void executeStatementStart(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<P> ps, P parameter, int iceaxeSqlExecuteId) {
+        // do override
+    }
+
+    /**
+     * called when execute statement start error
+     *
+     * @param transaction        transaction
+     * @param ps                 SQL statement
+     * @param parameter          SQL parameter
+     * @param iceaxeSqlExecuteId iceaxe SQL executeId
+     * @param occurred           exception
+     */
+    default void executeStatementStartException(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<P> ps, P parameter, int iceaxeSqlExecuteId, Throwable occurred) {
         // do override
     }
 
