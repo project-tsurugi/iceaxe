@@ -51,7 +51,7 @@ public class TgParameterList {
      */
     public static final Function<TgParameterList, TgParameterList> IDENTITY = p -> p;
 
-    private final List<Parameter> lowParameterList = new ArrayList<>();
+    private final List<TgParameter> parameterList = new ArrayList<>();
 
     /**
      * Tsurugi Parameter for PreparedStatement
@@ -68,7 +68,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList bool(@Nonnull String name, boolean value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -80,7 +80,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList bool(@Nonnull String name, @Nullable Boolean value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -92,7 +92,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList int4(@Nonnull String name, int value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -104,7 +104,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList int4(@Nonnull String name, @Nullable Integer value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -116,7 +116,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList int8(@Nonnull String name, long value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -128,7 +128,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList int8(@Nonnull String name, @Nullable Long value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -140,7 +140,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList float4(@Nonnull String name, float value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -152,7 +152,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList float4(@Nonnull String name, @Nullable Float value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -164,7 +164,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList float8(@Nonnull String name, double value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -176,7 +176,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList float8(@Nonnull String name, @Nullable Double value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -188,7 +188,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList decimal(@Nonnull String name, @Nullable BigDecimal value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -226,7 +226,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList character(@Nonnull String name, @Nullable String value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -238,7 +238,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList bytes(@Nonnull String name, @Nullable byte[] value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -250,7 +250,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList bits(@Nonnull String name, @Nullable boolean[] value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -262,7 +262,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList date(@Nonnull String name, @Nullable LocalDate value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -274,7 +274,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList time(@Nonnull String name, @Nullable LocalTime value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -286,7 +286,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList dateTime(@Nonnull String name, @Nullable LocalDateTime value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -298,7 +298,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList offsetTime(@Nonnull String name, @Nullable OffsetTime value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -310,7 +310,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList offsetDateTime(@Nonnull String name, @Nullable OffsetDateTime value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -322,7 +322,7 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList zonedDateTime(@Nonnull String name, @Nullable ZonedDateTime value) {
-        add(IceaxeLowParameterUtil.create(name, value));
+        add(TgParameter.of(name, value));
         return this;
     }
 
@@ -578,12 +578,8 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList add(TgParameter parameter) {
-        lowParameterList.add(parameter.toLowParameter());
+        parameterList.add(parameter);
         return this;
-    }
-
-    protected void add(Parameter lowParameter) {
-        lowParameterList.add(lowParameter);
     }
 
     /**
@@ -593,19 +589,21 @@ public class TgParameterList {
      * @return this
      */
     public TgParameterList add(TgParameterList otherList) {
-        for (var p : otherList.toLowParameterList()) {
-            lowParameterList.add(p);
-        }
+        parameterList.addAll(otherList.parameterList);
         return this;
     }
 
     // internal
     public List<Parameter> toLowParameterList() {
-        return this.lowParameterList;
+        var list = new ArrayList<Parameter>(parameterList.size());
+        for (var parameter : parameterList) {
+            list.add(parameter.toLowParameter());
+        }
+        return list;
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + lowParameterList;
+        return getClass().getSimpleName() + parameterList;
     }
 }

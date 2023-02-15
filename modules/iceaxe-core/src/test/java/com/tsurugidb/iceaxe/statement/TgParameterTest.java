@@ -22,6 +22,7 @@ class TgParameterTest {
     void testOfStringBoolean() {
         var parameter = TgParameter.of("foo", true);
         assertEquals(Parameters.of("foo", true), parameter.toLowParameter());
+        assertEquals("foo=true(boolean)", parameter.toString());
     }
 
     @Test
@@ -30,12 +31,14 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", Boolean.TRUE);
         assertEquals(Parameters.of("foo", true), parameter.toLowParameter());
+        assertEquals("foo=true(Boolean)", parameter.toString());
     }
 
     @Test
     void testOfStringInt() {
         var parameter = TgParameter.of("foo", 123);
         assertEquals(Parameters.of("foo", 123), parameter.toLowParameter());
+        assertEquals("foo=123(int)", parameter.toString());
     }
 
     @Test
@@ -44,12 +47,14 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", Integer.valueOf(123));
         assertEquals(Parameters.of("foo", 123), parameter.toLowParameter());
+        assertEquals("foo=123(Integer)", parameter.toString());
     }
 
     @Test
     void testOfStringLong() {
         var parameter = TgParameter.of("foo", 123L);
         assertEquals(Parameters.of("foo", 123L), parameter.toLowParameter());
+        assertEquals("foo=123(long)", parameter.toString());
     }
 
     @Test
@@ -58,12 +63,14 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", Long.valueOf(123));
         assertEquals(Parameters.of("foo", 123L), parameter.toLowParameter());
+        assertEquals("foo=123(Long)", parameter.toString());
     }
 
     @Test
     void testOfStringFloat() {
         var parameter = TgParameter.of("foo", 123f);
         assertEquals(Parameters.of("foo", 123f), parameter.toLowParameter());
+        assertEquals("foo=123.0(float)", parameter.toString());
     }
 
     @Test
@@ -72,12 +79,14 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", Float.valueOf(123));
         assertEquals(Parameters.of("foo", 123f), parameter.toLowParameter());
+        assertEquals("foo=123.0(Float)", parameter.toString());
     }
 
     @Test
     void testOfStringDouble() {
         var parameter = TgParameter.of("foo", 123d);
         assertEquals(Parameters.of("foo", 123d), parameter.toLowParameter());
+        assertEquals("foo=123.0(double)", parameter.toString());
     }
 
     @Test
@@ -86,6 +95,7 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", Double.valueOf(123));
         assertEquals(Parameters.of("foo", 123d), parameter.toLowParameter());
+        assertEquals("foo=123.0(Double)", parameter.toString());
     }
 
     @Test
@@ -94,6 +104,7 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", BigDecimal.valueOf(123));
         assertEquals(Parameters.of("foo", BigDecimal.valueOf(123)), parameter.toLowParameter());
+        assertEquals("foo=123(BigDecimal)", parameter.toString());
     }
 
     @Test
@@ -102,14 +113,16 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", "abc");
         assertEquals(Parameters.of("foo", "abc"), parameter.toLowParameter());
+        assertEquals("foo=abc(String)", parameter.toString());
     }
 
     @Test
     void testOfStringByteArray() {
         assertEquals(Parameters.ofNull("foo"), TgParameter.of("foo", (byte[]) null).toLowParameter());
 
-        var parameter = TgParameter.of("foo", new byte[] { 1, 2, 3 });
-        assertEquals(Parameters.of("foo", new byte[] { 1, 2, 3 }), parameter.toLowParameter());
+        var parameter = TgParameter.of("foo", new byte[] { 0, 1, 0xe, 0xf, 0x10, 0x7f, -1 });
+        assertEquals(Parameters.of("foo", new byte[] { 0, 1, 0xe, 0xf, 0x10, 0x7f, -1 }), parameter.toLowParameter());
+        assertEquals("foo=[00,01,0e,0f,10,7f,ff](byte[])", parameter.toString());
     }
 
     @Test
@@ -118,6 +131,7 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", new boolean[] { true, false, true });
         assertEquals(Parameters.of("foo", new boolean[] { true, false, true }), parameter.toLowParameter());
+        assertEquals("foo=[true, false, true](boolean[])", parameter.toString());
     }
 
     @Test
@@ -126,6 +140,7 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", LocalDate.of(2022, 6, 3));
         assertEquals(Parameters.of("foo", LocalDate.of(2022, 6, 3)), parameter.toLowParameter());
+        assertEquals("foo=2022-06-03(LocalDate)", parameter.toString());
     }
 
     @Test
@@ -134,6 +149,7 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", LocalTime.of(23, 30, 59));
         assertEquals(Parameters.of("foo", LocalTime.of(23, 30, 59)), parameter.toLowParameter());
+        assertEquals("foo=23:30:59(LocalTime)", parameter.toString());
     }
 
     @Test
@@ -142,6 +158,7 @@ class TgParameterTest {
 
         var parameter = TgParameter.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
         assertEquals(Parameters.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), parameter.toLowParameter());
+        assertEquals("foo=2022-09-22T23:30:59(LocalDateTime)", parameter.toString());
     }
 
     @Test
@@ -151,6 +168,7 @@ class TgParameterTest {
         var offset = ZoneOffset.ofHours(9);
         var parameter = TgParameter.of("foo", OffsetTime.of(23, 30, 59, 0, offset));
         assertEquals(Parameters.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), parameter.toLowParameter());
+        assertEquals("foo=23:30:59+09:00(OffsetTime)", parameter.toString());
     }
 
     @Test
@@ -160,6 +178,7 @@ class TgParameterTest {
         var offset = ZoneOffset.ofHours(9);
         var parameter = TgParameter.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
         assertEquals(Parameters.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), parameter.toLowParameter());
+        assertEquals("foo=2022-09-22T23:30:59+09:00(OffsetDateTime)", parameter.toString());
     }
 
     @Test
@@ -170,5 +189,6 @@ class TgParameterTest {
         var dateTime = ZonedDateTime.of(2022, 6, 3, 23, 30, 59, 999, zone);
         var parameter = TgParameter.of("foo", dateTime);
         assertEquals(Parameters.of("foo", dateTime.toOffsetDateTime()), parameter.toLowParameter());
+        assertEquals("foo=2022-06-03T23:30:59.000000999+09:00[Asia/Tokyo](ZonedDateTime)", parameter.toString());
     }
 }
