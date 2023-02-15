@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.session.event;
 
+import javax.annotation.Nullable;
+
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
@@ -77,7 +79,7 @@ public interface TsurugiSessionEventListener {
      * @param session  session
      * @param occurred exception
      */
-    default void closeSession(TsurugiSession session, Throwable occurred) {
+    default void closeSession(TsurugiSession session, @Nullable Throwable occurred) {
         // do override
     }
 }

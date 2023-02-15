@@ -40,6 +40,19 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
                 executeQueryClose(transaction, ps, rs, occurred);
             }
         });
+
+        executeQueryStarted2(transaction, ps, rs);
+    }
+
+    /**
+     * called when execute query started
+     *
+     * @param transaction transaction
+     * @param ps          SQL statement
+     * @param rs          ResultSet
+     */
+    default void executeQueryStarted2(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<R> ps, TsurugiResultSet<R> rs) {
+        // do override
     }
 
     /**

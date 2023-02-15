@@ -40,6 +40,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
 
     private final Path outputDir;
     private int writeExplain;
+    private boolean writeReadRecord;
     private final Map<TgSessionTxLog, TsurugiSessionTxFileLogWriter> writerMap = new ConcurrentHashMap<>();
 
     /**
@@ -48,18 +49,20 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
      * @param outputDir output directory
      */
     public TsurugiSessionTxFileLogger(Path outputDir) {
-        this(outputDir, EXPLAIN_BOTH);
+        this(outputDir, EXPLAIN_BOTH, false);
     }
 
     /**
      * Creates a new instance.
      *
-     * @param outputDir    output directory
-     * @param writeExplain write explain flag
+     * @param outputDir       output directory
+     * @param writeExplain    write explain flag
+     * @param writeReadRecord write read record
      */
-    public TsurugiSessionTxFileLogger(Path outputDir, int writeExplain) {
+    public TsurugiSessionTxFileLogger(Path outputDir, int writeExplain, boolean writeReadRecord) {
         this.outputDir = outputDir;
         this.writeExplain = writeExplain;
+        this.writeReadRecord = writeReadRecord;
     }
 
     @Override
@@ -171,7 +174,19 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, Throwable occurred) {
+    protected <R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiResultSet<R> rs, R record) {
+        if (!this.writeReadRecord) {
+            return;
+        }
+        var writer = getWriter(txLog);
+
+        int sqlId = sqlLog.getIceaxeSqlExecuteId();
+        int index = rs.getReadCount() - 1;
+        writer.println("sql-%d: read[%d]=%s", sqlId, index, record);
+    }
+
+    @Override
+    protected <R> void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiResultSet<R> rs, Throwable occurred) {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
@@ -286,7 +301,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    public void closeSession(TsurugiSession session, Throwable occurred) {
+    public void logSessionClose(TsurugiSession session, Throwable occurred) {
         for (var writer : writerMap.values()) {
             writer.close();
         }

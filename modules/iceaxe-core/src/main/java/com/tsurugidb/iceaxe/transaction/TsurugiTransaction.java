@@ -53,10 +53,11 @@ public class TsurugiTransaction implements Closeable {
     private final int iceaxeTransactionId;
     private final TsurugiSession ownerSession;
     private FutureResponse<Transaction> lowTransactionFuture;
+    private final TgTxOption txOption;
     private Throwable lowFutureException = null;
     private Transaction lowTransaction;
     private boolean calledGetLowTransaction = false;
-    private final TgTxOption txOption;
+    private String transactionId = null;
     private TsurugiTransactionManager ownerTm = null;
     private int iceaxeTmExecuteId = 0;
     private int attempt = 0;
@@ -295,7 +296,8 @@ public class TsurugiTransaction implements Closeable {
             this.lowTransactionFuture = null;
             applyCloseTimeout();
 
-            event(null, listener -> listener.gotTransactionId(this, lowTransaction.getTransactionId()));
+            this.transactionId = lowTransaction.getTransactionId();
+            event(null, listener -> listener.gotTransactionId(this, transactionId));
         }
         return this.lowTransaction;
     }
@@ -307,8 +309,13 @@ public class TsurugiTransaction implements Closeable {
      * @throws IOException
      */
     public String getTransactionId() throws IOException {
-        var transaction = getLowTransaction();
-        return transaction.getTransactionId();
+        if (this.transactionId == null) {
+            var transaction = getLowTransaction();
+            if (this.transactionId == null) {
+                this.transactionId = transaction.getTransactionId();
+            }
+        }
+        return this.transactionId;
     }
 
     // execute statement
@@ -994,6 +1001,7 @@ public class TsurugiTransaction implements Closeable {
 
     @Override
     public String toString() {
-        return "TsurugiTransaction(iceaxeTxId=" + iceaxeTransactionId + ", iceaxeTmExecuteId=" + iceaxeTmExecuteId + ", attempt=" + attempt + ", tx=" + txOption + ")";
+        return "TsurugiTransaction(" + txOption + ", iceaxeTxId=" + iceaxeTransactionId + ", iceaxeTmExecuteId=" + iceaxeTmExecuteId + ", attempt=" + attempt + ", transactionId=" + transactionId
+                + ")";
     }
 }

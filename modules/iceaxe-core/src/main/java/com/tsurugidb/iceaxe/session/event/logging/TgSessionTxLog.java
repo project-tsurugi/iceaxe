@@ -89,8 +89,10 @@ public class TgSessionTxLog {
      * @return SQL execute log
      */
     public TgSessionSqlLog getNewSqlLog(int iceaxeSqlExecuteId) {
+        var startTime = ZonedDateTime.now();
+
         var log = createSqlLog();
-        log.setStartTime(ZonedDateTime.now());
+        log.setStartTime(startTime);
         log.setIceaxeSqExecutelId(iceaxeSqlExecuteId);
 
         sqlLogMap.put(iceaxeSqlExecuteId, log);

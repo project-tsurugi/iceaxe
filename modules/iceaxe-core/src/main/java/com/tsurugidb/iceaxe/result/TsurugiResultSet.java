@@ -188,6 +188,11 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         event(null, listener -> listener.endResult(this));
     }
 
+    /**
+     * get hasNextRow
+     *
+     * @return hasNextRow
+     */
     public Optional<Boolean> getHasNextRow() {
         return this.hasNextRow;
     }

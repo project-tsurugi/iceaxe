@@ -24,29 +24,41 @@ import com.tsurugidb.tsubakuro.common.impl.SessionImpl;
 public class TsurugiConnector {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiConnector.class);
 
-    private static Path sessionTxLogDir;
-    private static int sessionTxLogExplain;
+    private static Path txLogDir;
+    private static int txLogExplain;
+    private static boolean txLogReadRecord;
     static {
         try {
             String dir = System.getProperty("iceaxe.tx.log.dir"); //$NON-NLS-1$
             if (dir != null) {
-                sessionTxLogDir = Path.of(dir);
-                Files.createDirectories(sessionTxLogDir);
-                LOG.debug("sessionTxLogDir={}", sessionTxLogDir);
+                txLogDir = Path.of(dir);
+                Files.createDirectories(txLogDir);
+                LOG.debug("txLogDir={}", txLogDir);
             }
         } catch (Exception ignore) {
-            sessionTxLogDir = null;
+            txLogDir = null;
         }
         try {
             String explain = System.getProperty("iceaxe.tx.log.explain"); //$NON-NLS-1$
             if (explain != null) {
-                sessionTxLogExplain = Integer.parseInt(explain);
-                LOG.debug("sessionTxLogExplain={}", sessionTxLogExplain);
+                txLogExplain = Integer.parseInt(explain);
+                LOG.debug("txLogExplain={}", txLogExplain);
             } else {
-                sessionTxLogExplain = TsurugiSessionTxFileLogger.EXPLAIN_FILE;
+                txLogExplain = TsurugiSessionTxFileLogger.EXPLAIN_FILE;
             }
         } catch (Exception ignore) {
-            sessionTxLogExplain = TsurugiSessionTxFileLogger.EXPLAIN_FILE;
+            txLogExplain = TsurugiSessionTxFileLogger.EXPLAIN_FILE;
+        }
+        try {
+            String readRecord = System.getProperty("iceaxe.tx.log.record"); //$NON-NLS-1$
+            if (readRecord != null) {
+                txLogReadRecord = Boolean.parseBoolean(readRecord);
+                LOG.debug("txLogReadRecord={}", txLogReadRecord);
+            } else {
+                txLogReadRecord = false;
+            }
+        } catch (Exception ignore) {
+            txLogReadRecord = false;
         }
     }
 
@@ -126,8 +138,8 @@ public class TsurugiConnector {
         var lowCredential = info.credential();
         var lowWireFuture = lowConnector.connect(lowCredential);
         var session = new TsurugiSession(info, lowSession, lowWireFuture);
-        if (sessionTxLogDir != null) {
-            session.addEventListener(new TsurugiSessionTxFileLogger(sessionTxLogDir, sessionTxLogExplain));
+        if (txLogDir != null) {
+            session.addEventListener(new TsurugiSessionTxFileLogger(txLogDir, txLogExplain, txLogReadRecord));
         }
         event(listener -> listener.accept(session));
         return session;

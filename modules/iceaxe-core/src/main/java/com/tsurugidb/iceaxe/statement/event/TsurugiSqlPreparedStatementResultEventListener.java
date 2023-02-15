@@ -30,6 +30,20 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
                 executeStatementClose(transaction, ps, parameter, rc, occurred);
             }
         });
+
+        executeStatementStarted2(transaction, ps, parameter, rc);
+    }
+
+    /**
+     * called when execute statement started
+     *
+     * @param transaction transaction
+     * @param ps          SQL statement
+     * @param parameter   SQL parameter
+     * @param rc          ResultCount
+     */
+    default void executeStatementStarted2(TsurugiTransaction transaction, TsurugiPreparedStatementUpdate1<P> ps, P parameter, TsurugiResultCount rc) {
+        // do override
     }
 
     /**

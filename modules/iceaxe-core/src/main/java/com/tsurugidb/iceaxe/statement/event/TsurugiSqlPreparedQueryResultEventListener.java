@@ -41,6 +41,20 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
                 executeQueryClose(transaction, ps, parameter, rs, occurred);
             }
         });
+
+        executeQueryStarted2(transaction, ps, parameter, rs);
+    }
+
+    /**
+     * called when execute query started
+     *
+     * @param transaction transaction
+     * @param ps          SQL statement
+     * @param parameter   SQL parameter
+     * @param rs          ResultSet
+     */
+    default void executeQueryStarted2(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiResultSet<R> rs) {
+        // do override
     }
 
     /**

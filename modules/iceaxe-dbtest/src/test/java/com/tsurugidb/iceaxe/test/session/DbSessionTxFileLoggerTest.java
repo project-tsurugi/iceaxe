@@ -70,7 +70,7 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
             var foo = TgVariable.ofInt4("foo");
 
             var session = DbTestConnector.createSession();
-            session.addEventListener(new TsurugiSessionTxFileLogger(logDir, writeExplain));
+            session.addEventListener(new TsurugiSessionTxFileLogger(logDir, writeExplain, false));
 
             var tm = session.createTransactionManager(TgTxOption.ofOCC());
             tm.executeDdl(CREATE_TEST_SQL);
