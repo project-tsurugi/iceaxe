@@ -7,11 +7,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +38,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 /**
  * insert duplicate bug test
  */
-// TODO DbInsertDuplicate2Testがあれば、DbInsertDuplicateTestは不要
-class DbInsertDuplicateTest extends DbTestTableTester {
+class DbInsertDuplicate2Test extends DbTestTableTester {
 
     private static final String TEST2 = "test2";
 
@@ -70,40 +69,29 @@ class DbInsertDuplicateTest extends DbTestTableTester {
 
     @Test
     void occ() throws Exception {
-        test(TgTxOption.ofOCC());
+        test(TgTxOption.ofOCC(), 60, 1500);
     }
 
-    @RepeatedTest(8)
-    @Disabled // TODO remove Disabled: ごく稀にtateyama-serverがクラッシュする
-    void ltx() throws Exception {
-        test(TgTxOption.ofLTX(TEST, TEST2));
-    }
-
-    // TODO remove this test case
-    // tateyama-serverでWAITING_CC_COMMITが発生して終わらなくなる
-    // デバッグビルド版のtateyama-server相手に実行すると顕著
     @Test
-    @Disabled
-    void ltxWithoutTimeout() throws Exception {
-        test(TgTxOption.ofLTX(TEST, TEST2), new DbTestSessions(Long.MAX_VALUE, TimeUnit.NANOSECONDS));
+    @Disabled // TODO remove Disabled: ごく稀にtateyama-serverがストールしたりクラッシュしたりする
+    // TCP接続でも発生するが、IPC接続の方が顕著
+    // Docker相手（TCP接続）ではほとんど発生しない
+    void ltx() throws Exception {
+        test(TgTxOption.ofLTX(TEST, TEST2), 60, 15000);
     }
 
-    private void test(TgTxOption option) throws Exception {
-        test(option, new DbTestSessions());
-    }
+    private void test(TgTxOption option, int threadSize, int attemptSize) throws Exception {
+        try (var sessions = new DbTestSessions(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+            var counter = new AtomicInteger(0);
 
-    private void test(TgTxOption option, DbTestSessions sessions) throws Exception {
-        int onlineSize = 40;
-
-        try (sessions) {
-            var onlineList = new ArrayList<OnlineTask>(onlineSize);
-            for (int i = 0; i < onlineSize; i++) {
-                var task = new OnlineTask(sessions.createSession(), option);
+            var onlineList = new ArrayList<OnlineTask>(threadSize);
+            for (int i = 0; i < threadSize; i++) {
+                var task = new OnlineTask(sessions.createSession(), option, attemptSize, counter);
                 onlineList.add(task);
             }
 
             var service = Executors.newCachedThreadPool();
-            var futureList = new ArrayList<Future<?>>(onlineSize);
+            var futureList = new ArrayList<Future<?>>(threadSize);
             onlineList.forEach(task -> futureList.add(service.submit(task)));
 
             RuntimeException save = null;
@@ -132,10 +120,14 @@ class DbInsertDuplicateTest extends DbTestTableTester {
 
         private final TsurugiSession session;
         private final TgTxOption option;
+        private final int attemptSize;
+        private final AtomicInteger counter;
 
-        public OnlineTask(TsurugiSession session, TgTxOption option) {
+        public OnlineTask(TsurugiSession session, TgTxOption option, int attemptSize, AtomicInteger counter) {
             this.session = session;
             this.option = option;
+            this.attemptSize = attemptSize;
+            this.counter = counter;
         }
 
         @Override
@@ -154,7 +146,10 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                 var setting = TgTmSetting.ofAlways(option);
                 var tm = session.createTransactionManager(setting);
 
-                for (int i = 0; i < 40; i++) {
+                for (;;) {
+                    if (counter.get() >= attemptSize) {
+                        break;
+                    }
                     try {
                         tm.execute(transaction -> {
                             execute(transaction, maxPs, insertPs, insert2Ps);
@@ -162,12 +157,12 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                     } catch (TsurugiTransactionIOException e) {
                         if (e.getDiagnosticCode() == SqlServiceCode.ERR_ALREADY_EXISTS) {
 //                          LOG.info("ERR_ALREADY_EXISTS {}", i);
-                            i--;
                             continue;
                         }
                         LOG.error("online task error: {}", e.getMessage());
                         throw e;
                     }
+                    counter.incrementAndGet();
                 }
             }
             return null;
@@ -181,8 +176,10 @@ class DbInsertDuplicateTest extends DbTestTableTester {
             var entity = new TestEntity(foo, foo, Integer.toString(foo));
             transaction.executeAndGetCount(insertPs, entity);
 
-            var parameter = TgParameterList.of(vKey1.bind(foo), vKey2.bind(foo / 2), vZzz2.bind(Integer.toString(foo)));
-            transaction.executeAndGetCount(insert2Ps, parameter);
+            for (int i = 0; i < 10; i++) {
+                var parameter = TgParameterList.of(vKey1.bind(foo), vKey2.bind(i + 1), vZzz2.bind(Integer.toString(foo)));
+                transaction.executeAndGetCount(insert2Ps, parameter);
+            }
         }
     }
 }
