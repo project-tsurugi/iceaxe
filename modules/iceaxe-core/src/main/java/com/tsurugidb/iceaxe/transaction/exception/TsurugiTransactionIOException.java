@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.transaction.exception;
 
-import java.text.MessageFormat;
-
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionSupplier;
@@ -28,11 +26,7 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
     }
 
     private static String createMessage(String message, TsurugiTransaction transaction) {
-        int iceaxeTransactionId = transaction.getIceaxeTransactionId();
-        int iceaxeTmExecuteId = transaction.getIceaxeTmExecuteId();
-        int attempt = transaction.getAttempt();
-        var option = transaction.getTransactionOption();
-        return message + MessageFormat.format(". iceaxeTxId={0}, iceaxeTmExecuteId={1}, attempt={2}, tx={3}", iceaxeTransactionId, iceaxeTmExecuteId, attempt, option);
+        return message + ". " + transaction;
     }
 
     /**
