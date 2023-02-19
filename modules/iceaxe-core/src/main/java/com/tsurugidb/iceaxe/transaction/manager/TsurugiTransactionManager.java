@@ -32,6 +32,7 @@ import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionTask;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
 
 /**
  * Tsurugi Transaction Manager
@@ -345,12 +346,12 @@ public class TsurugiTransactionManager {
     /**
      * execute query.
      *
-     * @param sql SQL
-     * @return record
+     * @param sql    SQL
+     * @param action The action to be performed for each record
      * @throws IOException
      */
-    public Optional<TsurugiResultEntity> executeAndFindRecord(String sql) throws IOException {
-        return executeAndFindRecord(defaultSetting(), sql, TgResultMapping.DEFAULT);
+    public void executeForEach(String sql, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
+        executeForEach(defaultSetting(), sql, TgResultMapping.DEFAULT, action);
     }
 
     /**
@@ -358,11 +359,11 @@ public class TsurugiTransactionManager {
      *
      * @param setting transaction manager settings
      * @param sql     SQL
-     * @return record
+     * @param action  The action to be performed for each record
      * @throws IOException
      */
-    public Optional<TsurugiResultEntity> executeAndFindRecord(TgTmSetting setting, String sql) throws IOException {
-        return executeAndFindRecord(setting, sql, TgResultMapping.DEFAULT);
+    public void executeForEach(TgTmSetting setting, String sql, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
+        executeForEach(setting, sql, TgResultMapping.DEFAULT, action);
     }
 
     /**
@@ -371,11 +372,11 @@ public class TsurugiTransactionManager {
      * @param <R>           result type
      * @param sql           SQL
      * @param resultMapping result mapping
-     * @return record
+     * @param action        The action to be performed for each record
      * @throws IOException
      */
-    public <R> Optional<R> executeAndFindRecord(String sql, TgResultMapping<R> resultMapping) throws IOException {
-        return executeAndFindRecord(defaultSetting(), sql, resultMapping);
+    public <R> void executeForEach(String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
+        executeForEach(defaultSetting(), sql, resultMapping, action);
     }
 
     /**
@@ -385,13 +386,13 @@ public class TsurugiTransactionManager {
      * @param setting       transaction manager settings
      * @param sql           SQL
      * @param resultMapping result mapping
-     * @return record
+     * @param action        The action to be performed for each record
      * @throws IOException
      */
-    public <R> Optional<R> executeAndFindRecord(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping) throws IOException {
+    public <R> void executeForEach(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
         var session = getSession();
         try (var ps = session.createPreparedQuery(sql, resultMapping)) {
-            return executeAndFindRecord(setting, ps);
+            executeForEach(setting, ps, action);
         }
     }
 
@@ -402,11 +403,11 @@ public class TsurugiTransactionManager {
      * @param sql              SQL
      * @param parameterMapping parameter mapping
      * @param parameter        SQL parameter
-     * @return record
+     * @param action           The action to be performed for each record
      * @throws IOException
      */
-    public <P> Optional<TsurugiResultEntity> executeAndFindRecord(String sql, TgParameterMapping<P> parameterMapping, P parameter) throws IOException {
-        return executeAndFindRecord(defaultSetting(), sql, parameterMapping, parameter, TgResultMapping.DEFAULT);
+    public <P> void executeForEach(String sql, TgParameterMapping<P> parameterMapping, P parameter, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
+        executeForEach(defaultSetting(), sql, parameterMapping, parameter, TgResultMapping.DEFAULT, action);
     }
 
     /**
@@ -417,11 +418,11 @@ public class TsurugiTransactionManager {
      * @param sql              SQL
      * @param parameterMapping parameter mapping
      * @param parameter        SQL parameter
-     * @return record
+     * @param action           The action to be performed for each record
      * @throws IOException
      */
-    public <P> Optional<TsurugiResultEntity> executeAndFindRecord(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter) throws IOException {
-        return executeAndFindRecord(setting, sql, parameterMapping, parameter, TgResultMapping.DEFAULT);
+    public <P> void executeForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
+        executeForEach(setting, sql, parameterMapping, parameter, TgResultMapping.DEFAULT, action);
     }
 
     /**
@@ -433,11 +434,11 @@ public class TsurugiTransactionManager {
      * @param parameterMapping parameter mapping
      * @param parameter        SQL parameter
      * @param resultMapping    result mapping
-     * @return record
+     * @param action           The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> Optional<R> executeAndFindRecord(String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping) throws IOException {
-        return executeAndFindRecord(defaultSetting(), sql, parameterMapping, parameter, resultMapping);
+    public <P, R> void executeForEach(String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
+        executeForEach(defaultSetting(), sql, parameterMapping, parameter, resultMapping, action);
     }
 
     /**
@@ -450,26 +451,27 @@ public class TsurugiTransactionManager {
      * @param parameterMapping parameter mapping
      * @param parameter        SQL parameter
      * @param resultMapping    result mapping
-     * @return record
+     * @param action           The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> Optional<R> executeAndFindRecord(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping) throws IOException {
+    public <P, R> void executeForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action)
+            throws IOException {
         var session = getSession();
         try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
-            return executeAndFindRecord(setting, ps, parameter);
+            executeForEach(setting, ps, parameter, action);
         }
     }
 
     /**
      * execute query.
      *
-     * @param <R> result type
-     * @param ps  PreparedStatement
-     * @return record
+     * @param <R>    result type
+     * @param ps     PreparedStatement
+     * @param action The action to be performed for each record
      * @throws IOException
      */
-    public <R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery0<R> ps) throws IOException {
-        return executeAndFindRecord(defaultSetting(), ps);
+    public <R> void executeForEach(TsurugiPreparedStatementQuery0<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
+        executeForEach(defaultSetting(), ps, action);
     }
 
     /**
@@ -478,12 +480,12 @@ public class TsurugiTransactionManager {
      * @param <R>     result type
      * @param setting transaction manager settings
      * @param ps      PreparedStatement
-     * @return record
+     * @param action  The action to be performed for each record
      * @throws IOException
      */
-    public <R> Optional<R> executeAndFindRecord(TgTmSetting setting, TsurugiPreparedStatementQuery0<R> ps) throws IOException {
-        return execute(setting, transaction -> {
-            return transaction.executeAndFindRecord(ps);
+    public <R> void executeForEach(TgTmSetting setting, TsurugiPreparedStatementQuery0<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
+        execute(setting, transaction -> {
+            transaction.executeForEach(ps, action);
         });
     }
 
@@ -492,14 +494,13 @@ public class TsurugiTransactionManager {
      *
      * @param <P>       parameter type
      * @param <R>       result type
-     * @param setting   transaction manager settings
      * @param ps        PreparedStatement
      * @param parameter SQL parameter
-     * @return record
+     * @param action    The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
-        return executeAndFindRecord(defaultSetting(), ps, parameter);
+    public <P, R> void executeForEach(TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
+        executeForEach(defaultSetting(), ps, parameter, action);
     }
 
     /**
@@ -510,12 +511,12 @@ public class TsurugiTransactionManager {
      * @param setting   transaction manager settings
      * @param ps        PreparedStatement
      * @param parameter SQL parameter
-     * @return record
+     * @param action    The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> Optional<R> executeAndFindRecord(TgTmSetting setting, TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
-        return execute(setting, transaction -> {
-            return transaction.executeAndFindRecord(ps, parameter);
+    public <P, R> void executeForEach(TgTmSetting setting, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
+        execute(setting, transaction -> {
+            transaction.executeForEach(ps, parameter, action);
         });
     }
 
@@ -692,6 +693,183 @@ public class TsurugiTransactionManager {
     public <P, R> List<R> executeAndGetList(TgTmSetting setting, TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
         return execute(setting, transaction -> {
             return transaction.executeAndGetList(ps, parameter);
+        });
+    }
+
+    /**
+     * execute query.
+     *
+     * @param sql SQL
+     * @return record
+     * @throws IOException
+     */
+    public Optional<TsurugiResultEntity> executeAndFindRecord(String sql) throws IOException {
+        return executeAndFindRecord(defaultSetting(), sql, TgResultMapping.DEFAULT);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param setting transaction manager settings
+     * @param sql     SQL
+     * @return record
+     * @throws IOException
+     */
+    public Optional<TsurugiResultEntity> executeAndFindRecord(TgTmSetting setting, String sql) throws IOException {
+        return executeAndFindRecord(setting, sql, TgResultMapping.DEFAULT);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>           result type
+     * @param sql           SQL
+     * @param resultMapping result mapping
+     * @return record
+     * @throws IOException
+     */
+    public <R> Optional<R> executeAndFindRecord(String sql, TgResultMapping<R> resultMapping) throws IOException {
+        return executeAndFindRecord(defaultSetting(), sql, resultMapping);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>           result type
+     * @param setting       transaction manager settings
+     * @param sql           SQL
+     * @param resultMapping result mapping
+     * @return record
+     * @throws IOException
+     */
+    public <R> Optional<R> executeAndFindRecord(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping) throws IOException {
+        var session = getSession();
+        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+            return executeAndFindRecord(setting, ps);
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>              parameter type
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param parameter        SQL parameter
+     * @return record
+     * @throws IOException
+     */
+    public <P> Optional<TsurugiResultEntity> executeAndFindRecord(String sql, TgParameterMapping<P> parameterMapping, P parameter) throws IOException {
+        return executeAndFindRecord(defaultSetting(), sql, parameterMapping, parameter, TgResultMapping.DEFAULT);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>              parameter type
+     * @param setting          transaction manager settings
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param parameter        SQL parameter
+     * @return record
+     * @throws IOException
+     */
+    public <P> Optional<TsurugiResultEntity> executeAndFindRecord(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter) throws IOException {
+        return executeAndFindRecord(setting, sql, parameterMapping, parameter, TgResultMapping.DEFAULT);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>              parameter type
+     * @param <R>              result type
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param parameter        SQL parameter
+     * @param resultMapping    result mapping
+     * @return record
+     * @throws IOException
+     */
+    public <P, R> Optional<R> executeAndFindRecord(String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping) throws IOException {
+        return executeAndFindRecord(defaultSetting(), sql, parameterMapping, parameter, resultMapping);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>              parameter type
+     * @param <R>              result type
+     * @param setting          transaction manager settings
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param parameter        SQL parameter
+     * @param resultMapping    result mapping
+     * @return record
+     * @throws IOException
+     */
+    public <P, R> Optional<R> executeAndFindRecord(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping) throws IOException {
+        var session = getSession();
+        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
+            return executeAndFindRecord(setting, ps, parameter);
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R> result type
+     * @param ps  PreparedStatement
+     * @return record
+     * @throws IOException
+     */
+    public <R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery0<R> ps) throws IOException {
+        return executeAndFindRecord(defaultSetting(), ps);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>     result type
+     * @param setting transaction manager settings
+     * @param ps      PreparedStatement
+     * @return record
+     * @throws IOException
+     */
+    public <R> Optional<R> executeAndFindRecord(TgTmSetting setting, TsurugiPreparedStatementQuery0<R> ps) throws IOException {
+        return execute(setting, transaction -> {
+            return transaction.executeAndFindRecord(ps);
+        });
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param setting   transaction manager settings
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @return record
+     * @throws IOException
+     */
+    public <P, R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
+        return executeAndFindRecord(defaultSetting(), ps, parameter);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param setting   transaction manager settings
+     * @param ps        PreparedStatement
+     * @param parameter SQL parameter
+     * @return record
+     * @throws IOException
+     */
+    public <P, R> Optional<R> executeAndFindRecord(TgTmSetting setting, TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
+        return execute(setting, transaction -> {
+            return transaction.executeAndFindRecord(ps, parameter);
         });
     }
 

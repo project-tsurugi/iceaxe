@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.transaction;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +28,6 @@ import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
@@ -332,10 +330,10 @@ public class TsurugiTransaction implements Closeable {
         EXECUTE_SATTEMENT("executeStatement"), //
         /** execute for each */
         EXECUTE_FOR_EACH("executeForEach"), //
-        /** execute and find record */
-        EXECUTE_FIND_RECORD("executeAndFindRecord"), //
         /** execute and get list */
         EXECUTE_GET_LIST("executeAndGetList"), //
+        /** execute and find record */
+        EXECUTE_FIND_RECORD("executeAndFindRecord"), //
         /** execute and get count */
         EXECUTE_GET_COUNT("executeAndGetCount"), //
         ;
@@ -534,16 +532,7 @@ public class TsurugiTransaction implements Closeable {
         Throwable occurred = null;
         try (var rs = ps.execute(this)) {
             result = rs;
-            for (var i = rs.iterator(); i.hasNext();) {
-                R record = i.next();
-                action.accept(record);
-            }
-        } catch (UncheckedIOException e) {
-            occurred = e;
-            throw e.getCause();
-        } catch (TsurugiTransactionRuntimeException e) {
-            occurred = e;
-            throw e.getCause();
+            rs.whileEach(action);
         } catch (Throwable e) {
             occurred = e;
             throw e;
@@ -574,76 +563,7 @@ public class TsurugiTransaction implements Closeable {
         Throwable occurred = null;
         try (var rs = ps.execute(this, parameter)) {
             result = rs;
-            for (var i = rs.iterator(); i.hasNext();) {
-                R record = i.next();
-                action.accept(record);
-            }
-        } catch (UncheckedIOException e) {
-            occurred = e;
-            throw e.getCause();
-        } catch (TsurugiTransactionRuntimeException e) {
-            occurred = e;
-            throw e.getCause();
-        } catch (Throwable e) {
-            occurred = e;
-            throw e;
-        } finally {
-            var finalRs = result;
-            var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalRs, finalOccurred));
-        }
-    }
-
-    /**
-     * execute query.
-     *
-     * @param <R> result type
-     * @param ps  SQL statement
-     * @return record
-     * @throws IOException
-     * @throws TsurugiTransactionException
-     */
-    public <R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery0<R> ps) throws IOException, TsurugiTransactionException {
-        var method = TgTxExecuteMethod.EXECUTE_FIND_RECORD;
-        int txExecuteId = getNewIceaxeTxExecuteId();
-        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
-
-        TsurugiResultSet<R> result = null;
-        Throwable occurred = null;
-        try (var rs = ps.execute(this)) {
-            result = rs;
-            return rs.findRecord();
-        } catch (Throwable e) {
-            occurred = e;
-            throw e;
-        } finally {
-            var finalRs = result;
-            var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRs, finalOccurred));
-        }
-    }
-
-    /**
-     * execute query.
-     *
-     * @param <P>       parameter type
-     * @param <R>       result type
-     * @param ps        SQL statement
-     * @param parameter SQL parameter
-     * @return record
-     * @throws IOException
-     * @throws TsurugiTransactionException
-     */
-    public <P, R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
-        var method = TgTxExecuteMethod.EXECUTE_FIND_RECORD;
-        int txExecuteId = getNewIceaxeTxExecuteId();
-        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
-
-        TsurugiResultSet<R> result = null;
-        Throwable occurred = null;
-        try (var rs = ps.execute(this, parameter)) {
-            result = rs;
-            return rs.findRecord();
+            rs.whileEach(action);
         } catch (Throwable e) {
             occurred = e;
             throw e;
@@ -704,6 +624,66 @@ public class TsurugiTransaction implements Closeable {
         try (var rs = ps.execute(this, parameter)) {
             result = rs;
             return rs.getRecordList();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalRs = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalRs, finalOccurred));
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R> result type
+     * @param ps  SQL statement
+     * @return record
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery0<R> ps) throws IOException, TsurugiTransactionException {
+        var method = TgTxExecuteMethod.EXECUTE_FIND_RECORD;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
+
+        TsurugiResultSet<R> result = null;
+        Throwable occurred = null;
+        try (var rs = ps.execute(this)) {
+            result = rs;
+            return rs.findRecord();
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalRs = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRs, finalOccurred));
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param ps        SQL statement
+     * @param parameter SQL parameter
+     * @return record
+     * @throws IOException
+     * @throws TsurugiTransactionException
+     */
+    public <P, R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+        var method = TgTxExecuteMethod.EXECUTE_FIND_RECORD;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
+
+        TsurugiResultSet<R> result = null;
+        Throwable occurred = null;
+        try (var rs = ps.execute(this, parameter)) {
+            result = rs;
+            return rs.findRecord();
         } catch (Throwable e) {
             occurred = e;
             throw e;
