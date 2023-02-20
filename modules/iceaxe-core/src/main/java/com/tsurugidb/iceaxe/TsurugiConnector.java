@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig;
+import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig.TgTxFileLogDirectoryType;
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogger;
 import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
 import com.tsurugidb.tsubakuro.common.Session;
@@ -24,41 +25,53 @@ import com.tsurugidb.tsubakuro.common.impl.SessionImpl;
 public class TsurugiConnector {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiConnector.class);
 
-    private static Path txLogDir;
-    private static int txLogExplain;
-    private static boolean txLogReadRecord;
+    private static TsurugiSessionTxFileLogConfig txFileLogConfig;
     static {
+        Path logDir = null;
         try {
-            String dir = System.getProperty("iceaxe.tx.log.dir"); //$NON-NLS-1$
-            if (dir != null) {
-                txLogDir = Path.of(dir);
-                Files.createDirectories(txLogDir);
-                LOG.debug("txLogDir={}", txLogDir);
+            String s = System.getProperty("iceaxe.tx.log.dir"); //$NON-NLS-1$
+            if (s != null) {
+                logDir = Path.of(s);
             }
-        } catch (Exception ignore) {
-            txLogDir = null;
+        } catch (Exception e) {
+            LOG.warn("iceaxe.tx.log.dir error (ignore)", e);
         }
-        try {
-            String explain = System.getProperty("iceaxe.tx.log.explain"); //$NON-NLS-1$
-            if (explain != null) {
-                txLogExplain = Integer.parseInt(explain);
-                LOG.debug("txLogExplain={}", txLogExplain);
-            } else {
-                txLogExplain = TsurugiSessionTxFileLogger.EXPLAIN_FILE;
+        if (logDir != null) {
+            var config = TsurugiSessionTxFileLogConfig.of(logDir);
+            try {
+                String s = System.getProperty("iceaxe.tx.log.dir_type"); //$NON-NLS-1$
+                if (s != null) {
+                    config.directoryType(TgTxFileLogDirectoryType.valueOf(s.toUpperCase()));
+                }
+            } catch (Exception e) {
+                LOG.warn("iceaxe.tx.log.dir_type error (ignore)", e);
             }
-        } catch (Exception ignore) {
-            txLogExplain = TsurugiSessionTxFileLogger.EXPLAIN_FILE;
-        }
-        try {
-            String readRecord = System.getProperty("iceaxe.tx.log.record"); //$NON-NLS-1$
-            if (readRecord != null) {
-                txLogReadRecord = Boolean.parseBoolean(readRecord);
-                LOG.debug("txLogReadRecord={}", txLogReadRecord);
-            } else {
-                txLogReadRecord = false;
+            try {
+                String s = System.getProperty("iceaxe.tx.log.auto_flush"); //$NON-NLS-1$
+                if (s != null) {
+                    config.autoFlush(Boolean.parseBoolean(s));
+                }
+            } catch (Exception e) {
+                LOG.warn("iceaxe.tx.log.auto_flush error (ignore)", e);
             }
-        } catch (Exception ignore) {
-            txLogReadRecord = false;
+            try {
+                String s = System.getProperty("iceaxe.tx.log.explain"); //$NON-NLS-1$
+                if (s != null) {
+                    config.writeExplain(Integer.parseInt(s));
+                }
+            } catch (Exception e) {
+                LOG.warn("iceaxe.tx.log.explain error (ignore)", e);
+            }
+            try {
+                String s = System.getProperty("iceaxe.tx.log.record"); //$NON-NLS-1$
+                if (s != null) {
+                    config.writeReadRecord(Boolean.parseBoolean(s));
+                }
+            } catch (Exception e) {
+                LOG.warn("iceaxe.tx.log.record error (ignore)", e);
+            }
+            txFileLogConfig = config;
+            LOG.debug("iceaxe.tx.log={}", txFileLogConfig);
         }
     }
 
@@ -138,8 +151,8 @@ public class TsurugiConnector {
         var lowCredential = info.credential();
         var lowWireFuture = lowConnector.connect(lowCredential);
         var session = new TsurugiSession(info, lowSession, lowWireFuture);
-        if (txLogDir != null) {
-            session.addEventListener(new TsurugiSessionTxFileLogger(txLogDir, txLogExplain, txLogReadRecord));
+        if (txFileLogConfig != null) {
+            session.addEventListener(new TsurugiSessionTxFileLogger(txFileLogConfig));
         }
         event(listener -> listener.accept(session));
         return session;

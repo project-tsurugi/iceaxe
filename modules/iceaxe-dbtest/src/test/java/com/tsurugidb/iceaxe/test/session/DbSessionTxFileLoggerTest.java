@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig;
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogger;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
@@ -42,35 +43,36 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
 
     @Test
     void testLog1() throws IOException {
-        execute(TsurugiSessionTxFileLogger.EXPLAIN_BOTH, false);
+        execute(TsurugiSessionTxFileLogConfig.EXPLAIN_BOTH, false);
     }
 
     @Test
     void testLog1Exception() throws IOException {
-        execute(TsurugiSessionTxFileLogger.EXPLAIN_BOTH, true);
+        execute(TsurugiSessionTxFileLogConfig.EXPLAIN_BOTH, true);
     }
 
     @Test
     void testLog2() throws IOException {
-        execute(TsurugiSessionTxFileLogger.EXPLAIN_NOTHING, false);
+        execute(TsurugiSessionTxFileLogConfig.EXPLAIN_NOTHING, false);
     }
 
     @Test
     void testLog2Exception() throws IOException {
-        execute(TsurugiSessionTxFileLogger.EXPLAIN_NOTHING, true);
+        execute(TsurugiSessionTxFileLogConfig.EXPLAIN_NOTHING, true);
     }
 
     private static final String ERROR_MESSAGE = "exception by test";
 
     private void execute(int writeExplain, boolean throwException) throws IOException {
         var logDir = Files.createTempDirectory("iceaxe-dbtest.tx-log.");
-        try {
-            LOG.debug("logDir={}", logDir);
+        LOG.debug("logDir={}", logDir);
 
+        var config = TsurugiSessionTxFileLogConfig.of(logDir).writeExplain(writeExplain);
+        try {
             var foo = TgVariable.ofInt4("foo");
 
             var session = DbTestConnector.createSession();
-            session.addEventListener(new TsurugiSessionTxFileLogger(logDir, writeExplain, false));
+            session.addEventListener(new TsurugiSessionTxFileLogger(config));
 
             var tm = session.createTransactionManager(TgTxOption.ofOCC());
             tm.executeDdl(CREATE_TEST_SQL);
@@ -131,7 +133,7 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
             }
 
             assertEquals(1, logCount);
-            if ((writeExplain & TsurugiSessionTxFileLogger.EXPLAIN_FILE) != 0) {
+            if ((writeExplain & TsurugiSessionTxFileLogConfig.EXPLAIN_FILE) != 0) {
                 assertEquals(0, explainCount); // TODO explainCount==1
             } else {
                 assertEquals(0, explainCount);
@@ -162,7 +164,7 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
             }
 
             assertEquals(1, logCount);
-            if ((writeExplain & TsurugiSessionTxFileLogger.EXPLAIN_FILE) != 0) {
+            if ((writeExplain & TsurugiSessionTxFileLogConfig.EXPLAIN_FILE) != 0) {
                 assertEquals(2, explainCount); // TODO explainCount==4
             } else {
                 assertEquals(0, explainCount);

@@ -17,9 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TsurugiSessionTxFileLogWriter implements Closeable {
 
-    private static final DateTimeFormatter FILENAME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss.SSSSSS");
     private static final DateTimeFormatter HEADER_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
+    protected final TsurugiSessionTxFileLogConfig config;
     private final Path outputDir;
     private final PrintWriter writer;
     private final Map<Throwable, Boolean> exceptionMap = new ConcurrentHashMap<>();
@@ -27,19 +27,24 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
     /**
      * Creates a new instance.
      *
-     * @param startTime       transaction start time
-     * @param threadName      thread name
-     * @param parentOutputDir output directory
+     * @param config config
+     * @param file   file path
      */
-    public TsurugiSessionTxFileLogWriter(ZonedDateTime startTime, String threadName, Path parentOutputDir) {
-        String fileName = "tx" + startTime.format(FILENAME_FORMATTER) + "_" + threadName;
-        this.outputDir = parentOutputDir.resolve(fileName);
+    public TsurugiSessionTxFileLogWriter(TsurugiSessionTxFileLogConfig config, Path file) {
+        this.config = config;
+        this.outputDir = file.getParent();
         try {
-            Files.createDirectory(outputDir);
-            this.writer = new PrintWriter(Files.newBufferedWriter(outputDir.resolve(fileName + ".log"), StandardCharsets.UTF_8), true);
+            if (this.outputDir != null) {
+                Files.createDirectories(outputDir);
+            }
+            this.writer = createPrintWriter(config, file);
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
+    }
+
+    protected PrintWriter createPrintWriter(TsurugiSessionTxFileLogConfig config, Path file) throws IOException {
+        return new PrintWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8), config.autoFlush());
     }
 
     /**
