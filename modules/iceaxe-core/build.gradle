@@ -8,7 +8,8 @@ dependencies {
     api "com.tsurugidb.tsubakuro:tsubakuro-explain:${tsubakuroVersion}"
 
     api 'com.google.code.findbugs:jsr305:3.0.2'
-    implementation 'org.slf4j:slf4j-simple:1.7.32'
+
+    testImplementation "ch.qos.logback:logback-classic:1.2.3"
 }
 
 spotbugs {
