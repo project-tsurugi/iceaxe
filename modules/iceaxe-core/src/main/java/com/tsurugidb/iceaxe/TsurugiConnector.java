@@ -17,7 +17,8 @@ import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogCo
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogger;
 import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
 import com.tsurugidb.tsubakuro.common.Session;
-import com.tsurugidb.tsubakuro.common.impl.SessionImpl;
+import com.tsurugidb.tsubakuro.common.SessionBuilder;
+import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi Connector
@@ -99,7 +100,7 @@ public class TsurugiConnector {
     }
 
     private final URI endpoint;
-    private final Connector lowConnector;
+    protected final Connector lowConnector;
     private List<Consumer<TsurugiSession>> eventListenerList = null;
 
     protected TsurugiConnector(URI endpoint, Connector lowConnector) {
@@ -147,10 +148,8 @@ public class TsurugiConnector {
      */
     public TsurugiSession createSession(TgSessionInfo info) throws IOException {
         LOG.trace("session create. info={}", info);
-        var lowSession = createLowSession();
-        var lowCredential = info.credential();
-        var lowWireFuture = lowConnector.connect(lowCredential);
-        var session = new TsurugiSession(info, lowSession, lowWireFuture);
+        var lowSessionFuture = createLowSession(info);
+        var session = new TsurugiSession(info, lowSessionFuture);
         if (txFileLogConfig != null) {
             session.addEventListener(new TsurugiSessionTxFileLogger(txFileLogConfig));
         }
@@ -158,8 +157,15 @@ public class TsurugiConnector {
         return session;
     }
 
-    protected Session createLowSession() {
-        return new SessionImpl();
+    protected FutureResponse<? extends Session> createLowSession(TgSessionInfo info) throws IOException {
+        var lowBuilder = SessionBuilder.connect(lowConnector);
+
+        var credential = info.credential();
+        if (credential != null) {
+            lowBuilder.withCredential(credential);
+        }
+
+        return lowBuilder.createAsync();
     }
 
     @Override

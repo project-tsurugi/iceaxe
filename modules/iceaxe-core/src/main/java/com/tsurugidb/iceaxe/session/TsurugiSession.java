@@ -37,7 +37,6 @@ import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.Wire;
 import com.tsurugidb.tsubakuro.common.Session;
 import com.tsurugidb.tsubakuro.sql.SqlClient;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
@@ -49,10 +48,9 @@ public class TsurugiSession implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSession.class);
 
     private final TgSessionInfo sessionInfo;
-    private final Session lowSession;
-    private FutureResponse<Wire> lowWireFuture;
+    private FutureResponse<? extends Session> lowSessionFuture;
+    private Session lowSession;
     private Throwable lowFutureException = null;
-    private boolean sessionConnected = false;
     private SqlClient lowSqlClient;
     private TsurugiTableMetadataHelper tableMetadataHelper = null;
     private TsurugiExplainHelper explainHelper = null;
@@ -64,10 +62,9 @@ public class TsurugiSession implements Closeable {
     private boolean closed = false;
 
     // internal
-    public TsurugiSession(TgSessionInfo info, Session lowSession, FutureResponse<Wire> lowWireFuture) {
+    public TsurugiSession(TgSessionInfo info, FutureResponse<? extends Session> lowSessionFuture) {
         this.sessionInfo = info;
-        this.lowSession = lowSession;
-        this.lowWireFuture = lowWireFuture;
+        this.lowSessionFuture = lowSessionFuture;
         this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
         this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CLOSE);
 
@@ -75,8 +72,8 @@ public class TsurugiSession implements Closeable {
     }
 
     private void applyCloseTimeout() {
+        closeTimeout.apply(lowSessionFuture);
         closeTimeout.apply(lowSession);
-        closeTimeout.apply(lowWireFuture);
         closeTimeout.apply(lowSqlClient);
     }
 
@@ -183,25 +180,22 @@ public class TsurugiSession implements Closeable {
 
 //  @ThreadSafe
     protected final synchronized Session getLowSession() throws IOException {
-        if (!this.sessionConnected) {
+        if (this.lowSession == null) {
             if (this.lowFutureException != null) {
                 throw new TsurugiIOException(IceaxeErrorCode.SESSION_LOW_ERROR, lowFutureException);
             }
 
-            LOG.trace("lowSession.wire get start");
-            Wire lowWire;
+            LOG.trace("lowSession get start");
             try {
-                lowWire = IceaxeIoUtil.getAndCloseFuture(lowWireFuture, connectTimeout);
+                this.lowSession = IceaxeIoUtil.getAndCloseFuture(lowSessionFuture, connectTimeout);
             } catch (Throwable e) {
                 this.lowFutureException = e;
                 throw e;
             }
-            LOG.trace("lowSession.wire connect");
-            lowSession.connect(lowWire);
-            LOG.trace("lowSession.wire get end");
-            this.sessionConnected = true;
+            LOG.trace("lowSession get end");
 
-            this.lowWireFuture = null;
+            this.lowSessionFuture = null;
+            applyCloseTimeout();
         }
         return this.lowSession;
     }
@@ -213,12 +207,11 @@ public class TsurugiSession implements Closeable {
      */
     public boolean isAlive() {
         try {
-            getLowSession();
+            return getLowSession().isAlive();
         } catch (IOException e) {
             LOG.trace("exception in isAlive()", e);
-            // fall through
+            return false;
         }
-        return lowSession.isAlive();
     }
 
     /**
@@ -470,7 +463,7 @@ public class TsurugiSession implements Closeable {
         Throwable occurred = null;
         try {
             IceaxeIoUtil.close(closeableSet, () -> {
-                IceaxeIoUtil.close(lowSqlClient, lowSession, lowWireFuture);
+                IceaxeIoUtil.close(lowSqlClient, lowSession, lowSessionFuture);
             });
         } catch (Throwable e) {
             occurred = e;

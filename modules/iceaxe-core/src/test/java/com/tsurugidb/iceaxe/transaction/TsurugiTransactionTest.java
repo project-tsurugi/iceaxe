@@ -23,7 +23,7 @@ class TsurugiTransactionTest {
 
     @Test
     void getLowTransactionError() throws IOException {
-        var session = new TsurugiSession(TgSessionInfo.of(), null, null);
+        var session = new TsurugiSession(TgSessionInfo.of(), null);
         var future = new FutureResponse<Transaction>() {
             @Override
             public boolean isDone() {
