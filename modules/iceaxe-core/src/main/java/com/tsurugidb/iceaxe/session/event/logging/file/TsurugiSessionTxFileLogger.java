@@ -63,7 +63,9 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
 
     protected String getLogFileName(TgSessionTxLog txLog) {
         String txName = getLogDirNameTx(txLog);
-        switch (config.directoryType()) {
+        switch (config.subDirType()) {
+        case NOTHING:
+            return txName + ".log";
         case TM:
             return getLogDirNameTm(txLog) + "/" + txName + ".log";
         case TX:

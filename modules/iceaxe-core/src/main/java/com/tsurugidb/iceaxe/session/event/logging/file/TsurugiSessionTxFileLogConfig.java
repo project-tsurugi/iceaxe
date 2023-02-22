@@ -26,12 +26,15 @@ public class TsurugiSessionTxFileLogConfig {
     /** output explain to log & file */
     public static final int EXPLAIN_BOTH = EXPLAIN_LOG | EXPLAIN_FILE;
 
-    public enum TgTxFileLogDirectoryType {
-        TM, TX, TM_TX;
+    /**
+     * sub directory type.
+     */
+    public enum TgTxFileLogSubDirType {
+        NOTHING, TM, TX, TM_TX;
     }
 
     private final Path outputDir;
-    private TgTxFileLogDirectoryType directoryType = TgTxFileLogDirectoryType.TX;
+    private TgTxFileLogSubDirType subDirType = TgTxFileLogSubDirType.TX;
     private boolean autoFlush = false;
     private int writeExplain = EXPLAIN_FILE;
     private boolean writeReadRecord = false;
@@ -55,23 +58,23 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set directory type
+     * set sub directory type
      *
-     * @param directoryType directory type
+     * @param subDirType sub directory type
      * @return this
      */
-    public TsurugiSessionTxFileLogConfig directoryType(TgTxFileLogDirectoryType directoryType) {
-        this.directoryType = directoryType;
+    public TsurugiSessionTxFileLogConfig subDirType(TgTxFileLogSubDirType subDirType) {
+        this.subDirType = subDirType;
         return this;
     }
 
     /**
-     * get directory type
+     * get sub directory type
      *
-     * @return directory type
+     * @return sub directory type
      */
-    public TgTxFileLogDirectoryType directoryType() {
-        return this.directoryType;
+    public TgTxFileLogSubDirType subDirType() {
+        return this.subDirType;
     }
 
     /**
@@ -138,7 +141,7 @@ public class TsurugiSessionTxFileLogConfig {
 
     @Override
     public String toString() {
-        return "TsurugiSessionTxFileLogConfig[outputDir=" + outputDir + ", directoryType=" + directoryType + ", autoFlush=" + autoFlush + ", writeExplain=" + writeExplain + ", writeReadRecord="
+        return "TsurugiSessionTxFileLogConfig[outputDir=" + outputDir + ", subDirType=" + subDirType + ", autoFlush=" + autoFlush + ", writeExplain=" + writeExplain + ", writeReadRecord="
                 + writeReadRecord + "]";
     }
 }

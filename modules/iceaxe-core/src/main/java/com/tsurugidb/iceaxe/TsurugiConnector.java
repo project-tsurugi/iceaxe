@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig;
-import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig.TgTxFileLogDirectoryType;
+import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig.TgTxFileLogSubDirType;
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogger;
 import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
 import com.tsurugidb.tsubakuro.common.Session;
@@ -40,12 +40,12 @@ public class TsurugiConnector {
         if (logDir != null) {
             var config = TsurugiSessionTxFileLogConfig.of(logDir);
             try {
-                String s = System.getProperty("iceaxe.tx.log.dir_type"); //$NON-NLS-1$
+                String s = System.getProperty("iceaxe.tx.log.sub_dir"); //$NON-NLS-1$
                 if (s != null) {
-                    config.directoryType(TgTxFileLogDirectoryType.valueOf(s.toUpperCase()));
+                    config.subDirType(TgTxFileLogSubDirType.valueOf(s.toUpperCase()));
                 }
             } catch (Exception e) {
-                LOG.warn("iceaxe.tx.log.dir_type error (ignore)", e);
+                LOG.warn("iceaxe.tx.log.sub_dir error (ignore)", e);
             }
             try {
                 String s = System.getProperty("iceaxe.tx.log.auto_flush"); //$NON-NLS-1$
