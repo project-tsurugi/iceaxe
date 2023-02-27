@@ -52,7 +52,7 @@ public class TsurugiExplainHelper {
         LOG.trace("explain start. source={}", source);
         var lowStatementMetadataFuture = explainLow(lowSqlClient, source);
         LOG.trace("explain started");
-        return getStatementMetadata(session, source, lowStatementMetadataFuture, connectTimeout, closeTimeout);
+        return getStatementMetadata(session, source, null, lowStatementMetadataFuture, connectTimeout, closeTimeout);
     }
 
     protected FutureResponse<StatementMetadata> explainLow(SqlClient lowSqlClient, String source) throws IOException {
@@ -64,6 +64,7 @@ public class TsurugiExplainHelper {
      *
      * @param session        tsurugi session
      * @param source         SQL statement
+     * @param arguments      SQL arguments
      * @param lowPs          PreparedStatement
      * @param lowParameter   list of Parameter
      * @param connectTimeout connect timeout
@@ -71,32 +72,32 @@ public class TsurugiExplainHelper {
      * @return statement metadata
      * @throws IOException
      */
-    public TgStatementMetadata explain(TsurugiSession session, String source, PreparedStatement lowPs, List<Parameter> lowParameter, IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout)
-            throws IOException {
+    public TgStatementMetadata explain(TsurugiSession session, String source, Object arguments, PreparedStatement lowPs, List<Parameter> lowParameter, IceaxeTimeout connectTimeout,
+            IceaxeTimeout closeTimeout) throws IOException {
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("explain start. source={}", source);
         var lowStatementMetadataFuture = explainLow(lowSqlClient, lowPs, lowParameter);
         LOG.trace("explain started");
-        return getStatementMetadata(session, source, lowStatementMetadataFuture, connectTimeout, closeTimeout);
+        return getStatementMetadata(session, source, arguments, lowStatementMetadataFuture, connectTimeout, closeTimeout);
     }
 
     protected FutureResponse<StatementMetadata> explainLow(SqlClient lowSqlClient, PreparedStatement lowPs, List<Parameter> lowParameter) throws IOException {
         return lowSqlClient.explain(lowPs, lowParameter);
     }
 
-    protected TgStatementMetadata getStatementMetadata(TsurugiSession session, String source, FutureResponse<StatementMetadata> lowStatementMetadataFuture, IceaxeTimeout connectTimeout,
-            IceaxeTimeout closeTimeout) throws IOException {
+    protected TgStatementMetadata getStatementMetadata(TsurugiSession session, String source, Object arguments, FutureResponse<StatementMetadata> lowStatementMetadataFuture,
+            IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout) throws IOException {
         try (var closeable = IceaxeIoUtil.closeable(lowStatementMetadataFuture)) {
             closeTimeout.apply(lowStatementMetadataFuture);
 
             var lowStatementMetadata = IceaxeIoUtil.getAndCloseFuture(lowStatementMetadataFuture, connectTimeout);
             LOG.trace("explain end");
 
-            return newStatementMetadata(source, lowStatementMetadata);
+            return newStatementMetadata(source, arguments, lowStatementMetadata);
         }
     }
 
-    protected TgStatementMetadata newStatementMetadata(String source, StatementMetadata lowStatementMetadata) {
-        return new TgStatementMetadata(source, lowStatementMetadata);
+    protected TgStatementMetadata newStatementMetadata(String source, Object arguments, StatementMetadata lowStatementMetadata) {
+        return new TgStatementMetadata(source, arguments, lowStatementMetadata);
     }
 }

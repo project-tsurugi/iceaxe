@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,10 +137,11 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         var lowParameterList = getLowParameterList(parameter);
 
         var helper = session.getExplainHelper();
-        return helper.explain(session, sql, lowPs, lowParameterList, getExplainConnectTimeout(), getExplainCloseTimeout());
+        return helper.explain(session, sql, parameter, lowPs, lowParameterList, getExplainConnectTimeout(), getExplainCloseTimeout());
     }
 
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void close() throws IOException {
         log.trace("lowPs close start");
         // not try-finally

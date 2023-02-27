@@ -2,6 +2,8 @@ package com.tsurugidb.iceaxe.explain;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.tsurugidb.sql.proto.SqlCommon.Column;
 import com.tsurugidb.tsubakuro.explain.PlanGraph;
 import com.tsurugidb.tsubakuro.explain.PlanGraphException;
@@ -15,17 +17,39 @@ import com.tsurugidb.tsubakuro.sql.StatementMetadata;
 public class TgStatementMetadata {
 
     protected final String source;
+    protected final Object arguments;
     protected final StatementMetadata lowStatementMetadata;
 
     /**
      * Creates a new instance.
      *
      * @param source               SQL statement
+     * @param arguments            SQL arguments
      * @param lowStatementMetadata low StatementMetadata
      */
-    public TgStatementMetadata(String source, StatementMetadata lowStatementMetadata) {
+    public TgStatementMetadata(String source, @Nullable Object arguments, StatementMetadata lowStatementMetadata) {
         this.source = source;
+        this.arguments = arguments;
         this.lowStatementMetadata = lowStatementMetadata;
+    }
+
+    /**
+     * get source.
+     *
+     * @return source
+     */
+    public String getSource() {
+        return this.source;
+    }
+
+    /**
+     * get arguments.
+     *
+     * @return SQL arguments
+     */
+    @SuppressWarnings("unchecked")
+    public <P> @Nullable P getArguments() {
+        return (P) this.arguments;
     }
 
     /**
@@ -66,6 +90,9 @@ public class TgStatementMetadata {
 
     @Override
     public String toString() {
-        return "explain[" + source + "]";
+        if (this.arguments == null) {
+            return "explain[" + source + "]";
+        }
+        return "explain[" + source + "][" + arguments + "]";
     }
 }
