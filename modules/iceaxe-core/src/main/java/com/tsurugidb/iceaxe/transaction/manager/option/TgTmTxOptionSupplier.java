@@ -16,34 +16,58 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 public abstract class TgTmTxOptionSupplier {
 
     /**
-     * create TsurugiTransactionOptionSupplier
+     * create TgTmTxOptionSupplier
      *
-     * @param transactionOptionList options
+     * @param txOptionList transaction options
      * @return supplier
      */
-    public static TgTmTxOptionSupplier of(TgTxOption... transactionOptionList) {
-        return TgTmTxOptionList.of(transactionOptionList);
+    public static TgTmTxOptionSupplier of(TgTxOption... txOptionList) {
+        return TgTmTxOptionList.of(txOptionList);
     }
 
     /**
-     * create TsurugiTransactionOptionSupplier
+     * create TgTmTxOptionSupplier
      *
-     * @param transactionOption option
+     * @param txOption transaction option
      * @return supplier
      */
-    public static TgTmTxOptionSupplier ofAlways(TgTxOption transactionOption) {
-        return TgTmTxOptionAlways.of(transactionOption, Integer.MAX_VALUE);
+    public static TgTmTxOptionSupplier ofAlways(TgTxOption txOption) {
+        return TgTmTxOptionAlways.of(txOption, Integer.MAX_VALUE);
     }
 
     /**
-     * create TsurugiTransactionOptionSupplier
+     * create TgTmTxOptionSupplier
      *
-     * @param transactionOption option
-     * @param attemtMaxCount    attempt max count
+     * @param txOption       transaction option
+     * @param attemtMaxCount attempt max count
      * @return supplier
      */
-    public static TgTmTxOptionSupplier ofAlways(TgTxOption transactionOption, int attemtMaxCount) {
-        return TgTmTxOptionAlways.of(transactionOption, attemtMaxCount);
+    public static TgTmTxOptionSupplier ofAlways(TgTxOption txOption, int attemtMaxCount) {
+        return TgTmTxOptionAlways.of(txOption, attemtMaxCount);
+    }
+
+    /**
+     * create TgTmTxOptionSupplier
+     *
+     * @param txOption transaction option
+     * @param size     size
+     * @return supplier
+     */
+    public static TgTmTxOptionSupplier of(TgTxOption txOption, int size) {
+        return TgTmTxOptionMultipleList.of().add(txOption, size);
+    }
+
+    /**
+     * create TgTmTxOptionSupplier
+     *
+     * @param txOption1 transaction option
+     * @param size1     size
+     * @param txOption2 transaction option
+     * @param size2     size
+     * @return supplier
+     */
+    public static TgTmTxOptionSupplier of(TgTxOption txOption1, int size1, TgTxOption txOption2, int size2) {
+        return TgTmTxOptionMultipleList.of().add(txOption1, size1).add(txOption2, size2);
     }
 
     /**

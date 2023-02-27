@@ -16,11 +16,11 @@ public final class TgTmTxOption {
     /**
      * Creates a new instance.
      *
-     * @param option transaction option
+     * @param txOption transaction option
      * @return tm option
      */
-    public static TgTmTxOption execute(@Nonnull TgTxOption option) {
-        return new TgTmTxOption(false, option);
+    public static TgTmTxOption execute(@Nonnull TgTxOption txOption) {
+        return new TgTmTxOption(false, txOption);
     }
 
     /**
@@ -42,11 +42,11 @@ public final class TgTmTxOption {
     }
 
     private final boolean isRetryOver;
-    private final TgTxOption option;
+    private final TgTxOption txOption;
 
-    private TgTmTxOption(boolean isRetryOver, TgTxOption option) {
+    private TgTmTxOption(boolean isRetryOver, TgTxOption txOption) {
         this.isRetryOver = isRetryOver;
-        this.option = option;
+        this.txOption = txOption;
     }
 
     /**
@@ -55,7 +55,7 @@ public final class TgTmTxOption {
      * @return true: executable
      */
     public boolean isExecute() {
-        return this.option != null;
+        return this.txOption != null;
     }
 
     /**
@@ -73,7 +73,7 @@ public final class TgTmTxOption {
      * @return transaction option
      */
     public TgTxOption getOption() {
-        return this.option;
+        return this.txOption;
     }
 
     @Override
@@ -81,9 +81,9 @@ public final class TgTmTxOption {
         if (this.isRetryOver) {
             return "RETRY_OVER";
         }
-        if (this.option == null) {
+        if (this.txOption == null) {
             return "NOT_RETRYABLE";
         }
-        return option.toString();
+        return txOption.toString();
     }
 }

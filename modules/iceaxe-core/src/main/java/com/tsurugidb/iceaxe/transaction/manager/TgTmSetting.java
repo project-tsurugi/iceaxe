@@ -28,48 +28,74 @@ public class TgTmSetting {
     /**
      * create Transaction Manager Settings
      *
-     * @param transactionOptionSupplier transaction option supplier
+     * @param txOptionSupplier transaction option supplier
      * @returnTransaction Manager Settings
      */
-    public static TgTmSetting of(TgTmTxOptionSupplier transactionOptionSupplier) {
-        return new TgTmSetting().transactionOptionSupplier(transactionOptionSupplier);
+    public static TgTmSetting of(TgTmTxOptionSupplier txOptionSupplier) {
+        return new TgTmSetting().txOptionSupplier(txOptionSupplier);
     }
 
     /**
      * create Transaction Manager Settings
      *
-     * @param transactionOptionList transaction option list
+     * @param txOptionList transaction option list
      * @return Transaction Manager Settings
      */
-    public static TgTmSetting of(TgTxOption... transactionOptionList) {
-        var supplier = TgTmTxOptionList.of(transactionOptionList);
+    public static TgTmSetting of(TgTxOption... txOptionList) {
+        var supplier = TgTmTxOptionList.of(txOptionList);
         return of(supplier);
     }
 
     /**
      * create Transaction Manager Settings
      *
-     * @param transactionOption transaction option
+     * @param txOption transaction option
      * @return Transaction Manager Settings
      */
-    public static TgTmSetting ofAlways(TgTxOption transactionOption) {
-        var supplier = TgTmTxOptionSupplier.ofAlways(transactionOption);
+    public static TgTmSetting ofAlways(TgTxOption txOption) {
+        var supplier = TgTmTxOptionSupplier.ofAlways(txOption);
         return of(supplier);
     }
 
     /**
      * create Transaction Manager Settings
      *
-     * @param transactionOption transaction option
-     * @param attemtMaxCount    attempt max count
+     * @param txOption       transaction option
+     * @param attemtMaxCount attempt max count
      * @return Transaction Manager Settings
      */
-    public static TgTmSetting ofAlways(TgTxOption transactionOption, int attemtMaxCount) {
-        var supplier = TgTmTxOptionSupplier.ofAlways(transactionOption, attemtMaxCount);
+    public static TgTmSetting ofAlways(TgTxOption txOption, int attemtMaxCount) {
+        var supplier = TgTmTxOptionSupplier.ofAlways(txOption, attemtMaxCount);
         return of(supplier);
     }
 
-    private TgTmTxOptionSupplier transactionOptionSupplier;
+    /**
+     * create Transaction Manager Settings
+     *
+     * @param txOption transaction option
+     * @param size     size
+     * @return Transaction Manager Settings
+     */
+    public static TgTmSetting of(TgTxOption txOption, int size) {
+        var supplier = TgTmTxOptionSupplier.of(txOption, size);
+        return of(supplier);
+    }
+
+    /**
+     * create Transaction Manager Settings
+     *
+     * @param txOption1 transaction option
+     * @param size1     size
+     * @param txOption2 transaction option
+     * @param size2     size
+     * @return Transaction Manager Settings
+     */
+    public static TgTmSetting of(TgTxOption txOption1, int size1, TgTxOption txOption2, int size2) {
+        var supplier = TgTmTxOptionSupplier.of(txOption1, size1, txOption2, size2);
+        return of(supplier);
+    }
+
+    private TgTmTxOptionSupplier txOptionSupplier;
     private String transactionLabel = null;
     private TgCommitType commitType;
     private TgTimeValue beginTimeout;
@@ -87,11 +113,11 @@ public class TgTmSetting {
     /**
      * set transaction option supplier
      *
-     * @param transactionOptionSupplier transaction option supplier
+     * @param txOptionSupplier transaction option supplier
      * @return this
      */
-    public TgTmSetting transactionOptionSupplier(TgTmTxOptionSupplier transactionOptionSupplier) {
-        this.transactionOptionSupplier = transactionOptionSupplier;
+    public TgTmSetting txOptionSupplier(TgTmTxOptionSupplier txOptionSupplier) {
+        this.txOptionSupplier = txOptionSupplier;
         return this;
     }
 
@@ -101,7 +127,7 @@ public class TgTmSetting {
      * @return transaction option supplier
      */
     public TgTmTxOptionSupplier getTransactionOptionSupplier() {
-        return this.transactionOptionSupplier;
+        return this.txOptionSupplier;
     }
 
     /**
@@ -151,10 +177,10 @@ public class TgTmSetting {
      * @see TgTmTxOptionSupplier
      */
     public TgTmTxOption getTransactionOption(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
-        if (this.transactionOptionSupplier == null) {
-            throw new IllegalStateException("transactionOptionSupplier is not specifed");
+        if (this.txOptionSupplier == null) {
+            throw new IllegalStateException("txOptionSupplier is not specifed");
         }
-        var tmOption = transactionOptionSupplier.get(attempt, transaction, e);
+        var tmOption = txOptionSupplier.get(attempt, transaction, e);
         if (tmOption.isExecute()) {
             var option = tmOption.getOption();
             if (option.label() == null && this.transactionLabel != null) {

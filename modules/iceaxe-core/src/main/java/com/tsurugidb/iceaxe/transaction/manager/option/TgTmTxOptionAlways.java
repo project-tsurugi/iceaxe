@@ -6,7 +6,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * Always the same TgTxOption
+ * Always the same {@link TgTxOption}
  */
 @ThreadSafe
 public class TgTmTxOptionAlways extends TgTmTxOptionSupplier {
@@ -14,40 +14,40 @@ public class TgTmTxOptionAlways extends TgTmTxOptionSupplier {
     /**
      * create TgTmTxOptionAlways
      *
-     * @param transactionOption transaction option
-     * @param attemtMaxCount    attempt max count
+     * @param txOption       transaction option
+     * @param attemtMaxCount attempt max count
      * @return TgTmTxOptionAlways
      */
-    public static TgTmTxOptionAlways of(TgTxOption transactionOption, int attemtMaxCount) {
-        if (transactionOption == null) {
-            throw new IllegalArgumentException("transactionOption is null");
+    public static TgTmTxOptionAlways of(TgTxOption txOption, int attemtMaxCount) {
+        if (txOption == null) {
+            throw new IllegalArgumentException("txOption is null");
         }
-        return new TgTmTxOptionAlways(transactionOption, attemtMaxCount);
+        return new TgTmTxOptionAlways(txOption, attemtMaxCount);
     }
 
-    protected final TgTxOption transactionOption;
+    protected final TgTxOption txOption;
     protected final int attemtMaxCount;
 
     /**
-     * TgTransactionOption list
+     * TgTxOption list
      *
-     * @param transactionOption transaction option
-     * @param attemtMaxCount    attempt max count
+     * @param txOption       transaction option
+     * @param attemtMaxCount attempt max count
      */
-    public TgTmTxOptionAlways(TgTxOption transactionOption, int attemtMaxCount) {
-        this.transactionOption = transactionOption;
+    public TgTmTxOptionAlways(TgTxOption txOption, int attemtMaxCount) {
+        this.txOption = txOption;
         this.attemtMaxCount = attemtMaxCount;
     }
 
     @Override
     protected TgTmTxOption computeFirstTmOption() {
-        return TgTmTxOption.execute(transactionOption);
+        return TgTmTxOption.execute(txOption);
     }
 
     @Override
     protected TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e) {
         if (attempt < attemtMaxCount) {
-            return TgTmTxOption.execute(transactionOption);
+            return TgTmTxOption.execute(txOption);
         }
         return TgTmTxOption.retryOver();
     }

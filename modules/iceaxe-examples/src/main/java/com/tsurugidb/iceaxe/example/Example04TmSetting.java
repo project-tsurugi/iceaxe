@@ -9,7 +9,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 /**
  * TgTmSetting example.
  *
- * @see Example03TransactionOption
+ * @see Example03TxOption
  * @see Example04TransactionManager
  * @see Example92Timeout#timeoutByTmSetting(com.tsurugidb.iceaxe.TsurugiConnector)
  */
@@ -46,6 +46,16 @@ public class Example04TmSetting {
 //      var tm = session.createTransactionManager(setting);
     }
 
+    void settingMultiple1(TgTxOption option) {
+        var setting = TgTmSetting.of(option, 3);
+//      var tm = session.createTransactionManager(setting);
+    }
+
+    void settingMultiple2(TgTxOption option1, TgTxOption option2) {
+        var setting = TgTmSetting.of(option1, 3, option2, 1);
+//      var tm = session.createTransactionManager(setting);
+    }
+
     //
     // TgTxOptionSupplier
     //
@@ -77,6 +87,22 @@ public class Example04TmSetting {
         // same as TgTmSetting.ofAlways(option, 3)
 
         var supplier = TgTmTxOptionSupplier.ofAlways(option, 3);
+        var setting = TgTmSetting.of(supplier);
+//      var tm = session.createTransactionManager(setting);
+    }
+
+    void supplierMultiple1(TgTxOption option) {
+        // same as TgTmSetting.of(option, 3)
+
+        var supplier = TgTmTxOptionSupplier.of(option, 3);
+        var setting = TgTmSetting.of(supplier);
+//      var tm = session.createTransactionManager(setting);
+    }
+
+    void supplierMultiple2(TgTxOption option1, TgTxOption option2) {
+        // same as TgTmSetting.of(option1, 3, option2, 1)
+
+        var supplier = TgTmTxOptionSupplier.of(option1, 3, option2, 1);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }

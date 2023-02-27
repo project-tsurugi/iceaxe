@@ -11,7 +11,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOptionRtx;
 /**
  * TgTxOption example.
  */
-public class Example03TransactionOption {
+public class Example03TxOption {
 
     // OCC (SHORT)
     TgTxOptionOcc occ() {
