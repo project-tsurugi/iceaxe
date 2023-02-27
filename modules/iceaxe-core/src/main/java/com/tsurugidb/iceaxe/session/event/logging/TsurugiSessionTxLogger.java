@@ -399,7 +399,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         var txLog = createTxLog();
         txLog.setTransaction(transaction);
         txLog.setStartTime(startTime);
-        txLogMap.put(transaction.getIceaxeTransactionId(), txLog);
+        txLogMap.put(transaction.getIceaxeTxId(), txLog);
 
         var tmLog = getTmLog(transaction.getIceaxeTmExecuteId());
         if (tmLog != null) {
@@ -415,7 +415,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     }
 
     protected TgSessionTxLog getTxLog(TsurugiTransaction transaction) {
-        var txLog = txLogMap.get(transaction.getIceaxeTransactionId());
+        var txLog = txLogMap.get(transaction.getIceaxeTxId());
         if (txLog == null) {
             LOG.debug("transaction not found in txLogMap. {}", transaction);
         }
@@ -594,7 +594,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     }
 
     protected void doLogTransactionClose(TsurugiTransaction transaction, @Nullable Throwable occurred) {
-        var txLog = txLogMap.remove(transaction.getIceaxeTransactionId());
+        var txLog = txLogMap.remove(transaction.getIceaxeTxId());
         if (txLog == null) {
             LOG.debug("tranaction already closed {}", transaction);
             return;

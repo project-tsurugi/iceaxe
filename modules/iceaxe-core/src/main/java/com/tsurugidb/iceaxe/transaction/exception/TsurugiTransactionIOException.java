@@ -11,7 +11,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 @SuppressWarnings("serial")
 public class TsurugiTransactionIOException extends TsurugiIOException {
 
-    private final int iceaxeTransactionId;
+    private final int iceaxeTxId;
     private final int iceaxeTmExecuteId;
     private final int attempt;
     private final TgTxOption option;
@@ -19,7 +19,7 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
     // internal
     public TsurugiTransactionIOException(String message, TsurugiTransaction transaction, Exception cause) {
         super(createMessage(message, transaction), cause);
-        this.iceaxeTransactionId = transaction.getIceaxeTransactionId();
+        this.iceaxeTxId = transaction.getIceaxeTxId();
         this.iceaxeTmExecuteId = transaction.getIceaxeTmExecuteId();
         this.attempt = transaction.getAttempt();
         this.option = transaction.getTransactionOption();
@@ -34,8 +34,8 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
      *
      * @return iceaxe transactionId
      */
-    public int getIceaxeTransactionId() {
-        return this.iceaxeTransactionId;
+    public int getIceaxeTxId() {
+        return this.iceaxeTxId;
     }
 
     /**
