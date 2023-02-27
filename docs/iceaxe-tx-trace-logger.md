@@ -151,7 +151,7 @@ tx20230225_085504_793636.3.main.log
 - 「20230225_085504_793636」はトランザクションの開始日時。
 - 次の「3」は、Iceaxe内で採番されたトランザクション番号（iceaxeTxId）
   - DBが採番するトランザクションIDとは異なる
-- 「main」はトランザクションオプションのラベルまたはスレッド名（ラベルが設定されていない場合はスレッド名が使われる）
+- 「main」はスレッド名
 
 ファイル名にiceaxeTxIdが入っているので、他のトランザクションと重複することは無い。
 （ただし、Iceaxeを使用する他のアプリケーション（別プロセス）が同じ場所に出力すると重複する可能性はある）
@@ -193,8 +193,7 @@ TsurugiTransaction(OCC{}, iceaxeTxId=3, iceaxeTmExecuteId=3, attempt=0, transact
 
 ```
 2023-02-25 08:55:04.798 [TX-3][iceaxeTxExecuteId=3] executeAndGetCount(sql) start
-2023-02-25 08:55:04.798 [sql-3] sql start
-insert into test(foo, bar, zzz)values(:foo, :bar, :zzz)
+2023-02-25 08:55:04.798 [sql-3] sql start. sql=insert into test(foo, bar, zzz)values(:foo, :bar, :zzz)
 2023-02-25 08:55:04.806 [sql-3] args=TestEntity{foo=1, bar=1, zzz=1}
 2023-02-25 08:55:05.269 [sql-3] PlanGraph [nodes=[{kind=write, title=write, attributes={write-kind=insert, table=test}}, {kind=values, title=values, attributes={}}]]
 ```
@@ -207,7 +206,7 @@ iceaxeTxExecuteIdは、executeXxxメソッド呼び出し毎にIceaxeで採番�
 `[sql-N]`のNは、iceaxeSqlExecuteId。（SQL実行毎にIceaxeで採番されるID。JavaVM内でSQL実行として一意となる連番）
 （常にシングルスレッドで実行されればiceaxeSqlExecuteIdとiceaxeTxExecuteIdは同じ値になるが、マルチスレッドならすぐずれる）
 
-startの直後の行に、実行するSQL文が出力される。
+startの行に、実行するSQL文が出力される。
 
 SQL文の次の行に引数（バインド変数の内容）が出力される。
 アプリケーションから渡された引数オブジェクトのtoString()が出力されるので、toStringメソッドが実装されている必要がある。
@@ -353,7 +352,7 @@ Usage: explain [options]
   - `dot.graph.randir=TB`
     - rankdir（グラフの向き）をTB（Top→Bottom）にする
 
-`--repot` と `--output` のどちらも指定しない場合は、何も出力されない。
+`--report` と `--output` のどちらも指定しない場合は、何も出力されない。
 
 ### 例
 

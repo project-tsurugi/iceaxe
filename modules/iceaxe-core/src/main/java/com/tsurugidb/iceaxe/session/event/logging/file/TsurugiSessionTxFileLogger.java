@@ -105,11 +105,12 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var startTime = txLog.getStartTime();
         var transaction = txLog.getTransaction();
         int txId = transaction.getIceaxeTxId();
-        var label = transaction.getTransactionOption().label();
-        if (label == null) {
-            label = Thread.currentThread().getName();
-        }
-        label = label.replaceAll("\\s+", "_");
+//      var label = transaction.getTransactionOption().label();
+//      if (label == null) {
+//          label = Thread.currentThread().getName();
+//      }
+//      label = label.replaceAll("\\s+", "_");
+        var label = Thread.currentThread().getName();
 
         return "tx" + startTime.format(FILENAME_FORMATTER) + "." + txId + "." + label;
     }
@@ -169,7 +170,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
         var ps = sqlLog.getSqlStatement();
-        writer.println(SQL_HEADER + " sql start\n%s", sqlId, ps.getSql());
+        writer.println(SQL_HEADER + " sql start. sql=%s", sqlId, ps.getSql());
 
         if (!ps.isPrepared()) {
             logSqlExplain(sqlId, writer, ((TsurugiSqlDirect) ps)::explain);
