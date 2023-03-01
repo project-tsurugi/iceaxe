@@ -45,12 +45,33 @@ JavaVMのシステムプロパティー（javaコマンドの`-D`）でTsurugiSe
       - トランザクション毎にサブディレクトリーを作成する。
     - `TM_TX`
       - トランザクションマネージャーのexecuteメソッド呼び出し毎にサブディレクトリーを作成し、その下にトランザクション毎のサブディレクトリーを作成する。
-- `iceaxe.tx.log.auto_flush`
-  - ログファイルの自動フラッシュ（1行出力する度にフラッシュする）を行うかどうか。
+- `iceaxe.tx.log.write_sql_file`
+  - SQLステートメントを作成する毎にSQL文をファイルに出力するかどうか。
     - `true`
-      - 自動フラッシュを行う。
+      - 出力する。
+      - 出力する場合、`出力先ディレクトリー/sql_statement/ss-N.sql`というファイルが出力される。
     - `false` （デフォルト）
-      - 自動フラッシュを行わない。
+      - 出力しない。
+- `iceaxe.tx.log.header_format`
+  - ログの各行の先頭に出力する時刻のフォーマット。
+    - java.time.format.DateTimeFormatter#ofPattern()に渡す文字列。
+  - デフォルトは`HH:mm:ss.SSS`
+- `iceaxe.tx.log.sql_max_length`
+  - SQLを実行する際にログ出力するSQL文の最大文字数。
+  - 負の数（デフォルト）
+    - SQL文を全て出力する。
+  - `0`
+    - SQL文を出力しない。
+  - 正の数
+    - その文字数まで出力する。
+- `iceaxe.tx.log.arg_max_length`
+  - SQLを実行する際にログ出力する引数（バインド変数）の最大文字数。
+  - 負の数（デフォルト）
+    - 引数を全て出力する。
+  - `0`
+    - 引数を出力しない。
+  - 正の数
+    - その文字数まで出力する。
 - `iceaxe.tx.log.explain`
   - 実行計画の出力有無を指定する。
     - 実行計画を出力する場合、SQLを実行する度に出力する。
@@ -66,6 +87,12 @@ JavaVMのシステムプロパティー（javaコマンドの`-D`）でTsurugiSe
       - 出力する。
     - `false` （デフォルト）
       - 出力しない。
+- `iceaxe.tx.log.auto_flush`
+  - ログファイルの自動フラッシュ（1行出力する度にフラッシュする）を行うかどうか。
+    - `true`
+      - 自動フラッシュを行う。
+    - `false` （デフォルト）
+      - 自動フラッシュを行わない。
 
 ### 例
 
@@ -164,7 +191,7 @@ tx20230225_085504_793636.3.main.log
 #### トランザクションの開始
 
 ```
-2023-02-25 08:55:04.795 [TX-3] transaction start 2023-02-25T08:55:04.793636900+09:00[GMT+09:00] main
+08:55:04.795 [TX-3] transaction start 2023-02-25T08:55:04.793636900+09:00[GMT+09:00] main
 TsurugiTransaction(OCC{}, iceaxeTxId=3, iceaxeTmExecuteId=3, attempt=0, transactionId=null)
 ```
 
@@ -192,24 +219,33 @@ TsurugiTransaction(OCC{}, iceaxeTxId=3, iceaxeTmExecuteId=3, attempt=0, transact
 #### SQL実行開始
 
 ```
-2023-02-25 08:55:04.798 [TX-3][iceaxeTxExecuteId=3] executeAndGetCount(sql) start
-2023-02-25 08:55:04.798 [sql-3] sql start. sql=insert into test(foo, bar, zzz)values(:foo, :bar, :zzz)
-2023-02-25 08:55:04.806 [sql-3] args=TestEntity{foo=1, bar=1, zzz=1}
-2023-02-25 08:55:05.269 [sql-3] PlanGraph [nodes=[{kind=write, title=write, attributes={write-kind=insert, table=test}}, {kind=values, title=values, attributes={}}]]
+08:55:04.798 [TX-3][iceaxeTxExecuteId=3] executeAndGetCount(sql) start
+08:55:04.798 [sql-3][ss-3] sql start. sql=insert into test(foo, bar, zzz)values(:foo, :bar, :zzz)
+08:55:04.806 [sql-3][ss-3] args=TestEntity{foo=1, bar=1, zzz=1}
+08:55:05.269 [sql-3][ss-3] PlanGraph [nodes=[{kind=write, title=write, attributes={write-kind=insert, table=test}}, {kind=values, title=values, attributes={}}]]
 ```
 
 TsurugiTransactionのexecuteXxxメソッド（上記の例ではexecuteAndGetCount）を開始したログが出力される。
 iceaxeTxExecuteIdは、executeXxxメソッド呼び出し毎にIceaxeで採番されるID。（JavaVM内でexecuteXxx呼び出しとして一意となる連番）
 
-「[sql-N] start」は、SQLステートメント（TsurugiSqlPreparedQuery・TsurugiSqlPreparedStatement等）でSQLの実行を開始したことを表す。
+「sql start」は、SQLステートメント（TsurugiSqlPreparedQuery・TsurugiSqlPreparedStatement等）でSQLの実行を開始したことを表す。
 
 `[sql-N]`のNは、iceaxeSqlExecuteId。（SQL実行毎にIceaxeで採番されるID。JavaVM内でSQL実行として一意となる連番）
 （常にシングルスレッドで実行されればiceaxeSqlExecuteIdとiceaxeTxExecuteIdは同じ値になるが、マルチスレッドならすぐずれる）
 
+`[ss-N]`のNは、iceaxeSqlId。（SQLステートメント作成毎にIceaxeで採番されるID。JavaVM内でSQLステートメントとして一意となる連番）
+SQLステートメントをファイル出力する設定になっている場合、`出力先ディレクトリー/sql_statement`の下に「ss-N.sql」というファイル名で出力される。
+
 startの行に、実行するSQL文が出力される。
+SQL文が指定された最大文字数より大きい場合、それ以降はカットされる。
+最大文字数が0だった場合、SQL文は出力されない。
+最大文字数が負の数だった場合、SQL文は全て出力される。
 
 SQL文の次の行に引数（バインド変数の内容）が出力される。
 アプリケーションから渡された引数オブジェクトのtoString()が出力されるので、toStringメソッドが実装されている必要がある。
+引数を文字列化したものが指定された最大文字数より大きい場合、それ以降はカットされる。
+最大文字数が0だった場合、引数は出力されない。
+最大文字数が負の数だった場合、引数は全て出力される。
 
 実行計画をログファイルに出力する設定になっている場合は、実行計画（PlanGraph）も出力される。
 実行計画をJSONファイルに出力する設定の場合、ファイル名は「sql-N.explain.json」となる。
@@ -218,7 +254,7 @@ SQL文の次の行に引数（バインド変数の内容）が出力される�
 #### トランザクションID
 
 ```
-2023-02-25 08:55:05.273 [TX-3] transactionId=000000000000001e0000000000001924
+08:55:05.273 [TX-3] transactionId=000000000000001e0000000000001924
 ```
 
 DB側で採番されたトランザクションIDが取得できると、それが出力される。
@@ -229,7 +265,7 @@ DB側で採番されたトランザクションIDが取得できると、それ�
 #### select結果
 
 ```
-2023-02-25 08:55:05.381 [sql-5] readCount=1, hasNextRow=true
+08:55:05.381 [sql-5][ss-5] readCount=1, hasNextRow=true
 ```
 
 実行したSQLがselect文の場合、DBからの読み込み終了時に、読み込んだ件数と「全レコードを読み終わったかどうか」が出力される。
@@ -243,9 +279,9 @@ executeAndFindRecordの場合、1件だけ読んで、hasNextRowはtrueになる
 #### SQL実行終了
 
 ```
-2023-02-25 08:55:05.286 [sql-3] sql end. 487[ms]
-2023-02-25 08:55:05.286 [sql-3] sql close. close.elapsed=0[ms]
-2023-02-25 08:55:05.288 [TX-3][iceaxeTxExecuteId=3] executeAndGetCount(sql-3) end. 490[ms]
+08:55:05.286 [sql-3][ss-3] sql end. 487[ms]
+08:55:05.286 [sql-3][ss-3] sql close. close.elapsed=0[ms]
+08:55:05.288 [TX-3][iceaxeTxExecuteId=3] executeAndGetCount(sql-3) end. 490[ms]
 ```
 
 SQLの実行終了時のログ。
@@ -263,8 +299,8 @@ TsurugiTransactionのexecuteQuery()とexecuteStatement()では、そのメソッ
 #### コミット・ロールバック
 
 ```
-2023-02-25 08:55:05.388 [TX-3] commit start. commitType=DEFAULT
-2023-02-25 08:55:05.391 [TX-3] commit end. 2[ms]
+08:55:05.388 [TX-3] commit start. commitType=DEFAULT
+08:55:05.391 [TX-3] commit end. 2[ms]
 ```
 
 コミットやロールバックの経過時間が出力される。
@@ -272,7 +308,7 @@ TsurugiTransactionのexecuteQuery()とexecuteStatement()では、そのメソッ
 #### トランザクションマネージャーの例外
 
 ```
-2023-02-25 09:28:06.837 [TM-6] tm.execute error
+09:28:06.837 [TM-6] tm.execute error
 com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException: ERR_ABORTED_RETRYABLE: SQL--0011: 
 ```
 
@@ -283,7 +319,7 @@ TsurugiTransactionManager.execute()に渡されたアプリケーションの処
 #### トランザクションのリトライ発生
 
 ```
-2023-02-25 09:28:06.898 [TM-6] tm.execute(iceaxeTmExecuteId=6, attempt=0) retry. nextTx=OCC{}
+09:28:06.898 [TM-6] tm.execute(iceaxeTmExecuteId=6, attempt=0) retry. nextTx=OCC{}
 ```
 
 シリアライゼイションエラー（リトライ可能なアボート）が発生してリトライする時、次のトランザクションのトランザクションオプションが出力される。
@@ -294,7 +330,7 @@ TsurugiTransactionManager.execute()に渡されたアプリケーションの処
 #### トランザクションの終了（クローズ）
 
 ```
-2023-02-25 08:55:05.391 [TX-3] transaction close. transaction.elapsed=597[ms]
+08:55:05.391 [TX-3] transaction close. transaction.elapsed=597[ms]
 ```
 
 トランザクションの経過時間が出力される。

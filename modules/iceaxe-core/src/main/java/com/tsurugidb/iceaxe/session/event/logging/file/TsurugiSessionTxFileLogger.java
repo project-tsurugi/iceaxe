@@ -1,5 +1,9 @@
 package com.tsurugidb.iceaxe.session.event.logging.file;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -34,7 +38,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     /** iceaxeTxId */
     private static final String TX_HEADER = "[TX-%d]";
     /** iceaxeSqlExecuteId */
-    private static final String SQL_HEADER = "[sql-%d]";
+    private static final String SQL_HEADER = "[sql-%d][ss-%d]";
     /** iceaxeTmExecuteId */
     private static final String TM_HEADER = "[TM-%d]";
 
@@ -50,6 +54,23 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
      */
     public TsurugiSessionTxFileLogger(TsurugiSessionTxFileLogConfig config) {
         this.config = config;
+    }
+
+    @Override
+    protected void logCreateSqlStatement(TsurugiSql sqlStatement) {
+        if (!config.writeSqlFile()) {
+            return;
+        }
+
+        int ssId = sqlStatement.getIceaxeSqlId();
+        String fileName = String.format("ss-%d.sql", ssId);
+        var outputDir = config.outputDir().resolve("sql_statement");
+        try {
+            Files.createDirectories(outputDir);
+            Files.writeString(outputDir.resolve(fileName), sqlStatement.getSql(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -169,22 +190,50 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
+        int ssId = sqlLog.getIceaxeSqlStatementId();
         var ps = sqlLog.getSqlStatement();
-        writer.println(SQL_HEADER + " sql start. sql=%s", sqlId, ps.getSql());
+        {
+            int maxLength = config.sqlMaxLength();
+            if (maxLength == 0) {
+                writer.println(SQL_HEADER + " sql start", sqlId, ssId);
+            } else {
+                String sql = snip(ps.getSql(), maxLength);
+                writer.println(SQL_HEADER + " sql start. sql=%s", sqlId, ssId, sql);
+            }
+        }
 
         if (!ps.isPrepared()) {
-            logSqlExplain(sqlId, writer, ((TsurugiSqlDirect) ps)::explain);
+            logSqlExplain(sqlId, ssId, writer, ((TsurugiSqlDirect) ps)::explain);
         } else {
             var parameter = sqlLog.getSqlParameter();
-            writer.println(SQL_HEADER + " args=%s", sqlId, parameter);
+
+            int maxLength = config.argMaxLength();
+            if (maxLength != 0) {
+                String args = snip(parameter, maxLength);
+                writer.println(SQL_HEADER + " args=%s", sqlId, ssId, args);
+            }
 
             @SuppressWarnings("unchecked")
             var prepared = (TsurugiSqlPrepared<Object>) ps;
-            logSqlExplain(sqlId, writer, () -> prepared.explain(parameter));
+            logSqlExplain(sqlId, ssId, writer, () -> prepared.explain(parameter));
         }
     }
 
-    protected void logSqlExplain(int sqlId, TsurugiSessionTxFileLogWriter writer, IoSupplier<TgStatementMetadata> explainSupplier) {
+    private String snip(Object object, int maxLength) {
+        if (object == null) {
+            return null;
+        }
+        String s = object.toString();
+        if (maxLength < 0) {
+            return s;
+        }
+        if (s.length() <= maxLength) {
+            return s;
+        }
+        return s.substring(0, maxLength) + "...";
+    }
+
+    protected void logSqlExplain(int sqlId, int ssId, TsurugiSessionTxFileLogWriter writer, IoSupplier<TgStatementMetadata> explainSupplier) {
         int writeExplain = config.writeExplain();
         if (writeExplain == TsurugiSessionTxFileLogConfig.EXPLAIN_NOTHING) {
             return;
@@ -195,14 +244,14 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
 
             if ((writeExplain & TsurugiSessionTxFileLogConfig.EXPLAIN_LOG) != 0) {
                 var graph = explain.getLowPlanGraph();
-                writer.println(SQL_HEADER + " %s", sqlId, graph);
+                writer.println(SQL_HEADER + " %s", sqlId, ssId, graph);
             }
             if ((writeExplain & TsurugiSessionTxFileLogConfig.EXPLAIN_FILE) != 0) {
                 String contents = explain.getMetadataContents();
                 writer.writeExplain(sqlId, contents);
             }
         } catch (Exception e) {
-            writer.println(SQL_HEADER + "[WARN] " + TsurugiSessionTxFileLogger.class.getSimpleName() + ": explain error", sqlId);
+            writer.println(SQL_HEADER + "[WARN] " + TsurugiSessionTxFileLogger.class.getSimpleName() + ": explain error", sqlId, ssId);
             writer.println(e);
         }
     }
@@ -212,7 +261,8 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
-        writer.println(SQL_HEADER + " sql start error", sqlId);
+        int ssId = sqlLog.getIceaxeSqlStatementId();
+        writer.println(SQL_HEADER + " sql start error", sqlId, ssId);
         writer.println(occurred);
     }
 
@@ -224,8 +274,9 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
+        int ssId = sqlLog.getIceaxeSqlStatementId();
         int index = rs.getReadCount() - 1;
-        writer.println(SQL_HEADER + " read[%d]=%s", sqlId, index, record);
+        writer.println(SQL_HEADER + " read[%d]=%s", sqlId, ssId, index, record);
     }
 
     @Override
@@ -233,7 +284,8 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
-        writer.println(SQL_HEADER + " read error", sqlId);
+        int ssId = sqlLog.getIceaxeSqlStatementId();
+        writer.println(SQL_HEADER + " read error", sqlId, ssId);
         writer.println(occurred);
     }
 
@@ -242,16 +294,17 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
+        int ssId = sqlLog.getIceaxeSqlStatementId();
         var time = elapsed(sqlLog.getStartTime(), sqlLog.getEndTime());
         var result = sqlLog.getSqlResult();
         if (result instanceof TsurugiResultSet) {
             var rs = (TsurugiResultSet<?>) result;
-            writer.println(SQL_HEADER + " readCount=%d, hasNextRow=%s", sqlId, rs.getReadCount(), rs.getHasNextRow().map(b -> b.toString()).orElse("unread"));
+            writer.println(SQL_HEADER + " readCount=%d, hasNextRow=%s", sqlId, ssId, rs.getReadCount(), rs.getHasNextRow().map(b -> b.toString()).orElse("unread"));
         }
         if (occurred == null) {
-            writer.println(SQL_HEADER + " sql end. %d[ms]", sqlId, time);
+            writer.println(SQL_HEADER + " sql end. %d[ms]", sqlId, ssId, time);
         } else {
-            writer.println(SQL_HEADER + " sql error. %d[ms]", sqlId, time);
+            writer.println(SQL_HEADER + " sql error. %d[ms]", sqlId, ssId, time);
             writer.println(occurred);
         }
     }
@@ -261,8 +314,9 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
+        int ssId = sqlLog.getIceaxeSqlStatementId();
         var time = elapsed(sqlLog.getEndTime(), sqlLog.getCloseTime());
-        writer.println(SQL_HEADER + " sql close. close.elapsed=%d[ms]", sqlId, time);
+        writer.println(SQL_HEADER + " sql close. close.elapsed=%d[ms]", sqlId, ssId, time);
         writer.println(occurred);
     }
 

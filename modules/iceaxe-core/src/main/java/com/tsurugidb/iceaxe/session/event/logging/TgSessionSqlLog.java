@@ -29,9 +29,9 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get sqlId
+     * get SQL executeId
      *
-     * @return sqlId
+     * @return SQL executeId
      */
     public int getIceaxeSqlExecuteId() {
         return this.iceaxeSqlExecuteId;
@@ -64,6 +64,15 @@ public class TgSessionSqlLog {
      */
     public Object getSqlParameter() {
         return this.sqlParameter;
+    }
+
+    /**
+     * get SQL statementId
+     *
+     * @return SQL statementId
+     */
+    public int getIceaxeSqlStatementId() {
+        return this.sqlStatement.getIceaxeSqlId();
     }
 
     /**

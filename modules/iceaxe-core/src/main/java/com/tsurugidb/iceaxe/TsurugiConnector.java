@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -39,40 +40,27 @@ public class TsurugiConnector {
         }
         if (logDir != null) {
             var config = TsurugiSessionTxFileLogConfig.of(logDir);
-            try {
-                String s = System.getProperty("iceaxe.tx.log.sub_dir"); //$NON-NLS-1$
-                if (s != null) {
-                    config.subDirType(TgTxFileLogSubDirType.valueOf(s.toUpperCase()));
-                }
-            } catch (Exception e) {
-                LOG.warn("iceaxe.tx.log.sub_dir error (ignore)", e);
-            }
-            try {
-                String s = System.getProperty("iceaxe.tx.log.auto_flush"); //$NON-NLS-1$
-                if (s != null) {
-                    config.autoFlush(Boolean.parseBoolean(s));
-                }
-            } catch (Exception e) {
-                LOG.warn("iceaxe.tx.log.auto_flush error (ignore)", e);
-            }
-            try {
-                String s = System.getProperty("iceaxe.tx.log.explain"); //$NON-NLS-1$
-                if (s != null) {
-                    config.writeExplain(Integer.parseInt(s));
-                }
-            } catch (Exception e) {
-                LOG.warn("iceaxe.tx.log.explain error (ignore)", e);
-            }
-            try {
-                String s = System.getProperty("iceaxe.tx.log.record"); //$NON-NLS-1$
-                if (s != null) {
-                    config.writeReadRecord(Boolean.parseBoolean(s));
-                }
-            } catch (Exception e) {
-                LOG.warn("iceaxe.tx.log.record error (ignore)", e);
-            }
+            txLogConfig("iceaxe.tx.log.sub_dir", s -> config.subDirType(TgTxFileLogSubDirType.valueOf(s.toUpperCase()))); // $NON-NLS-1$
+            txLogConfig("iceaxe.tx.log.write_sql_file", s -> config.writeSqlFile(Boolean.parseBoolean(s))); // $NON-NLS-1$
+            txLogConfig("iceaxe.tx.log.header_format", s -> config.headerFormatter(DateTimeFormatter.ofPattern(s))); // $NON-NLS-1$
+            txLogConfig("iceaxe.tx.log.sql_max_length", s -> config.sqlMaxLength(Integer.parseInt(s))); // $NON-NLS-1$
+            txLogConfig("iceaxe.tx.log.arg_max_length", s -> config.argMaxLength(Integer.parseInt(s))); // $NON-NLS-1$
+            txLogConfig("iceaxe.tx.log.explain", s -> config.writeExplain(Integer.parseInt(s))); // $NON-NLS-1$
+            txLogConfig("iceaxe.tx.log.record", s -> config.writeReadRecord(Boolean.parseBoolean(s))); // $NON-NLS-1$
+            txLogConfig("iceaxe.tx.log.auto_flush", s -> config.autoFlush(Boolean.parseBoolean(s))); // $NON-NLS-1$
             txFileLogConfig = config;
             LOG.debug("iceaxe.tx.log={}", txFileLogConfig);
+        }
+    }
+
+    private static void txLogConfig(String key, Consumer<String> configSetter) {
+        try {
+            String s = System.getProperty(key);
+            if (s != null) {
+                configSetter.accept(s.trim());
+            }
+        } catch (Exception e) {
+            LOG.warn(key + " error (ignore)", e);
         }
     }
 

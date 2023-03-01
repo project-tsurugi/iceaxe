@@ -250,6 +250,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         @SuppressWarnings("unchecked")
         var logger = (TsurugiSqlQueryEventListener<R>) this.queryLogger;
         ps.addEventListener(logger);
+
+        logCreateSqlStatement(ps);
     }
 
     @Override
@@ -257,12 +259,16 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         @SuppressWarnings("unchecked")
         var logger = (TsurugiSqlPreparedQueryResultEventListener<P, R>) this.preparedQueryLogger;
         ps.addEventListener(logger);
+
+        logCreateSqlStatement(ps);
     }
 
     @Override
     public final void createStatement(TsurugiPreparedStatementUpdate0 ps) {
         var logger = this.statementLogger;
         ps.addEventListener(logger);
+
+        logCreateSqlStatement(ps);
     }
 
     @Override
@@ -270,6 +276,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         @SuppressWarnings("unchecked")
         var logger = (TsurugiSqlPreparedStatementResultEventListener<P>) this.preparedStatementLogger;
         ps.addEventListener(logger);
+
+        logCreateSqlStatement(ps);
     }
 
     @Override
@@ -292,6 +300,15 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     }
 
     // Session
+
+    /**
+     * called when create SQL statement
+     *
+     * @param sqlStatement SQL statement
+     */
+    protected void logCreateSqlStatement(TsurugiSql sqlStatement) {
+        // do override
+    }
 
     /**
      * called when close session

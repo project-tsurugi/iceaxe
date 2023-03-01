@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,8 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link TsurugiSessionTxFileLogger} writer
  */
 public class TsurugiSessionTxFileLogWriter implements Closeable {
-
-    private static final DateTimeFormatter HEADER_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     protected final TsurugiSessionTxFileLogConfig config;
     private final Path outputDir;
@@ -80,7 +77,7 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
      */
     public void println(String text) {
         var now = ZonedDateTime.now();
-        writer.print(now.format(HEADER_FORMATTER));
+        writer.print(now.format(config.headerFormatter()));
         writer.print(' ');
         writer.println(text);
     }

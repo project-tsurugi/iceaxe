@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.session.event.logging.file;
 
 import java.nio.file.Path;
+import java.time.format.DateTimeFormatter;
 
 /**
  * {@link TsurugiSessionTxFileLogger} config.
@@ -35,9 +36,13 @@ public class TsurugiSessionTxFileLogConfig {
 
     private final Path outputDir;
     private TgTxFileLogSubDirType subDirType = TgTxFileLogSubDirType.TX;
-    private boolean autoFlush = false;
+    private boolean writeSqlFile = false;
+    private DateTimeFormatter headerFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+    private int sqlMaxLength = -1; // <0: 全て出力する, ==0: 出力しない
+    private int argMaxLength = -1; // <0: 全て出力する, ==0: 出力しない
     private int writeExplain = EXPLAIN_FILE;
     private boolean writeReadRecord = false;
+    private boolean autoFlush = false;
 
     /**
      * Creates a new instance.
@@ -78,23 +83,83 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set auto flush
+     * set write SQL file
      *
-     * @param autoFlush auto flush
+     * @param write write SQL file
      * @return this
      */
-    public TsurugiSessionTxFileLogConfig autoFlush(boolean autoFlush) {
-        this.autoFlush = autoFlush;
+    public TsurugiSessionTxFileLogConfig writeSqlFile(boolean write) {
+        this.writeSqlFile = write;
         return this;
     }
 
     /**
-     * get auto flush
+     * get write SQL file
      *
-     * @return auto flush
+     * @return write SQL file
      */
-    public boolean autoFlush() {
-        return this.autoFlush;
+    public boolean writeSqlFile() {
+        return this.writeSqlFile;
+    }
+
+    /**
+     * set header formatter
+     *
+     * @param formatter header formatter
+     * @return this
+     */
+    public TsurugiSessionTxFileLogConfig headerFormatter(DateTimeFormatter formatter) {
+        this.headerFormatter = formatter;
+        return this;
+    }
+
+    /**
+     * get header formatter
+     *
+     * @return header formatter
+     */
+    public DateTimeFormatter headerFormatter() {
+        return this.headerFormatter;
+    }
+
+    /**
+     * set SQL max length
+     *
+     * @param maxLength SQL max length
+     * @return this
+     */
+    public TsurugiSessionTxFileLogConfig sqlMaxLength(int maxLength) {
+        this.sqlMaxLength = maxLength;
+        return this;
+    }
+
+    /**
+     * get SQL max length
+     *
+     * @return SQL max length
+     */
+    public int sqlMaxLength() {
+        return this.sqlMaxLength;
+    }
+
+    /**
+     * set SQL argument max length
+     *
+     * @param maxLength SQL argument max length
+     * @return this
+     */
+    public TsurugiSessionTxFileLogConfig argMaxLength(int maxLength) {
+        this.argMaxLength = maxLength;
+        return this;
+    }
+
+    /**
+     * get SQL argument max length
+     *
+     * @return SQL argument max length
+     */
+    public int argMaxLength() {
+        return this.argMaxLength;
     }
 
     /**
@@ -139,9 +204,29 @@ public class TsurugiSessionTxFileLogConfig {
         return this.writeReadRecord;
     }
 
+    /**
+     * set auto flush
+     *
+     * @param autoFlush auto flush
+     * @return this
+     */
+    public TsurugiSessionTxFileLogConfig autoFlush(boolean autoFlush) {
+        this.autoFlush = autoFlush;
+        return this;
+    }
+
+    /**
+     * get auto flush
+     *
+     * @return auto flush
+     */
+    public boolean autoFlush() {
+        return this.autoFlush;
+    }
+
     @Override
     public String toString() {
-        return "TsurugiSessionTxFileLogConfig[outputDir=" + outputDir + ", subDirType=" + subDirType + ", autoFlush=" + autoFlush + ", writeExplain=" + writeExplain + ", writeReadRecord="
-                + writeReadRecord + "]";
+        return "TsurugiSessionTxFileLogConfig [outputDir=" + outputDir + ", subDirType=" + subDirType + ", writeSqlFile=" + writeSqlFile + ", headerFormatter=" + headerFormatter + ", sqlMaxLength="
+                + sqlMaxLength + ", argMaxLength=" + argMaxLength + ", writeExplain=" + writeExplain + ", writeReadRecord=" + writeReadRecord + ", autoFlush=" + autoFlush + "]";
     }
 }
