@@ -268,15 +268,25 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
 
     @Override
     protected <R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiResultSet<R> rs, R record) {
-        if (!config.writeReadRecord()) {
+        if (!(config.writeReadRecord() || config.readProgress() >= 1)) {
             return;
         }
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
         int ssId = sqlLog.getIceaxeSqlStatementId();
-        int index = rs.getReadCount() - 1;
-        writer.println(SQL_HEADER + " read[%d]=%s", sqlId, ssId, index, record);
+        if (config.writeReadRecord()) {
+            int index = rs.getReadCount() - 1;
+            writer.println(SQL_HEADER + " read[%d]=%s", sqlId, ssId, index, record);
+        }
+
+        int progress = config.readProgress();
+        if (progress >= 1) {
+            int count = rs.getReadCount();
+            if (count % progress == 0) {
+                writer.println(SQL_HEADER + " read progress=%d", sqlId, ssId, count);
+            }
+        }
     }
 
     @Override
@@ -299,7 +309,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var result = sqlLog.getSqlResult();
         if (result instanceof TsurugiResultSet) {
             var rs = (TsurugiResultSet<?>) result;
-            writer.println(SQL_HEADER + " readCount=%d, hasNextRow=%s", sqlId, ssId, rs.getReadCount(), rs.getHasNextRow().map(b -> b.toString()).orElse("unread"));
+            writer.println(SQL_HEADER + " readCount=%d, hasNextRow=%s", sqlId, ssId, rs.getReadCount(), getNextRowText(rs));
         }
         if (occurred == null) {
             writer.println(SQL_HEADER + " sql end. %d[ms]", sqlId, ssId, time);
@@ -307,6 +317,10 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
             writer.println(SQL_HEADER + " sql error. %d[ms]", sqlId, ssId, time);
             writer.println(occurred);
         }
+    }
+
+    private String getNextRowText(TsurugiResultSet<?> rs) {
+        return rs.getHasNextRow().map(b -> b.toString()).orElse("unread");
     }
 
     @Override

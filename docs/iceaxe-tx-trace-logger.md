@@ -87,6 +87,9 @@ JavaVMのシステムプロパティー（javaコマンドの`-D`）でTsurugiSe
       - 出力する。
     - `false` （デフォルト）
       - 出力しない。
+- `iceaxe.tx.log.read_progress`
+  - select文の読み込みの進捗状況を出力する件数。この件数毎にログを出力する。
+  - デフォルトは`0`（出力しない）
 - `iceaxe.tx.log.auto_flush`
   - ログファイルの自動フラッシュ（1行出力する度にフラッシュする）を行うかどうか。
     - `true`

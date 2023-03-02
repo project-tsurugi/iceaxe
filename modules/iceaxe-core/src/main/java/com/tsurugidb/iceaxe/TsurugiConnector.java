@@ -47,6 +47,7 @@ public class TsurugiConnector {
             txLogConfig("iceaxe.tx.log.arg_max_length", s -> config.argMaxLength(Integer.parseInt(s))); // $NON-NLS-1$
             txLogConfig("iceaxe.tx.log.explain", s -> config.writeExplain(Integer.parseInt(s))); // $NON-NLS-1$
             txLogConfig("iceaxe.tx.log.record", s -> config.writeReadRecord(Boolean.parseBoolean(s))); // $NON-NLS-1$
+            txLogConfig("iceaxe.tx.log.read_progress", s -> config.readProgress(Integer.parseInt(s))); // $NON-NLS-1$
             txLogConfig("iceaxe.tx.log.auto_flush", s -> config.autoFlush(Boolean.parseBoolean(s))); // $NON-NLS-1$
             txFileLogConfig = config;
             LOG.debug("iceaxe.tx.log={}", txFileLogConfig);

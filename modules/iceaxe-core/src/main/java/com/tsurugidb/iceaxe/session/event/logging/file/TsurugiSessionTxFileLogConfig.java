@@ -42,6 +42,7 @@ public class TsurugiSessionTxFileLogConfig {
     private int argMaxLength = -1; // <0: 全て出力する, ==0: 出力しない
     private int writeExplain = EXPLAIN_FILE;
     private boolean writeReadRecord = false;
+    private int readProgress = 0;
     private boolean autoFlush = false;
 
     /**
@@ -202,6 +203,26 @@ public class TsurugiSessionTxFileLogConfig {
      */
     public boolean writeReadRecord() {
         return this.writeReadRecord;
+    }
+
+    /**
+     * set read progress
+     *
+     * @param count read progress
+     * @return this
+     */
+    public TsurugiSessionTxFileLogConfig readProgress(int count) {
+        this.readProgress = count;
+        return this;
+    }
+
+    /**
+     * get read progress
+     *
+     * @return read progress
+     */
+    public int readProgress() {
+        return this.readProgress;
     }
 
     /**
