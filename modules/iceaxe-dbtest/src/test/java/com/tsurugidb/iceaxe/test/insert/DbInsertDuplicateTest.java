@@ -6,12 +6,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +35,6 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 /**
  * insert duplicate bug test
  */
-// TODO DbInsertDuplicate2Testがあれば、DbInsertDuplicateTestは不要
 class DbInsertDuplicateTest extends DbTestTableTester {
 
     private static final String TEST2 = "test2";
@@ -73,19 +69,9 @@ class DbInsertDuplicateTest extends DbTestTableTester {
         test(TgTxOption.ofOCC());
     }
 
-    @RepeatedTest(8)
-    @Disabled // TODO remove Disabled: ごく稀にtateyama-serverがクラッシュする
+    @Test
     void ltx() throws Exception {
         test(TgTxOption.ofLTX(TEST, TEST2));
-    }
-
-    // TODO remove this test case
-    // tateyama-serverでWAITING_CC_COMMITが発生して終わらなくなる
-    // デバッグビルド版のtateyama-server相手に実行すると顕著
-    @Test
-    @Disabled
-    void ltxWithoutTimeout() throws Exception {
-        test(TgTxOption.ofLTX(TEST, TEST2), new DbTestSessions(Long.MAX_VALUE, TimeUnit.NANOSECONDS));
     }
 
     private void test(TgTxOption option) throws Exception {

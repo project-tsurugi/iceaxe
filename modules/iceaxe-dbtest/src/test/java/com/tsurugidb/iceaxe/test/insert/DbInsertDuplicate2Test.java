@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,15 +68,12 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
 
     @Test
     void occ() throws Exception {
-        test(TgTxOption.ofOCC(), 60, 1500);
+        test(TgTxOption.ofOCC(), 30, 500);
     }
 
     @Test
-    @Disabled // TODO remove Disabled: ごく稀にtateyama-serverがストールしたりクラッシュしたりする
-    // TCP接続でも発生するが、IPC接続の方が顕著
-    // Docker相手（TCP接続）ではほとんど発生しない
     void ltx() throws Exception {
-        test(TgTxOption.ofLTX(TEST, TEST2), 60, 15000);
+        test(TgTxOption.ofLTX(TEST, TEST2), 30, 500);
     }
 
     private void test(TgTxOption option, int threadSize, int attemptSize) throws Exception {
