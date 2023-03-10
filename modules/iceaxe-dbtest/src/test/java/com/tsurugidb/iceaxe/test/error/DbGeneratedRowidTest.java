@@ -2,13 +2,10 @@ package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +14,7 @@ import org.junit.jupiter.api.TestInfo;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 
 /**
  * generated rowid test
@@ -80,14 +78,15 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
-            for (var entity : list) {
-                assertEquals(List.of(), entity.getNameList());
-            }
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                tm.executeAndGetList(ps);
+            });
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
+//TODO      assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
+
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
@@ -96,15 +95,15 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
-            int i = 0;
-            for (var entity : list) {
-                assertEquals(++i, entity.getInt8("k"));
-            }
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                tm.executeAndGetList(ps);
+            });
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
+//TODO      assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
+
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
@@ -113,15 +112,15 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
-            int i = 0;
-            for (var entity : list) {
-                assertEquals(++i, entity.getInt8("@#0"));
-            }
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                tm.executeAndGetList(ps);
+            });
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
+//TODO      assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
+
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
@@ -130,14 +129,15 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
-            for (var entity : list) {
-                assertEquals(1, entity.getInt4("c"));
-            }
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                tm.executeAndGetList(ps);
+            });
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
+//TODO      assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
+
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
@@ -146,18 +146,15 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedQuery(sql)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
-            var expectedSet = LongStream.rangeClosed(1, list.size()).boxed().collect(Collectors.toSet());
-            for (var entity : list) {
-                // TODO generated_rowidが使えるならば、cで件数が取得されるべき
-//              assertEquals(1, entity.getInt4("c"));
-                assertTrue(expectedSet.remove(entity.getInt8("c")));
-            }
-            assertEquals(Set.of(), expectedSet);
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                tm.executeAndGetList(ps);
+            });
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
+//TODO      assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
+
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
@@ -167,21 +164,14 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = tm.executeAndGetCount(ps);
-            assertUpdateCount(1, count);
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                tm.executeAndGetCount(ps);
+            });
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
-        var list = selectAllFromTest();
-        assertEquals(SIZE, list.size());
-        for (var entity : list) {
-            if (entity.getFoo() == key - 1) {
-                assertEquals(11L, entity.getBar());
-            } else {
-                assertEquals(entity.getFoo().longValue(), entity.getBar());
-            }
-        }
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
@@ -191,21 +181,14 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        // TODO generated_rowidが（見えなくて）エラーになるべき
         try (var ps = session.createPreparedStatement(sql)) {
-            int count = tm.executeAndGetCount(ps);
-            assertUpdateCount(1, count);
+            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                tm.executeAndGetCount(ps);
+            });
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
-        var list = selectAllFromTest();
-        assertEquals(SIZE - 1, list.size());
-        for (var entity : list) {
-            if (entity.getFoo() == key - 1) {
-                assertEquals(11L, entity.getBar());
-            } else {
-                assertEquals(entity.getFoo().longValue(), entity.getBar());
-            }
-        }
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
