@@ -200,8 +200,8 @@ public class TsurugiTransactionManager {
                         event(setting, null, listener -> listener.executeEndSuccess(transaction, false, r));
                         return r;
                     }
-                    var info = ownerSession.getSessionInfo();
-                    var commitType = setting.getCommitType(info);
+                    var sessionOption = ownerSession.getSessionOption();
+                    var commitType = setting.getCommitType(sessionOption);
                     transaction.commit(commitType);
                     LOG.trace("tm.execute end (committed)");
                     event(setting, null, listener -> listener.executeEndSuccess(transaction, true, r));

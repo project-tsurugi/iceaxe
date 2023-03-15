@@ -9,8 +9,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.util.ServerResource;
 import com.tsurugidb.tsubakuro.util.Timeout;
@@ -46,8 +46,8 @@ class IceaxeTimeoutTest {
 
     @Test
     void test() {
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var target = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var target = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
 
         // get 1回目
         target.apply(new IceaxeServerResourceTestMock() {
@@ -79,8 +79,8 @@ class IceaxeTimeoutTest {
 
     @Test
     void testToString() {
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var target = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var target = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         assertEquals("IceaxeTimeout{key=SESSION_CONNECT, value=null}", target.toString());
 
         target.get();

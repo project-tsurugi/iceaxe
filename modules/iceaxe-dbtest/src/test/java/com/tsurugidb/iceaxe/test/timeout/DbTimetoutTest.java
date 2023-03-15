@@ -6,7 +6,7 @@ import java.io.IOException;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.result.TsurugiResultSet;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
@@ -16,7 +16,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 public abstract class DbTimetoutTest extends DbTestTableTester {
 
     protected static class TimeoutModifier {
-        public void modifySessionInfo(TgSessionInfo info) {
+        public void modifySessionInfo(TgSessionOption sessionOption) {
             // do override
         }
 
@@ -84,12 +84,12 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
     }
 
     protected TsurugiSession createSession(PipeServerThtread pipeServer, TsurugiConnector connector, TimeoutModifier modifier) throws IOException {
-        var info = TgSessionInfo.of();
-        modifier.modifySessionInfo(info);
+        var sessionOption = TgSessionOption.of();
+        modifier.modifySessionInfo(sessionOption);
 
         TsurugiSession session = null;
         try {
-            session = connector.createSession(info);
+            session = connector.createSession(sessionOption);
             modifier.modifySession(session);
         } catch (Throwable t) {
             if (session != null) {

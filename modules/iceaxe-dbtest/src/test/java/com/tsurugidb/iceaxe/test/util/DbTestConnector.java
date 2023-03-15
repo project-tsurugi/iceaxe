@@ -9,8 +9,8 @@ import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 
 public class DbTestConnector {
@@ -36,7 +36,7 @@ public class DbTestConnector {
 
     public static TsurugiConnector createConnector() {
         URI endpoint = getEndPoint();
-        return TsurugiConnector.createConnector(endpoint);
+        return TsurugiConnector.of(endpoint);
     }
 
     public static TsurugiSession createSession() throws IOException {
@@ -44,11 +44,11 @@ public class DbTestConnector {
     }
 
     public static TsurugiSession createSession(long time, TimeUnit unit) throws IOException {
-        var info = TgSessionInfo.of();
-        info.timeout(TgTimeoutKey.DEFAULT, time, unit);
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, time, unit);
 
         var connector = createConnector();
-        return connector.createSession(info);
+        return connector.createSession(sessionOption);
     }
 
     public static Socket createSocket() {

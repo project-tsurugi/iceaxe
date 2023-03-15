@@ -8,7 +8,6 @@ import java.util.Optional;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.statement.TgParameterList;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
@@ -28,12 +27,11 @@ public class Example00 {
     public static void main(String... args) throws IOException {
         // @see Example01Connector
         var endpoint = URI.create("tcp://localhost:12345");
-        var connector = TsurugiConnector.createConnector(endpoint);
+        var credential = new UsernamePasswordCredential("user", "password");
+        var connector = TsurugiConnector.of(endpoint, credential);
 
         // @see Example02Session
-        var credential = new UsernamePasswordCredential("user", "password");
-        var info = TgSessionInfo.of(credential);
-        try (var session = connector.createSession(info)) {
+        try (var session = connector.createSession()) {
             executeCreateTable(session);
             executeInsert(session);
             executeUpdate(session);

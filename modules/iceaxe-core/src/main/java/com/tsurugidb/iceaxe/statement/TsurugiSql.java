@@ -11,8 +11,8 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
@@ -60,8 +60,8 @@ public abstract class TsurugiSql implements Closeable {
         return this.ownerSession;
     }
 
-    protected final TgSessionInfo getSessionInfo() {
-        return ownerSession.getSessionInfo();
+    protected final TgSessionOption getSessionOption() {
+        return ownerSession.getSessionOption();
     }
 
     /**
@@ -95,8 +95,8 @@ public abstract class TsurugiSql implements Closeable {
 
     protected synchronized IceaxeTimeout getExplainConnectTimeout() {
         if (this.explainConnectTimeout == null) {
-            var info = ownerSession.getSessionInfo();
-            this.explainConnectTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CONNECT);
+            var sessionOption = ownerSession.getSessionOption();
+            this.explainConnectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CONNECT);
         }
         return this.explainConnectTimeout;
     }
@@ -122,8 +122,8 @@ public abstract class TsurugiSql implements Closeable {
 
     protected synchronized IceaxeTimeout getExplainCloseTimeout() {
         if (this.explainCloseTimeout == null) {
-            var info = ownerSession.getSessionInfo();
-            this.explainCloseTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CLOSE);
+            var sessionOption = ownerSession.getSessionOption();
+            this.explainCloseTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CLOSE);
         }
         return this.explainCloseTimeout;
     }

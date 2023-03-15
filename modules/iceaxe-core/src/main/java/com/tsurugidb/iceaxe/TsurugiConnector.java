@@ -8,15 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig;
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig.TgTxFileLogSubDirType;
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogger;
 import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
+import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
+import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
 import com.tsurugidb.tsubakuro.common.Session;
 import com.tsurugidb.tsubakuro.common.SessionBuilder;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
@@ -66,35 +71,118 @@ public class TsurugiConnector {
     }
 
     /**
-     * create Tsurugi Connector
+     * create connector
      *
      * @param endpoint the end-point URI
-     * @return Tsurugi Connector
+     * @return connector
+     * @see #of(URI, Credential, TgSessionOption)
      */
+    @Deprecated(forRemoval = true)
     public static TsurugiConnector createConnector(String endpoint) {
         var uri = URI.create(endpoint);
         return createConnector(uri);
     }
 
     /**
-     * create Tsurugi Connector
+     * create connector
      *
      * @param endpoint the end-point URI
-     * @return Tsurugi Connector
+     * @return connector
+     * @see #of(URI, Credential, TgSessionOption)
      */
+    @Deprecated(forRemoval = true)
     public static TsurugiConnector createConnector(URI endpoint) {
+        return of(endpoint, null, null);
+    }
+
+    /**
+     * create connector
+     *
+     * @param endpoint the end-point URI
+     * @return connector
+     */
+    public static TsurugiConnector of(String endpoint) {
+        var uri = URI.create(endpoint);
+        return of(uri, NullCredential.INSTANCE, TgSessionOption.of());
+    }
+
+    /**
+     * create connector
+     *
+     * @param endpoint the end-point URI
+     * @return connector
+     */
+    public static TsurugiConnector of(URI endpoint) {
+        return of(endpoint, NullCredential.INSTANCE, TgSessionOption.of());
+    }
+
+    /**
+     * create connector
+     *
+     * @param endpoint   the end-point URI
+     * @param credential credential. if null, use NullCredential
+     * @return connector
+     */
+    public static TsurugiConnector of(String endpoint, Credential credential) {
+        var uri = URI.create(endpoint);
+        return of(uri, credential, TgSessionOption.of());
+    }
+
+    /**
+     * create connector
+     *
+     * @param endpoint   the end-point URI
+     * @param credential credential. if null, use NullCredential
+     * @return connector
+     */
+    public static TsurugiConnector of(URI endpoint, Credential credential) {
+        return of(endpoint, credential, TgSessionOption.of());
+    }
+
+    /**
+     * create connector
+     *
+     * @param endpoint      the end-point URI
+     * @param credential    credential. if null, use NullCredential
+     * @param sessionOption session option. if null, use new SessionOption instance
+     * @return connector
+     */
+    public static TsurugiConnector of(@Nonnull String endpoint, @Nullable Credential credential, @Nullable TgSessionOption sessionOption) {
+        var uri = URI.create(endpoint);
+        return of(uri, credential, sessionOption);
+    }
+
+    /**
+     * create connector
+     *
+     * @param endpoint      the end-point URI
+     * @param credential    credential. if null, use NullCredential
+     * @param sessionOption session option. if null, use new SessionOption instance
+     * @return connector
+     */
+    public static TsurugiConnector of(@Nonnull URI endpoint, @Nullable Credential credential, @Nullable TgSessionOption sessionOption) {
+        if (endpoint == null) {
+            throw new IllegalArgumentException("endpoint is null");
+        }
+        var credential0 = (credential != null) ? credential : NullCredential.INSTANCE;
+        var sessionOption0 = (sessionOption != null) ? sessionOption : TgSessionOption.of();
+
         var lowConnector = Connector.create(endpoint);
-        var connector = new TsurugiConnector(endpoint, lowConnector);
+        var connector = new TsurugiConnector(lowConnector, endpoint, credential0, sessionOption0);
         return connector;
     }
 
-    private final URI endpoint;
     protected final Connector lowConnector;
+    private final URI endpoint;
+    private final Credential defaultCredential;
+    private final TgSessionOption defaultSessionOption;
     private List<Consumer<TsurugiSession>> eventListenerList = null;
 
-    protected TsurugiConnector(URI endpoint, Connector lowConnector) {
-        this.endpoint = endpoint;
+    protected TsurugiConnector(Connector lowConnector, URI endpoint, Credential defaultCredential, TgSessionOption defaultSessionOption) {
         this.lowConnector = lowConnector;
+        this.endpoint = endpoint;
+        this.defaultCredential = defaultCredential;
+        this.defaultSessionOption = defaultSessionOption;
     }
 
     /**
@@ -104,6 +192,15 @@ public class TsurugiConnector {
      */
     public URI getEndpoint() {
         return this.endpoint;
+    }
+
+    /**
+     * get session option
+     *
+     * @return session option
+     */
+    public TgSessionOption getSessionOption() {
+        return this.defaultSessionOption;
     }
 
     /**
@@ -129,16 +226,49 @@ public class TsurugiConnector {
     }
 
     /**
-     * create Tsurugi Session
+     * create session
      *
-     * @param info Session Information
-     * @return Tsurugi Session
+     * @return session
      * @throws IOException
      */
-    public TsurugiSession createSession(TgSessionInfo info) throws IOException {
-        LOG.trace("session create. info={}", info);
-        var lowSessionFuture = createLowSession(info);
-        var session = new TsurugiSession(info, lowSessionFuture);
+    public TsurugiSession createSession() throws IOException {
+        return createSession(defaultCredential, defaultSessionOption);
+    }
+
+    /**
+     * create session
+     *
+     * @param credential credential
+     * @return session
+     * @throws IOException
+     */
+    public TsurugiSession createSession(Credential credential) throws IOException {
+        return createSession(credential, defaultSessionOption);
+    }
+
+    /**
+     * create session
+     *
+     * @param sessionOption session option
+     * @return session
+     * @throws IOException
+     */
+    public TsurugiSession createSession(TgSessionOption sessionOption) throws IOException {
+        return createSession(defaultCredential, sessionOption);
+    }
+
+    /**
+     * create session
+     *
+     * @param sessionOption session option
+     * @return session
+     * @throws IOException
+     */
+    public TsurugiSession createSession(Credential credential, TgSessionOption sessionOption) throws IOException {
+        LOG.trace("create session. credential={}, option={}", credential, sessionOption);
+        var option = (sessionOption != null) ? sessionOption : TgSessionOption.of();
+        var lowSessionFuture = createLowSession(credential, option);
+        var session = new TsurugiSession(lowSessionFuture, option);
         if (txFileLogConfig != null) {
             session.addEventListener(new TsurugiSessionTxFileLogger(txFileLogConfig));
         }
@@ -146,10 +276,9 @@ public class TsurugiConnector {
         return session;
     }
 
-    protected FutureResponse<? extends Session> createLowSession(TgSessionInfo info) throws IOException {
+    protected FutureResponse<? extends Session> createLowSession(@Nullable Credential credential, TgSessionOption sessionOption) throws IOException {
         var lowBuilder = SessionBuilder.connect(lowConnector);
 
-        var credential = info.credential();
         if (credential != null) {
             lowBuilder.withCredential(credential);
         }
@@ -159,6 +288,6 @@ public class TsurugiConnector {
 
     @Override
     public String toString() {
-        return "TsurugiConnector(" + endpoint + ")";
+        return "TsurugiConnector(" + endpoint + ", " + defaultCredential + ")";
     }
 }

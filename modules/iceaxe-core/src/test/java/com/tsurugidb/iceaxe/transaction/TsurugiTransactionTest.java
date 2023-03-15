@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -23,7 +23,7 @@ class TsurugiTransactionTest {
 
     @Test
     void getLowTransactionError() throws IOException {
-        var session = new TsurugiSession(TgSessionInfo.of(), null);
+        var session = new TsurugiSession(null, TgSessionOption.of());
         var future = new FutureResponse<Transaction>() {
             @Override
             public boolean isDone() {

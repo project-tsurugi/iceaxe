@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
@@ -31,9 +31,9 @@ public class TsurugiExplainHelper {
      * @throws IOException
      */
     public TgStatementMetadata explain(TsurugiSession session, String source) throws IOException {
-        var info = session.getSessionInfo();
-        var connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CONNECT);
-        var closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.EXPLAIN_CLOSE);
+        var sessionOption = session.getSessionOption();
+        var connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CONNECT);
+        var closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CLOSE);
         return explain(session, source, connectTimeout, closeTimeout);
     }
 

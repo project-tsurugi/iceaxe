@@ -3,29 +3,21 @@ package com.tsurugidb.iceaxe.example;
 import java.io.IOException;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
 
 /**
  * example to specify commitType
  */
 public class Example91CommitType {
 
-    void main() throws IOException {
-        var connector = Example01Connector.createConnector();
-        commit1(connector);
-        commit2(connector);
-        commit3(connector);
-    }
+    void commitTypeBySessionOption(TsurugiConnector connector) throws IOException {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setCommitType(TgCommitType.STORED);
 
-    void commit1(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of(NullCredential.INSTANCE);
-        info.commitType(TgCommitType.STORED);
-
-        try (var session = connector.createSession(info)) {
+        try (var session = connector.createSession(sessionOption)) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
             tm.execute(transaction -> {
@@ -34,10 +26,8 @@ public class Example91CommitType {
         }
     }
 
-    void commit2(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of(NullCredential.INSTANCE);
-
-        try (var session = connector.createSession(info)) {
+    void commitTypeByCreateTm(TsurugiConnector connector) throws IOException {
+        try (var session = connector.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitType(TgCommitType.STORED);
             var tm = session.createTransactionManager(setting);
 
@@ -47,10 +37,8 @@ public class Example91CommitType {
         }
     }
 
-    void commit3(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of(NullCredential.INSTANCE);
-
-        try (var session = connector.createSession(info)) {
+    void commitTypeByTmExecute(TsurugiConnector connector) throws IOException {
+        try (var session = connector.createSession()) {
             var tm = session.createTransactionManager();
 
             var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitType(TgCommitType.STORED);

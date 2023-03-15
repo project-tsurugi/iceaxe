@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeServerExceptionTestMock;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 
@@ -37,8 +37,8 @@ class IceaxeIoUtilTest {
                 count.addAndGet(1);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = IceaxeIoUtil.getAndCloseFuture(future, timeout);
         assertEquals("abc", actual);
         assertEquals(1, count.get());
@@ -58,8 +58,8 @@ class IceaxeIoUtilTest {
                 count.addAndGet(1);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(TsurugiIOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("MOCK_123: abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
@@ -80,8 +80,8 @@ class IceaxeIoUtilTest {
                 count.addAndGet(1);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
         assertNull(actual.getCause());
@@ -102,8 +102,8 @@ class IceaxeIoUtilTest {
                 count.addAndGet(1);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
@@ -127,8 +127,8 @@ class IceaxeIoUtilTest {
                 throw new IceaxeServerExceptionTestMock("abc", 123);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(TsurugiIOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("MOCK_123: abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
@@ -151,8 +151,8 @@ class IceaxeIoUtilTest {
                 throw new IOException("abc");
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
         assertNull(actual.getCause());
@@ -175,8 +175,8 @@ class IceaxeIoUtilTest {
                 throw new InterruptedException("abc");
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
@@ -195,8 +195,8 @@ class IceaxeIoUtilTest {
                 throw new IceaxeServerExceptionTestMock("def", 456);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
         var s0 = actual.getSuppressed()[0];
@@ -218,8 +218,8 @@ class IceaxeIoUtilTest {
                 throw new IOException("def");
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
         var s0 = actual.getSuppressed()[0];
@@ -240,8 +240,8 @@ class IceaxeIoUtilTest {
                 throw new InterruptedException("def");
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
         var s0 = actual.getSuppressed()[0];
@@ -265,8 +265,8 @@ class IceaxeIoUtilTest {
                 count.addAndGet(1);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout);
         assertEquals("abc", actual);
         assertEquals(1, count.get());
@@ -286,8 +286,8 @@ class IceaxeIoUtilTest {
                 count.addAndGet(1);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(TsurugiTransactionException.class, () -> IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout));
         assertEquals("MOCK_123: abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());
@@ -311,8 +311,8 @@ class IceaxeIoUtilTest {
                 throw new IceaxeServerExceptionTestMock("abc", 123);
             }
         };
-        var info = TgSessionInfo.of().timeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
-        var timeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         var actual = assertThrowsExactly(TsurugiTransactionException.class, () -> IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout));
         assertEquals("MOCK_123: abc", actual.getMessage());
         assertEquals("abc", actual.getCause().getMessage());

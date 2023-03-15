@@ -21,7 +21,7 @@ import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
 import com.tsurugidb.iceaxe.statement.TgParameterMapping;
 import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
@@ -47,7 +47,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class TsurugiSession implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSession.class);
 
-    private final TgSessionInfo sessionInfo;
+    private final TgSessionOption sessionOption;
     private FutureResponse<? extends Session> lowSessionFuture;
     private Session lowSession;
     private Throwable lowFutureException = null;
@@ -62,11 +62,11 @@ public class TsurugiSession implements Closeable {
     private boolean closed = false;
 
     // internal
-    public TsurugiSession(TgSessionInfo info, FutureResponse<? extends Session> lowSessionFuture) {
-        this.sessionInfo = info;
+    public TsurugiSession(FutureResponse<? extends Session> lowSessionFuture, TgSessionOption sessionOption) {
+        this.sessionOption = sessionOption;
         this.lowSessionFuture = lowSessionFuture;
-        this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
-        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CLOSE);
+        this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
+        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CLOSE);
 
         applyCloseTimeout();
     }
@@ -132,8 +132,8 @@ public class TsurugiSession implements Closeable {
     }
 
     // internal
-    public final TgSessionInfo getSessionInfo() {
-        return sessionInfo;
+    public final TgSessionOption getSessionOption() {
+        return sessionOption;
     }
 
     /**

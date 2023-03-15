@@ -4,30 +4,22 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
 
 /**
  * example to specify timeout
  */
 public class Example92Timeout {
 
-    void main() throws IOException {
-        var connector = Example01Connector.createConnector();
-        timeoutBySessionInfo(connector);
-        timeoutByTmSetting(connector);
-        timeoutByDirect(connector);
-    }
+    void timeoutBySessionOption(TsurugiConnector connector) throws IOException {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
+        sessionOption.setTimeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
 
-    void timeoutBySessionInfo(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of(NullCredential.INSTANCE);
-        info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
-        info.timeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
-
-        try (var session = connector.createSession(info)) {
+        try (var session = connector.createSession(sessionOption)) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
             tm.execute(transaction -> {
@@ -37,10 +29,10 @@ public class Example92Timeout {
     }
 
     void timeoutByTmSetting(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of(NullCredential.INSTANCE);
-        info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
 
-        try (var session = connector.createSession(info)) {
+        try (var session = connector.createSession(sessionOption)) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitTimeout(1, TimeUnit.HOURS);
             var tm = session.createTransactionManager(setting);
 
@@ -50,11 +42,11 @@ public class Example92Timeout {
         }
     }
 
-    void timeoutByDirect(TsurugiConnector connector) throws IOException {
-        var info = TgSessionInfo.of(NullCredential.INSTANCE);
-        info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
+    void timeoutByTransaction(TsurugiConnector connector) throws IOException {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
 
-        try (var session = connector.createSession(info)) {
+        try (var session = connector.createSession(sessionOption)) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
             tm.execute(transaction -> {

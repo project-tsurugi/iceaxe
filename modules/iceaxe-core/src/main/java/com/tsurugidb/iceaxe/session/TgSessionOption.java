@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.result.TsurugiResultCount;
@@ -16,45 +16,22 @@ import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
-import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
-import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 
 /**
- * Tsurugi Session Information
+ * Tsurugi Session Option
+ *
+ * @see TsurugiConnector#createSession(TgSessionOption)
  */
 @ThreadSafe
-public class TgSessionInfo {
+public class TgSessionOption {
 
     /**
-     * create Session Information
+     * create session option
      *
-     * @return Session Information
+     * @return session option
      */
-    public static TgSessionInfo of() {
-        return new TgSessionInfo();
-    }
-
-    /**
-     * create Session Information
-     *
-     * @param user     user id
-     * @param password password
-     * @return Session Information
-     */
-    @Deprecated(forRemoval = true) // TODO remove TgSessionInfo.of(user, password)
-    public static TgSessionInfo of(@Nonnull String user, @Nullable String password) {
-        var credential = new UsernamePasswordCredential(user, password);
-        return of(credential);
-    }
-
-    /**
-     * create Session Information
-     *
-     * @param credential Credential
-     * @return Session Information
-     */
-    public static TgSessionInfo of(@Nonnull Credential credential) {
-        return new TgSessionInfo().credential(credential);
+    public static TgSessionOption of() {
+        return new TgSessionOption();
     }
 
     /**
@@ -103,35 +80,14 @@ public class TgSessionInfo {
         RESULT_CLOSE,
     }
 
-    private Credential credential;
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
     private TgCommitType commitType = TgCommitType.DEFAULT;
 
     /**
-     * Tsurugi Session Information
+     * Tsurugi Session Option
      */
-    public TgSessionInfo() {
+    public TgSessionOption() {
         timeoutMap.put(TgTimeoutKey.DEFAULT, TgTimeValue.of(Long.MAX_VALUE, TimeUnit.NANOSECONDS));
-    }
-
-    /**
-     * set credential
-     *
-     * @param credential Credential
-     * @return this
-     */
-    public TgSessionInfo credential(@Nonnull Credential credential) {
-        this.credential = credential;
-        return this;
-    }
-
-    /**
-     * get credential
-     *
-     * @return Credential
-     */
-    public Credential credential() {
-        return this.credential;
     }
 
     /**
@@ -143,7 +99,7 @@ public class TgSessionInfo {
      *
      * @return this
      */
-    public TgSessionInfo timeout(@Nonnull TgTimeoutKey key, long time, @Nonnull TimeUnit unit) {
+    public TgSessionOption setTimeout(@Nonnull TgTimeoutKey key, long time, @Nonnull TimeUnit unit) {
         timeoutMap.put(key, new TgTimeValue(time, unit));
         return this;
     }
@@ -154,7 +110,7 @@ public class TgSessionInfo {
      * @param key timeout key
      * @return time
      */
-    public TgTimeValue timeout(TgTimeoutKey key) {
+    public TgTimeValue getTimeout(TgTimeoutKey key) {
         TgTimeValue value = timeoutMap.get(key);
         if (value != null) {
             return value;
@@ -168,7 +124,7 @@ public class TgSessionInfo {
      * @param commitType commit type
      * @return this
      */
-    public TgSessionInfo commitType(@Nonnull TgCommitType commitType) {
+    public TgSessionOption setCommitType(@Nonnull TgCommitType commitType) {
         this.commitType = commitType;
         return this;
     }
@@ -178,12 +134,12 @@ public class TgSessionInfo {
      *
      * @return commit type
      */
-    public TgCommitType commitType() {
+    public TgCommitType getCommitType() {
         return this.commitType;
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{credential=" + credential + ", timeout=" + timeoutMap + ", commitType=" + commitType + "}";
+        return getClass().getSimpleName() + "{timeout=" + timeoutMap + ", commitType=" + commitType + "}";
     }
 }

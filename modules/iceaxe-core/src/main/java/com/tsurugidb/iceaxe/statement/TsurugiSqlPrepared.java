@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
@@ -40,9 +40,9 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         super(session, sql);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
         this.parameterMapping = parameterMapping;
-        var info = session.getSessionInfo();
-        this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.PS_CONNECT);
-        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.PS_CLOSE);
+        var sessionOption = session.getSessionOption();
+        this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.PS_CONNECT);
+        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.PS_CLOSE);
 
         applyCloseTimeout();
     }

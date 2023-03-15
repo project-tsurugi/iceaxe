@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -213,14 +213,14 @@ public class TgTmSetting {
     /**
      * get commit type
      *
-     * @param info Session information
+     * @param sessionOption session option
      * @return commit type
      */
-    public TgCommitType getCommitType(TgSessionInfo info) {
+    public TgCommitType getCommitType(TgSessionOption sessionOption) {
         if (this.commitType != null) {
             return this.commitType;
         }
-        return info.commitType();
+        return sessionOption.getCommitType();
     }
 
     /**

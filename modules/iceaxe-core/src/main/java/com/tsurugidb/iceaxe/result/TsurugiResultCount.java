@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.result.event.TsurugiResultCountEventListener;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -37,9 +37,9 @@ public class TsurugiResultCount extends TsurugiResult {
         super(sqlExecuteId, transaction);
         this.lowResultFuture = lowResultFuture;
 
-        var info = transaction.getSessionInfo();
-        this.checkTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CHECK);
-        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.RESULT_CLOSE);
+        var sessionOption = transaction.getSessionOption();
+        this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CHECK);
+        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
 
         applyCloseTimeout();
     }

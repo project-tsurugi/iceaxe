@@ -25,7 +25,7 @@ abstract class TimeoutServerThread extends Thread implements Closeable {
     public TsurugiConnector getTsurugiConnector() {
         int port = server.getLocalPort();
         var endpoint = URI.create("tcp://localhost:" + port);
-        var connector = TsurugiConnector.createConnector(endpoint);
+        var connector = TsurugiConnector.of(endpoint);
         return connector;
     }
 

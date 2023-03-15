@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.result.event.TsurugiResultSetEventListener;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
@@ -60,9 +60,9 @@ public class TsurugiResultSet<R> extends TsurugiResult implements Iterable<R> {
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
 
-        var info = transaction.getSessionInfo();
-        this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.RS_CONNECT);
-        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.RS_CLOSE);
+        var sessionOption = transaction.getSessionOption();
+        this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RS_CONNECT);
+        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RS_CLOSE);
 
         applyCloseTimeout();
     }

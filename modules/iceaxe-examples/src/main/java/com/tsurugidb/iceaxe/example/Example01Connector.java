@@ -1,8 +1,12 @@
 package com.tsurugidb.iceaxe.example;
 
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 
 /**
  * TsurugiConnector example
@@ -12,20 +16,32 @@ import com.tsurugidb.iceaxe.TsurugiConnector;
 public class Example01Connector {
 
     static TsurugiConnector createConnector() {
-        var connector = TsurugiConnector.createConnector("tcp://localhost:12345");
+        var endpoint = URI.create("tcp://localhost:12345");
+        var credential = Example01Credential.getCredential();
+        var connector = TsurugiConnector.of(endpoint, credential);
         return connector;
     }
 
-    static TsurugiConnector createConnectorUri() {
-        var endpoint = URI.create("tcp://localhost:12345");
-        var connector = TsurugiConnector.createConnector(endpoint);
+    static TsurugiConnector createConnectorString() {
+        var endpoint = "tcp://localhost:12345";
+        var credential = Example01Credential.getCredential();
+        var connector = TsurugiConnector.of(endpoint, credential);
         return connector;
     }
 
     static TsurugiConnector createConnectorIpc() {
         String databaseName = "tateyama";
         var endpoint = "ipc:" + databaseName;
-        var connector = TsurugiConnector.createConnector(endpoint);
+        var credential = Example01Credential.getCredential();
+        var connector = TsurugiConnector.of(endpoint, credential);
+        return connector;
+    }
+
+    static TsurugiConnector createConnectorWithSessionOption() {
+        var endpoint = URI.create("tcp://localhost:12345");
+        var credential = Example01Credential.getCredential();
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES).setCommitType(TgCommitType.DEFAULT);
+        var connector = TsurugiConnector.of(endpoint, credential, sessionOption);
         return connector;
     }
 }
