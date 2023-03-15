@@ -9,9 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 
@@ -42,7 +42,7 @@ class DbUpdateTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
         }
@@ -64,7 +64,7 @@ class DbUpdateTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
         }
@@ -87,7 +87,7 @@ class DbUpdateTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
         }
@@ -117,7 +117,7 @@ class DbUpdateTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(0, count);
         }
@@ -133,15 +133,15 @@ class DbUpdateTest extends DbTestTableTester {
                 + "  zzz = :zzz" //
                 + " where foo = :foo";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-                .int4("foo", TestEntity::getFoo) //
-                .int8("bar", TestEntity::getBar) //
-                .character("zzz", TestEntity::getZzz);
+                .addInt("foo", TestEntity::getFoo) //
+                .addLong("bar", TestEntity::getBar) //
+                .addString("zzz", TestEntity::getZzz);
 
         var updateEntity = new TestEntity(5, 55, "go");
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             int count = tm.executeAndGetCount(ps, updateEntity);
             assertUpdateCount(1, count);
         }
@@ -168,7 +168,7 @@ class DbUpdateTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
         }
@@ -191,7 +191,7 @@ class DbUpdateTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
         }
@@ -216,7 +216,7 @@ class DbUpdateTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
         }
@@ -236,19 +236,19 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         tm.execute(tranasction -> {
             // insert
-            try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 int count = tranasction.executeAndGetCount(ps, insertEntity);
                 assertUpdateCount(1, count);
             }
 
             // update
-            try (var ps = session.createPreparedStatement(sql)) {
+            try (var ps = session.createStatement(sql)) {
                 int count = tranasction.executeAndGetCount(ps);
                 assertUpdateCount(1, count);
             }
 
             // select
-            try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+            try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
                 var list = tranasction.executeAndGetList(ps);
                 assertEquals(SIZE + 1, list.size());
                 for (var entity : list) {
@@ -284,18 +284,18 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         tm.execute(tranasction -> {
             // insert
-            try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 ps.execute(tranasction, insertEntity); // not get-count
             }
             // executeの結果を確認せずに次のSQLを実行すると、同一トランザクション内でもSQLの実行順序が保証されないらしい
 
             // update
-            try (var ps = session.createPreparedStatement(sql)) {
+            try (var ps = session.createStatement(sql)) {
                 ps.execute(tranasction); // not get-count
             }
 
             // select
-            try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+            try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
                 var list = tranasction.executeAndGetList(ps);
                 assertEquals(SIZE + 1, list.size());
                 for (var entity : list) {
@@ -322,7 +322,7 @@ class DbUpdateTest extends DbTestTableTester {
     @Test
     void updateUpdate() throws IOException {
         int foo = 1;
-        var bar = TgVariable.ofInt8("bar");
+        var bar = TgBindVariable.ofLong("bar");
         var sql = "update " + TEST //
                 + " set" //
                 + "  bar = " + bar //
@@ -333,21 +333,21 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         tm.execute(tranasction -> {
             // update
-            try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+            try (var ps = session.createStatement(sql, parameterMapping)) {
                 {
-                    var param = TgParameterList.of(bar.bind(101));
+                    var param = TgBindParameters.of(bar.bind(101));
                     int count = tranasction.executeAndGetCount(ps, param);
                     assertUpdateCount(1, count);
                 }
                 {
-                    var param = TgParameterList.of(bar.bind(102));
+                    var param = TgBindParameters.of(bar.bind(102));
                     int count = tranasction.executeAndGetCount(ps, param);
                     assertUpdateCount(1, count);
                 }
             }
 
             // select
-            try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+            try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
                 var list = tranasction.executeAndGetList(ps);
                 assertEquals(SIZE, list.size());
                 for (var entity : list) {

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultCount;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 
@@ -56,7 +56,7 @@ public class DbTimeoutResultCheckTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyResult(TsurugiResultCount result) {
+            public void modifyResult(TsurugiStatementResult result) {
                 result.setCheckTimeout(1, TimeUnit.SECONDS);
             }
         });
@@ -67,7 +67,7 @@ public class DbTimeoutResultCheckTest extends DbTimetoutTest {
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             transaction.getLowTransaction();
 
-            try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(0);
 
                 pipeServer.setPipeWrite(false);

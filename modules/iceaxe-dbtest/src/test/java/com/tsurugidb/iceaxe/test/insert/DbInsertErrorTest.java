@@ -42,7 +42,7 @@ class DbInsertErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             // TODO insert null to PK
             tm.executeAndGetCount(ps);
 //          var e = assertThrowsExactly(TsurugiIOException.class, () -> tm.executeAndGetCount(ps));
@@ -73,7 +73,7 @@ class DbInsertErrorTest extends DbTestTableTester {
         executeDdl(session, createSql);
 
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 var entity = new TestEntity(123, null, null);
                 tm.executeAndGetCount(ps, entity);
@@ -94,7 +94,7 @@ class DbInsertErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        var ps = session.createPreparedStatement(sql);
+        var ps = session.createStatement(sql);
         ps.close();
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             tm.executeAndGetCount(ps);
@@ -106,7 +106,7 @@ class DbInsertErrorTest extends DbTestTableTester {
     void ps1ExecuteAfterClose() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING);
+        var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING);
         ps.close();
         var entity = createTestEntity(1);
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
@@ -131,7 +131,7 @@ class DbInsertErrorTest extends DbTestTableTester {
                 + "values(1, 1, '1')";
 
         var session = getSession();
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             var transaction = session.createTransaction(TgTxOption.ofOCC());
             if (getLow) {
                 transaction.getLowTransaction();

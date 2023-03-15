@@ -45,7 +45,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             // TODO updatePK null
 //          var e = assertThrowsExactly(TsurugiIOException.class, () -> tm.executeAndGetCount(ps));
 //          assertEqualsCode(null, e); // TODO エラーコード
@@ -72,7 +72,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             // TODO updatePK same value
 //          var e = assertThrowsExactly(TsurugiIOException.class, () -> tm.executeAndGetCount(ps));
 //          assertEqualsCode(null, e); // TODO エラーコード
@@ -107,7 +107,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
                 + "  zzz = null";
 
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });

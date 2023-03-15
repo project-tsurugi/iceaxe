@@ -1,0 +1,615 @@
+package com.tsurugidb.iceaxe.sql.parameter;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
+import com.tsurugidb.sql.proto.SqlRequest.Parameter;
+
+/**
+ * Tsurugi Bind Parameter for {@link TsurugiSqlPrepared}
+ *
+ * @see TsurugiSqlPreparedQuery#execute(com.tsurugidb.iceaxe.transaction.TsurugiTransaction, Object)
+ * @see TsurugiSqlPreparedStatement#execute(com.tsurugidb.iceaxe.transaction.TsurugiTransaction, Object)
+ */
+public class TgBindParameters {
+
+    /**
+     * create bind parameters
+     *
+     * @return bind parameters
+     */
+    public static TgBindParameters of() {
+        return new TgBindParameters();
+    }
+
+    /**
+     * create bind parameters
+     *
+     * @param parameters bind parameter
+     * @return bind parameters
+     */
+    public static TgBindParameters of(TgBindParameter... parameters) {
+        var parameterList = new TgBindParameters();
+        for (var parameter : parameters) {
+            parameterList.add(parameter);
+        }
+        return parameterList;
+    }
+
+    /**
+     * a function that always returns its input argument.
+     */
+    public static final Function<TgBindParameters, TgBindParameters> IDENTITY = p -> p;
+
+    private final List<TgBindParameter> parameterList = new ArrayList<>();
+
+    /**
+     * Tsurugi Parameter for PreparedStatement
+     */
+    public TgBindParameters() {
+        // do nothing
+    }
+
+    /**
+     * add value(boolean)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addBoolean(@Nonnull String name, boolean value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(boolean)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addBoolean(@Nonnull String name, @Nullable Boolean value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(int)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addInt(@Nonnull String name, int value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(int)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addInt(@Nonnull String name, @Nullable Integer value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(long)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addLong(@Nonnull String name, long value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(long)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addLong(@Nonnull String name, @Nullable Long value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(float)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addFloat(@Nonnull String name, float value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(float)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addFloat(@Nonnull String name, @Nullable Float value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(double)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addDouble(@Nonnull String name, double value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(double)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addDouble(@Nonnull String name, @Nullable Double value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(decimal)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addDecimal(@Nonnull String name, @Nullable BigDecimal value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(decimal)
+     *
+     * @param name  name
+     * @param value value
+     * @param scale rounding scale. see {@link TgBindVariableBigDecimal#DEFAULT_ROUNDING_MODE}
+     * @return this
+     */
+    public TgBindParameters addDecimal(@Nonnull String name, @Nullable BigDecimal value, int scale) {
+        return addDecimal(name, value, scale, TgBindVariableBigDecimal.DEFAULT_ROUNDING_MODE);
+    }
+
+    /**
+     * add value(decimal)
+     *
+     * @param name  name
+     * @param value value
+     * @param scale rounding scale
+     * @param mode  rounding mode
+     * @return this
+     */
+    public TgBindParameters addDecimal(@Nonnull String name, @Nullable BigDecimal value, int scale, @Nonnull RoundingMode mode) {
+        var value0 = (value != null) ? value.setScale(scale, mode) : null;
+        return addDecimal(name, value0);
+    }
+
+    /**
+     * add value(String)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addString(@Nonnull String name, @Nullable String value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(byte[])
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addBytes(@Nonnull String name, @Nullable byte[] value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(boolean[])
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addBits(@Nonnull String name, @Nullable boolean[] value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(date)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addDate(@Nonnull String name, @Nullable LocalDate value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(time)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addTime(@Nonnull String name, @Nullable LocalTime value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(dateTime)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addDateTime(@Nonnull String name, @Nullable LocalDateTime value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(offset time)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addOffsetTime(@Nonnull String name, @Nullable OffsetTime value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(offset dateTime)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addOffsetDateTime(@Nonnull String name, @Nullable OffsetDateTime value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(zoned dateTime)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters addZonedDateTime(@Nonnull String name, @Nullable ZonedDateTime value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(boolean)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, boolean value) {
+        return addBoolean(name, value);
+    }
+
+    /**
+     * add value(boolean)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable Boolean value) {
+        return addBoolean(name, value);
+    }
+
+    /**
+     * add value(int)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, int value) {
+        return addInt(name, value);
+    }
+
+    /**
+     * add value(int)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable Integer value) {
+        return addInt(name, value);
+    }
+
+    /**
+     * add value(long)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, long value) {
+        return addLong(name, value);
+    }
+
+    /**
+     * add value(long)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable Long value) {
+        return addLong(name, value);
+    }
+
+    /**
+     * add value(float)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, float value) {
+        return addFloat(name, value);
+    }
+
+    /**
+     * add value(float)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable Float value) {
+        return addFloat(name, value);
+    }
+
+    /**
+     * add value(double)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, double value) {
+        return addDouble(name, value);
+    }
+
+    /**
+     * add value(double)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable Double value) {
+        return addDouble(name, value);
+    }
+
+    /**
+     * add value(decimal)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable BigDecimal value) {
+        return addDecimal(name, value);
+    }
+
+    /**
+     * add value(decimal)
+     *
+     * @param name  name
+     * @param value value
+     * @param scale rounding scale. see {@link TgBindVariableBigDecimal#DEFAULT_ROUNDING_MODE}
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable BigDecimal value, int scale) {
+        return addDecimal(name, value, scale);
+    }
+
+    /**
+     * add value(decimal)
+     *
+     * @param name  name
+     * @param value value
+     * @param scale rounding scale
+     * @param mode  rounding mode
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable BigDecimal value, int scale, RoundingMode mode) {
+        return addDecimal(name, value, scale, mode);
+    }
+
+    /**
+     * add value(String)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable String value) {
+        return addString(name, value);
+    }
+
+    /**
+     * add value(byte[])
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable byte[] value) {
+        return addBytes(name, value);
+    }
+
+    /**
+     * add value(boolean[])
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable boolean[] value) {
+        return addBits(name, value);
+    }
+
+    /**
+     * add value(date)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable LocalDate value) {
+        return addDate(name, value);
+    }
+
+    /**
+     * add value(time)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable LocalTime value) {
+        return addTime(name, value);
+    }
+
+    /**
+     * add value(dateTime)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable LocalDateTime value) {
+        return addDateTime(name, value);
+    }
+
+    /**
+     * add value(offset time)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable OffsetTime value) {
+        return addOffsetTime(name, value);
+    }
+
+    /**
+     * add value(offset dateTime)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable OffsetDateTime value) {
+        return addOffsetDateTime(name, value);
+    }
+
+    /**
+     * add value(zoned dateTime)
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable ZonedDateTime value) {
+        return addZonedDateTime(name, value);
+    }
+
+    /**
+     * add parameter
+     *
+     * @param parameter parameter
+     * @return this
+     */
+    public TgBindParameters add(TgBindParameter parameter) {
+        parameterList.add(parameter);
+        return this;
+    }
+
+    /**
+     * add parameter
+     *
+     * @param otherList parameter list
+     * @return this
+     */
+    public TgBindParameters add(TgBindParameters otherList) {
+        parameterList.addAll(otherList.parameterList);
+        return this;
+    }
+
+    // internal
+    public List<Parameter> toLowParameterList() {
+        var list = new ArrayList<Parameter>(parameterList.size());
+        for (var parameter : parameterList) {
+            list.add(parameter.toLowParameter());
+        }
+        return list;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + parameterList;
+    }
+}

@@ -12,10 +12,10 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
-import com.tsurugidb.iceaxe.statement.TgVariableList;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
@@ -46,7 +46,7 @@ class DbInsertTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(1, count);
         }
@@ -62,19 +62,19 @@ class DbInsertTest extends DbTestTableTester {
         var sql = "insert into " + TEST //
                 + (columns ? " (" + TEST_COLUMNS + ")" : "") //
                 + "values(:foo, :bar, :zzz)";
-        var vlist = TgVariableList.of() //
-                .int4("foo") //
-                .int8("bar") //
-                .character("zzz");
+        var vlist = TgBindVariables.of() //
+                .addInt("foo") //
+                .addLong("bar") //
+                .addString("zzz");
         var parameterMapping = TgParameterMapping.of(vlist);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            var plist = TgParameterList.of() //
-                    .int4("foo", entity.getFoo()) //
-                    .int8("bar", entity.getBar()) //
-                    .character("zzz", entity.getZzz());
+        try (var ps = session.createStatement(sql, parameterMapping)) {
+            var plist = TgBindParameters.of() //
+                    .addInt("foo", entity.getFoo()) //
+                    .addLong("bar", entity.getBar()) //
+                    .addString("zzz", entity.getZzz());
             int count = tm.executeAndGetCount(ps, plist);
             assertUpdateCount(1, count);
         }
@@ -87,9 +87,9 @@ class DbInsertTest extends DbTestTableTester {
     void insertByBind(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
-        var foo = TgVariable.ofInt4("foo");
-        var bar = TgVariable.ofInt8("bar");
-        var zzz = TgVariable.ofCharacter("zzz");
+        var foo = TgBindVariable.ofInt("foo");
+        var bar = TgBindVariable.ofLong("bar");
+        var zzz = TgBindVariable.ofString("zzz");
 
         var sql = "insert into " + TEST //
                 + (columns ? " (" + TEST_COLUMNS + ")" : "") //
@@ -98,8 +98,8 @@ class DbInsertTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            var plist = TgParameterList.of( //
+        try (var ps = session.createStatement(sql, parameterMapping)) {
+            var plist = TgBindParameters.of( //
                     foo.bind(entity.getFoo()), //
                     bar.bind(entity.getBar()), //
                     zzz.bind(entity.getZzz()));
@@ -119,13 +119,13 @@ class DbInsertTest extends DbTestTableTester {
                 + (columns ? " (" + TEST_COLUMNS + ")" : "") //
                 + "values(:foo, :bar, :zzz)";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-                .int4("foo", TestEntity::getFoo) //
-                .int8("bar", TestEntity::getBar) //
-                .character("zzz", TestEntity::getZzz);
+                .addInt("foo", TestEntity::getFoo) //
+                .addLong("bar", TestEntity::getBar) //
+                .addString("zzz", TestEntity::getZzz);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             int count = tm.executeAndGetCount(ps, entity);
             assertUpdateCount(1, count);
         }
@@ -143,13 +143,13 @@ class DbInsertTest extends DbTestTableTester {
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(:foo, :bar, :zzz)";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-                .int4("foo", TestEntity::getFoo) //
-                .int8("bar", TestEntity::getBar) //
-                .character("zzz", TestEntity::getZzz);
+                .addInt("foo", TestEntity::getFoo) //
+                .addLong("bar", TestEntity::getBar) //
+                .addString("zzz", TestEntity::getZzz);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 for (var entity : entityList) {
                     int count = transaction.executeAndGetCount(ps, entity);
@@ -176,7 +176,7 @@ class DbInsertTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < size; i++) {
                     var entity = createTestEntity(i);
@@ -201,14 +201,14 @@ class DbInsertTest extends DbTestTableTester {
     @Test
     void insertPart() throws IOException {
         int key = 1;
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = "insert into " + TEST + "(foo) values(" + foo + ")";
         var parameterMapping = TgParameterMapping.of(foo);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            var parameter = TgParameterList.of(foo.bind(key));
+        try (var ps = session.createStatement(sql, parameterMapping)) {
+            var parameter = TgBindParameters.of(foo.bind(key));
             int count = tm.executeAndGetCount(ps, parameter);
             assertUpdateCount(1, count);
         }

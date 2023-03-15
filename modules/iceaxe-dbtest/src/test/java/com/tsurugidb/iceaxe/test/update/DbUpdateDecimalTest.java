@@ -13,9 +13,9 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -65,7 +65,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
     private void div(int divValue, boolean cast, boolean expectedSuccess) throws IOException {
         insert(BigDecimal.ONE);
 
-        var div = TgVariable.ofDecimal("div");
+        var div = TgBindVariable.ofDecimal("div");
         String expression = "value / " + div;
         if (cast) {
             expression = "cast(" + expression + " as decimal(5,2))";
@@ -75,8 +75,8 @@ class DbUpdateDecimalTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, mapping)) {
-            var parameter = TgParameterList.of(div.bind(divValue));
+        try (var ps = session.createStatement(sql, mapping)) {
+            var parameter = TgBindParameters.of(div.bind(divValue));
             if (expectedSuccess) {
                 int count = tm.executeAndGetCount(ps, parameter);
                 assertUpdateCount(1, count);
@@ -91,7 +91,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
                     });
                     assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
 
-                    try (var selectPs = session.createPreparedQuery("select value from " + TEST)) {
+                    try (var selectPs = session.createQuery("select value from " + TEST)) {
                         var list = transaction.executeAndGetList(selectPs);
                         assertEquals(0, list.size()); // TODO 1 (even if ERR_EXPRESSION_EVALUATION_FAILURE)
                     }
@@ -101,13 +101,13 @@ class DbUpdateDecimalTest extends DbTestTableTester {
     }
 
     private void insert(BigDecimal value) throws IOException {
-        var variable = TgVariable.ofDecimal(VNAME);
+        var variable = TgBindVariable.ofDecimal(VNAME);
         var mapping = TgParameterMapping.of(variable);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL, mapping)) {
-            var parameter = TgParameterList.of(variable.bind(value));
+        try (var ps = session.createStatement(SQL, mapping)) {
+            var parameter = TgBindParameters.of(variable.bind(value));
             int count = tm.executeAndGetCount(ps, parameter);
             assertUpdateCount(1, count);
         }
@@ -116,7 +116,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
     private BigDecimal selectValue() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery("select value from " + TEST)) {
+        try (var ps = session.createQuery("select value from " + TEST)) {
             var entity = tm.executeAndFindRecord(ps).get();
             return entity.getDecimal(VNAME);
         }

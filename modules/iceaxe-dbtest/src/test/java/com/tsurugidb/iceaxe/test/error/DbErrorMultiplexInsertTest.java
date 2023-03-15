@@ -98,7 +98,7 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
                 var transaction = session.createTransaction(TgTxOption.ofOCC());
                 // transaction.close is called on session.close
 
-                var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING);
+                var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING);
                 // ps.close is called on session.close
 
                 var entity = createTestEntity(i);

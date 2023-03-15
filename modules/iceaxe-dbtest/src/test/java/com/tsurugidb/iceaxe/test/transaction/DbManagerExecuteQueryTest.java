@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -104,10 +104,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeForEach_sql_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
@@ -122,10 +122,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeForEach_setting_sql_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
@@ -141,10 +141,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeForEach_sql_parameter_result() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
@@ -159,10 +159,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeForEach_setting_sql_parameter_result() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
@@ -183,7 +183,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var list = new ArrayList<TsurugiResultEntity>();
             tm.executeForEach(ps, entity -> {
                 list.add(entity);
@@ -201,7 +201,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var list = new ArrayList<TsurugiResultEntity>();
             tm.executeForEach(setting, ps, entity -> {
                 list.add(entity);
@@ -213,15 +213,15 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeForEach_ps_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             var list = new ArrayList<TsurugiResultEntity>();
             tm.executeForEach(ps, parameter, entity -> {
                 list.add(entity);
@@ -233,16 +233,16 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeForEach_setting_ps_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             var list = new ArrayList<TsurugiResultEntity>();
             tm.executeForEach(setting, ps, parameter, entity -> {
                 list.add(entity);
@@ -304,10 +304,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndGetList_sql_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
@@ -319,10 +319,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndGetList_setting_sql_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
@@ -335,10 +335,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndGetList_sql_parameter_result() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
@@ -350,10 +350,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndGetList_setting_sql_parameter_result() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
@@ -371,7 +371,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(ps);
 
             assertEqualsTestTableResultEntity(SIZE - 1, list);
@@ -386,7 +386,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(setting, ps);
 
             assertEqualsTestTableResultEntity(SIZE - 1, list);
@@ -395,15 +395,15 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndGetList_ps_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             var list = tm.executeAndGetList(ps, parameter);
 
             assertEqualsTestTableResultEntity(SIZE - 1, list);
@@ -412,16 +412,16 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndGetList_setting_ps_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(SIZE - 1));
+        var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             var list = tm.executeAndGetList(setting, ps, parameter);
 
             assertEqualsTestTableResultEntity(SIZE - 1, list);
@@ -484,10 +484,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndFindRecord_sql_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo = " + foo;
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(1));
+        var parameter = TgBindParameters.of(foo.bind(1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
@@ -500,10 +500,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndFindRecord_setting_sql_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo = " + foo;
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(1));
+        var parameter = TgBindParameters.of(foo.bind(1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
@@ -517,10 +517,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndFindRecord_sql_parameter_result() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo = " + foo;
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(1));
+        var parameter = TgBindParameters.of(foo.bind(1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
@@ -533,10 +533,10 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndFindRecord_setting_sql_parameter_result() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo = " + foo;
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(1));
+        var parameter = TgBindParameters.of(foo.bind(1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
@@ -555,7 +555,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var entity = tm.executeAndFindRecord(ps).get();
 
             var expected = createTestEntity(1);
@@ -571,7 +571,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var entity = tm.executeAndFindRecord(setting, ps).get();
 
             var expected = createTestEntity(1);
@@ -581,15 +581,15 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndFindRecord_ps_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo = " + foo;
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(1));
+        var parameter = TgBindParameters.of(foo.bind(1));
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             var entity = tm.executeAndFindRecord(ps, parameter).get();
 
             var expected = createTestEntity(1);
@@ -599,16 +599,16 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
     @Test
     void executeAndFindRecord_setting_ps_parameter() throws IOException, TsurugiTransactionException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo = " + foo;
         var parameterMapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(1));
+        var parameter = TgBindParameters.of(foo.bind(1));
 
         var session = getSession();
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             var entity = tm.executeAndFindRecord(setting, ps, parameter).get();
 
             var expected = createTestEntity(1);

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
@@ -41,11 +41,11 @@ class DbSelectCountTest extends DbTestTableTester {
         insertTestTable(size);
 
         var sql = "select count(*) from " + TEST;
-        var resultMapping = TgResultMapping.of(record -> record.nextInt4());
+        var resultMapping = TgResultMapping.of(record -> record.nextInt());
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createQuery(sql, resultMapping)) {
             int count = tm.executeAndFindRecord(ps).get();
             assertEquals(size, count);
         }

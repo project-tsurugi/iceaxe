@@ -36,7 +36,7 @@ class DbSelectIrregularTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         tm.execute(transaction -> {
-            var ps = session.createPreparedQuery(sql);
+            var ps = session.createQuery(sql);
             var rs = ps.execute(transaction);
             ps.close();
             var list = rs.getRecordList();

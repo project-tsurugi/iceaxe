@@ -13,8 +13,8 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -68,7 +68,7 @@ public class DbTimeoutPsConnectTest extends DbTimetoutTest {
             transaction.getLowTransaction();
 
             pipeServer.setPipeWrite(false);
-            try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 modifier.modifyPs(ps);
 
                 var entity = createTestEntity(0);

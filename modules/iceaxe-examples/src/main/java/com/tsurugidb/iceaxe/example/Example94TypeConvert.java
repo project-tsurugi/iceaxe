@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import com.tsurugidb.iceaxe.result.TgResultMapping;
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.statement.TgDataType;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.TgDataType;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -108,9 +108,9 @@ public class Example94TypeConvert {
 
             var sql = "insert into example94 (key1, date1) values(:key, :date)";
             var parameterMapping = TgParameterMapping.of(Example94Entity.class) //
-                    .int4("key", Example94Entity::getKey) //
-                    .add("date", TgDataType.CHARACTER, Example94Entity::getDate);
-            try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+                    .addInt("key", Example94Entity::getKey) //
+                    .add("date", TgDataType.STRING, Example94Entity::getDate);
+            try (var ps = session.createStatement(sql, parameterMapping)) {
                 tm.executeAndGetCount(ps, entity);
             } catch (IOException e) {
                 System.out.println("insert1----");
@@ -126,10 +126,10 @@ public class Example94TypeConvert {
 
             var sql = "insert into example94 (key1, date1) values(:key, :date)";
             var parameterMapping = TgParameterMapping.of(Example94Entity.class) //
-                    .int4("key", Example94Entity::getKey) //
-                    .add("date", TgDataType.CHARACTER, Example94Entity::getDate) //
-                    .convertUtil(CONVERT_UTIL); // set parameter mapping (for 'add' method)
-            try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+                    .addInt("key", Example94Entity::getKey) //
+                    .add("date", TgDataType.STRING, Example94Entity::getDate) //
+                    .setConvertUtil(CONVERT_UTIL); // set parameter mapping (for 'add' method)
+            try (var ps = session.createStatement(sql, parameterMapping)) {
                 tm.executeAndGetCount(ps, entity);
             } catch (IOException e) {
                 System.out.println("insert2----");
@@ -147,9 +147,9 @@ public class Example94TypeConvert {
 
             var sql = "select * from example94";
             var resultMapping = TgResultMapping.of(Example94Entity::new) //
-                    .int4(Example94Entity::setKey) //
-                    .date(Example94Entity::setDate);
-            try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+                    .addInt(Example94Entity::setKey) //
+                    .addDate(Example94Entity::setDate);
+            try (var ps = session.createQuery(sql, resultMapping)) {
                 var list = tm.executeAndGetList(ps);
                 System.out.println(list);
             }
@@ -163,10 +163,10 @@ public class Example94TypeConvert {
 
             var sql = "select * from example94";
             var resultMapping = TgResultMapping.of(Example94Entity::new) //
-                    .int4(Example94Entity::setKey) //
-                    .date(Example94Entity::setDate) //
-                    .convertUtil(CONVERT_UTIL); // set result mapping
-            try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+                    .addInt(Example94Entity::setKey) //
+                    .addDate(Example94Entity::setDate) //
+                    .setConvertUtil(CONVERT_UTIL); // set result mapping
+            try (var ps = session.createQuery(sql, resultMapping)) {
                 var list = tm.executeAndGetList(ps);
                 System.out.println(list);
             }
@@ -179,14 +179,14 @@ public class Example94TypeConvert {
             var tm = session.createTransactionManager(setting);
 
             var sql = "select * from example94";
-            try (var ps = session.createPreparedQuery(sql)) {
+            try (var ps = session.createQuery(sql)) {
                 tm.execute(transaction -> {
                     try (var rs = ps.execute(transaction)) {
                         for (TsurugiResultEntity entity : rs) {
                             entity.setConvertUtil(CONVERT_UTIL); // set result entity
 
-                            int key = entity.getInt4("key1");
-                            String s = entity.getCharacter("date1");
+                            int key = entity.getInt("key1");
+                            String s = entity.getString("date1");
                             LocalDate d = entity.getDate("date1");
                             System.out.printf("key=%d, s=%s, d=%s\n", key, s, d);
                         }

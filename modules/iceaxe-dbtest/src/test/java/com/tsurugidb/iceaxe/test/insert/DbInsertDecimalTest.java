@@ -11,10 +11,10 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
-import com.tsurugidb.iceaxe.statement.TgVariable.TgVariableBigDecimal;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -49,13 +49,13 @@ class DbInsertDecimalTest extends DbTestTableTester {
     @ValueSource(strings = { "123", "1.01" })
     void normal(String s) throws IOException {
         var value = new BigDecimal(s);
-        var variable = TgVariable.ofDecimal(VNAME);
+        var variable = TgBindVariable.ofDecimal(VNAME);
         var mapping = TgParameterMapping.of(variable);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL, mapping)) {
-            var parameter = TgParameterList.of(variable.bind(value));
+        try (var ps = session.createStatement(SQL, mapping)) {
+            var parameter = TgBindParameters.of(variable.bind(value));
             int count = tm.executeAndGetCount(ps, parameter);
             assertUpdateCount(1, count);
         }
@@ -68,13 +68,13 @@ class DbInsertDecimalTest extends DbTestTableTester {
     @ValueSource(strings = { "1234", "1.001" })
     void outOfRange(String s) throws IOException {
         var value = new BigDecimal(s);
-        var variable = TgVariable.ofDecimal(VNAME);
+        var variable = TgBindVariable.ofDecimal(VNAME);
         var mapping = TgParameterMapping.of(variable);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL, mapping)) {
-            var parameter = TgParameterList.of(variable.bind(value));
+        try (var ps = session.createStatement(SQL, mapping)) {
+            var parameter = TgBindParameters.of(variable.bind(value));
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> tm.executeAndGetCount(ps, parameter));
             assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
             String expected = "ERR_EXPRESSION_EVALUATION_FAILURE: SQL--0017: .";
@@ -86,26 +86,26 @@ class DbInsertDecimalTest extends DbTestTableTester {
     @ValueSource(strings = { "1.1", "1.01", "1.001" })
     void scale(String s) throws IOException {
         var value = new BigDecimal(s);
-        var variable = TgVariable.ofDecimal(VNAME, 2); // TgVariable with scale
+        var variable = TgBindVariable.ofDecimal(VNAME, 2); // TgVariable with scale
         var mapping = TgParameterMapping.of(variable);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL, mapping)) {
-            var parameter = TgParameterList.of(variable.bind(value));
+        try (var ps = session.createStatement(SQL, mapping)) {
+            var parameter = TgBindParameters.of(variable.bind(value));
             int count = tm.executeAndGetCount(ps, parameter);
             assertUpdateCount(1, count);
         }
 
         var actual = selectValue();
-        var expected = value.setScale(2, TgVariableBigDecimal.DEFAULT_ROUNDING_MODE);
+        var expected = value.setScale(2, TgBindVariableBigDecimal.DEFAULT_ROUNDING_MODE);
         assertEquals(expected, actual);
     }
 
     private BigDecimal selectValue() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery("select value from " + TEST)) {
+        try (var ps = session.createQuery("select value from " + TEST)) {
             var entity = tm.executeAndFindRecord(ps).get();
             return entity.getDecimal(VNAME);
         }

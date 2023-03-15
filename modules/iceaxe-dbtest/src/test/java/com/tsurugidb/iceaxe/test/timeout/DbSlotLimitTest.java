@@ -9,10 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -48,8 +48,8 @@ public class DbSlotLimitTest extends DbTimetoutTest {
             transaction.setCloseTimeout(1, TimeUnit.SECONDS); // TODO 本来はトランザクションはタイムアウトせず正常にクローズできて欲しい
             transaction.getLowTransaction();
 
-            try (var ps = session.createPreparedQuery(SELECT_SQL)) {
-                var rsList = new ArrayList<TsurugiResultSet<?>>();
+            try (var ps = session.createQuery(SELECT_SQL)) {
+                var rsList = new ArrayList<TusurigQueryResult<?>>();
 
                 pipeServer.setPipeWrite(false);
                 try {
@@ -79,7 +79,7 @@ public class DbSlotLimitTest extends DbTimetoutTest {
         }
     }
 
-    private void execute(TsurugiTransaction transaction, TsurugiPreparedStatementQuery0<TsurugiResultEntity> ps, List<TsurugiResultSet<?>> rsList) throws IOException, TsurugiTransactionException {
+    private void execute(TsurugiTransaction transaction, TsurugiSqlQuery<TsurugiResultEntity> ps, List<TusurigQueryResult<?>> rsList) throws IOException, TsurugiTransactionException {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
             LOG.trace("i={}", i);
             try {

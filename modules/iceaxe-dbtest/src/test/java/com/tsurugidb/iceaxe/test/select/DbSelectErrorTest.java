@@ -11,11 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.result.TsurugiResultSet;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
@@ -47,7 +47,7 @@ class DbSelectErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
@@ -62,7 +62,7 @@ class DbSelectErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
@@ -77,7 +77,7 @@ class DbSelectErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        var ps = session.createPreparedQuery(sql);
+        var ps = session.createQuery(sql);
         ps.close();
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             tm.executeAndGetList(ps);
@@ -87,15 +87,15 @@ class DbSelectErrorTest extends DbTestTableTester {
 
     @Test
     void ps1ExecuteAfterClose() throws IOException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = "select * from " + TEST + " where foo=" + foo;
         var parameterMapping = TgParameterMapping.of(foo);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        var ps = session.createPreparedQuery(sql, parameterMapping);
+        var ps = session.createQuery(sql, parameterMapping);
         ps.close();
-        var parameter = TgParameterList.of(foo.bind(1));
+        var parameter = TgBindParameters.of(foo.bind(1));
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
             tm.executeAndGetList(ps, parameter);
         });
@@ -116,7 +116,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var sql = "select * from " + TEST;
 
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var transaction = session.createTransaction(TgTxOption.ofOCC());
             if (getLow) {
                 transaction.getLowTransaction();
@@ -136,8 +136,8 @@ class DbSelectErrorTest extends DbTestTableTester {
         var sql = "select * from " + TEST;
 
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql)) {
-            TsurugiResultSet<TsurugiResultEntity> rs;
+        try (var ps = session.createQuery(sql)) {
+            TusurigQueryResult<TsurugiResultEntity> rs;
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                 rs = ps.execute(transaction);
             }
@@ -153,7 +153,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var sql = "select * from " + TEST;
 
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                 try (var rs = ps.execute(transaction)) {
                     var i = rs.iterator();

@@ -60,7 +60,7 @@ class DbQueryCommentTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         if (prepared) {
-            try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
+            try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
                 var list = tm.executeAndGetList(ps);
                 assertEquals(SIZE, list.size());
                 for (int i = 0; i < SIZE; i++) {
@@ -70,15 +70,15 @@ class DbQueryCommentTest extends DbTestTableTester {
                 }
             }
         } else {
-            try (var ps = session.createPreparedQuery(sql)) {
+            try (var ps = session.createQuery(sql)) {
                 var list = tm.executeAndGetList(ps);
                 assertEquals(SIZE, list.size());
                 for (int i = 0; i < SIZE; i++) {
                     var expected = createTestEntity(i);
                     var actual = list.get(i);
-                    assertEquals(expected.getFoo(), actual.getInt4("foo"));
-                    assertEquals(expected.getBar(), actual.getInt8("bar"));
-                    assertEquals(expected.getZzz(), actual.getCharacter("zzz"));
+                    assertEquals(expected.getFoo(), actual.getInt("foo"));
+                    assertEquals(expected.getBar(), actual.getLong("bar"));
+                    assertEquals(expected.getZzz(), actual.getString("zzz"));
                 }
             }
         }

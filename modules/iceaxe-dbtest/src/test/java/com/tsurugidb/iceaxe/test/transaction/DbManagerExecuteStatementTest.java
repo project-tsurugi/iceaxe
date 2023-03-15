@@ -92,7 +92,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedStatement(SQL)) {
+        try (var ps = session.createStatement(SQL)) {
             int result = tm.executeAndGetCount(ps);
 
             assertUpdateCount(1, result);
@@ -107,7 +107,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedStatement(SQL)) {
+        try (var ps = session.createStatement(SQL)) {
             int result = tm.executeAndGetCount(setting, ps);
 
             assertUpdateCount(1, result);
@@ -123,7 +123,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             int result = tm.executeAndGetCount(ps, entity);
 
             assertUpdateCount(1, result);
@@ -140,7 +140,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             int result = tm.executeAndGetCount(setting, ps, entity);
 
             assertUpdateCount(1, result);

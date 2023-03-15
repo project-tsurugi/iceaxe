@@ -4,11 +4,11 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
-import com.tsurugidb.iceaxe.result.TsurugiResultCount;
-import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
+import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
+import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -32,11 +32,11 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
             // do override
         }
 
-        public void modifyResultSet(TsurugiResultSet<?> rs) {
+        public void modifyResultSet(TusurigQueryResult<?> rs) {
             // do override
         }
 
-        public void modifyResult(TsurugiResultCount result) {
+        public void modifyResult(TsurugiStatementResult result) {
             // do override
         }
     }

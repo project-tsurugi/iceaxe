@@ -46,7 +46,7 @@ class DbStatementCommentTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         var entity = createTestEntity(0);
         if (prepared) {
-            try (var ps = session.createPreparedStatement(sql, INSERT_MAPPING)) {
+            try (var ps = session.createStatement(sql, INSERT_MAPPING)) {
                 int count = tm.executeAndGetCount(ps, entity);
                 assertUpdateCount(1, count);
             }
@@ -54,7 +54,7 @@ class DbStatementCommentTest extends DbTestTableTester {
             var sqlr = sql.replace(":foo", Integer.toString(entity.getFoo())) //
                     .replace(":bar", Long.toString(entity.getBar())) //
                     .replace(":zzz", "'" + entity.getZzz() + "'");
-            try (var ps = session.createPreparedStatement(sqlr)) {
+            try (var ps = session.createStatement(sqlr)) {
                 int count = tm.executeAndGetCount(ps);
                 assertUpdateCount(1, count);
             }

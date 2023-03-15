@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 
@@ -52,13 +52,13 @@ class DbBindVariableTest extends DbTestTableTester {
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(" + f + ", " + b + ", " + z + ")";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-                .int4(trimColumn(f), TestEntity::getFoo) //
-                .int8(trimColumn(b), TestEntity::getBar) //
-                .character(trimColumn(z), TestEntity::getZzz);
+                .addInt(trimColumn(f), TestEntity::getFoo) //
+                .addLong(trimColumn(b), TestEntity::getBar) //
+                .addString(trimColumn(z), TestEntity::getZzz);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             var entity = createTestEntity(SIZE);
             tm.executeAndGetCount(ps, entity);
         }
@@ -82,15 +82,15 @@ class DbBindVariableTest extends DbTestTableTester {
     }
 
     private void bindSelect(String b) throws IOException {
-        var bar = TgVariable.ofInt4(trimColumn(b));
+        var bar = TgBindVariable.ofInt(trimColumn(b));
         var sql = SELECT_SQL + " where foo=" + b;
         var parameterMapping = TgParameterMapping.of(bar);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, parameterMapping, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(sql, parameterMapping, SELECT_MAPPING)) {
             int key = 2;
-            var parameter = TgParameterList.of(bar.bind(key));
+            var parameter = TgBindParameters.of(bar.bind(key));
             var list = tm.executeAndGetList(ps, parameter);
 
             if (b.equals("bar")) {

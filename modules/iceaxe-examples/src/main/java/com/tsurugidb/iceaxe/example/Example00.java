@@ -7,11 +7,11 @@ import java.util.Optional;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
-import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -71,10 +71,10 @@ public class Example00 {
 
         var sql = "insert into " + TABLE_NAME + "(foo, bar, zzz) values(:foo, :bar, :zzz)";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-                .int4("foo", TestEntity::getFoo) //
-                .int8("bar", TestEntity::getBar) //
-                .character("zzz", TestEntity::getZzz);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+                .addInt("foo", TestEntity::getFoo) //
+                .addLong("bar", TestEntity::getBar) //
+                .addString("zzz", TestEntity::getZzz);
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < 10; i++) {
                     var entity = new TestEntity(i, Long.valueOf(i), "z" + i);
@@ -92,14 +92,14 @@ public class Example00 {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX(TABLE_NAME));
         var tm = session.createTransactionManager(setting);
 
-        var foo = TgVariable.ofInt4("foo");
-        var bar = TgVariable.ofInt8("bar");
+        var foo = TgBindVariable.ofInt("foo");
+        var bar = TgBindVariable.ofLong("bar");
         var sql = "update " + TABLE_NAME + " set bar=" + bar + " where foo=" + foo;
         var parameterMapping = TgParameterMapping.of(foo, bar);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < 10; i += 2) {
-                    var parameter = TgParameterList.of(foo.bind(i), bar.bind(i + 1));
+                    var parameter = TgBindParameters.of(foo.bind(i), bar.bind(i + 1));
                     transaction.executeAndGetCount(ps, parameter);
                 }
             });
@@ -115,10 +115,10 @@ public class Example00 {
 
         var sql = "select foo, bar, zzz from " + TABLE_NAME;
         var resultMapping = TgResultMapping.of(TestEntity::new) //
-                .int4("foo", TestEntity::setFoo) //
-                .int8("bar", TestEntity::setBar) //
-                .character("zzz", TestEntity::setZzz);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+                .addInt("foo", TestEntity::setFoo) //
+                .addLong("bar", TestEntity::setBar) //
+                .addString("zzz", TestEntity::setZzz);
+        try (var ps = session.createQuery(sql, resultMapping)) {
             tm.execute(transaction -> {
                 List<TestEntity> list = transaction.executeAndGetList(ps);
                 for (var entity : list) {

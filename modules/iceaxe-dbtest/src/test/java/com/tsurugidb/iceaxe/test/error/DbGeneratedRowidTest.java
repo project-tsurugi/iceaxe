@@ -11,8 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 
@@ -64,8 +64,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var sql = "select * from " + TEST;
 
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of())) {
-            var result = ps.explain(TgParameterList.of());
+        try (var ps = session.createQuery(sql, TgParameterMapping.of())) {
+            var result = ps.explain(TgBindParameters.of());
             var actualSet = result.getLowColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
             var expectedSet = Set.of("foo", "bar", "zzz"); // 「select *」ではgenerated_rowidは出てこない
             assertEquals(expectedSet, actualSet);
@@ -78,7 +78,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
@@ -95,7 +95,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
@@ -112,7 +112,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
@@ -129,7 +129,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
@@ -146,7 +146,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
@@ -164,7 +164,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
@@ -181,7 +181,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
@@ -201,13 +201,13 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var sql = "select foo as " + GENERATED_KEY + " from " + TEST + " order by foo";
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             for (var entity : list) {
                 // 現状、generated_rowidで始まる別名は取得できない
                 var e = assertThrowsExactly(IllegalArgumentException.class, () -> {
-                    entity.getInt4(GENERATED_KEY);
+                    entity.getInt(GENERATED_KEY);
                 });
                 assertEquals("not found column. name=__generated_rowid___test", e.getMessage());
             }

@@ -38,7 +38,7 @@ class DbDeleteIrregularTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         tm.execute(transaction -> {
-            var ps = session.createPreparedStatement(sql);
+            var ps = session.createStatement(sql);
             var rc = ps.execute(transaction);
             ps.close();
             int count = rc.getUpdateCount();

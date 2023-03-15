@@ -14,12 +14,12 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.statement.TgParameter;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameter;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -127,21 +127,21 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     }
 
     private void insertMultiTx(int recordSize, int threadSize, TgTmSetting setting, boolean prepare) throws IOException {
-        var key1 = TgVariable.ofInt4("key1");
+        var key1 = TgBindVariable.ofInt("key1");
         var deleteSql = "delete from " + TEST2 + " where key1=" + key1;
         var deleteMapping = TgParameterMapping.of(key1);
         var insertSql = "insert into " + TEST2 + "(key1,key2,key3,value1) values(:key1,:key2,:key3,:value1)";
         var insertMapping = TgParameterMapping.of(Test2Entity.class) //
-                .int4("key1", Test2Entity::getKey1) //
-                .int8("key2", Test2Entity::getKey2) //
-                .date("key3", Test2Entity::getKey3) //
-                .character("value1", Test2Entity::getValue1);
+                .addInt("key1", Test2Entity::getKey1) //
+                .addLong("key2", Test2Entity::getKey2) //
+                .addDate("key3", Test2Entity::getKey3) //
+                .addString("value1", Test2Entity::getValue1);
 
         var excptionList = new ArrayList<Exception>();
         var session = getSession();
-        try (var selectPs = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING); //
-                var deletePs = session.createPreparedStatement(deleteSql, deleteMapping); //
-                var insertPs = session.createPreparedStatement(insertSql, insertMapping)) {
+        try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING); //
+                var deletePs = session.createStatement(deleteSql, deleteMapping); //
+                var insertPs = session.createStatement(insertSql, insertMapping)) {
             if (prepare) {
                 var tm = session.createTransactionManager(TgTmSetting.of(TgTxOption.ofLTX(TEST2)));
                 tm.execute((TsurugiTransactionAction) transaction -> {
@@ -186,16 +186,16 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     }
 
     private static class InsertMultiTxThread extends Thread {
-        private final TsurugiPreparedStatementQuery0<TestEntity> selectPs;
-        private final TsurugiPreparedStatementUpdate1<TgParameterList> deletePs;
-        private final TsurugiPreparedStatementUpdate1<Test2Entity> insertPs;
+        private final TsurugiSqlQuery<TestEntity> selectPs;
+        private final TsurugiSqlPreparedStatement<TgBindParameters> deletePs;
+        private final TsurugiSqlPreparedStatement<Test2Entity> insertPs;
         private final int number;
         private final int recordSize;
         private final TsurugiTransactionManager tm;
         private Exception exception;
 
-        public InsertMultiTxThread(TsurugiPreparedStatementQuery0<TestEntity> selectPs, TsurugiPreparedStatementUpdate1<TgParameterList> deletePs,
-                TsurugiPreparedStatementUpdate1<Test2Entity> insertPs, int number, int recordSize, TsurugiTransactionManager tm) {
+        public InsertMultiTxThread(TsurugiSqlQuery<TestEntity> selectPs, TsurugiSqlPreparedStatement<TgBindParameters> deletePs,
+                TsurugiSqlPreparedStatement<Test2Entity> insertPs, int number, int recordSize, TsurugiTransactionManager tm) {
             this.selectPs = selectPs;
             this.deletePs = deletePs;
             this.insertPs = insertPs;
@@ -217,7 +217,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
         }
 
         private void runInTransaction(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
-            var parameter = TgParameterList.of(TgParameter.of("key1", number));
+            var parameter = TgBindParameters.of(TgBindParameter.of("key1", number));
             transaction.executeAndGetCount(deletePs, parameter);
 
             for (int i = 0; i < recordSize; i++) {

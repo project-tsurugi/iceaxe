@@ -12,12 +12,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
-import com.tsurugidb.iceaxe.statement.TgVariable.TgVariableLong;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableLong;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
@@ -47,12 +47,12 @@ class DbSelectOtherTxTest extends DbTestTableTester {
     @RepeatedTest(8)
     void select1() throws IOException, TsurugiTransactionException {
         var selectSql = "select * from " + TEST + " where foo=1";
-        var bar = TgVariable.ofInt8("bar");
+        var bar = TgBindVariable.ofLong("bar");
         var updateSql = "update " + TEST + " set bar=" + bar + " where foo=1";
 
         var session = getSession();
-        try (var selectPs = session.createPreparedQuery(selectSql, SELECT_MAPPING); //
-                var updatePs = session.createPreparedStatement(updateSql, TgParameterMapping.of(bar))) {
+        try (var selectPs = session.createQuery(selectSql, SELECT_MAPPING); //
+                var updatePs = session.createStatement(updateSql, TgParameterMapping.of(bar))) {
             updateOtherTxOcc(session, updatePs, bar, 111);
 
             try (var tx = session.createTransaction(TgTxOption.ofLTX(TEST))) {
@@ -87,12 +87,12 @@ class DbSelectOtherTxTest extends DbTestTableTester {
     @RepeatedTest(4)
     void select2() throws IOException, TsurugiTransactionException {
         var selectSql = "select * from " + TEST + " where foo=1";
-        var bar = TgVariable.ofInt8("bar");
+        var bar = TgBindVariable.ofLong("bar");
         var updateSql = "update " + TEST + " set bar=" + bar + " where foo=1";
 
         var session = getSession();
-        try (var selectPs = session.createPreparedQuery(selectSql, SELECT_MAPPING); //
-                var updatePs = session.createPreparedStatement(updateSql, TgParameterMapping.of(bar))) {
+        try (var selectPs = session.createQuery(selectSql, SELECT_MAPPING); //
+                var updatePs = session.createStatement(updateSql, TgParameterMapping.of(bar))) {
             updateOtherTxOcc(session, updatePs, bar, 111);
 
             try (var tx = session.createTransaction(TgTxOption.ofLTX(TEST))) {
@@ -119,16 +119,16 @@ class DbSelectOtherTxTest extends DbTestTableTester {
         }
     }
 
-    private void updateOtherTxOcc(TsurugiSession session, TsurugiPreparedStatementUpdate1<TgParameterList> updatePs, TgVariableLong bar, long value) throws IOException, TsurugiTransactionException {
+    private void updateOtherTxOcc(TsurugiSession session, TsurugiSqlPreparedStatement<TgBindParameters> updatePs, TgBindVariableLong bar, long value) throws IOException, TsurugiTransactionException {
         try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
-            var parameter = TgParameterList.of(bar.bind(value));
+            var parameter = TgBindParameters.of(bar.bind(value));
             int count = tx.executeAndGetCount(updatePs, parameter);
             assertUpdateCount(1, count);
             tx.commit(TgCommitType.DEFAULT);
         }
     }
 
-    private TestEntity select(TsurugiTransaction tx, TsurugiPreparedStatementQuery0<TestEntity> selectPs) throws IOException, TsurugiTransactionException {
+    private TestEntity select(TsurugiTransaction tx, TsurugiSqlQuery<TestEntity> selectPs) throws IOException, TsurugiTransactionException {
         return tx.executeAndFindRecord(selectPs).get();
     }
 }

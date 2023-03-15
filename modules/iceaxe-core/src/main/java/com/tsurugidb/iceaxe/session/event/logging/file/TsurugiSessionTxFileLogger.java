@@ -12,17 +12,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
-import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
-import com.tsurugidb.iceaxe.result.TsurugiResult;
-import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.logging.TgSessionSqlLog;
 import com.tsurugidb.iceaxe.session.event.logging.TgSessionTxLog;
 import com.tsurugidb.iceaxe.session.event.logging.TgSessionTxLog.TgSessionTxExecuteLog;
+import com.tsurugidb.iceaxe.sql.TsurugiSql;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlDirect;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
+import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
+import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
+import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.session.event.logging.TsurugiSessionTxLogger;
-import com.tsurugidb.iceaxe.statement.TsurugiSql;
-import com.tsurugidb.iceaxe.statement.TsurugiSqlDirect;
-import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxExecuteMethod;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -159,7 +159,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected void logTransactionSqlEnd(TgTxExecuteMethod method, TgSessionTxLog txLog, TgSessionTxExecuteLog exLog, TsurugiSql ps, Object parameter, @Nullable TsurugiResult result,
+    protected void logTransactionSqlEnd(TgTxExecuteMethod method, TgSessionTxLog txLog, TgSessionTxExecuteLog exLog, TsurugiSql ps, Object parameter, @Nullable TsurugiSqlResult result,
             @Nullable Throwable occurred) {
         var writer = getWriter(txLog);
 
@@ -267,7 +267,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected <R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiResultSet<R> rs, R record) {
+    protected <R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TusurigQueryResult<R> rs, R record) {
         if (!(config.writeReadRecord() || config.readProgress() >= 1)) {
             return;
         }
@@ -290,7 +290,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected <R> void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiResultSet<R> rs, Throwable occurred) {
+    protected <R> void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TusurigQueryResult<R> rs, Throwable occurred) {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
@@ -307,8 +307,8 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         int ssId = sqlLog.getIceaxeSqlStatementId();
         var time = elapsed(sqlLog.getStartTime(), sqlLog.getEndTime());
         var result = sqlLog.getSqlResult();
-        if (result instanceof TsurugiResultSet) {
-            var rs = (TsurugiResultSet<?>) result;
+        if (result instanceof TusurigQueryResult) {
+            var rs = (TusurigQueryResult<?>) result;
             writer.println(SQL_HEADER + " readCount=%d, hasNextRow=%s", sqlId, ssId, rs.getReadCount(), getNextRowText(rs));
         }
         if (occurred == null) {
@@ -319,7 +319,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         }
     }
 
-    private String getNextRowText(TsurugiResultSet<?> rs) {
+    private String getNextRowText(TusurigQueryResult<?> rs) {
         return rs.getHasNextRow().map(b -> b.toString()).orElse("unread");
     }
 

@@ -65,7 +65,7 @@ class DbTransactionTest extends DbTestTableTester {
     @Test
     void commit() throws IOException, TsurugiTransactionException {
         var session = getSession();
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING); //
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             assertSelect(SIZE, session, transaction);
 
@@ -84,7 +84,7 @@ class DbTransactionTest extends DbTestTableTester {
     void commitTm() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
                 assertSelect(SIZE, session, transaction);
 
@@ -101,7 +101,7 @@ class DbTransactionTest extends DbTestTableTester {
     @Test
     void rollback() throws IOException, TsurugiTransactionException {
         var session = getSession();
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING); //
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             assertSelect(SIZE, session, transaction);
 
@@ -120,7 +120,7 @@ class DbTransactionTest extends DbTestTableTester {
     void rollbackTmByException() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             assertThrowsExactly(IOException.class, () -> {
                 tm.execute((TsurugiTransactionAction) transaction -> {
                     assertSelect(SIZE, session, transaction);
@@ -142,7 +142,7 @@ class DbTransactionTest extends DbTestTableTester {
     void rollbackTmExplicit() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
                 assertSelect(SIZE, session, transaction);
 
@@ -159,7 +159,7 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     private static void assertSelect(int expected, TsurugiSession session, TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
-        try (var ps = session.createPreparedQuery(SELECT_SQL)) {
+        try (var ps = session.createQuery(SELECT_SQL)) {
             var list = transaction.executeAndGetList(ps);
             assertEquals(expected, list.size());
         }

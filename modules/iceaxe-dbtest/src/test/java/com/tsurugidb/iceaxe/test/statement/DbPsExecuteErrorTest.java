@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -42,7 +42,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
@@ -58,7 +58,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(0, count); // TODO 0?
         }
@@ -66,9 +66,9 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
 
     @Test
     void insertParameterSizeUnmatch() throws IOException {
-        var foo = TgVariable.ofInt4("foo");
-        var bar = TgVariable.ofInt8("bar");
-        var zzz = TgVariable.ofCharacter("zzz");
+        var foo = TgBindVariable.ofInt("foo");
+        var bar = TgBindVariable.ofLong("bar");
+        var zzz = TgBindVariable.ofString("zzz");
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(" + foo + ", " + bar + ", " + zzz + ")";
@@ -76,9 +76,9 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                var plist = TgParameterList.of(foo.bind(123), bar.bind(456) /* ,zzz */);
+                var plist = TgBindParameters.of(foo.bind(123), bar.bind(456) /* ,zzz */);
                 tm.executeAndGetCount(ps, plist);
             });
             assertEqualsCode(SqlServiceCode.ERR_UNRESOLVED_HOST_VARIABLE, e);
@@ -90,9 +90,9 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
 
     @Test
     void insertParameterTypeMismatch() throws IOException {
-        var foo = TgVariable.ofInt8("foo"); // INT4 <-> Int8
-        var bar = TgVariable.ofInt4("bar"); // INT8 <-> Int4
-        var zzz = TgVariable.ofInt4("zzzi"); // CHARACTER <-> Int4
+        var foo = TgBindVariable.ofLong("foo"); // INT4 <-> Int8
+        var bar = TgBindVariable.ofInt("bar"); // INT8 <-> Int4
+        var zzz = TgBindVariable.ofInt("zzzi"); // CHARACTER <-> Int4
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(" + foo + ", " + bar + ", " + zzz + ")";
@@ -100,9 +100,9 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-                var plist = TgParameterList.of(foo.bind(123), bar.bind(456), zzz.bind(789));
+                var plist = TgBindParameters.of(foo.bind(123), bar.bind(456), zzz.bind(789));
                 tm.executeAndGetCount(ps, plist);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);

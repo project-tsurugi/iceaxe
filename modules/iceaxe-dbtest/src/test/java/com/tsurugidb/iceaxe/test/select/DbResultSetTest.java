@@ -12,12 +12,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultSet;
+import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 
 /**
- * {@link TsurugiResultSet} test
+ * {@link TusurigQueryResult} test
  */
 class DbResultSetTest extends DbTestTableTester {
 
@@ -39,7 +39,7 @@ class DbResultSetTest extends DbTestTableTester {
     void whileEach() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var rs = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), rs.getHasNextRow());
@@ -62,7 +62,7 @@ class DbResultSetTest extends DbTestTableTester {
     void getRecordList() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var rs = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), rs.getHasNextRow());
@@ -81,7 +81,7 @@ class DbResultSetTest extends DbTestTableTester {
     void findRecord() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(SELECT_SQL + " order by foo", SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_SQL + " order by foo", SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var rs = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), rs.getHasNextRow());
@@ -102,7 +102,7 @@ class DbResultSetTest extends DbTestTableTester {
     void iterator() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var rs = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), rs.getHasNextRow());
@@ -126,7 +126,7 @@ class DbResultSetTest extends DbTestTableTester {
     void forEach() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var rs = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), rs.getHasNextRow());

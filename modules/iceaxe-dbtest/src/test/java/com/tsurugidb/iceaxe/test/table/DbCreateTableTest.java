@@ -61,7 +61,7 @@ class DbCreateTableTest extends DbTestTableTester {
         assertTrue(session.findTableMetadata(TEST).isEmpty());
 
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL)) {
+        try (var ps = session.createStatement(SQL)) {
             tm.execute(transaction -> {
                 transaction.executeAndGetCount(ps);
                 assertTrue(session.findTableMetadata(TEST).isPresent());

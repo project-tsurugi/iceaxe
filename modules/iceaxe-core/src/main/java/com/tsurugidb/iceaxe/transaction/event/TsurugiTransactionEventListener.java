@@ -2,8 +2,8 @@ package com.tsurugidb.iceaxe.transaction.event;
 
 import javax.annotation.Nullable;
 
-import com.tsurugidb.iceaxe.result.TsurugiResult;
-import com.tsurugidb.iceaxe.statement.TsurugiSql;
+import com.tsurugidb.iceaxe.sql.TsurugiSql;
+import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxExecuteMethod;
@@ -47,7 +47,7 @@ public interface TsurugiTransactionEventListener {
      * @param result            SQL result
      * @param occurred          exception
      */
-    default void executeEnd(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter, @Nullable TsurugiResult result,
+    default void executeEnd(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter, @Nullable TsurugiSqlResult result,
             @Nullable Throwable occurred) {
         // do override
     }

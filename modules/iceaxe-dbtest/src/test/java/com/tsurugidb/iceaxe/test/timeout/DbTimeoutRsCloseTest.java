@@ -7,9 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultSet;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 
@@ -52,7 +52,7 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyResultSet(TsurugiResultSet<?> rs) {
+            public void modifyResultSet(TusurigQueryResult<?> rs) {
                 rs.setRsCloseTimeout(1, TimeUnit.SECONDS);
             }
         });
@@ -63,7 +63,7 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             transaction.getLowTransaction();
 
-            try (var ps = session.createPreparedQuery(SELECT_SQL)) {
+            try (var ps = session.createQuery(SELECT_SQL)) {
                 var rs = ps.execute(transaction);
                 modifier.modifyResultSet(rs);
 

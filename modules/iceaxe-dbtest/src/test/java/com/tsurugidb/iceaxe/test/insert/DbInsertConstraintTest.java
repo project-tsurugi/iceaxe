@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
@@ -40,7 +40,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             int count1 = tm.executeAndGetCount(ps, entity);
             assertUpdateCount(1, count1);
 
@@ -59,7 +59,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.execute((TsurugiTransactionAction) transaction -> {
                     int count1 = transaction.executeAndGetCount(ps, entity);
@@ -85,7 +85,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.execute(transaction -> {
                     int count1 = transaction.executeAndGetCount(ps, entity);
@@ -109,14 +109,14 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     void insertSameTxLazyCheck() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             for (int i = 0; i < 10; i++) {
                 insertSameTxLazyCheck(tm, ps);
             }
         }
     }
 
-    private void insertSameTxLazyCheck(TsurugiTransactionManager tm, TsurugiPreparedStatementUpdate1<TestEntity> ps) throws IOException {
+    private void insertSameTxLazyCheck(TsurugiTransactionManager tm, TsurugiSqlPreparedStatement<TestEntity> ps) throws IOException {
         var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var entity = createTestEntity(1);
@@ -145,7 +145,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             var e0 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                 try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
                         var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
@@ -183,7 +183,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
                     var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
                 int count1 = tx1.executeAndGetCount(ps, entity);
