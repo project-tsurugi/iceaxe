@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.test.statement;
+package com.tsurugidb.iceaxe.test.sql;
 
 import java.io.IOException;
 import java.util.List;

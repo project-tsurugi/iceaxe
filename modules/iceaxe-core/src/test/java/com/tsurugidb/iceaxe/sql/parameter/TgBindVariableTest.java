@@ -258,7 +258,7 @@ class TgBindVariableTest {
     void testOfZonedDateTime() {
         var variable = TgBindVariable.ofZonedDateTime("foo");
         assertEquals("foo", variable.name());
-        assertEquals(TgDataType.OFFSET_DATE_TIME, variable.type());
+        assertEquals(TgDataType.ZONED_DATE_TIME, variable.type());
 
         var zone = ZoneId.of("Asia/Tokyo");
         var dateTime = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone);

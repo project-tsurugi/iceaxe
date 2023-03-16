@@ -121,7 +121,7 @@ class TgBindVariablesTest {
     @Test
     void testZonedDateTime() {
         var variables = new TgBindVariables().addZonedDateTime("foo");
-        assertVariable(Map.of("foo", TgDataType.OFFSET_DATE_TIME), variables);
+        assertVariable(Map.of("foo", TgDataType.ZONED_DATE_TIME), variables);
     }
 
     @Test

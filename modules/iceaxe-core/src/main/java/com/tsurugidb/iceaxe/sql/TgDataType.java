@@ -74,7 +74,11 @@ public enum TgDataType {
     /**
      * offset dateTime
      */
-    OFFSET_DATE_TIME(AtomType.TIME_POINT_WITH_TIME_ZONE, List.of(OffsetDateTime.class, ZonedDateTime.class)),
+    OFFSET_DATE_TIME(AtomType.TIME_POINT_WITH_TIME_ZONE, List.of(OffsetDateTime.class)),
+    /**
+     * zoned dateTime
+     */
+    ZONED_DATE_TIME(AtomType.TIME_POINT_WITH_TIME_ZONE, List.of(ZonedDateTime.class)),
     //
     ;
 
@@ -111,7 +115,7 @@ public enum TgDataType {
     public static TgDataType of(Class<?> clazz) {
         var type = TYPE_MAP.get(clazz);
         if (type == null) {
-            throw new InternalError("unsupported type error. class=" + clazz);
+            throw new UnsupportedOperationException("unsupported type error. class=" + clazz);
         }
         return type;
     }
@@ -130,7 +134,7 @@ public enum TgDataType {
     public static TgDataType of(AtomType lowType) {
         var type = LOW_TYPE_MAP.get(lowType);
         if (type == null) {
-            throw new InternalError("unsupported type error. lowType=" + lowType);
+            throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);
         }
         return type;
     }

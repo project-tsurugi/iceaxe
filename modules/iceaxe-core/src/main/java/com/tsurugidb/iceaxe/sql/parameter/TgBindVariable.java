@@ -321,8 +321,23 @@ public abstract class TgBindVariable<T> {
 
         @Override
         public TgBindParameter bind(@Nullable BigDecimal value) {
-            var value0 = (value != null && roundingMode != null) ? value.setScale(scale, roundingMode) : value;
-            return TgBindParameter.of(name(), value0);
+            return TgBindParameter.of(name(), roundValue(value, scale, roundingMode));
+        }
+
+        /**
+         * round value
+         *
+         * @param value        value
+         * @param scale        scale
+         * @param roundingMode rounding mode
+         * @return rounded value
+         */
+        public static BigDecimal roundValue(@Nullable BigDecimal value, int scale, RoundingMode roundingMode) {
+            if (value != null && roundingMode != null) {
+                return value.setScale(scale, roundingMode);
+            } else {
+                return value;
+            }
         }
 
         @Override
@@ -596,7 +611,7 @@ public abstract class TgBindVariable<T> {
     public static class TgBindVariableZonedDateTime extends TgBindVariable<ZonedDateTime> {
 
         protected TgBindVariableZonedDateTime(@Nonnull String name) {
-            super(name, TgDataType.OFFSET_DATE_TIME);
+            super(name, TgDataType.ZONED_DATE_TIME);
         }
 
         @Override

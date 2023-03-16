@@ -522,7 +522,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @return this
      */
     public TgEntityParameterMapping<P> addZonedDateTime(String name, Function<P, ZonedDateTime> getter) {
-        addVariable(name, TgDataType.OFFSET_DATE_TIME);
+        addVariable(name, TgDataType.ZONED_DATE_TIME);
         parameterConverterList.add((parameter, convertUtil) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
@@ -641,6 +641,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
+        case ZONED_DATE_TIME:
         default:
             throw new UnsupportedOperationException("unsupported type error. type=" + type);
         }

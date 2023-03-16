@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.test.statement;
+package com.tsurugidb.iceaxe.test.sql;
 
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 

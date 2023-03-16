@@ -223,7 +223,7 @@ public class TgBindVariables {
      * @return this
      */
     public TgBindVariables addZonedDateTime(@Nonnull String name) {
-        addInternal(name, TgDataType.OFFSET_DATE_TIME);
+        addInternal(name, TgDataType.ZONED_DATE_TIME);
         return this;
     }
 

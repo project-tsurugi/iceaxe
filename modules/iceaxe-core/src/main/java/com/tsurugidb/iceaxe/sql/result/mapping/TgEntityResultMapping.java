@@ -1326,6 +1326,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         map.put(TgDataType.DATE_TIME, TsurugiResultRecord::nextDateTimeOrNull);
         map.put(TgDataType.OFFSET_TIME, TsurugiResultRecord::nextOffsetTimeOrNull);
         map.put(TgDataType.OFFSET_DATE_TIME, TsurugiResultRecord::nextOffsetDateTimeOrNull);
+//x     map.put(TgDataType.ZONED_DATE_TIME, TsurugiResultRecord::nextZonedDateTimeOrNull);
         RECORD_GETTER_MAP = map;
     }
 

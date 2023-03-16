@@ -31,15 +31,16 @@ public class Example31Select {
             selectAsList_execPs(session, tm);
             selectAsList_execTm(session, tm);
 
-            selectAsUserEntityLoop(session, tm);
-            selectAsUserEntityList(session, tm);
+            selectAsEntityLoop(session, tm);
+            select_asEntityList(session, tm);
 
             selectByParameter1(session, tm);
+            selectByParameter1_singleVariable(session, tm);
             selectByParameter2(session, tm);
-            selectByParameter2Bind(session, tm);
-            selectByParameter2AsUserEntityList_execRs(session, tm);
-            selectByParameter2AsUserEntityList_execPs(session, tm);
-            selectByParameter2AsUserEntityList_execTm(session, tm);
+            selectByParameter2_bindVariable(session, tm);
+            selectByParameter2_asEntityList_execRs(session, tm);
+            selectByParameter2_asEntityList_execPs(session, tm);
+            selectByParameter2_asEntityList_execTm(session, tm);
         }
     }
 
@@ -92,7 +93,7 @@ public class Example31Select {
         System.out.println(list);
     }
 
-    void selectAsUserEntityLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsEntityLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST", resultMappingForTestEntity())) {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
@@ -107,7 +108,7 @@ public class Example31Select {
     }
 
     private TgResultMapping<TestEntity> resultMappingForTestEntity() {
-        switch (0) {
+        switch (4) {
         default:
             return TgResultMapping.of(record -> {
                 var entity = new TestEntity();
@@ -136,7 +137,7 @@ public class Example31Select {
         }
     }
 
-    void selectAsUserEntityList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void select_asEntityList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST", resultMappingForTestEntity())) {
             List<TestEntity> list = tm.execute(transaction -> {
                 return transaction.executeAndGetList(ps);
@@ -147,9 +148,22 @@ public class Example31Select {
 
     void selectByParameter1(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "select * from TEST where FOO = :foo";
-        var variable = TgBindVariables.of().addInt("foo");
+        var variables = TgBindVariables.of().addInt("foo");
         Function<Integer, TgBindParameters> parameterConverter = foo -> TgBindParameters.of().add("foo", foo);
-        try (var ps = session.createQuery(sql, TgParameterMapping.of(variable, parameterConverter))) {
+        var parameterMapping = TgParameterMapping.of(variables, parameterConverter);
+        try (var ps = session.createQuery(sql, parameterMapping)) {
+            List<TsurugiResultEntity> list = tm.execute(transaction -> {
+                int parameter = 123;
+                return transaction.executeAndGetList(ps, parameter);
+            });
+            System.out.println(list);
+        }
+    }
+
+    void selectByParameter1_singleVariable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        var sql = "select * from TEST where FOO = :foo";
+        var parameterMapping = TgParameterMapping.of("foo", int.class);
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 int parameter = 123;
                 return transaction.executeAndGetList(ps, parameter);
@@ -160,8 +174,9 @@ public class Example31Select {
 
     void selectByParameter2(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
-        var variable = TgBindVariables.of().addInt("foo").addLong("bar");
-        try (var ps = session.createQuery(sql, TgParameterMapping.of(variable))) {
+        var variables = TgBindVariables.of().addInt("foo").addLong("bar");
+        var parameterMapping = TgParameterMapping.of(variables);
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 var parameter = TgBindParameters.of().add("foo", 123).add("bar", 456L);
                 return transaction.executeAndGetList(ps, parameter);
@@ -170,13 +185,13 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2Bind(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_bindVariable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
 //      var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
-        var variable = TgBindVariables.of(foo, bar);
-        try (var ps = session.createQuery(sql, TgParameterMapping.of(variable))) {
+        var parameterMapping = TgParameterMapping.of(foo, bar);
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456));
                 return transaction.executeAndGetList(ps, parameter);
@@ -185,12 +200,11 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2AsUserEntityList_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
-        var variable = TgBindVariables.of(foo, bar);
-        var parameterMapping = TgParameterMapping.of(variable);
+        var parameterMapping = TgParameterMapping.of(foo, bar);
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
@@ -201,12 +215,11 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2AsUserEntityList_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
-        var variable = TgBindVariables.of(foo, bar);
-        var parameterMapping = TgParameterMapping.of(variable);
+        var parameterMapping = TgParameterMapping.of(foo, bar);
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
@@ -217,12 +230,11 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2AsUserEntityList_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
-        var variable = TgBindVariables.of(foo, bar);
-        var parameterMapping = TgParameterMapping.of(variable);
+        var parameterMapping = TgParameterMapping.of(foo, bar);
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
             var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456));

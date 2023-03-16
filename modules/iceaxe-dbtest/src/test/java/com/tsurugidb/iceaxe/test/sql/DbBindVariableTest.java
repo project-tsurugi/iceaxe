@@ -1,4 +1,4 @@
-package com.tsurugidb.iceaxe.test.statement;
+package com.tsurugidb.iceaxe.test.sql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,9 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 
@@ -107,5 +108,29 @@ class DbBindVariableTest extends DbTestTableTester {
             return s.substring(1);
         }
         return s;
+    }
+
+    @Test
+    void singleVariable_class() throws IOException {
+        singleVariable(TgParameterMapping.of("foo", int.class));
+    }
+
+    @Test
+    void singleVariable_type() throws IOException {
+        singleVariable(TgParameterMapping.of("foo", TgDataType.INT));
+    }
+
+    private void singleVariable(TgParameterMapping<Integer> parameterMapping) throws IOException {
+        var sql = SELECT_SQL + " where foo = :foo";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, parameterMapping, SELECT_MAPPING)) {
+            int key = 2;
+            var list = tm.executeAndGetList(ps, key);
+
+            assertEquals(1, list.size());
+            assertEquals(createTestEntity(key), list.get(0));
+        }
     }
 }
