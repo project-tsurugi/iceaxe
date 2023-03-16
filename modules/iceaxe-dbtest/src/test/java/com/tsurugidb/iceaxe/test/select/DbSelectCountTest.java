@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
@@ -16,32 +18,38 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
  */
 class DbSelectCountTest extends DbTestTableTester {
 
-    @BeforeAll
-    static void beforeAll() throws IOException {
-        var LOG = LoggerFactory.getLogger(DbSelectCountTest.class);
-        LOG.debug("init start");
+    @BeforeEach
+    void beforeEach(TestInfo info) throws IOException {
+        LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
         createTestTable();
 
-        LOG.debug("init end");
+        LOG.debug("{} init end", info.getDisplayName());
     }
 
-    @Test
-    void count0() throws IOException {
-        count(0);
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 3 })
+    void count_converter(int size) throws IOException {
+        count(size, TgResultMapping.of(record -> record.nextInt()));
     }
 
-    @Test
-    void countN() throws IOException {
-        count(3);
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 3 })
+    void count_singleColumn_class(int size) throws IOException {
+        count(size, TgResultMapping.of(int.class));
     }
 
-    private void count(int size) throws IOException {
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 3 })
+    void count_singleColumn_type(int size) throws IOException {
+        count(size, TgResultMapping.of(TgDataType.INT));
+    }
+
+    private void count(int size, TgResultMapping<Integer> resultMapping) throws IOException {
         insertTestTable(size);
 
         var sql = "select count(*) from " + TEST;
-        var resultMapping = TgResultMapping.of(record -> record.nextInt());
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);

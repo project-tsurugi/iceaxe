@@ -79,6 +79,7 @@ public abstract class TgParameterMapping<P> {
      * @param name  bind variable name
      * @param clazz parameter type
      * @return parameter mapping
+     * @see TgSingleParameterMapping
      */
     public static <P> TgParameterMapping<P> of(String name, Class<P> clazz) {
         return TgSingleParameterMapping.of(name, clazz);
@@ -91,6 +92,7 @@ public abstract class TgParameterMapping<P> {
      * @param name bind variable name
      * @param type parameter type
      * @return parameter mapping
+     * @see TgSingleParameterMapping
      */
     public static <P> TgParameterMapping<P> of(String name, TgDataType type) {
         return TgSingleParameterMapping.of(name, type);

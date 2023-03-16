@@ -28,6 +28,7 @@ public class Example32Count {
             countAll0_execTm(session, tm);
 
             countAllAsInteger(session, tm);
+            countAllAsInteger_singleColumn(session, tm);
 
             countGroup(session, tm);
         }
@@ -71,6 +72,17 @@ public class Example32Count {
 
     void countAllAsInteger(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var resultMapping = TgResultMapping.of(record -> record.nextInt());
+        try (var ps = session.createQuery("select count(*) from TEST", resultMapping)) {
+            int count = tm.execute(transaction -> {
+                Optional<Integer> countOpt = transaction.executeAndFindRecord(ps);
+                return countOpt.get();
+            });
+            System.out.println(count);
+        }
+    }
+
+    void countAllAsInteger_singleColumn(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        var resultMapping = TgResultMapping.of(int.class);
         try (var ps = session.createQuery("select count(*) from TEST", resultMapping)) {
             int count = tm.execute(transaction -> {
                 Optional<Integer> countOpt = transaction.executeAndFindRecord(ps);

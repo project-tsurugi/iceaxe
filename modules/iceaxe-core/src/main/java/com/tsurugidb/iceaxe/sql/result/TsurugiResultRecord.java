@@ -247,6 +247,10 @@ public class TsurugiResultRecord {
                 return lowResultSet.fetchTimePointValue();
             case DATETIME_INTERVAL:
                 return lowResultSet.fetchDateTimeIntervalValue();
+            case TIME_OF_DAY_WITH_TIME_ZONE:
+                return lowResultSet.fetchTimeOfDayWithTimeZoneValue();
+            case TIME_POINT_WITH_TIME_ZONE:
+                return lowResultSet.fetchTimePointWithTimeZoneValue();
             default:
                 throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);
             }

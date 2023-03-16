@@ -298,7 +298,7 @@ public class DbTestTableTester {
 
     protected static int selectCountFrom(String tableName) throws IOException {
         var sql = "select count(*) from " + tableName;
-        var resultMapping = TgResultMapping.of(record -> record.nextInt());
+        var resultMapping = TgResultMapping.of(int.class);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
