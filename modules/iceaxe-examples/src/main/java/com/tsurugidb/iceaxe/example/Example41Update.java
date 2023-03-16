@@ -47,8 +47,8 @@ public class Example41Update {
 
         try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
-                var plist = TgBindParameters.of(foo.bind(123), add.bind(1));
-                int count = transaction.executeAndGetCount(ps, plist);
+                var parameter = TgBindParameters.of(foo.bind(123), add.bind(1));
+                int count = transaction.executeAndGetCount(ps, parameter);
                 System.out.println(count);
             });
         }

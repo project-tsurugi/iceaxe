@@ -165,7 +165,7 @@ class TgBindVariablesTest {
     }
 
     @Test
-    void testAddTgVariableList() {
+    void testAddTgVariabls() {
         var variable1 = new TgBindVariables() //
                 .addInt("foo") //
                 .addLong("bar");
@@ -189,8 +189,8 @@ class TgBindVariablesTest {
                 .addLong("bar") //
                 .addString("zzz");
 
-        assertEquals(":foo,:bar,:zzz", variables.getSqlNames());
-        assertEquals(":foo, :bar, :zzz", variables.getSqlNames(", "));
+        assertEquals(":foo,:bar,:zzz", variables.getSqlNamesString());
+        assertEquals(":foo, :bar, :zzz", variables.getSqlNamesString(", "));
     }
 
     private static void assertVariable(Map<String, TgDataType> expectedMap, TgBindVariables actual) {

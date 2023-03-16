@@ -12,6 +12,7 @@ import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
  * TsurugiSession example
  *
  * @see Example01Connector
+ * @see Example02SessionOption
  */
 public class Example02Session {
 

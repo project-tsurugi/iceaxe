@@ -37,7 +37,7 @@ public class Example71In {
             parameter.add(variable.bind(foo));
         }
 
-        var sql = "select * from TEST where foo in(" + variables.getSqlNames() + ")";
+        var sql = "select * from TEST where foo in(" + variables.getSqlNamesString() + ")";
         var parameterMapping = TgParameterMapping.of(variables);
         var resultMapping = TgResultMapping.of(TestEntity::new) //
                 .addInt(TestEntity::setFoo) //
