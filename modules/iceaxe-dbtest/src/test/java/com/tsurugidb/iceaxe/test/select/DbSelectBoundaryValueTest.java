@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
@@ -205,8 +205,8 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
-            var param = TgBindParameters.of(variable.bind(value));
-            var actual = tm.executeAndGetList(ps, param);
+            var parameter = TgBindParameters.of(variable.bind(value));
+            var actual = tm.executeAndGetList(ps, parameter);
             assertEquals(expected, actual);
         }
     }

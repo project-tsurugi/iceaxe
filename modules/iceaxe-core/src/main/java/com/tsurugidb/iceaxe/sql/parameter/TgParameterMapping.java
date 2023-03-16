@@ -31,43 +31,43 @@ public abstract class TgParameterMapping<P> {
     /**
      * create Parameter Mapping
      *
-     * @param variableList variable definition
+     * @param variables bind variables
      * @return Tsurugi Parameter Mapping
      */
-    public static TgParameterMapping<TgBindParameters> of(TgBindVariable<?>... variableList) {
-        return of(TgBindVariables.of(variableList));
+    public static TgParameterMapping<TgBindParameters> of(TgBindVariable<?>... variables) {
+        return of(TgBindVariables.of(variables));
     }
 
     /**
      * create Parameter Mapping
      *
-     * @param variableList variable definition
+     * @param variables bind variables
      * @return Tsurugi Parameter Mapping
      */
-    public static TgParameterMapping<TgBindParameters> of(Collection<? extends TgBindVariable<?>> variableList) {
-        return of(TgBindVariables.of(variableList));
+    public static TgParameterMapping<TgBindParameters> of(Collection<? extends TgBindVariable<?>> variables) {
+        return of(TgBindVariables.of(variables));
     }
 
     /**
      * create Parameter Mapping
      *
-     * @param variableList variable definition
+     * @param variables bind variables
      * @return Tsurugi Parameter Mapping
      */
-    public static TgParameterMapping<TgBindParameters> of(TgBindVariables variableList) {
-        return of(variableList, TgBindParameters.IDENTITY);
+    public static TgParameterMapping<TgBindParameters> of(TgBindVariables variables) {
+        return of(variables, TgBindParameters.IDENTITY);
     }
 
     /**
      * create Parameter Mapping
      *
      * @param <P>                parameter type
-     * @param variableList       variable definition
+     * @param variables          bind variables
      * @param parameterConverter converter from P to Parameter
      * @return Tsurugi Parameter Mapping
      */
-    public static <P> TgParameterMapping<P> of(TgBindVariables variableList, Function<P, TgBindParameters> parameterConverter) {
-        return new TgConverterParameterMapping<>(variableList, parameterConverter);
+    public static <P> TgParameterMapping<P> of(TgBindVariables variables, Function<P, TgBindParameters> parameterConverter) {
+        return new TgConverterParameterMapping<>(variables, parameterConverter);
     }
 
     private IceaxeConvertUtil convertUtil = null;

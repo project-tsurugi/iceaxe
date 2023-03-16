@@ -52,7 +52,7 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyResult(TsurugiStatementResult result) {
+            public void modifyStatementResult(TsurugiStatementResult result) {
                 result.setCloseTimeout(1, TimeUnit.SECONDS);
             }
         });
@@ -66,7 +66,7 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(0);
                 var result = ps.execute(transaction, entity);
-                modifier.modifyResult(result);
+                modifier.modifyStatementResult(result);
 
                 pipeServer.setPipeWrite(false);
                 try {

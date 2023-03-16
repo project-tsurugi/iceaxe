@@ -4,32 +4,31 @@ import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
-import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
-import com.tsurugidb.iceaxe.sql.result.event.TsurugiResultCountEventListener;
+import com.tsurugidb.iceaxe.sql.result.event.TsurugiStatementResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
- * {@link TsurugiSqlStatement} with {@link TsurugiSqlResult} event listener
+ * {@link TsurugiSqlStatement} with {@link TsurugiStatementResult} event listener
  */
 public interface TsurugiSqlStatementResultEventListener extends TsurugiSqlStatementEventListener {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    default void executeStatementStarted(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult rc) {
-        rc.addEventListener(new TsurugiResultCountEventListener() {
+    default void executeStatementStarted(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result) {
+        result.addEventListener(new TsurugiStatementResultEventListener() {
             @Override
-            public void endResult(TsurugiStatementResult rc, @Nullable Throwable occurred) {
-                executeStatementEnd(transaction, ps, rc, occurred);
+            public void endResult(TsurugiStatementResult result, @Nullable Throwable occurred) {
+                executeStatementEnd(transaction, ps, result, occurred);
             }
 
             @Override
-            public void closeResult(TsurugiStatementResult rc, @Nullable Throwable occurred) {
-                executeStatementClose(transaction, ps, rc, occurred);
+            public void closeResult(TsurugiStatementResult result, @Nullable Throwable occurred) {
+                executeStatementClose(transaction, ps, result, occurred);
             }
         });
 
-        executeStatementStarted2(transaction, ps, rc);
+        executeStatementStarted2(transaction, ps, result);
     }
 
     /**
@@ -37,9 +36,9 @@ public interface TsurugiSqlStatementResultEventListener extends TsurugiSqlStatem
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rc          ResultCount
+     * @param result      SQL result
      */
-    default void executeStatementStarted2(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult rc) {
+    default void executeStatementStarted2(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result) {
         // do override
     }
 
@@ -48,22 +47,22 @@ public interface TsurugiSqlStatementResultEventListener extends TsurugiSqlStatem
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rc          ResultCount
+     * @param result      SQL result
      * @param occurred    exception
      */
-    default void executeStatementEnd(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult rc, @Nullable Throwable occurred) {
+    default void executeStatementEnd(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result, @Nullable Throwable occurred) {
         // do override
     }
 
     /**
-     * called when close ResultCount
+     * called when close result
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rc          ResultCount
+     * @param result      SQL result
      * @param occurred    exception
      */
-    default void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult rc, @Nullable Throwable occurred) {
+    default void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result, @Nullable Throwable occurred) {
         // do override
     }
 }

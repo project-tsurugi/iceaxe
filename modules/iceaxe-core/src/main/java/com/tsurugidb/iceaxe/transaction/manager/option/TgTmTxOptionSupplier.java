@@ -18,11 +18,11 @@ public abstract class TgTmTxOptionSupplier {
     /**
      * create TgTmTxOptionSupplier
      *
-     * @param txOptionList transaction options
+     * @param txOptions transaction options
      * @return supplier
      */
-    public static TgTmTxOptionSupplier of(TgTxOption... txOptionList) {
-        return TgTmTxOptionList.of(txOptionList);
+    public static TgTmTxOptionSupplier of(TgTxOption... txOptions) {
+        return TgTmTxOptionList.of(txOptions);
     }
 
     /**

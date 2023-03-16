@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
-import com.tsurugidb.iceaxe.sql.result.event.TsurugiResultSetEventListener;
+import com.tsurugidb.iceaxe.sql.result.event.TsurugiQueryResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
@@ -40,8 +40,8 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
  * @see TsurugiSqlPreparedQuery#execute(TsurugiTransaction, Object)
  */
 @NotThreadSafe
-public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<R> {
-    private static final Logger LOG = LoggerFactory.getLogger(TusurigQueryResult.class);
+public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<R> {
+    private static final Logger LOG = LoggerFactory.getLogger(TsurugiQueryResult.class);
 
     private FutureResponse<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
@@ -50,14 +50,14 @@ public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<
     private final IceaxeConvertUtil convertUtil;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
-    private List<TsurugiResultSetEventListener<R>> eventListenerList = null;
+    private List<TsurugiQueryResultEventListener<R>> eventListenerList = null;
     private int readCount = 0;
     private TsurugiResultRecord record;
     private Optional<Boolean> hasNextRow = Optional.empty();
     private boolean calledEndEvent = false;
 
     // internal
-    public TusurigQueryResult(int sqlExecuteId, TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil)
+    public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil)
             throws IOException {
         super(sqlExecuteId, transaction);
         this.lowResultSetFuture = lowResultSetFuture;
@@ -121,7 +121,7 @@ public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @param listener event listener
      * @return this
      */
-    public TsurugiSqlResult addEventListener(TsurugiResultSetEventListener<R> listener) {
+    public TsurugiSqlResult addEventListener(TsurugiQueryResultEventListener<R> listener) {
         if (this.eventListenerList == null) {
             this.eventListenerList = new ArrayList<>();
         }
@@ -129,7 +129,7 @@ public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return this;
     }
 
-    private void event(Throwable occurred, Consumer<TsurugiResultSetEventListener<R>> action) {
+    private void event(Throwable occurred, Consumer<TsurugiQueryResultEventListener<R>> action) {
         if (this.eventListenerList != null) {
             try {
                 for (var listener : eventListenerList) {
@@ -352,7 +352,7 @@ public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<
     public Iterator<R> iterator() {
         try {
             var record = getRecord();
-            return new TsurugiResultSetIterator(record);
+            return new TsurugiQueryResultIterator(record);
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         } catch (TsurugiTransactionException e) {
@@ -360,12 +360,12 @@ public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<
         }
     }
 
-    protected class TsurugiResultSetIterator implements Iterator<R> {
+    protected class TsurugiQueryResultIterator implements Iterator<R> {
         private final TsurugiResultRecord record;
         private boolean moveNext = true;
         private boolean hasNext;
 
-        public TsurugiResultSetIterator(TsurugiResultRecord record) {
+        public TsurugiQueryResultIterator(TsurugiResultRecord record) {
             this.record = record;
         }
 
@@ -405,7 +405,7 @@ public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<
             } catch (TsurugiTransactionException e) {
                 throw new TsurugiTransactionRuntimeException(e);
             }
-            event(null, listener -> listener.readRecord(TusurigQueryResult.this, result));
+            event(null, listener -> listener.readRecord(TsurugiQueryResult.this, result));
             this.moveNext = true;
             return result;
         }
@@ -437,7 +437,7 @@ public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<
 
     @Override
     public void close() throws IOException, TsurugiTransactionException {
-        LOG.trace("rs close start");
+        LOG.trace("queryResult close start");
 
         Throwable occurred = null;
         try {
@@ -466,6 +466,6 @@ public class TusurigQueryResult<R> extends TsurugiSqlResult implements Iterable<
             }
         }
 
-        LOG.trace("rs close end");
+        LOG.trace("queryResult close end");
     }
 }

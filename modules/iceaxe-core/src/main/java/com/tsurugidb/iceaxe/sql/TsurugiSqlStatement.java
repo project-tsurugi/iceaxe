@@ -62,7 +62,7 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
      * execute statement
      *
      * @param transaction Transaction
-     * @return result
+     * @return SQL result
      * @throws IOException
      * @throws TsurugiTransactionException
      * @see TsurugiTransaction#executeStatement(TsurugiSqlStatement)
@@ -70,23 +70,23 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
     public TsurugiStatementResult execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         checkClose();
 
-        LOG.trace("executeStatement start");
+        LOG.trace("execute start");
         int sqlExecuteId = getNewIceaxeSqlExecuteId();
         event(null, listener -> listener.executeStatementStart(transaction, this, sqlExecuteId));
 
-        TsurugiStatementResult rc;
+        TsurugiStatementResult result;
         try {
             var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeStatement(sql));
-            LOG.trace("executeStatement started");
+            LOG.trace("execute started");
 
-            rc = new TsurugiStatementResult(sqlExecuteId, transaction, lowResultFuture);
+            result = new TsurugiStatementResult(sqlExecuteId, transaction, lowResultFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeStatementStartException(transaction, this, sqlExecuteId, e));
             throw e;
         }
 
-        event(null, listener -> listener.executeStatementStarted(transaction, this, rc));
-        return rc;
+        event(null, listener -> listener.executeStatementStarted(transaction, this, result));
+        return result;
     }
 
     /**

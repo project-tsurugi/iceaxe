@@ -44,8 +44,8 @@ public class TsurugiDefaultRetryPredicate implements BiPredicate<TsurugiTransact
             return r.booleanValue();
         }
 
-        var option = transaction.getTransactionOption();
-        var type = option.type();
+        var txOption = transaction.getTransactionOption();
+        var type = txOption.type();
         if (type == null) {
             return testOther(transaction, e);
         }

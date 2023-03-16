@@ -45,8 +45,8 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
         var session = getSession();
         try (var ps = session.createQuery(sql, SELECT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-            try (var rs = transaction.executeQuery(ps)) {
-                List<TestEntity> list = rs.getRecordList();
+            try (var result = transaction.executeQuery(ps)) {
+                List<TestEntity> list = result.getRecordList();
                 assertEqualsTestTable(SIZE - 1, list);
             }
         }
@@ -62,8 +62,8 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql, parameterMapping, SELECT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
-            try (var rs = transaction.executeQuery(ps, parameter)) {
-                List<TestEntity> list = rs.getRecordList();
+            try (var result = transaction.executeQuery(ps, parameter)) {
+                List<TestEntity> list = result.getRecordList();
                 assertEqualsTestTable(SIZE - 1, list);
             }
         }

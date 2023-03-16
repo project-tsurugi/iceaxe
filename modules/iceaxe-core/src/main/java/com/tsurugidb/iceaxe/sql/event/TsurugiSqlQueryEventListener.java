@@ -1,7 +1,7 @@
 package com.tsurugidb.iceaxe.sql.event;
 
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
@@ -39,9 +39,9 @@ public interface TsurugiSqlQueryEventListener<R> {
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rs          ResultSet
+     * @param result      SQL result
      */
-    default void executeQueryStarted(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TusurigQueryResult<R> rs) {
+    default void executeQueryStarted(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result) {
         // do override
     }
 }

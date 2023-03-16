@@ -36,7 +36,7 @@ public class Example32Count {
     void countAll0_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select count(*) count from TEST")) {
             int count = tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
+                try (var result = transaction.executeQuery(ps)) {
                     Optional<TsurugiResultEntity> recordOpt = result.findRecord();
                     return recordOpt.get().getInt("count");
                 }
@@ -73,21 +73,19 @@ public class Example32Count {
         var resultMapping = TgResultMapping.of(record -> record.nextInt());
         try (var ps = session.createQuery("select count(*) from TEST", resultMapping)) {
             int count = tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
-                    Optional<Integer> countOpt = result.findRecord();
-                    return countOpt.get();
-                }
+                Optional<Integer> countOpt = transaction.executeAndFindRecord(ps);
+                return countOpt.get();
             });
             System.out.println(count);
         }
     }
 
     void countGroup(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        try (var ps = session.createQuery("select ZZZ, count(*) from TEST group by ZZZ", TgResultMapping.of(CountByZzzEntity::of))) {
+        var sql = "select ZZZ, count(*) from TEST group by ZZZ";
+        var resultMapping = TgResultMapping.of(CountByZzzEntity::of);
+        try (var ps = session.createQuery(sql, resultMapping)) {
             List<CountByZzzEntity> list = tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
-                    return result.getRecordList();
-                }
+                return transaction.executeAndGetList(ps);
             });
             System.out.println(list);
         }

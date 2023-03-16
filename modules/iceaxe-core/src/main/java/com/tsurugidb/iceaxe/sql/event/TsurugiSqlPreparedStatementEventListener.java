@@ -42,9 +42,9 @@ public interface TsurugiSqlPreparedStatementEventListener<P> {
      * @param transaction transaction
      * @param ps          SQL statement
      * @param parameter   SQL parameter
-     * @param rc          ResultCount
+     * @param result      SQL result
      */
-    default void executeStatementStarted(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<P> ps, P parameter, TsurugiStatementResult rc) {
+    default void executeStatementStarted(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<P> ps, P parameter, TsurugiStatementResult result) {
         // do override
     }
 }

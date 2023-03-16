@@ -16,25 +16,25 @@ class TgTxOptionOccTest extends TgTxOptionTester {
 
     @Test
     void empty() {
-        TgTxOptionOcc option = TgTxOption.ofOCC();
+        TgTxOptionOcc txOption = TgTxOption.ofOCC();
         String expected = "OCC{}";
-        assertOption(expected, null, option);
+        assertOption(expected, null, txOption);
     }
 
     @Test
     void label() {
-        TgTxOptionOcc option = TgTxOption.ofOCC().label("abc");
+        TgTxOptionOcc txOption = TgTxOption.ofOCC().label("abc");
         String expected = "OCC{label=abc}";
-        assertOption(expected, "abc", option);
+        assertOption(expected, "abc", txOption);
     }
 
     @Test
     void clone0() {
-        TgTxOptionOcc option = TgTxOption.ofOCC().label("abc");
-        TgTxOptionOcc clone = option.clone();
+        TgTxOptionOcc txOption = TgTxOption.ofOCC().label("abc");
+        TgTxOptionOcc clone = txOption.clone();
 
-        option.label(null);
-        assertOption("OCC{}", null, option);
+        txOption.label(null);
+        assertOption("OCC{}", null, txOption);
 
         String expected = "OCC{label=abc}";
         assertOption(expected, "abc", clone);
@@ -42,20 +42,20 @@ class TgTxOptionOccTest extends TgTxOptionTester {
 
     @Test
     void cloneLabel() {
-        TgTxOptionOcc option = TgTxOption.ofOCC().label("abc");
-        TgTxOptionOcc clone = option.clone("def");
+        TgTxOptionOcc txOption = TgTxOption.ofOCC().label("abc");
+        TgTxOptionOcc clone = txOption.clone("def");
 
-        assertOption("OCC{label=abc}", "abc", option);
+        assertOption("OCC{label=abc}", "abc", txOption);
 
         String expected = "OCC{label=def}";
         assertOption(expected, "def", clone);
     }
 
-    private void assertOption(String text, String label, TgTxOptionOcc option) {
-        assertEquals(text, option.toString());
-        assertEquals(expectedType, option.type());
-        assertEquals(label, option.label());
+    private void assertOption(String text, String label, TgTxOptionOcc txOption) {
+        assertEquals(text, txOption.toString());
+        assertEquals(expectedType, txOption.type());
+        assertEquals(label, txOption.label());
 
-        assertLowOption(label, null, List.of(), option);
+        assertLowOption(label, null, List.of(), txOption);
     }
 }

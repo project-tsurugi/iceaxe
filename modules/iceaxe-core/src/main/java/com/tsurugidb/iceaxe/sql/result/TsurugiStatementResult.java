@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
-import com.tsurugidb.iceaxe.sql.result.event.TsurugiResultCountEventListener;
+import com.tsurugidb.iceaxe.sql.result.event.TsurugiStatementResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -35,7 +35,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     private FutureResponse<Void> lowResultFuture;
     private final IceaxeTimeout checkTimeout;
     private final IceaxeTimeout closeTimeout;
-    private List<TsurugiResultCountEventListener> eventListenerList = null;
+    private List<TsurugiStatementResultEventListener> eventListenerList = null;
 
     // internal
     public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, FutureResponse<Void> lowResultFuture) throws IOException {
@@ -98,7 +98,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * @param listener event listener
      * @return this
      */
-    public TsurugiSqlResult addEventListener(TsurugiResultCountEventListener listener) {
+    public TsurugiSqlResult addEventListener(TsurugiStatementResultEventListener listener) {
         if (this.eventListenerList == null) {
             this.eventListenerList = new ArrayList<>();
         }
@@ -106,7 +106,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         return this;
     }
 
-    private void event(Throwable occurred, Consumer<TsurugiResultCountEventListener> action) {
+    private void event(Throwable occurred, Consumer<TsurugiStatementResultEventListener> action) {
         if (this.eventListenerList != null) {
             try {
                 for (var listener : eventListenerList) {
@@ -153,13 +153,13 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         // FIXME 更新件数取得
         // 件数を保持し、何度呼ばれても返せるようにする
 //      throw new InternalError("not yet implements");
-//      System.err.println("not yet implements TsurugiResultCount.getUpdateCount(), now always returns -1");
+//      System.err.println("not yet implements TsurugiStatementResult.getUpdateCount(), now always returns -1");
         return -1;
     }
 
     @Override
     public void close() throws IOException, TsurugiTransactionException {
-        LOG.trace("result close start");
+        LOG.trace("statementResult close start");
 
         Throwable occurred = null;
         try {
@@ -185,6 +185,6 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
             }
         }
 
-        LOG.trace("result close end");
+        LOG.trace("statementResult close end");
     }
 }

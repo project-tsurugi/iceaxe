@@ -37,11 +37,11 @@ class DbSelectIrregularTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         tm.execute(transaction -> {
             var ps = session.createQuery(sql);
-            var rs = ps.execute(transaction);
+            var result = ps.execute(transaction);
             ps.close();
-            var list = rs.getRecordList();
+            var list = result.getRecordList();
             assertEquals(SIZE, list.size());
-            rs.close();
+            result.close();
         });
     }
 }

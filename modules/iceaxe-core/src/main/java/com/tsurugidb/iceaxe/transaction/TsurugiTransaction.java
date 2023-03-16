@@ -19,13 +19,13 @@ import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
-import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
+import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
@@ -70,11 +70,11 @@ public class TsurugiTransaction implements Closeable {
     private boolean closed = false;
 
     // internal
-    public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption option) throws IOException {
+    public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption txOption) throws IOException {
         this.iceaxeTxId = TRANSACTION_COUNT.incrementAndGet();
         this.ownerSession = session;
         this.lowTransactionFuture = lowTransactionFuture;
-        this.txOption = option;
+        this.txOption = txOption;
         session.addChild(this);
 
         var sessionOption = session.getSessionOption();
@@ -373,16 +373,16 @@ public class TsurugiTransaction implements Closeable {
 
             TsurugiStatementResult result = null;
             Throwable occurred = null;
-            try (var rc = ps.execute(this)) {
-                result = rc;
-                rc.getUpdateCount();
+            try (var rs = ps.execute(this)) {
+                result = rs;
+                rs.getUpdateCount();
             } catch (Throwable e) {
                 occurred = e;
                 throw e;
             } finally {
-                var finalRc = result;
+                var finalResult = result;
                 var finalOccurred = occurred;
-                event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRc, finalOccurred));
+                event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
             }
         }
     }
@@ -392,19 +392,19 @@ public class TsurugiTransaction implements Closeable {
      *
      * @param <R> result type
      * @param ps  SQL statement
-     * @return ResultSet ({@link java.io.Closeable})
+     * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
      * @throws TsurugiTransactionException
      * @see #executeForEach(TsurugiSqlQuery, TsurugiTransactionConsumer)
      * @see #executeAndFindRecord(TsurugiSqlQuery)
      * @see #executeAndGetList(TsurugiSqlQuery)
      */
-    public <R> TusurigQueryResult<R> executeQuery(TsurugiSqlQuery<R> ps) throws IOException, TsurugiTransactionException {
+    public <R> TsurugiQueryResult<R> executeQuery(TsurugiSqlQuery<R> ps) throws IOException, TsurugiTransactionException {
         var method = TgTxExecuteMethod.EXECUTE_QUERY;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
 
-        TusurigQueryResult<R> result = null;
+        TsurugiQueryResult<R> result = null;
         Throwable occurred = null;
         try {
             result = ps.execute(this);
@@ -413,9 +413,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRs = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRs, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
         }
     }
 
@@ -426,19 +426,19 @@ public class TsurugiTransaction implements Closeable {
      * @param <R>       result type
      * @param ps        SQL statement
      * @param parameter SQL parameter
-     * @return ResultSet ({@link java.io.Closeable})
+     * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
      * @throws TsurugiTransactionException
      * @see #executeForEach(TsurugiSqlPreparedQuery, P, TsurugiTransactionConsumer)
      * @see #executeAndFindRecord(TsurugiSqlPreparedQuery, P)
      * @see #executeAndGetList(TsurugiSqlPreparedQuery, P)
      */
-    public <P, R> TusurigQueryResult<R> executeQuery(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+    public <P, R> TsurugiQueryResult<R> executeQuery(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
         var method = TgTxExecuteMethod.EXECUTE_QUERY;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
 
-        TusurigQueryResult<R> result = null;
+        TsurugiQueryResult<R> result = null;
         Throwable occurred = null;
         try {
             result = ps.execute(this, parameter);
@@ -447,9 +447,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRs = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalRs, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
         }
     }
 
@@ -457,7 +457,7 @@ public class TsurugiTransaction implements Closeable {
      * execute statement.
      *
      * @param ps SQL statement
-     * @return result ({@link java.io.Closeable})
+     * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
      * @throws TsurugiTransactionException
      * @see #executeAndGetCount(TsurugiSqlStatement)
@@ -476,9 +476,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRc = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRc, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
         }
     }
 
@@ -488,7 +488,7 @@ public class TsurugiTransaction implements Closeable {
      * @param <P>       parameter type
      * @param ps        SQL statement
      * @param parameter SQL parameter
-     * @return result ({@link java.io.Closeable})
+     * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
      * @throws TsurugiTransactionException
      * @see #executeAndGetCount(TsurugiSqlPreparedStatement, P)
@@ -507,9 +507,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRc = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalRc, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
         }
     }
 
@@ -528,7 +528,7 @@ public class TsurugiTransaction implements Closeable {
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
 
-        TusurigQueryResult<R> result = null;
+        TsurugiQueryResult<R> result = null;
         Throwable occurred = null;
         try (var rs = ps.execute(this)) {
             result = rs;
@@ -537,9 +537,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRs = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRs, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
         }
     }
 
@@ -559,7 +559,7 @@ public class TsurugiTransaction implements Closeable {
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
 
-        TusurigQueryResult<R> result = null;
+        TsurugiQueryResult<R> result = null;
         Throwable occurred = null;
         try (var rs = ps.execute(this, parameter)) {
             result = rs;
@@ -568,9 +568,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRs = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalRs, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
         }
     }
 
@@ -588,7 +588,7 @@ public class TsurugiTransaction implements Closeable {
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
 
-        TusurigQueryResult<R> result = null;
+        TsurugiQueryResult<R> result = null;
         Throwable occurred = null;
         try (var rs = ps.execute(this)) {
             result = rs;
@@ -597,9 +597,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRs = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRs, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
         }
     }
 
@@ -619,7 +619,7 @@ public class TsurugiTransaction implements Closeable {
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
 
-        TusurigQueryResult<R> result = null;
+        TsurugiQueryResult<R> result = null;
         Throwable occurred = null;
         try (var rs = ps.execute(this, parameter)) {
             result = rs;
@@ -628,9 +628,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRs = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalRs, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
         }
     }
 
@@ -648,7 +648,7 @@ public class TsurugiTransaction implements Closeable {
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
 
-        TusurigQueryResult<R> result = null;
+        TsurugiQueryResult<R> result = null;
         Throwable occurred = null;
         try (var rs = ps.execute(this)) {
             result = rs;
@@ -657,9 +657,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRs = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRs, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
         }
     }
 
@@ -679,7 +679,7 @@ public class TsurugiTransaction implements Closeable {
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
 
-        TusurigQueryResult<R> result = null;
+        TsurugiQueryResult<R> result = null;
         Throwable occurred = null;
         try (var rs = ps.execute(this, parameter)) {
             result = rs;
@@ -688,9 +688,9 @@ public class TsurugiTransaction implements Closeable {
             occurred = e;
             throw e;
         } finally {
-            var finalRs = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalRs, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
         }
     }
 
@@ -709,16 +709,16 @@ public class TsurugiTransaction implements Closeable {
 
         TsurugiStatementResult result = null;
         Throwable occurred = null;
-        try (var rc = ps.execute(this)) {
-            result = rc;
-            return rc.getUpdateCount();
+        try (var rs = ps.execute(this)) {
+            result = rs;
+            return rs.getUpdateCount();
         } catch (Throwable e) {
             occurred = e;
             throw e;
         } finally {
-            var finalRc = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalRc, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
         }
     }
 
@@ -739,16 +739,16 @@ public class TsurugiTransaction implements Closeable {
 
         TsurugiStatementResult result = null;
         Throwable occurred = null;
-        try (var rc = ps.execute(this, parameter)) {
-            result = rc;
-            return rc.getUpdateCount();
+        try (var rs = ps.execute(this, parameter)) {
+            result = rs;
+            return rs.getUpdateCount();
         } catch (Throwable e) {
             occurred = e;
             throw e;
         } finally {
-            var finalRc = result;
+            var finalResult = result;
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalRc, finalOccurred));
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
         }
     }
 

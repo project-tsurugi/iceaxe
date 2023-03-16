@@ -9,9 +9,9 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
@@ -43,7 +43,7 @@ public class Example21Insert {
     void insert0_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
+                try (var result = transaction.executeStatement(ps)) {
                     return result.getUpdateCount();
                 }
             });
@@ -104,7 +104,7 @@ public class Example21Insert {
                     parameter = TgBindParameters.of(foo.bind(123), bar.bind(456), zzz.bind("abc"));
                     break;
                 case 1:
-                    // TgParameterList.of()を使う場合、値のデータ型はvariableで指定されたデータ型と一致していなければならない
+                    // TgBindParameters.of().add()を使う場合、値のデータ型はvariableで指定されたデータ型と一致していなければならない
                     parameter = TgBindParameters.of().add("foo", 123).add("bar", 456L).add("zzz", "abc");
                     break;
                 case 2:
@@ -112,9 +112,8 @@ public class Example21Insert {
                     break;
                 }
 
-                try (var result = ps.execute(transaction, parameter)) {
-                    System.out.println(result.getUpdateCount());
-                }
+                int count = transaction.executeAndGetCount(ps, parameter);
+                System.out.println(count);
             });
         }
     }
@@ -127,9 +126,9 @@ public class Example21Insert {
                 entity.setFoo(123);
                 entity.setBar(456L);
                 entity.setZzz("abc");
-                try (var result = ps.execute(transaction, entity)) {
-                    System.out.println(result.getUpdateCount());
-                }
+
+                int count = transaction.executeAndGetCount(ps, entity);
+                System.out.println(count);
             });
         }
     }
@@ -162,9 +161,8 @@ public class Example21Insert {
         try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 var entity = new TestEntity(123, 456L, "abc");
-                try (var result = ps.execute(transaction, entity)) {
-                    System.out.println(result.getUpdateCount());
-                }
+                int count = transaction.executeAndGetCount(ps, entity);
+                System.out.println(count);
             });
         }
     }
@@ -194,8 +192,8 @@ public class Example21Insert {
         protected void compute() {
             if (list.size() <= 100) {
                 for (TestEntity entity : list) {
-                    try (var result = preparedStatement.execute(transaction, entity)) {
-                        // System.out.println(result.getUpdateCount());
+                    try {
+                        transaction.executeAndGetCount(preparedStatement, entity);
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     } catch (TsurugiTransactionException e) {

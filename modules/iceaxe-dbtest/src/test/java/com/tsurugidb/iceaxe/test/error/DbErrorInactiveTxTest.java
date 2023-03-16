@@ -172,7 +172,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
                 var tm = session.createTransactionManager(setting);
                 tm.addEventListener(new TsurugiTmEventListener() {
                     @Override
-                    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextOption) {
+                    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextTxOption) {
 //                      LOG.info("OCC retry: " + cause.getMessage());
                     }
                 });

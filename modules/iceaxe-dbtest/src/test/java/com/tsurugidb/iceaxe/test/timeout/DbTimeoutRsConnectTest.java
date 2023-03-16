@@ -13,12 +13,12 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
-import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * ResultSet connect timeout test
+ * {@link TsurugiQueryResult} connect timeout test
  */
 public class DbTimeoutRsConnectTest extends DbTimetoutTest {
 
@@ -56,8 +56,8 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyResultSet(TusurigQueryResult<?> rs) {
-                rs.setRsConnectTimeout(1, TimeUnit.SECONDS);
+            public void modifyQueryResult(TsurugiQueryResult<?> result) {
+                result.setRsConnectTimeout(1, TimeUnit.SECONDS);
             }
         });
     }
@@ -69,11 +69,11 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
 
             try (var ps = session.createQuery(SELECT_SQL)) {
                 pipeServer.setPipeWrite(false);
-                try (var rs = ps.execute(transaction)) {
-                    modifier.modifyResultSet(rs);
+                try (var result = ps.execute(transaction)) {
+                    modifier.modifyQueryResult(result);
 
                     try {
-                        rs.getRecordList();
+                        result.getRecordList();
                     } catch (IOException e) {
                         assertInstanceOf(TimeoutException.class, e.getCause());
                         LOG.trace("timeout success");

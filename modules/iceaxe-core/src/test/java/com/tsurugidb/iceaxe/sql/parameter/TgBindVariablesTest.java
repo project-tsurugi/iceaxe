@@ -14,104 +14,119 @@ class TgBindVariablesTest {
 
     @Test
     void testOf() {
-        var variable = TgBindVariables.of();
-        assertVariable(Map.of(), variable);
-        assertEquals("TgBindVariables[]", variable.toString());
+        var variables = TgBindVariables.of();
+        assertVariable(Map.of(), variables);
+        assertEquals("TgBindVariables[]", variables.toString());
+    }
+
+    @Test
+    void testOfArray() {
+        var v1 = TgBindVariable.ofInt("foo");
+        var variables = TgBindVariables.of(v1);
+        assertVariable(Map.of("foo", TgDataType.INT), variables);
+    }
+
+    @Test
+    void testOfCollection() {
+        var v1 = TgBindVariable.ofInt("foo");
+        var v2 = TgBindVariable.ofLong("bar");
+        var variables = TgBindVariables.of(v1, v2);
+        assertVariable(Map.of("foo", TgDataType.INT, "bar", TgDataType.LONG), variables);
     }
 
     @Test
     void testBoolean() {
-        var variable = new TgBindVariables().addBoolean("foo");
-        assertVariable(Map.of("foo", TgDataType.BOOLEAN), variable);
+        var variables = new TgBindVariables().addBoolean("foo");
+        assertVariable(Map.of("foo", TgDataType.BOOLEAN), variables);
     }
 
     @Test
     void testInt() {
-        var variable = new TgBindVariables().addInt("foo");
-        assertVariable(Map.of("foo", TgDataType.INT), variable);
+        var variables = new TgBindVariables().addInt("foo");
+        assertVariable(Map.of("foo", TgDataType.INT), variables);
     }
 
     @Test
     void testLong() {
-        var variable = new TgBindVariables().addLong("foo");
-        assertVariable(Map.of("foo", TgDataType.LONG), variable);
+        var variables = new TgBindVariables().addLong("foo");
+        assertVariable(Map.of("foo", TgDataType.LONG), variables);
     }
 
     @Test
     void testFloat() {
-        var variable = new TgBindVariables().addFloat("foo");
-        assertVariable(Map.of("foo", TgDataType.FLOAT), variable);
+        var variables = new TgBindVariables().addFloat("foo");
+        assertVariable(Map.of("foo", TgDataType.FLOAT), variables);
     }
 
     @Test
     void testDouble() {
-        var variable = new TgBindVariables().addDouble("foo");
-        assertVariable(Map.of("foo", TgDataType.DOUBLE), variable);
+        var variables = new TgBindVariables().addDouble("foo");
+        assertVariable(Map.of("foo", TgDataType.DOUBLE), variables);
     }
 
     @Test
     void testDecimal() {
-        var variable = new TgBindVariables().addDecimal("foo");
-        assertVariable(Map.of("foo", TgDataType.DECIMAL), variable);
+        var variables = new TgBindVariables().addDecimal("foo");
+        assertVariable(Map.of("foo", TgDataType.DECIMAL), variables);
     }
 
     @Test
     void testString() {
-        var variable = new TgBindVariables().addString("foo");
-        assertVariable(Map.of("foo", TgDataType.STRING), variable);
+        var variables = new TgBindVariables().addString("foo");
+        assertVariable(Map.of("foo", TgDataType.STRING), variables);
     }
 
     @Test
     void testBytes() {
-        var variable = new TgBindVariables().addBytes("foo");
-        assertVariable(Map.of("foo", TgDataType.BYTES), variable);
+        var variables = new TgBindVariables().addBytes("foo");
+        assertVariable(Map.of("foo", TgDataType.BYTES), variables);
     }
 
     @Test
     void testBits() {
-        var variable = new TgBindVariables().addBits("foo");
-        assertVariable(Map.of("foo", TgDataType.BITS), variable);
+        var variables = new TgBindVariables().addBits("foo");
+        assertVariable(Map.of("foo", TgDataType.BITS), variables);
     }
 
     @Test
     void testDate() {
-        var variable = new TgBindVariables().addDate("foo");
-        assertVariable(Map.of("foo", TgDataType.DATE), variable);
+        var variables = new TgBindVariables().addDate("foo");
+        assertVariable(Map.of("foo", TgDataType.DATE), variables);
     }
 
     @Test
     void testTime() {
-        var variable = new TgBindVariables().addTime("foo");
-        assertVariable(Map.of("foo", TgDataType.TIME), variable);
+        var variables = new TgBindVariables().addTime("foo");
+        assertVariable(Map.of("foo", TgDataType.TIME), variables);
     }
 
     @Test
     void testDateTime() {
-        var variable = new TgBindVariables().addDateTime("foo");
-        assertVariable(Map.of("foo", TgDataType.DATE_TIME), variable);
+        var variables = new TgBindVariables().addDateTime("foo");
+        assertVariable(Map.of("foo", TgDataType.DATE_TIME), variables);
     }
 
     @Test
     void testOffsetTime() {
-        var variable = new TgBindVariables().addOffsetTime("foo");
-        assertVariable(Map.of("foo", TgDataType.OFFSET_TIME), variable);
+        var variables = new TgBindVariables().addOffsetTime("foo");
+        assertVariable(Map.of("foo", TgDataType.OFFSET_TIME), variables);
     }
 
     @Test
     void testOffsetDateTime() {
-        var variable = new TgBindVariables().addOffsetDateTime("foo");
-        assertVariable(Map.of("foo", TgDataType.OFFSET_DATE_TIME), variable);
+        var variables = new TgBindVariables().addOffsetDateTime("foo");
+        assertVariable(Map.of("foo", TgDataType.OFFSET_DATE_TIME), variables);
     }
 
     @Test
     void testZonedDateTime() {
-        var variable = new TgBindVariables().addZonedDateTime("foo");
-        assertVariable(Map.of("foo", TgDataType.OFFSET_DATE_TIME), variable);
+        var variables = new TgBindVariables().addZonedDateTime("foo");
+        assertVariable(Map.of("foo", TgDataType.OFFSET_DATE_TIME), variables);
     }
 
     @Test
     void testSetDataType() {
-        var variable = new TgBindVariables() //
+        var variables = new TgBindVariables() //
                 .add("i4", TgDataType.INT) //
                 .add("i8", TgDataType.LONG) //
                 .add("f4", TgDataType.FLOAT) //
@@ -122,12 +137,12 @@ class TgBindVariablesTest {
                 entry("i8", TgDataType.LONG), //
                 entry("f4", TgDataType.FLOAT), //
                 entry("f8", TgDataType.DOUBLE), //
-                entry("c", TgDataType.STRING)), variable);
+                entry("c", TgDataType.STRING)), variables);
     }
 
     @Test
     void testSetClass() {
-        var variable = new TgBindVariables() //
+        var variables = new TgBindVariables() //
                 .add("i4", int.class) //
                 .add("I4", Integer.class) //
                 .add("i8", long.class) //
@@ -146,7 +161,7 @@ class TgBindVariablesTest {
                 entry("F4", TgDataType.FLOAT), //
                 entry("f8", TgDataType.DOUBLE), //
                 entry("F8", TgDataType.DOUBLE), //
-                entry("c", TgDataType.STRING)), variable);
+                entry("c", TgDataType.STRING)), variables);
     }
 
     @Test
@@ -154,14 +169,14 @@ class TgBindVariablesTest {
         var variable1 = new TgBindVariables() //
                 .addInt("foo") //
                 .addLong("bar");
-        var variable = new TgBindVariables() //
+        var variables = new TgBindVariables() //
                 .addString("zzz");
-        variable.add(variable1);
+        variables.add(variable1);
 
         assertVariable(Map.ofEntries( //
                 entry("foo", TgDataType.INT), //
                 entry("bar", TgDataType.LONG), //
-                entry("zzz", TgDataType.STRING)), variable);
+                entry("zzz", TgDataType.STRING)), variables);
         assertVariable(Map.ofEntries( //
                 entry("foo", TgDataType.INT), //
                 entry("bar", TgDataType.LONG)), variable1);
@@ -169,13 +184,13 @@ class TgBindVariablesTest {
 
     @Test
     void testGetSqlNames() {
-        var variable = new TgBindVariables() //
+        var variables = new TgBindVariables() //
                 .addInt("foo") //
                 .addLong("bar") //
                 .addString("zzz");
 
-        assertEquals(":foo,:bar,:zzz", variable.getSqlNames());
-        assertEquals(":foo, :bar, :zzz", variable.getSqlNames(", "));
+        assertEquals(":foo,:bar,:zzz", variables.getSqlNames());
+        assertEquals(":foo, :bar, :zzz", variables.getSqlNames(", "));
     }
 
     private static void assertVariable(Map<String, TgDataType> expectedMap, TgBindVariables actual) {

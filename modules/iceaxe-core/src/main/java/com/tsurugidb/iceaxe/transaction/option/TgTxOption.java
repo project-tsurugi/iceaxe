@@ -28,11 +28,11 @@ public interface TgTxOption extends Cloneable {
      */
     public static TgTxOptionLtx ofLTX(String... writePreserveTableNames) {
         // return ofLTX(List.of(writePreserveTableNames));
-        var option = new TgTxOptionLtx();
+        var txOption = new TgTxOptionLtx();
         for (var name : writePreserveTableNames) {
-            option.addWritePreserve(name);
+            txOption.addWritePreserve(name);
         }
-        return option;
+        return txOption;
     }
 
     /**
@@ -42,11 +42,11 @@ public interface TgTxOption extends Cloneable {
      * @return transaction option
      */
     public static TgTxOptionLtx ofLTX(Collection<String> writePreserveTableNames) {
-        var option = new TgTxOptionLtx();
+        var txOption = new TgTxOptionLtx();
         for (var name : writePreserveTableNames) {
-            option.addWritePreserve(name);
+            txOption.addWritePreserve(name);
         }
-        return option;
+        return txOption;
     }
 
     /**
@@ -56,9 +56,9 @@ public interface TgTxOption extends Cloneable {
      * @return transaction option
      */
     public static TgTxOptionLtx ofLTX(Stream<String> writePreserveTableNames) {
-        var option = new TgTxOptionLtx();
-        writePreserveTableNames.forEachOrdered(option::addWritePreserve);
-        return option;
+        var txOption = new TgTxOptionLtx();
+        writePreserveTableNames.forEachOrdered(txOption::addWritePreserve);
+        return txOption;
     }
 
     /**
@@ -100,17 +100,17 @@ public interface TgTxOption extends Cloneable {
     public String label();
 
     /**
-     * clone option
+     * clone transaction option
      *
-     * @return new option
+     * @return new transaction option
      */
     public TgTxOption clone();
 
     /**
-     * clone option
+     * clone transaction option
      *
      * @param label label
-     * @return new option
+     * @return new transaction option
      */
     public TgTxOption clone(String label);
 

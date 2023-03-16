@@ -55,8 +55,8 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(insertSql, insertMapping)) {
-            var param = TgBindParameters.of(variable.bind(value));
-            tm.executeAndGetCount(ps, param);
+            var parameter = TgBindParameters.of(variable.bind(value));
+            tm.executeAndGetCount(ps, parameter);
         }
 
         var selectSql = "select " + name + " from " + TEST;
@@ -81,8 +81,8 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(insertSql, insertMapping)) {
-            var param = TgBindParameters.of(variable.bind(value));
-            tm.executeAndGetCount(ps, param);
+            var parameter = TgBindParameters.of(variable.bind(value));
+            tm.executeAndGetCount(ps, parameter);
         }
 
         var selectSql = "select " + name + " from " + TEST;
@@ -107,8 +107,8 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(insertSql, insertMapping)) {
-            var param = TgBindParameters.of(variable.bind(value));
-            tm.executeAndGetCount(ps, param);
+            var parameter = TgBindParameters.of(variable.bind(value));
+            tm.executeAndGetCount(ps, parameter);
         }
 
         var selectSql = "select " + name + " from " + TEST;
@@ -133,8 +133,8 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(insertSql, insertMapping)) {
-            var param = TgBindParameters.of(variable.bind(value));
-            tm.executeAndGetCount(ps, param);
+            var parameter = TgBindParameters.of(variable.bind(value));
+            tm.executeAndGetCount(ps, parameter);
         }
 
         var selectSql = "select " + name + " from " + TEST;

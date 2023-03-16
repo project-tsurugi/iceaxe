@@ -14,8 +14,8 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -81,8 +81,8 @@ class DbDeleteTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {
-            var plist = TgBindParameters.of(foo.bind(number));
-            int count = tm.executeAndGetCount(ps, plist);
+            var parameter = TgBindParameters.of(foo.bind(number));
+            int count = tm.executeAndGetCount(ps, parameter);
             assertUpdateCount(1, count);
         }
 

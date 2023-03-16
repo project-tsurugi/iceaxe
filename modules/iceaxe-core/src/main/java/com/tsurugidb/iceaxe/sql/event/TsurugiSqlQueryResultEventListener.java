@@ -4,13 +4,12 @@ import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
-import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
-import com.tsurugidb.iceaxe.sql.result.event.TsurugiResultSetEventListener;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
+import com.tsurugidb.iceaxe.sql.result.event.TsurugiQueryResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
- * {@link TsurugiSqlQuery} with {@link TsurugiSqlResult} event listener
+ * {@link TsurugiSqlQuery} with {@link TsurugiQueryResult} event listener
  *
  * @param <R> result type
  */
@@ -18,30 +17,30 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    default void executeQueryStarted(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TusurigQueryResult<R> rs) {
-        rs.addEventListener(new TsurugiResultSetEventListener<>() {
+    default void executeQueryStarted(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result) {
+        result.addEventListener(new TsurugiQueryResultEventListener<>() {
             @Override
-            public void readRecord(TusurigQueryResult<R> rs, R record) {
-                executeQueryRead(transaction, ps, rs, record);
+            public void readRecord(TsurugiQueryResult<R> result, R record) {
+                executeQueryRead(transaction, ps, result, record);
             }
 
             @Override
-            public void readException(TusurigQueryResult<R> rs, Throwable occurred) {
-                executeQueryException(transaction, ps, rs, occurred);
+            public void readException(TsurugiQueryResult<R> result, Throwable occurred) {
+                executeQueryException(transaction, ps, result, occurred);
             }
 
             @Override
-            public void endResult(TusurigQueryResult<R> rs) {
-                executeQueryEnd(transaction, ps, rs);
+            public void endResult(TsurugiQueryResult<R> result) {
+                executeQueryEnd(transaction, ps, result);
             }
 
             @Override
-            public void closeResult(TusurigQueryResult<R> rs, @Nullable Throwable occurred) {
-                executeQueryClose(transaction, ps, rs, occurred);
+            public void closeResult(TsurugiQueryResult<R> result, @Nullable Throwable occurred) {
+                executeQueryClose(transaction, ps, result, occurred);
             }
         });
 
-        executeQueryStarted2(transaction, ps, rs);
+        executeQueryStarted2(transaction, ps, result);
     }
 
     /**
@@ -49,9 +48,9 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rs          ResultSet
+     * @param result      SQL result
      */
-    default void executeQueryStarted2(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TusurigQueryResult<R> rs) {
+    default void executeQueryStarted2(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result) {
         // do override
     }
 
@@ -60,10 +59,10 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rs          SQL parameter
+     * @param result      SQL result
      * @param record      record
      */
-    default void executeQueryRead(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TusurigQueryResult<R> rs, R record) {
+    default void executeQueryRead(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result, R record) {
         // do override
     }
 
@@ -72,10 +71,10 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rs          SQL parameter
+     * @param result      SQL result
      * @param occurred    exception
      */
-    default void executeQueryException(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TusurigQueryResult<R> rs, Throwable occurred) {
+    default void executeQueryException(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result, Throwable occurred) {
         // do override
     }
 
@@ -84,21 +83,21 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rs          SQL parameter
+     * @param result      SQL result
      */
-    default void executeQueryEnd(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TusurigQueryResult<R> rs) {
+    default void executeQueryEnd(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result) {
         // do override
     }
 
     /**
-     * called when close ResultSet
+     * called when close result
      *
      * @param transaction transaction
      * @param ps          SQL statement
-     * @param rs          SQL parameter
+     * @param result      SQL result
      * @param occurred    exception
      */
-    default void executeQueryClose(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TusurigQueryResult<R> rs, @Nullable Throwable occurred) {
+    default void executeQueryClose(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result, @Nullable Throwable occurred) {
         // do override
     }
 }

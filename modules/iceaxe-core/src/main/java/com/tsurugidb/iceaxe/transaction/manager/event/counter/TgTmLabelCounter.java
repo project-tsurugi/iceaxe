@@ -22,14 +22,14 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     private final Map<String, TgTmCountAtomic> counter = new ConcurrentHashMap<>();
 
     @Override
-    public void executeStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option) {
-        String label = label(option);
+    public void executeStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption txOption) {
+        String label = label(txOption);
         getOrCreate(label).incrementExecuteCount();
     }
 
     @Override
-    public void transactionStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, int attempt, TgTxOption option) {
-        String label = label(option);
+    public void transactionStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, int attempt, TgTxOption txOption) {
+        String label = label(txOption);
         getOrCreate(label).incrementTransactionCount();
     }
 
@@ -67,7 +67,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     }
 
     @Override
-    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextOption) {
+    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextTxOption) {
         String label = label(transaction);
         getOrCreate(label).incrementRetryCount();
     }
@@ -89,12 +89,12 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     }
 
     @Override
-    public void executeEndFail(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption option, TsurugiTransaction transaction, Throwable e) {
+    public void executeEndFail(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption txOption, TsurugiTransaction transaction, Throwable e) {
         String label;
         if (transaction != null) {
             label = label(transaction);
         } else {
-            label = label(option);
+            label = label(txOption);
         }
         getOrCreate(label).incrementFailCount();
     }
@@ -103,8 +103,8 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
         return label(transaction.getTransactionOption());
     }
 
-    protected String label(TgTxOption option) {
-        String label = option.label();
+    protected String label(TgTxOption txOption) {
+        String label = txOption.label();
         return (label != null) ? label : "";
     }
 

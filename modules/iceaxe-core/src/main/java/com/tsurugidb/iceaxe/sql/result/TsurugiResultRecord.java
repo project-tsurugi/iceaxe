@@ -31,7 +31,7 @@ import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.ResultSet;
 
 /**
- * Tsurugi Result Record for {@link TusurigQueryResult}
+ * Tsurugi Result Record for {@link TsurugiQueryResult}
  *
  * <p>
  * TODO+++翻訳: 当クラスのメソッド群は以下の3種類に分類される。ある群のメソッドを使用したら、他の群のメソッドは基本的に使用不可。
@@ -82,9 +82,9 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * </ul>
  * </ul>
  * <p>
- * 当クラスは{@link TusurigQueryResult}と連動しており、インスタンスは複数レコード間で共有される。<br>
+ * 当クラスは{@link TsurugiQueryResult}と連動しており、インスタンスは複数レコード間で共有される。<br>
  * そのため、レコードの値を保持する目的で、当インスタンスをユーザープログラムで保持してはならない。<br>
- * また、{@link TusurigQueryResult}のクローズ後に当クラスは使用できない。
+ * また、{@link TsurugiQueryResult}のクローズ後に当クラスは使用できない。
  * </p>
  */
 @NotThreadSafe
@@ -166,7 +166,7 @@ public class TsurugiResultRecord {
 
     @Nonnull
     protected Column getLowColumn(int index) throws IOException, TsurugiTransactionException {
-        var lowColumnList = TusurigQueryResult.getLowColumnList(lowResultSet);
+        var lowColumnList = TsurugiQueryResult.getLowColumnList(lowResultSet);
         return lowColumnList.get(index);
     }
 
@@ -181,7 +181,7 @@ public class TsurugiResultRecord {
     @Nonnull
     public String getCurrentColumnName() throws IOException, TsurugiTransactionException {
         var lowColumn = getLowColumn(currentColumnIndex);
-        return TusurigQueryResult.getColumnName(lowColumn, currentColumnIndex);
+        return TsurugiQueryResult.getColumnName(lowColumn, currentColumnIndex);
     }
 
     /**
@@ -270,7 +270,7 @@ public class TsurugiResultRecord {
      */
     @Nonnull
     public List<String> getNameList() throws IOException, TsurugiTransactionException {
-        return TusurigQueryResult.getNameList(lowResultSet);
+        return TsurugiQueryResult.getNameList(lowResultSet);
     }
 
     @Nonnull

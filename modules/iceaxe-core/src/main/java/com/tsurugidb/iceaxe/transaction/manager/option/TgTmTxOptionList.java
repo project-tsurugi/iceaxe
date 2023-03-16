@@ -16,27 +16,27 @@ public class TgTmTxOptionList extends TgTmTxOptionSupplier {
     /**
      * create TgTmTxOptionList
      *
-     * @param txOptionList options
+     * @param txOptions transaction options
      * @return TgTmTxOptionList
      */
-    public static TgTmTxOptionList of(TgTxOption... txOptionList) {
-        if (txOptionList == null || txOptionList.length == 0) {
-            throw new IllegalArgumentException("txOptionList is null or empty");
+    public static TgTmTxOptionList of(TgTxOption... txOptions) {
+        if (txOptions == null || txOptions.length == 0) {
+            throw new IllegalArgumentException("txOptions is null or empty");
         }
-        return new TgTmTxOptionList(List.of(txOptionList));
+        return new TgTmTxOptionList(List.of(txOptions));
     }
 
     /**
      * create TgTmTxOptionList
      *
-     * @param txOptionList options
+     * @param txOptions transaction options
      * @return TgTmTxOptionList
      */
-    public static TgTmTxOptionList of(List<TgTxOption> txOptionList) {
-        if (txOptionList == null || txOptionList.isEmpty()) {
-            throw new IllegalArgumentException("txOptionList is null or empty");
+    public static TgTmTxOptionList of(List<TgTxOption> txOptions) {
+        if (txOptions == null || txOptions.isEmpty()) {
+            throw new IllegalArgumentException("txOptions is null or empty");
         }
-        return new TgTmTxOptionList(txOptionList);
+        return new TgTmTxOptionList(txOptions);
     }
 
     private final List<TgTxOption> txOptionList;
@@ -44,7 +44,7 @@ public class TgTmTxOptionList extends TgTmTxOptionSupplier {
     /**
      * TgTxOption list
      *
-     * @param txOptionList options
+     * @param txOptionList transaction options
      */
     public TgTmTxOptionList(List<TgTxOption> txOptionList) {
         this.txOptionList = txOptionList;

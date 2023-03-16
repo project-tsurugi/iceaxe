@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.event.TsurugiSqlQueryEventListener;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
@@ -68,32 +68,32 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * execute query
      *
      * @param transaction Transaction
-     * @return Result Set
+     * @return SQL result
      * @throws IOException
      * @throws TsurugiTransactionException
      * @see TsurugiTransaction#executeQuery(TsurugiSqlQuery)
      */
-    public TusurigQueryResult<R> execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+    public TsurugiQueryResult<R> execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
         checkClose();
 
-        LOG.trace("executeQuery start");
+        LOG.trace("execute start");
         int sqlExecuteId = getNewIceaxeSqlExecuteId();
         event(null, listener -> listener.executeQueryStart(transaction, this, sqlExecuteId));
 
-        TusurigQueryResult<R> rs;
+        TsurugiQueryResult<R> result;
         try {
             var lowResultSetFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeQuery(sql));
-            LOG.trace("executeQuery started");
+            LOG.trace("execute started");
 
             var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
-            rs = new TusurigQueryResult<>(sqlExecuteId, transaction, lowResultSetFuture, resultMapping, convertUtil);
+            result = new TsurugiQueryResult<>(sqlExecuteId, transaction, lowResultSetFuture, resultMapping, convertUtil);
         } catch (Throwable e) {
             event(e, listener -> listener.executeQueryStartException(transaction, this, sqlExecuteId, e));
             throw e;
         }
 
-        event(null, listener -> listener.executeQueryStarted(transaction, this, rs));
-        return rs;
+        event(null, listener -> listener.executeQueryStarted(transaction, this, result));
+        return result;
     }
 
     /**

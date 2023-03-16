@@ -9,20 +9,21 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
 /**
- * Tsurugi Bind Parameter for {@link TsurugiSqlPrepared}
+ * Tsurugi Bind Parameters for {@link TsurugiSqlPrepared}
  *
  * @see TsurugiSqlPreparedQuery#execute(com.tsurugidb.iceaxe.transaction.TsurugiTransaction, Object)
  * @see TsurugiSqlPreparedStatement#execute(com.tsurugidb.iceaxe.transaction.TsurugiTransaction, Object)
@@ -45,11 +46,25 @@ public class TgBindParameters {
      * @return bind parameters
      */
     public static TgBindParameters of(TgBindParameter... parameters) {
-        var parameterList = new TgBindParameters();
+        var bp = new TgBindParameters();
         for (var parameter : parameters) {
-            parameterList.add(parameter);
+            bp.add(parameter);
         }
-        return parameterList;
+        return bp;
+    }
+
+    /**
+     * create bind parameters
+     *
+     * @param parameters bind parameter
+     * @return bind parameters
+     */
+    public static TgBindParameters of(Collection<? extends TgBindParameter> parameters) {
+        var bp = new TgBindParameters();
+        for (var parameter : parameters) {
+            bp.add(parameter);
+        }
+        return bp;
     }
 
     /**
@@ -591,11 +606,11 @@ public class TgBindParameters {
     /**
      * add parameter
      *
-     * @param otherList parameter list
+     * @param other parameters
      * @return this
      */
-    public TgBindParameters add(TgBindParameters otherList) {
-        parameterList.addAll(otherList.parameterList);
+    public TgBindParameters add(TgBindParameters other) {
+        parameterList.addAll(other.parameterList);
         return this;
     }
 

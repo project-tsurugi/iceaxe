@@ -39,8 +39,8 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
         var session = getSession();
         try (var ps = session.createStatement(sql); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-            try (var rc = transaction.executeStatement(ps)) {
-                assertUpdateCount(1, rc.getUpdateCount());
+            try (var result = transaction.executeStatement(ps)) {
+                assertUpdateCount(1, result.getUpdateCount());
 
                 transaction.commit(TgCommitType.DEFAULT);
             }
@@ -55,8 +55,8 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             var entity = createTestEntity(SIZE);
-            try (var rc = transaction.executeStatement(ps, entity)) {
-                assertUpdateCount(1, rc.getUpdateCount());
+            try (var result = transaction.executeStatement(ps, entity)) {
+                assertUpdateCount(1, result.getUpdateCount());
 
                 transaction.commit(TgCommitType.DEFAULT);
             }

@@ -14,13 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableInteger;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableString;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -74,17 +74,17 @@ class DbInsertDuplicateTest extends DbTestTableTester {
         test(TgTxOption.ofLTX(TEST, TEST2));
     }
 
-    private void test(TgTxOption option) throws Exception {
-        test(option, new DbTestSessions());
+    private void test(TgTxOption txOption) throws Exception {
+        test(txOption, new DbTestSessions());
     }
 
-    private void test(TgTxOption option, DbTestSessions sessions) throws Exception {
+    private void test(TgTxOption txOption, DbTestSessions sessions) throws Exception {
         int onlineSize = 40;
 
         try (sessions) {
             var onlineList = new ArrayList<OnlineTask>(onlineSize);
             for (int i = 0; i < onlineSize; i++) {
-                var task = new OnlineTask(sessions.createSession(), option);
+                var task = new OnlineTask(sessions.createSession(), txOption);
                 onlineList.add(task);
             }
 
@@ -117,11 +117,11 @@ class DbInsertDuplicateTest extends DbTestTableTester {
         private static final TgBindVariableString vZzz2 = TgBindVariable.ofString("zzz2");
 
         private final TsurugiSession session;
-        private final TgTxOption option;
+        private final TgTxOption txOption;
 
-        public OnlineTask(TsurugiSession session, TgTxOption option) {
+        public OnlineTask(TsurugiSession session, TgTxOption txOption) {
             this.session = session;
-            this.option = option;
+            this.txOption = txOption;
         }
 
         @Override
@@ -137,7 +137,7 @@ class DbInsertDuplicateTest extends DbTestTableTester {
             try (var maxPs = session.createQuery(maxSql); //
                     var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                     var insert2Ps = session.createStatement(insert2Sql, insert2Mapping)) {
-                var setting = TgTmSetting.ofAlways(option);
+                var setting = TgTmSetting.ofAlways(txOption);
                 var tm = session.createTransactionManager(setting);
 
                 for (int i = 0; i < 40; i++) {

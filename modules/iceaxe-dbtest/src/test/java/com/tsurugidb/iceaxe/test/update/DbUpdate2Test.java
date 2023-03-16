@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
@@ -56,8 +56,8 @@ class DbUpdate2Test extends DbTestTableTester {
         try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < SIZE; i++) {
-                    var param = TgBindParameters.of(pk.bind(i), v1.bind(initValue1(i)), v2.bind(initValue2(i)));
-                    transaction.executeAndGetCount(ps, param);
+                    var parameter = TgBindParameters.of(pk.bind(i), v1.bind(initValue1(i)), v2.bind(initValue2(i)));
+                    transaction.executeAndGetCount(ps, parameter);
                 }
             });
         }

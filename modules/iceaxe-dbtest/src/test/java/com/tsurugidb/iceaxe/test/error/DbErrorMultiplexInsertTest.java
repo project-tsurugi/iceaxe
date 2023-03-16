@@ -108,13 +108,13 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
                     transaction.executeAndGetCount(ps, entity);
                     break;
                 case CLOSE_ONLY:
-                    try (var rs = ps.execute(transaction, entity)) {
+                    try (var result = ps.execute(transaction, entity)) {
                     }
                     break;
                 case EXEUTE_ONLY:
                     @SuppressWarnings("unused")
-                    var rs = ps.execute(transaction, entity);
-                    // rs.close is called on ps.close
+                    var result = ps.execute(transaction, entity);
+                    // result.close is called on ps.close
                     break;
                 }
 

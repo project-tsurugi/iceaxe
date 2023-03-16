@@ -28,23 +28,23 @@ public class Example71In {
     }
 
     void in1(TsurugiSession session, TsurugiTransactionManager tm, List<Integer> fooList) throws IOException {
-        var vlist = TgBindVariables.of();
-        var plist = TgBindParameters.of();
+        var variables = TgBindVariables.of();
+        var parameter = TgBindParameters.of();
         int i = 0;
         for (var foo : fooList) {
             var variable = TgBindVariable.ofInt("f" + (i++));
-            vlist.add(variable);
-            plist.add(variable.bind(foo));
+            variables.add(variable);
+            parameter.add(variable.bind(foo));
         }
 
-        var sql = "select * from TEST where foo in(" + vlist.getSqlNames() + ")";
-        var parameterMapping = TgParameterMapping.of(vlist);
+        var sql = "select * from TEST where foo in(" + variables.getSqlNames() + ")";
+        var parameterMapping = TgParameterMapping.of(variables);
         var resultMapping = TgResultMapping.of(TestEntity::new) //
                 .addInt(TestEntity::setFoo) //
                 .addLong(TestEntity::setBar) //
                 .addString(TestEntity::setZzz);
         try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
-            var list = tm.executeAndGetList(ps, plist);
+            var list = tm.executeAndGetList(ps, parameter);
             for (var entity : list) {
                 System.out.println(entity);
             }

@@ -10,8 +10,8 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -78,8 +78,8 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-                var plist = TgBindParameters.of(foo.bind(123), bar.bind(456) /* ,zzz */);
-                tm.executeAndGetCount(ps, plist);
+                var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456) /* ,zzz */);
+                tm.executeAndGetCount(ps, parameter);
             });
             assertEqualsCode(SqlServiceCode.ERR_UNRESOLVED_HOST_VARIABLE, e);
             assertContains("Value is not assigned for host variable 'zzz'.", e.getMessage());
@@ -102,8 +102,8 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {
             var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-                var plist = TgBindParameters.of(foo.bind(123), bar.bind(456), zzz.bind(789));
-                tm.executeAndGetCount(ps, plist);
+                var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456), zzz.bind(789));
+                tm.executeAndGetCount(ps, parameter);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
             assertContains("inconsistent_type int4() (expected: {character_string})", e.getMessage()); // TODO カラム名の確認

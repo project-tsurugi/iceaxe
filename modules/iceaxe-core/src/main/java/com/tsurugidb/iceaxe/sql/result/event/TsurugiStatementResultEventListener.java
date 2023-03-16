@@ -7,25 +7,25 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 /**
  * {@link TsurugiStatementResult} event listener
  */
-public interface TsurugiResultCountEventListener {
+public interface TsurugiStatementResultEventListener {
 
     /**
      * called when execute end
      *
-     * @param rc       ResultCount
+     * @param result   SQL result
      * @param occurred exception
      */
-    default void endResult(TsurugiStatementResult rc, @Nullable Throwable occurred) {
+    default void endResult(TsurugiStatementResult result, @Nullable Throwable occurred) {
         // do override
     }
 
     /**
-     * called when close ResultCount
+     * called when close result
      *
-     * @param rc       ResultCount
+     * @param result   SQL result
      * @param occurred exception
      */
-    default void closeResult(TsurugiStatementResult rc, @Nullable Throwable occurred) {
+    default void closeResult(TsurugiStatementResult result, @Nullable Throwable occurred) {
         // do override
     }
 }

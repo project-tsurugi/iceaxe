@@ -4,9 +4,8 @@ import java.io.IOException;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
-import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -44,9 +43,9 @@ public class Example41Update {
         var add = TgBindVariable.ofLong("add");
 
         var sql = "update TEST set bar = bar + :add where foo = :foo";
-        var vlist = TgBindVariables.of(foo, add);
+        var parameterMapping = TgParameterMapping.of(foo, add);
 
-        try (var ps = session.createStatement(sql, TgParameterMapping.of(vlist))) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 var plist = TgBindParameters.of(foo.bind(123), add.bind(1));
                 int count = transaction.executeAndGetCount(ps, plist);

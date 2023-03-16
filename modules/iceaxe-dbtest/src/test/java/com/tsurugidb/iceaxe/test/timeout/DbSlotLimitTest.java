@@ -11,8 +11,8 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -49,20 +49,20 @@ public class DbSlotLimitTest extends DbTimetoutTest {
             transaction.getLowTransaction();
 
             try (var ps = session.createQuery(SELECT_SQL)) {
-                var rsList = new ArrayList<TusurigQueryResult<?>>();
+                var resultList = new ArrayList<TsurugiQueryResult<?>>();
 
                 pipeServer.setPipeWrite(false);
                 try {
-                    execute(transaction, ps, rsList);
+                    execute(transaction, ps, resultList);
                 } finally {
                     pipeServer.setPipeWrite(true);
                 }
 
                 int i = 0;
-                for (var rs : rsList) {
+                for (var result : resultList) {
                     LOG.trace("close i={}", i);
                     try {
-                        rs.close();
+                        result.close();
                     } catch (ResponseTimeoutException e) {
                         // success
                     }
@@ -79,14 +79,14 @@ public class DbSlotLimitTest extends DbTimetoutTest {
         }
     }
 
-    private void execute(TsurugiTransaction transaction, TsurugiSqlQuery<TsurugiResultEntity> ps, List<TusurigQueryResult<?>> rsList) throws IOException, TsurugiTransactionException {
+    private void execute(TsurugiTransaction transaction, TsurugiSqlQuery<TsurugiResultEntity> ps, List<TsurugiQueryResult<?>> resultList) throws IOException, TsurugiTransactionException {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
             LOG.trace("i={}", i);
             try {
-                var rs = ps.execute(transaction);
-                rs.setRsConnectTimeout(1, TimeUnit.MILLISECONDS);
-                rs.setRsCloseTimeout(1, TimeUnit.MILLISECONDS);
-                rsList.add(rs);
+                var result = ps.execute(transaction);
+                result.setRsConnectTimeout(1, TimeUnit.MILLISECONDS);
+                result.setRsCloseTimeout(1, TimeUnit.MILLISECONDS);
+                resultList.add(result);
             } catch (Throwable t) {
                 LOG.error("excption occurred. i={}", i, t);
                 throw t;

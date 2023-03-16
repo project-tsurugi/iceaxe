@@ -399,44 +399,44 @@ public class TsurugiSession implements Closeable {
     /**
      * create transaction manager
      *
-     * @param setting transaction manager settings
+     * @param txOption transaction option
      * @return Transaction Manager
      */
 //  @ThreadSafe
-    public TsurugiTransactionManager createTransactionManager(TgTxOption option) {
-        var setting = TgTmSetting.of(option);
+    public TsurugiTransactionManager createTransactionManager(TgTxOption txOption) {
+        var setting = TgTmSetting.of(txOption);
         return createTransactionManager(setting);
     }
 
     /**
      * create Transaction
      *
-     * @param option transaction option
+     * @param txOption transaction option
      * @return Transaction
      * @throws IOException
      */
 //  @ThreadSafe
-    public TsurugiTransaction createTransaction(@Nonnull TgTxOption option) throws IOException {
-        return createTransaction(option, null);
+    public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption) throws IOException {
+        return createTransaction(txOption, null);
     }
 
     /**
      * create Transaction
      *
-     * @param option      transaction option
+     * @param txOption    transaction option
      * @param initializer transaction initializer
      * @return Transaction
      * @throws IOException
      */
 //  @ThreadSafe
-    public TsurugiTransaction createTransaction(@Nonnull TgTxOption option, @Nullable Consumer<TsurugiTransaction> initializer) throws IOException {
+    public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption, @Nullable Consumer<TsurugiTransaction> initializer) throws IOException {
         checkClose();
 
-        var lowOption = option.toLowTransactionOption();
+        var lowOption = txOption.toLowTransactionOption();
         LOG.trace("lowTransaction create start. lowOption={}", lowOption);
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
         LOG.trace("lowTransaction create started");
-        var transaction = new TsurugiTransaction(this, lowTransactionFuture, option);
+        var transaction = new TsurugiTransaction(this, lowTransactionFuture, txOption);
         if (initializer != null) {
             initializer.accept(transaction);
         }

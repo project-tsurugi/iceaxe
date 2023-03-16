@@ -25,446 +25,455 @@ class TgBindParametersTest {
 
     @Test
     void testOf() {
-        var list = TgBindParameters.of();
+        var parameter = TgBindParameters.of();
 
-        assertParameterList(List.of(), list);
+        assertParameterList(List.of(), parameter);
     }
 
     @Test
-    void testOfTgParameterArray() {
+    void testOfArray() {
         var foo = TgBindVariable.ofInt("foo");
-        var list = TgBindParameters.of(foo.bind(123));
+        var parameter = TgBindParameters.of(foo.bind(123));
 
-        assertParameterList(TgBindParameter.of("foo", 123), list);
+        assertParameterList(TgBindParameter.of("foo", 123), parameter);
+    }
+
+    @Test
+    void testOfCollection() {
+        var foo = TgBindVariable.ofInt("foo");
+        var list = List.of(foo.bind(123));
+        var parameter = TgBindParameters.of(list);
+
+        assertParameterList(TgBindParameter.of("foo", 123), parameter);
     }
 
     @Test
     void testBoolStringBoolean() {
-        var list = TgBindParameters.of();
-        list.addBoolean("foo", true);
+        var parameter = TgBindParameters.of();
+        parameter.addBoolean("foo", true);
 
-        assertParameterList(TgBindParameter.of("foo", true), list);
+        assertParameterList(TgBindParameter.of("foo", true), parameter);
     }
 
     @Test
     void testBoolStringBooleanWrapper() {
-        var list = TgBindParameters.of();
-        list.addBoolean("foo", Boolean.TRUE);
-        list.addBoolean("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addBoolean("foo", Boolean.TRUE);
+        parameter.addBoolean("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", Boolean.TRUE), TgBindParameter.of("bar", (Boolean) null), list);
+        assertParameterList(TgBindParameter.of("foo", Boolean.TRUE), TgBindParameter.of("bar", (Boolean) null), parameter);
     }
 
     @Test
     void testIntStringInt() {
-        var list = TgBindParameters.of();
-        list.addInt("foo", 123);
+        var parameter = TgBindParameters.of();
+        parameter.addInt("foo", 123);
 
-        assertParameterList(TgBindParameter.of("foo", 123), list);
+        assertParameterList(TgBindParameter.of("foo", 123), parameter);
     }
 
     @Test
     void testIntStringInteger() {
-        var list = TgBindParameters.of();
-        list.addInt("foo", Integer.valueOf(123));
-        list.addInt("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addInt("foo", Integer.valueOf(123));
+        parameter.addInt("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", 123), TgBindParameter.of("bar", (Integer) null), list);
+        assertParameterList(TgBindParameter.of("foo", 123), TgBindParameter.of("bar", (Integer) null), parameter);
     }
 
     @Test
     void testLongStringLong() {
-        var list = TgBindParameters.of();
-        list.addLong("foo", 123);
+        var parameter = TgBindParameters.of();
+        parameter.addLong("foo", 123);
 
-        assertParameterList(TgBindParameter.of("foo", 123L), list);
+        assertParameterList(TgBindParameter.of("foo", 123L), parameter);
     }
 
     @Test
     void testLongStringLongWrapper() {
-        var list = TgBindParameters.of();
-        list.addLong("foo", Long.valueOf(123));
-        list.addLong("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addLong("foo", Long.valueOf(123));
+        parameter.addLong("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", 123L), TgBindParameter.of("bar", (Long) null), list);
+        assertParameterList(TgBindParameter.of("foo", 123L), TgBindParameter.of("bar", (Long) null), parameter);
     }
 
     @Test
     void testFloatStringFloat() {
-        var list = TgBindParameters.of();
-        list.addFloat("foo", 123);
+        var parameter = TgBindParameters.of();
+        parameter.addFloat("foo", 123);
 
-        assertParameterList(TgBindParameter.of("foo", 123f), list);
+        assertParameterList(TgBindParameter.of("foo", 123f), parameter);
     }
 
     @Test
     void testFloatStringFloatWrapper() {
-        var list = TgBindParameters.of();
-        list.addFloat("foo", Float.valueOf(123));
-        list.addFloat("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addFloat("foo", Float.valueOf(123));
+        parameter.addFloat("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", 123f), TgBindParameter.of("bar", (Float) null), list);
+        assertParameterList(TgBindParameter.of("foo", 123f), TgBindParameter.of("bar", (Float) null), parameter);
     }
 
     @Test
     void testDoubleStringDouble() {
-        var list = TgBindParameters.of();
-        list.addDouble("foo", 123);
+        var parameter = TgBindParameters.of();
+        parameter.addDouble("foo", 123);
 
-        assertParameterList(TgBindParameter.of("foo", 123d), list);
+        assertParameterList(TgBindParameter.of("foo", 123d), parameter);
     }
 
     @Test
     void testDoubleStringDoubleWrapper() {
-        var list = TgBindParameters.of();
-        list.addDouble("foo", Double.valueOf(123));
-        list.addDouble("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addDouble("foo", Double.valueOf(123));
+        parameter.addDouble("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", 123d), TgBindParameter.of("bar", (Double) null), list);
+        assertParameterList(TgBindParameter.of("foo", 123d), TgBindParameter.of("bar", (Double) null), parameter);
     }
 
     @Test
     void testDecimal() {
-        var list = TgBindParameters.of();
-        list.addDecimal("foo", BigDecimal.valueOf(123));
-        list.addDecimal("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addDecimal("foo", BigDecimal.valueOf(123));
+        parameter.addDecimal("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", BigDecimal.valueOf(123)), TgBindParameter.of("bar", (BigDecimal) null), list);
+        assertParameterList(TgBindParameter.of("foo", BigDecimal.valueOf(123)), TgBindParameter.of("bar", (BigDecimal) null), parameter);
     }
 
     @Test
     void testDecimalScale() {
-        var list = TgBindParameters.of();
-        list.addDecimal("p", new BigDecimal("1.01"), 1);
-        list.addDecimal("m", new BigDecimal("-1.01"), 1);
-        list.addDecimal("bar", null, 1);
+        var parameter = TgBindParameters.of();
+        parameter.addDecimal("p", new BigDecimal("1.01"), 1);
+        parameter.addDecimal("m", new BigDecimal("-1.01"), 1);
+        parameter.addDecimal("bar", null, 1);
 
         var mode = TgBindVariableBigDecimal.DEFAULT_ROUNDING_MODE;
-        assertParameterList(TgBindParameter.of("p", new BigDecimal("1.01").setScale(1, mode)), TgBindParameter.of("m", new BigDecimal("-1.01").setScale(1, mode)), TgBindParameter.of("bar", (BigDecimal) null),
-                list);
+        assertParameterList(TgBindParameter.of("p", new BigDecimal("1.01").setScale(1, mode)), TgBindParameter.of("m", new BigDecimal("-1.01").setScale(1, mode)),
+                TgBindParameter.of("bar", (BigDecimal) null), parameter);
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "FLOOR", "DOWN", "HALF_UP" })
     void testDecimalRoundingMode(RoundingMode mode) {
-        var list = TgBindParameters.of();
-        list.addDecimal("p", new BigDecimal("1.05"), 1, mode);
-        list.addDecimal("m", new BigDecimal("-1.05"), 1, mode);
-        list.addDecimal("bar", null, 1, mode);
+        var parameter = TgBindParameters.of();
+        parameter.addDecimal("p", new BigDecimal("1.05"), 1, mode);
+        parameter.addDecimal("m", new BigDecimal("-1.05"), 1, mode);
+        parameter.addDecimal("bar", null, 1, mode);
 
-        assertParameterList(TgBindParameter.of("p", new BigDecimal("1.05").setScale(1, mode)), TgBindParameter.of("m", new BigDecimal("-1.05").setScale(1, mode)), TgBindParameter.of("bar", (BigDecimal) null),
-                list);
+        assertParameterList(TgBindParameter.of("p", new BigDecimal("1.05").setScale(1, mode)), TgBindParameter.of("m", new BigDecimal("-1.05").setScale(1, mode)),
+                TgBindParameter.of("bar", (BigDecimal) null), parameter);
     }
 
     @Test
     void testString() {
-        var list = TgBindParameters.of();
-        list.addString("foo", "abc");
-        list.addString("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addString("foo", "abc");
+        parameter.addString("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", "abc"), TgBindParameter.of("bar", (String) null), list);
+        assertParameterList(TgBindParameter.of("foo", "abc"), TgBindParameter.of("bar", (String) null), parameter);
     }
 
     @Test
     void testBytes() {
-        var list = TgBindParameters.of();
-        list.addBytes("foo", new byte[] { 1, 2, 3 });
-        list.addBytes("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addBytes("foo", new byte[] { 1, 2, 3 });
+        parameter.addBytes("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", new byte[] { 1, 2, 3 }), TgBindParameter.of("bar", (byte[]) null), list);
+        assertParameterList(TgBindParameter.of("foo", new byte[] { 1, 2, 3 }), TgBindParameter.of("bar", (byte[]) null), parameter);
     }
 
     @Test
     void testBits() {
-        var list = TgBindParameters.of();
-        list.addBits("foo", new boolean[] { true, false, true });
-        list.addBits("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addBits("foo", new boolean[] { true, false, true });
+        parameter.addBits("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", new boolean[] { true, false, true }), TgBindParameter.of("bar", (boolean[]) null), list);
+        assertParameterList(TgBindParameter.of("foo", new boolean[] { true, false, true }), TgBindParameter.of("bar", (boolean[]) null), parameter);
     }
 
     @Test
     void testDate() {
-        var list = TgBindParameters.of();
-        list.addDate("foo", LocalDate.of(2022, 6, 30));
-        list.addDate("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addDate("foo", LocalDate.of(2022, 6, 30));
+        parameter.addDate("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", LocalDate.of(2022, 6, 30)), TgBindParameter.of("bar", (LocalDate) null), list);
+        assertParameterList(TgBindParameter.of("foo", LocalDate.of(2022, 6, 30)), TgBindParameter.of("bar", (LocalDate) null), parameter);
     }
 
     @Test
     void testTime() {
-        var list = TgBindParameters.of();
-        list.addTime("foo", LocalTime.of(23, 30, 59));
-        list.addTime("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addTime("foo", LocalTime.of(23, 30, 59));
+        parameter.addTime("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", LocalTime.of(23, 30, 59)), TgBindParameter.of("bar", (LocalTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", LocalTime.of(23, 30, 59)), TgBindParameter.of("bar", (LocalTime) null), parameter);
     }
 
     @Test
     void testDateTime() {
-        var list = TgBindParameters.of();
-        list.addDateTime("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
-        list.addDateTime("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addDateTime("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
+        parameter.addDateTime("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), TgBindParameter.of("bar", (LocalDateTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), TgBindParameter.of("bar", (LocalDateTime) null), parameter);
     }
 
     @Test
     void testOffsetTime() {
         var offset = ZoneOffset.ofHours(9);
-        var list = TgBindParameters.of();
-        list.addOffsetTime("foo", OffsetTime.of(23, 30, 59, 0, offset));
-        list.addOffsetTime("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addOffsetTime("foo", OffsetTime.of(23, 30, 59, 0, offset));
+        parameter.addOffsetTime("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), TgBindParameter.of("bar", (OffsetTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), TgBindParameter.of("bar", (OffsetTime) null), parameter);
     }
 
     @Test
     void testOffsetDateTime() {
         var offset = ZoneOffset.ofHours(9);
-        var list = TgBindParameters.of();
-        list.addOffsetDateTime("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
-        list.addOffsetDateTime("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addOffsetDateTime("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
+        parameter.addOffsetDateTime("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), TgBindParameter.of("bar", (OffsetTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), TgBindParameter.of("bar", (OffsetTime) null), parameter);
     }
 
     @Test
     void testZonedDateTime() {
         var zdt = ZonedDateTime.of(2022, 6, 30, 23, 30, 59, 999, ZoneId.of("Asia/Tokyo"));
-        var list = TgBindParameters.of();
-        list.addZonedDateTime("foo", zdt);
-        list.addZonedDateTime("bar", null);
+        var parameter = TgBindParameters.of();
+        parameter.addZonedDateTime("foo", zdt);
+        parameter.addZonedDateTime("bar", null);
 
-        assertParameterList(TgBindParameter.of("foo", zdt), TgBindParameter.of("bar", (ZonedDateTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", zdt), TgBindParameter.of("bar", (ZonedDateTime) null), parameter);
     }
 
     @Test
     void testAddStringBoolean() {
-        var list = TgBindParameters.of();
-        list.add("foo", true);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", true);
 
-        assertParameterList(TgBindParameter.of("foo", true), list);
+        assertParameterList(TgBindParameter.of("foo", true), parameter);
     }
 
     @Test
     void testAddStringBooleanWrapper() {
-        var list = TgBindParameters.of();
-        list.add("foo", Boolean.TRUE);
-        list.add("bar", (Boolean) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", Boolean.TRUE);
+        parameter.add("bar", (Boolean) null);
 
-        assertParameterList(TgBindParameter.of("foo", Boolean.TRUE), TgBindParameter.of("bar", (Boolean) null), list);
+        assertParameterList(TgBindParameter.of("foo", Boolean.TRUE), TgBindParameter.of("bar", (Boolean) null), parameter);
     }
 
     @Test
     void testAddStringInt() {
-        var list = TgBindParameters.of();
-        list.add("foo", 123);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", 123);
 
-        assertParameterList(TgBindParameter.of("foo", 123), list);
+        assertParameterList(TgBindParameter.of("foo", 123), parameter);
     }
 
     @Test
     void testAddStringInteger() {
-        var list = TgBindParameters.of();
-        list.add("foo", Integer.valueOf(123));
-        list.add("bar", (Integer) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", Integer.valueOf(123));
+        parameter.add("bar", (Integer) null);
 
-        assertParameterList(TgBindParameter.of("foo", 123), TgBindParameter.of("bar", (Integer) null), list);
+        assertParameterList(TgBindParameter.of("foo", 123), TgBindParameter.of("bar", (Integer) null), parameter);
     }
 
     @Test
     void testAddStringLong() {
-        var list = TgBindParameters.of();
-        list.add("foo", 123L);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", 123L);
 
-        assertParameterList(TgBindParameter.of("foo", 123L), list);
+        assertParameterList(TgBindParameter.of("foo", 123L), parameter);
     }
 
     @Test
     void testAddStringLongWrapoper() {
-        var list = TgBindParameters.of();
-        list.add("foo", Long.valueOf(123));
-        list.add("bar", (Long) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", Long.valueOf(123));
+        parameter.add("bar", (Long) null);
 
-        assertParameterList(TgBindParameter.of("foo", 123L), TgBindParameter.of("bar", (Long) null), list);
+        assertParameterList(TgBindParameter.of("foo", 123L), TgBindParameter.of("bar", (Long) null), parameter);
     }
 
     @Test
     void testAddStringFloat() {
-        var list = TgBindParameters.of();
-        list.add("foo", 123f);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", 123f);
 
-        assertParameterList(TgBindParameter.of("foo", 123f), list);
+        assertParameterList(TgBindParameter.of("foo", 123f), parameter);
     }
 
     @Test
     void testAddStringFloatWrapper() {
-        var list = TgBindParameters.of();
-        list.add("foo", Float.valueOf(123));
-        list.add("bar", (Float) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", Float.valueOf(123));
+        parameter.add("bar", (Float) null);
 
-        assertParameterList(TgBindParameter.of("foo", 123f), TgBindParameter.of("bar", (Float) null), list);
+        assertParameterList(TgBindParameter.of("foo", 123f), TgBindParameter.of("bar", (Float) null), parameter);
     }
 
     @Test
     void testAddStringDouble() {
-        var list = TgBindParameters.of();
-        list.add("foo", 123d);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", 123d);
 
-        assertParameterList(TgBindParameter.of("foo", 123d), list);
+        assertParameterList(TgBindParameter.of("foo", 123d), parameter);
     }
 
     @Test
     void testAddStringDoubleWrapper() {
-        var list = TgBindParameters.of();
-        list.add("foo", Double.valueOf(123));
-        list.add("bar", (Double) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", Double.valueOf(123));
+        parameter.add("bar", (Double) null);
 
-        assertParameterList(TgBindParameter.of("foo", 123d), TgBindParameter.of("bar", (Double) null), list);
+        assertParameterList(TgBindParameter.of("foo", 123d), TgBindParameter.of("bar", (Double) null), parameter);
     }
 
     @Test
     void testAddStringBigDecimal() {
-        var list = TgBindParameters.of();
-        list.add("foo", BigDecimal.valueOf(123));
-        list.add("bar", (BigDecimal) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", BigDecimal.valueOf(123));
+        parameter.add("bar", (BigDecimal) null);
 
-        assertParameterList(TgBindParameter.of("foo", BigDecimal.valueOf(123)), TgBindParameter.of("bar", (BigDecimal) null), list);
+        assertParameterList(TgBindParameter.of("foo", BigDecimal.valueOf(123)), TgBindParameter.of("bar", (BigDecimal) null), parameter);
     }
 
     @Test
     void testAddStringBigDecimalScale() {
-        var list = TgBindParameters.of();
-        list.add("p", new BigDecimal("1.15"), 1);
-        list.add("m", new BigDecimal("-1.15"), 1);
-        list.add("bar", (BigDecimal) null, 1);
+        var parameter = TgBindParameters.of();
+        parameter.add("p", new BigDecimal("1.15"), 1);
+        parameter.add("m", new BigDecimal("-1.15"), 1);
+        parameter.add("bar", (BigDecimal) null, 1);
 
         var mode = TgBindVariableBigDecimal.DEFAULT_ROUNDING_MODE;
-        assertParameterList(TgBindParameter.of("p", new BigDecimal("1.15").setScale(1, mode)), TgBindParameter.of("m", new BigDecimal("-1.15").setScale(1, mode)), TgBindParameter.of("bar", (BigDecimal) null),
-                list);
+        assertParameterList(TgBindParameter.of("p", new BigDecimal("1.15").setScale(1, mode)), TgBindParameter.of("m", new BigDecimal("-1.15").setScale(1, mode)),
+                TgBindParameter.of("bar", (BigDecimal) null), parameter);
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "FLOOR", "DOWN", "HALF_UP" })
     void testAddStringBigDecimalRoundingMode(RoundingMode mode) {
-        var list = TgBindParameters.of();
-        list.add("p", new BigDecimal("1.15"), 1, mode);
-        list.add("m", new BigDecimal("-1.15"), 1, mode);
-        list.add("bar", (BigDecimal) null, 1, mode);
+        var parameter = TgBindParameters.of();
+        parameter.add("p", new BigDecimal("1.15"), 1, mode);
+        parameter.add("m", new BigDecimal("-1.15"), 1, mode);
+        parameter.add("bar", (BigDecimal) null, 1, mode);
 
-        assertParameterList(TgBindParameter.of("p", new BigDecimal("1.15").setScale(1, mode)), TgBindParameter.of("m", new BigDecimal("-1.15").setScale(1, mode)), TgBindParameter.of("bar", (BigDecimal) null),
-                list);
+        assertParameterList(TgBindParameter.of("p", new BigDecimal("1.15").setScale(1, mode)), TgBindParameter.of("m", new BigDecimal("-1.15").setScale(1, mode)),
+                TgBindParameter.of("bar", (BigDecimal) null), parameter);
     }
 
     @Test
     void testAddStringString() {
-        var list = TgBindParameters.of();
-        list.add("foo", "abc");
-        list.add("bar", (String) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", "abc");
+        parameter.add("bar", (String) null);
 
-        assertParameterList(TgBindParameter.of("foo", "abc"), TgBindParameter.of("bar", (String) null), list);
+        assertParameterList(TgBindParameter.of("foo", "abc"), TgBindParameter.of("bar", (String) null), parameter);
     }
 
     @Test
     void testAddStringByteArray() {
-        var list = TgBindParameters.of();
-        list.add("foo", new byte[] { 1, 2, 3 });
-        list.add("bar", (byte[]) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", new byte[] { 1, 2, 3 });
+        parameter.add("bar", (byte[]) null);
 
-        assertParameterList(TgBindParameter.of("foo", new byte[] { 1, 2, 3 }), TgBindParameter.of("bar", (byte[]) null), list);
+        assertParameterList(TgBindParameter.of("foo", new byte[] { 1, 2, 3 }), TgBindParameter.of("bar", (byte[]) null), parameter);
     }
 
     @Test
     void testAddStringBooleanArray() {
-        var list = TgBindParameters.of();
-        list.add("foo", new boolean[] { true, false, true });
-        list.add("bar", (boolean[]) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", new boolean[] { true, false, true });
+        parameter.add("bar", (boolean[]) null);
 
-        assertParameterList(TgBindParameter.of("foo", new boolean[] { true, false, true }), TgBindParameter.of("bar", (boolean[]) null), list);
+        assertParameterList(TgBindParameter.of("foo", new boolean[] { true, false, true }), TgBindParameter.of("bar", (boolean[]) null), parameter);
     }
 
     @Test
     void testAddStringLocalDate() {
-        var list = TgBindParameters.of();
-        list.add("foo", LocalDate.of(2022, 6, 30));
-        list.add("bar", (LocalDate) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", LocalDate.of(2022, 6, 30));
+        parameter.add("bar", (LocalDate) null);
 
-        assertParameterList(TgBindParameter.of("foo", LocalDate.of(2022, 6, 30)), TgBindParameter.of("bar", (LocalDate) null), list);
+        assertParameterList(TgBindParameter.of("foo", LocalDate.of(2022, 6, 30)), TgBindParameter.of("bar", (LocalDate) null), parameter);
     }
 
     @Test
     void testAddStringLocalTime() {
-        var list = TgBindParameters.of();
-        list.add("foo", LocalTime.of(23, 30, 59));
-        list.add("bar", (LocalTime) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", LocalTime.of(23, 30, 59));
+        parameter.add("bar", (LocalTime) null);
 
-        assertParameterList(TgBindParameter.of("foo", LocalTime.of(23, 30, 59)), TgBindParameter.of("bar", (LocalTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", LocalTime.of(23, 30, 59)), TgBindParameter.of("bar", (LocalTime) null), parameter);
     }
 
     @Test
     void testAddStringLocalDateTime() {
-        var list = TgBindParameters.of();
-        list.add("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
-        list.add("bar", (LocalDateTime) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
+        parameter.add("bar", (LocalDateTime) null);
 
-        assertParameterList(TgBindParameter.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), TgBindParameter.of("bar", (LocalDateTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), TgBindParameter.of("bar", (LocalDateTime) null), parameter);
     }
 
     @Test
     void testAddStringOffsetTime() {
         var offset = ZoneOffset.ofHours(9);
-        var list = TgBindParameters.of();
-        list.add("foo", OffsetTime.of(23, 30, 59, 0, offset));
-        list.add("bar", (OffsetTime) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", OffsetTime.of(23, 30, 59, 0, offset));
+        parameter.add("bar", (OffsetTime) null);
 
-        assertParameterList(TgBindParameter.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), TgBindParameter.of("bar", (OffsetTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), TgBindParameter.of("bar", (OffsetTime) null), parameter);
     }
 
     @Test
     void testAddStringOffsetDateTime() {
         var offset = ZoneOffset.ofHours(9);
-        var list = TgBindParameters.of();
-        list.add("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
-        list.add("bar", (OffsetDateTime) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
+        parameter.add("bar", (OffsetDateTime) null);
 
-        assertParameterList(TgBindParameter.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), TgBindParameter.of("bar", (OffsetDateTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), TgBindParameter.of("bar", (OffsetDateTime) null), parameter);
     }
 
     @Test
     void testAddStringZonedDateTime() {
         var zdt = ZonedDateTime.of(2022, 6, 30, 23, 30, 59, 999, ZoneId.of("Asia/Tokyo"));
-        var list = TgBindParameters.of();
-        list.add("foo", zdt);
-        list.add("bar", (ZonedDateTime) null);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", zdt);
+        parameter.add("bar", (ZonedDateTime) null);
 
-        assertParameterList(TgBindParameter.of("foo", zdt), TgBindParameter.of("bar", (ZonedDateTime) null), list);
+        assertParameterList(TgBindParameter.of("foo", zdt), TgBindParameter.of("bar", (ZonedDateTime) null), parameter);
     }
 
     @Test
     void testAddTgParameter() {
-        var list = TgBindParameters.of();
-        list.add(TgBindParameter.of("foo", 123));
-        list.add(TgBindParameter.of("bar", "abc"));
+        var parameter = TgBindParameters.of();
+        parameter.add(TgBindParameter.of("foo", 123));
+        parameter.add(TgBindParameter.of("bar", "abc"));
 
-        assertParameterList(TgBindParameter.of("foo", 123), TgBindParameter.of("bar", "abc"), list);
+        assertParameterList(TgBindParameter.of("foo", 123), TgBindParameter.of("bar", "abc"), parameter);
     }
 
     @Test
     void testAddTgParameterList() {
-        var list = TgBindParameters.of();
-        list.add("foo", 123);
-        list.add("bar", "abc");
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", 123);
+        parameter.add("bar", "abc");
 
-        var list2 = TgBindParameters.of();
-        list2.add("zzz1", 123);
-        list2.add("zzz2", 456);
+        var parameter2 = TgBindParameters.of();
+        parameter2.add("zzz1", 123);
+        parameter2.add("zzz2", 456);
 
-        list.add(list2);
+        parameter.add(parameter2);
 
-        assertParameterList(List.of(TgBindParameter.of("foo", 123), TgBindParameter.of("bar", "abc"), TgBindParameter.of("zzz1", 123), TgBindParameter.of("zzz2", 456)), list);
-        assertParameterList(TgBindParameter.of("zzz1", 123), TgBindParameter.of("zzz2", 456), list2);
+        assertParameterList(List.of(TgBindParameter.of("foo", 123), TgBindParameter.of("bar", "abc"), TgBindParameter.of("zzz1", 123), TgBindParameter.of("zzz2", 456)), parameter);
+        assertParameterList(TgBindParameter.of("zzz1", 123), TgBindParameter.of("zzz2", 456), parameter2);
     }
 
     private void assertParameterList(TgBindParameter expected, TgBindParameters actual) {

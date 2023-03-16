@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
@@ -137,12 +137,12 @@ class DbSelectErrorTest extends DbTestTableTester {
 
         var session = getSession();
         try (var ps = session.createQuery(sql)) {
-            TusurigQueryResult<TsurugiResultEntity> rs;
+            TsurugiQueryResult<TsurugiResultEntity> result;
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-                rs = ps.execute(transaction);
+                result = ps.execute(transaction);
             }
             var e = assertThrowsExactly(IOException.class, () -> {
-                rs.getRecordList();
+                result.getRecordList();
             });
             assertMatches("Future .+ is already closed", e.getMessage());
         }
@@ -155,8 +155,8 @@ class DbSelectErrorTest extends DbTestTableTester {
         var session = getSession();
         try (var ps = session.createQuery(sql)) {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-                try (var rs = ps.execute(transaction)) {
-                    var i = rs.iterator();
+                try (var result = ps.execute(transaction)) {
+                    var i = result.iterator();
                     i.next();
                     transaction.close();
                     while (i.hasNext()) {

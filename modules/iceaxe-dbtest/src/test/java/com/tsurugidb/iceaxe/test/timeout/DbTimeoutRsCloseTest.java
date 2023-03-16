@@ -9,12 +9,12 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
-import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * ResultSet close timeout test
+ * {@link TsurugiQueryResult} close timeout test
  */
 public class DbTimeoutRsCloseTest extends DbTimetoutTest {
 
@@ -52,8 +52,8 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyResultSet(TusurigQueryResult<?> rs) {
-                rs.setRsCloseTimeout(1, TimeUnit.SECONDS);
+            public void modifyQueryResult(TsurugiQueryResult<?> result) {
+                result.setRsCloseTimeout(1, TimeUnit.SECONDS);
             }
         });
     }
@@ -64,14 +64,14 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
             transaction.getLowTransaction();
 
             try (var ps = session.createQuery(SELECT_SQL)) {
-                var rs = ps.execute(transaction);
-                modifier.modifyResultSet(rs);
+                var result = ps.execute(transaction);
+                modifier.modifyQueryResult(result);
 
-                // rs.getRecordList();
+                // result.getRecordList();
 
                 pipeServer.setPipeWrite(false);
                 try {
-                    rs.close();
+                    result.close();
                 } catch (IOException e) {
                     // RS_CLOSEはタイムアウトするような通信処理が無い
 //                  assertInstanceOf(TimeoutException.class, e.getCause());

@@ -68,7 +68,7 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      *
      * @param transaction Transaction
      * @param parameter   SQL parameter
-     * @return result
+     * @return SQL result
      * @throws IOException
      * @throws TsurugiTransactionException
      * @see TsurugiTransaction#executeStatement(TsurugiSqlPreparedStatement, P)
@@ -76,25 +76,25 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
     public TsurugiStatementResult execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
         checkClose();
 
-        LOG.trace("executeStatement start");
+        LOG.trace("execute start");
         int sqlExecuteId = getNewIceaxeSqlExecuteId();
         event(null, listener -> listener.executeStatementStart(transaction, this, parameter, sqlExecuteId));
 
-        TsurugiStatementResult rc;
+        TsurugiStatementResult result;
         try {
             var lowPs = getLowPreparedStatement();
             var lowParameterList = getLowParameterList(parameter);
             var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeStatement(lowPs, lowParameterList));
-            LOG.trace("executeStatement started");
+            LOG.trace("execute started");
 
-            rc = new TsurugiStatementResult(sqlExecuteId, transaction, lowResultFuture);
+            result = new TsurugiStatementResult(sqlExecuteId, transaction, lowResultFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeStatementStartException(transaction, this, parameter, sqlExecuteId, e));
             throw e;
         }
 
-        event(null, listener -> listener.executeStatementStarted(transaction, this, parameter, rc));
-        return rc;
+        event(null, listener -> listener.executeStatementStarted(transaction, this, parameter, result));
+        return result;
     }
 
     /**

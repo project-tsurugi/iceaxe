@@ -44,8 +44,8 @@ class DbSelectFewTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-                    try (var rs = ps.execute(transaction)) {
-                        // rs.close without read
+                    try (var result = ps.execute(transaction)) {
+                        // result.close without read
                     }
                     transaction.commit(TgCommitType.DEFAULT);
                 }

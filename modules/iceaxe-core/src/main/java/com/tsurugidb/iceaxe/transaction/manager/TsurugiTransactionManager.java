@@ -171,22 +171,22 @@ public class TsurugiTransactionManager {
 
         final int tmExecuteId = EXECUTE_COUNT.incrementAndGet();
 
-        var option = setting.getFirstTransactionOption();
+        var txOption = setting.getFirstTransactionOption();
         {
-            var finalOption = option;
-            event(setting, null, listener -> listener.executeStart(this, tmExecuteId, finalOption));
+            var finalTxOption = txOption;
+            event(setting, null, listener -> listener.executeStart(this, tmExecuteId, finalTxOption));
         }
         for (int attempt = 0;; attempt++) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("tm.execute iceaxeTmExecuteId={}, attempt={}, tx={}", tmExecuteId, attempt, option);
+                LOG.trace("tm.execute iceaxeTmExecuteId={}, attempt={}, tx={}", tmExecuteId, attempt, txOption);
             }
 
             final int finalAttempt = attempt;
-            final var finalOption = option;
-            event(setting, null, listener -> listener.transactionStart(this, tmExecuteId, finalAttempt, finalOption));
+            final var finalTxOption = txOption;
+            event(setting, null, listener -> listener.transactionStart(this, tmExecuteId, finalAttempt, finalTxOption));
 
             TsurugiTransaction lastTransaction = null;
-            try (var transaction = ownerSession.createTransaction(option, tx -> {
+            try (var transaction = ownerSession.createTransaction(txOption, tx -> {
                 tx.setOwner(this, tmExecuteId, finalAttempt);
                 setting.initializeTransaction(tx);
             })) {
@@ -208,12 +208,12 @@ public class TsurugiTransactionManager {
                     return r;
                 } catch (TsurugiTransactionException e) {
                     event(setting, e, listener -> listener.transactionException(transaction, e));
-                    option = processTransactionException(setting, transaction, e, option, e);
+                    txOption = processTransactionException(setting, transaction, e, txOption, e);
                     continue;
                 } catch (TsurugiTransactionRuntimeException e) {
                     event(setting, e, listener -> listener.transactionException(transaction, e));
                     var c = e.getCause();
-                    option = processTransactionException(setting, transaction, e, option, c);
+                    txOption = processTransactionException(setting, transaction, e, txOption, c);
                     continue;
                 } catch (Exception e) {
                     event(setting, e, listener -> listener.transactionException(transaction, e));
@@ -223,7 +223,7 @@ public class TsurugiTransactionManager {
                         rollback(setting, transaction, e);
                         throw e;
                     }
-                    option = processTransactionException(setting, transaction, e, option, c);
+                    txOption = processTransactionException(setting, transaction, e, txOption, c);
                     continue;
                 } catch (Throwable e) {
                     LOG.trace("tm.execute error", e);
@@ -234,7 +234,7 @@ public class TsurugiTransactionManager {
             } catch (Throwable e) {
                 {
                     var finalTransaction = lastTransaction;
-                    event(setting, e, listener -> listener.executeEndFail(this, tmExecuteId, finalOption, finalTransaction, e));
+                    event(setting, e, listener -> listener.executeEndFail(this, tmExecuteId, finalTxOption, finalTransaction, e));
                 }
                 throw e;
             }
@@ -250,7 +250,7 @@ public class TsurugiTransactionManager {
         return null;
     }
 
-    private TgTxOption processTransactionException(TgTmSetting setting, TsurugiTransaction transaction, Exception cause, TgTxOption option, TsurugiTransactionException e) throws IOException {
+    private TgTxOption processTransactionException(TgTmSetting setting, TsurugiTransaction transaction, Exception cause, TgTxOption txOption, TsurugiTransactionException e) throws IOException {
         boolean calledRollback = false;
         try {
             int attempt = transaction.getAttempt();
@@ -271,7 +271,7 @@ public class TsurugiTransactionManager {
                     calledRollback = true;
                 }
 
-                var nextOption = nextTmOption.getOption();
+                var nextOption = nextTmOption.getTransactionOption();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("tm.execute retry{}. e={}, nextTx={}", attempt + 1, e.getMessage(), nextOption);
                 }

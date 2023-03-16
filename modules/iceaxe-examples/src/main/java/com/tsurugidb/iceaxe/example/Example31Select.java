@@ -46,7 +46,7 @@ public class Example31Select {
     void selectLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST")) {
             tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
+                try (var result = transaction.executeQuery(ps)) {
                     List<String> nameList = result.getNameList();
                     System.out.println(nameList);
 
@@ -63,7 +63,7 @@ public class Example31Select {
     void selectAsList_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
+                try (var result = transaction.executeQuery(ps)) {
                     return result.getRecordList();
                 }
             });
@@ -95,7 +95,7 @@ public class Example31Select {
     void selectAsUserEntityLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST", resultMappingForTestEntity())) {
             tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
+                try (var result = transaction.executeQuery(ps)) {
                     for (TestEntity entity : result) {
                         System.out.println(entity.getFoo());
                         System.out.println(entity.getBar());
@@ -139,9 +139,7 @@ public class Example31Select {
     void selectAsUserEntityList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST", resultMappingForTestEntity())) {
             List<TestEntity> list = tm.execute(transaction -> {
-                try (var result = ps.execute(transaction)) {
-                    return result.getRecordList();
-                }
+                return transaction.executeAndGetList(ps);
             });
             System.out.println(list);
         }
@@ -153,10 +151,8 @@ public class Example31Select {
         Function<Integer, TgBindParameters> parameterConverter = foo -> TgBindParameters.of().add("foo", foo);
         try (var ps = session.createQuery(sql, TgParameterMapping.of(variable, parameterConverter))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
-                int param = 123;
-                try (var result = ps.execute(transaction, param)) {
-                    return result.getRecordList();
-                }
+                int parameter = 123;
+                return transaction.executeAndGetList(ps, parameter);
             });
             System.out.println(list);
         }
@@ -168,9 +164,7 @@ public class Example31Select {
         try (var ps = session.createQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 var parameter = TgBindParameters.of().add("foo", 123).add("bar", 456L);
-                try (var result = ps.execute(transaction, parameter)) {
-                    return result.getRecordList();
-                }
+                return transaction.executeAndGetList(ps, parameter);
             });
             System.out.println(list);
         }
@@ -185,9 +179,7 @@ public class Example31Select {
         try (var ps = session.createQuery(sql, TgParameterMapping.of(variable))) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456));
-                try (var result = ps.execute(transaction, parameter)) {
-                    return result.getRecordList();
-                }
+                return transaction.executeAndGetList(ps, parameter);
             });
             System.out.println(list);
         }
@@ -203,9 +195,7 @@ public class Example31Select {
         try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
                 var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456));
-                try (var result = ps.execute(transaction, parameter)) {
-                    return result.getRecordList();
-                }
+                return transaction.executeAndGetList(ps, parameter);
             });
             System.out.println(list);
         }

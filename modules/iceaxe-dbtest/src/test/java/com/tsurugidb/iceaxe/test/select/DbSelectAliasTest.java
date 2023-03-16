@@ -104,10 +104,10 @@ class DbSelectAliasTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, resultMapping)) {
             tm.execute(transaction -> {
-                try (var rs = ps.execute(transaction)) {
-                    List<String> nameList = rs.getNameList();
+                try (var result = ps.execute(transaction)) {
+                    List<String> nameList = result.getNameList();
                     assertEquals(List.of("@#0", "@#1"), nameList);
-                    TsurugiResultEntity entity = rs.findRecord().get();
+                    TsurugiResultEntity entity = result.findRecord().get();
                     assertEquals(SIZE, entity.getInt("@#0"));
                     assertEquals(SIZE, entity.getInt("@#1"));
                 }

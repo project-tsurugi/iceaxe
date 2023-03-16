@@ -13,7 +13,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.event.TsurugiSqlPreparedQueryEventListener;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
@@ -74,34 +74,34 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      *
      * @param transaction Transaction
      * @param parameter   SQL parameter
-     * @return Result Set
+     * @return SQL result
      * @throws IOException
      * @throws TsurugiTransactionException
      * @see TsurugiTransaction#executeQuery(TsurugiSqlPreparedQuery, P)
      */
-    public TusurigQueryResult<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
+    public TsurugiQueryResult<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
         checkClose();
 
-        LOG.trace("executeQuery start");
+        LOG.trace("execute start");
         int sqlExecuteId = getNewIceaxeSqlExecuteId();
         event(null, listener -> listener.executeQueryStart(transaction, this, parameter, sqlExecuteId));
 
-        TusurigQueryResult<R> rs;
+        TsurugiQueryResult<R> result;
         try {
             var lowPs = getLowPreparedStatement();
             var lowParameterList = getLowParameterList(parameter);
             var lowResultSetFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeQuery(lowPs, lowParameterList));
-            LOG.trace("executeQuery started");
+            LOG.trace("execute started");
 
             var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
-            rs = new TusurigQueryResult<>(sqlExecuteId, transaction, lowResultSetFuture, resultMapping, convertUtil);
+            result = new TsurugiQueryResult<>(sqlExecuteId, transaction, lowResultSetFuture, resultMapping, convertUtil);
         } catch (Throwable e) {
             event(e, listener -> listener.executeQueryStartException(transaction, this, parameter, sqlExecuteId, e));
             throw e;
         }
 
-        event(null, listener -> listener.executeQueryStarted(transaction, this, parameter, rs));
-        return rs;
+        event(null, listener -> listener.executeQueryStarted(transaction, this, parameter, result));
+        return result;
     }
 
     /**

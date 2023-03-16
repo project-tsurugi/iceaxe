@@ -8,7 +8,7 @@ import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -32,11 +32,11 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
             // do override
         }
 
-        public void modifyResultSet(TusurigQueryResult<?> rs) {
+        public void modifyQueryResult(TsurugiQueryResult<?> result) {
             // do override
         }
 
-        public void modifyResult(TsurugiStatementResult result) {
+        public void modifyStatementResult(TsurugiStatementResult result) {
             // do override
         }
     }

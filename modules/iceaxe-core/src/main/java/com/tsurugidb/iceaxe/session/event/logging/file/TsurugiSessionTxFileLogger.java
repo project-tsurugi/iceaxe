@@ -16,13 +16,13 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.logging.TgSessionSqlLog;
 import com.tsurugidb.iceaxe.session.event.logging.TgSessionTxLog;
 import com.tsurugidb.iceaxe.session.event.logging.TgSessionTxLog.TgSessionTxExecuteLog;
+import com.tsurugidb.iceaxe.session.event.logging.TsurugiSessionTxLogger;
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlDirect;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
-import com.tsurugidb.iceaxe.session.event.logging.TsurugiSessionTxLogger;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxExecuteMethod;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -267,7 +267,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected <R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TusurigQueryResult<R> rs, R record) {
+    protected <R> void logSqlRead(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiQueryResult<R> result, R record) {
         if (!(config.writeReadRecord() || config.readProgress() >= 1)) {
             return;
         }
@@ -276,13 +276,13 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
         int ssId = sqlLog.getIceaxeSqlStatementId();
         if (config.writeReadRecord()) {
-            int index = rs.getReadCount() - 1;
+            int index = result.getReadCount() - 1;
             writer.println(SQL_HEADER + " read[%d]=%s", sqlId, ssId, index, record);
         }
 
         int progress = config.readProgress();
         if (progress >= 1) {
-            int count = rs.getReadCount();
+            int count = result.getReadCount();
             if (count % progress == 0) {
                 writer.println(SQL_HEADER + " read progress=%d", sqlId, ssId, count);
             }
@@ -290,7 +290,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected <R> void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TusurigQueryResult<R> rs, Throwable occurred) {
+    protected <R> void logSqlReadException(TgSessionTxLog txLog, TgSessionSqlLog sqlLog, TsurugiQueryResult<R> result, Throwable occurred) {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
@@ -307,8 +307,8 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         int ssId = sqlLog.getIceaxeSqlStatementId();
         var time = elapsed(sqlLog.getStartTime(), sqlLog.getEndTime());
         var result = sqlLog.getSqlResult();
-        if (result instanceof TusurigQueryResult) {
-            var rs = (TusurigQueryResult<?>) result;
+        if (result instanceof TsurugiQueryResult) {
+            var rs = (TsurugiQueryResult<?>) result;
             writer.println(SQL_HEADER + " readCount=%d, hasNextRow=%s", sqlId, ssId, rs.getReadCount(), getNextRowText(rs));
         }
         if (occurred == null) {
@@ -319,8 +319,8 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         }
     }
 
-    private String getNextRowText(TusurigQueryResult<?> rs) {
-        return rs.getHasNextRow().map(b -> b.toString()).orElse("unread");
+    private String getNextRowText(TsurugiQueryResult<?> result) {
+        return result.getHasNextRow().map(b -> b.toString()).orElse("unread");
     }
 
     @Override
@@ -388,13 +388,13 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected void logTmExecuteRetry(TgSessionTxLog txLog, Exception cause, TgTxOption nextOption) {
+    protected void logTmExecuteRetry(TgSessionTxLog txLog, Exception cause, TgTxOption nextTxOption) {
         var writer = getWriter(txLog);
 
         var transaction = txLog.getTransaction();
         var tmExecuteId = transaction.getIceaxeTmExecuteId();
         var attempt = transaction.getAttempt();
-        writer.println(TM_HEADER + " tm.execute(iceaxeTmExecuteId=%d, attempt=%d) retry. nextTx=%s", tmExecuteId, tmExecuteId, attempt, nextOption);
+        writer.println(TM_HEADER + " tm.execute(iceaxeTmExecuteId=%d, attempt=%d) retry. nextTx=%s", tmExecuteId, tmExecuteId, attempt, nextTxOption);
     }
 
     @Override

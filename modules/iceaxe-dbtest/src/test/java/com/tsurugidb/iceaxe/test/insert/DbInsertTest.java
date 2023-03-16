@@ -13,9 +13,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
@@ -62,20 +62,20 @@ class DbInsertTest extends DbTestTableTester {
         var sql = "insert into " + TEST //
                 + (columns ? " (" + TEST_COLUMNS + ")" : "") //
                 + "values(:foo, :bar, :zzz)";
-        var vlist = TgBindVariables.of() //
+        var variables = TgBindVariables.of() //
                 .addInt("foo") //
                 .addLong("bar") //
                 .addString("zzz");
-        var parameterMapping = TgParameterMapping.of(vlist);
+        var parameterMapping = TgParameterMapping.of(variables);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {
-            var plist = TgBindParameters.of() //
+            var parameter = TgBindParameters.of() //
                     .addInt("foo", entity.getFoo()) //
                     .addLong("bar", entity.getBar()) //
                     .addString("zzz", entity.getZzz());
-            int count = tm.executeAndGetCount(ps, plist);
+            int count = tm.executeAndGetCount(ps, parameter);
             assertUpdateCount(1, count);
         }
 
@@ -99,11 +99,11 @@ class DbInsertTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {
-            var plist = TgBindParameters.of( //
+            var parameter = TgBindParameters.of( //
                     foo.bind(entity.getFoo()), //
                     bar.bind(entity.getBar()), //
                     zzz.bind(entity.getZzz()));
-            int count = tm.executeAndGetCount(ps, plist);
+            int count = tm.executeAndGetCount(ps, parameter);
             assertUpdateCount(1, count);
         }
 
@@ -182,14 +182,14 @@ class DbInsertTest extends DbTestTableTester {
                     var entity = createTestEntity(i);
 
                     if (resultCheck) {
-                        try (var rc = ps.execute(transaction, entity)) {
-                            var count = rc.getUpdateCount();
+                        try (var result = ps.execute(transaction, entity)) {
+                            var count = result.getUpdateCount();
                             assertUpdateCount(1, count);
                         }
                     } else {
                         @SuppressWarnings("unused")
-                        var rc = ps.execute(transaction, entity);
-                        // rc.close is called on transaction.close
+                        var result = ps.execute(transaction, entity);
+                        // result.close is called on transaction.close
                     }
                 }
             });

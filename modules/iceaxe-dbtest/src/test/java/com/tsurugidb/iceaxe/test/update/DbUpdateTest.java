@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 
@@ -335,13 +335,13 @@ class DbUpdateTest extends DbTestTableTester {
             // update
             try (var ps = session.createStatement(sql, parameterMapping)) {
                 {
-                    var param = TgBindParameters.of(bar.bind(101));
-                    int count = tranasction.executeAndGetCount(ps, param);
+                    var parameter = TgBindParameters.of(bar.bind(101));
+                    int count = tranasction.executeAndGetCount(ps, parameter);
                     assertUpdateCount(1, count);
                 }
                 {
-                    var param = TgBindParameters.of(bar.bind(102));
-                    int count = tranasction.executeAndGetCount(ps, param);
+                    var parameter = TgBindParameters.of(bar.bind(102));
+                    int count = tranasction.executeAndGetCount(ps, parameter);
                     assertUpdateCount(1, count);
                 }
             }

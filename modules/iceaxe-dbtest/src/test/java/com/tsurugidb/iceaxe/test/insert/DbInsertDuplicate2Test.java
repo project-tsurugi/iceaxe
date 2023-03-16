@@ -16,13 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableInteger;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableString;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -76,13 +76,13 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
         test(TgTxOption.ofLTX(TEST, TEST2), 30, 500);
     }
 
-    private void test(TgTxOption option, int threadSize, int attemptSize) throws Exception {
+    private void test(TgTxOption txOption, int threadSize, int attemptSize) throws Exception {
         try (var sessions = new DbTestSessions(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
             var counter = new AtomicInteger(0);
 
             var onlineList = new ArrayList<OnlineTask>(threadSize);
             for (int i = 0; i < threadSize; i++) {
-                var task = new OnlineTask(sessions.createSession(), option, attemptSize, counter);
+                var task = new OnlineTask(sessions.createSession(), txOption, attemptSize, counter);
                 onlineList.add(task);
             }
 
@@ -115,13 +115,13 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
         private static final TgBindVariableString vZzz2 = TgBindVariable.ofString("zzz2");
 
         private final TsurugiSession session;
-        private final TgTxOption option;
+        private final TgTxOption txOption;
         private final int attemptSize;
         private final AtomicInteger counter;
 
-        public OnlineTask(TsurugiSession session, TgTxOption option, int attemptSize, AtomicInteger counter) {
+        public OnlineTask(TsurugiSession session, TgTxOption txOption, int attemptSize, AtomicInteger counter) {
             this.session = session;
-            this.option = option;
+            this.txOption = txOption;
             this.attemptSize = attemptSize;
             this.counter = counter;
         }
@@ -139,7 +139,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
             try (var maxPs = session.createQuery(maxSql); //
                     var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                     var insert2Ps = session.createStatement(insert2Sql, insert2Mapping)) {
-                var setting = TgTmSetting.ofAlways(option);
+                var setting = TgTmSetting.ofAlways(txOption);
                 var tm = session.createTransactionManager(setting);
 
                 for (;;) {

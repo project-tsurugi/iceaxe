@@ -12,20 +12,20 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.sql.result.TusurigQueryResult;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 
 /**
- * {@link TusurigQueryResult} test
+ * {@link TsurugiQueryResult} test
  */
-class DbResultSetTest extends DbTestTableTester {
+class DbQueryResultTest extends DbTestTableTester {
 
     private static final int SIZE = 4;
 
     @BeforeAll
     static void beforeAll() throws IOException {
-        var LOG = LoggerFactory.getLogger(DbResultSetTest.class);
+        var LOG = LoggerFactory.getLogger(DbQueryResultTest.class);
         LOG.debug("init start");
 
         dropTestTable();
@@ -41,18 +41,18 @@ class DbResultSetTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
-                try (var rs = transaction.executeQuery(ps)) {
-                    assertEquals(Optional.empty(), rs.getHasNextRow());
+                try (var result = transaction.executeQuery(ps)) {
+                    assertEquals(Optional.empty(), result.getHasNextRow());
 
                     int[] count = { 0 };
-                    rs.whileEach(entity -> {
+                    result.whileEach(entity -> {
                         var expected = createTestEntity(count[0]++);
                         assertEquals(expected, entity);
                     });
                     assertEquals(SIZE, count[0]);
 
-                    assertEquals(Optional.of(false), rs.getHasNextRow());
-                    assertEquals(SIZE, rs.getReadCount());
+                    assertEquals(Optional.of(false), result.getHasNextRow());
+                    assertEquals(SIZE, result.getReadCount());
                 }
             });
         }
@@ -64,14 +64,14 @@ class DbResultSetTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
-                try (var rs = transaction.executeQuery(ps)) {
-                    assertEquals(Optional.empty(), rs.getHasNextRow());
+                try (var result = transaction.executeQuery(ps)) {
+                    assertEquals(Optional.empty(), result.getHasNextRow());
 
-                    List<TestEntity> list = rs.getRecordList();
+                    List<TestEntity> list = result.getRecordList();
                     assertEqualsTestTable(SIZE, list);
 
-                    assertEquals(Optional.of(false), rs.getHasNextRow());
-                    assertEquals(SIZE, rs.getReadCount());
+                    assertEquals(Optional.of(false), result.getHasNextRow());
+                    assertEquals(SIZE, result.getReadCount());
                 }
             });
         }
@@ -83,16 +83,16 @@ class DbResultSetTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL + " order by foo", SELECT_MAPPING)) {
             tm.execute(transaction -> {
-                try (var rs = transaction.executeQuery(ps)) {
-                    assertEquals(Optional.empty(), rs.getHasNextRow());
+                try (var result = transaction.executeQuery(ps)) {
+                    assertEquals(Optional.empty(), result.getHasNextRow());
 
-                    Optional<TestEntity> recordOpt = rs.findRecord();
+                    Optional<TestEntity> recordOpt = result.findRecord();
                     assertTrue(recordOpt.isPresent());
                     var expected = createTestEntity(0);
                     assertEquals(expected, recordOpt.get());
 
-                    assertEquals(Optional.of(true), rs.getHasNextRow());
-                    assertEquals(1, rs.getReadCount());
+                    assertEquals(Optional.of(true), result.getHasNextRow());
+                    assertEquals(1, result.getReadCount());
                 }
             });
         }
@@ -104,19 +104,19 @@ class DbResultSetTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
-                try (var rs = transaction.executeQuery(ps)) {
-                    assertEquals(Optional.empty(), rs.getHasNextRow());
+                try (var result = transaction.executeQuery(ps)) {
+                    assertEquals(Optional.empty(), result.getHasNextRow());
 
                     int[] count = { 0 };
-                    for (Iterator<TestEntity> i = rs.iterator(); i.hasNext();) {
+                    for (Iterator<TestEntity> i = result.iterator(); i.hasNext();) {
                         var entity = i.next();
                         var expected = createTestEntity(count[0]++);
                         assertEquals(expected, entity);
                     }
                     assertEquals(SIZE, count[0]);
 
-                    assertEquals(Optional.of(false), rs.getHasNextRow());
-                    assertEquals(SIZE, rs.getReadCount());
+                    assertEquals(Optional.of(false), result.getHasNextRow());
+                    assertEquals(SIZE, result.getReadCount());
                 }
             });
         }
@@ -128,18 +128,18 @@ class DbResultSetTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
-                try (var rs = transaction.executeQuery(ps)) {
-                    assertEquals(Optional.empty(), rs.getHasNextRow());
+                try (var result = transaction.executeQuery(ps)) {
+                    assertEquals(Optional.empty(), result.getHasNextRow());
 
                     int[] count = { 0 };
-                    rs.forEach(entity -> {
+                    result.forEach(entity -> {
                         var expected = createTestEntity(count[0]++);
                         assertEquals(expected, entity);
                     });
                     assertEquals(SIZE, count[0]);
 
-                    assertEquals(Optional.of(false), rs.getHasNextRow());
-                    assertEquals(SIZE, rs.getReadCount());
+                    assertEquals(Optional.of(false), result.getHasNextRow());
+                    assertEquals(SIZE, result.getReadCount());
                 }
             });
         }

@@ -15,7 +15,7 @@ import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 import com.tsurugidb.tsubakuro.sql.Placeholders;
 
 /**
- * Tsurugi Bind Variable definition for {@link TsurugiSqlPrepared}
+ * Tsurugi Bind Variables for {@link TsurugiSqlPrepared}
  *
  * @see TgParameterMapping#of(TgBindVariables)
  */
@@ -34,28 +34,28 @@ public class TgBindVariables {
      * create bind variables
      *
      * @param variables bind variable
-     * @return vind variable
+     * @return bind variables
      */
     public static TgBindVariables of(TgBindVariable<?>... variables) {
-        var variableList = new TgBindVariables();
+        var bv = new TgBindVariables();
         for (var variable : variables) {
-            variableList.add(variable);
+            bv.add(variable);
         }
-        return variableList;
+        return bv;
     }
 
     /**
      * create bind variables
      *
      * @param variables bind variable
-     * @return bind variable
+     * @return bind variables
      */
     public static TgBindVariables of(Collection<? extends TgBindVariable<?>> variables) {
-        var variableList = new TgBindVariables();
+        var bv = new TgBindVariables();
         for (var variable : variables) {
-            variableList.add(variable);
+            bv.add(variable);
         }
-        return variableList;
+        return bv;
     }
 
     private final List<Placeholder> lowPlaceholderList = new ArrayList<>();

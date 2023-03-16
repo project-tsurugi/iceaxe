@@ -181,8 +181,8 @@ public class Example94TypeConvert {
             var sql = "select * from example94";
             try (var ps = session.createQuery(sql)) {
                 tm.execute(transaction -> {
-                    try (var rs = ps.execute(transaction)) {
-                        for (TsurugiResultEntity entity : rs) {
+                    try (var result = transaction.executeQuery(ps)) {
+                        for (TsurugiResultEntity entity : result) {
                             entity.setConvertUtil(CONVERT_UTIL); // set result entity
 
                             int key = entity.getInt("key1");
