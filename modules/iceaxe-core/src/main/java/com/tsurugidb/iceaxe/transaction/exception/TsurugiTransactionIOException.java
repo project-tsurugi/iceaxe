@@ -14,7 +14,7 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
     private final int iceaxeTxId;
     private final int iceaxeTmExecuteId;
     private final int attempt;
-    private final TgTxOption option;
+    private final TgTxOption txOption;
 
     // internal
     public TsurugiTransactionIOException(String message, TsurugiTransaction transaction, Exception cause) {
@@ -22,7 +22,7 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
         this.iceaxeTxId = transaction.getIceaxeTxId();
         this.iceaxeTmExecuteId = transaction.getIceaxeTmExecuteId();
         this.attempt = transaction.getAttempt();
-        this.option = transaction.getTransactionOption();
+        this.txOption = transaction.getTransactionOption();
     }
 
     private static String createMessage(String message, TsurugiTransaction transaction) {
@@ -63,6 +63,6 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
      * @return transaction option
      */
     public TgTxOption getTransactionOption() {
-        return this.option;
+        return this.txOption;
     }
 }

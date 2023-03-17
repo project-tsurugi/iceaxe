@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
@@ -46,18 +46,18 @@ class DbUpdate2Test extends DbTestTableTester {
         var sql = "insert into " + TEST //
                 + "(pk, value1, value2)" //
                 + "values(:pk, :value1, :value2)";
-        var pk = TgVariable.ofInt4("pk");
-        var v1 = TgVariable.ofInt4("value1");
-        var v2 = TgVariable.ofInt4("value2");
+        var pk = TgBindVariable.ofInt("pk");
+        var v1 = TgBindVariable.ofInt("value1");
+        var v2 = TgBindVariable.ofInt("value2");
         var parameterMapping = TgParameterMapping.of(pk, v1, v2);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < SIZE; i++) {
-                    var param = TgParameterList.of(pk.bind(i), v1.bind(initValue1(i)), v2.bind(initValue2(i)));
-                    transaction.executeAndGetCount(ps, param);
+                    var parameter = TgBindParameters.of(pk.bind(i), v1.bind(initValue1(i)), v2.bind(initValue2(i)));
+                    transaction.executeAndGetCount(ps, parameter);
                 }
             });
         }
@@ -80,22 +80,22 @@ class DbUpdate2Test extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
         }
 
         var selectSql = "select * from " + TEST + " order by pk";
-        try (var ps = session.createPreparedQuery(selectSql)) {
+        try (var ps = session.createQuery(selectSql)) {
             var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             int i = 0;
             for (var entity : list) {
                 int v1 = initValue1(i);
                 int v2 = initValue2(i);
-                assertEquals(i, entity.getInt4("pk"));
-                assertEquals(v1 + 1, entity.getInt4("value1"));
-                assertEquals(v2 + v1, entity.getInt4("value2"));
+                assertEquals(i, entity.getInt("pk"));
+                assertEquals(v1 + 1, entity.getInt("value1"));
+                assertEquals(v2 + v1, entity.getInt("value2"));
                 i++;
             }
         }
@@ -110,22 +110,22 @@ class DbUpdate2Test extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
         }
 
         var selectSql = "select * from " + TEST + " order by pk";
-        try (var ps = session.createPreparedQuery(selectSql)) {
+        try (var ps = session.createQuery(selectSql)) {
             var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             int i = 0;
             for (var entity : list) {
                 int v1 = initValue1(i);
                 int v2 = initValue2(i);
-                assertEquals(i, entity.getInt4("pk"));
-                assertEquals(v2, entity.getInt4("value1"));
-                assertEquals(v1, entity.getInt4("value2"));
+                assertEquals(i, entity.getInt("pk"));
+                assertEquals(v2, entity.getInt("value1"));
+                assertEquals(v1, entity.getInt("value2"));
                 i++;
             }
         }

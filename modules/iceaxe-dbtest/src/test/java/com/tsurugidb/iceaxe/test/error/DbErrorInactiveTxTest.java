@@ -13,13 +13,13 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
-import com.tsurugidb.iceaxe.statement.TgVariable.TgVariableInteger;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableInteger;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -123,19 +123,19 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
         }
 
         private void execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
-            var groupId = TgVariable.ofInt4("groupId");
-            var id = TgVariable.ofInt4("id");
-            var fkFoo = TgVariable.ofInt4("fkFoo");
-            var value1 = TgVariable.ofDecimal("value1");
-            var value2 = TgVariable.ofDecimal("value2");
+            var groupId = TgBindVariable.ofInt("groupId");
+            var id = TgBindVariable.ofInt("id");
+            var fkFoo = TgBindVariable.ofInt("fkFoo");
+            var value1 = TgBindVariable.ofDecimal("value1");
+            var value2 = TgBindVariable.ofDecimal("value2");
             var vlist = List.of(groupId, id, fkFoo, value1, value2);
             var sql = "insert into " + TEST2 //
                     + "(group_id, id, fk_foo, value1, value2)" //
                     + "values(" + vlist.stream().map(v -> v.sqlName()).collect(Collectors.joining(",")) + ")";
             var parameterMapping = TgParameterMapping.of(vlist);
-            try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+            try (var ps = session.createStatement(sql, parameterMapping)) {
                 for (int i = 0; i < 50; i++) {
-                    var parameter = TgParameterList.of( //
+                    var parameter = TgBindParameters.of( //
                             groupId.bind(targetGroupId), //
                             id.bind(i + 1), //
                             fkFoo.bind(i % TEST_SIZE), //
@@ -153,7 +153,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
 
         private final TsurugiSession session;
         private final int maxGroupId;
-        private final TgVariableInteger vGruopId = TgVariable.ofInt4("groupId");
+        private final TgBindVariableInteger vGruopId = TgBindVariable.ofInt("groupId");
 
         public OnlineTask(TsurugiSession session, int groupId) {
             this.session = session;
@@ -167,12 +167,12 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
                     + "inner join " + TEST + " t1 on t1.foo=fk_foo\n" //
                     + "where group_id=" + vGruopId;
             var parameterMapping = TgParameterMapping.of(vGruopId);
-            try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+            try (var ps = session.createQuery(sql, parameterMapping)) {
                 var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
                 var tm = session.createTransactionManager(setting);
                 tm.addEventListener(new TsurugiTmEventListener() {
                     @Override
-                    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextOption) {
+                    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextTxOption) {
 //                      LOG.info("OCC retry: " + cause.getMessage());
                     }
                 });
@@ -192,8 +192,8 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
             return null;
         }
 
-        private void execute(TsurugiTransaction transaction, TsurugiPreparedStatementQuery1<TgParameterList, TsurugiResultEntity> ps, int groupId) throws IOException, TsurugiTransactionException {
-            var parameter = TgParameterList.of(vGruopId.bind(groupId));
+        private void execute(TsurugiTransaction transaction, TsurugiSqlPreparedQuery<TgBindParameters, TsurugiResultEntity> ps, int groupId) throws IOException, TsurugiTransactionException {
+            var parameter = TgBindParameters.of(vGruopId.bind(groupId));
             transaction.executeAndGetList(ps, parameter);
         }
     }

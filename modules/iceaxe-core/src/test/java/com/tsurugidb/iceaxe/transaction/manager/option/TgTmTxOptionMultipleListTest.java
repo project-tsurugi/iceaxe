@@ -37,17 +37,17 @@ class TgTmTxOptionMultipleListTest {
     void computeFirstTmOption() {
         var target = TgTmTxOptionMultipleList.of().add(TgTxOption.ofOCC(), 3).add(TgTxOption.ofLTX(), 2);
 
-        assertEqualsOcc(target.computeFirstTmOption().getOption());
+        assertEqualsOcc(target.computeFirstTmOption().getTransactionOption());
     }
 
     @Test
     void computeRetryTmOption() {
         var target = TgTmTxOptionMultipleList.of().add(TgTxOption.ofOCC(), 3).add(TgTxOption.ofLTX(), 2);
 
-        assertEqualsOcc(target.computeRetryTmOption(1, null).getOption());
-        assertEqualsOcc(target.computeRetryTmOption(2, null).getOption());
-        assertEqualsLtx(target.computeRetryTmOption(3, null).getOption());
-        assertEqualsLtx(target.computeRetryTmOption(4, null).getOption());
+        assertEqualsOcc(target.computeRetryTmOption(1, null).getTransactionOption());
+        assertEqualsOcc(target.computeRetryTmOption(2, null).getTransactionOption());
+        assertEqualsLtx(target.computeRetryTmOption(3, null).getTransactionOption());
+        assertEqualsLtx(target.computeRetryTmOption(4, null).getTransactionOption());
         assertTrue(target.computeRetryTmOption(5, null).isRetryOver());
     }
 

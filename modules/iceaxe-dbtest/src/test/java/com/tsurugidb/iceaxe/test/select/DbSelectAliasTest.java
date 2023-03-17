@@ -12,8 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TgResultMapping;
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -44,7 +44,7 @@ class DbSelectAliasTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
             var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
             for (int i = 0; i < SIZE; i++) {
@@ -80,12 +80,12 @@ class DbSelectAliasTest extends DbTestTableTester {
         var resultMapping = TgResultMapping.of(record -> {
             List<String> nameList = record.getNameList();
             assertEquals(List.of(name), nameList);
-            return record.getInt4(name);
+            return record.getInt(name);
         });
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createQuery(sql, resultMapping)) {
             int count = tm.executeAndFindRecord(ps).get();
             assertEquals(SIZE, count);
         }
@@ -102,14 +102,14 @@ class DbSelectAliasTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createQuery(sql, resultMapping)) {
             tm.execute(transaction -> {
-                try (var rs = ps.execute(transaction)) {
-                    List<String> nameList = rs.getNameList();
+                try (var result = ps.execute(transaction)) {
+                    List<String> nameList = result.getNameList();
                     assertEquals(List.of("@#0", "@#1"), nameList);
-                    TsurugiResultEntity entity = rs.findRecord().get();
-                    assertEquals(SIZE, entity.getInt4("@#0"));
-                    assertEquals(SIZE, entity.getInt4("@#1"));
+                    TsurugiResultEntity entity = result.findRecord().get();
+                    assertEquals(SIZE, entity.getInt("@#0"));
+                    assertEquals(SIZE, entity.getInt("@#1"));
                 }
             });
         }

@@ -72,7 +72,7 @@ public final class TgTmTxOption {
      *
      * @return transaction option
      */
-    public TgTxOption getOption() {
+    public TgTxOption getTransactionOption() {
         return this.txOption;
     }
 

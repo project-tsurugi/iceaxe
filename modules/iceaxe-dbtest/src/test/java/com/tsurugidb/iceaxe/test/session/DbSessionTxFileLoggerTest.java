@@ -20,9 +20,9 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogConfig;
 import com.tsurugidb.iceaxe.session.event.logging.file.TsurugiSessionTxFileLogger;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -69,17 +69,17 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
 
         var config = TsurugiSessionTxFileLogConfig.of(logDir).writeExplain(writeExplain);
         try {
-            var foo = TgVariable.ofInt4("foo");
+            var foo = TgBindVariable.ofInt("foo");
 
             var session = DbTestConnector.createSession();
             session.addEventListener(new TsurugiSessionTxFileLogger(config));
 
             var tm = session.createTransactionManager(TgTxOption.ofOCC());
             tm.executeDdl(CREATE_TEST_SQL);
-            try (var ps1 = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING); //
-                    var ps2 = session.createPreparedQuery(SELECT_SQL, SELECT_MAPPING); //
-                    var ps3 = session.createPreparedQuery(SELECT_SQL + " where foo=" + foo, TgParameterMapping.of(foo), SELECT_MAPPING); //
-                    var ps4 = session.createPreparedStatement("delete from " + TEST)) {
+            try (var ps1 = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
+                    var ps2 = session.createQuery(SELECT_SQL, SELECT_MAPPING); //
+                    var ps3 = session.createQuery(SELECT_SQL + " where foo=" + foo, TgParameterMapping.of(foo), SELECT_MAPPING); //
+                    var ps4 = session.createStatement("delete from " + TEST)) {
                 tm.execute(transaction -> {
                     var entity = createTestEntity(1);
                     transaction.executeAndGetCount(ps1, entity);
@@ -88,7 +88,7 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
                     assertEquals(1, list.size());
                     assertEquals(entity, list.get(0));
 
-                    var record = transaction.executeAndFindRecord(ps3, TgParameterList.of(foo.bind(entity.getFoo()))).get();
+                    var record = transaction.executeAndFindRecord(ps3, TgBindParameters.of(foo.bind(entity.getFoo()))).get();
                     assertEquals(entity, record);
 
                     transaction.executeAndGetCount(ps4);

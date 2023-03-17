@@ -62,9 +62,9 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
 
     @Override
     public TgTxOptionLtx clone() {
-        var option = super.clone();
-        option.writePreserveList = new ArrayList<>(this.writePreserveList);
-        return option;
+        var txOption = super.clone();
+        txOption.writePreserveList = new ArrayList<>(this.writePreserveList);
+        return txOption;
     }
 
     @Override

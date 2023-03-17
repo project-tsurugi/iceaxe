@@ -57,22 +57,22 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<?>> implem
     @Override
     @SuppressWarnings("unchecked")
     public T clone() {
-        T option;
+        T txOption;
         try {
-            option = (T) super.clone();
+            txOption = (T) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e);
         }
 
-        option.reset();
-        return option;
+        txOption.reset();
+        return txOption;
     }
 
     @Override
     public T clone(String label) {
-        T option = clone();
-        option.label(label);
-        return option;
+        T txOption = clone();
+        txOption.label(label);
+        return txOption;
     }
 
     @Override

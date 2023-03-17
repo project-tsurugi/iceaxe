@@ -16,8 +16,8 @@ public class TgTxOptionTester {
         this.expectedType = type;
     }
 
-    protected void assertLowOption(String label, TransactionPriority priority, List<String> writePreserve, TgTxOption option) {
-        var builder = option.toLowTransactionOption();
+    protected void assertLowOption(String label, TransactionPriority priority, List<String> writePreserve, TgTxOption txOption) {
+        var builder = txOption.toLowTransactionOption();
         assertEquals(expectedType, builder.getType());
         assertEquals((label != null) ? label : "", builder.getLabel());
         assertEquals((priority != null) ? priority : TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED, builder.getPriority());

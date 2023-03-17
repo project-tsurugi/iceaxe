@@ -11,14 +11,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultSet;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
-import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * ResultSet connect timeout test
+ * {@link TsurugiQueryResult} connect timeout test
  */
 public class DbTimeoutRsConnectTest extends DbTimetoutTest {
 
@@ -36,8 +36,8 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
     void timeoutDefault() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.SECONDS);
+            public void modifySessionInfo(TgSessionOption sessionOption) {
+                sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -46,8 +46,8 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
     void timeoutSpecified() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.RS_CONNECT, 1, TimeUnit.SECONDS);
+            public void modifySessionInfo(TgSessionOption sessionOption) {
+                sessionOption.setTimeout(TgTimeoutKey.RS_CONNECT, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -56,8 +56,8 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyResultSet(TsurugiResultSet<?> rs) {
-                rs.setRsConnectTimeout(1, TimeUnit.SECONDS);
+            public void modifyQueryResult(TsurugiQueryResult<?> result) {
+                result.setRsConnectTimeout(1, TimeUnit.SECONDS);
             }
         });
     }
@@ -67,13 +67,13 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             transaction.getLowTransaction();
 
-            try (var ps = session.createPreparedQuery(SELECT_SQL)) {
+            try (var ps = session.createQuery(SELECT_SQL)) {
                 pipeServer.setPipeWrite(false);
-                try (var rs = ps.execute(transaction)) {
-                    modifier.modifyResultSet(rs);
+                try (var result = ps.execute(transaction)) {
+                    modifier.modifyQueryResult(result);
 
                     try {
-                        rs.getRecordList();
+                        result.getRecordList();
                     } catch (IOException e) {
                         assertInstanceOf(TimeoutException.class, e.getCause());
                         LOG.trace("timeout success");

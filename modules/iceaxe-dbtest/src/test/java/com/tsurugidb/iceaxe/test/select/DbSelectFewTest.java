@@ -41,11 +41,11 @@ class DbSelectFewTest extends DbTestTableTester {
         var sql = "select * from " + TEST;
 
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-                    try (var rs = ps.execute(transaction)) {
-                        // rs.close without read
+                    try (var result = ps.execute(transaction)) {
+                        // result.close without read
                     }
                     transaction.commit(TgCommitType.DEFAULT);
                 }
@@ -60,7 +60,7 @@ class DbSelectFewTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 Optional<TestEntity> entity = tm.executeAndFindRecord(ps);
                 assertEquals(expected, entity.get());
@@ -75,7 +75,7 @@ class DbSelectFewTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < ATTEMPT_SIZE; i++) {
                     Optional<TestEntity> entity = transaction.executeAndFindRecord(ps);

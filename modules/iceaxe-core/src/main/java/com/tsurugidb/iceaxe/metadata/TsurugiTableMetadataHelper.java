@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
@@ -45,9 +45,9 @@ public class TsurugiTableMetadataHelper {
     protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException {
         try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {
 
-            var info = session.getSessionInfo();
-            var connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.METADATA_CONNECT);
-            var closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.METADATA_CLOSE);
+            var sessionOption = session.getSessionOption();
+            var connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CONNECT);
+            var closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CLOSE);
             closeTimeout.apply(lowTableMetadataFuture);
 
             var lowTableMetadata = IceaxeIoUtil.getAndCloseFuture(lowTableMetadataFuture, connectTimeout);

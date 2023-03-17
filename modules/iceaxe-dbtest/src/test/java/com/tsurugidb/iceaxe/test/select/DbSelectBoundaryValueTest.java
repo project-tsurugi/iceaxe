@@ -15,10 +15,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TgResultMapping;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
@@ -124,14 +124,14 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
                 + "(int4, int8, float4, float8)" //
                 + "values(:int4, :int8, :float4, :float8)";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-                .int4("int4", TestEntity::getInt4) //
-                .int8("int8", TestEntity::getInt8) //
-                .float4("float4", TestEntity::getFloat4) //
-                .float8("float8", TestEntity::getFloat8);
+                .addInt("int4", TestEntity::getInt4) //
+                .addLong("int8", TestEntity::getInt8) //
+                .addFloat("float4", TestEntity::getFloat4) //
+                .addDouble("float8", TestEntity::getFloat8);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 for (var entity : TEST_ENTITY_LIST) {
                     transaction.executeAndGetCount(ps, entity);
@@ -143,7 +143,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(ints = { Integer.MIN_VALUE, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, Integer.MAX_VALUE })
     void selectInt4(int value) throws IOException {
-        var variable = TgVariable.ofInt4("value");
+        var variable = TgBindVariable.ofInt("value");
         test("int4 =:value", entity -> entity.getInt4() == value, value, variable);
         test("int4<>:value", entity -> entity.getInt4() != value, value, variable);
         test("int4>=:value", entity -> entity.getInt4() >= value, value, variable);
@@ -155,7 +155,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(longs = { Long.MIN_VALUE, Long.MIN_VALUE + 1, Long.MAX_VALUE - 1, Long.MAX_VALUE })
     void selectInt8(long value) throws IOException {
-        var variable = TgVariable.ofInt8("value");
+        var variable = TgBindVariable.ofLong("value");
         test("int8 =:value", entity -> entity.getInt8() == value, value, variable);
         test("int8<>:value", entity -> entity.getInt8() != value, value, variable);
         test("int8>=:value", entity -> entity.getInt8() >= value, value, variable);
@@ -167,7 +167,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(floats = { Float.MIN_VALUE, Float.MIN_VALUE + Float.MIN_NORMAL, Float.MAX_VALUE - Float.MIN_NORMAL, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN })
     void selectFloat4(float value) throws IOException {
-        var variable = TgVariable.ofFloat4("value");
+        var variable = TgBindVariable.ofFloat("value");
         test("float4 =:value", entity -> entity.getFloat4() == value, value, variable);
         test("float4<>:value", entity -> entity.getFloat4() != value, value, variable);
         test("float4>=:value", entity -> entity.getFloat4() >= value, value, variable);
@@ -180,7 +180,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
     @ValueSource(doubles = { Double.MIN_VALUE, Double.MIN_VALUE + Double.MIN_NORMAL, Double.MIN_VALUE - Double.MIN_NORMAL, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
             Double.NaN })
     void selectFloat8(double value) throws IOException {
-        var variable = TgVariable.ofFloat8("value");
+        var variable = TgBindVariable.ofDouble("value");
         test("float8 =:value", entity -> entity.getFloat8() == value, value, variable);
         test("float8<>:value", entity -> entity.getFloat8() != value, value, variable);
         test("float8>=:value", entity -> entity.getFloat8() >= value, value, variable);
@@ -189,24 +189,24 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
         test("float8< :value", entity -> entity.getFloat8() < value, value, variable);
     }
 
-    private static <T> void test(String where, Predicate<TestEntity> expectedPredicate, T value, TgVariable<T> variable) throws IOException {
+    private static <T> void test(String where, Predicate<TestEntity> expectedPredicate, T value, TgBindVariable<T> variable) throws IOException {
         var sql = "select int4, int8, float4, float8 from " + TEST //
                 + " where " + where //
                 + " order by int4";
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = TgResultMapping.of(TestEntity::new) //
-                .int4("int4", TestEntity::setInt4) //
-                .int8("int8", TestEntity::setInt8) //
-                .float4("float4", TestEntity::setFloat4) //
-                .float8("float8", TestEntity::setFloat8);
+                .addInt("int4", TestEntity::setInt4) //
+                .addLong("int8", TestEntity::setInt8) //
+                .addFloat("float4", TestEntity::setFloat4) //
+                .addDouble("float8", TestEntity::setFloat8);
 
         var expected = TEST_ENTITY_LIST.stream().filter(expectedPredicate).collect(Collectors.toList());
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
-            var param = TgParameterList.of(variable.bind(value));
-            var actual = tm.executeAndGetList(ps, param);
+        try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
+            var parameter = TgBindParameters.of(variable.bind(value));
+            var actual = tm.executeAndGetList(ps, parameter);
             assertEquals(expected, actual);
         }
     }

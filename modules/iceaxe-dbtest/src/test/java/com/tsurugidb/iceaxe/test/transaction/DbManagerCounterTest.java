@@ -10,9 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
@@ -199,19 +199,19 @@ class DbManagerCounterTest extends DbTestTableTester {
         var setting4 = TgTmSetting.ofAlways(TgTxOption.ofOCC().label("tran2"));
         var setting5 = TgTmSetting.ofAlways(TgTxOption.ofOCC()); // label(null)
 
-        var bar = TgVariable.ofInt4("bar");
+        var bar = TgBindVariable.ofInt("bar");
         var sql = "update " + TEST + " set bar=" + bar + " where foo=1";
         var mapping = TgParameterMapping.of(bar);
 
         var session = tm.getSession();
-        try (var ps = session.createPreparedStatement(sql, mapping)) {
+        try (var ps = session.createStatement(sql, mapping)) {
             tm.execute(setting1, tx1 -> {
-                var param1 = TgParameterList.of(bar.bind(111));
+                var param1 = TgBindParameters.of(bar.bind(111));
                 tx1.executeAndGetCount(ps, param1);
 
                 var e = assertThrowsExactly(TsurugiTransactionRetryOverIOException.class, () -> {
                     tm.execute(setting2, tx2 -> {
-                        var param2 = TgParameterList.of(bar.bind(222));
+                        var param2 = TgBindParameters.of(bar.bind(222));
                         tx2.executeAndGetCount(ps, param2);
                     });
                 });
@@ -225,7 +225,7 @@ class DbManagerCounterTest extends DbTestTableTester {
 
                 tm.execute(setting4, tx4 -> {
                     if (tx4.getAttempt() < 2) {
-                        var param4 = TgParameterList.of(bar.bind(333));
+                        var param4 = TgBindParameters.of(bar.bind(333));
                         tx4.executeAndGetCount(ps, param4);
                     }
                 });

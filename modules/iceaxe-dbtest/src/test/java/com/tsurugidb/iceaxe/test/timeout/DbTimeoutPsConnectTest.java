@@ -11,10 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -36,8 +36,8 @@ public class DbTimeoutPsConnectTest extends DbTimetoutTest {
     void timeoutDefault() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.SECONDS);
+            public void modifySessionInfo(TgSessionOption sessionOption) {
+                sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -46,8 +46,8 @@ public class DbTimeoutPsConnectTest extends DbTimetoutTest {
     void timeoutSpecified() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.PS_CONNECT, 1, TimeUnit.SECONDS);
+            public void modifySessionInfo(TgSessionOption sessionOption) {
+                sessionOption.setTimeout(TgTimeoutKey.PS_CONNECT, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -68,7 +68,7 @@ public class DbTimeoutPsConnectTest extends DbTimetoutTest {
             transaction.getLowTransaction();
 
             pipeServer.setPipeWrite(false);
-            try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 modifier.modifyPs(ps);
 
                 var entity = createTestEntity(0);

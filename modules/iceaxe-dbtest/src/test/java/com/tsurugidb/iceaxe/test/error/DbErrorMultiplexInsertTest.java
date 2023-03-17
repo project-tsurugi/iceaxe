@@ -98,7 +98,7 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
                 var transaction = session.createTransaction(TgTxOption.ofOCC());
                 // transaction.close is called on session.close
 
-                var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING);
+                var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING);
                 // ps.close is called on session.close
 
                 var entity = createTestEntity(i);
@@ -108,13 +108,13 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
                     transaction.executeAndGetCount(ps, entity);
                     break;
                 case CLOSE_ONLY:
-                    try (var rs = ps.execute(transaction, entity)) {
+                    try (var result = ps.execute(transaction, entity)) {
                     }
                     break;
                 case EXEUTE_ONLY:
                     @SuppressWarnings("unused")
-                    var rs = ps.execute(transaction, entity);
-                    // rs.close is called on ps.close
+                    var result = ps.execute(transaction, entity);
+                    // result.close is called on ps.close
                     break;
                 }
 

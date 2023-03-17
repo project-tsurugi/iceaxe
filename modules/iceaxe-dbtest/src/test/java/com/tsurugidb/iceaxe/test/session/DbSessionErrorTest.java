@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -26,7 +26,7 @@ class DbSessionErrorTest extends DbTestTableTester {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-            session.createPreparedQuery(SELECT_SQL);
+            session.createQuery(SELECT_SQL);
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
     }
@@ -36,7 +36,7 @@ class DbSessionErrorTest extends DbTestTableTester {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-            session.createPreparedQuery(SELECT_SQL, TgParameterMapping.of());
+            session.createQuery(SELECT_SQL, TgParameterMapping.of());
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
     }
@@ -46,7 +46,7 @@ class DbSessionErrorTest extends DbTestTableTester {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-            session.createPreparedStatement(INSERT_SQL);
+            session.createStatement(INSERT_SQL);
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
     }
@@ -56,7 +56,7 @@ class DbSessionErrorTest extends DbTestTableTester {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
-            session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING);
+            session.createStatement(INSERT_SQL, INSERT_MAPPING);
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
     }

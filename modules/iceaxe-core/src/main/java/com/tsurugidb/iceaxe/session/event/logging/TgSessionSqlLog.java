@@ -2,8 +2,8 @@ package com.tsurugidb.iceaxe.session.event.logging;
 
 import java.time.ZonedDateTime;
 
-import com.tsurugidb.iceaxe.result.TsurugiResult;
-import com.tsurugidb.iceaxe.statement.TsurugiSql;
+import com.tsurugidb.iceaxe.sql.TsurugiSql;
+import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 
 /**
  * Tsurugi SQL execute log
@@ -13,7 +13,7 @@ public class TgSessionSqlLog {
     private int iceaxeSqlExecuteId;
     private TsurugiSql sqlStatement;
     private Object sqlParameter;
-    private TsurugiResult result;
+    private TsurugiSqlResult result;
 
     private ZonedDateTime startTime;
     private ZonedDateTime endTime;
@@ -80,7 +80,7 @@ public class TgSessionSqlLog {
      *
      * @param result SQL result
      */
-    public void setSqlResult(TsurugiResult result) {
+    public void setSqlResult(TsurugiSqlResult result) {
         this.result = result;
     }
 
@@ -89,7 +89,7 @@ public class TgSessionSqlLog {
      *
      * @return SQL result
      */
-    public TsurugiResult getSqlResult() {
+    public TsurugiSqlResult getSqlResult() {
         return this.result;
     }
 

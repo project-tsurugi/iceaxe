@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
@@ -44,19 +44,19 @@ class DbSelectFetchTest extends DbTestTableTester {
 
     @Test
     void fetch() throws IOException {
-        var cond = TgVariable.ofInt4("foo");
+        var cond = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo=" + cond;
         var parameterMapping = TgParameterMapping.of(cond);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery("select foo from " + TEST); //
-                var ps2 = session.createPreparedQuery(sql, parameterMapping, SELECT_MAPPING); //
-                var ps3 = session.createPreparedStatement(INSERT_SQL.replace(TEST, TEST2), INSERT_MAPPING)) {
+        try (var ps = session.createQuery("select foo from " + TEST); //
+                var ps2 = session.createQuery(sql, parameterMapping, SELECT_MAPPING); //
+                var ps3 = session.createStatement(INSERT_SQL.replace(TEST, TEST2), INSERT_MAPPING)) {
             tm.execute(transaction -> {
                 transaction.executeForEach(ps, fetch -> {
-                    int foo = fetch.getInt4("foo");
-                    var parameter = TgParameterList.of(cond.bind(foo));
+                    int foo = fetch.getInt("foo");
+                    var parameter = TgBindParameters.of(cond.bind(foo));
                     var entity = transaction.executeAndFindRecord(ps2, parameter).get();
                     transaction.executeAndGetCount(ps3, entity);
                 });

@@ -89,7 +89,7 @@ class DbInsertNoPkTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             for (int i = 0; i < size; i++) {
                 tm.execute(transaction -> {
                     int count = transaction.executeAndGetCount(ps);

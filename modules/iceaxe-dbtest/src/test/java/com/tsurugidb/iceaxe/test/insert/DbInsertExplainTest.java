@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
+import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
@@ -37,7 +37,7 @@ class DbInsertExplainTest extends DbTestTableTester {
                 + "values(1, 2, '3')";
 
         var session = getSession();
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             assertThrowsExactly(UnsupportedOperationException.class, () -> {
                 var result = ps.explain();
                 assertExplain(result);
@@ -48,7 +48,7 @@ class DbInsertExplainTest extends DbTestTableTester {
     @Test
     void psParameter() throws Exception {
         var session = getSession();
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             var entity = createTestEntity(1);
             var result = ps.explain(entity);
             assertExplain(result);

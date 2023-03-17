@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
@@ -85,7 +85,7 @@ class DbTransactionParallelTest extends DbTestTableTester {
         Tx2Thread[] thread = { null };
 
         try (var session = DbTestConnector.createSession(Long.MAX_VALUE, TimeUnit.NANOSECONDS); //
-                var ps1 = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING); //
+                var ps1 = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                 var tx1 = session.createTransaction(txOption1)) {
             try {
 //              LOG.info("tx1={}", tx1.getTransactionId());
@@ -106,7 +106,7 @@ class DbTransactionParallelTest extends DbTestTableTester {
         assertEquals(TEST2_SIZE, selectCountFrom(TEST2));
     }
 
-    private void runInTransaction(TsurugiTransaction tx1, TsurugiPreparedStatementUpdate1<TestEntity> ps1, Tx2Thread[] thread, TgTxOption txOption2, boolean wait)
+    private void runInTransaction(TsurugiTransaction tx1, TsurugiSqlPreparedStatement<TestEntity> ps1, Tx2Thread[] thread, TgTxOption txOption2, boolean wait)
             throws IOException, TsurugiTransactionException, InterruptedException {
         for (int i = 0; i < TEST_SIZE; i++) {
             if (i == 10) {
@@ -144,7 +144,7 @@ class DbTransactionParallelTest extends DbTestTableTester {
         public void run() {
             try {
                 try (var session = DbTestConnector.createSession(Long.MAX_VALUE, TimeUnit.NANOSECONDS); //
-                        var ps2 = session.createPreparedStatement(INSERT_SQL.replace(TEST, TEST2), INSERT_MAPPING); //
+                        var ps2 = session.createStatement(INSERT_SQL.replace(TEST, TEST2), INSERT_MAPPING); //
                         var tx2 = session.createTransaction(txOption2)) {
                     try {
 //                      LOG.info("tx2={}", tx2.getTransactionId());
@@ -161,7 +161,7 @@ class DbTransactionParallelTest extends DbTestTableTester {
             this.done = true;
         }
 
-        private void runInTransaction(TsurugiTransaction tx2, TsurugiPreparedStatementUpdate1<TestEntity> ps2) throws IOException, TsurugiTransactionException {
+        private void runInTransaction(TsurugiTransaction tx2, TsurugiSqlPreparedStatement<TestEntity> ps2) throws IOException, TsurugiTransactionException {
             for (int i = 0; i < TEST2_SIZE; i++) {
                 var entity = createTestEntity(i);
                 tx2.executeAndGetCount(ps2, entity);

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -62,7 +62,7 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
     private void insertSingleTx(int recordSize, int threadSize, TgTxOption tx) throws IOException {
         var session = getSession();
         var tm = session.createTransactionManager(tx);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
                 var list = new ArrayList<InsertSingleTxThread>(threadSize);
                 for (int i = 0; i < threadSize; i++) {
@@ -86,13 +86,13 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
 
     private static class InsertSingleTxThread extends Thread {
 
-        private final TsurugiPreparedStatementUpdate1<TestEntity> ps;
+        private final TsurugiSqlPreparedStatement<TestEntity> ps;
         private final int number;
         private final int threadSize;
         private final int recordSize;
         private final TsurugiTransaction transaction;
 
-        public InsertSingleTxThread(TsurugiPreparedStatementUpdate1<TestEntity> ps, int number, int threadSize, int recordSize, TsurugiTransaction transaction) {
+        public InsertSingleTxThread(TsurugiSqlPreparedStatement<TestEntity> ps, int number, int threadSize, int recordSize, TsurugiTransaction transaction) {
             this.ps = ps;
             this.number = number;
             this.threadSize = threadSize;
@@ -127,7 +127,7 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
     private void insertMultiTx(int recordSize, int threadSize, TgTxOption tx) throws IOException {
         var session = getSession();
         var tm = session.createTransactionManager(tx);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             var list = new ArrayList<InsertMultiTxThread>(threadSize);
             for (int i = 0; i < threadSize; i++) {
                 var thread = new InsertMultiTxThread(ps, i, threadSize, recordSize, tm);
@@ -149,13 +149,13 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
 
     private static class InsertMultiTxThread extends Thread {
 
-        private final TsurugiPreparedStatementUpdate1<TestEntity> ps;
+        private final TsurugiSqlPreparedStatement<TestEntity> ps;
         private final int number;
         private final int threadSize;
         private final int recordSize;
         private final TsurugiTransactionManager tm;
 
-        public InsertMultiTxThread(TsurugiPreparedStatementUpdate1<TestEntity> ps, int number, int threadSize, int recordSize, TsurugiTransactionManager tm) {
+        public InsertMultiTxThread(TsurugiSqlPreparedStatement<TestEntity> ps, int number, int threadSize, int recordSize, TsurugiTransactionManager tm) {
             this.ps = ps;
             this.number = number;
             this.threadSize = threadSize;

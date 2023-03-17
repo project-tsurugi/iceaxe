@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
@@ -38,7 +38,7 @@ class DbUpdateExplainTest extends DbTestTableTester {
         var sql = "update " + TEST + " set bar=bar+1";
 
         var session = getSession();
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             assertThrowsExactly(UnsupportedOperationException.class, () -> {
                 var result = ps.explain();
                 assertExplain(result);
@@ -48,13 +48,13 @@ class DbUpdateExplainTest extends DbTestTableTester {
 
     @Test
     void psParameter() throws Exception {
-        var add = TgVariable.ofInt8("add");
+        var add = TgBindVariable.ofLong("add");
         var sql = "update " + TEST + " set bar=bar+" + add;
         var parameterMapping = TgParameterMapping.of(add);
 
         var session = getSession();
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
-            var parameter = TgParameterList.of(add.bind(1));
+        try (var ps = session.createStatement(sql, parameterMapping)) {
+            var parameter = TgBindParameters.of(add.bind(1));
             var result = ps.explain(parameter);
             assertExplain(result);
         }

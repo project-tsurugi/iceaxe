@@ -13,15 +13,15 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TgResultMapping;
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
-import com.tsurugidb.iceaxe.statement.TsurugiSql;
+import com.tsurugidb.iceaxe.sql.TsurugiSql;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
@@ -171,22 +171,22 @@ public class TsurugiTransactionManager {
 
         final int tmExecuteId = EXECUTE_COUNT.incrementAndGet();
 
-        var option = setting.getFirstTransactionOption();
+        var txOption = setting.getFirstTransactionOption();
         {
-            var finalOption = option;
-            event(setting, null, listener -> listener.executeStart(this, tmExecuteId, finalOption));
+            var finalTxOption = txOption;
+            event(setting, null, listener -> listener.executeStart(this, tmExecuteId, finalTxOption));
         }
         for (int attempt = 0;; attempt++) {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("tm.execute iceaxeTmExecuteId={}, attempt={}, tx={}", tmExecuteId, attempt, option);
+                LOG.trace("tm.execute iceaxeTmExecuteId={}, attempt={}, tx={}", tmExecuteId, attempt, txOption);
             }
 
             final int finalAttempt = attempt;
-            final var finalOption = option;
-            event(setting, null, listener -> listener.transactionStart(this, tmExecuteId, finalAttempt, finalOption));
+            final var finalTxOption = txOption;
+            event(setting, null, listener -> listener.transactionStart(this, tmExecuteId, finalAttempt, finalTxOption));
 
             TsurugiTransaction lastTransaction = null;
-            try (var transaction = ownerSession.createTransaction(option, tx -> {
+            try (var transaction = ownerSession.createTransaction(txOption, tx -> {
                 tx.setOwner(this, tmExecuteId, finalAttempt);
                 setting.initializeTransaction(tx);
             })) {
@@ -200,20 +200,20 @@ public class TsurugiTransactionManager {
                         event(setting, null, listener -> listener.executeEndSuccess(transaction, false, r));
                         return r;
                     }
-                    var info = ownerSession.getSessionInfo();
-                    var commitType = setting.getCommitType(info);
+                    var sessionOption = ownerSession.getSessionOption();
+                    var commitType = setting.getCommitType(sessionOption);
                     transaction.commit(commitType);
                     LOG.trace("tm.execute end (committed)");
                     event(setting, null, listener -> listener.executeEndSuccess(transaction, true, r));
                     return r;
                 } catch (TsurugiTransactionException e) {
                     event(setting, e, listener -> listener.transactionException(transaction, e));
-                    option = processTransactionException(setting, transaction, e, option, e);
+                    txOption = processTransactionException(setting, transaction, e, txOption, e);
                     continue;
                 } catch (TsurugiTransactionRuntimeException e) {
                     event(setting, e, listener -> listener.transactionException(transaction, e));
                     var c = e.getCause();
-                    option = processTransactionException(setting, transaction, e, option, c);
+                    txOption = processTransactionException(setting, transaction, e, txOption, c);
                     continue;
                 } catch (Exception e) {
                     event(setting, e, listener -> listener.transactionException(transaction, e));
@@ -223,7 +223,7 @@ public class TsurugiTransactionManager {
                         rollback(setting, transaction, e);
                         throw e;
                     }
-                    option = processTransactionException(setting, transaction, e, option, c);
+                    txOption = processTransactionException(setting, transaction, e, txOption, c);
                     continue;
                 } catch (Throwable e) {
                     LOG.trace("tm.execute error", e);
@@ -234,7 +234,7 @@ public class TsurugiTransactionManager {
             } catch (Throwable e) {
                 {
                     var finalTransaction = lastTransaction;
-                    event(setting, e, listener -> listener.executeEndFail(this, tmExecuteId, finalOption, finalTransaction, e));
+                    event(setting, e, listener -> listener.executeEndFail(this, tmExecuteId, finalTxOption, finalTransaction, e));
                 }
                 throw e;
             }
@@ -250,7 +250,7 @@ public class TsurugiTransactionManager {
         return null;
     }
 
-    private TgTxOption processTransactionException(TgTmSetting setting, TsurugiTransaction transaction, Exception cause, TgTxOption option, TsurugiTransactionException e) throws IOException {
+    private TgTxOption processTransactionException(TgTmSetting setting, TsurugiTransaction transaction, Exception cause, TgTxOption txOption, TsurugiTransactionException e) throws IOException {
         boolean calledRollback = false;
         try {
             int attempt = transaction.getAttempt();
@@ -271,7 +271,7 @@ public class TsurugiTransactionManager {
                     calledRollback = true;
                 }
 
-                var nextOption = nextTmOption.getOption();
+                var nextOption = nextTmOption.getTransactionOption();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("tm.execute retry{}. e={}, nextTx={}", attempt + 1, e.getMessage(), nextOption);
                 }
@@ -391,7 +391,7 @@ public class TsurugiTransactionManager {
      */
     public <R> void executeForEach(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createQuery(sql, resultMapping)) {
             executeForEach(setting, ps, action);
         }
     }
@@ -457,7 +457,7 @@ public class TsurugiTransactionManager {
     public <P, R> void executeForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action)
             throws IOException {
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
             executeForEach(setting, ps, parameter, action);
         }
     }
@@ -470,7 +470,7 @@ public class TsurugiTransactionManager {
      * @param action The action to be performed for each record
      * @throws IOException
      */
-    public <R> void executeForEach(TsurugiPreparedStatementQuery0<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
+    public <R> void executeForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
         executeForEach(defaultSetting(), ps, action);
     }
 
@@ -483,7 +483,7 @@ public class TsurugiTransactionManager {
      * @param action  The action to be performed for each record
      * @throws IOException
      */
-    public <R> void executeForEach(TgTmSetting setting, TsurugiPreparedStatementQuery0<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
+    public <R> void executeForEach(TgTmSetting setting, TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
         execute(setting, transaction -> {
             transaction.executeForEach(ps, action);
         });
@@ -499,7 +499,7 @@ public class TsurugiTransactionManager {
      * @param action    The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> void executeForEach(TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
+    public <P, R> void executeForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
         executeForEach(defaultSetting(), ps, parameter, action);
     }
 
@@ -514,7 +514,7 @@ public class TsurugiTransactionManager {
      * @param action    The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> void executeForEach(TgTmSetting setting, TsurugiPreparedStatementQuery1<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
+    public <P, R> void executeForEach(TgTmSetting setting, TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
         execute(setting, transaction -> {
             transaction.executeForEach(ps, parameter, action);
         });
@@ -568,7 +568,7 @@ public class TsurugiTransactionManager {
      */
     public <R> List<R> executeAndGetList(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping) throws IOException {
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createQuery(sql, resultMapping)) {
             return executeAndGetList(setting, ps);
         }
     }
@@ -633,7 +633,7 @@ public class TsurugiTransactionManager {
      */
     public <P, R> List<R> executeAndGetList(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping) throws IOException {
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
             return executeAndGetList(setting, ps, parameter);
         }
     }
@@ -646,7 +646,7 @@ public class TsurugiTransactionManager {
      * @return list of record
      * @throws IOException
      */
-    public <R> List<R> executeAndGetList(TsurugiPreparedStatementQuery0<R> ps) throws IOException {
+    public <R> List<R> executeAndGetList(TsurugiSqlQuery<R> ps) throws IOException {
         return executeAndGetList(defaultSetting(), ps);
     }
 
@@ -659,7 +659,7 @@ public class TsurugiTransactionManager {
      * @return list of record
      * @throws IOException
      */
-    public <R> List<R> executeAndGetList(TgTmSetting setting, TsurugiPreparedStatementQuery0<R> ps) throws IOException {
+    public <R> List<R> executeAndGetList(TgTmSetting setting, TsurugiSqlQuery<R> ps) throws IOException {
         return execute(setting, transaction -> {
             return transaction.executeAndGetList(ps);
         });
@@ -675,7 +675,7 @@ public class TsurugiTransactionManager {
      * @return list of record
      * @throws IOException
      */
-    public <P, R> List<R> executeAndGetList(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
+    public <P, R> List<R> executeAndGetList(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException {
         return executeAndGetList(defaultSetting(), ps, parameter);
     }
 
@@ -690,7 +690,7 @@ public class TsurugiTransactionManager {
      * @return list of record
      * @throws IOException
      */
-    public <P, R> List<R> executeAndGetList(TgTmSetting setting, TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
+    public <P, R> List<R> executeAndGetList(TgTmSetting setting, TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException {
         return execute(setting, transaction -> {
             return transaction.executeAndGetList(ps, parameter);
         });
@@ -744,7 +744,7 @@ public class TsurugiTransactionManager {
      */
     public <R> Optional<R> executeAndFindRecord(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping) throws IOException {
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createQuery(sql, resultMapping)) {
             return executeAndFindRecord(setting, ps);
         }
     }
@@ -809,7 +809,7 @@ public class TsurugiTransactionManager {
      */
     public <P, R> Optional<R> executeAndFindRecord(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping) throws IOException {
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
             return executeAndFindRecord(setting, ps, parameter);
         }
     }
@@ -822,7 +822,7 @@ public class TsurugiTransactionManager {
      * @return record
      * @throws IOException
      */
-    public <R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery0<R> ps) throws IOException {
+    public <R> Optional<R> executeAndFindRecord(TsurugiSqlQuery<R> ps) throws IOException {
         return executeAndFindRecord(defaultSetting(), ps);
     }
 
@@ -835,7 +835,7 @@ public class TsurugiTransactionManager {
      * @return record
      * @throws IOException
      */
-    public <R> Optional<R> executeAndFindRecord(TgTmSetting setting, TsurugiPreparedStatementQuery0<R> ps) throws IOException {
+    public <R> Optional<R> executeAndFindRecord(TgTmSetting setting, TsurugiSqlQuery<R> ps) throws IOException {
         return execute(setting, transaction -> {
             return transaction.executeAndFindRecord(ps);
         });
@@ -852,7 +852,7 @@ public class TsurugiTransactionManager {
      * @return record
      * @throws IOException
      */
-    public <P, R> Optional<R> executeAndFindRecord(TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
+    public <P, R> Optional<R> executeAndFindRecord(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException {
         return executeAndFindRecord(defaultSetting(), ps, parameter);
     }
 
@@ -867,7 +867,7 @@ public class TsurugiTransactionManager {
      * @return record
      * @throws IOException
      */
-    public <P, R> Optional<R> executeAndFindRecord(TgTmSetting setting, TsurugiPreparedStatementQuery1<P, R> ps, P parameter) throws IOException {
+    public <P, R> Optional<R> executeAndFindRecord(TgTmSetting setting, TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException {
         return execute(setting, transaction -> {
             return transaction.executeAndFindRecord(ps, parameter);
         });
@@ -894,7 +894,7 @@ public class TsurugiTransactionManager {
      */
     public int executeAndGetCount(TgTmSetting setting, String sql) throws IOException {
         var session = getSession();
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             return executeAndGetCount(setting, ps);
         }
     }
@@ -924,7 +924,7 @@ public class TsurugiTransactionManager {
      */
     public <P> int executeAndGetCount(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter) throws IOException {
         var session = getSession();
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             return executeAndGetCount(setting, ps, parameter);
         }
     }
@@ -936,7 +936,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException
      */
-    public int executeAndGetCount(TsurugiPreparedStatementUpdate0 ps) throws IOException {
+    public int executeAndGetCount(TsurugiSqlStatement ps) throws IOException {
         return executeAndGetCount(defaultSetting(), ps);
     }
 
@@ -948,7 +948,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException
      */
-    public int executeAndGetCount(TgTmSetting setting, TsurugiPreparedStatementUpdate0 ps) throws IOException {
+    public int executeAndGetCount(TgTmSetting setting, TsurugiSqlStatement ps) throws IOException {
         return execute(setting, transaction -> {
             return transaction.executeAndGetCount(ps);
         });
@@ -963,7 +963,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException
      */
-    public <P> int executeAndGetCount(TsurugiPreparedStatementUpdate1<P> ps, P parameter) throws IOException {
+    public <P> int executeAndGetCount(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException {
         return executeAndGetCount(defaultSetting(), ps, parameter);
     }
 
@@ -977,7 +977,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException
      */
-    public <P> int executeAndGetCount(TgTmSetting setting, TsurugiPreparedStatementUpdate1<P> ps, P parameter) throws IOException {
+    public <P> int executeAndGetCount(TgTmSetting setting, TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException {
         return execute(setting, transaction -> {
             return transaction.executeAndGetCount(ps, parameter);
         });

@@ -10,8 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TgResultMapping;
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
@@ -40,7 +40,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
                 assertEquals(List.of(), list);
@@ -54,7 +54,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < ATTEMPT_SIZE; i++) {
                     List<TsurugiResultEntity> list = transaction.executeAndGetList(ps);
@@ -71,11 +71,11 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
     void selectCount(String where) throws IOException {
         var sql = "select count(*) from " + TEST + where;
-        var resultMapping = TgResultMapping.of(record -> record.nextInt4());
+        var resultMapping = TgResultMapping.of(record -> record.nextInt());
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createQuery(sql, resultMapping)) {
             int count = tm.executeAndFindRecord(ps).get();
             assertEquals(0, count);
         }
@@ -91,10 +91,10 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             TsurugiResultEntity entity = tm.executeAndFindRecord(ps).get();
-            assertNull(entity.getInt4OrNull("sum"));
-            assertNull(entity.getCharacterOrNull("zzz"));
+            assertNull(entity.getIntOrNull("sum"));
+            assertNull(entity.getStringOrNull("zzz"));
         }
     }
 
@@ -110,7 +110,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(ps);
             assertEquals(0, list.size());
         }
@@ -128,7 +128,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(ps);
             assertEquals(0, list.size());
         }

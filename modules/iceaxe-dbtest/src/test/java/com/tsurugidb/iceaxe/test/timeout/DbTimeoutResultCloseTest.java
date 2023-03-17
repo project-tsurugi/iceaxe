@@ -7,9 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultCount;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 
@@ -32,8 +32,8 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
     void timeoutDefault() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.SECONDS);
+            public void modifySessionInfo(TgSessionOption sessionOption) {
+                sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -42,8 +42,8 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
     void timeoutSpecified() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.RESULT_CLOSE, 1, TimeUnit.SECONDS);
+            public void modifySessionInfo(TgSessionOption sessionOption) {
+                sessionOption.setTimeout(TgTimeoutKey.RESULT_CLOSE, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -52,7 +52,7 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
     void timeoutSet() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifyResult(TsurugiResultCount result) {
+            public void modifyStatementResult(TsurugiStatementResult result) {
                 result.setCloseTimeout(1, TimeUnit.SECONDS);
             }
         });
@@ -63,10 +63,10 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             transaction.getLowTransaction();
 
-            try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(0);
                 var result = ps.execute(transaction, entity);
-                modifier.modifyResult(result);
+                modifier.modifyStatementResult(result);
 
                 pipeServer.setPipeWrite(false);
                 try {

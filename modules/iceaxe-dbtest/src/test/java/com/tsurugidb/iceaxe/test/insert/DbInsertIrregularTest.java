@@ -32,12 +32,12 @@ class DbInsertIrregularTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         tm.execute(transaction -> {
-            var ps = session.createPreparedStatement(sql);
-            var rc = ps.execute(transaction);
+            var ps = session.createStatement(sql);
+            var result = ps.execute(transaction);
             ps.close();
-            int count = rc.getUpdateCount();
+            int count = result.getUpdateCount();
             assertUpdateCount(1, count);
-            rc.close();
+            result.close();
         });
     }
 }

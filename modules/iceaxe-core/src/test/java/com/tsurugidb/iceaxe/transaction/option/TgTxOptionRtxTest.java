@@ -17,36 +17,36 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
 
     @Test
     void empty() {
-        TgTxOptionRtx option = TgTxOption.ofRTX();
+        TgTxOptionRtx txOption = TgTxOption.ofRTX();
         String expected = "RTX{}";
         assertOption(expected, null, null, //
-                option);
+                txOption);
     }
 
     @Test
     void label() {
-        TgTxOptionRtx option = TgTxOption.ofRTX().label("abc");
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc");
         String expected = "RTX{label=abc}";
         assertOption(expected, "abc", null, //
-                option);
+                txOption);
     }
 
     @Test
     void priority() {
-        TgTxOptionRtx option = TgTxOption.ofRTX().priority(TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED);
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().priority(TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED);
         String expected = "RTX{priority=DEFAULT}";
         assertOption(expected, null, TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED, //
-                option);
+                txOption);
     }
 
     @Test
     void clone0() {
-        TgTxOptionRtx option = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
-        TgTxOptionRtx clone = option.clone();
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionRtx clone = txOption.clone();
 
-        option.label(null);
-        option.priority(null);
-        assertOption("RTX{}", null, null, option);
+        txOption.label(null);
+        txOption.priority(null);
+        assertOption("RTX{}", null, null, txOption);
 
         String expected = "RTX{label=abc, priority=INTERRUPT}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, //
@@ -55,23 +55,23 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
 
     @Test
     void cloneLabel() {
-        TgTxOptionRtx option = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
-        TgTxOptionRtx clone = option.clone("def");
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionRtx clone = txOption.clone("def");
 
         assertOption("RTX{label=abc, priority=INTERRUPT}", "abc", TransactionPriority.INTERRUPT, //
-                option);
+                txOption);
 
         String expected = "RTX{label=def, priority=INTERRUPT}";
         assertOption(expected, "def", TransactionPriority.INTERRUPT, //
                 clone);
     }
 
-    private void assertOption(String text, String label, TransactionPriority priority, TgTxOptionRtx option) {
-        assertEquals(text, option.toString());
-        assertEquals(expectedType, option.type());
-        assertEquals(label, option.label());
-        assertEquals(priority, option.priority());
+    private void assertOption(String text, String label, TransactionPriority priority, TgTxOptionRtx txOption) {
+        assertEquals(text, txOption.toString());
+        assertEquals(expectedType, txOption.type());
+        assertEquals(label, txOption.label());
+        assertEquals(priority, txOption.priority());
 
-        assertLowOption(label, priority, List.of(), option);
+        assertLowOption(label, priority, List.of(), txOption);
     }
 }

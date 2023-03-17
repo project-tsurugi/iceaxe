@@ -35,7 +35,7 @@ class DbDropTableTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL)) {
+        try (var ps = session.createStatement(SQL)) {
             tm.executeAndGetCount(ps);
         }
     }
@@ -44,7 +44,7 @@ class DbDropTableTest extends DbTestTableTester {
     void dropNotFound() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL)) {
+        try (var ps = session.createStatement(SQL)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
@@ -61,7 +61,7 @@ class DbDropTableTest extends DbTestTableTester {
         assertTrue(session.findTableMetadata(TEST).isPresent());
 
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(SQL)) {
+        try (var ps = session.createStatement(SQL)) {
             tm.execute(transaction -> {
                 transaction.executeAndGetCount(ps);
                 assertTrue(session.findTableMetadata(TEST).isEmpty());

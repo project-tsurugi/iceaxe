@@ -16,18 +16,18 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
-import com.tsurugidb.iceaxe.result.TgResultMapping;
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
+import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
@@ -47,7 +47,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class TsurugiSession implements Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSession.class);
 
-    private final TgSessionInfo sessionInfo;
+    private final TgSessionOption sessionOption;
     private FutureResponse<? extends Session> lowSessionFuture;
     private Session lowSession;
     private Throwable lowFutureException = null;
@@ -62,11 +62,11 @@ public class TsurugiSession implements Closeable {
     private boolean closed = false;
 
     // internal
-    public TsurugiSession(TgSessionInfo info, FutureResponse<? extends Session> lowSessionFuture) {
-        this.sessionInfo = info;
+    public TsurugiSession(FutureResponse<? extends Session> lowSessionFuture, TgSessionOption sessionOption) {
+        this.sessionOption = sessionOption;
         this.lowSessionFuture = lowSessionFuture;
-        this.connectTimeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CONNECT);
-        this.closeTimeout = new IceaxeTimeout(info, TgTimeoutKey.SESSION_CLOSE);
+        this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
+        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CLOSE);
 
         applyCloseTimeout();
     }
@@ -132,8 +132,8 @@ public class TsurugiSession implements Closeable {
     }
 
     // internal
-    public final TgSessionInfo getSessionInfo() {
-        return sessionInfo;
+    public final TgSessionOption getSessionOption() {
+        return sessionOption;
     }
 
     /**
@@ -270,105 +270,105 @@ public class TsurugiSession implements Closeable {
     }
 
     /**
-     * create PreparedStatement
+     * create SQL query
      *
      * @param sql SQL
-     * @return PreparedStatement
+     * @return SQL query
      * @throws IOException
      */
 //  @ThreadSafe
-    public TsurugiPreparedStatementQuery0<TsurugiResultEntity> createPreparedQuery(String sql) throws IOException {
-        return createPreparedQuery(sql, TgResultMapping.DEFAULT);
+    public TsurugiSqlQuery<TsurugiResultEntity> createQuery(String sql) throws IOException {
+        return createQuery(sql, TgResultMapping.DEFAULT);
     }
 
     /**
-     * create PreparedStatement
+     * create SQL query
      *
      * @param <R>           result type
      * @param sql           SQL
      * @param resultMapping result mapping
-     * @return PreparedStatement
+     * @return SQL query
      * @throws IOException
      */
 //  @ThreadSafe
-    public <R> TsurugiPreparedStatementQuery0<R> createPreparedQuery(String sql, TgResultMapping<R> resultMapping) throws IOException {
+    public <R> TsurugiSqlQuery<R> createQuery(String sql, TgResultMapping<R> resultMapping) throws IOException {
         checkClose();
-        LOG.trace("createPreparedQuery. sql={}", sql);
-        var ps = new TsurugiPreparedStatementQuery0<>(this, sql, resultMapping);
+        LOG.trace("createQuery. sql={}", sql);
+        var ps = new TsurugiSqlQuery<>(this, sql, resultMapping);
         event(null, listener -> listener.createQuery(ps));
         return ps;
     }
 
     /**
-     * create PreparedStatement
+     * create SQL prepared query
      *
      * @param <P>              parameter type
      * @param sql              SQL
      * @param parameterMapping parameter mapping
-     * @return PreparedStatement
+     * @return SQL prepared query
      * @throws IOException
      */
 //  @ThreadSafe
-    public <P> TsurugiPreparedStatementQuery1<P, TsurugiResultEntity> createPreparedQuery(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
-        return createPreparedQuery(sql, parameterMapping, TgResultMapping.DEFAULT);
+    public <P> TsurugiSqlPreparedQuery<P, TsurugiResultEntity> createQuery(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
+        return createQuery(sql, parameterMapping, TgResultMapping.DEFAULT);
     }
 
     /**
-     * create PreparedStatement
+     * create SQL prepared query
      *
      * @param <P>              parameter type
      * @param <R>              result type
      * @param sql              SQL
      * @param parameterMapping parameter mapping
      * @param resultMapping    result mapping
-     * @return PreparedStatement
+     * @return SQL prepared query
      * @throws IOException
      */
 //  @ThreadSafe
-    public <P, R> TsurugiPreparedStatementQuery1<P, R> createPreparedQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException {
+    public <P, R> TsurugiSqlPreparedQuery<P, R> createQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException {
         checkClose();
-        LOG.trace("createPreparedQuery start. sql={}", sql);
+        LOG.trace("createQuery start. sql={}", sql);
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
-        LOG.trace("createPreparedQuery started");
-        var ps = new TsurugiPreparedStatementQuery1<>(this, sql, lowPreparedStatementFuture, parameterMapping, resultMapping);
+        LOG.trace("createQuery started");
+        var ps = new TsurugiSqlPreparedQuery<>(this, sql, lowPreparedStatementFuture, parameterMapping, resultMapping);
         event(null, listener -> listener.createQuery(ps));
         return ps;
     }
 
     /**
-     * create PreparedStatement
+     * create SQL statement
      *
      * @param sql SQL
-     * @return PreparedStatement
+     * @return SQL statement
      * @throws IOException
      */
 //  @ThreadSafe
-    public TsurugiPreparedStatementUpdate0 createPreparedStatement(String sql) throws IOException {
+    public TsurugiSqlStatement createStatement(String sql) throws IOException {
         checkClose();
-        LOG.trace("createPreparedStatement. sql={}", sql);
-        var ps = new TsurugiPreparedStatementUpdate0(this, sql);
+        LOG.trace("createStatement. sql={}", sql);
+        var ps = new TsurugiSqlStatement(this, sql);
         event(null, listener -> listener.createStatement(ps));
         return ps;
     }
 
     /**
-     * create PreparedStatement
+     * create SQL prepared statement
      *
      * @param <P>              parameter type
      * @param sql              SQL
      * @param parameterMapping parameter mapping
-     * @return PreparedStatement
+     * @return SQL prepared statement
      * @throws IOException
      */
 //  @ThreadSafe
-    public <P> TsurugiPreparedStatementUpdate1<P> createPreparedStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
+    public <P> TsurugiSqlPreparedStatement<P> createStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
         checkClose();
-        LOG.trace("createPreparedStatement start. sql={}", sql);
+        LOG.trace("createStatement start. sql={}", sql);
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
-        LOG.trace("createPreparedStatement started");
-        var ps = new TsurugiPreparedStatementUpdate1<>(this, sql, lowPreparedStatementFuture, parameterMapping);
+        LOG.trace("createStatement started");
+        var ps = new TsurugiSqlPreparedStatement<>(this, sql, lowPreparedStatementFuture, parameterMapping);
         event(null, listener -> listener.createStatement(ps));
         return ps;
     }
@@ -399,44 +399,44 @@ public class TsurugiSession implements Closeable {
     /**
      * create transaction manager
      *
-     * @param setting transaction manager settings
+     * @param txOption transaction option
      * @return Transaction Manager
      */
 //  @ThreadSafe
-    public TsurugiTransactionManager createTransactionManager(TgTxOption option) {
-        var setting = TgTmSetting.of(option);
+    public TsurugiTransactionManager createTransactionManager(TgTxOption txOption) {
+        var setting = TgTmSetting.of(txOption);
         return createTransactionManager(setting);
     }
 
     /**
      * create Transaction
      *
-     * @param option transaction option
+     * @param txOption transaction option
      * @return Transaction
      * @throws IOException
      */
 //  @ThreadSafe
-    public TsurugiTransaction createTransaction(@Nonnull TgTxOption option) throws IOException {
-        return createTransaction(option, null);
+    public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption) throws IOException {
+        return createTransaction(txOption, null);
     }
 
     /**
      * create Transaction
      *
-     * @param option      transaction option
+     * @param txOption    transaction option
      * @param initializer transaction initializer
      * @return Transaction
      * @throws IOException
      */
 //  @ThreadSafe
-    public TsurugiTransaction createTransaction(@Nonnull TgTxOption option, @Nullable Consumer<TsurugiTransaction> initializer) throws IOException {
+    public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption, @Nullable Consumer<TsurugiTransaction> initializer) throws IOException {
         checkClose();
 
-        var lowOption = option.toLowTransactionOption();
+        var lowOption = txOption.toLowTransactionOption();
         LOG.trace("lowTransaction create start. lowOption={}", lowOption);
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
         LOG.trace("lowTransaction create started");
-        var transaction = new TsurugiTransaction(this, lowTransactionFuture, option);
+        var transaction = new TsurugiTransaction(this, lowTransactionFuture, txOption);
         if (initializer != null) {
             initializer.accept(transaction);
         }

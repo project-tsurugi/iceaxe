@@ -3,10 +3,9 @@ package com.tsurugidb.iceaxe.example;
 import java.io.IOException;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
-import com.tsurugidb.iceaxe.statement.TgVariableList;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -28,7 +27,7 @@ public class Example41Update {
     }
 
     void update0(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        try (var ps = session.createPreparedStatement("update TEST set bar = 0")) {
+        try (var ps = session.createStatement("update TEST set bar = 0")) {
             int count = tm.executeAndGetCount(ps);
             System.out.println(count);
         }
@@ -40,16 +39,16 @@ public class Example41Update {
     }
 
     void updateParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        var foo = TgVariable.ofInt4("foo");
-        var add = TgVariable.ofInt8("add");
+        var foo = TgBindVariable.ofInt("foo");
+        var add = TgBindVariable.ofLong("add");
 
         var sql = "update TEST set bar = bar + :add where foo = :foo";
-        var vlist = TgVariableList.of(foo, add);
+        var parameterMapping = TgParameterMapping.of(foo, add);
 
-        try (var ps = session.createPreparedStatement(sql, TgParameterMapping.of(vlist))) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
-                var plist = TgParameterList.of(foo.bind(123), add.bind(1));
-                int count = transaction.executeAndGetCount(ps, plist);
+                var parameter = TgBindParameters.of(foo.bind(123), add.bind(1));
+                int count = transaction.executeAndGetCount(ps, parameter);
                 System.out.println(count);
             });
         }
@@ -61,11 +60,11 @@ public class Example41Update {
                 + " zzz = :zzz" //
                 + " where foo = :foo";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
-                .int4("foo", TestEntity::getFoo) //
-                .int8("bar", TestEntity::getBar) //
-                .character("zzz", TestEntity::getZzz);
+                .addInt("foo", TestEntity::getFoo) //
+                .addLong("bar", TestEntity::getBar) //
+                .addString("zzz", TestEntity::getZzz);
 
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 var entity = new TestEntity(123, 456L, "abc");
                 int count = transaction.executeAndGetCount(ps, entity);

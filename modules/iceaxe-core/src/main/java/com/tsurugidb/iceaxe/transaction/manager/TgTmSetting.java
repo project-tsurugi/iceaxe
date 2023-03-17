@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -38,11 +38,11 @@ public class TgTmSetting {
     /**
      * create Transaction Manager Settings
      *
-     * @param txOptionList transaction option list
+     * @param txOptions transaction options
      * @return Transaction Manager Settings
      */
-    public static TgTmSetting of(TgTxOption... txOptionList) {
-        var supplier = TgTmTxOptionList.of(txOptionList);
+    public static TgTmSetting of(TgTxOption... txOptions) {
+        var supplier = TgTmTxOptionList.of(txOptions);
         return of(supplier);
     }
 
@@ -157,14 +157,14 @@ public class TgTmSetting {
      */
     public TgTxOption getFirstTransactionOption() {
         var tmOption = getTransactionOption(0, null, null);
-        var option = tmOption.getOption();
-        if (option == null) {
-            throw new IllegalStateException(MessageFormat.format("tm-option is not execute. tmOption={0}", tmOption));
+        var txOption = tmOption.getTransactionOption();
+        if (txOption == null) {
+            throw new IllegalStateException(MessageFormat.format("tmOption is not execute. tmOption={0}", tmOption));
         }
-        if (option.label() == null && this.transactionLabel != null) {
-            return option.clone(transactionLabel);
+        if (txOption.label() == null && this.transactionLabel != null) {
+            return txOption.clone(transactionLabel);
         }
-        return option;
+        return txOption;
     }
 
     /**
@@ -182,9 +182,9 @@ public class TgTmSetting {
         }
         var tmOption = txOptionSupplier.get(attempt, transaction, e);
         if (tmOption.isExecute()) {
-            var option = tmOption.getOption();
-            if (option.label() == null && this.transactionLabel != null) {
-                tmOption = TgTmTxOption.execute(option.clone(transactionLabel));
+            var txOption = tmOption.getTransactionOption();
+            if (txOption.label() == null && this.transactionLabel != null) {
+                tmOption = TgTmTxOption.execute(txOption.clone(transactionLabel));
             }
         }
         return tmOption;
@@ -213,14 +213,14 @@ public class TgTmSetting {
     /**
      * get commit type
      *
-     * @param info Session information
+     * @param sessionOption session option
      * @return commit type
      */
-    public TgCommitType getCommitType(TgSessionInfo info) {
+    public TgCommitType getCommitType(TgSessionOption sessionOption) {
         if (this.commitType != null) {
             return this.commitType;
         }
-        return info.commitType();
+        return sessionOption.getCommitType();
     }
 
     /**

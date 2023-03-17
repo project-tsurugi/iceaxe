@@ -16,38 +16,38 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 @SuppressWarnings("unused")
 public class Example04TmSetting {
 
-    void setting1(TgTxOption option) {
+    void setting1(TgTxOption txOption) {
         // 指定されたトランザクションオプションでトランザクションを実行
         // トランザクションが失敗したら例外発生
-        var setting = TgTmSetting.of(option);
+        var setting = TgTmSetting.of(txOption);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void setting2(TgTxOption... optionList) {
+    void setting2(TgTxOption... txOptions) {
         // 指定されたトランザクションオプションでトランザクションを実行
         // トランザクションがリトライ可能なabortであれば、次に指定されたトランザクションオプションを使って再実行
         // 指定されたトランザクションオプションを全て使ってもトランザクションが失敗した場合は、例外発生
-        var setting = TgTmSetting.of(optionList);
+        var setting = TgTmSetting.of(txOptions);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void settingAlways(TgTxOption option) {
+    void settingAlways(TgTxOption txOption) {
         // 指定されたトランザクションオプションでトランザクションを実行
         // トランザクションがリトライ可能なabortである限り、指定されたトランザクションオプションを使って再実行し続ける
-        var setting = TgTmSetting.ofAlways(option);
+        var setting = TgTmSetting.ofAlways(txOption);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void settingAlwaysLimit(TgTxOption option) {
+    void settingAlwaysLimit(TgTxOption txOption) {
         // 指定されたトランザクションオプションでトランザクションを実行
         // トランザクションがリトライ可能なabortであれば、指定されたトランザクションオプションを使って再実行する
         // 指定された最大試行回数を超えたら、例外発生
-        var setting = TgTmSetting.ofAlways(option, 3);
+        var setting = TgTmSetting.ofAlways(txOption, 3);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void settingMultiple1(TgTxOption option) {
-        var setting = TgTmSetting.of(option, 3);
+    void settingMultiple1(TgTxOption txOption) {
+        var setting = TgTmSetting.of(txOption, 3);
 //      var tm = session.createTransactionManager(setting);
     }
 
@@ -57,76 +57,76 @@ public class Example04TmSetting {
     }
 
     //
-    // TgTxOptionSupplier
+    // TgTmTxOptionSupplier
     //
-    void supplier1(TgTxOption option) {
-        // same as TgTmSetting.of(option)
+    void supplier1(TgTxOption txOption) {
+        // same as TgTmSetting.of(txOption)
 
-        var supplier = TgTmTxOptionSupplier.of(option);
+        var supplier = TgTmTxOptionSupplier.of(txOption);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void supplier2(TgTxOption... optionList) {
-        // same as TgTmSetting.of(optionList)
+    void supplier2(TgTxOption... txOptions) {
+        // same as TgTmSetting.of(txOptions)
 
-        var supplier = TgTmTxOptionSupplier.of(optionList);
+        var supplier = TgTmTxOptionSupplier.of(txOptions);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void supplierAlways(TgTxOption option) {
-        // same as TgTmSetting.ofAlways(option)
+    void supplierAlways(TgTxOption txOption) {
+        // same as TgTmSetting.ofAlways(txOption)
 
-        var supplier = TgTmTxOptionSupplier.ofAlways(option);
+        var supplier = TgTmTxOptionSupplier.ofAlways(txOption);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void supplierAlwaysLimit(TgTxOption option) {
-        // same as TgTmSetting.ofAlways(option, 3)
+    void supplierAlwaysLimit(TgTxOption txOption) {
+        // same as TgTmSetting.ofAlways(txOption, 3)
 
-        var supplier = TgTmTxOptionSupplier.ofAlways(option, 3);
+        var supplier = TgTmTxOptionSupplier.ofAlways(txOption, 3);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void supplierMultiple1(TgTxOption option) {
-        // same as TgTmSetting.of(option, 3)
+    void supplierMultiple1(TgTxOption txOption) {
+        // same as TgTmSetting.of(txOption, 3)
 
-        var supplier = TgTmTxOptionSupplier.of(option, 3);
+        var supplier = TgTmTxOptionSupplier.of(txOption, 3);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void supplierMultiple2(TgTxOption option1, TgTxOption option2) {
-        // same as TgTmSetting.of(option1, 3, option2, 1)
+    void supplierMultiple2(TgTxOption txOption1, TgTxOption txOption2) {
+        // same as TgTmSetting.of(txOption1, 3, txOption2, 1)
 
-        var supplier = TgTmTxOptionSupplier.of(option1, 3, option2, 1);
+        var supplier = TgTmTxOptionSupplier.of(txOption1, 3, txOption2, 1);
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void supplierCustom(TgTxOption firstOption, TgTxOption laterOption) {
+    void supplierCustom(TgTxOption firstTxOption, TgTxOption laterTxOption) {
         var supplier = new TgTmTxOptionSupplier() {
             @Override
             protected TgTmTxOption computeFirstTmOption() {
                 // 初回はfirstOptionでトランザクション実行
-                return TgTmTxOption.execute(firstOption);
+                return TgTmTxOption.execute(firstTxOption);
             }
 
             @Override
             protected TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e) {
                 // 2回目以降でリトライ可能な場合はlaterOptionでトランザクション実行
-                return TgTmTxOption.execute(laterOption);
+                return TgTmTxOption.execute(laterTxOption);
             }
         };
         var setting = TgTmSetting.of(supplier);
 //      var tm = session.createTransactionManager(setting);
     }
 
-    void supplierLog(TgTxOption option) {
-        var supplier = TgTmTxOptionSupplier.ofAlways(option, Integer.MAX_VALUE);
+    void supplierLog(TgTxOption txOption) {
+        var supplier = TgTmTxOptionSupplier.ofAlways(txOption, Integer.MAX_VALUE);
         supplier.setTmOptionListener((attempt, e, tmOption) -> {
             if (attempt > 0 && tmOption.isExecute()) {
                 System.out.println("retry " + attempt);
@@ -135,8 +135,8 @@ public class Example04TmSetting {
         var setting = TgTmSetting.of(supplier);
     }
 
-    void supplierLogFromSetting(TgTxOption option) {
-        var setting = TgTmSetting.ofAlways(option);
+    void supplierLogFromSetting(TgTxOption txOption) {
+        var setting = TgTmSetting.ofAlways(txOption);
         setting.getTransactionOptionSupplier().setTmOptionListener((attempt, e, tmOption) -> {
             if (attempt > 0 && tmOption.isExecute()) {
                 System.out.println("retry " + attempt);

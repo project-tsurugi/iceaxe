@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -42,7 +42,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     void select() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(SELECT_SQL)) {
+        try (var ps = session.createQuery(SELECT_SQL)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 LOG.trace("i={}", i);
                 var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
@@ -84,7 +84,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     private void statement(String sql, String expected) throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
                     tm.execute((TsurugiTransactionAction) transaction -> {
@@ -103,15 +103,15 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
 
     @Test
     void selectBind() throws IOException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo=" + foo;
         var parameterMapping = TgParameterMapping.of(foo);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
-                var parameter = TgParameterList.of(foo.bind(1));
+                var parameter = TgBindParameters.of(foo.bind(1));
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetList(ps, parameter);
                 });
@@ -119,7 +119,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 assertContains("table_not_found test", e.getMessage());
             });
             tm.execute((TsurugiTransactionAction) transaction -> {
-                var parameter = TgParameterList.of(foo.bind(1));
+                var parameter = TgBindParameters.of(foo.bind(1));
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetList(ps, parameter);
                 });
@@ -138,20 +138,20 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
 
     @Test
     void updateBind() throws IOException {
-        var bar = TgVariable.ofInt8("bar");
+        var bar = TgBindVariable.ofLong("bar");
         var sql = "update " + TEST + " set bar = " + bar;
         var mapping = TgParameterMapping.of(bar);
-        var parameter = TgParameterList.of(bar.bind(0));
+        var parameter = TgBindParameters.of(bar.bind(0));
         var expected = "table_not_found test";
         preparedStatement(sql, mapping, parameter, expected);
     }
 
     @Test
     void deleteBind() throws IOException {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = "delete from " + TEST + " where foo=" + foo;
         var mapping = TgParameterMapping.of(foo);
-        var parameter = TgParameterList.of(foo.bind(1));
+        var parameter = TgBindParameters.of(foo.bind(1));
         var expected = "table_not_found test";
         preparedStatement(sql, mapping, parameter, expected);
     }
@@ -159,7 +159,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     private <P> void preparedStatement(String sql, TgParameterMapping<P> parameterMapping, P parameter, String expected) throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(sql, parameterMapping)) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetCount(ps, parameter);

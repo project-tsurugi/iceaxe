@@ -14,9 +14,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
-import com.tsurugidb.iceaxe.statement.TgEntityParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
@@ -86,12 +86,12 @@ class DbSelectJoinTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         tm.execute(transaction -> {
-            try (var ps = session.createPreparedStatement(MASTER_INSERT_SQL, MASTER_MAPPING)) {
+            try (var ps = session.createStatement(MASTER_INSERT_SQL, MASTER_MAPPING)) {
                 for (var entity : MASTER_LIST) {
                     transaction.executeAndGetCount(ps, entity);
                 }
             }
-            try (var ps = session.createPreparedStatement(DETAIL_INSERT_SQL, DETAIL_MAPPING)) {
+            try (var ps = session.createStatement(DETAIL_INSERT_SQL, DETAIL_MAPPING)) {
                 for (var entity : DETAIL_LIST) {
                     transaction.executeAndGetCount(ps, entity);
                 }
@@ -121,8 +121,8 @@ class DbSelectJoinTest extends DbTestTableTester {
             + " (m_id, m_name)" //
             + " values(:m_id, :m_name)";
     private static final TgEntityParameterMapping<MasterEntity> MASTER_MAPPING = TgParameterMapping.of(MasterEntity.class) //
-            .int4("m_id", MasterEntity::getId) //
-            .character("m_name", MasterEntity::getName);
+            .addInt("m_id", MasterEntity::getId) //
+            .addString("m_name", MasterEntity::getName);
 
     private static class DetailEntity {
         private long id;
@@ -152,9 +152,9 @@ class DbSelectJoinTest extends DbTestTableTester {
             + " (d_id, d_master_id, d_memo)" //
             + " values(:d_id, :d_master_id, :d_memo)";
     private static final TgEntityParameterMapping<DetailEntity> DETAIL_MAPPING = TgParameterMapping.of(DetailEntity.class) //
-            .int8("d_id", DetailEntity::getId) //
-            .int4("d_master_id", DetailEntity::getMasterId) //
-            .character("d_memo", DetailEntity::getMemo);
+            .addLong("d_id", DetailEntity::getId) //
+            .addInt("d_master_id", DetailEntity::getMasterId) //
+            .addString("d_memo", DetailEntity::getMemo);
 
     @Test
     void simpleJoin() throws IOException {
@@ -172,7 +172,7 @@ class DbSelectJoinTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             assertEqualsMasterDetail(expectedList, list);
         }
@@ -194,7 +194,7 @@ class DbSelectJoinTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             assertEqualsMasterDetail(expectedList, list);
         }
@@ -214,7 +214,7 @@ class DbSelectJoinTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             assertEquals(4, list.size()); // TODO left join実装待ち
 //          assertEqualsMasterDetail(expectedList, list);
@@ -253,16 +253,16 @@ class DbSelectJoinTest extends DbTestTableTester {
         for (var pair : expectedList) {
             var actual = actualList.get(i++);
             var detail = pair.detail;
-            assertEquals(detail.getId(), actual.getInt8("d_id"));
-            assertEquals(detail.getMasterId(), actual.getInt4OrNull("d_master_id"));
-            assertEquals(detail.getMemo(), actual.getCharacter("d_memo"));
+            assertEquals(detail.getId(), actual.getLong("d_id"));
+            assertEquals(detail.getMasterId(), actual.getIntOrNull("d_master_id"));
+            assertEquals(detail.getMemo(), actual.getString("d_memo"));
             var master = pair.master;
             if (master != null) {
-                assertEquals(master.getId(), actual.getInt4("m_id"));
-                assertEquals(master.getName(), actual.getCharacter("m_name"));
+                assertEquals(master.getId(), actual.getInt("m_id"));
+                assertEquals(master.getName(), actual.getString("m_name"));
             } else {
-                assertNull(actual.getInt4OrNull("m_id"));
-                assertNull(actual.getInt4OrNull("m_name"));
+                assertNull(actual.getIntOrNull("m_id"));
+                assertNull(actual.getIntOrNull("m_name"));
             }
         }
     }

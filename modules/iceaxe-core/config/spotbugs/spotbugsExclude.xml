@@ -6,16 +6,16 @@
 
   <Match>
     <Or>
-      <Class name="com.tsurugidb.iceaxe.result.TgEntityResultMapping" />
       <Class name="com.tsurugidb.iceaxe.session.TsurugiSession" />
-      <Class name="com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared" />
+      <Class name="com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared" />
+      <Class name="com.tsurugidb.iceaxe.sql.result.mapping.TgEntityResultMapping" />
       <Class name="com.tsurugidb.iceaxe.transaction.TsurugiTransaction" />
     </Or>
     <Bug pattern="IS2_INCONSISTENT_SYNC" />
   </Match>
   <Match>
-    <Class name="com.tsurugidb.iceaxe.statement.TgEntityParameterMapping" />
-    <Method name="~.*bool.*" />
+    <Class name="com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping" />
+    <Method name="~.*addBoolean.*" />
     <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
   </Match>
 

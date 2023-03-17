@@ -100,7 +100,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
                 var transaction = session.createTransaction(TgTxOption.ofOCC());
                 // transaction.close is called on session.close
 
-                var ps = session.createPreparedQuery(sql);
+                var ps = session.createQuery(sql);
                 // ps.close is called on session.close
 
                 switch (type) {
@@ -109,13 +109,13 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
                     transaction.executeAndGetList(ps);
                     break;
                 case CLOSE_ONLY:
-                    try (var rs = ps.execute(transaction)) {
+                    try (var result = ps.execute(transaction)) {
                     }
                     break;
                 case EXEUTE_ONLY:
                     @SuppressWarnings("unused")
-                    var rs = ps.execute(transaction);
-                    // rs.close is called on ps.close
+                    var result = ps.execute(transaction);
+                    // result.close is called on ps.close
                     break;
                 }
 

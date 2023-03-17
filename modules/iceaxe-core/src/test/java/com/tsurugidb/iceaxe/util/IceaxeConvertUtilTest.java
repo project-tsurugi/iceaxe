@@ -59,66 +59,66 @@ class IceaxeConvertUtilTest {
     }
 
     @Test
-    void testToInt4() {
-        assertNull(target.toInt4(null));
+    void testToInt() {
+        assertNull(target.toInt(null));
 
-        assertEquals(Integer.valueOf(123), target.toInt4((byte) 123));
-        assertEquals(Integer.valueOf(123), target.toInt4((short) 123));
-        assertEquals(Integer.valueOf(123), target.toInt4(123));
-        assertEquals(Integer.valueOf(123), target.toInt4(123L));
-        assertEquals(Integer.valueOf(123), target.toInt4(123f));
-        assertEquals(Integer.valueOf(123), target.toInt4(123d));
-        assertEquals(Integer.valueOf(123), target.toInt4(BigDecimal.valueOf(123)));
-        assertEquals(Integer.valueOf(123), target.toInt4("123"));
+        assertEquals(Integer.valueOf(123), target.toInt((byte) 123));
+        assertEquals(Integer.valueOf(123), target.toInt((short) 123));
+        assertEquals(Integer.valueOf(123), target.toInt(123));
+        assertEquals(Integer.valueOf(123), target.toInt(123L));
+        assertEquals(Integer.valueOf(123), target.toInt(123f));
+        assertEquals(Integer.valueOf(123), target.toInt(123d));
+        assertEquals(Integer.valueOf(123), target.toInt(BigDecimal.valueOf(123)));
+        assertEquals(Integer.valueOf(123), target.toInt("123"));
 
-        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toInt4("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toInt("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
     @Test
-    void testToInt8() {
-        assertNull(target.toInt8(null));
+    void testToLong() {
+        assertNull(target.toLong(null));
 
-        assertEquals(Long.valueOf(123), target.toInt8((byte) 123));
-        assertEquals(Long.valueOf(123), target.toInt8((short) 123));
-        assertEquals(Long.valueOf(123), target.toInt8(123));
-        assertEquals(Long.valueOf(123), target.toInt8(123L));
-        assertEquals(Long.valueOf(123), target.toInt8(123f));
-        assertEquals(Long.valueOf(123), target.toInt8(123d));
-        assertEquals(Long.valueOf(123), target.toInt8(BigDecimal.valueOf(123)));
-        assertEquals(Long.valueOf(123), target.toInt8("123"));
+        assertEquals(Long.valueOf(123), target.toLong((byte) 123));
+        assertEquals(Long.valueOf(123), target.toLong((short) 123));
+        assertEquals(Long.valueOf(123), target.toLong(123));
+        assertEquals(Long.valueOf(123), target.toLong(123L));
+        assertEquals(Long.valueOf(123), target.toLong(123f));
+        assertEquals(Long.valueOf(123), target.toLong(123d));
+        assertEquals(Long.valueOf(123), target.toLong(BigDecimal.valueOf(123)));
+        assertEquals(Long.valueOf(123), target.toLong("123"));
 
-        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toInt8("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toLong("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
     @Test
-    void testToFloat4() {
-        assertNull(target.toFloat4(null));
+    void testToFloat() {
+        assertNull(target.toFloat(null));
 
-        assertEquals(Float.valueOf(123), target.toFloat4(123));
-        assertEquals(Float.valueOf(123), target.toFloat4(123L));
-        assertEquals(Float.valueOf(123), target.toFloat4(123f));
-        assertEquals(Float.valueOf(123), target.toFloat4(123d));
-        assertEquals(Float.valueOf(123), target.toFloat4(BigDecimal.valueOf(123)));
-        assertEquals(Float.valueOf(123), target.toFloat4("123"));
+        assertEquals(Float.valueOf(123), target.toFloat(123));
+        assertEquals(Float.valueOf(123), target.toFloat(123L));
+        assertEquals(Float.valueOf(123), target.toFloat(123f));
+        assertEquals(Float.valueOf(123), target.toFloat(123d));
+        assertEquals(Float.valueOf(123), target.toFloat(BigDecimal.valueOf(123)));
+        assertEquals(Float.valueOf(123), target.toFloat("123"));
 
-        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toFloat4("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toFloat("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
     @Test
-    void testToFloat8() {
-        assertNull(target.toFloat8(null));
+    void testToDouble() {
+        assertNull(target.toDouble(null));
 
-        assertEquals(Double.valueOf(123), target.toFloat8(123));
-        assertEquals(Double.valueOf(123), target.toFloat8(123L));
-        assertEquals(Double.valueOf(123), target.toFloat8(123f));
-        assertEquals(Double.valueOf(123), target.toFloat8(123d));
-        assertEquals(Double.valueOf(123), target.toFloat8(BigDecimal.valueOf(123)));
-        assertEquals(Double.valueOf(123), target.toFloat8("123"));
+        assertEquals(Double.valueOf(123), target.toDouble(123));
+        assertEquals(Double.valueOf(123), target.toDouble(123L));
+        assertEquals(Double.valueOf(123), target.toDouble(123f));
+        assertEquals(Double.valueOf(123), target.toDouble(123d));
+        assertEquals(Double.valueOf(123), target.toDouble(BigDecimal.valueOf(123)));
+        assertEquals(Double.valueOf(123), target.toDouble("123"));
 
-        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toFloat8("abc"));
+        var e = assertThrowsExactly(UnsupportedOperationException.class, () -> target.toDouble("abc"));
         assertInstanceOf(NumberFormatException.class, e.getCause());
     }
 
@@ -141,24 +141,24 @@ class IceaxeConvertUtilTest {
     }
 
     @Test
-    void testToCharacter() {
-        assertNull(target.toCharacter(null));
+    void testToString() {
+        assertNull(target.toString(null));
 
-        assertEquals("123", target.toCharacter((byte) 123));
-        assertEquals("123", target.toCharacter((short) 123));
-        assertEquals("123", target.toCharacter(123));
-        assertEquals("123", target.toCharacter(123L));
-        assertEquals("123.0", target.toCharacter(123f));
-        assertEquals("123.0", target.toCharacter(123d));
-        assertEquals("123", target.toCharacter(BigDecimal.valueOf(123)));
-        assertEquals("123", target.toCharacter("123"));
+        assertEquals("123", target.toString((byte) 123));
+        assertEquals("123", target.toString((short) 123));
+        assertEquals("123", target.toString(123));
+        assertEquals("123", target.toString(123L));
+        assertEquals("123.0", target.toString(123f));
+        assertEquals("123.0", target.toString(123d));
+        assertEquals("123", target.toString(BigDecimal.valueOf(123)));
+        assertEquals("123", target.toString("123"));
 
         var e = assertThrowsExactly(UnsupportedOperationException.class, () -> new IceaxeConvertUtil() {
             @Override
             protected String convertString(Object obj) {
                 throw new RuntimeException("test");
             }
-        }.toCharacter("123"));
+        }.toString("123"));
         assertEquals("test", e.getCause().getMessage());
     }
 

@@ -16,14 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
-import com.tsurugidb.iceaxe.result.TgEntityResultMapping;
-import com.tsurugidb.iceaxe.result.TgResultMapping;
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgEntityParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.sql.result.mapping.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
@@ -124,7 +124,7 @@ public class DbTestTableTester {
     @Deprecated(forRemoval = true)
     private static void executeDdlWorkaround(TsurugiSession session, String sql) throws IOException {
         var tm = createTransactionManagerOcc(session, 3);
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             for (int i = 1;; i++) {
                 try {
                     tm.executeAndGetCount(ps);
@@ -152,14 +152,14 @@ public class DbTestTableTester {
             + "(" + TEST_COLUMNS + ")" //
             + "values(:foo, :bar, :zzz)";
     protected static final TgEntityParameterMapping<TestEntity> INSERT_MAPPING = TgParameterMapping.of(TestEntity.class) //
-            .int4("foo", TestEntity::getFoo) //
-            .int8("bar", TestEntity::getBar) //
-            .character("zzz", TestEntity::getZzz);
+            .addInt("foo", TestEntity::getFoo) //
+            .addLong("bar", TestEntity::getBar) //
+            .addString("zzz", TestEntity::getZzz);
 
     protected static void insertTestTable(int size) throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 for (int i = 0; i < size; i++) {
                     var entity = createTestEntity(i);
@@ -176,7 +176,7 @@ public class DbTestTableTester {
     protected static void insertTestTable(TestEntity entity) throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 transaction.executeAndGetCount(ps, entity);
             });
@@ -186,9 +186,9 @@ public class DbTestTableTester {
     protected static final String SELECT_SQL = "select " + TEST_COLUMNS + " from " + TEST;
 
     protected static final TgEntityResultMapping<TestEntity> SELECT_MAPPING = TgResultMapping.of(TestEntity::new) //
-            .int4("foo", TestEntity::setFoo) //
-            .int8("bar", TestEntity::setBar) //
-            .character("zzz", TestEntity::setZzz);
+            .addInt("foo", TestEntity::setFoo) //
+            .addLong("bar", TestEntity::setBar) //
+            .addString("zzz", TestEntity::setZzz);
 
     // transaction manager
 
@@ -266,9 +266,9 @@ public class DbTestTableTester {
     }
 
     protected static void assertEqualsResultEntity(TestEntity expected, TsurugiResultEntity actual) {
-        assertEquals(expected.getFoo(), actual.getInt4OrNull("foo"));
-        assertEquals(expected.getBar(), actual.getInt8OrNull("bar"));
-        assertEquals(expected.getZzz(), actual.getCharacterOrNull("zzz"));
+        assertEquals(expected.getFoo(), actual.getIntOrNull("foo"));
+        assertEquals(expected.getBar(), actual.getLongOrNull("bar"));
+        assertEquals(expected.getZzz(), actual.getStringOrNull("zzz"));
     }
 
     protected static List<TestEntity> selectAllFromTest() throws IOException {
@@ -276,18 +276,18 @@ public class DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
-        try (var ps = session.createPreparedQuery(sql, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
             return tm.executeAndGetList(ps);
         }
     }
 
     protected static TestEntity selectFromTest(int foo) throws IOException {
-        var where1 = TgVariable.ofInt4("foo");
+        var where1 = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo=" + where1;
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
-        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of(where1), SELECT_MAPPING)) {
-            var parameter = TgParameterList.of(where1.bind(foo));
+        try (var ps = session.createQuery(sql, TgParameterMapping.of(where1), SELECT_MAPPING)) {
+            var parameter = TgBindParameters.of(where1.bind(foo));
             return tm.executeAndFindRecord(ps, parameter).orElse(null);
         }
     }
@@ -298,11 +298,11 @@ public class DbTestTableTester {
 
     protected static int selectCountFrom(String tableName) throws IOException {
         var sql = "select count(*) from " + tableName;
-        var resultMapping = TgResultMapping.of(record -> record.nextInt4());
+        var resultMapping = TgResultMapping.of(int.class);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
-        try (var ps = session.createPreparedQuery(sql, resultMapping)) {
+        try (var ps = session.createQuery(sql, resultMapping)) {
             return tm.executeAndFindRecord(ps).get();
         }
     }

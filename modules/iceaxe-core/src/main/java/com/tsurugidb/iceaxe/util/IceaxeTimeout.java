@@ -2,8 +2,8 @@ package com.tsurugidb.iceaxe.util;
 
 import java.util.concurrent.TimeUnit;
 
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.tsubakuro.util.ServerResource;
 import com.tsurugidb.tsubakuro.util.Timeout;
 import com.tsurugidb.tsubakuro.util.Timeout.Policy;
@@ -11,12 +11,12 @@ import com.tsurugidb.tsubakuro.util.Timeout.Policy;
 // internal
 public class IceaxeTimeout {
 
-    private final TgSessionInfo info;
+    private final TgSessionOption sessionOption;
     private final TgTimeoutKey key;
     private TgTimeValue value;
 
-    public IceaxeTimeout(TgSessionInfo info, TgTimeoutKey key) {
-        this.info = info;
+    public IceaxeTimeout(TgSessionOption sessionOption, TgTimeoutKey key) {
+        this.sessionOption = sessionOption;
         this.key = key;
     }
 
@@ -30,7 +30,7 @@ public class IceaxeTimeout {
 
     public TgTimeValue get() {
         if (this.value == null) {
-            this.value = info.timeout(key);
+            this.value = sessionOption.getTimeout(key);
         }
         return this.value;
     }

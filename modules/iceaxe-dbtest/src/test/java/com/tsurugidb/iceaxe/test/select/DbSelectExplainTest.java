@@ -12,10 +12,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.explain.TgStatementMetadata;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
+import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 import com.tsurugidb.tsubakuro.explain.PlanGraphException;
@@ -44,7 +44,7 @@ class DbSelectExplainTest extends DbTestTableTester {
         var sql = "select * from " + TEST;
 
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             assertThrowsExactly(UnsupportedOperationException.class, () -> {
                 var result = ps.explain();
                 assertExplain(result);
@@ -54,13 +54,13 @@ class DbSelectExplainTest extends DbTestTableTester {
 
     @Test
     void psParameter() throws Exception {
-        var foo = TgVariable.ofInt4("foo");
+        var foo = TgBindVariable.ofInt("foo");
         var sql = "select * from " + TEST + " where foo=" + foo;
         var parameterMapping = TgParameterMapping.of(foo);
 
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
-            var parameter = TgParameterList.of(foo.bind(1));
+        try (var ps = session.createQuery(sql, parameterMapping)) {
+            var parameter = TgBindParameters.of(foo.bind(1));
             var result = ps.explain(parameter);
             assertExplain(result);
         }
@@ -87,8 +87,8 @@ class DbSelectExplainTest extends DbTestTableTester {
         var sql = "select * from " + Stream.generate(() -> TEST).limit(6).collect(Collectors.joining(","));
 
         var session = getSession();
-        try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of())) {
-            var result = ps.explain(TgParameterList.of());
+        try (var ps = session.createQuery(sql, TgParameterMapping.of())) {
+            var result = ps.explain(TgBindParameters.of());
             assertNotNull(result.getLowPlanGraph());
         }
     }

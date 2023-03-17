@@ -74,7 +74,7 @@ public class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public Integer toInt4(@Nullable Object obj) {
+    public Integer toInt(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -107,7 +107,7 @@ public class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public Long toInt8(@Nullable Object obj) {
+    public Long toLong(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -140,7 +140,7 @@ public class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public Float toFloat4(@Nullable Object obj) {
+    public Float toFloat(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -173,7 +173,7 @@ public class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public Double toFloat8(@Nullable Object obj) {
+    public Double toDouble(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -251,7 +251,7 @@ public class IceaxeConvertUtil {
      * @return value
      */
     @Nullable
-    public String toCharacter(@Nullable Object obj) {
+    public String toString(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }

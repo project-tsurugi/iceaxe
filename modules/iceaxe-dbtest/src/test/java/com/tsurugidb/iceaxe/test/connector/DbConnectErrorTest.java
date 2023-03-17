@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -41,11 +41,11 @@ public class DbConnectErrorTest {
 
     private void connect(int port) throws IOException {
         var endpoint = URI.create("tcp://localhost:" + port);
-        var connector = TsurugiConnector.createConnector(endpoint);
+        var connector = TsurugiConnector.of(endpoint);
 
-        var info = TgSessionInfo.of();
-        info.timeout(TgTimeoutKey.DEFAULT, 3, TimeUnit.SECONDS);
-        try (var session = connector.createSession(info); //
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 3, TimeUnit.SECONDS);
+        try (var session = connector.createSession(sessionOption); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
         }
     }

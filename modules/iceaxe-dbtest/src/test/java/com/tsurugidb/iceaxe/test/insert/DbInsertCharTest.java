@@ -46,7 +46,7 @@ class DbInsertCharTest extends DbTestTableTester {
     void insertNull() throws IOException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             var entity = new TestEntity(1, 1, null);
             int count = tm.executeAndGetCount(ps, entity);
             assertUpdateCount(1, count);
@@ -66,7 +66,7 @@ class DbInsertCharTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             int i = 0;
             for (var zzz : list) {
                 assert zzz.getBytes(StandardCharsets.UTF_8).length <= ZZZ_SIZE;
@@ -90,7 +90,7 @@ class DbInsertCharTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             int i = 0;
             for (var zzz : list) {
                 assert zzz.getBytes(StandardCharsets.UTF_8).length > ZZZ_SIZE;
@@ -114,7 +114,7 @@ class DbInsertCharTest extends DbTestTableTester {
         int size = 6;
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             for (int i = 1; i <= size; i++) {
                 var entity = new TestEntity(i, i, nulCharText(i));
 
@@ -123,7 +123,7 @@ class DbInsertCharTest extends DbTestTableTester {
             }
         }
 
-        try (var ps = session.createPreparedQuery(SELECT_SQL + " order by zzz", SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_SQL + " order by zzz", SELECT_MAPPING)) {
             var list = tm.executeAndGetList(ps);
             assertEquals(size, list.size());
             // int i = size;

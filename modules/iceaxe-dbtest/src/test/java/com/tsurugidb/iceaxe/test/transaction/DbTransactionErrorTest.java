@@ -45,7 +45,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
                 + "values(123, 456, 'abc')";
 
         var session = getSession();
-        try (var ps = session.createPreparedStatement(sql); //
+        try (var ps = session.createStatement(sql); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             int count = transaction.executeAndGetCount(ps);
             assertUpdateCount(1, count);
@@ -65,7 +65,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofRTX());
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> tm.executeAndGetCount(ps));
             assertEqualsCode(SqlServiceCode.ERR_UNSUPPORTED, e);
         }
@@ -82,7 +82,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofLTX()); // no WritePreserve
-        try (var ps = session.createPreparedStatement(sql)) {
+        try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> tm.executeAndGetCount(ps));
             assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
         }

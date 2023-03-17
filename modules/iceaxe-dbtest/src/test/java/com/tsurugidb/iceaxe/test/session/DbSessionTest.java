@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -36,7 +36,7 @@ class DbSessionTest extends DbTestTableTester {
     void preparedStatementOnly() throws IOException {
         var sql = "select * from " + TEST;
         try (var session = DbTestConnector.createSession()) {
-            try (var ps = session.createPreparedQuery(sql, TgParameterMapping.of())) {
+            try (var ps = session.createQuery(sql, TgParameterMapping.of())) {
                 assertTrue(session.isAlive());
             }
         }

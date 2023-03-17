@@ -14,7 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -41,8 +41,8 @@ class DbSelectLiteralTest extends DbTestTableTester {
     @Test
     void nullLiteral() throws IOException {
         test("null", entity -> {
-            assertNull(entity.getCharacterOrNull(COLUMN));
-            assertNull(entity.getInt4OrNull(COLUMN));
+            assertNull(entity.getStringOrNull(COLUMN));
+            assertNull(entity.getIntOrNull(COLUMN));
         });
     }
 
@@ -50,9 +50,9 @@ class DbSelectLiteralTest extends DbTestTableTester {
     void longLiteral() throws IOException {
         long literal = 1;
         test(Long.toString(literal), entity -> {
-            assertEquals(literal, entity.getInt8(COLUMN));
+            assertEquals(literal, entity.getLong(COLUMN));
 
-            assertEquals((int) literal, entity.getInt4(COLUMN));
+            assertEquals((int) literal, entity.getInt(COLUMN));
             assertEquals(BigDecimal.valueOf(literal), entity.getDecimal(COLUMN));
         });
     }
@@ -61,7 +61,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
     void doubleLiteral() throws IOException {
         double literal = 12.3;
         test(Double.toString(literal), entity -> {
-            assertEquals(literal, entity.getFloat8(COLUMN));
+            assertEquals(literal, entity.getDouble(COLUMN));
 
             assertEquals(BigDecimal.valueOf(literal), entity.getDecimal(COLUMN));
         });
@@ -81,7 +81,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
     void stringLiteral() throws IOException {
         String literal = "abc";
         test(String.format("'%s'", literal), entity -> {
-            assertEquals(literal, entity.getCharacter(COLUMN));
+            assertEquals(literal, entity.getString(COLUMN));
         });
     }
 
@@ -100,7 +100,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var entity = tm.executeAndFindRecord(ps).get();
             assertion.accept(entity);
         }

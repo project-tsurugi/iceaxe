@@ -64,12 +64,12 @@ class DbSystemReservedWordTest extends DbTestTableTester {
         var sql = "select foo as __foo from " + TEST + " order by foo";
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createPreparedQuery(sql)) {
+        try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(ps);
             assertEquals(size, list.size());
             int i = 0;
             for (var entity : list) {
-                assertEquals(i++, entity.getInt4("__foo"));
+                assertEquals(i++, entity.getInt("__foo"));
             }
         }
     }

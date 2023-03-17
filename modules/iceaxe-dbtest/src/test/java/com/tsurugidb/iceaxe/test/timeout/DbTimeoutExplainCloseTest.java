@@ -9,13 +9,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-import com.tsurugidb.iceaxe.explain.TsurugiExplainHelper;
-import com.tsurugidb.iceaxe.session.TgSessionInfo;
-import com.tsurugidb.iceaxe.session.TgSessionInfo.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
+import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TsurugiSqlPrepared;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
@@ -43,8 +43,8 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
     void timeoutDefault() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.SECONDS);
+            public void modifySessionInfo(TgSessionOption sessionOption) {
+                sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -53,8 +53,8 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
     void timeoutSpecified() throws IOException {
         testTimeout(new TimeoutModifier() {
             @Override
-            public void modifySessionInfo(TgSessionInfo info) {
-                info.timeout(TgTimeoutKey.EXPLAIN_CLOSE, 1, TimeUnit.SECONDS);
+            public void modifySessionInfo(TgSessionOption sessionOption) {
+                sessionOption.setTimeout(TgTimeoutKey.EXPLAIN_CLOSE, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -107,10 +107,10 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
 
         var sql = "select * from " + TEST;
         var parameterMapping = TgParameterMapping.of();
-        try (var ps = session.createPreparedQuery(sql, parameterMapping)) {
+        try (var ps = session.createQuery(sql, parameterMapping)) {
             session.setExplainHelper(helper);
 
-            var parameter = TgParameterList.of();
+            var parameter = TgBindParameters.of();
             try {
                 ps.explain(parameter);
             } catch (IOException e) {

@@ -50,11 +50,11 @@ public class Example03TxOption {
     }
 
     // clone
-    TgTxOption cloneSimple(TgTxOption option) {
-        return option.clone();
+    TgTxOption cloneSimple(TgTxOption txOption) {
+        return txOption.clone();
     }
 
-    TgTxOption cloneWithLabel(TgTxOption option) {
-        return option.clone("new label");
+    TgTxOption cloneWithLabel(TgTxOption txOption) {
+        return txOption.clone("new label");
     }
 }

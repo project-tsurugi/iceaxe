@@ -3,12 +3,12 @@ package com.tsurugidb.iceaxe.example;
 import java.io.IOException;
 import java.util.List;
 
-import com.tsurugidb.iceaxe.result.TgResultMapping;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TgParameterList;
-import com.tsurugidb.iceaxe.statement.TgParameterMapping;
-import com.tsurugidb.iceaxe.statement.TgVariable;
-import com.tsurugidb.iceaxe.statement.TgVariableList;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -28,23 +28,23 @@ public class Example71In {
     }
 
     void in1(TsurugiSession session, TsurugiTransactionManager tm, List<Integer> fooList) throws IOException {
-        var vlist = TgVariableList.of();
-        var plist = TgParameterList.of();
+        var variables = TgBindVariables.of();
+        var parameter = TgBindParameters.of();
         int i = 0;
         for (var foo : fooList) {
-            var variable = TgVariable.ofInt4("f" + (i++));
-            vlist.add(variable);
-            plist.add(variable.bind(foo));
+            var variable = TgBindVariable.ofInt("f" + (i++));
+            variables.add(variable);
+            parameter.add(variable.bind(foo));
         }
 
-        var sql = "select * from TEST where foo in(" + vlist.getSqlNames() + ")";
-        var parameterMapping = TgParameterMapping.of(vlist);
+        var sql = "select * from TEST where foo in(" + variables.getSqlNamesString() + ")";
+        var parameterMapping = TgParameterMapping.of(variables);
         var resultMapping = TgResultMapping.of(TestEntity::new) //
-                .int4(TestEntity::setFoo) //
-                .int8(TestEntity::setBar) //
-                .character(TestEntity::setZzz);
-        try (var ps = session.createPreparedQuery(sql, parameterMapping, resultMapping)) {
-            var list = tm.executeAndGetList(ps, plist);
+                .addInt(TestEntity::setFoo) //
+                .addLong(TestEntity::setBar) //
+                .addString(TestEntity::setZzz);
+        try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
+            var list = tm.executeAndGetList(ps, parameter);
             for (var entity : list) {
                 System.out.println(entity);
             }

@@ -3,10 +3,10 @@ package com.tsurugidb.iceaxe.session.event;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery0;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementQuery1;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate0;
-import com.tsurugidb.iceaxe.statement.TsurugiPreparedStatementUpdate1;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 
@@ -21,7 +21,7 @@ public interface TsurugiSessionEventListener {
      * @param <R> result type
      * @param ps  query
      */
-    default <R> void createQuery(TsurugiPreparedStatementQuery0<R> ps) {
+    default <R> void createQuery(TsurugiSqlQuery<R> ps) {
         // do override
     }
 
@@ -32,7 +32,7 @@ public interface TsurugiSessionEventListener {
      * @param <R> result type
      * @param ps  query
      */
-    default <P, R> void createQuery(TsurugiPreparedStatementQuery1<P, R> ps) {
+    default <P, R> void createQuery(TsurugiSqlPreparedQuery<P, R> ps) {
         // do override
     }
 
@@ -41,7 +41,7 @@ public interface TsurugiSessionEventListener {
      *
      * @param ps statement
      */
-    default void createStatement(TsurugiPreparedStatementUpdate0 ps) {
+    default void createStatement(TsurugiSqlStatement ps) {
         // do override
     }
 
@@ -51,7 +51,7 @@ public interface TsurugiSessionEventListener {
      * @param <P> parameter type
      * @param ps  statement
      */
-    default <P> void createStatement(TsurugiPreparedStatementUpdate1<P> ps) {
+    default <P> void createStatement(TsurugiSqlPreparedStatement<P> ps) {
         // do override
     }
 
