@@ -328,8 +328,8 @@ public class TsurugiTransaction implements Closeable {
         EXECUTE_QUERY("executeQuery"), //
         /** execute statement */
         EXECUTE_SATTEMENT("executeStatement"), //
-        /** execute for each */
-        EXECUTE_FOR_EACH("executeForEach"), //
+        /** execute and for each */
+        EXECUTE_FOR_EACH("executeAndForEach"), //
         /** execute and get list */
         EXECUTE_GET_LIST("executeAndGetList"), //
         /** execute and find record */
@@ -395,7 +395,7 @@ public class TsurugiTransaction implements Closeable {
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
      * @throws TsurugiTransactionException
-     * @see #executeForEach(TsurugiSqlQuery, TsurugiTransactionConsumer)
+     * @see #executeAndForEach(TsurugiSqlQuery, TsurugiTransactionConsumer)
      * @see #executeAndFindRecord(TsurugiSqlQuery)
      * @see #executeAndGetList(TsurugiSqlQuery)
      */
@@ -429,7 +429,7 @@ public class TsurugiTransaction implements Closeable {
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
      * @throws TsurugiTransactionException
-     * @see #executeForEach(TsurugiSqlPreparedQuery, P, TsurugiTransactionConsumer)
+     * @see #executeAndForEach(TsurugiSqlPreparedQuery, P, TsurugiTransactionConsumer)
      * @see #executeAndFindRecord(TsurugiSqlPreparedQuery, P)
      * @see #executeAndGetList(TsurugiSqlPreparedQuery, P)
      */
@@ -523,7 +523,7 @@ public class TsurugiTransaction implements Closeable {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    public <R> void executeForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+    public <R> void executeAndForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
         var method = TgTxExecuteMethod.EXECUTE_FOR_EACH;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
@@ -554,7 +554,7 @@ public class TsurugiTransaction implements Closeable {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    public <P, R> void executeForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+    public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
         var method = TgTxExecuteMethod.EXECUTE_FOR_EACH;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));

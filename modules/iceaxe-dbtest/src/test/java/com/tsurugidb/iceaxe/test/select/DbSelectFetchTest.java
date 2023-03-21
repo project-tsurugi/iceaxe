@@ -54,7 +54,7 @@ class DbSelectFetchTest extends DbTestTableTester {
                 var ps2 = session.createQuery(sql, parameterMapping, SELECT_MAPPING); //
                 var ps3 = session.createStatement(INSERT_SQL.replace(TEST, TEST2), INSERT_MAPPING)) {
             tm.execute(transaction -> {
-                transaction.executeForEach(ps, fetch -> {
+                transaction.executeAndForEach(ps, fetch -> {
                     int foo = fetch.getInt("foo");
                     var parameter = TgBindParameters.of(cond.bind(foo));
                     var entity = transaction.executeAndFindRecord(ps2, parameter).get();

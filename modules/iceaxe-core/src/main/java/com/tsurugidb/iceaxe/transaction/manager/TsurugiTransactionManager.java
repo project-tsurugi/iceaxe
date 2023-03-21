@@ -350,8 +350,8 @@ public class TsurugiTransactionManager {
      * @param action The action to be performed for each record
      * @throws IOException
      */
-    public void executeForEach(String sql, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
-        executeForEach(defaultSetting(), sql, TgResultMapping.DEFAULT, action);
+    public void executeAndForEach(String sql, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
+        executeAndForEach(defaultSetting(), sql, TgResultMapping.DEFAULT, action);
     }
 
     /**
@@ -362,8 +362,8 @@ public class TsurugiTransactionManager {
      * @param action  The action to be performed for each record
      * @throws IOException
      */
-    public void executeForEach(TgTmSetting setting, String sql, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
-        executeForEach(setting, sql, TgResultMapping.DEFAULT, action);
+    public void executeAndForEach(TgTmSetting setting, String sql, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
+        executeAndForEach(setting, sql, TgResultMapping.DEFAULT, action);
     }
 
     /**
@@ -375,8 +375,8 @@ public class TsurugiTransactionManager {
      * @param action        The action to be performed for each record
      * @throws IOException
      */
-    public <R> void executeForEach(String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
-        executeForEach(defaultSetting(), sql, resultMapping, action);
+    public <R> void executeAndForEach(String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
+        executeAndForEach(defaultSetting(), sql, resultMapping, action);
     }
 
     /**
@@ -389,10 +389,10 @@ public class TsurugiTransactionManager {
      * @param action        The action to be performed for each record
      * @throws IOException
      */
-    public <R> void executeForEach(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
+    public <R> void executeAndForEach(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
         var session = getSession();
         try (var ps = session.createQuery(sql, resultMapping)) {
-            executeForEach(setting, ps, action);
+            executeAndForEach(setting, ps, action);
         }
     }
 
@@ -406,8 +406,8 @@ public class TsurugiTransactionManager {
      * @param action           The action to be performed for each record
      * @throws IOException
      */
-    public <P> void executeForEach(String sql, TgParameterMapping<P> parameterMapping, P parameter, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
-        executeForEach(defaultSetting(), sql, parameterMapping, parameter, TgResultMapping.DEFAULT, action);
+    public <P> void executeAndForEach(String sql, TgParameterMapping<P> parameterMapping, P parameter, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
+        executeAndForEach(defaultSetting(), sql, parameterMapping, parameter, TgResultMapping.DEFAULT, action);
     }
 
     /**
@@ -421,8 +421,8 @@ public class TsurugiTransactionManager {
      * @param action           The action to be performed for each record
      * @throws IOException
      */
-    public <P> void executeForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
-        executeForEach(setting, sql, parameterMapping, parameter, TgResultMapping.DEFAULT, action);
+    public <P> void executeAndForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TsurugiTransactionConsumer<TsurugiResultEntity> action) throws IOException {
+        executeAndForEach(setting, sql, parameterMapping, parameter, TgResultMapping.DEFAULT, action);
     }
 
     /**
@@ -437,8 +437,8 @@ public class TsurugiTransactionManager {
      * @param action           The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> void executeForEach(String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
-        executeForEach(defaultSetting(), sql, parameterMapping, parameter, resultMapping, action);
+    public <P, R> void executeAndForEach(String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action) throws IOException {
+        executeAndForEach(defaultSetting(), sql, parameterMapping, parameter, resultMapping, action);
     }
 
     /**
@@ -454,11 +454,11 @@ public class TsurugiTransactionManager {
      * @param action           The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> void executeForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action)
+    public <P, R> void executeAndForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping, TsurugiTransactionConsumer<R> action)
             throws IOException {
         var session = getSession();
         try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
-            executeForEach(setting, ps, parameter, action);
+            executeAndForEach(setting, ps, parameter, action);
         }
     }
 
@@ -470,8 +470,8 @@ public class TsurugiTransactionManager {
      * @param action The action to be performed for each record
      * @throws IOException
      */
-    public <R> void executeForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
-        executeForEach(defaultSetting(), ps, action);
+    public <R> void executeAndForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
+        executeAndForEach(defaultSetting(), ps, action);
     }
 
     /**
@@ -483,9 +483,9 @@ public class TsurugiTransactionManager {
      * @param action  The action to be performed for each record
      * @throws IOException
      */
-    public <R> void executeForEach(TgTmSetting setting, TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
+    public <R> void executeAndForEach(TgTmSetting setting, TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException {
         execute(setting, transaction -> {
-            transaction.executeForEach(ps, action);
+            transaction.executeAndForEach(ps, action);
         });
     }
 
@@ -499,8 +499,8 @@ public class TsurugiTransactionManager {
      * @param action    The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> void executeForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
-        executeForEach(defaultSetting(), ps, parameter, action);
+    public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
+        executeAndForEach(defaultSetting(), ps, parameter, action);
     }
 
     /**
@@ -514,9 +514,9 @@ public class TsurugiTransactionManager {
      * @param action    The action to be performed for each record
      * @throws IOException
      */
-    public <P, R> void executeForEach(TgTmSetting setting, TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
+    public <P, R> void executeAndForEach(TgTmSetting setting, TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException {
         execute(setting, transaction -> {
-            transaction.executeForEach(ps, parameter, action);
+            transaction.executeAndForEach(ps, parameter, action);
         });
     }
 

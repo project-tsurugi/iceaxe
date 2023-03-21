@@ -12,8 +12,8 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
@@ -41,14 +41,14 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_sql() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_sql() throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo < " + (SIZE - 1) + " order by foo";
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
         var list = new ArrayList<TsurugiResultEntity>();
-        tm.executeForEach(sql, entity -> {
+        tm.executeAndForEach(sql, entity -> {
             list.add(entity);
         });
 
@@ -56,7 +56,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_setting_sql() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_setting_sql() throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo < " + (SIZE - 1) + " order by foo";
 
         var session = getSession();
@@ -64,7 +64,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
         var list = new ArrayList<TsurugiResultEntity>();
-        tm.executeForEach(setting, sql, entity -> {
+        tm.executeAndForEach(setting, sql, entity -> {
             list.add(entity);
         });
 
@@ -72,14 +72,14 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_sql_result() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_sql_result() throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo < " + (SIZE - 1) + " order by foo";
 
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
         var list = new ArrayList<TestEntity>();
-        tm.executeForEach(sql, SELECT_MAPPING, entity -> {
+        tm.executeAndForEach(sql, SELECT_MAPPING, entity -> {
             list.add(entity);
         });
 
@@ -87,7 +87,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_setting_sql_result() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_setting_sql_result() throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo < " + (SIZE - 1) + " order by foo";
 
         var session = getSession();
@@ -95,7 +95,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
         var list = new ArrayList<TestEntity>();
-        tm.executeForEach(setting, sql, SELECT_MAPPING, entity -> {
+        tm.executeAndForEach(setting, sql, SELECT_MAPPING, entity -> {
             list.add(entity);
         });
 
@@ -103,7 +103,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_sql_parameter() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_sql_parameter() throws IOException, TsurugiTransactionException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
@@ -113,7 +113,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
         var list = new ArrayList<TsurugiResultEntity>();
-        tm.executeForEach(sql, parameterMapping, parameter, entity -> {
+        tm.executeAndForEach(sql, parameterMapping, parameter, entity -> {
             list.add(entity);
         });
 
@@ -121,7 +121,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_setting_sql_parameter() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_setting_sql_parameter() throws IOException, TsurugiTransactionException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
@@ -132,7 +132,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
         var list = new ArrayList<TsurugiResultEntity>();
-        tm.executeForEach(setting, sql, parameterMapping, parameter, entity -> {
+        tm.executeAndForEach(setting, sql, parameterMapping, parameter, entity -> {
             list.add(entity);
         });
 
@@ -140,7 +140,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_sql_parameter_result() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_sql_parameter_result() throws IOException, TsurugiTransactionException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
@@ -150,7 +150,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
         var list = new ArrayList<TestEntity>();
-        tm.executeForEach(sql, parameterMapping, parameter, SELECT_MAPPING, entity -> {
+        tm.executeAndForEach(sql, parameterMapping, parameter, SELECT_MAPPING, entity -> {
             list.add(entity);
         });
 
@@ -158,7 +158,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_setting_sql_parameter_result() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_setting_sql_parameter_result() throws IOException, TsurugiTransactionException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
@@ -169,7 +169,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
 
         var list = new ArrayList<TestEntity>();
-        tm.executeForEach(setting, sql, parameterMapping, parameter, SELECT_MAPPING, entity -> {
+        tm.executeAndForEach(setting, sql, parameterMapping, parameter, SELECT_MAPPING, entity -> {
             list.add(entity);
         });
 
@@ -177,7 +177,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_ps() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_ps() throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo < " + (SIZE - 1) + " order by foo";
 
         var session = getSession();
@@ -185,7 +185,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
         try (var ps = session.createQuery(sql)) {
             var list = new ArrayList<TsurugiResultEntity>();
-            tm.executeForEach(ps, entity -> {
+            tm.executeAndForEach(ps, entity -> {
                 list.add(entity);
             });
 
@@ -194,7 +194,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_setting_ps() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_setting_ps() throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo < " + (SIZE - 1) + " order by foo";
 
         var session = getSession();
@@ -203,7 +203,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
         try (var ps = session.createQuery(sql)) {
             var list = new ArrayList<TsurugiResultEntity>();
-            tm.executeForEach(setting, ps, entity -> {
+            tm.executeAndForEach(setting, ps, entity -> {
                 list.add(entity);
             });
 
@@ -212,7 +212,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_ps_parameter() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_ps_parameter() throws IOException, TsurugiTransactionException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
@@ -223,7 +223,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
         try (var ps = session.createQuery(sql, parameterMapping)) {
             var list = new ArrayList<TsurugiResultEntity>();
-            tm.executeForEach(ps, parameter, entity -> {
+            tm.executeAndForEach(ps, parameter, entity -> {
                 list.add(entity);
             });
 
@@ -232,7 +232,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach_setting_ps_parameter() throws IOException, TsurugiTransactionException {
+    void executeAndForEach_setting_ps_parameter() throws IOException, TsurugiTransactionException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
@@ -244,7 +244,7 @@ class DbManagerExecuteQueryTest extends DbTestTableTester {
 
         try (var ps = session.createQuery(sql, parameterMapping)) {
             var list = new ArrayList<TsurugiResultEntity>();
-            tm.executeForEach(setting, ps, parameter, entity -> {
+            tm.executeAndForEach(setting, ps, parameter, entity -> {
                 list.add(entity);
             });
 

@@ -70,14 +70,14 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEach() throws IOException, TsurugiTransactionException {
+    void executeAndForEach() throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo < " + (SIZE - 1) + " order by foo";
 
         var session = getSession();
         try (var ps = session.createQuery(sql, SELECT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             int[] count = { 0 };
-            transaction.executeForEach(ps, entity -> {
+            transaction.executeAndForEach(ps, entity -> {
                 var expected = createTestEntity(count[0]++);
                 assertEquals(expected, entity);
             });
@@ -86,7 +86,7 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executePreparedForEach() throws IOException, TsurugiTransactionException {
+    void executePreparedAndForEach() throws IOException, TsurugiTransactionException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
@@ -96,7 +96,7 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
             int[] count = { 0 };
-            transaction.executeForEach(ps, parameter, entity -> {
+            transaction.executeAndForEach(ps, parameter, entity -> {
                 var expected = createTestEntity(count[0]++);
                 assertEquals(expected, entity);
             });
@@ -105,7 +105,7 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executeForEachRaw() throws IOException, TsurugiTransactionException {
+    void executeAndForEachRaw() throws IOException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo < " + (SIZE - 1) + " order by foo";
         var resultMapping = TgResultMapping.of(record -> record);
 
@@ -113,7 +113,7 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql, resultMapping); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             int[] count = { 0 };
-            transaction.executeForEach(ps, record -> {
+            transaction.executeAndForEach(ps, record -> {
                 var expected = createTestEntity(count[0]++);
                 assertEquals(expected.getFoo(), record.nextIntOrNull());
                 assertEquals(expected.getBar(), record.nextLongOrNull());
@@ -124,7 +124,7 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
     }
 
     @Test
-    void executePreparedForEachRaw() throws IOException, TsurugiTransactionException {
+    void executePreparedAndForEachRaw() throws IOException, TsurugiTransactionException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo < " + foo + " order by foo";
         var parameterMapping = TgParameterMapping.of(foo);
@@ -135,7 +135,7 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             var parameter = TgBindParameters.of(foo.bind(SIZE - 1));
             int[] count = { 0 };
-            transaction.executeForEach(ps, parameter, record -> {
+            transaction.executeAndForEach(ps, parameter, record -> {
                 var expected = createTestEntity(count[0]++);
                 assertEquals(expected.getFoo(), record.nextIntOrNull());
                 assertEquals(expected.getBar(), record.nextLongOrNull());
