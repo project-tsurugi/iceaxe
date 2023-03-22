@@ -14,17 +14,16 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameter;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -144,13 +143,14 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
                 var insertPs = session.createStatement(insertSql, insertMapping)) {
             if (prepare) {
                 var tm = session.createTransactionManager(TgTmSetting.of(TgTxOption.ofLTX(TEST2)));
-                tm.execute((TsurugiTransactionAction) transaction -> {
+                tm.execute(transaction -> {
                     for (int i = 0; i < threadSize; i++) {
                         for (int j = 0; j < 2; j++) {
                             var entity = new Test2Entity(i, 1 + j);
                             transaction.executeAndGetCount(insertPs, entity);
                         }
                     }
+                    return;
                 });
             }
 
@@ -194,8 +194,8 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
         private final TsurugiTransactionManager tm;
         private Exception exception;
 
-        public InsertMultiTxThread(TsurugiSqlQuery<TestEntity> selectPs, TsurugiSqlPreparedStatement<TgBindParameters> deletePs,
-                TsurugiSqlPreparedStatement<Test2Entity> insertPs, int number, int recordSize, TsurugiTransactionManager tm) {
+        public InsertMultiTxThread(TsurugiSqlQuery<TestEntity> selectPs, TsurugiSqlPreparedStatement<TgBindParameters> deletePs, TsurugiSqlPreparedStatement<Test2Entity> insertPs, int number,
+                int recordSize, TsurugiTransactionManager tm) {
             this.selectPs = selectPs;
             this.deletePs = deletePs;
             this.insertPs = insertPs;

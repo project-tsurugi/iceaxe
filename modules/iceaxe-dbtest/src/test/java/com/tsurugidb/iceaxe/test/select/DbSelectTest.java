@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -56,6 +57,13 @@ class DbSelectTest extends DbTestTableTester {
             assertEquals(expected.getFoo(), actual.getIntOrNull("foo"));
             assertEquals(expected.getBar(), actual.getLongOrNull("bar"));
             assertEquals(expected.getZzz(), actual.getStringOrNull("zzz"));
+
+            assertEquals(List.of("foo", "bar", "zzz"), actual.getNameList());
+            assertEquals("foo", actual.getName(0));
+            assertEquals("bar", actual.getName(1));
+            assertEquals("zzz", actual.getName(2));
+            assertThrows(IndexOutOfBoundsException.class, () -> actual.getName(-1));
+            assertThrows(IndexOutOfBoundsException.class, () -> actual.getName(3));
         }
     }
 
@@ -102,9 +110,22 @@ class DbSelectTest extends DbTestTableTester {
     }
 
     @Test
-    void selectColumn() throws IOException {
+    void selectColumn_convert() throws IOException {
         var sql = "select foo from " + TEST;
         var resultMapping = TgResultMapping.of(record -> record.nextInt());
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, resultMapping)) {
+            List<Integer> list = tm.executeAndGetList(ps);
+            assertColumn(list);
+        }
+    }
+
+    @Test
+    void selectColumn_single() throws IOException {
+        var sql = "select foo from " + TEST;
+        var resultMapping = TgResultMapping.of(int.class);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);

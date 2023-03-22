@@ -308,9 +308,9 @@ public class TsurugiTransaction implements Closeable {
      */
     public String getTransactionId() throws IOException {
         if (this.transactionId == null) {
-            var transaction = getLowTransaction();
+            var lowTx = getLowTransaction();
             if (this.transactionId == null) {
-                this.transactionId = transaction.getTransactionId();
+                this.transactionId = lowTx.getTransactionId();
             }
         }
         return this.transactionId;

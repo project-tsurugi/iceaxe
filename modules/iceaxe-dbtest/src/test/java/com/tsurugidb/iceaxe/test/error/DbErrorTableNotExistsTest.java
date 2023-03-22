@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -110,7 +110,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, parameterMapping)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 var parameter = TgBindParameters.of(foo.bind(1));
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetList(ps, parameter);
@@ -118,7 +118,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                 assertContains("table_not_found test", e.getMessage());
             });
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 var parameter = TgBindParameters.of(foo.bind(1));
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetList(ps, parameter);
@@ -160,14 +160,14 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetCount(ps, parameter);
                 });
                 assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
                 assertContains(expected, e.getMessage());
             });
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetCount(ps, parameter);
                 });

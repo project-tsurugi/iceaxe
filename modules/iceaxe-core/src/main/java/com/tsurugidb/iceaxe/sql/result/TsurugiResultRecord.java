@@ -215,7 +215,6 @@ public class TsurugiResultRecord {
     @Nullable
     public Object fetchCurrentColumnValue() throws IOException, TsurugiTransactionException {
         if (lowResultSet.isNull()) {
-            LOG.trace("fetch null");
             return null;
         }
         var lowType = getCurrentColumnLowType();

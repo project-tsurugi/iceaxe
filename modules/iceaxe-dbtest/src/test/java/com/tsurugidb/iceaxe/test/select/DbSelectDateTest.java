@@ -10,10 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
 /**
  * select date test
@@ -48,12 +47,13 @@ class DbSelectDateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, mapping)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
                     var date = LocalDate.of(2022, 10, 1 + i);
                     var parameter = TgBindParameters.of(variable.bind(date));
                     transaction.executeAndGetCount(ps, parameter);
                 }
+                return;
             });
         }
     }

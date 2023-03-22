@@ -25,7 +25,6 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.sql.result.mapping.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
-import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -160,11 +159,12 @@ public class DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
                     var entity = createTestEntity(i);
                     transaction.executeAndGetCount(ps, entity);
                 }
+                return;
             });
         }
     }
@@ -177,7 +177,7 @@ public class DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 transaction.executeAndGetCount(ps, entity);
             });
         }

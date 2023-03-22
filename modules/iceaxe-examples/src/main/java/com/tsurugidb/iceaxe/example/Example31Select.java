@@ -51,10 +51,10 @@ public class Example31Select {
                     List<String> nameList = result.getNameList();
                     System.out.println(nameList);
 
-                    for (TsurugiResultEntity record : result) {
-                        System.out.println(record.getIntOrNull("foo"));
-                        System.out.println(record.getLongOrNull("bar"));
-                        System.out.println(record.getStringOrNull("zzz"));
+                    for (TsurugiResultEntity entity : result) {
+                        System.out.println(entity.getIntOrNull("foo"));
+                        System.out.println(entity.getLongOrNull("bar"));
+                        System.out.println(entity.getStringOrNull("zzz"));
                     }
                 }
             });

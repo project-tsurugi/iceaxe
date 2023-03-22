@@ -12,7 +12,6 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
-import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
@@ -75,11 +74,12 @@ public class Example00 {
                 .addLong("bar", TestEntity::getBar) //
                 .addString("zzz", TestEntity::getZzz);
         try (var ps = session.createStatement(sql, parameterMapping)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 for (int i = 0; i < 10; i++) {
                     var entity = new TestEntity(i, Long.valueOf(i), "z" + i);
                     transaction.executeAndGetCount(ps, entity);
                 }
+                return;
             });
         }
     }
@@ -97,11 +97,12 @@ public class Example00 {
         var sql = "update " + TABLE_NAME + " set bar=" + bar + " where foo=" + foo;
         var parameterMapping = TgParameterMapping.of(foo, bar);
         try (var ps = session.createStatement(sql, parameterMapping)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 for (int i = 0; i < 10; i += 2) {
                     var parameter = TgBindParameters.of(foo.bind(i), bar.bind(i + 1));
                     transaction.executeAndGetCount(ps, parameter);
                 }
+                return;
             });
         }
     }

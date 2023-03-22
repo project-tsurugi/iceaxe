@@ -13,7 +13,6 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 
@@ -76,11 +75,12 @@ class DbSelectFewTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 for (int i = 0; i < ATTEMPT_SIZE; i++) {
                     Optional<TestEntity> entity = transaction.executeAndFindRecord(ps);
                     assertEquals(expected, entity.get());
                 }
+                return;
             });
         }
     }

@@ -94,6 +94,18 @@ public class Example32Count {
 
     void countGroup(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "select ZZZ, count(*) from TEST group by ZZZ";
+        try (var ps = session.createQuery(sql)) {
+            List<TsurugiResultEntity> list = tm.execute(transaction -> {
+                return transaction.executeAndGetList(ps);
+            });
+            for (TsurugiResultEntity entity : list) {
+                System.out.printf("%s: %d%n", entity.getString("ZZZ"), entity.getInt(entity.getName(1)));
+            }
+        }
+    }
+
+    void countGroup_userEntity(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        var sql = "select ZZZ, count(*) from TEST group by ZZZ";
         var resultMapping = TgResultMapping.of(CountByZzzEntity::of);
         try (var ps = session.createQuery(sql, resultMapping)) {
             List<CountByZzzEntity> list = tm.execute(transaction -> {

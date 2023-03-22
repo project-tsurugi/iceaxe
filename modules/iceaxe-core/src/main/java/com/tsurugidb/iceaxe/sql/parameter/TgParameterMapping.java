@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgConverterParameterMapping;
+import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEmptyParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgSingleParameterMapping;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
@@ -37,6 +38,9 @@ public abstract class TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgParameterMapping<TgBindParameters> of(TgBindVariable<?>... variables) {
+        if (variables.length == 0) {
+            return TgEmptyParameterMapping.of();
+        }
         return of(TgBindVariables.of(variables));
     }
 

@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +50,7 @@ public class TsurugiResultEntity {
     private IceaxeConvertUtil convertUtil = IceaxeConvertUtil.INSTANCE;
     /** Map&lt;name, value&gt; */
     private final Map<String, Object> valueMap = new LinkedHashMap<>();
+    private List<String> nameList;
 
     /**
      * set convert type utility
@@ -66,13 +66,28 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get name list
+     * get column name list
      *
      * @return list of column name
      */
     @Nonnull
     public List<String> getNameList() {
-        return new ArrayList<>(valueMap.keySet());
+        if (this.nameList == null) {
+            var set = valueMap.keySet();
+            this.nameList = List.of(set.toArray(new String[set.size()]));
+        }
+        return this.nameList;
+    }
+
+    /**
+     * get column name
+     *
+     * @param index column index
+     * @return column name
+     * @throws IndexOutOfBoundsException
+     */
+    public String getName(int index) {
+        return getNameList().get(index);
     }
 
     @Nullable

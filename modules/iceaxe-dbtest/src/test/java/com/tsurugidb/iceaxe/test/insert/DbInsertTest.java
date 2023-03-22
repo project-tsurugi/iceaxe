@@ -18,7 +18,6 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
-import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 
 /**
  * insert test
@@ -177,7 +176,7 @@ class DbInsertTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-            tm.execute((TsurugiTransactionAction) transaction -> {
+            tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
                     var entity = createTestEntity(i);
 
@@ -192,6 +191,7 @@ class DbInsertTest extends DbTestTableTester {
                         // result.close is called on transaction.close
                     }
                 }
+                return;
             });
         }
 
