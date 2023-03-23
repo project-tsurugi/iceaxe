@@ -6,11 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -71,5 +73,48 @@ class DbCreateTableTest extends DbTestTableTester {
         }
 
         assertTrue(session.findTableMetadata(TEST).isPresent());
+    }
+
+    @Test
+    void repeatOccWithPk() throws IOException {
+        repeat(TgTxOption.ofOCC(), true);
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled たまにシリアライゼーションエラーが発生する
+    void repeatOccNoPk() throws IOException {
+        repeat(TgTxOption.ofOCC(), false);
+    }
+
+    @Test
+    void repeatLtxWithPk() throws IOException {
+        repeat(TgTxOption.ofLTX(), true);
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled tateyama-serverがクラッシュする
+    void repeatLtxNoPk() throws IOException {
+        repeat(TgTxOption.ofLTX(), false);
+    }
+
+    private void repeat(TgTxOption txOption, boolean hasPk) throws IOException {
+        var createDdl = "create table " + TEST //
+                + "(" //
+                + "  foo int," //
+                + "  bar bigint," //
+                + "  zzz varchar(10)" //
+                + (hasPk ? ", primary key(foo)" : "") //
+                + ")";
+        var dropDdl = "drop table " + TEST;
+
+        var session = getSession();
+        var tm = session.createTransactionManager(txOption);
+        for (int i = 0; i < 100; i++) {
+            if (session.findTableMetadata(TEST).isPresent()) {
+                tm.executeDdl(dropDdl);
+            }
+
+            tm.executeDdl(createDdl);
+        }
     }
 }
