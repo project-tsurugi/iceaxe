@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -172,6 +173,15 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
                     excptionList.add(exception);
                 }
             }
+        }
+
+        if (!excptionList.isEmpty()) {
+            String message = excptionList.stream().map(e -> e.getMessage()).collect(Collectors.joining("\n"));
+            var re = new RuntimeException(message);
+            for (var e : excptionList) {
+                re.addSuppressed(e);
+            }
+            throw re;
         }
 
         var actual = selectCountFrom(TEST2);
