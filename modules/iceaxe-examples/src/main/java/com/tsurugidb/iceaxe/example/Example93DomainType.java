@@ -107,7 +107,7 @@ public class Example93DomainType {
 
     void insert2(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException {
         var key = TgBindVariable.ofInt("key");
-        var type = new ExampleTypeVariable("type"); // custom TgVariable
+        var type = new ExampleTypeBindVariable("type"); // custom TgBindVariable
         var sql = "insert into example93 (key1, type) values(" + key + ", " + type + ")";
         var parameterMapping = TgParameterMapping.of(Example93Entity1.class) //
                 .add(key, Example93Entity1::getKey) //
@@ -117,9 +117,9 @@ public class Example93DomainType {
         }
     }
 
-    static class ExampleTypeVariable extends TgBindVariable<ExampleType> {
+    static class ExampleTypeBindVariable extends TgBindVariable<ExampleType> {
 
-        public ExampleTypeVariable(String name) {
+        public ExampleTypeBindVariable(String name) {
             super(name, TgDataType.STRING); // テーブルのデータ型
         }
 
@@ -131,7 +131,7 @@ public class Example93DomainType {
 
         @Override
         public TgBindVariable<ExampleType> clone(String name) {
-            return new ExampleTypeVariable(name);
+            return new ExampleTypeBindVariable(name);
         }
     }
 

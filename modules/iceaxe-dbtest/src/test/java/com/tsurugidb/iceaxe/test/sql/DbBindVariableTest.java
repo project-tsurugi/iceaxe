@@ -11,6 +11,7 @@ import org.junit.jupiter.api.TestInfo;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
@@ -56,6 +57,29 @@ class DbBindVariableTest extends DbTestTableTester {
                 .addInt(trimColumn(f), TestEntity::getFoo) //
                 .addLong(trimColumn(b), TestEntity::getBar) //
                 .addString(trimColumn(z), TestEntity::getZzz);
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createStatement(sql, parameterMapping)) {
+            var entity = createTestEntity(SIZE);
+            tm.executeAndGetCount(ps, entity);
+        }
+
+        assertEqualsTestTable(SIZE + 1);
+    }
+
+    @Test
+    void insertEntityWithBindVariable() throws IOException {
+        var foo = TgBindVariable.ofInt("foo");
+        var bar = TgBindVariable.ofLong("bar");
+        var zzz = TgBindVariable.ofString("zzz");
+        var sql = "insert into " + TEST //
+                + "(" + TEST_COLUMNS + ")" //
+                + "values(" + TgBindVariables.of(foo, bar, zzz).getSqlNamesString() + ")";
+        var parameterMapping = TgParameterMapping.of(TestEntity.class) //
+                .add(foo, TestEntity::getFoo) //
+                .add(bar, TestEntity::getBar) //
+                .add(zzz, TestEntity::getZzz);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
