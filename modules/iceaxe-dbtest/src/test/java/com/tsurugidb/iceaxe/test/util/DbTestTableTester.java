@@ -110,13 +110,15 @@ public class DbTestTableTester {
     }
 
     protected static void executeDdl(TsurugiSession session, String sql) throws IOException {
-        boolean workaround = false;
+        // FIXME issue106 2023-03-23 retry-over
+        // TODO retry-overが解消されたらfalseに戻す
+        boolean workaround = true;
         if (workaround) {
             executeDdlWorkaround(session, sql);
             return;
         }
 
-        var tm = createTransactionManagerOcc(session);
+      var tm = createTransactionManagerOcc(session);
         tm.executeDdl(sql);
     }
 
