@@ -132,7 +132,7 @@ public class DbTestTableTester {
                     return;
                 } catch (TsurugiTransactionIOException e) {
                     // duplicate_table（ERR_PHANTOM）が発生したら、リトライ
-                    if (e.getMessage().contains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: duplicate_table table `test' is already defined")) {
+                    if (e.getMessage().contains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: duplicate_table table")) {
                         var line = Arrays.stream(e.getStackTrace()).filter(elem -> {
                             String fullName = elem.getClassName();
                             return fullName.startsWith("com.tsurugidb.iceaxe.test.") && fullName.endsWith("Test");
