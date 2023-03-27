@@ -85,6 +85,33 @@ public interface TgTxOption extends Cloneable {
     public TransactionType type();
 
     /**
+     * check transaction type is OCC
+     *
+     * @return {@code true} if OCC
+     */
+    public default boolean isOCC() {
+        return type() == TransactionType.SHORT;
+    }
+
+    /**
+     * check transaction type is LTX
+     *
+     * @return {@code true} if LTX
+     */
+    public default boolean isLTX() {
+        return type() == TransactionType.LONG;
+    }
+
+    /**
+     * check transaction type is RTX
+     *
+     * @return {@code true} if RTX
+     */
+    public default boolean isRTX() {
+        return type() == TransactionType.READ_ONLY;
+    }
+
+    /**
      * set label
      *
      * @param label label

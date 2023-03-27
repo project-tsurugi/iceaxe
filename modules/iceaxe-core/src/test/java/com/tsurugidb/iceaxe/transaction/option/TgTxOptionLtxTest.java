@@ -1,6 +1,8 @@
 package com.tsurugidb.iceaxe.transaction.option;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -14,6 +16,14 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
 
     public TgTxOptionLtxTest() {
         super(TransactionType.LONG);
+    }
+
+    @Test
+    void isLTX() {
+        var txOption = TgTxOption.ofLTX();
+        assertFalse(txOption.isOCC());
+        assertTrue(txOption.isLTX());
+        assertFalse(txOption.isRTX());
     }
 
     @Test
