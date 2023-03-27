@@ -40,25 +40,25 @@ class DbInsertNoPkTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    @ValueSource(booleans = { true, false })
     void insertConstant(boolean columns) throws IOException {
         new DbInsertTest().insertConstant(columns);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
-    void insertByVariableList(boolean columns) throws IOException {
-        new DbInsertTest().insertByVariableList(columns);
+    @ValueSource(booleans = { true, false })
+    void insertByBindVariables(boolean columns) throws IOException {
+        new DbInsertTest().insertByBindVariables(columns);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    @ValueSource(booleans = { true, false })
     void insertByBind(boolean columns) throws IOException {
         new DbInsertTest().insertByBind(columns);
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    @ValueSource(booleans = { true, false })
     void insertByEntity(boolean columns) throws IOException {
         new DbInsertTest().insertByEntity(columns);
     }

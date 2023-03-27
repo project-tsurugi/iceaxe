@@ -35,7 +35,7 @@ class DbInsertTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    @ValueSource(booleans = { true, false })
     void insertConstant(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
@@ -54,13 +54,13 @@ class DbInsertTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
-    void insertByVariableList(boolean columns) throws IOException {
+    @ValueSource(booleans = { true, false })
+    void insertByBindVariables(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
                 + (columns ? " (" + TEST_COLUMNS + ")" : "") //
-                + "values(:foo, :bar, :zzz)";
+                + " values(:foo, :bar, :zzz)";
         var variables = TgBindVariables.of() //
                 .addInt("foo") //
                 .addLong("bar") //
@@ -82,7 +82,7 @@ class DbInsertTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    @ValueSource(booleans = { true, false })
     void insertByBind(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
@@ -92,7 +92,7 @@ class DbInsertTest extends DbTestTableTester {
 
         var sql = "insert into " + TEST //
                 + (columns ? " (" + TEST_COLUMNS + ")" : "") //
-                + "values(" + foo + ", " + bar + ", " + zzz + ")";
+                + " values(" + foo + ", " + bar + ", " + zzz + ")";
         var parameterMapping = TgParameterMapping.of(foo, bar, zzz);
 
         var session = getSession();
@@ -110,13 +110,13 @@ class DbInsertTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true/* , false */ }) // TODO without columns
+    @ValueSource(booleans = { true, false })
     void insertByEntity(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
                 + (columns ? " (" + TEST_COLUMNS + ")" : "") //
-                + "values(:foo, :bar, :zzz)";
+                + " values(:foo, :bar, :zzz)";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
                 .addInt("foo", TestEntity::getFoo) //
                 .addLong("bar", TestEntity::getBar) //
