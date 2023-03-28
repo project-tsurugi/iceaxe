@@ -7,6 +7,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOptionLtx;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOptionOcc;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOptionRtx;
+import com.tsurugidb.sql.proto.SqlRequest.TransactionPriority;
 
 /**
  * TgTxOption example.
@@ -38,10 +39,25 @@ public class Example03TxOption {
         return TgTxOption.ofLTX().addWritePreserve("tableName1").addWritePreserve("tableName2");
     }
 
+    TgTxOptionLtx ltx_priority() {
+        return TgTxOption.ofLTX("tableName1").priority(TransactionPriority.INTERRUPT_EXCLUDE);
+    }
+
+    TgTxOptionLtx ltx_readArea() {
+        return TgTxOption.ofLTX("tableName1").addInclusiveReadArea("tableName2");
+    }
+
     // READ ONLY
     TgTxOptionRtx rtx() {
         return TgTxOption.ofRTX();
-        // TODO including, excluding, etc
+    }
+
+    TgTxOptionRtx rtx_priority() {
+        return TgTxOption.ofRTX().priority(TransactionPriority.WAIT);
+    }
+
+    TgTxOptionRtx rtx_readArea() {
+        return TgTxOption.ofRTX().addInclusiveReadArea("tableName1");
     }
 
     // label

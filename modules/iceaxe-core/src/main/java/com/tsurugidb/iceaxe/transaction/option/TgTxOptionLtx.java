@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.transaction.option;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -36,6 +37,34 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
      */
     public synchronized TgTxOptionLtx addWritePreserve(String tableName) {
         writePreserveList.add(tableName);
+        reset();
+        return this;
+    }
+
+    /**
+     * add write preserve
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addWritePreserve(String... tableNames) {
+        for (var tableName : tableNames) {
+            writePreserveList.add(tableName);
+        }
+        reset();
+        return this;
+    }
+
+    /**
+     * add write preserve
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addWritePreserve(Collection<String> tableNames) {
+        for (var tableName : tableNames) {
+            writePreserveList.add(tableName);
+        }
         reset();
         return this;
     }

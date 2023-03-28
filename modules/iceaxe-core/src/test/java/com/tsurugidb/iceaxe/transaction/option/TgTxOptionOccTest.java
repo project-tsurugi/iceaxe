@@ -25,7 +25,7 @@ class TgTxOptionOccTest extends TgTxOptionTester {
     }
 
     @Test
-    void empty() {
+    void of() {
         TgTxOptionOcc txOption = TgTxOption.ofOCC();
         String expected = "OCC{}";
         assertOption(expected, null, txOption);
@@ -66,6 +66,6 @@ class TgTxOptionOccTest extends TgTxOptionTester {
         assertEquals(expectedType, txOption.type());
         assertEquals(label, txOption.label());
 
-        assertLowOption(label, null, List.of(), txOption);
+        assertLowOption(label, null, List.of(), List.of(), List.of(), txOption);
     }
 }
