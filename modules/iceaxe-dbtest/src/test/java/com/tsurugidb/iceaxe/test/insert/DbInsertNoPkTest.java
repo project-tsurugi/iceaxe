@@ -59,8 +59,14 @@ class DbInsertNoPkTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByEntity(boolean columns) throws IOException {
-        new DbInsertTest().insertByEntity(columns);
+    void insertByEntityMapping(boolean columns) throws IOException {
+        new DbInsertTest().insertByEntityMapping(columns);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void insertByEntityConverter(boolean columns) throws IOException {
+        new DbInsertTest().insertByEntityConverter(columns);
     }
 
     @Test

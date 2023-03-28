@@ -20,7 +20,7 @@ public class Example02Session {
         var sessionOption = TgSessionOption.of();
         var connector = TsurugiConnector.of(endpoint, credential, sessionOption);
         try (var session = connector.createSession()) {
-//          session.createPreparedStatement()
+//          session.createStatement()
 //          session.createTransactionManager()
         }
     }
@@ -29,7 +29,7 @@ public class Example02Session {
         var connector = TsurugiConnector.of(endpoint, credential);
         var sessionOption = TgSessionOption.of();
         try (var session = connector.createSession(sessionOption)) {
-//          session.createPreparedStatement()
+//          session.createStatement()
 //          session.createTransactionManager()
         }
     }
@@ -38,7 +38,7 @@ public class Example02Session {
         var connector = TsurugiConnector.of(endpoint);
         var sessionOption = TgSessionOption.of();
         try (var session = connector.createSession(credential, sessionOption)) {
-//          session.createPreparedStatement()
+//          session.createStatement()
 //          session.createTransactionManager()
         }
     }

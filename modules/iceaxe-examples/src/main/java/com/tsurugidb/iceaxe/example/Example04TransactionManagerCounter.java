@@ -29,7 +29,7 @@ public class Example04TransactionManagerCounter {
         var tm = session.createTransactionManager(SETTING);
         tm.addEventListener(counter);
 
-        tm.execute(tx -> {
+        tm.execute(transaction -> {
             // execute sql
         });
 
@@ -43,7 +43,7 @@ public class Example04TransactionManagerCounter {
         var tm = session.createTransactionManager(SETTING);
         tm.addEventListener(counter);
 
-        tm.execute(tx -> {
+        tm.execute(transaction -> {
             // execute sql
         });
 
@@ -58,7 +58,7 @@ public class Example04TransactionManagerCounter {
         var setting = TgTmSetting.ofAlways(OCC);
         setting.addEventListener(counter);
 
-        tm.execute(setting, tx -> {
+        tm.execute(setting, transaction -> {
             // execute sql
         });
 

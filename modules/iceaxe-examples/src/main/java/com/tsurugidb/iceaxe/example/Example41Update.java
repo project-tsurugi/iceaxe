@@ -20,29 +20,30 @@ public class Example41Update {
             var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
             var tm = session.createTransactionManager(setting);
 
-            update0(session, tm);
-            updateParameter(session, tm);
+            update_tm(session, tm);
+            update_tm_sql(tm);
+            updateBindParameter(session, tm);
             updateEntity(session, tm);
         }
     }
 
-    void update0(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        try (var ps = session.createStatement("update TEST set bar = 0")) {
+    void update_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        try (var ps = session.createStatement("update TEST set BAR = 0")) {
             int count = tm.executeAndGetCount(ps);
             System.out.println(count);
         }
     }
 
-    void update0Direct(TsurugiTransactionManager tm) throws IOException {
-        int count = tm.executeAndGetCount("update TEST set bar = 0");
+    void update_tm_sql(TsurugiTransactionManager tm) throws IOException {
+        int count = tm.executeAndGetCount("update TEST set BAR = 0");
         System.out.println(count);
     }
 
-    void updateParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void updateBindParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgBindVariable.ofInt("foo");
         var add = TgBindVariable.ofLong("add");
 
-        var sql = "update TEST set bar = bar + :add where foo = :foo";
+        var sql = "update TEST set BAR = BAR + :add where FOO = :foo";
         var parameterMapping = TgParameterMapping.of(foo, add);
 
         try (var ps = session.createStatement(sql, parameterMapping)) {
@@ -56,9 +57,9 @@ public class Example41Update {
 
     void updateEntity(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "update TEST set" //
-                + " bar = :bar" //
-                + " zzz = :zzz" //
-                + " where foo = :foo";
+                + " BAR = :bar" //
+                + " ZZZ = :zzz" //
+                + " where FOO = :foo";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
                 .addInt("foo", TestEntity::getFoo) //
                 .addLong("bar", TestEntity::getBar) //

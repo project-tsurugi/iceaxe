@@ -29,19 +29,19 @@ public class Example93DomainType {
             var entity = new Example93Entity2();
             switch (1) {
             case 1:
-                insert1(session, tm, entity);
+                insert_getterAsString(session, tm, entity);
                 break;
             case 2:
-                insert2(session, tm, entity);
+                insert_getterWithConverter(session, tm, entity);
                 break;
             case 3:
-                insert3(session, tm, entity);
+                insert_bindVariable(session, tm, entity);
                 break;
             }
 
-            select1(session, tm);
-            select2(session, tm);
-            select3(session, tm);
+            select_setterAsString(session, tm);
+            select_setterWithConverter(session, tm);
+            select_converter(session, tm);
         }
     }
 
@@ -95,7 +95,7 @@ public class Example93DomainType {
         }
     }
 
-    void insert1(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity2 entity) throws IOException {
+    void insert_getterAsString(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity2 entity) throws IOException {
         var sql = "insert into example93 (key1, type) values(:key, :type)";
         var parameterMapping = TgParameterMapping.of(Example93Entity2.class) //
                 .addInt("key", Example93Entity2::getKey) //
@@ -105,7 +105,17 @@ public class Example93DomainType {
         }
     }
 
-    void insert2(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException {
+    void insert_getterWithConverter(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException {
+        var sql = "insert into example93 (key1, type) values(:key, :type)";
+        var parameterMapping = TgParameterMapping.of(Example93Entity1.class) //
+                .addInt("key", Example93Entity1::getKey) //
+                .addString("type", Example93Entity1::getType, ExampleType::name); // getter with converter
+        try (var ps = session.createStatement(sql, parameterMapping)) {
+            tm.executeAndGetCount(ps, entity);
+        }
+    }
+
+    void insert_bindVariable(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException {
         var key = TgBindVariable.ofInt("key");
         var type = new ExampleTypeBindVariable("type"); // custom TgBindVariable
         var sql = "insert into example93 (key1, type) values(" + key + ", " + type + ")";
@@ -135,17 +145,29 @@ public class Example93DomainType {
         }
     }
 
-    void insert3(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException {
-        var sql = "insert into example93 (key1, type) values(:key, :type)";
-        var parameterMapping = TgParameterMapping.of(Example93Entity1.class) //
-                .addInt("key", Example93Entity1::getKey) //
-                .addString("type", Example93Entity1::getType, ExampleType::name); // getter with converter
-        try (var ps = session.createStatement(sql, parameterMapping)) {
-            tm.executeAndGetCount(ps, entity);
+    void select_setterAsString(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        var sql = "select * from example93";
+        var resultMapping = TgResultMapping.of(Example93Entity2::new) //
+                .addInt(Example93Entity2::setKey) //
+                .addString(Example93Entity2::setTypeAsString); // setter as String
+        try (var ps = session.createQuery(sql, resultMapping)) {
+            var list = tm.executeAndGetList(ps);
+            System.out.println(list);
         }
     }
 
-    void select1(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void select_setterWithConverter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        var sql = "select * from example93";
+        var resultMapping = TgResultMapping.of(Example93Entity1::new) //
+                .addInt(Example93Entity1::setKey) //
+                .addString(Example93Entity1::setType, ExampleType::valueOf); // setter with converter
+        try (var ps = session.createQuery(sql, resultMapping)) {
+            var list = tm.executeAndGetList(ps);
+            System.out.println(list);
+        }
+    }
+
+    void select_converter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var sql = "select * from example93";
         var resultMapping = TgResultMapping.of(Example93Entity1::new) //
                 .addInt(Example93Entity1::setKey) //
@@ -160,27 +182,5 @@ public class Example93DomainType {
         String value = record.nextStringOrNull();
         ExampleType type = (value != null) ? ExampleType.valueOf(value) : null;
         entity.setType(type);
-    }
-
-    void select2(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        var sql = "select * from example93";
-        var resultMapping = TgResultMapping.of(Example93Entity2::new) //
-                .addInt(Example93Entity2::setKey) //
-                .addString(Example93Entity2::setTypeAsString); // setter as String
-        try (var ps = session.createQuery(sql, resultMapping)) {
-            var list = tm.executeAndGetList(ps);
-            System.out.println(list);
-        }
-    }
-
-    void select3(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        var sql = "select * from example93";
-        var resultMapping = TgResultMapping.of(Example93Entity1::new) //
-                .addInt(Example93Entity1::setKey) //
-                .addString(Example93Entity1::setType, ExampleType::valueOf); // setter with converter
-        try (var ps = session.createQuery(sql, resultMapping)) {
-            var list = tm.executeAndGetList(ps);
-            System.out.println(list);
-        }
     }
 }

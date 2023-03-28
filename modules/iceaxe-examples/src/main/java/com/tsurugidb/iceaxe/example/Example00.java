@@ -53,9 +53,9 @@ public class Example00 {
         }
 
         var sql = "create table " + TABLE_NAME + " (\n" //
-                + "  foo int primary key,\n" //
-                + "  bar bigint,\n" //
-                + "  zzz varchar(10)\n" //
+                + "  FOO int primary key,\n" //
+                + "  BAR bigint,\n" //
+                + "  ZZZ varchar(10)\n" //
                 + ")";
         tm.executeDdl(sql);
     }
@@ -68,7 +68,7 @@ public class Example00 {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX(TABLE_NAME));
         var tm = session.createTransactionManager(setting);
 
-        var sql = "insert into " + TABLE_NAME + "(foo, bar, zzz) values(:foo, :bar, :zzz)";
+        var sql = "insert into " + TABLE_NAME + "(FOO, BAR, ZZZ) values(:foo, :bar, :zzz)";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
                 .addInt("foo", TestEntity::getFoo) //
                 .addLong("bar", TestEntity::getBar) //
@@ -94,7 +94,7 @@ public class Example00 {
 
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
-        var sql = "update " + TABLE_NAME + " set bar=" + bar + " where foo=" + foo;
+        var sql = "update " + TABLE_NAME + " set BAR=" + bar + " where FOO=" + foo;
         var parameterMapping = TgParameterMapping.of(foo, bar);
         try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
@@ -114,11 +114,11 @@ public class Example00 {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
         var tm = session.createTransactionManager(setting);
 
-        var sql = "select foo, bar, zzz from " + TABLE_NAME;
+        var sql = "select FOO, BAR, ZZZ from " + TABLE_NAME;
         var resultMapping = TgResultMapping.of(TestEntity::new) //
-                .addInt("foo", TestEntity::setFoo) //
-                .addLong("bar", TestEntity::setBar) //
-                .addString("zzz", TestEntity::setZzz);
+                .addInt("FOO", TestEntity::setFoo) //
+                .addLong("BAR", TestEntity::setBar) //
+                .addString("ZZZ", TestEntity::setZzz);
         try (var ps = session.createQuery(sql, resultMapping)) {
             tm.execute(transaction -> {
                 List<TestEntity> list = transaction.executeAndGetList(ps);

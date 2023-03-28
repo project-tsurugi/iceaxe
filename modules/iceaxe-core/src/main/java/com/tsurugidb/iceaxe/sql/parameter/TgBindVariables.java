@@ -298,8 +298,8 @@ public class TgBindVariables {
      *
      * @return sql names
      */
-    public String getSqlNamesString() {
-        return getSqlNamesString(",");
+    public String getSqlNames() {
+        return getSqlNames(",");
     }
 
     /**
@@ -308,7 +308,7 @@ public class TgBindVariables {
      * @param delimiter the delimiter to be used between each element
      * @return sql names
      */
-    public String getSqlNamesString(String delimiter) {
+    public String getSqlNames(String delimiter) {
         return lowPlaceholderList.stream().map(ph -> ":" + ph.getName()).collect(Collectors.joining(delimiter));
     }
 

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -111,7 +112,7 @@ class DbInsertTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByEntity(boolean columns) throws IOException {
+    void insertByEntityMapping(boolean columns) throws IOException {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
@@ -121,6 +122,28 @@ class DbInsertTest extends DbTestTableTester {
                 .addInt("foo", TestEntity::getFoo) //
                 .addLong("bar", TestEntity::getBar) //
                 .addString("zzz", TestEntity::getZzz);
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createStatement(sql, parameterMapping)) {
+            int count = tm.executeAndGetCount(ps, entity);
+            assertUpdateCount(1, count);
+        }
+
+        assertEqualsTestTable(entity);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void insertByEntityConverter(boolean columns) throws IOException {
+        var variables = TgBindVariables.of().addInt("foo").addLong("bar").addString("zzz");
+        var sql = "insert into " + TEST //
+                + (columns ? " (" + TEST_COLUMNS + ")" : "") //
+                + " values(" + variables.getSqlNames() + ")";
+        Function<TestEntity, TgBindParameters> parameterConverter = entity -> TgBindParameters.of().add("foo", entity.getFoo()).add("bar", entity.getBar()).add("zzz", entity.getZzz());
+        var parameterMapping = TgParameterMapping.of(variables, parameterConverter);
+
+        var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);

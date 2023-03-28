@@ -14,7 +14,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 public class TestEntity {
     public static final String INSERT_SQL = "insert into TEST values(:foo, :bar, :zzz)";
 
-    public static final TgBindVariables VARIABLE = TgBindVariables.of().addInt("foo").addLong("bar").addString("zzz");
+    public static final TgBindVariables VARIABLES = TgBindVariables.of().addInt("foo").addLong("bar").addString("zzz");
     static final TgBindVariables VARIABLE1 = TgBindVariables.of().add("foo", TgDataType.INT).add("bar", TgDataType.LONG).add("zzz", TgDataType.STRING);
     static final TgBindVariables VARIABLE2 = TgBindVariables.of().add("foo", int.class).add("bar", long.class).add("zzz", String.class);
 

@@ -29,18 +29,19 @@ public class Example21Insert {
             var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
             var tm = session.createTransactionManager(setting);
 
-            insert0_execRs(session, tm);
-            insert0_execPs(session, tm);
-            insert0_execTm(session, tm);
+            insert_executeStatement(session, tm);
+            insert_executeAndGetCount(session, tm);
+            insert_tm(session, tm);
+            insert_tm_sql(tm);
 
-            insertParameter(session, tm);
+            insertBindParameter(session, tm);
             insertEntity(session, tm);
             insertEntityMapping(session, tm);
             insertForkJoin(session, tm, List.of(/* entities */));
         }
     }
 
-    void insert0_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void insert_executeStatement(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.execute(transaction -> {
                 try (var result = transaction.executeStatement(ps)) {
@@ -51,7 +52,7 @@ public class Example21Insert {
         }
     }
 
-    void insert0_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void insert_executeAndGetCount(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.execute(transaction -> {
                 return transaction.executeAndGetCount(ps);
@@ -60,43 +61,47 @@ public class Example21Insert {
         }
     }
 
-    void insert0_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void insert_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.executeAndGetCount(ps);
             System.out.println(count);
         }
     }
 
-    void insert0_execTmDirect(TsurugiTransactionManager tm) throws IOException {
+    void insert_tm_sql(TsurugiTransactionManager tm) throws IOException {
         int count = tm.executeAndGetCount("insert into TEST values(123, 456, 'abc')");
         System.out.println(count);
     }
 
-    void insertParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void insertBindParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var zzz = TgBindVariable.ofString("zzz");
 
-        var sql = "insert into TEST values(:foo, :bar, :zzz)";
-//      var sql = "insert into TEST values(" + foo + ", " + bar + ", " + zzz + ")";
-
-        TgBindVariables variable;
+        String sql;
+        TgBindVariables variables;
         switch (0) {
         default:
-            variable = TgBindVariables.of(foo, bar, zzz);
+//          sql = "insert into TEST values(" + foo + ", " + bar + ", " + zzz + ")";
+            variables = TgBindVariables.of(foo, bar, zzz);
+            sql = "insert into TEST values(" + variables.getSqlNames() + ")";
             break;
         case 1:
-            variable = TgBindVariables.of().addInt("foo").addLong("bar").addString("zzz");
+            sql = "insert into TEST values(:foo, :bar, :zzz)";
+            variables = TgBindVariables.of().addInt("foo").addLong("bar").addString("zzz");
             break;
         case 2:
-            variable = TgBindVariables.of().add("foo", TgDataType.INT).add("bar", TgDataType.LONG).add("zzz", TgDataType.STRING);
+            sql = "insert into TEST values(:foo, :bar, :zzz)";
+            variables = TgBindVariables.of().add("foo", TgDataType.INT).add("bar", TgDataType.LONG).add("zzz", TgDataType.STRING);
             break;
         case 3:
-            variable = TgBindVariables.of().add("foo", int.class).add("bar", long.class).add("zzz", String.class);
+            sql = "insert into TEST values(:foo, :bar, :zzz)";
+            variables = TgBindVariables.of().add("foo", int.class).add("bar", long.class).add("zzz", String.class);
             break;
         }
+        var parameterMapping = TgParameterMapping.of(variables);
 
-        try (var ps = session.createStatement(sql, TgParameterMapping.of(variable))) {
+        try (var ps = session.createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
                 TgBindParameters parameter;
                 switch (0) {
@@ -119,7 +124,7 @@ public class Example21Insert {
     }
 
     void insertEntity(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        try (var ps = session.createStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLE, TestEntity::toParameter))) {
+        try (var ps = session.createStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLES, TestEntity::toParameter))) {
             tm.execute(transaction -> {
 //              var entity = new TestEntity(123, 456L, "abc");
                 var entity = new TestEntity();
@@ -168,7 +173,7 @@ public class Example21Insert {
     }
 
     void insertForkJoin(TsurugiSession session, TsurugiTransactionManager tm, List<TestEntity> entityList) throws IOException {
-        try (var ps = session.createStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLE, TestEntity::toParameter))) {
+        try (var ps = session.createStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLES, TestEntity::toParameter))) {
             tm.execute(transaction -> {
                 var task = new InsertTask(transaction, ps, entityList).fork();
                 task.join();
@@ -180,18 +185,18 @@ public class Example21Insert {
     static class InsertTask extends RecursiveAction {
         private final TsurugiTransaction transaction;
         private final TsurugiSqlPreparedStatement<TestEntity> preparedStatement;
-        private final List<TestEntity> list;
+        private final List<TestEntity> entityList;
 
-        public InsertTask(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<TestEntity> preparedStatement, List<TestEntity> list) {
+        public InsertTask(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<TestEntity> preparedStatement, List<TestEntity> entityList) {
             this.transaction = transaction;
             this.preparedStatement = preparedStatement;
-            this.list = list;
+            this.entityList = entityList;
         }
 
         @Override
         protected void compute() {
-            if (list.size() <= 100) {
-                for (TestEntity entity : list) {
+            if (entityList.size() <= 100) {
+                for (TestEntity entity : entityList) {
                     try {
                         transaction.executeAndGetCount(preparedStatement, entity);
                     } catch (IOException e) {
@@ -201,9 +206,9 @@ public class Example21Insert {
                     }
                 }
             } else {
-                int n = list.size() / 2;
-                var task1 = new InsertTask(transaction, preparedStatement, list.subList(0, n)).fork();
-                var task2 = new InsertTask(transaction, preparedStatement, list.subList(n, list.size())).fork();
+                int n = entityList.size() / 2;
+                var task1 = new InsertTask(transaction, preparedStatement, entityList.subList(0, n)).fork();
+                var task2 = new InsertTask(transaction, preparedStatement, entityList.subList(n, entityList.size())).fork();
                 // FIXME TsurugiTransactionException例外処理
                 task1.join();
                 task2.join();

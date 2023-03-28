@@ -29,10 +29,10 @@ public class Example11Ddl {
     void createTable(TsurugiTransactionManager tm) throws IOException {
         var sql = "create table TEST" //
                 + "(" //
-                + "  foo int," // INT4
-                + "  bar bigint," // INT8
-                + "  zzz varchar(10)," // CHARACTER
-                + "  primary key(foo)" //
+                + "  FOO int," // INT4
+                + "  BAR bigint," // INT8
+                + "  ZZZ varchar(10)," // CHARACTER
+                + "  primary key(FOO)" //
                 + ")";
         tm.executeDdl(sql);
     }
@@ -43,8 +43,8 @@ public class Example11Ddl {
     }
 
     void existsTable(TsurugiSession session) throws IOException {
-        var opt = session.findTableMetadata("TEST");
-        if (opt.isPresent()) {
+        var metadataOpt = session.findTableMetadata("TEST");
+        if (metadataOpt.isPresent()) {
             System.out.println("table exists");
         } else {
             System.out.println("table not exists");
@@ -52,9 +52,9 @@ public class Example11Ddl {
     }
 
     void getTableMetadata(TsurugiSession session) throws IOException {
-        var opt = session.findTableMetadata("TEST");
-        if (opt.isPresent()) {
-            var metadata = opt.get();
+        var metadataOpt = session.findTableMetadata("TEST");
+        if (metadataOpt.isPresent()) {
+            var metadata = metadataOpt.get();
             System.out.println(metadata.getDatabaseName());
             System.out.println(metadata.getSchemaName());
             System.out.println(metadata.getTableName());
@@ -71,10 +71,10 @@ public class Example11Ddl {
             }
             transaction.executeDdl("create table TEST" //
                     + "(" //
-                    + "  foo int," // INT4
-                    + "  bar bigint," // INT8
-                    + "  zzz varchar(10)," // CHARACTER
-                    + "  primary key(foo)" //
+                    + "  FOO int," // INT4
+                    + "  BAR bigint," // INT8
+                    + "  ZZZ varchar(10)," // CHARACTER
+                    + "  primary key(FOO)" //
                     + ")");
         });
     }

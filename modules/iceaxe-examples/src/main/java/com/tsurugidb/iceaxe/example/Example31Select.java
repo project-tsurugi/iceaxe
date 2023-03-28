@@ -27,20 +27,22 @@ public class Example31Select {
 
             selectLoop(session, tm);
 
-            selectAsList_execRs(session, tm);
-            selectAsList_execPs(session, tm);
-            selectAsList_execTm(session, tm);
+            selectAsList_executeQuery(session, tm);
+            selectAsList_executeAndGetList(session, tm);
+            selectAsList_tm(session, tm);
+            selectAsList_tm_sql(tm);
 
             selectAsEntityLoop(session, tm);
-            select_asEntityList(session, tm);
+            selectAsEntityList(session, tm);
 
             selectByParameter1(session, tm);
             selectByParameter1_singleVariable(session, tm);
             selectByParameter2(session, tm);
             selectByParameter2_bindVariable(session, tm);
-            selectByParameter2_asEntityList_execRs(session, tm);
-            selectByParameter2_asEntityList_execPs(session, tm);
-            selectByParameter2_asEntityList_execTm(session, tm);
+            selectByParameter2_asEntityList_executeQuery(session, tm);
+            selectByParameter2_asEntityList_executeAndGetList(session, tm);
+            selectByParameter2_asEntityList_tm(session, tm);
+            selectByParameter2_asEntityList_tm_sql(tm);
         }
     }
 
@@ -52,16 +54,16 @@ public class Example31Select {
                     System.out.println(nameList);
 
                     for (TsurugiResultEntity entity : result) {
-                        System.out.println(entity.getIntOrNull("foo"));
-                        System.out.println(entity.getLongOrNull("bar"));
-                        System.out.println(entity.getStringOrNull("zzz"));
+                        System.out.println(entity.getIntOrNull("FOO"));
+                        System.out.println(entity.getLongOrNull("BAR"));
+                        System.out.println(entity.getStringOrNull("ZZZ"));
                     }
                 }
             });
         }
     }
 
-    void selectAsList_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsList_executeQuery(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
@@ -72,7 +74,7 @@ public class Example31Select {
         }
     }
 
-    void selectAsList_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsList_executeAndGetList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 return transaction.executeAndGetList(ps);
@@ -81,20 +83,21 @@ public class Example31Select {
         }
     }
 
-    void selectAsList_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsList_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         try (var ps = session.createQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             System.out.println(list);
         }
     }
 
-    void selectAsList_execTmDirect(TsurugiTransactionManager tm) throws IOException {
+    void selectAsList_tm_sql(TsurugiTransactionManager tm) throws IOException {
         List<TsurugiResultEntity> list = tm.executeAndGetList("select * from TEST");
         System.out.println(list);
     }
 
     void selectAsEntityLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        try (var ps = session.createQuery("select * from TEST", resultMappingForTestEntity())) {
+        var resultMapping = resultMappingForTestEntity();
+        try (var ps = session.createQuery("select * from TEST", resultMapping)) {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     for (TestEntity entity : result) {
@@ -112,9 +115,9 @@ public class Example31Select {
         default:
             return TgResultMapping.of(record -> {
                 var entity = new TestEntity();
-                entity.setFoo(record.getIntOrNull("foo"));
-                entity.setBar(record.getLongOrNull("bar"));
-                entity.setZzz(record.getStringOrNull("zzz"));
+                entity.setFoo(record.getIntOrNull("FOO"));
+                entity.setBar(record.getLongOrNull("BAR"));
+                entity.setZzz(record.getStringOrNull("ZZZ"));
                 return entity;
             });
         case 1:
@@ -131,14 +134,15 @@ public class Example31Select {
                     .addString(2, TestEntity::setZzz);
         case 4:
             return TgResultMapping.of(TestEntity::new) //
-                    .addInt("foo", TestEntity::setFoo) //
-                    .addLong("bar", TestEntity::setBar) //
-                    .addString("zzz", TestEntity::setZzz);
+                    .addInt("FOO", TestEntity::setFoo) //
+                    .addLong("BAR", TestEntity::setBar) //
+                    .addString("ZZZ", TestEntity::setZzz);
         }
     }
 
-    void select_asEntityList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        try (var ps = session.createQuery("select * from TEST", resultMappingForTestEntity())) {
+    void selectAsEntityList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        var resultMapping = resultMappingForTestEntity();
+        try (var ps = session.createQuery("select * from TEST", resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
                 return transaction.executeAndGetList(ps);
             });
@@ -200,7 +204,24 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2_asEntityList_execRs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_executeQuery(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+        var foo = TgBindVariable.ofInt("foo");
+        var bar = TgBindVariable.ofLong("bar");
+        var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
+        var parameterMapping = TgParameterMapping.of(foo, bar);
+        var resultMapping = resultMappingForTestEntity();
+        try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
+            List<TestEntity> list = tm.execute(transaction -> {
+                var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456));
+                try (var rs = transaction.executeQuery(ps, parameter)) {
+                    return rs.getRecordList();
+                }
+            });
+            System.out.println(list);
+        }
+    }
+
+    void selectByParameter2_asEntityList_executeAndGetList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
@@ -215,22 +236,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2_asEntityList_execPs(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
-        var foo = TgBindVariable.ofInt("foo");
-        var bar = TgBindVariable.ofLong("bar");
-        var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
-        var parameterMapping = TgParameterMapping.of(foo, bar);
-        var resultMapping = resultMappingForTestEntity();
-        try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
-            List<TestEntity> list = tm.execute(transaction -> {
-                var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456));
-                return transaction.executeAndGetList(ps, parameter);
-            });
-            System.out.println(list);
-        }
-    }
-
-    void selectByParameter2_asEntityList_execTm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
@@ -241,5 +247,16 @@ public class Example31Select {
             List<TestEntity> list = tm.executeAndGetList(ps, parameter);
             System.out.println(list);
         }
+    }
+
+    void selectByParameter2_asEntityList_tm_sql(TsurugiTransactionManager tm) throws IOException {
+        var foo = TgBindVariable.ofInt("foo");
+        var bar = TgBindVariable.ofLong("bar");
+        var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
+        var parameterMapping = TgParameterMapping.of(foo, bar);
+        var resultMapping = resultMappingForTestEntity();
+        var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456));
+        List<TestEntity> list = tm.executeAndGetList(sql, parameterMapping, parameter, resultMapping);
+        System.out.println(list);
     }
 }

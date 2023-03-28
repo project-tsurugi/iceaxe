@@ -37,14 +37,14 @@ public class Example04TransactionManager {
     void manager1(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager(SETTING);
         tm.execute(transaction -> {
-//          preparedStatement.execute(transaction)
+//          transaction.executeAndXxx(ps);
         });
     }
 
     void manager2(TsurugiSession session) throws IOException {
         var tm = session.createTransactionManager();
         tm.execute(SETTING, transaction -> {
-//          preparedStatement.execute(transaction)
+//          transaction.executeAndXxx(ps);
         });
     }
 }
