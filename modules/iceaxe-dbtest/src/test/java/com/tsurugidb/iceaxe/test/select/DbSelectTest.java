@@ -135,7 +135,21 @@ class DbSelectTest extends DbTestTableTester {
         }
     }
 
+    @Test
+    void selectMultiColumn_single() throws IOException {
+        var sql = "select foo, bar, zzz from " + TEST;
+        var resultMapping = TgResultMapping.of(int.class);
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, resultMapping)) {
+            List<Integer> list = tm.executeAndGetList(ps);
+            assertColumn(list);
+        }
+    }
+
     private static void assertColumn(List<Integer> actualList) {
+        assertEquals(SIZE, actualList.size());
         for (int i = 0; i < SIZE; i++) {
             assertTrue(actualList.contains(i));
         }
