@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.ThreadSafe;
@@ -70,6 +71,18 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
+     * add write preserve
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addWritePreserve(Stream<String> tableNames) {
+        tableNames.forEachOrdered(writePreserveList::add);
+        reset();
+        return this;
+    }
+
+    /**
      * get write preserve
      *
      * @return list of table name
@@ -90,8 +103,8 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     @Override
-    public TgTxOptionLtx clone() {
-        var txOption = super.clone();
+    public synchronized TgTxOptionLtx clone() {
+        TgTxOptionLtx txOption = super.clone();
         txOption.writePreserveList = new ArrayList<>(this.writePreserveList);
         return txOption;
     }

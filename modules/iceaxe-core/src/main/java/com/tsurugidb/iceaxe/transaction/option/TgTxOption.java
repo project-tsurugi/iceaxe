@@ -12,7 +12,7 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 public interface TgTxOption extends Cloneable {
 
     /**
-     * create transaction option for OCC
+     * create transaction option for short transaction
      *
      * @return transaction option
      */
@@ -27,12 +27,7 @@ public interface TgTxOption extends Cloneable {
      * @return transaction option
      */
     public static TgTxOptionLtx ofLTX(String... writePreserveTableNames) {
-        // return ofLTX(List.of(writePreserveTableNames));
-        var txOption = new TgTxOptionLtx();
-        for (var name : writePreserveTableNames) {
-            txOption.addWritePreserve(name);
-        }
-        return txOption;
+        return new TgTxOptionLtx().addWritePreserve(writePreserveTableNames);
     }
 
     /**
@@ -42,11 +37,7 @@ public interface TgTxOption extends Cloneable {
      * @return transaction option
      */
     public static TgTxOptionLtx ofLTX(Collection<String> writePreserveTableNames) {
-        var txOption = new TgTxOptionLtx();
-        for (var name : writePreserveTableNames) {
-            txOption.addWritePreserve(name);
-        }
-        return txOption;
+        return new TgTxOptionLtx().addWritePreserve(writePreserveTableNames);
     }
 
     /**
@@ -56,9 +47,7 @@ public interface TgTxOption extends Cloneable {
      * @return transaction option
      */
     public static TgTxOptionLtx ofLTX(Stream<String> writePreserveTableNames) {
-        var txOption = new TgTxOptionLtx();
-        writePreserveTableNames.forEachOrdered(txOption::addWritePreserve);
-        return txOption;
+        return new TgTxOptionLtx().addWritePreserve(writePreserveTableNames);
     }
 
     /**

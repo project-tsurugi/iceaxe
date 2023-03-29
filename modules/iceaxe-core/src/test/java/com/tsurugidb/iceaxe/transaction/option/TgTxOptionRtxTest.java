@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -74,6 +75,14 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
     }
 
     @Test
+    void inclusiveReadAreaStream() {
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().addInclusiveReadArea(Stream.of("t1", "t2"));
+        String expected = "RTX{inclusiveReadArea=[t1, t2]}";
+        assertOption(expected, null, null, List.of("t1", "t2"), List.of(), //
+                txOption);
+    }
+
+    @Test
     void exclusiveReadArea() {
         TgTxOptionRtx txOption = TgTxOption.ofRTX().addExclusiveReadArea("t1");
         String expected = "RTX{exclusiveReadArea=[t1]}";
@@ -92,6 +101,14 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
     @Test
     void exclusiveReadAreaCollection() {
         TgTxOptionRtx txOption = TgTxOption.ofRTX().addExclusiveReadArea(List.of("t1", "t2"));
+        String expected = "RTX{exclusiveReadArea=[t1, t2]}";
+        assertOption(expected, null, null, List.of(), List.of("t1", "t2"), //
+                txOption);
+    }
+
+    @Test
+    void exclusiveReadAreaStream() {
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().addExclusiveReadArea(Stream.of("t1", "t2"));
         String expected = "RTX{exclusiveReadArea=[t1, t2]}";
         assertOption(expected, null, null, List.of(), List.of("t1", "t2"), //
                 txOption);

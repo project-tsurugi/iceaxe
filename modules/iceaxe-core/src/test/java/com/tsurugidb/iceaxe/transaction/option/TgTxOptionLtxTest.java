@@ -99,6 +99,14 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
     }
 
     @Test
+    void writePreserveStream() {
+        TgTxOptionLtx txOption = TgTxOption.ofLTX().addWritePreserve(Stream.of("t1", "t2"));
+        String expected = "LTX{writePreserve=[t1, t2]}";
+        assertOption(expected, null, null, List.of("t1", "t2"), List.of(), List.of(), //
+                txOption);
+    }
+
+    @Test
     void inclusiveReadArea() {
         TgTxOptionLtx txOption = TgTxOption.ofLTX().addInclusiveReadArea("t1");
         String expected = "LTX{inclusiveReadArea=[t1], writePreserve=[]}";
@@ -123,6 +131,14 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
     }
 
     @Test
+    void inclusiveReadAreaStream() {
+        TgTxOptionLtx txOption = TgTxOption.ofLTX().addInclusiveReadArea(Stream.of("t1", "t2"));
+        String expected = "LTX{inclusiveReadArea=[t1, t2], writePreserve=[]}";
+        assertOption(expected, null, null, List.of(), List.of("t1", "t2"), List.of(), //
+                txOption);
+    }
+
+    @Test
     void exclusiveReadArea() {
         TgTxOptionLtx txOption = TgTxOption.ofLTX().addExclusiveReadArea("t1");
         String expected = "LTX{exclusiveReadArea=[t1], writePreserve=[]}";
@@ -141,6 +157,14 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
     @Test
     void exclusiveReadAreaCollection() {
         TgTxOptionLtx txOption = TgTxOption.ofLTX().addExclusiveReadArea(List.of("t1", "t2"));
+        String expected = "LTX{exclusiveReadArea=[t1, t2], writePreserve=[]}";
+        assertOption(expected, null, null, List.of(), List.of(), List.of("t1", "t2"), //
+                txOption);
+    }
+
+    @Test
+    void exclusiveReadAreaStream() {
+        TgTxOptionLtx txOption = TgTxOption.ofLTX().addExclusiveReadArea(Stream.of("t1", "t2"));
         String expected = "LTX{exclusiveReadArea=[t1, t2], writePreserve=[]}";
         assertOption(expected, null, null, List.of(), List.of(), List.of("t1", "t2"), //
                 txOption);

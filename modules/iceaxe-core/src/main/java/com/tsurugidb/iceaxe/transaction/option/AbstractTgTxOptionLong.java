@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.ThreadSafe;
@@ -17,7 +18,7 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionPriority;
  * @param <T> concrete class
  */
 @ThreadSafe
-public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<?>> extends AbstractTgTxOption<T> {
+public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>> extends AbstractTgTxOption<T> {
 
     private TransactionPriority lowPriority = null;
     private List<String> inclusiveReadAreaList = new ArrayList<>();
@@ -89,6 +90,19 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<?>
     }
 
     /**
+     * add inclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized T addInclusiveReadArea(Stream<String> tableNames) {
+        tableNames.forEachOrdered(inclusiveReadAreaList::add);
+        reset();
+        return (T) this;
+    }
+
+    /**
      * get inclusive read area
      *
      * @return inclusive read area
@@ -141,6 +155,19 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<?>
     }
 
     /**
+     * add exclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized T addExclusiveReadArea(Stream<String> tableNames) {
+        tableNames.forEachOrdered(exclusiveReadAreaList::add);
+        reset();
+        return (T) this;
+    }
+
+    /**
      * get exclusive read area
      *
      * @return exclusive read area
@@ -168,12 +195,12 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<?>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public T clone() {
-        var txOption = (AbstractTgTxOptionLong<?>) super.clone();
-        txOption.inclusiveReadAreaList = new ArrayList<>(this.inclusiveReadAreaList);
-        txOption.exclusiveReadAreaList = new ArrayList<>(this.exclusiveReadAreaList);
-        return (T) txOption;
+    public synchronized T clone() {
+        T txOption = super.clone();
+        var cast = (AbstractTgTxOptionLong<T>) txOption;
+        cast.inclusiveReadAreaList = new ArrayList<>(this.inclusiveReadAreaList);
+        cast.exclusiveReadAreaList = new ArrayList<>(this.exclusiveReadAreaList);
+        return txOption;
     }
 
     @Override

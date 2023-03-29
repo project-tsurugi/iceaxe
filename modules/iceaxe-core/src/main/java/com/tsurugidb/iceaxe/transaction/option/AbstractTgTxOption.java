@@ -11,7 +11,7 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
  * @param <T> concrete class
  */
 @ThreadSafe
-public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<?>> implements TgTxOption {
+public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implements TgTxOption {
 
     private String label = null;
 
