@@ -1,6 +1,8 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -106,6 +108,50 @@ class DbTransactionErrorTest extends DbTestTableTester {
                 }
             }
             fail("err_resource_limit_reached did not occur");
+        }
+    }
+
+    @Test
+    void executeAfterCommit() throws IOException, TsurugiTransactionException {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+
+            transaction.commit(TgCommitType.DEFAULT);
+
+            try (var ps = session.createQuery(SELECT_SQL)) {
+                var e = assertThrows(IOException.class, () -> transaction.executeAndGetList(ps));
+                assertEquals("transaction already closed", e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    void executeAfterRollback() throws IOException, TsurugiTransactionException {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+
+            transaction.rollback();
+
+            try (var ps = session.createQuery(SELECT_SQL)) {
+                var e = assertThrows(IOException.class, () -> transaction.executeAndGetList(ps));
+                assertEquals("transaction already closed", e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    void executeAfterError() throws IOException, TsurugiTransactionException {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            try (var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
+                    var selectPs = session.createQuery(SELECT_SQL)) {
+                var entity = createTestEntity(1);
+                var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(insertPs, entity));
+                assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e1);
+
+                var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetList(selectPs));
+                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
+            }
         }
     }
 
