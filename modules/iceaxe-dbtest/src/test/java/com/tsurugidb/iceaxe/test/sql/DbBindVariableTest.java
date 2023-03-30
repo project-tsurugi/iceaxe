@@ -164,6 +164,18 @@ class DbBindVariableTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, parameterMapping, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps, TgBindParameters.of());
+
+            assertEquals(SIZE, list.size());
+        }
+    }
+
+    @Test
+    void emptyBindNull() throws IOException {
+        var parameterMapping = TgParameterMapping.of();
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(SELECT_SQL, parameterMapping, SELECT_MAPPING)) {
             var list = tm.executeAndGetList(ps, null);
 
             assertEquals(SIZE, list.size());
