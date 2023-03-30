@@ -46,6 +46,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
     private static final String SELECT_SQL1 = SELECT_SQL + " where foo = " + KEY;
     private static final String UPDATE_SQL1 = "update " + TEST + " set bar =  " + BAR_AFTER1 + " where foo = " + KEY;
     private static final String UPDATE_SQL2 = "update " + TEST + " set bar =  " + BAR_AFTER2 + " where foo = " + KEY;
+    private static final String DELETE_SQL = "delete from " + TEST + " where foo = " + (SIZE - 1);
 
     @Test
     void occR_occR() throws IOException, TsurugiTransactionException {
@@ -112,6 +113,51 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
                 assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
             }
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 1, -1 })
+    void occR_occW_phantom(int add) throws IOException, TsurugiTransactionException {
+        occR_w_phantom(OCC, add);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 1, -1 })
+    void occR_ltx_phantom(int add) throws IOException, TsurugiTransactionException {
+        occR_w_phantom(LTX, add);
+    }
+
+    private void occR_w_phantom(TgTxOption txOption2, int add) throws IOException, TsurugiTransactionException {
+        var session = getSession();
+        try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING); //
+                var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
+                var deletePs = session.createStatement(DELETE_SQL)) {
+            try (var tx1 = session.createTransaction(OCC)) {
+                var list11 = tx1.executeAndGetList(selectPs);
+                assertEquals(SIZE, list11.size());
+
+                try (var tx2 = session.createTransaction(txOption2)) {
+                    if (add > 0) {
+                        var entity2 = createTestEntity(SIZE);
+                        tx2.executeAndGetCount(insertPs, entity2);
+                    } else {
+                        tx2.executeAndGetCount(deletePs);
+                    }
+
+                    tx2.commit(TgCommitType.DEFAULT);
+                }
+
+                var list12 = tx1.executeAndGetList(selectPs);
+                assertEquals(SIZE + add, list12.size());
+
+                var e = assertThrows(TsurugiTransactionException.class, () -> {
+                    tx1.commit(TgCommitType.DEFAULT);
+                });
+                assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
+            }
+        }
+
+        assertEqualsTestTable(SIZE + add);
     }
 
     @Test
