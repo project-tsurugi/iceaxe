@@ -141,11 +141,26 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected void logTransactionId(TgSessionTxLog txLog, String transactionId) {
+    protected void logLowTransactionGetStart(TgSessionTxLog txLog) {
         var writer = getWriter(txLog);
 
         int txId = txLog.getTransaction().getIceaxeTxId();
-        writer.println(TX_HEADER + " transactionId=%s", txId, transactionId);
+        writer.println(TX_HEADER + " lowTransaction get start", txId);
+    }
+
+    @Override
+    protected void logLowTransactionGetEnd(TgSessionTxLog txLog, String transactionId, Throwable occurred) {
+        var writer = getWriter(txLog);
+
+        int txId = txLog.getTransaction().getIceaxeTxId();
+        var time = elapsed(txLog.getLowGetStartTime(), txLog.getLowGetEndTime());
+        if (transactionId != null) {
+            writer.println(TX_HEADER + " lowTransaction get end. %d[ms], transactionId=%s", txId, time, transactionId);
+        }
+        if (occurred != null) {
+            writer.println(TX_HEADER + " lowTransaction get error. %d[ms]", txId, time);
+            writer.println(occurred);
+        }
     }
 
     @Override

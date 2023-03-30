@@ -14,12 +14,22 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxExecuteMethod;
 public interface TsurugiTransactionEventListener {
 
     /**
-     * called when get transactionId
+     * called when low transaction get start
+     *
+     * @param transaction transaction
+     */
+    default void lowTransactionGetStart(TsurugiTransaction transaction) {
+        // do override
+    }
+
+    /**
+     * called when low transaction get end
      *
      * @param transaction   transaction
      * @param transactionId transactionId
+     * @param occurred      exception
      */
-    default void gotTransactionId(TsurugiTransaction transaction, String transactionId) {
+    default void lowTransactionGetEnd(TsurugiTransaction transaction, @Nullable String transactionId, @Nullable Throwable occurred) {
         // do override
     }
 

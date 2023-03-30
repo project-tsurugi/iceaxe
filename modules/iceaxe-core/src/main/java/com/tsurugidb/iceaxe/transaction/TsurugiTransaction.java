@@ -283,10 +283,12 @@ public class TsurugiTransaction implements Closeable {
             }
 
             LOG.trace("lowTransaction get start");
+            event(null, listener -> listener.lowTransactionGetStart(this));
             try {
                 this.lowTransaction = IceaxeIoUtil.getAndCloseFuture(lowTransactionFuture, beginTimeout);
             } catch (Throwable e) {
                 this.lowFutureException = e;
+                event(e, listener -> listener.lowTransactionGetEnd(this, null, e));
                 throw e;
             }
             LOG.trace("lowTransaction get end");
@@ -295,7 +297,7 @@ public class TsurugiTransaction implements Closeable {
             applyCloseTimeout();
 
             this.transactionId = lowTransaction.getTransactionId();
-            event(null, listener -> listener.gotTransactionId(this, transactionId));
+            event(null, listener -> listener.lowTransactionGetEnd(this, transactionId, null));
         }
         return this.lowTransaction;
     }

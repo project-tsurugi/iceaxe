@@ -257,7 +257,8 @@ SQL文の次の行に引数（バインド変数の内容）が出力される�
 #### トランザクションID
 
 ```
-08:55:05.273 [TX-3] transactionId=0000000100000003
+08:55:05.272 [TX-3] lowTransaction get start
+08:55:05.273 [TX-3] lowTransaction get end. 1[ms], transactionId=TID-0000001400002507
 ```
 
 DB側で採番されたトランザクションIDが取得できると、それが出力される。

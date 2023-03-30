@@ -77,8 +77,13 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
 
     private final TsurugiTransactionEventListener txLogger = new TsurugiTransactionEventListener() {
         @Override
-        public void gotTransactionId(TsurugiTransaction transaction, String transactionId) {
-            doLogTransactionId(transaction, transactionId);
+        public void lowTransactionGetStart(TsurugiTransaction transaction) {
+            doLowTransactionGetStart(transaction);
+        }
+
+        @Override
+        public void lowTransactionGetEnd(TsurugiTransaction transaction, String transactionId, Throwable occurred) {
+            doLowTransactionGetEnd(transaction, transactionId, occurred);
         }
 
         @Override
@@ -382,8 +387,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     /**
      * called when retry transaction
      *
-     * @param txLog      transaction log
-     * @param cause      retry exception
+     * @param txLog        transaction log
+     * @param cause        retry exception
      * @param nextTxOption next transaction option
      */
     protected void logTmExecuteRetry(TgSessionTxLog txLog, Exception cause, @Nullable TgTxOption nextTxOption) {
@@ -449,15 +454,15 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         // do override
     }
 
-    protected void doLogTransactionId(TsurugiTransaction transaction, String transactionId) {
+    protected void doLowTransactionGetStart(TsurugiTransaction transaction) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
         }
 
-        txLog.setTransactionId(transactionId);
+        txLog.setLowGetStartTime(ZonedDateTime.now());
 
-        logTransactionId(txLog, transactionId);
+        logLowTransactionGetStart(txLog);
     }
 
     /**
@@ -466,7 +471,30 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param txLog         transaction log
      * @param transactionId transactionId
      */
-    protected void logTransactionId(TgSessionTxLog txLog, String transactionId) {
+    protected void logLowTransactionGetStart(TgSessionTxLog txLog) {
+        // do override
+    }
+
+    protected void doLowTransactionGetEnd(TsurugiTransaction transaction, String transactionId, Throwable occurred) {
+        var txLog = getTxLog(transaction);
+        if (txLog == null) {
+            return;
+        }
+
+        txLog.setLowGetEndTime(ZonedDateTime.now());
+        txLog.setTransactionId(transactionId);
+
+        logLowTransactionGetEnd(txLog, transactionId, occurred);
+    }
+
+    /**
+     * called when get transactionId
+     *
+     * @param txLog         transaction log
+     * @param transactionId transactionId
+     * @param occurred      exception
+     */
+    protected void logLowTransactionGetEnd(TgSessionTxLog txLog, @Nullable String transactionId, @Nullable Throwable occurred) {
         // do override
     }
 

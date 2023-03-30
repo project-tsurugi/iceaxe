@@ -21,6 +21,8 @@ public class TgSessionTxLog {
     private final Map<Integer, TgSessionSqlLog> sqlLogMap = new ConcurrentHashMap<>();
 
     private ZonedDateTime startTime;
+    private ZonedDateTime lowGetStartTime;
+    private ZonedDateTime lowGetEndTime;
     private final Map<Integer, TgSessionTxExecuteLog> timeMap = new ConcurrentHashMap<>();
     private ZonedDateTime commitStartTime;
     private ZonedDateTime commitEndTime;
@@ -148,6 +150,42 @@ public class TgSessionTxLog {
      */
     public ZonedDateTime getStartTime() {
         return this.startTime;
+    }
+
+    /**
+     * set low transaction get start time
+     *
+     * @param time low transaction get start time
+     */
+    public void setLowGetStartTime(ZonedDateTime time) {
+        this.lowGetStartTime = time;
+    }
+
+    /**
+     * get low transaction get start time
+     *
+     * @return low transaction get start time
+     */
+    public ZonedDateTime getLowGetStartTime() {
+        return this.lowGetStartTime;
+    }
+
+    /**
+     * set low transaction get end time
+     *
+     * @param time low transaction get end time
+     */
+    public void setLowGetEndTime(ZonedDateTime time) {
+        this.lowGetEndTime = time;
+    }
+
+    /**
+     * get low transaction get end time
+     *
+     * @return low transaction get end time
+     */
+    public ZonedDateTime getLowGetEndTime() {
+        return this.lowGetEndTime;
     }
 
     /**
