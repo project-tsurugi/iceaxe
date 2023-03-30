@@ -35,9 +35,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  zzz varchar(10)," //
                 + "  primary key(goo)" //
                 + ")";
-        var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-            executeDdl(getSession(), sql);
-        });
+        var e = executeErrorDdl(sql);
         assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
         assertContains("translating statement failed: column_not_found primary key column \"goo\" is not found", e.getMessage());
     }
@@ -51,9 +49,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  zzz varchar(10)," //
                 + "  primary key(foo)" //
                 + ")";
-        var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
-            executeDdl(getSession(), sql);
-        });
+        var e = executeErrorDdl(sql);
         assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
         assertContains("translating statement failed: invalid_default_value primary key definition must be upto one", e.getMessage());
     }
@@ -67,7 +63,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  zzz varchar(10)," //
                 + "  primary key(foo, foo)" //
                 + ")";
-        // TODO cause exception
+        // TODO executeErrorDdl(sql)
         executeDdl(getSession(), sql);
     }
 
@@ -81,7 +77,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
 
             dropTestTable();
             try {
-                // TODO cause exception
+                // TODO executeErrorDdl(sql)
                 executeDdl(getSession(), sql);
             } catch (Throwable e) {
                 LOG.error("duplicateColumnName fail. ddl={}", sql, e);
@@ -103,5 +99,12 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  foo bigint" //
                 + (pk2 ? ",primary key(foo)" : "") //
                 + ")";
+    }
+
+    private static TsurugiTransactionIOException executeErrorDdl(String sql) throws IOException {
+        var tm = createTransactionManagerOcc(getSession());
+        return assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            tm.executeDdl(sql);
+        });
     }
 }
