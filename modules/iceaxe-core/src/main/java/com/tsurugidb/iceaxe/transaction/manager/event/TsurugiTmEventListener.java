@@ -85,6 +85,16 @@ public interface TsurugiTmEventListener {
     }
 
     /**
+     * called when transaction exception is not retryable
+     *
+     * @param transaction transaction
+     * @param cause       exception
+     */
+    default void transactionNotRetryable(TsurugiTransaction transaction, Exception cause) {
+        // do override
+    }
+
+    /**
      * called when execute success end
      *
      * @param transaction transaction

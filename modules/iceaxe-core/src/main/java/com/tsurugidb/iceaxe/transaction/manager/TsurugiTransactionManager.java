@@ -284,6 +284,7 @@ public class TsurugiTransactionManager {
                 event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause));
                 throw new TsurugiTransactionRetryOverIOException(transaction, cause);
             } else {
+                event(setting, cause, listener -> listener.transactionNotRetryable(transaction, cause));
                 throw new TsurugiTransactionIOException(cause.getMessage(), transaction, cause);
             }
         } catch (Throwable t) {
