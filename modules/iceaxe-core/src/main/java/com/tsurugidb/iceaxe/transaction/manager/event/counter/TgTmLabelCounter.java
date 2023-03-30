@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
@@ -19,7 +20,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 @ThreadSafe
 public class TgTmLabelCounter implements TsurugiTmEventListener {
 
-    private final Map<String, TgTmCountAtomic> counter = new ConcurrentHashMap<>();
+    private final Map<String, TgTmCountAtomic> counterMap = new ConcurrentHashMap<>();
 
     @Override
     public void executeStart(TsurugiTransactionManager tm, int iceaxeTmExecuteId, TgTxOption txOption) {
@@ -109,7 +110,11 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     }
 
     protected TgTmCountAtomic getOrCreate(String label) {
-        return counter.computeIfAbsent(label, k -> new TgTmCountAtomic());
+        return counterMap.computeIfAbsent(label, this::newTmCountAtomic);
+    }
+
+    protected TgTmCountAtomic newTmCountAtomic(String label) {
+        return new TgTmCountAtomic();
     }
 
     /**
@@ -118,7 +123,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
      * @return count map
      */
     public Map<String, ? extends TgTmCount> getCountMap() {
-        return this.counter;
+        return this.counterMap;
     }
 
     /**
@@ -128,7 +133,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
      * @return count
      */
     public Optional<TgTmCount> findCount(String label) {
-        var count = counter.get(label);
+        var count = counterMap.get(label);
         return Optional.ofNullable(count);
     }
 
@@ -139,7 +144,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
      * @return count
      */
     public Optional<TgTmCount> findCountByPrefix(String labelPrefix) {
-        var count = TgTmCountSum.of(counter.entrySet().stream() //
+        var count = TgTmCountSum.of(counterMap.entrySet().stream() //
                 .filter(entry -> entry.getKey().startsWith(labelPrefix)) //
                 .map(entry -> entry.getValue()));
         return Optional.ofNullable(count);
@@ -151,19 +156,20 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
      * @return count
      */
     public TgTmCount getCount() {
-        var count = TgTmCountSum.of(counter.values().stream());
+        var count = TgTmCountSum.of(counterMap.values().stream());
         return (count != null) ? count : new TgTmCountSum();
     }
 
     /**
      * reset count
      */
+    @OverridingMethodsMustInvokeSuper
     public void reset() {
-        counter.clear();
+        counterMap.clear();
     }
 
     @Override
     public String toString() {
-        return "TgTmLabelCounter" + counter;
+        return "TgTmLabelCounter" + counterMap;
     }
 }
