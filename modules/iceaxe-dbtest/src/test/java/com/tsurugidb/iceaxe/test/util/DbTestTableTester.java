@@ -24,9 +24,11 @@ import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.sql.result.mapping.TgEntityResultMapping;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -118,13 +120,20 @@ public class DbTestTableTester {
             return;
         }
 
-      var tm = createTransactionManagerOcc(session);
+        var tm = createTransactionManagerOcc(session);
         tm.executeDdl(sql);
     }
 
     @Deprecated(forRemoval = true)
     private static void executeDdlWorkaround(TsurugiSession session, String sql) throws IOException {
         var tm = createTransactionManagerOcc(session, 3);
+        tm.addEventListener(new TsurugiTmEventListener() {
+            @Override
+            public void transactionException(TsurugiTransaction transaction, Throwable e) {
+                var log = LoggerFactory.getLogger(DbTestTableTester.class);
+                log.warn("executeDdl error. {}, sql={}", e.getMessage(), sql);
+            }
+        });
         try (var ps = session.createStatement(sql)) {
             for (int i = 1;; i++) {
                 try {
