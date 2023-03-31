@@ -114,7 +114,7 @@ import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredent
 
 var endpoint = URI.create("tcp://localhost:12345");
 var credential = new UsernamePasswordCredential("user", "password");
-var connector = TsurugiConnector.of(endpoint, credentail);
+var connector = TsurugiConnector.of(endpoint, credential);
 ```
 
 エンドポイントの他に、セッションを生成するのに必要な認証情報を指定することが出来る。（ここで指定せず、セッションを生成するcreateSessionメソッドの引数として渡すことも出来る）
