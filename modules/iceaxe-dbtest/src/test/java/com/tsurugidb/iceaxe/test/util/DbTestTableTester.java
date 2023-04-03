@@ -112,11 +112,15 @@ public class DbTestTableTester {
     }
 
     protected static void executeDdl(TsurugiSession session, String sql) throws IOException {
+        executeDdl(session, sql, TEST);
+    }
+
+    protected static void executeDdl(TsurugiSession session, String sql, String tableName) throws IOException {
         // FIXME issue106 2023-03-23 retry-over
         // TODO retry-overが解消されたらfalseに戻す
         boolean workaround = true;
         if (workaround) {
-            executeDdlWorkaround(session, sql);
+            executeDdlWorkaround(session, sql, tableName);
             return;
         }
 
@@ -125,7 +129,7 @@ public class DbTestTableTester {
     }
 
     @Deprecated(forRemoval = true)
-    private static void executeDdlWorkaround(TsurugiSession session, String sql) throws IOException {
+    private static void executeDdlWorkaround(TsurugiSession session, String sql, String tableName) throws IOException {
         var tm = createTransactionManagerOcc(session, 3);
         tm.addEventListener(new TsurugiTmEventListener() {
             @Override
@@ -149,7 +153,7 @@ public class DbTestTableTester {
                         var log = LoggerFactory.getLogger(DbTestTableTester.class);
                         log.warn("executeDdl duplicate_table retry{} at {}", i, line);
 
-                        dropTestTable();
+                        dropTable(tableName);
                         continue;
                     }
                     throw e;

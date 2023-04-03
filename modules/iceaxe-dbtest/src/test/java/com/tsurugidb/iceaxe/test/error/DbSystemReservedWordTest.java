@@ -39,7 +39,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
                 + "  bar bigint," //
                 + "  zzz varchar(10)" //
                 + ")";
-        executeDdl(getSession(), sql);
+        executeDdl(getSession(), sql, tableName);
     }
 
     @Test
