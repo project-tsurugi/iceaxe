@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.result.event.TsurugiQueryResultEventListener;
@@ -57,9 +58,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     private boolean calledEndEvent = false;
 
     // internal
-    public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil)
-            throws IOException {
-        super(sqlExecuteId, transaction);
+    public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping,
+            IceaxeConvertUtil convertUtil) throws IOException {
+        super(sqlExecuteId, transaction, ps, parameter);
         this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
@@ -148,7 +149,12 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         this.calledGetLowResultSet = true;
         if (this.lowResultSet == null) {
             LOG.trace("lowResultSet get start");
-            this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout);
+            try {
+                this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout);
+            } catch (TsurugiTransactionException e) {
+                fillTsurugiException(e);
+                throw e;
+            }
             LOG.trace("lowResultSet get end");
 
             this.lowResultSetFuture = null;
@@ -168,7 +174,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             }
         } catch (ServerException e) {
             event(e, listener -> listener.readException(this, e));
-            throw new TsurugiTransactionException(e);
+            throw fillTsurugiException(new TsurugiTransactionException(e));
         } catch (InterruptedException e) {
             event(e, listener -> listener.readException(this, e));
             throw new IOException(e.getMessage(), e);
@@ -208,7 +214,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         if (this.record == null) {
             try {
                 var lowResultSet = getLowResultSet();
-                this.record = new TsurugiResultRecord(lowResultSet, convertUtil);
+                this.record = new TsurugiResultRecord(this, lowResultSet, convertUtil);
             } catch (Throwable e) {
                 event(e, listener -> listener.readException(this, e));
                 throw e;
@@ -221,6 +227,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         R result;
         try {
             result = resultMapping.convert(record);
+        } catch (TsurugiTransactionException e) {
+            event(e, listener -> listener.readException(this, e));
+            fillTsurugiException(e);
+            throw e;
         } catch (Throwable e) {
             event(e, listener -> listener.readException(this, e));
             throw e;
@@ -249,15 +259,19 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      */
     public List<String> getNameList() throws IOException, TsurugiTransactionException {
         try {
-            return getNameList(getLowResultSet());
+            return getNameList(this, getLowResultSet());
+        } catch (TsurugiTransactionException e) {
+            event(e, listener -> listener.readException(this, e));
+            fillTsurugiException(e);
+            throw e;
         } catch (Throwable e) {
             event(e, listener -> listener.readException(this, e));
             throw e;
         }
     }
 
-    static List<String> getNameList(ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
-        var lowColumnList = getLowColumnList(lowResultSet);
+    static List<String> getNameList(TsurugiQueryResult<?> rs, ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
+        var lowColumnList = getLowColumnList(rs, lowResultSet);
         var size = lowColumnList.size();
         var list = new ArrayList<String>(size);
         int i = 0;
@@ -268,12 +282,12 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return list;
     }
 
-    static List<? extends Column> getLowColumnList(ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
+    static List<? extends Column> getLowColumnList(TsurugiQueryResult<?> rs, ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
         try {
             var lowMetadata = lowResultSet.getMetadata();
             return lowMetadata.getColumns();
         } catch (ServerException e) {
-            throw new TsurugiTransactionException(e);
+            throw rs.fillTsurugiException(new TsurugiTransactionException(e));
         } catch (InterruptedException e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -453,6 +467,14 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
                 // not try-finally
                 IceaxeIoUtil.closeInTransaction(lowResultSet, lowResultSetFuture);
                 super.close();
+            } catch (TsurugiTransactionException e) {
+                fillTsurugiException(e);
+                if (occurred != null) {
+                    occurred.addSuppressed(e);
+                } else {
+                    occurred = e;
+                    throw e;
+                }
             } catch (Throwable e) {
                 if (occurred != null) {
                     occurred.addSuppressed(e);

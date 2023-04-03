@@ -6,7 +6,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxExecuteMethod;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
 
 /**
  * {@link TsurugiTransaction} event listener
@@ -42,7 +42,7 @@ public interface TsurugiTransactionEventListener {
      * @param ps                SQL statement
      * @param parameter         SQL parameter
      */
-    default void executeStart(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter) {
+    default void executeStart(TsurugiTransaction transaction, TgTxMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter) {
         // do override
     }
 
@@ -57,7 +57,7 @@ public interface TsurugiTransactionEventListener {
      * @param result            SQL result
      * @param occurred          exception
      */
-    default void executeEnd(TsurugiTransaction transaction, TgTxExecuteMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter, @Nullable TsurugiSqlResult result,
+    default void executeEnd(TsurugiTransaction transaction, TgTxMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter, @Nullable TsurugiSqlResult result,
             @Nullable Throwable occurred) {
         // do override
     }

@@ -254,7 +254,7 @@ class TgSingleResultMappingTest {
                 };
             }
         };
-        var record = new TsurugiResultRecord(lowResultSet, IceaxeConvertUtil.INSTANCE) {
+        var record = new TsurugiResultRecord(null, lowResultSet, IceaxeConvertUtil.INSTANCE) {
         };
         try {
             assertEquals(expectedValue, actual.convert(record));

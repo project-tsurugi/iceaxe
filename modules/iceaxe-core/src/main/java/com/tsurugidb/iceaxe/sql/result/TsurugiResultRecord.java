@@ -109,12 +109,14 @@ public class TsurugiResultRecord {
         }
     }
 
+    private final TsurugiQueryResult<?> ownerResult;
     private final ResultSet lowResultSet;
     private final IceaxeConvertUtil convertUtil;
     private int currentColumnIndex;
     private Map<String, TsurugiResultColumnValue> columnMap;
 
-    protected TsurugiResultRecord(ResultSet lowResultSet, IceaxeConvertUtil convertUtil) {
+    protected TsurugiResultRecord(TsurugiQueryResult<?> owner, ResultSet lowResultSet, IceaxeConvertUtil convertUtil) {
+        this.ownerResult = owner;
         this.lowResultSet = lowResultSet;
         this.convertUtil = convertUtil;
         reset();
@@ -158,7 +160,7 @@ public class TsurugiResultRecord {
             }
             return exists;
         } catch (ServerException e) {
-            throw new TsurugiTransactionException(e);
+            throw ownerResult.fillTsurugiException(new TsurugiTransactionException(e));
         } catch (InterruptedException e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -166,7 +168,7 @@ public class TsurugiResultRecord {
 
     @Nonnull
     protected Column getLowColumn(int index) throws IOException, TsurugiTransactionException {
-        var lowColumnList = TsurugiQueryResult.getLowColumnList(lowResultSet);
+        var lowColumnList = TsurugiQueryResult.getLowColumnList(ownerResult, lowResultSet);
         return lowColumnList.get(index);
     }
 
@@ -254,7 +256,7 @@ public class TsurugiResultRecord {
                 throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);
             }
         } catch (ServerException e) {
-            throw new TsurugiTransactionException(e);
+            throw ownerResult.fillTsurugiException(new TsurugiTransactionException(e));
         } catch (InterruptedException e) {
             throw new IOException(e.getMessage(), e);
         }
@@ -273,7 +275,7 @@ public class TsurugiResultRecord {
      */
     @Nonnull
     public List<String> getNameList() throws IOException, TsurugiTransactionException {
-        return TsurugiQueryResult.getNameList(lowResultSet);
+        return TsurugiQueryResult.getNameList(ownerResult, lowResultSet);
     }
 
     @Nonnull

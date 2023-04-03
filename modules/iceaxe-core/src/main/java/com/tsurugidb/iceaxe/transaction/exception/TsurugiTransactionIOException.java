@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.transaction.exception;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
-import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -29,39 +28,22 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
         return message + ". " + transaction;
     }
 
-    /**
-     * get iceaxe transactionId
-     *
-     * @return iceaxe transactionId
-     */
+    @Override
     public int getIceaxeTxId() {
         return this.iceaxeTxId;
     }
 
-    /**
-     * get iceaxe tm executeId
-     *
-     * @return iceaxe tm executeId
-     */
+    @Override
     public int getIceaxeTmExecuteId() {
         return this.iceaxeTmExecuteId;
     }
 
-    /**
-     * get attempt number
-     *
-     * @return attempt number
-     * @see TgTmTxOptionSupplier#get(int, TsurugiTransactionException)
-     */
+    @Override
     public int getAttempt() {
         return this.attempt;
     }
 
-    /**
-     * get transaction option
-     *
-     * @return transaction option
-     */
+    @Override
     public TgTxOption getTransactionOption() {
         return this.txOption;
     }

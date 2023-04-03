@@ -87,7 +87,7 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
             var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeStatement(lowPs, lowParameterList));
             LOG.trace("execute started");
 
-            result = new TsurugiStatementResult(sqlExecuteId, transaction, lowResultFuture);
+            result = new TsurugiStatementResult(sqlExecuteId, transaction, this, parameter, lowResultFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeStatementStartException(transaction, this, parameter, sqlExecuteId, e));
             throw e;

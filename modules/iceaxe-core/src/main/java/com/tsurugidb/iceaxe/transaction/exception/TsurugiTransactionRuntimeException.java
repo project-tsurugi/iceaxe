@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.transaction.exception;
 
+import java.util.Optional;
+
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 
@@ -11,7 +13,7 @@ public class TsurugiTransactionRuntimeException extends RuntimeException impleme
 
     /**
      * Tsurugi Transaction RuntimeException
-     * 
+     *
      * @param cause TsurugiTransactionException
      */
     public TsurugiTransactionRuntimeException(TsurugiTransactionException cause) {
@@ -26,5 +28,10 @@ public class TsurugiTransactionRuntimeException extends RuntimeException impleme
     @Override
     public DiagnosticCode getDiagnosticCode() {
         return getCause().getDiagnosticCode();
+    }
+
+    @Override
+    public Optional<TsurugiTransactionException> findTransactionException() {
+        return Optional.of(getCause());
     }
 }

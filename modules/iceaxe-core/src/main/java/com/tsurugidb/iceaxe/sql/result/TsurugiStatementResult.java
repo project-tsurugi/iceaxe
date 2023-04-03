@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
 import com.tsurugidb.iceaxe.sql.result.event.TsurugiStatementResultEventListener;
@@ -38,8 +39,8 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     private List<TsurugiStatementResultEventListener> eventListenerList = null;
 
     // internal
-    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, FutureResponse<Void> lowResultFuture) throws IOException {
-        super(sqlExecuteId, transaction);
+    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<Void> lowResultFuture) throws IOException {
+        super(sqlExecuteId, transaction, ps, parameter);
         this.lowResultFuture = lowResultFuture;
 
         var sessionOption = transaction.getSessionOption();
@@ -127,6 +128,10 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
             Throwable occurred = null;
             try {
                 IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout);
+            } catch (TsurugiTransactionException e) {
+                occurred = e;
+                fillTsurugiException(e);
+                throw e;
             } catch (Throwable e) {
                 occurred = e;
                 throw e;
@@ -172,6 +177,14 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
                 // not try-finally
                 IceaxeIoUtil.closeInTransaction(lowResultFuture);
                 super.close();
+            } catch (TsurugiTransactionException e) {
+                fillTsurugiException(e);
+                if (occurred != null) {
+                    occurred.addSuppressed(e);
+                } else {
+                    occurred = e;
+                    throw e;
+                }
             } catch (Throwable e) {
                 if (occurred != null) {
                     occurred.addSuppressed(e);
