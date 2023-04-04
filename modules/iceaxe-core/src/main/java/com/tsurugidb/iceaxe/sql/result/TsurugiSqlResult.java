@@ -38,7 +38,7 @@ public abstract class TsurugiSqlResult implements AutoCloseable {
 
     // internal
     public TsurugiTransactionException fillTsurugiException(TsurugiTransactionException e) {
-        e.setSql(ownerTransaction, null, 0, sqlStatement, sqlParameter);
+        e.setSql(ownerTransaction, sqlStatement, sqlParameter, this);
         return e;
     }
 

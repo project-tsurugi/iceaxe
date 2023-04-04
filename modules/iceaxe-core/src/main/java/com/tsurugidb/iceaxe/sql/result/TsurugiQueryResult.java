@@ -260,10 +260,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     public List<String> getNameList() throws IOException, TsurugiTransactionException {
         try {
             return getNameList(this, getLowResultSet());
-        } catch (TsurugiTransactionException e) {
-            event(e, listener -> listener.readException(this, e));
-            fillTsurugiException(e);
-            throw e;
         } catch (Throwable e) {
             event(e, listener -> listener.readException(this, e));
             throw e;

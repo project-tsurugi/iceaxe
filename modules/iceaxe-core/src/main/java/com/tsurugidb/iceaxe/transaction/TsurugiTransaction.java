@@ -383,7 +383,7 @@ public class TsurugiTransaction implements Closeable {
                 rs.getUpdateCount();
             } catch (TsurugiTransactionException e) {
                 occurred = e;
-                e.setSql(this, method, txExecuteId, ps, null);
+                e.setTxMethod(method, txExecuteId);
                 throw e;
             } catch (Throwable e) {
                 occurred = e;
@@ -420,7 +420,7 @@ public class TsurugiTransaction implements Closeable {
             return result;
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, null);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -458,7 +458,7 @@ public class TsurugiTransaction implements Closeable {
             return result;
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, parameter);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -491,7 +491,7 @@ public class TsurugiTransaction implements Closeable {
             return result;
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, null);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -526,7 +526,7 @@ public class TsurugiTransaction implements Closeable {
             return result;
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, parameter);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -560,7 +560,7 @@ public class TsurugiTransaction implements Closeable {
             rs.whileEach(action);
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, null);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -595,7 +595,7 @@ public class TsurugiTransaction implements Closeable {
             rs.whileEach(action);
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, parameter);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -628,7 +628,7 @@ public class TsurugiTransaction implements Closeable {
             return rs.getRecordList();
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, null);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -663,7 +663,7 @@ public class TsurugiTransaction implements Closeable {
             return rs.getRecordList();
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, parameter);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -696,7 +696,7 @@ public class TsurugiTransaction implements Closeable {
             return rs.findRecord();
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, null);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -731,7 +731,7 @@ public class TsurugiTransaction implements Closeable {
             return rs.findRecord();
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, parameter);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -763,7 +763,7 @@ public class TsurugiTransaction implements Closeable {
             return rs.getUpdateCount();
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, null);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -797,7 +797,7 @@ public class TsurugiTransaction implements Closeable {
             return rs.getUpdateCount();
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, method, txExecuteId, ps, parameter);
+            e.setTxMethod(method, txExecuteId);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -916,7 +916,7 @@ public class TsurugiTransaction implements Closeable {
             this.committed = true;
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, TgTxMethod.COMMIT, 0, null, null);
+            e.setTxMethod(TgTxMethod.COMMIT, 0);
             throw e;
         } catch (Throwable e) {
             occurred = e;
@@ -951,7 +951,7 @@ public class TsurugiTransaction implements Closeable {
             this.rollbacked = true;
         } catch (TsurugiTransactionException e) {
             occurred = e;
-            e.setSql(this, TgTxMethod.ROLLBACK, 0, null, null);
+            e.setTxMethod(TgTxMethod.ROLLBACK, 0);
             throw e;
         } catch (Throwable e) {
             occurred = e;

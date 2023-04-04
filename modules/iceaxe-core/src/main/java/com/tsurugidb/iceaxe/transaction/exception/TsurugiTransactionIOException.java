@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.transaction.exception;
 
+import java.io.IOException;
+
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -10,18 +12,12 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 @SuppressWarnings("serial")
 public class TsurugiTransactionIOException extends TsurugiIOException {
 
-    private final int iceaxeTxId;
-    private final int iceaxeTmExecuteId;
-    private final int attempt;
-    private final TgTxOption txOption;
+    private final TsurugiTransaction transaction;
 
     // internal
     public TsurugiTransactionIOException(String message, TsurugiTransaction transaction, Exception cause) {
         super(createMessage(message, transaction), cause);
-        this.iceaxeTxId = transaction.getIceaxeTxId();
-        this.iceaxeTmExecuteId = transaction.getIceaxeTmExecuteId();
-        this.attempt = transaction.getAttempt();
-        this.txOption = transaction.getTransactionOption();
+        this.transaction = transaction;
     }
 
     private static String createMessage(String message, TsurugiTransaction transaction) {
@@ -30,21 +26,30 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
 
     @Override
     public int getIceaxeTxId() {
-        return this.iceaxeTxId;
+        return transaction.getIceaxeTxId();
     }
 
     @Override
     public int getIceaxeTmExecuteId() {
-        return this.iceaxeTmExecuteId;
+        return transaction.getIceaxeTmExecuteId();
     }
 
     @Override
     public int getAttempt() {
-        return this.attempt;
+        return transaction.getAttempt();
     }
 
     @Override
     public TgTxOption getTransactionOption() {
-        return this.txOption;
+        return transaction.getTransactionOption();
+    }
+
+    @Override
+    public String getTransactionId() {
+        try {
+            return transaction.getTransactionId();
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

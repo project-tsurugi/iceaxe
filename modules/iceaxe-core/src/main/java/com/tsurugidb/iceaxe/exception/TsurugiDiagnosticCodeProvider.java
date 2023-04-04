@@ -120,6 +120,15 @@ public interface TsurugiDiagnosticCodeProvider {
         return findTransactionException().map(e -> e.getTransactionOption()).orElse(null);
     }
 
+    /**
+     * get transaction id
+     *
+     * @return transaction id
+     */
+    public default @Nullable String getTransactionId() {
+        return findTransactionException().map(e -> e.getTransactionId()).orElse(null);
+    }
+
     // transaction execute information
 
     /**
@@ -156,6 +165,15 @@ public interface TsurugiDiagnosticCodeProvider {
      */
     public default @Nullable Object getSqlParameter() {
         return findTransactionException().map(e -> e.getSqlParameter()).orElse(null);
+    }
+
+    /**
+     * get iceaxe SQL executeId.
+     *
+     * @return iceaxe SQL executeId
+     */
+    public default int getIceaxeSqlExecuteId() {
+        return findTransactionException().map(e -> e.getIceaxeSqlExecuteId()).orElse(0);
     }
 
     /**

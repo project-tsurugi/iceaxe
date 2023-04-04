@@ -115,8 +115,8 @@ public class TsurugiResultRecord {
     private int currentColumnIndex;
     private Map<String, TsurugiResultColumnValue> columnMap;
 
-    protected TsurugiResultRecord(TsurugiQueryResult<?> owner, ResultSet lowResultSet, IceaxeConvertUtil convertUtil) {
-        this.ownerResult = owner;
+    protected TsurugiResultRecord(TsurugiQueryResult<?> result, ResultSet lowResultSet, IceaxeConvertUtil convertUtil) {
+        this.ownerResult = result;
         this.lowResultSet = lowResultSet;
         this.convertUtil = convertUtil;
         reset();
