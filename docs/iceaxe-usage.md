@@ -1,4 +1,4 @@
-# Iceaxe使用方法（2023-03-31）
+# Iceaxe使用方法（2023-04-04）
 
 Iceaxeの使用方法（概要）を説明する。
 
@@ -14,6 +14,30 @@ Iceaxeはユーザープログラマーの利便性を高める為に用意さ�
 
 IceaxeはJDBCではないが、その位置付け（プログラムのレイヤー）はJDBCと同様である。
 （ORMのような高度な機能は持たない。（ユーザープログラマーが用意したEntityクラスからSQL文を生成したり、SQL文からEntityクラスを生成したりするような機能は対象外））
+
+### Iceaxeで使用する用語
+
+| 用語                         | 説明                                                         | 関連するクラス・メソッド                                     |
+| ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| コネクター                   | エンドポイントと認証情報を保持するクラス。コネクターを使ってセッションを生成する | TsurugiConnector                                             |
+| エンドポイント               | Tsurugi DBの場所と接続方法                                   | URI                                                          |
+| 認証情報                     | ユーザー名とパスワードや、アクセストークン等                 | Credential                                                   |
+| セッション                   | DBと接続し、通信を行うクラス。セッションからSQLステートメントやトランザクションを生成する | TsurugiSession                                               |
+| SQLステートメント            | SQL文やバインド変数の定義を保持するクラス。トランザクションでSQLを実行するときに使用する | TsurugiSql                                                   |
+| DDL                          | データの定義を行うSQL。create tableやdrop table等            | executeDdl()                                                 |
+| DML                          | データの操作を行うSQL。クエリーと更新系SQL                   |                                                              |
+| クエリー                     | select文                                                     | TsurugiSqlQuery・TsurugiSqlPreparedQuery・TsurugiQueryResult |
+| 更新系SQL                    | insert, update, delete文の総称                               | TsurugiSqlStatement・TsurugiSqlPreparedStatement・TsurugiStatementResult |
+| バインド変数                 | SQL文の中に埋め込む変数。SQL実行時にSQL文の外から値を渡せる  | TgBindVariable・TgBindParameters                             |
+| トランザクション             | SQLを実行し、コミット（またはロールバック）を行う為のクラス。トランザクション開始時にトランザクションオプションを指定する必要がある。Iceaxeで想定している基本的な使用方法としては、トランザクションのライフサイクルはトランザクションマネージャーで管理する | TsurugiTransaction                                           |
+| トランザクションオプション   | トランザクション開始時に指定する。OCC・LTX・RTXの3種類ある。どの時点のデータを読むかや、他トランザクションとの競合時にどちらがアボートするか（優先されるか）が異なる。 | TgTxOption                                                   |
+| OCC                          | 実行時間が短いトランザクション。最新のデータを読む。他トランザクションとの競合時にアボートしやすい（優先度が低い） | TgTxOptionOcc                                                |
+| LTX                          | 実行時間が長いトランザクション。トランザクション開始時点のデータを読む。一番最初に始まったLTXはアボートしない（優先度が高い） | TgTxOptionLtx                                                |
+| RTX                          | 読み込み専用のトランザクション。基本的にトランザクション開始時点のデータを読む。他トランザクションと競合しない | TgTxOptionRtx                                                |
+| トランザクションマネージャー | トランザクションのライフサイクルを管理するクラス。トランザクションでシリアライゼーションエラーが発生したときにトランザクションを再実行する機能を持つ | TsurugiTransactionManager                                    |
+| シリアライゼーションエラー   | トランザクションの処理内容が（他トランザクションと競合して）シリアライザブルでないときに発生するエラー（トランザクション分離レベルがSERIALIZBLEのRDBMS（Tsurugi）で発生する）。「リトライ可能なアボート」とも呼ぶ |                                                              |
+| リトライ・再実行             | トランザクション内の一連の処理を最初から再度実行し直すこと   |                                                              |
+| アボート                     | DBサーバー内でトランザクション処理が失敗すること             |                                                              |
 
 
 
@@ -83,13 +107,14 @@ Iceaxeを用いてTsurugiのDBでSQLを実行する手順は、概ね以下の�
 Tsurugi DBの場所と接続方法は『エンドポイント』と呼ばれるURIで指定する。
 TsurugiConnectorクラスでエンドポイントを（必要に応じて認証情報も）保持する。
 
-TsurugiConnectorはセッションを生成するのに使用する。
-
-TsurugiConnectorはセッション生成に関してスレッドセーフ。
+- TsurugiConnectorは自分自身のインスタンス生成メソッドを使って生成する。
+- TsurugiConnectorはセッションを生成するのに使用する。
+- TsurugiConnectorはセッション生成に関してスレッドセーフ。
 
 #### エンドポイントについて
 
-エンドポイントの内容はTsubakuroの仕様に準ずる。現時点では以下の通り。
+Tsurugi DBの場所と接続方法を表すエンドポイントの内容はTsubakuroの仕様に準ずる。
+現時点では以下の通り。
 
 Tsurugi DBへの接続方法には、TCP接続とIPC接続がある。
 TCP接続は、データ通信にTCP/IP（ソケット通信）を用いる方法である。ただし、現時点のTCP接続は暫定実装という位置付けであり、性能はあまり良くない。
@@ -102,6 +127,16 @@ IPC接続の場合は、URIのスキーマ名をipcとし、Tsurugi DBのデー�
 例：`ipc:tateyama`
 
 これらのエンドポイントの値は、Tsurugi DBを起動する際に読み込まれる設定ファイルの `stream_endpoint` や `ipc_endpoint` に記述されている。
+
+##### Tsurugi DBの設定ファイルの例
+
+```
+[stream_endpoint]
+    port=12345
+
+[ipc_endpoint]
+    database_name=tateyama
+```
 
 #### コネクターを生成する例
 
@@ -129,24 +164,25 @@ Credentialの例は、Example01Credentialを参照。
 
 ### セッション
 
-TsurugiSessionクラスで、Tsurugi DBに接続して通信（データ送受信）を行う。
-
+Iceaxeでは、『セッション』はDB接続を表す。
 例えばTCP接続の場合、ひとつのセッションインスタンスが（Tsubakuro内で）ひとつのTCPソケットを保持する。
 
-セッションからは複数のSQLステートメントやトランザクションが同時に生成できる（マルチスレッドで生成可能）。
+TsurugiSessionクラスで、Tsurugi DBに接続して通信（データ送受信）を行う。
 
-SQLステートメントやトランザクションは、DBとの通信に（生成元の）セッションを使用する。
+- TsurugiSessionはTsurugiConnectorから生成する。
+  - 同時に生成できるセッション数にはDBサーバー側に上限がある。
+  - 使用終了後に**必ず**クローズする必要がある。
+- TsurugiSessionからSQLステートメントやトランザクションを生成する。
+- TsurugiSessionのcreate系メソッド（SQLステートメントの生成やトランザクションの生成等）はスレッドセーフ。（それぞれ複数をマルチスレッドで生成可能）
+
+SQLステートメントやトランザクションは、DBサーバーとの通信に（生成元の）セッションを使用する。
 このため、（SQLステートメントやトランザクションの操作自体は並列に実行可能なのだが）実際の通信を行うセッションでは（Tsubakuro内では）通信データをキューに入れ、順番に送信する。
 したがって、ひとつのセッションから大量にトランザクションを生成してSQLを並列に実行すると、キューが詰まって実行が遅くなる可能性がある。
-
-同時に生成できるセッション数にはDB側に上限がある。
-
-TsurugiSessionのcreate系メソッド（SQLステートメントの生成やトランザクションの生成等）はスレッドセーフ。
 
 #### セッションを生成する例
 
 TsurugiSessionインスタンスはTsurugiConnectorのcreateSessionメソッドで生成する。
-セッションインスタンスを使い終わったら、**必ず**クローズする必要がある。
+セッションインスタンスを使い終わったら、**必ず**クローズする必要がある。（セッションから生成されたSQLステートメントやトランザクションが明示的にクローズされなかった場合はセッションのクローズ時にクローズされるが、セッションが明示的にクローズされなかった場合に暗黙にクローズする仕組みは無い）
 
 ```java
 import java.util.concurrent.TimeUnit;
@@ -160,6 +196,7 @@ try (var session = connector.createSession(sessionOption)) {
 }
 ```
 
+セッションの生成時にセッションオプション（TgSessionOption）を指定する。
 TgSessionOptionには、通信のタイムアウト時間や“トランザクションのコミット時に指定するコミットオプション”のデフォルト値を設定することが出来る。
 
 TgSessionOptionを指定する必要がない場合は、引数なしのcreateSessionメソッドを利用できる。
@@ -177,7 +214,12 @@ TgSessionOptionやTsurugiSessionを生成する例は、iceaxe-examplesのExampl
 ### トランザクション
 
 TsurugiTransactionは、1回分のトランザクションを管理するクラス。
-SQLを実行する際にトランザクションを使用する。
+
+- TsurugiTransactionはTsurugiSessionから生成する。
+  - 使用終了後にクローズする必要がある。（明示的にクローズしない場合、セッションのクローズ時にクローズされる）
+  - トランザクションマネージャーを使用する場合は、その内部で生成・クローズされる。
+- SQLを実行する際にトランザクションを使用する。
+- TsurugiTransactionの状態取得メソッドやexecute系メソッド（SQLステートメントの実行）・コミット・ロールバックはスレッドセーフ。
 
 TsurugiTransactionインスタンスは、TsurugiSessionのcreateTransactionメソッドによって生成する。
 トランザクションは生成と同時に開始され、コミットまたはロールバックしてから、クローズして終了する。
@@ -185,15 +227,13 @@ TsurugiTransactionインスタンスは、TsurugiSessionのcreateTransactionメ�
 トランザクションの開始時には『トランザクションオプション』を指定する。
 コミット時には『コミットオプション』を指定する。
 
-TsurugiTransactionの状態取得メソッドやexecute系メソッド（SQLステートメントの実行）・コミット・ロールバックはスレッドセーフ。
-
 コミット・ロールバックは一度しか実行できない。
 コミット完了後にコミットやロールバックを呼んでも無視される。ロールバック完了後にロールバックを呼んでも無視される。ロールバック完了後にコミットを呼ぶと例外が発生する。（コミット完了後にロールバックを呼んでも無視するのは、try文の本体でコミットしてfinally節でロールバックを呼んでも問題ないようにする為）
 制限事項：現時点のTsubakuroでは、コミットやロールバック処理中に例外が発生した場合、その後にコミットやロールバックを呼んでも無視される。
 
 コミットやロールバック完了後にSQLを実行しようとすると、（Tsubakuroで）例外が発生する。
 
-トランザクションの実行中にDB側の要因によって例外（例えばinsertの一意制約違反）が発生すると、そのトランザクションはそれ以上使用できなくなる。（トランザクションがinactiveになる）
+トランザクションの実行中にDB側の要因によってエラー（例えばinsertの一意制約違反）が発生すると、そのトランザクションはそれ以上使用できなくなる。（トランザクションがinactiveになる）
 
 なお、Iceaxeの基本的な使用方法としては、トランザクションインスタンスのライフサイクル（生成・コミット・ロールバック・クローズ）は後述のトランザクションマネージャーで管理することを想定している。
 
@@ -203,29 +243,36 @@ Tsurugiでは、トランザクション開始時にトランザクションオ�
 
 トランザクションオプションによって、どの時点のデータが読まれるかや、2つのトランザクションの処理が競合したときにどちらがシリアライゼーションエラー（リトライ可能なアボート）になるかが違ってくる。
 
-- OCC
+- OCC（optimistic concurrency control）
   - 実行時間が短いトランザクション。
     - TsubakuroのTransactionType.SHORTに該当する。
     - 処理時間が20～40ミリ秒程度（DBの1 epochの長さ未満）で処理件数が少量（数百件程度）であれば、LTXより高速。
+  - SQL実行時点のデータが読まれる。
+    - 同条件のselectで（途中で他トランザクションによって値が更新・コミットされた時に）1回目と2回目で異なる値が読まれることもあるが、その場合はコミット時にシリアライゼーションエラーが発生する。
   - LTXと競合した場合、特殊な場合を除いてOCCがシリアライゼーションエラーになる。
   - OCC同士が競合した場合、後からコミットしようとした方がシリアライゼーションエラーになる。
-- LTX
-  - 実行時間が長いトランザクションのうち、データの更新（insert/update/delete）を伴うもの。
+- LTX（long transaction）
+  - 実行時間が長いトランザクションのうち、データの更新（insert, update, delete）を伴うもの。
     - TsubakuroのTransactionType.LONGに該当する。
   - 更新対象テーブルを全てwrite preserveに指定する必要がある。
     - write preserveに指定したテーブルを更新しなくても構わないが、余計なテーブルを指定していると、DB側で余分な競合チェックが働くことになる。
+    - 先に始まったLTXの write preserve領域を、後に始まったLTXが操作（select, insert, update, delete）した場合、後に始まったLTXは先に始まったLTXの完了まで待たされる。（処理結果が競合していないかどうかは、優先度が高い（先に始まった）LTXが完了しないと判断できない為）
+      - read areaを指定することで緩和される可能性はある。
+  - LTX開始時点のデータが読まれる。
+    - selectのみのLTXも可能。OCCほどアボートしないが、コミット時に他LTXとの待ち合わせが発生しうる。
   - OCCと競合した場合、特殊な場合を除いてOCCがシリアライゼーションエラーになる。
   - LTX同士が競合した場合、後からトランザクション実行を開始した方がシリアライゼーションエラーになる。
-- RTX
+- RTX（read only transaction）
   - 実行時間が長いトランザクションのうち、クエリー（select）のみのもの。
     - TsubakuroのTransactionType.READ_ONLYに該当する。
-  - 他のトランザクションと競合しない。
   - 基本的にRTX開始時点のデータが読まれる。ただし、先に開始しているLTXがあった場合、そのLTX開始前のデータが読まれる。
     - 先に開始したLTXの開始時点で他に実行中のLTXがあったら、最悪の場合はそれら全ての開始前になるので、かなり古いデータが読まれることもある。
+  - 他のトランザクションと競合しない。
 
 Iceaxeでは、トランザクションオプションはTgTxOptionクラスで表す。
 
-TgTxOptionはスレッドセーフ。
+- TgTxOptionはスレッドセーフ。
+
 
 ```java
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -257,13 +304,13 @@ var rtx = TgTxOption.ofRTX();
         - EXCLUDEあり
           - 自分の実行中に新しいトランザクションは実行できない（failさせる）。
     - 制限事項：priorityは未実装。指定は出来るが、効果は無い。
-  - incusive read area
+  - inclusive read area
     - 参照する（select/insert/update/deleteを実行する対象の）テーブル名
     - 制限事項：inclusive read areaは未実装。指定は出来るが、効果は無い。
   - exclusive read area
     - 参照しない（select/insert/update/deleteを実行しない対象の）テーブル名
     - 制限事項：exclusive read areaは未実装。指定は出来るが、効果は無い。
-- LTX
+- LTXのみ
   - write preserve
     - 更新対象のテーブル名
 
@@ -271,10 +318,12 @@ TgTxOptionを生成する例は、iceaxe-examplesのExample03TxOptionを参照�
 
 #### コミットについて
 
+Tsurugiのトランザクション分離レベルはSERIALIZABLEである。
+
 Tsurugiでは（Tsurugi以外でもトランザクション分離レベルがSERIALIZABLEであるRDBMSでは）、コミットが成功するまで、データに信頼性が無い（シリアライザブルであるという保証が無い）。
 selectのみのトランザクションであっても、必ずコミットして成功することを確認しなければならない。
 
-（トランザクション分離レベルREAD_COMMITTED（既存のほとんどのRDBMSのデフォルト）では、あるテーブルから全件selectし（1回目の取得）、そのテーブルが別トランザクションによってinsertまたはdelete・コミットされた後に再び全件selectすると、更新後の（1回目より増減した）データが読まれる（2回目の取得）。すなわち、1回目と2回目で異なるデータがselectされる。SERIALIZABLEではこれは許されない（SERIALIZABLEでは、トランザクション内では常に同じデータが読まれなければならない）ので、こういう状態になるとシリアライゼーションエラーが発生する。逆に言えば、コミットが成功したなら、シリアライゼーションエラーが起きなかったということである）
+（トランザクション分離レベルREAD_COMMITTED（既存のほとんどのRDBMSのデフォルト）では、あるテーブルから全件selectし（1回目の取得）、そのテーブルが別トランザクションによってinsertまたはdelete・コミットされた後に再び全件selectすると（2回目の取得）、更新後の（1回目より増減した）データが読まれる。すなわち、1回目と2回目で異なるデータがselectされる。SERIALIZABLEではこれは許されない（SERIALIZABLEでは、トランザクション内では常に同じデータが読まれなければならない）ので、こういう状態になるとシリアライゼーションエラーが発生する。逆に言えば、コミットが成功したなら、シリアライゼーションエラーが起きなかったということである）
 
 Tsurugiでは、SQLを実行した時やトランザクションをコミットした時にそのトランザクションの内容が他のトランザクションと競合していないか確認しており、競合した場合はシリアライゼーションエラー（リトライ可能なアボート）が発生することがある。
 
@@ -312,7 +361,7 @@ transaction.commit(TgCommitType.DEFAULT);
 
 #### トランザクションの例
 
-Iceaxeの基本的な使用方法としてはトランザクションマネージャーでトランザクションを管理することを想定しているが、コミットやロールバック・シリアライゼーションエラー発生時の制御等をユーザープログラマーが行いたい場合は、直接トランザクションを生成・使用することも出来る。
+Iceaxeの基本的な使用方法としてはトランザクションマネージャーでトランザクションを管理することを想定しているが、コミットやロールバック・シリアライゼーションエラー発生時の制御等をユーザープログラマーが自分で行いたい場合は、直接トランザクションを生成・使用することも出来る。
 
 TsurugiTransactionインスタンスはTsurugiSessionのcreateTransactionメソッドで生成する。
 トランザクションインスタンスを使い終わったら、クローズする必要がある。（明示的にクローズしない場合、セッションのクローズ時にクローズされる）
@@ -354,15 +403,19 @@ TsurugiTransactionの状態を取得するメソッドのうち、主なもの�
 
 ### トランザクションマネージャー
 
-TsurugiTransactionManagerは、トランザクション内でシリアライゼーションエラー（リトライ可能なアボート）が発生したときに自動的に再実行を行う為のクラス。Iceaxe独自の機能。
+Icaexeの『トランザクションマネージャー』（TsurugiTransactionManagerクラス）は、TsurugiTransactionのライフサイクルを管理する。
+トランザクション内でシリアライゼーションエラー（リトライ可能なアボート）が発生したときに自動的に再実行する機能を持つ。
 
-TsurugiTransactionManagerのexecute系メソッド（トランザクションの実行）はスレッドセーフ。
+- TsurugiTransactionManagerはTsurugiSessionから生成する。
+  - TsurugiTransactionManagerはCloseableではない（クローズする必要は無い）。
+- TsurugiTransactionManager内部でTsurugiTransactionを生成する。
+- TsurugiTransactionManagerのexecute系メソッド（トランザクションの実行）はスレッドセーフ。
 
 #### トランザクションマネージャーの例
 
 TsurugiTransactionManagerインスタンスはTsurugiSessionのcreateTransactionManagerメソッドで生成する。
 
-トランザクションマネージャーは内部でトランザクションを生成するが、その際には、トランザクションマネージャーの生成に使われたセッションを使用する。
+トランザクションマネージャーは内部でトランザクションを生成するが、その際には、トランザクションマネージャーの生成に使われたセッション（DB接続）を使用する。
 
 トランザクションマネージャーを生成する際か、トランザクションを実行する（executeメソッドを呼び出す）際のどちらかで、トランザクションマネージャーの設定（TgTmSetting）を渡す必要がある。
 
@@ -409,7 +462,7 @@ TgTmTxOptionSupplierを生成するメソッドは以下のようなものがあ
 | メソッド                               | 説明                                                         | 実行回数                                   |
 | -------------------------------------- | ------------------------------------------------------------ | ------------------------------------------ |
 | of(txOption)                           | 初回のトランザクションオプションを指定する。                 | 1回（再実行はしない）                      |
-| of(txOptions)                          | トランザクションオプションの一覧を指定する。n個目のトランザクションオプションがn回目の実行時に使われる。 | 指定されたトランザクションオプションの個数 |
+| of(txOptions...)                       | トランザクションオプションの一覧を指定する。n個目のトランザクションオプションがn回目の実行時に使われる。 | 指定されたトランザクションオプションの個数 |
 | ofAlways(txOption)                     | 常に指定されたトランザクションオプションで実行される。       | Integer.MAX_VALUE回（実質、無限）          |
 | ofAlways(txOption, attemtMaxCount)     | 常に指定されたトランザクションオプションで実行される。       | attemtMaxCount回                           |
 | of(txOption1, size1, txOption2, size2) | txOption1をsize1回実行した後で、txOption2をsize2回実行する。 | size1＋size2 回                            |
@@ -447,7 +500,7 @@ create tableやdrop table等のDDLを実行する際もトランザクション�
 DDLはTsurugiTransactionのexecuteDdlメソッドで実行できる。
 
 LTXでDDLを実行する場合、write preserve（更新対象テーブル）を指定する必要は無い。
-制限事項：DDLを実行する旨のオプションを指定することになる予定
+制限事項：DDLを実行する旨のオプションを指定することになる予定。
 
 DDLの実行でも（システムテーブルへの書き込みで）シリアライゼーションエラーが発生する可能性があるので、リトライできるようにする必要がある。
 
@@ -468,6 +521,8 @@ tm.executeDdl("create table TEST(FOO int primary key, BAR bigint, ZZZ varchar(10
 ```
 
 DDLの例は、iceaxe-examplesのExample11Ddlを参照。
+
+※executeDdlメソッドの内部は、後述の「更新系SQLの実行方法」と同等。
 
 #### Iceaxeが対応しているデータ型
 
@@ -496,12 +551,12 @@ DDLの例は、iceaxe-examplesのExample11Ddlを参照。
 
 ### SQL（DML）の実行方法
 
-SQL文は『SQLステートメント』（TsurugiSqlのサブクラス）で管理・実行する。
+Iceaxeでは、SQL文を『SQLステートメント』（TsurugiSqlのサブクラス）で管理・実行する。
 
-TsurugiSqlの具象クラスのインスタンスはTsurugiSessionから生成する。
-使い終わったらクローズする必要がある。（明示的にクローズしない場合、セッションのクローズ時にクローズされる）
-
-TsurugiSql系クラスは、SQL実行に関してスレッドセーフ。
+- TsurugiSqlの具象クラスのインスタンスはTsurugiSessionから生成する。
+  - 使用終了後にクローズする必要がある。（明示的にクローズしない場合、セッションのクローズ時にクローズされる）
+- TsurugiTransactionのexecute系メソッドにTsurugiSqlを渡してSQLを実行する。
+- TsurugiSql系クラスは、SQL実行に関してスレッドセーフ。
 
 SQLがクエリー（select文）か更新系SQL（insert・update・delete文）か、バインド変数が有るか無いかによって、具象クラスや生成する為のメソッドが異なる。
 
@@ -556,9 +611,9 @@ SQLの実行完了を確認する方法は以下の通り。
 
 TsurugiTransactionのexecuteAnd系メソッドを使うと、更新の成功可否チェックや実行結果クラスのクローズはメソッド内部で処理される。
 
-なお、トランザクションマネージャーにも同名のexecuteAnd系メソッドがあり、ひとつのトランザクションでひとつのSQLしか実行しない場合は、こちらを使うのも便利である。
+なお、トランザクションマネージャーにも同名のexecuteAnd系メソッドがあり、ひとつのトランザクションでひとつのSQLしか実行しない場合は、こちらを利用することも出来る。
 
-SQLステートメントは、SQLステートメントが作られたセッションと同じセッションから作られたトランザクションに対してしか実行できない。（セッションがクローズされたらそのセッションで作られたSQLステートメントは使用不可になるので、別セッション（で作られたトランザクション）では使用できない）
+SQLステートメントは、SQLステートメントが作られたセッションと同じセッションから作られたトランザクションに対してしか実行できない。（セッションがクローズされたらそのセッションで作られたSQLステートメントは使用不可になるので、別セッションで作られたトランザクションでは使用できない）
 
 クエリーの例はiceaxe-examplesのExample31Select, Example32Countを参照。
 更新系SQLの例はiceaxe-examplesのExample21Insert, Example41Updateを参照。
@@ -646,7 +701,7 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 }
 ```
 
-TgBindVariableの `ofデータ型` メソッドにバインド変数名を渡してインスタンスを生成する。
+TgBindVariableのof系メソッドにバインド変数名を渡してインスタンスを生成する。
 
 TgBindVariableのsqlNameメソッドは `:変数名` という文字列を返す。
 なお、toStringメソッドは `:変数名/*データ型*/` というコメント付きの文字列を返すので、（コメントがネストしないなら）これをSQL文に使うことも出来る。
@@ -739,7 +794,10 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 
 var variables = TgBindVariables.of().addInt("foo").addLong("bar").addString("zzz");
 var sql = "insert into TEST (FOO, BAR, ZZZ) values(" + variables.getSqlNames() + ")";
-Function<TestEntity, TgBindParameters> parameterConverter = entity -> TgBindParameters.of().add("foo", entity.getFoo()).add("bar", entity.getBar()).add("zzz", entity.getZzz());
+Function<TestEntity, TgBindParameters> parameterConverter = entity -> TgBindParameters.of()
+    .add("foo", entity.getFoo())
+    .add("bar", entity.getBar())
+    .add("zzz", entity.getZzz());
 var parameterMapping = TgParameterMapping.of(variables, parameterConverter);
 try (var ps = session.createStatement(sql, parameterMapping)) {
     tm.execute(transaction -> {
@@ -948,11 +1006,13 @@ while (record.moveCurrentColumnNext()) { // カラムが存在している間ル
 }
 ```
 
+値を取得するfetchCurrentColumnValueメソッドは、moveCurrentColumnNextメソッドの呼び出し1回につき一度しか実行できない。
+
 ###### カラム名指定系
 
 メソッド名が `getデータ型` あるいは `findデータ型` で始まっているメソッド群。
 
-select文のカラム名を指定して値を取得する。
+select文のカラム名を指定して値を取得する方法である。
 
 ```java
 entity.setFoo(record.getIntOrNull("FOO"));
@@ -1024,7 +1084,7 @@ try (var ps = session.createQuery(sql, parameterMapping)) {
 ```
 
 実行計画の取得にトランザクションは無関係であり、SQLステートメント（TsurugiSqlの具象クラス）のexplainメソッドでSQLのメタデータを取得する。
-バインド変数がある場合は、explainメソッドの引数にSQLのパラメーター（具体的な値）を渡す。
+バインド変数がある場合は、explainメソッドの引数にSQLのパラメーター（具体的な値）を渡す。（SQLを実行するときに渡すパラメーターと同じ）
 
 実行計画を取得する例は、iceaxe-examplesのExample61Explainを参照。
 
@@ -1045,9 +1105,9 @@ DBと通信する箇所では、タイムアウト時間を指定できる。
 タイムアウト時間は、セッション生成時に指定するセッションオプションで指定できる。
 
 どの箇所のタイムアウト時間かは、TgTimeoutKey列挙型で指定する。
-TgTimeoutKey.DEFAULTで、全ての箇所で共通のデフォルトのタイムアウト時間を指定できる。デフォルトのタイムアウト時間を指定しなかった場合は、Long.MAX_VALUE[ナノ秒]になる（実質、無限待ち）。
+TgTimeoutKey.DEFAULTで、デフォルトの（全ての箇所で共通の）タイムアウト時間を指定できる。デフォルトのタイムアウト時間を指定しなかった場合は、Long.MAX_VALUE[ナノ秒]になる（実質、無限待ち）。
 
-##### セッションオプションでタイムアウトを指定する例
+##### セッションオプションでタイムアウト時間を指定する例
 
 ```java
 import java.util.concurrent.TimeUnit;
@@ -1065,9 +1125,9 @@ try (var session = connector.createSession(sessionOption)) {
 
 #### 個別のタイムアウト指定
 
-DBと通信を行うクラスでは、タイムアウト時間を指定するメソッドがある。
+DBサーバーと通信を行うクラスでは、タイムアウト時間を指定するメソッドがある。
 
-##### TsurugiTransactionでタイムアウトを指定する例
+##### TsurugiTransactionでタイムアウト時間を指定する例
 
 ```java
 import java.util.concurrent.TimeUnit;
@@ -1082,7 +1142,7 @@ tm.execute(transaction -> {
 
 トランザクションマネージャーで生成するトランザクションに対しては、トランザクションマネージャーの設定でタイムアウト時間を指定することが出来る。
 
-##### トランザクションマネージャーでタイムアウトを指定する例
+##### トランザクションマネージャーでタイムアウト時間を指定する例
 
 ```java
 import java.util.concurrent.TimeUnit;
@@ -1191,6 +1251,71 @@ var parameterMapping = TgParameterMapping.of(ExampleEntity.class)
 ```
 
 TgParameterMappingのaddメソッドにTgBindVariableを渡す方法を用いる。
+
+
+
+### 例外ハンドリング
+
+DBサーバーとの通信中にTsubakuroで発生したIOExceptionは、Iceaxeはそのままスローする。
+
+制限事項：IceaxeはInterruptedExceptionをIOExceptionにラップしてスローしているが、そのままスローするように変更するかもしれない。
+
+トランザクション実行中に（SQLやコミットの実行で）DBサーバーからエラーが返されると、TsubakuroはServerExceptionを発生させる。Iceaxe（TsurugiTransaction）はそれをTsurugiTransactionExceptionにラップしてスローする。
+トランザクション実行以外でTsubakuroからServerExceptionが発生した場合は、IceaxeはTsurugiIOExceptionにラップしてスローする。
+
+TsurugiTransactionExceptionやTsurugiIOExceptionからは、DBサーバーで発生したエラーのエラーコード（TsubakuroのDiagnosticCodeインターフェース）が取得できる。
+エラーコードは、主にTsubakuroのSqlServiceCode列挙型（DiagnosticCodeを実装している）の値である。
+
+制限事項：現在のエラーコードは未整理なので、今後変わる可能性がある。
+
+トランザクションマネージャーは、このエラーコードを用いてシリアライゼーションエラー（リトライ可能なアボート）かどうかを判定する。
+
+シリアライゼーションエラーだった場合はトランザクションマネージャーはトランザクションの再実行を行うが、実行回数が指定回数を超えた場合は、トランザクションマネージャーのexecute系メソッドからTsurugiTransactionRetryOverIOException（リトライ回数オーバーの例外）がスローされる。
+
+トランザクションで発生したTsurugiTransactionExceptionがシリアライゼーションエラーでない場合は、トランザクションマネージャーのexecute系メソッドからはTsurugiTransactionIOExceptionがスローされる。
+
+（TsurugiTransactionで発生した例外は、トランザクションマネージャーからはIOExceptionとしてスローされる）
+
+#### エラーコードを取得する例
+
+```java
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
+
+public boolean isRetryable(TsurugiTransaction e) {
+    var code = e.getDiagnosticCode();
+    if (code == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
+        // シリアライゼーションエラー（リトライ可能なアボート）
+        return true;
+    }
+    return false;
+}
+```
+
+#### TsurugiTransactionExceptionから取得できる情報
+
+TsurugiTransactionExceptionからはエラーコード以外に以下のような情報（エラー発生時の値）を取得できる。
+（例外の発生個所によっては取得できない場合がある。その場合はnullや0が返る）
+
+##### SQL実行時に発生した場合の情報
+
+| メソッド              | 情報                                                         | 情報元             |
+| --------------------- | ------------------------------------------------------------ | ------------------ |
+| getIceaxeTxId         | Iceaxeが付けたトランザクション番号                           | TsurugiTransaction |
+| getIceaxeTmExecuteId  | トランザクションマネージャーのexecuteメソッドを実行する際に付けられた番号 | TsurugiTransaction |
+| getAttempt            | トランザクションマネージャーでの試行番号                     | TsurugiTransaction |
+| getTransactionOption  | トランザクションオプション                                   | TsurugiTransaction |
+| getTransactionId      | DB側が採番したトランザクションID                             | TsurugiTransaction |
+| getSqlStatement       | SQLステートメント                                            | TsurugiSql         |
+| getSqlParameter       | SQL実行時のバインド変数の値（パラメーター）                  |                    |
+| getIceaxeSqlExecuteId | SQL実行毎にIceaxeで採番された番号                            | TsurugiSqlResult   |
+
+##### TsurugiTransactionのメソッドで発生した場合の情報
+
+| メソッド             | 情報                                                         | 情報元             |
+| -------------------- | ------------------------------------------------------------ | ------------------ |
+| getTxMethod          | 発生個所のメソッド名を表す列挙型                             | TsurugiTransaction |
+| getIceaxeTxExecuteId | TsurugiTransactionのexecute系メソッドを実行する際に付けられた番号 | TsurugiTransaction |
 
 
 
