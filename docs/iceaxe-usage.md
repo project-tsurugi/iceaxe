@@ -6,14 +6,19 @@ Iceaxeの使用方法（概要）を説明する。
 
 ## はじめに
 
-『Iceaxe（アイスアックス）』は、Java（Java11以降）でTsurugiのDBに対してSQLを実行するのに使用するライブラリー（API）。
+『Iceaxe（アイスアックス）』は、Java（Java11以降）でTsurugiのデータベース（DB）に対してSQLを実行するために使用するライブラリー（API）。
 
 JavaでTsurugiのDBにアクセスするライブラリー（API）には『Tsubakuro』というものもあり、Iceaxeは内部でTsubakuroを使用している。
 Iceaxeはユーザープログラマーの利便性を高める為に用意されている。
 このため、Iceaxeを高レベルAPI、Tsubakuroを低レベルAPIと呼ぶことがある。
 
 IceaxeはJDBCではないが、その位置付け（プログラムのレイヤー）はJDBCと同様である。
-（ORMのような高度な機能は持たない。（ユーザープログラマーが用意したEntityクラスからSQL文を生成したり、SQL文からEntityクラスを生成したりするような機能は対象外））
+
+IceaxeはORMのような高度な抽象化レイヤー機能は持たない。
+例えば、ユーザープログラマーが用意したEntityクラスからSQL文を生成したり、SQL文からEntityクラスを生成したりするような機能は対象外。
+
+
+
 
 ### Iceaxeで使用する用語
 
@@ -21,7 +26,7 @@ IceaxeはJDBCではないが、その位置付け（プログラムのレイヤ�
 | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | コネクター                   | エンドポイントと認証情報を保持するクラス。コネクターを使ってセッションを生成する | TsurugiConnector                                             |
 | エンドポイント               | Tsurugi DBの場所と接続方法                                   | URI                                                          |
-| 認証情報                     | ユーザー名とパスワードや、アクセストークン等                 | Credential                                                   |
+| 認証情報                     | TsurugiのDBサーバーに接続する為のユーザー名とパスワードや、アクセストークン等 | Credential                                                   |
 | セッション                   | DBと接続し、通信を行うクラス。セッションからSQLステートメントやトランザクションを生成する | TsurugiSession                                               |
 | SQLステートメント            | SQL文やバインド変数の定義を保持するクラス。トランザクションでSQLを実行するときに使用する | TsurugiSql                                                   |
 | DDL                          | データの定義を行うSQL。create tableやdrop table等            | executeDdl()                                                 |
@@ -51,10 +56,12 @@ Iceaxe（およびTsubakuro）はJDBCではない。
 
 
 
+
 ## IceaxeとTsubakuroの関係
 
 JavaでTsurugiのDBにアクセスするにはTsubakuroだけあればよい。
 Iceaxeも内部ではTsubakuroを呼び出しているだけである。
+
 
 しかし、IceaxeはTsubakuroをラップして（包み隠して）、ユーザープログラマーの利便性を高める機能を提供している。
 
@@ -65,7 +72,7 @@ IceaxeとTsubakuroの主な違いは以下のようなものである。
 | 機能      | SQLを実行する機能が対象。                                    | 全ての機能が対象。（SQLを実行する機能だけでなく、例えば、バックアップを行うDataStoreがある） |
 | API方式   | 同期APIである。すなわち、処理を行うメソッドを呼び出すと、処理が終わるまで制御が返ってこない。 | 非同期APIである。すなわち、処理を行うメソッドを呼び出すとFutureが返ってくる。 |
 | リトライ  | トランザクションがシリアライゼーションエラー（リトライ可能なアボート）になった時に再実行する機能を提供している。 | トランザクションの再実行に関する機能は無い。                 |
-| ResultSet | select文の結果のデータ型をユーザープログラマーが利用したい型に変換して取得する機能がある。カラム名を指定して取得することも可能。 | select文の結果を取得する際は、返ってきたデータ型で取得する必要がある。また、カラム名を指定することは出来ず、カラムの並び順に従って取得する。各カラムのデータは一度だけしか取得できない。 |
+| ResultSet | select文の実行結果のデータ型をユーザープログラマーが利用したい型に変換して取得する機能がある。カラム名を指定して取得することも可能。 | select文の実行結果を取得する際は、返ってきたデータ型で取得する必要がある。また、カラム名を指定することは出来ず、カラムの並び順に従って取得する。各カラムのデータは一度だけしか取得できない。 |
 
 IceaxeはTsubakuroをラップしているので、Iceaxeを使用する場合は、ユーザープログラムには基本的にTsubakuroのクラスは現れない。
 ただし、一部のクラスや列挙型（認証情報のCredentialクラスやエラーコード等）では、Tsubakuroのクラスをユーザープログラマーが直接使用することもある。
@@ -82,7 +89,9 @@ Tsubakuroはデータ受信の為にセッション毎にスレッドを作成�
 
 
 
+
 ## IceaxeのAPI（クラス・メソッド）
+
 
 ### 使用手順の概略
 
@@ -92,13 +101,14 @@ Iceaxeを用いてTsurugiのDBでSQLを実行する手順は、概ね以下の�
 2. コネクターから『セッション』（TsurugiSessionクラス）を生成する（DBに接続する）。
 3. セッションからSQLを表す『SQLステートメント』（TsurugiSqlのサブクラス）を生成する。
 4. セッションから『トランザクションマネージャー』（TsurugiTransactionManagerクラス）を生成する。
-5. トランザクションマネージャーの内部で『トランザクション』（TsurugiTransactionクラス）を生成する。
+5. トランザクションマネージャーを使って『トランザクション』（TsurugiTransactionクラス）を生成する。
 6. トランザクションを用いてSQLステートメントを実行する。
 7. トランザクションをコミット（またはロールバック）し、クローズする。
 8. 使い終わったSQLステートメントをクローズする。
 9. セッションをクローズする。
 
 ※SQLステートメントとトランザクションを生成する順序は任意（トランザクションの途中でSQLステートメントを生成・クローズしても問題ない）
+
 
 
 
@@ -120,11 +130,12 @@ Tsurugi DBへの接続方法には、TCP接続とIPC接続がある。
 TCP接続は、データ通信にTCP/IP（ソケット通信）を用いる方法である。ただし、現時点のTCP接続は暫定実装という位置付けであり、性能はあまり良くない。
 IPC接続は、データ通信にLinuxのプロセス間通信（共有メモリー）を用いる方法である。このため、Tsurugi DBと同一マシン上でないと使用できないが、最も高速である。
 
-TCP接続の場合は、URIのスキーマ名をtcpとし、Tsurugi DBのIPアドレス（ホスト名）とTCPポート番号を指定する。
+TCP接続の場合は、URIのスキーマ名をtcpとし、TCP接続エンドポイントのIPアドレス（ホスト名）とTCPポート番号を指定する。
 例：`tcp://localhost:12345`
 
-IPC接続の場合は、URIのスキーマ名をipcとし、Tsurugi DBのデータベース名を指定する。
+IPC接続の場合は、URIのスキーマ名をipcとし、IPC接続エンドポイントのデータベース名を指定する。
 例：`ipc:tateyama`
+
 
 これらのエンドポイントの値は、Tsurugi DBを起動する際に読み込まれる設定ファイルの `stream_endpoint` や `ipc_endpoint` に記述されている。
 
@@ -152,13 +163,13 @@ var credential = new UsernamePasswordCredential("user", "password");
 var connector = TsurugiConnector.of(endpoint, credential);
 ```
 
-エンドポイントの他に、セッションを生成するのに必要な認証情報を指定することが出来る。（ここで指定せず、セッションを生成するcreateSessionメソッドの引数として渡すことも出来る）
-認証情報のCredentialクラスは、Tsubakuroのものを使用する。
+コネクターの生成時には、エンドポイントの他に、セッションを生成するのに必要な認証情報を指定することが出来る（ここで指定せず、セッションを生成するcreateSessionメソッドの引数として渡すことも出来る。認証情報のCredentialクラスは、Tsubakuroのものを使用する）。
 
 TsurugiConnectorを生成する例は、iceaxe-examplesのExample01Connectorを参照。
 Credentialの例は、Example01Credentialを参照。
 
-制限事項：現時点では認証は実装されていないので、どんなCredentialを指定しても良い。
+制限事項：現時点ではDBサーバー側で認証が実装されていない（認証を行わない）ので、どんなCredentialを指定しても良い。
+
 
 
 
@@ -178,6 +189,7 @@ TsurugiSessionクラスで、Tsurugi DBに接続して通信（データ送受�
 SQLステートメントやトランザクションは、DBサーバーとの通信に（生成元の）セッションを使用する。
 このため、（SQLステートメントやトランザクションの操作自体は並列に実行可能なのだが）実際の通信を行うセッションでは（Tsubakuro内では）通信データをキューに入れ、順番に送信する。
 したがって、ひとつのセッションから大量にトランザクションを生成してSQLを並列に実行すると、キューが詰まって実行が遅くなる可能性がある。
+
 
 #### セッションを生成する例
 
@@ -210,7 +222,6 @@ try (var session = connector.createSession()) {
 TgSessionOptionやTsurugiSessionを生成する例は、iceaxe-examplesのExample02Sessionを参照。
 
 
-
 ### トランザクション
 
 TsurugiTransactionは、1回分のトランザクションを管理するクラス。
@@ -234,6 +245,7 @@ TsurugiTransactionインスタンスは、TsurugiSessionのcreateTransactionメ�
 コミットやロールバック完了後にSQLを実行しようとすると、（Tsubakuroで）例外が発生する。
 
 トランザクションの実行中にDB側の要因によってエラー（例えばinsertの一意制約違反）が発生すると、そのトランザクションはそれ以上使用できなくなる。（トランザクションがinactiveになる）
+
 
 なお、Iceaxeの基本的な使用方法としては、トランザクションインスタンスのライフサイクル（生成・コミット・ロールバック・クローズ）は後述のトランザクションマネージャーで管理することを想定している。
 
@@ -316,6 +328,7 @@ var rtx = TgTxOption.ofRTX();
 
 TgTxOptionを生成する例は、iceaxe-examplesのExample03TxOptionを参照。
 
+
 #### コミットについて
 
 Tsurugiのトランザクション分離レベルはSERIALIZABLEである。
@@ -336,10 +349,10 @@ Tsurugiでは、SQLを実行した時やトランザクションをコミット�
 
 Tsurugiでは、トランザクションのコミット時にオプションを指定する。
 
-DB内でどこまで処理したらcommitメソッドから制御が返るかを表す。
+DBサーバー内でどこまで処理したらcommitメソッドから制御が返るかを表す。
 
 - DEFAULT
-  - DB側の設定に従う。
+  - DBサーバー側の設定に従う。
 - ACCEPTED
   - コミット操作が受け付けられた。
 - AVAILABLE
@@ -357,7 +370,9 @@ import com.tsurugidb.iceaxe.transaction.TgCommitType;
 transaction.commit(TgCommitType.DEFAULT);
 ```
 
-制限事項：コミットオプションは未実装。何かを指定する必要はあるが、効果は無い。
+制限事項：コミットオプションはDBサーバー側で未実装。何かを指定する必要はあるが、効果は無い。
+
+----
 
 #### トランザクションの例
 
@@ -500,7 +515,7 @@ create tableやdrop table等のDDLを実行する際もトランザクション�
 DDLはTsurugiTransactionのexecuteDdlメソッドで実行できる。
 
 LTXでDDLを実行する場合、write preserve（更新対象テーブル）を指定する必要は無い。
-制限事項：DDLを実行する旨のオプションを指定することになる予定。
+制限事項：将来的には、DDLを実行する旨のオプションを指定しないといけなくなる予定。
 
 DDLの実行でも（システムテーブルへの書き込みで）シリアライゼーションエラーが発生する可能性があるので、リトライできるようにする必要がある。
 
@@ -512,7 +527,7 @@ tm.execute(transaction -> {
 });
 ```
 
-ひとつしかDDLを実行しない場合は、トランザクションマネージャーのexecuteDdlメソッドを利用することも出来る。
+トランザクション内でひとつしかDDLを実行しない場合は、下記の例のようにトランザクションマネージャーのexecuteDdlメソッドを利用することも出来る。
 通常はトランザクションマネージャーを生成する際にトランザクションオプションを指定するが、トランザクションマネージャーのexecuteDdlメソッドを使う場合は省略可能。（省略した場合はwrite preserve無しのLTXとなる）
 
 ```java
@@ -750,7 +765,7 @@ TgParameterMappingのofメソッドに、パラメーターとして使いたい
 
 実行時のパラメーターには、TgParameterMappingのofメソッドで指定したクラスのオブジェクトが直接指定できる。
 
-###### バインド変数の例（TgBindVariableを使ってEntityを変換する方法）
+##### バインド変数の例（TgBindVariableを使ってEntityを変換する方法）
 
 TgBindVariableを使ってEntityクラスの変換定義を記述することが出来る。
 
@@ -1169,19 +1184,19 @@ select結果を保持したりバインド変数に変換したりする為に�
 ```java
 class ExampleEntity {
     private ExampleType exampleType; // 列挙型
-    
+
     public void setExampleType(ExampleType type) {
         this.exampleType = type;
     }
-    
+
     public ExampleType getExampleType() {
         return this.exampleType;
     }
-    
+
     public void setExampleTypeAsString(String type) {
         this.exampleType = ExampleType.valueOf(type);
     }
-    
+
     public String getExampleTypeAsString() {
         return exampleType.name();
     }
@@ -1200,11 +1215,11 @@ TgParameterMappingやTgResultMappingクラスのadd系メソッドにおいて�
 ```java
 class ExampleEntity {
     private ExampleType exampleType; // 列挙型
-    
+
     public void setExampleType(ExampleType type) {
         this.exampleType = type;
     }
-    
+
     public ExampleType getExampleType() {
         return this.exampleType;
     }
@@ -1419,7 +1434,7 @@ var parameterMapping = TgParameterMapping.of(TestEntity.class)
     .setConvertUtil(MY_CONVERT_UTIL);
 var resultMapping = TgResultMapping.of(TestEntity::new)
     ～
-    .setConvertUtil(MY_CONVERT_UTIL);    
+    .setConvertUtil(MY_CONVERT_UTIL);
 ```
 
 IceaxeConvertUtilの例は、iceaxe-examplesのExample94TypeConvertを参照。
@@ -1455,3 +1470,4 @@ IceaxeConvertUtilの例は、iceaxe-examplesのExample94TypeConvertを参照。
 - コミット処理中にタイムアウト等の例外が発生してロールバックを呼び出しても、ロールバックされない。
   - Tsubakuroでは、コミットを開始した後にロールバックを呼んでも、何もせずに正常終了を返す。
 - クライアント（Tsubakuroを使用するアプリケーション）を強制終了すると、DB側はクリーンアップされないので、トランザクション等が残り続ける。
+
