@@ -3,8 +3,6 @@ package com.tsurugidb.iceaxe.test.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -25,7 +23,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -49,16 +47,16 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
     private static final String DELETE_SQL = "delete from " + TEST + " where foo = " + (SIZE - 1);
 
     @Test
-    void occR_occR() throws IOException, TsurugiTransactionException {
+    void occR_occR() throws Exception {
         occR_r(OCC);
     }
 
     @Test
-    void occR_rtx() throws IOException, TsurugiTransactionException {
+    void occR_rtx() throws Exception {
         occR_r(RTX);
     }
 
-    private void occR_r(TgTxOption txOption2) throws IOException, TsurugiTransactionException {
+    private void occR_r(TgTxOption txOption2) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING)) {
             try (var tx1 = session.createTransaction(OCC)) {
@@ -81,16 +79,16 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
     }
 
     @Test
-    void occR_occW() throws IOException, TsurugiTransactionException {
+    void occR_occW() throws Exception {
         occR_w(OCC);
     }
 
     @Test
-    void occR_ltx() throws IOException, TsurugiTransactionException {
+    void occR_ltx() throws Exception {
         occR_w(LTX);
     }
 
-    private void occR_w(TgTxOption txOption2) throws IOException, TsurugiTransactionException {
+    private void occR_w(TgTxOption txOption2) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1)) {
@@ -117,17 +115,17 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 1, -1 })
-    void occR_occW_phantom(int add) throws IOException, TsurugiTransactionException {
+    void occR_occW_phantom(int add) throws Exception {
         occR_w_phantom(OCC, add);
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 1, -1 })
-    void occR_ltx_phantom(int add) throws IOException, TsurugiTransactionException {
+    void occR_ltx_phantom(int add) throws Exception {
         occR_w_phantom(LTX, add);
     }
 
-    private void occR_w_phantom(TgTxOption txOption2, int add) throws IOException, TsurugiTransactionException {
+    private void occR_w_phantom(TgTxOption txOption2, int add) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING); //
                 var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
@@ -161,16 +159,16 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
     }
 
     @Test
-    void occW_occR() throws IOException, TsurugiTransactionException {
+    void occW_occR() throws Exception {
         occW_r(OCC);
     }
 
     @Test
-    void occW_rtx() throws IOException, TsurugiTransactionException {
+    void occW_rtx() throws Exception {
         occW_r(RTX);
     }
 
-    private void occW_r(TgTxOption txOption2) throws IOException, TsurugiTransactionException {
+    private void occW_r(TgTxOption txOption2) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1)) {
@@ -193,16 +191,16 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
     }
 
     @Test
-    void occW_occW() throws IOException, TsurugiTransactionException {
+    void occW_occW() throws Exception {
         occW_w(OCC);
     }
 
     @Test
-    void occW_ltx() throws IOException, TsurugiTransactionException {
+    void occW_ltx() throws Exception {
         occW_w(LTX);
     }
 
-    private void occW_w(TgTxOption txOption2) throws IOException, TsurugiTransactionException {
+    private void occW_w(TgTxOption txOption2) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1); //
@@ -229,7 +227,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2, 3 })
-    void occW_ltx2(int position) throws IOException, TsurugiTransactionException {
+    void occW_ltx2(int position) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1); //
@@ -283,7 +281,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
     }
 
     @Test
-    void occW_occW3() throws IOException, TsurugiTransactionException {
+    void occW_occW3() throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1); //
@@ -309,7 +307,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
     }
 
     @Test
-    void occW_ltx3() throws IOException, TsurugiTransactionException {
+    void occW_ltx3() throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1); //

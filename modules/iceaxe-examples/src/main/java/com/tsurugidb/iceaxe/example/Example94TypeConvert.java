@@ -41,11 +41,11 @@ public class Example94TypeConvert {
         }
     };
 
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws IOException, InterruptedException {
         new Example94TypeConvert().main();
     }
 
-    void main() throws IOException {
+    void main() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
@@ -64,7 +64,7 @@ public class Example94TypeConvert {
         select3();
     }
 
-    void createTable(TsurugiTransactionManager tm) throws IOException {
+    void createTable(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "create table example94 (" //
                 + "key1 int," //
                 + "date1 char(10)," // yyyy/MM/dd
@@ -99,7 +99,7 @@ public class Example94TypeConvert {
         }
     }
 
-    void insert1(Example94Entity entity) throws IOException {
+    void insert1(Example94Entity entity) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             session.setConvertUtil(CONVERT_UTIL); // set session
 
@@ -119,7 +119,7 @@ public class Example94TypeConvert {
         }
     }
 
-    void insert2(Example94Entity entity) throws IOException {
+    void insert2(Example94Entity entity) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
@@ -138,7 +138,7 @@ public class Example94TypeConvert {
         }
     }
 
-    void select1() throws IOException {
+    void select1() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             session.setConvertUtil(CONVERT_UTIL); // set session
 
@@ -156,7 +156,7 @@ public class Example94TypeConvert {
         }
     }
 
-    void select2() throws IOException {
+    void select2() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
@@ -173,7 +173,7 @@ public class Example94TypeConvert {
         }
     }
 
-    void select3() throws IOException {
+    void select3() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);

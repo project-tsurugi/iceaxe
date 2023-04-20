@@ -2,14 +2,11 @@ package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
@@ -19,7 +16,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbManagerExecuteDdlTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -28,7 +25,7 @@ class DbManagerExecuteDdlTest extends DbTestTableTester {
     }
 
     @Test
-    void executeDdl0() throws IOException, TsurugiTransactionException {
+    void executeDdl0() throws Exception {
         var session = getSession();
         assertTrue(session.findTableMetadata(TEST).isEmpty());
 
@@ -39,7 +36,7 @@ class DbManagerExecuteDdlTest extends DbTestTableTester {
     }
 
     @Test
-    void executeDdlDefaultSetting() throws IOException, TsurugiTransactionException {
+    void executeDdlDefaultSetting() throws Exception {
         var session = getSession();
         assertTrue(session.findTableMetadata(TEST).isEmpty());
 
@@ -50,7 +47,7 @@ class DbManagerExecuteDdlTest extends DbTestTableTester {
     }
 
     @Test
-    void executeDdl() throws IOException, TsurugiTransactionException {
+    void executeDdl() throws Exception {
         var session = getSession();
         assertTrue(session.findTableMetadata(TEST).isEmpty());
 

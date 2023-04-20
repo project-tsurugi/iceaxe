@@ -19,7 +19,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example93DomainType {
 
-    void main() throws IOException {
+    void main() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
@@ -45,7 +45,7 @@ public class Example93DomainType {
         }
     }
 
-    void createTable(TsurugiTransactionManager tm) throws IOException {
+    void createTable(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "create table example93 (" //
                 + "key1 int," //
                 + "type varchar," // @see ExampleType
@@ -95,7 +95,7 @@ public class Example93DomainType {
         }
     }
 
-    void insert_getterAsString(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity2 entity) throws IOException {
+    void insert_getterAsString(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity2 entity) throws IOException, InterruptedException {
         var sql = "insert into example93 (key1, type) values(:key, :type)";
         var parameterMapping = TgParameterMapping.of(Example93Entity2.class) //
                 .addInt("key", Example93Entity2::getKey) //
@@ -105,7 +105,7 @@ public class Example93DomainType {
         }
     }
 
-    void insert_getterWithConverter(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException {
+    void insert_getterWithConverter(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException, InterruptedException {
         var sql = "insert into example93 (key1, type) values(:key, :type)";
         var parameterMapping = TgParameterMapping.of(Example93Entity1.class) //
                 .addInt("key", Example93Entity1::getKey) //
@@ -115,7 +115,7 @@ public class Example93DomainType {
         }
     }
 
-    void insert_bindVariable(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException {
+    void insert_bindVariable(TsurugiSession session, TsurugiTransactionManager tm, Example93Entity1 entity) throws IOException, InterruptedException {
         var key = TgBindVariable.ofInt("key");
         var type = new ExampleTypeBindVariable("type"); // custom TgBindVariable
         var sql = "insert into example93 (key1, type) values(" + key + ", " + type + ")";
@@ -145,7 +145,7 @@ public class Example93DomainType {
         }
     }
 
-    void select_setterAsString(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void select_setterAsString(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "select * from example93";
         var resultMapping = TgResultMapping.of(Example93Entity2::new) //
                 .addInt(Example93Entity2::setKey) //
@@ -156,7 +156,7 @@ public class Example93DomainType {
         }
     }
 
-    void select_setterWithConverter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void select_setterWithConverter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "select * from example93";
         var resultMapping = TgResultMapping.of(Example93Entity1::new) //
                 .addInt(Example93Entity1::setKey) //
@@ -167,7 +167,7 @@ public class Example93DomainType {
         }
     }
 
-    void select_converter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void select_converter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "select * from example93";
         var resultMapping = TgResultMapping.of(Example93Entity1::new) //
                 .addInt(Example93Entity1::setKey) //
@@ -178,7 +178,7 @@ public class Example93DomainType {
         }
     }
 
-    private void setEntityType(Example93Entity1 entity, TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    private void setEntityType(Example93Entity1 entity, TsurugiResultRecord record) throws IOException, TsurugiTransactionException, InterruptedException {
         String value = record.nextStringOrNull();
         ExampleType type = (value != null) ? ExampleType.valueOf(value) : null;
         entity.setType(type);

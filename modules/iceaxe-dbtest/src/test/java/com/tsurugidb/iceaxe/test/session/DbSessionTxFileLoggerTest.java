@@ -33,7 +33,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbSessionTxFileLoggerTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -42,28 +42,28 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
     }
 
     @Test
-    void testLog1() throws IOException {
+    void testLog1() throws Exception {
         execute(TsurugiSessionTxFileLogConfig.EXPLAIN_BOTH, false);
     }
 
     @Test
-    void testLog1Exception() throws IOException {
+    void testLog1Exception() throws Exception {
         execute(TsurugiSessionTxFileLogConfig.EXPLAIN_BOTH, true);
     }
 
     @Test
-    void testLog2() throws IOException {
+    void testLog2() throws Exception {
         execute(TsurugiSessionTxFileLogConfig.EXPLAIN_NOTHING, false);
     }
 
     @Test
-    void testLog2Exception() throws IOException {
+    void testLog2Exception() throws Exception {
         execute(TsurugiSessionTxFileLogConfig.EXPLAIN_NOTHING, true);
     }
 
     private static final String ERROR_MESSAGE = "exception by test";
 
-    private void execute(int writeExplain, boolean throwException) throws IOException {
+    private void execute(int writeExplain, boolean throwException) throws IOException, InterruptedException {
         var logDir = Files.createTempDirectory("iceaxe-dbtest.tx-log.");
         LOG.debug("logDir={}", logDir);
 

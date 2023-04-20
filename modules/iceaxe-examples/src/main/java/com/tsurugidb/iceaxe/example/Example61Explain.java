@@ -23,7 +23,7 @@ public class Example61Explain {
         }
     }
 
-    void explainQuery(TsurugiSession session) throws IOException, PlanGraphException {
+    void explainQuery(TsurugiSession session) throws IOException, InterruptedException, PlanGraphException {
         var sql = "select * from TEST";
 
         try (var ps = session.createQuery(sql)) {
@@ -32,7 +32,7 @@ public class Example61Explain {
         }
     }
 
-    void explainPreparedQuery(TsurugiSession session) throws IOException, PlanGraphException {
+    void explainPreparedQuery(TsurugiSession session) throws IOException, InterruptedException, PlanGraphException {
         var foo = TgBindVariable.ofInt("foo");
         var sql = "select * from TEST where FOO=" + foo;
         var parameterMapping = TgParameterMapping.of(foo);
@@ -44,7 +44,7 @@ public class Example61Explain {
         }
     }
 
-    void explainStatement(TsurugiSession session) throws IOException, PlanGraphException {
+    void explainStatement(TsurugiSession session) throws IOException, InterruptedException, PlanGraphException {
         var sql = "update TEST set BAR=123";
 
         try (var ps = session.createStatement(sql)) {
@@ -53,7 +53,7 @@ public class Example61Explain {
         }
     }
 
-    void explainPreparedStatement(TsurugiSession session) throws IOException, PlanGraphException {
+    void explainPreparedStatement(TsurugiSession session) throws IOException, InterruptedException, PlanGraphException {
         var bar = TgBindVariable.ofLong("bar");
         var sql = "update TEST set BAR=" + bar;
         var parameterMapping = TgParameterMapping.of(bar);

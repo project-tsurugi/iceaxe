@@ -32,7 +32,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -56,7 +56,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
     private static final String DELETE_SQL = "delete from " + TEST + " where foo = " + (SIZE - 1);
 
     @Test
-    void ltx_occR() throws IOException, TsurugiTransactionException {
+    void ltx_occR() throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1)) {
@@ -81,7 +81,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
     }
 
     @Test
-    void ltx_rtx() throws IOException, TsurugiTransactionException {
+    void ltx_rtx() throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1)) {
@@ -104,7 +104,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
     }
 
     @Test
-    void ltx_occW() throws IOException, TsurugiTransactionException {
+    void ltx_occW() throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1); //
@@ -130,7 +130,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
     }
 
     @Test
-    void ltx_ltx() throws IOException, TsurugiTransactionException {
+    void ltx_ltx() throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1); //
@@ -149,6 +149,8 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                             tx2.commit(TgCommitType.DEFAULT);
                         } catch (IOException e) {
                             throw new UncheckedIOException(e.getMessage(), e);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
                         } catch (TsurugiTransactionException e) {
                             throw new TsurugiTransactionRuntimeException(e);
                         } finally {
@@ -177,7 +179,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
     }
 
     @Test
-    void ltx_ltx2() throws IOException, TsurugiTransactionException {
+    void ltx_ltx2() throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs = session.createStatement(UPDATE_SQL1); //
@@ -204,7 +206,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 1, -1 })
-    void ltx_occW_phantom(int add) throws IOException, TsurugiTransactionException {
+    void ltx_occW_phantom(int add) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING); //
                 var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
@@ -239,7 +241,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 1, -1 })
-    void ltx_ltx_phantom(int add) throws IOException, TsurugiTransactionException, InterruptedException, ExecutionException {
+    void ltx_ltx_phantom(int add) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING); //
                 var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
@@ -264,6 +266,8 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                             tx2.commit(TgCommitType.DEFAULT);
                         } catch (IOException e) {
                             throw new UncheckedIOException(e.getMessage(), e);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
                         } catch (TsurugiTransactionException e) {
                             throw new TsurugiTransactionRuntimeException(e);
                         } finally {

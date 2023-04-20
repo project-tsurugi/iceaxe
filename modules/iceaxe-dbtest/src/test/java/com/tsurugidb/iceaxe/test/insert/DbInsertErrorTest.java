@@ -23,7 +23,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbInsertErrorTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -35,7 +35,7 @@ class DbInsertErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void insertNullToPK() throws IOException {
+    void insertNullToPK() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(null, 456, 'abc')";
@@ -60,7 +60,7 @@ class DbInsertErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void insertNullToNotNull() throws IOException {
+    void insertNullToNotNull() throws Exception {
         var session = getSession();
 
         var createSql = "create table " + TEST //
@@ -87,7 +87,7 @@ class DbInsertErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void ps0ExecuteAfterClose() throws IOException {
+    void ps0ExecuteAfterClose() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(1, 1, '1')";
@@ -103,7 +103,7 @@ class DbInsertErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void ps1ExecuteAfterClose() throws IOException {
+    void ps1ExecuteAfterClose() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING);
@@ -116,16 +116,16 @@ class DbInsertErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void ps0ExecuteAfterTxFutureClose() throws IOException {
+    void ps0ExecuteAfterTxFutureClose() throws Exception {
         ps0ExecuteAfterTxClose(false, "Future is already closed");
     }
 
     @Test
-    void ps0ExecuteAfterTxClose() throws IOException {
+    void ps0ExecuteAfterTxClose() throws Exception {
         ps0ExecuteAfterTxClose(true, "already closed");
     }
 
-    private void ps0ExecuteAfterTxClose(boolean getLow, String expected) throws IOException {
+    private void ps0ExecuteAfterTxClose(boolean getLow, String expected) throws IOException, InterruptedException {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(1, 1, '1')";

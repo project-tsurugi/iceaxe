@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
-import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -99,7 +99,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     }
 
 //  @ThreadSafe
-    protected final synchronized PreparedStatement getLowPreparedStatement() throws IOException {
+    protected final synchronized PreparedStatement getLowPreparedStatement() throws IOException, InterruptedException {
         if (this.lowPreparedStatement == null) {
             if (lowFutureException != null) {
                 throw new TsurugiIOException(IceaxeErrorCode.PS_LOW_ERROR, lowFutureException);
@@ -131,8 +131,9 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
      * @param parameter SQL parameter
      * @return statement metadata
      * @throws IOException
+     * @throws InterruptedException
      */
-    public TgStatementMetadata explain(P parameter) throws IOException {
+    public TgStatementMetadata explain(P parameter) throws IOException, InterruptedException {
         var session = getSession();
         var lowPs = getLowPreparedStatement();
         var lowParameterList = getLowParameterList(parameter);

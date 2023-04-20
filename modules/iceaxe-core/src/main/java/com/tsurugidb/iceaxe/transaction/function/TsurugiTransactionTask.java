@@ -10,5 +10,5 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
  */
 @FunctionalInterface
 public interface TsurugiTransactionTask<R> {
-    public R run(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException;
+    public R run(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException;
 }

@@ -9,9 +9,9 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.iceaxe.session.TsurugiSession;
 
 /**
  * Result close timeout test
@@ -19,7 +19,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 public class DbTimeoutResultCloseTest extends DbTimetoutTest {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -29,7 +29,7 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutDefault() throws IOException {
+    void timeoutDefault() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -39,7 +39,7 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSpecified() throws IOException {
+    void timeoutSpecified() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -49,7 +49,7 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSet() throws IOException {
+    void timeoutSet() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifyStatementResult(TsurugiStatementResult result) {

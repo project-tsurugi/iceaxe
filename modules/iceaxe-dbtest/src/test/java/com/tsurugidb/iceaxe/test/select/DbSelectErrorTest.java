@@ -17,7 +17,6 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -30,7 +29,7 @@ class DbSelectErrorTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectErrorTest.class);
         LOG.debug("init start");
 
@@ -42,7 +41,7 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void undefinedColumnName() throws IOException {
+    void undefinedColumnName() throws Exception {
         var sql = "select hoge from " + TEST;
 
         var session = getSession();
@@ -57,7 +56,7 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void aggregateWithoutGroupBy() throws IOException {
+    void aggregateWithoutGroupBy() throws Exception {
         var sql = "select foo, sum(bar) as bar from " + TEST;
 
         var session = getSession();
@@ -72,7 +71,7 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void ps0ExecuteAfterClose() throws IOException {
+    void ps0ExecuteAfterClose() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -86,7 +85,7 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void ps1ExecuteAfterClose() throws IOException {
+    void ps1ExecuteAfterClose() throws Exception {
         var foo = TgBindVariable.ofInt("foo");
         var sql = "select * from " + TEST + " where foo=" + foo;
         var parameterMapping = TgParameterMapping.of(foo);
@@ -103,16 +102,16 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void ps0ExecuteAfterTxFutureClose() throws IOException {
+    void ps0ExecuteAfterTxFutureClose() throws Exception {
         ps0ExecuteAfterTxClose(false, "Future is already closed");
     }
 
     @Test
-    void ps0ExecuteAfterTxClose() throws IOException {
+    void ps0ExecuteAfterTxClose() throws Exception {
         ps0ExecuteAfterTxClose(true, "already closed");
     }
 
-    private void ps0ExecuteAfterTxClose(boolean getLow, String expected) throws IOException {
+    private void ps0ExecuteAfterTxClose(boolean getLow, String expected) throws IOException, InterruptedException {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -132,7 +131,7 @@ class DbSelectErrorTest extends DbTestTableTester {
 
     @Test
     @Disabled // TODO remove @Disabled このテストの実行後にdrop tableでtateyama-serverが落ちることがある
-    void selectAfterTransactionClose() throws IOException, TsurugiTransactionException {
+    void selectAfterTransactionClose() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -149,7 +148,7 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void selectInTransactionClose() throws IOException, TsurugiTransactionException {
+    void selectInTransactionClose() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();

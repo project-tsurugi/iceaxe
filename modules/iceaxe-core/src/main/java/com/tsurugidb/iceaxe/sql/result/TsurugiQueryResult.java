@@ -26,6 +26,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeExcep
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
+import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
 import com.tsurugidb.sql.proto.SqlCommon.Column;
@@ -145,7 +146,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         }
     }
 
-    protected final synchronized ResultSet getLowResultSet() throws IOException, TsurugiTransactionException {
+    protected final synchronized ResultSet getLowResultSet() throws IOException, InterruptedException, TsurugiTransactionException {
         this.calledGetLowResultSet = true;
         if (this.lowResultSet == null) {
             LOG.trace("lowResultSet get start");
@@ -163,7 +164,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return this.lowResultSet;
     }
 
-    protected boolean nextLowRecord() throws IOException, TsurugiTransactionException {
+    protected boolean nextLowRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         boolean exists;
         try {
             var lowResultSet = getLowResultSet();
@@ -175,9 +176,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         } catch (ServerException e) {
             event(e, listener -> listener.readException(this, e));
             throw fillTsurugiException(new TsurugiTransactionException(e));
-        } catch (InterruptedException e) {
-            event(e, listener -> listener.readException(this, e));
-            throw new IOException(e.getMessage(), e);
         } catch (Throwable e) {
             event(e, listener -> listener.readException(this, e));
             throw e;
@@ -210,7 +208,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return this.hasNextRow;
     }
 
-    protected TsurugiResultRecord getRecord() throws IOException, TsurugiTransactionException {
+    protected TsurugiResultRecord getRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.record == null) {
             try {
                 var lowResultSet = getLowResultSet();
@@ -223,7 +221,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return this.record;
     }
 
-    protected R convertRecord(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    protected R convertRecord(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         R result;
         try {
             result = resultMapping.convert(record);
@@ -255,9 +253,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @return list of column name
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public List<String> getNameList() throws IOException, TsurugiTransactionException {
+    public List<String> getNameList() throws IOException, InterruptedException, TsurugiTransactionException {
         try {
             return getNameList(this, getLowResultSet());
         } catch (Throwable e) {
@@ -266,7 +265,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         }
     }
 
-    static List<String> getNameList(TsurugiQueryResult<?> rs, ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
+    static List<String> getNameList(TsurugiQueryResult<?> rs, ResultSet lowResultSet) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowColumnList = getLowColumnList(rs, lowResultSet);
         var size = lowColumnList.size();
         var list = new ArrayList<String>(size);
@@ -278,14 +277,12 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return list;
     }
 
-    static List<? extends Column> getLowColumnList(TsurugiQueryResult<?> rs, ResultSet lowResultSet) throws IOException, TsurugiTransactionException {
+    static List<? extends Column> getLowColumnList(TsurugiQueryResult<?> rs, ResultSet lowResultSet) throws IOException, InterruptedException, TsurugiTransactionException {
         try {
             var lowMetadata = lowResultSet.getMetadata();
             return lowMetadata.getColumns();
         } catch (ServerException e) {
             throw rs.fillTsurugiException(new TsurugiTransactionException(e));
-        } catch (InterruptedException e) {
-            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -304,9 +301,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @param action The action to be performed for each record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public void whileEach(TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+    public void whileEach(TsurugiTransactionConsumer<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var record = getRecord();
         while (nextLowRecord()) {
             record.reset();
@@ -321,9 +319,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public List<R> getRecordList() throws IOException, TsurugiTransactionException {
+    public List<R> getRecordList() throws IOException, InterruptedException, TsurugiTransactionException {
         var list = new ArrayList<R>();
         var record = getRecord();
         while (nextLowRecord()) {
@@ -340,9 +339,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public Optional<R> findRecord() throws IOException, TsurugiTransactionException {
+    public Optional<R> findRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         if (nextLowRecord()) {
             var record = getRecord();
             record.reset();
@@ -365,6 +365,8 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             return new TsurugiQueryResultIterator(record);
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
+        } catch (InterruptedException e) {
+            throw new InterruptedRuntimeException(e);
         } catch (TsurugiTransactionException e) {
             throw new TsurugiTransactionRuntimeException(e);
         }
@@ -385,6 +387,8 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
                     this.hasNext = nextLowRecord();
                 } catch (IOException e) {
                     throw new UncheckedIOException(e.getMessage(), e);
+                } catch (InterruptedException e) {
+                    throw new InterruptedRuntimeException(e);
                 } catch (TsurugiTransactionException e) {
                     throw new TsurugiTransactionRuntimeException(e);
                 } finally {
@@ -412,6 +416,8 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
                 result = convertRecord(record);
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                throw new InterruptedRuntimeException(e);
             } catch (TsurugiTransactionException e) {
                 throw new TsurugiTransactionRuntimeException(e);
             }
@@ -438,6 +444,8 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
+        } catch (InterruptedException e) {
+            throw new InterruptedRuntimeException(e);
         } catch (TsurugiTransactionException e) {
             throw new TsurugiTransactionRuntimeException(e);
         }
@@ -446,7 +454,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     // close
 
     @Override
-    public void close() throws IOException, TsurugiTransactionException {
+    public void close() throws IOException, InterruptedException, TsurugiTransactionException {
         LOG.trace("queryResult close start");
 
         Throwable occurred = null;

@@ -18,7 +18,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbCreateTableErrorTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -27,7 +27,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void columnNotFoundPk() throws IOException {
+    void columnNotFoundPk() throws Exception {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  foo int," //
@@ -41,7 +41,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void duplicatePkDefinition() throws IOException {
+    void duplicatePkDefinition() throws Exception {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  foo int primary key," //
@@ -55,7 +55,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void duplicatePk() throws IOException {
+    void duplicatePk() throws Exception {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  foo int," //
@@ -68,7 +68,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void duplicateColumnName() throws IOException {
+    void duplicateColumnName() throws Exception {
         for (int i = 0; i <= 0b11; i++) {
             var sql = getDuplicateColumnSql(i);
             if (sql == null) {

@@ -70,10 +70,11 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * @param transaction Transaction
      * @return SQL result
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see TsurugiTransaction#executeQuery(TsurugiSqlQuery)
      */
-    public TsurugiQueryResult<R> execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+    public TsurugiQueryResult<R> execute(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();
 
         LOG.trace("execute start");
@@ -102,10 +103,11 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * @param transaction Transaction
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+    public Optional<R> executeAndFindRecord(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
         return transaction.executeAndFindRecord(this);
     }
 
@@ -115,9 +117,10 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * @param tm Transaction Manager
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm) throws IOException {
+    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         return tm.executeAndFindRecord(this);
     }
 
@@ -128,9 +131,10 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * @param setting transaction manager settings
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException {
+    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException, InterruptedException {
         return tm.executeAndFindRecord(setting, this);
     }
 
@@ -140,10 +144,11 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * @param transaction Transaction
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+    public List<R> executeAndGetList(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
         return transaction.executeAndGetList(this);
     }
 
@@ -153,9 +158,10 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * @param tm Transaction Manager
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransactionManager tm) throws IOException {
+    public List<R> executeAndGetList(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         return tm.executeAndGetList(this);
     }
 
@@ -166,9 +172,10 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * @param setting transaction manager settings
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException {
+    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException, InterruptedException {
         return tm.executeAndGetList(setting, this);
     }
 }

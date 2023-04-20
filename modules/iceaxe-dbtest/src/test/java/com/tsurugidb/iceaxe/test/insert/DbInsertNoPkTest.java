@@ -19,7 +19,7 @@ import com.tsurugidb.iceaxe.test.util.TestEntity;
 class DbInsertNoPkTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -28,7 +28,7 @@ class DbInsertNoPkTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         // no primary key
         var sql = "create table " + TEST //
                 + "(" //
@@ -41,51 +41,51 @@ class DbInsertNoPkTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertConstant(boolean columns) throws IOException {
+    void insertConstant(boolean columns) throws Exception {
         new DbInsertTest().insertConstant(columns);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByBindVariables(boolean columns) throws IOException {
+    void insertByBindVariables(boolean columns) throws Exception {
         new DbInsertTest().insertByBindVariables(columns);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByBind(boolean columns) throws IOException {
+    void insertByBind(boolean columns) throws Exception {
         new DbInsertTest().insertByBind(columns);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByEntityMapping(boolean columns) throws IOException {
+    void insertByEntityMapping(boolean columns) throws Exception {
         new DbInsertTest().insertByEntityMapping(columns);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByEntityConverter(boolean columns) throws IOException {
+    void insertByEntityConverter(boolean columns) throws Exception {
         new DbInsertTest().insertByEntityConverter(columns);
     }
 
     @Test
-    void insertMany() throws IOException {
+    void insertMany() throws Exception {
         new DbInsertTest().insertMany();
     }
 
     @Test
-    void insertResultCheck() throws IOException {
+    void insertResultCheck() throws Exception {
         new DbInsertTest().insertResultCheck();
     }
 
     @Test
-    void insertResultNoCheck() throws IOException {
+    void insertResultNoCheck() throws Exception {
         new DbInsertTest().insertResultNoCheck();
     }
 
     @Test
-    void insertDuplicate() throws IOException {
+    void insertDuplicate() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
         int size = 4;
 

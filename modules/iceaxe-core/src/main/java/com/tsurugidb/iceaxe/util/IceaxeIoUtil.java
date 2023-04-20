@@ -24,32 +24,35 @@ public final class IceaxeIoUtil {
 
     /**
      * get value from future
-     * 
+     *
      * @param <V>     the result value type
      * @param future  future
      * @param timeout the maximum time to wait
      * @return result value
      * @throws IOException
+     * @throws InterruptedException
      */
-    public static <V> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException {
+    public static <V> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, InterruptedException {
         return getAndCloseFuture(future, timeout, TsurugiIOException::new);
     }
 
     /**
      * get value from future in transaction
-     * 
+     *
      * @param <V>     the result value type
      * @param future  future
      * @param timeout the maximum time to wait
      * @return result value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public static <V> V getAndCloseFutureInTransaction(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
+    public static <V> V getAndCloseFutureInTransaction(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, InterruptedException, TsurugiTransactionException {
         return getAndCloseFuture(future, timeout, TsurugiTransactionException::new);
     }
 
-    private static <V, E extends Exception> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout, Function<ServerException, E> serverExceptionWrapper) throws IOException, E {
+    private static <V, E extends Exception> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout, Function<ServerException, E> serverExceptionWrapper)
+            throws IOException, InterruptedException, E {
         Throwable occurred = null;
         try {
             var time = timeout.get();
@@ -60,7 +63,7 @@ public final class IceaxeIoUtil {
             E wrapper = serverExceptionWrapper.apply(e);
             occurred = wrapper;
             throw wrapper;
-        } catch (InterruptedException | TimeoutException e) {
+        } catch (TimeoutException e) {
             var ioe = new IOException(e.getMessage(), e);
             occurred = ioe;
             throw ioe;
@@ -77,12 +80,6 @@ public final class IceaxeIoUtil {
                 } else {
                     throw wrapper;
                 }
-            } catch (InterruptedException e) {
-                if (occurred != null) {
-                    occurred.addSuppressed(e);
-                } else {
-                    throw new IOException(e.getMessage(), e);
-                }
             } catch (Throwable e) {
                 if (occurred != null) {
                     occurred.addSuppressed(e);
@@ -95,7 +92,7 @@ public final class IceaxeIoUtil {
 
     /**
      * wrap with Closeable
-     * 
+     *
      * @param future future
      * @return Closeable
      */
@@ -107,12 +104,13 @@ public final class IceaxeIoUtil {
 
     /**
      * close resources
-     * 
+     *
      * @param closeableSet Closeable set
      * @param runnable     close action
      * @throws IOException
+     * @throws InterruptedException
      */
-    public static void close(IceaxeCloseableSet closeableSet, IoRunnable runnable) throws IOException {
+    public static void close(IceaxeCloseableSet closeableSet, IoRunnable runnable) throws IOException, InterruptedException {
         List<Throwable> saveList = closeableSet.close();
 
         try {
@@ -145,7 +143,7 @@ public final class IceaxeIoUtil {
 
     /**
      * close resources
-     * 
+     *
      * @param closeables AutoCloseable
      * @throws IOException
      */
@@ -155,7 +153,7 @@ public final class IceaxeIoUtil {
 
     /**
      * close resources in transaction
-     * 
+     *
      * @param closeables AutoCloseable
      * @throws IOException
      * @throws TsurugiTransactionException

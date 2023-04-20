@@ -64,10 +64,11 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
      * @param transaction Transaction
      * @return SQL result
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see TsurugiTransaction#executeStatement(TsurugiSqlStatement)
      */
-    public TsurugiStatementResult execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+    public TsurugiStatementResult execute(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();
 
         LOG.trace("execute start");
@@ -95,10 +96,11 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
      * @param transaction Transaction
      * @return row count
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+    public int executeAndGetCount(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
         return transaction.executeAndGetCount(this);
     }
 
@@ -108,9 +110,10 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
      * @param tm Transaction Manager
      * @return row count
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransactionManager tm) throws IOException {
+    public int executeAndGetCount(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         return tm.executeAndGetCount(this);
     }
 
@@ -121,9 +124,10 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
      * @param setting transaction manager settings
      * @return row count
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException {
+    public int executeAndGetCount(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException, InterruptedException {
         return tm.executeAndGetCount(setting, this);
     }
 }

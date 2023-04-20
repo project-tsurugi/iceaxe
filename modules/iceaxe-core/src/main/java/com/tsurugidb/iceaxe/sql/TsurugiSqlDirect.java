@@ -24,8 +24,9 @@ public abstract class TsurugiSqlDirect extends TsurugiSql {
      *
      * @return statement metadata
      * @throws IOException
+     * @throws InterruptedException
      */
-    public TgStatementMetadata explain() throws IOException {
+    public TgStatementMetadata explain() throws IOException, InterruptedException {
         var session = getSession();
         var helper = session.getExplainHelper();
         return helper.explain(session, sql, getExplainConnectTimeout(), getExplainCloseTimeout());

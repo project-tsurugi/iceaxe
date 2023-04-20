@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ class DbSelectTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectTest.class);
         LOG.debug("init start");
 
@@ -37,7 +36,7 @@ class DbSelectTest extends DbTestTableTester {
     }
 
     @Test
-    void selectAllByResultEntity() throws IOException {
+    void selectAllByResultEntity() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -68,7 +67,7 @@ class DbSelectTest extends DbTestTableTester {
     }
 
     @Test
-    void selectAllByTestEntity() throws IOException {
+    void selectAllByTestEntity() throws Exception {
         var sql = "select * from " + TEST;
         var resultMapping = TgResultMapping.of(TestEntity::new) //
                 .addInt("foo", TestEntity::setFoo) //
@@ -84,7 +83,7 @@ class DbSelectTest extends DbTestTableTester {
     }
 
     @Test
-    void selectColumnsByTestEntity() throws IOException {
+    void selectColumnsByTestEntity() throws Exception {
         var sql = "select " + TEST_COLUMNS + " from " + TEST;
         var resultMapping = TgResultMapping.of(TestEntity::new) //
                 .addInt(TestEntity::setFoo) //
@@ -110,7 +109,7 @@ class DbSelectTest extends DbTestTableTester {
     }
 
     @Test
-    void selectColumn_convert() throws IOException {
+    void selectColumn_convert() throws Exception {
         var sql = "select foo from " + TEST;
         var resultMapping = TgResultMapping.of(record -> record.nextInt());
 
@@ -123,7 +122,7 @@ class DbSelectTest extends DbTestTableTester {
     }
 
     @Test
-    void selectColumn_single() throws IOException {
+    void selectColumn_single() throws Exception {
         var sql = "select foo from " + TEST;
         var resultMapping = TgResultMapping.of(int.class);
 
@@ -136,7 +135,7 @@ class DbSelectTest extends DbTestTableTester {
     }
 
     @Test
-    void selectMultiColumn_single() throws IOException {
+    void selectMultiColumn_single() throws Exception {
         var sql = "select foo, bar, zzz from " + TEST;
         var resultMapping = TgResultMapping.of(int.class);
 

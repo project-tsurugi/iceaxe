@@ -26,7 +26,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbInsertMultiThreadTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -36,30 +36,30 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
     }
 
     @Test
-    void insertSingleTxOcc() throws IOException, InterruptedException {
+    void insertSingleTxOcc() throws Exception {
         insertSingleTx(1000, 30, TgTxOption.ofOCC());
     }
 
     @Test
-    void insertSingleTxLtx() throws IOException, InterruptedException {
+    void insertSingleTxLtx() throws Exception {
         insertSingleTx(1000, 30, TgTxOption.ofLTX(TEST));
     }
 
     @Test
-    void insertMultiTxOcc() throws IOException, InterruptedException {
+    void insertMultiTxOcc() throws Exception {
         insertMultiTx(1000, 30, TgTxOption.ofOCC());
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 8, 30 })
-    void insertMultiTxLtx(int threadSize) throws IOException, InterruptedException {
+    void insertMultiTxLtx(int threadSize) throws Exception {
         insertMultiTx(1000, threadSize, TgTxOption.ofLTX(TEST));
     }
 
     /**
      * single transaction, parallel insert
      */
-    private void insertSingleTx(int recordSize, int threadSize, TgTxOption tx) throws IOException {
+    private void insertSingleTx(int recordSize, int threadSize, TgTxOption tx) throws IOException, InterruptedException {
         var session = getSession();
         var tm = session.createTransactionManager(tx);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -106,12 +106,12 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
                 runInTransaction();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
-            } catch (TsurugiTransactionException e) {
+            } catch (InterruptedException | TsurugiTransactionException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        private void runInTransaction() throws IOException, TsurugiTransactionException {
+        private void runInTransaction() throws IOException, InterruptedException, TsurugiTransactionException {
             for (int i = 0; i < recordSize; i++) {
                 if (i % threadSize == number) {
                     var entity = createTestEntity(i);
@@ -124,7 +124,7 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
     /**
      * transaction per thread, parallel insert
      */
-    private void insertMultiTx(int recordSize, int threadSize, TgTxOption tx) throws IOException {
+    private void insertMultiTx(int recordSize, int threadSize, TgTxOption tx) throws IOException, InterruptedException {
         var session = getSession();
         var tm = session.createTransactionManager(tx);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -171,10 +171,12 @@ class DbInsertMultiThreadTest extends DbTestTableTester {
                 });
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
 
-        private void runInTransaction(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+        private void runInTransaction(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
             for (int i = 0; i < recordSize; i++) {
                 if (i % threadSize == number) {
                     var entity = createTestEntity(i);

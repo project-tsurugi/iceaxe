@@ -20,7 +20,7 @@ class DbQueryCommentTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbQueryCommentTest.class);
         LOG.debug("init start");
 
@@ -33,7 +33,7 @@ class DbQueryCommentTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
-    void comment(boolean prepared) throws IOException {
+    void comment(boolean prepared) throws Exception {
         var list1 = List.of("", "-- comment1\n", "/*comment1*/");
         var list2 = List.of("", "-- comment2\n", "/*comment2*/");
         var list3 = List.of("", "-- comment3", "-- comment3\n", "/*comment3*/");
@@ -56,7 +56,7 @@ class DbQueryCommentTest extends DbTestTableTester {
         }
     }
 
-    private void test(String sql, boolean prepared) throws IOException {
+    private void test(String sql, boolean prepared) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         if (prepared) {

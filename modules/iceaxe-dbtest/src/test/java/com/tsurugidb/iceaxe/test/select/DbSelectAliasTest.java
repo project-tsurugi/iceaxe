@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.test.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -26,7 +25,7 @@ class DbSelectAliasTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectAliasTest.class);
         LOG.debug("init start");
 
@@ -39,7 +38,7 @@ class DbSelectAliasTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { " as", "" })
-    void selectTableAlias(String as) throws IOException {
+    void selectTableAlias(String as) throws Exception {
         var sql = "select t.foo, t.bar, t.zzz from " + TEST + as + " t order by t.foo";
 
         var session = getSession();
@@ -56,13 +55,13 @@ class DbSelectAliasTest extends DbTestTableTester {
     }
 
     @Test
-    void selectAsName() throws IOException {
+    void selectAsName() throws Exception {
         var sql = "select count(*) as count from " + TEST;
         selectCount(sql, "count");
     }
 
     @Test
-    void selectName() throws IOException {
+    void selectName() throws Exception {
         var sql = "select count(*) cnt from " + TEST;
         var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
             selectCount(sql, "cnt");
@@ -71,12 +70,12 @@ class DbSelectAliasTest extends DbTestTableTester {
     }
 
     @Test
-    void selectNoName() throws IOException {
+    void selectNoName() throws Exception {
         var sql = "select count(*) from " + TEST;
         selectCount(sql, "@#0");
     }
 
-    private void selectCount(String sql, String name) throws IOException {
+    private void selectCount(String sql, String name) throws Exception {
         var resultMapping = TgResultMapping.of(record -> {
             List<String> nameList = record.getNameList();
             assertEquals(List.of(name), nameList);
@@ -92,7 +91,7 @@ class DbSelectAliasTest extends DbTestTableTester {
     }
 
     @Test
-    void selectNoName2() throws IOException {
+    void selectNoName2() throws Exception {
         var sql = "select count(*), count(foo) from " + TEST;
         var resultMapping = TgResultMapping.of(record -> {
             List<String> nameList = record.getNameList();

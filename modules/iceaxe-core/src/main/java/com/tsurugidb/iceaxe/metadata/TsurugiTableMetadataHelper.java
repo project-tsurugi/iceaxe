@@ -29,8 +29,9 @@ public class TsurugiTableMetadataHelper {
      * @param tableName table name
      * @return table metadata
      * @throws IOException
+     * @throws InterruptedException
      */
-    public Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName) throws IOException {
+    public Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName) throws IOException, InterruptedException {
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("getTableMetadata start. tableName={}", tableName);
         var lowTableMetadataFuture = getLowTableMetadata(lowSqlClient, tableName);
@@ -42,7 +43,7 @@ public class TsurugiTableMetadataHelper {
         return lowSqlClient.getTableMetadata(tableName);
     }
 
-    protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException {
+    protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException, InterruptedException {
         try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {
 
             var sessionOption = session.getSessionOption();

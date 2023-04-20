@@ -28,7 +28,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
     private static final Logger LOG = LoggerFactory.getLogger(DbSelectBoundaryValueTest.class);
 
     @BeforeAll
-    static void beforeAll(TestInfo info) throws IOException {
+    static void beforeAll(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -38,7 +38,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  int4 int," //
@@ -119,7 +119,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
             new TestEntity(Integer.MAX_VALUE, Long.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE) //
     );
 
-    private static void insertTable() throws IOException {
+    private static void insertTable() throws IOException, InterruptedException {
         var sql = "insert into " + TEST //
                 + "(int4, int8, float4, float8)" //
                 + "values(:int4, :int8, :float4, :float8)";
@@ -142,7 +142,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { Integer.MIN_VALUE, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1, Integer.MAX_VALUE })
-    void selectInt4(int value) throws IOException {
+    void selectInt4(int value) throws Exception {
         var variable = TgBindVariable.ofInt("value");
         test("int4 =:value", entity -> entity.getInt4() == value, value, variable);
         test("int4<>:value", entity -> entity.getInt4() != value, value, variable);
@@ -154,7 +154,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(longs = { Long.MIN_VALUE, Long.MIN_VALUE + 1, Long.MAX_VALUE - 1, Long.MAX_VALUE })
-    void selectInt8(long value) throws IOException {
+    void selectInt8(long value) throws Exception {
         var variable = TgBindVariable.ofLong("value");
         test("int8 =:value", entity -> entity.getInt8() == value, value, variable);
         test("int8<>:value", entity -> entity.getInt8() != value, value, variable);
@@ -166,7 +166,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(floats = { Float.MIN_VALUE, Float.MIN_VALUE + Float.MIN_NORMAL, Float.MAX_VALUE - Float.MIN_NORMAL, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN })
-    void selectFloat4(float value) throws IOException {
+    void selectFloat4(float value) throws Exception {
         var variable = TgBindVariable.ofFloat("value");
         test("float4 =:value", entity -> entity.getFloat4() == value, value, variable);
         test("float4<>:value", entity -> entity.getFloat4() != value, value, variable);
@@ -179,7 +179,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(doubles = { Double.MIN_VALUE, Double.MIN_VALUE + Double.MIN_NORMAL, Double.MIN_VALUE - Double.MIN_NORMAL, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
             Double.NaN })
-    void selectFloat8(double value) throws IOException {
+    void selectFloat8(double value) throws Exception {
         var variable = TgBindVariable.ofDouble("value");
         test("float8 =:value", entity -> entity.getFloat8() == value, value, variable);
         test("float8<>:value", entity -> entity.getFloat8() != value, value, variable);
@@ -189,7 +189,7 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
         test("float8< :value", entity -> entity.getFloat8() < value, value, variable);
     }
 
-    private static <T> void test(String where, Predicate<TestEntity> expectedPredicate, T value, TgBindVariable<T> variable) throws IOException {
+    private static <T> void test(String where, Predicate<TestEntity> expectedPredicate, T value, TgBindVariable<T> variable) throws IOException, InterruptedException {
         var sql = "select int4, int8, float4, float8 from " + TEST //
                 + " where " + where //
                 + " order by int4";

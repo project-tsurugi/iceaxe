@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -13,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
@@ -23,7 +21,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbDeleteExplainTest extends DbTestTableTester {
 
     @BeforeAll
-    static void beforeAll(TestInfo info) throws IOException {
+    static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbDeleteExplainTest.class);
         LOG.debug("{} init start", info.getDisplayName());
 

@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.test.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -32,7 +31,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectAggregateTest.class);
         LOG.debug("init start");
 
@@ -45,7 +44,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " order by count(*)" })
-    void selectCount(String order) throws IOException {
+    void selectCount(String order) throws Exception {
         var sql = "select count(*) from " + TEST + order;
         var resultMapping = TgResultMapping.of(record -> record.nextInt());
 
@@ -64,7 +63,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " order by sum(bar)" })
-    void selectSum(String order) throws IOException {
+    void selectSum(String order) throws Exception {
         var sql = "select sum(bar) as sum, min(zzz) as zzz from " + TEST + order;
 
         var session = getSession();
@@ -83,7 +82,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " order by foo" })
-    void selectKeyCount(String order) throws IOException {
+    void selectKeyCount(String order) throws Exception {
         var sql = "select foo, count(*) as cnt from " + TEST + " group by foo" + order;
 
         var session = getSession();
@@ -110,7 +109,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "", " order by foo" })
-    void selectKeySum(String order) throws IOException {
+    void selectKeySum(String order) throws Exception {
         var sql = "select foo, sum(bar) as sum, min(zzz) as zzz from " + TEST + " group by foo" + order;
 
         var session = getSession();
@@ -138,29 +137,29 @@ class DbSelectAggregateTest extends DbTestTableTester {
     }
 
     @Test
-    void selectCountWhereEmpty() throws IOException {
+    void selectCountWhereEmpty() throws Exception {
         new DbSelectEmptyTest().selectCount(" where foo<0");
     }
 
     @Test
-    void selectSumWhereEmpty() throws IOException {
+    void selectSumWhereEmpty() throws Exception {
         new DbSelectEmptyTest().selectSum(" where foo<0");
     }
 
     @Test
-    void selectKeyCountWhereEmpty() throws IOException {
+    void selectKeyCountWhereEmpty() throws Exception {
         new DbSelectEmptyTest().selectKeyCount(" where foo<0");
     }
 
     @Test
-    void selectKeySumWhereEmpty() throws IOException {
+    void selectKeySumWhereEmpty() throws Exception {
         new DbSelectEmptyTest().selectKeySum(" where foo<0");
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "foo,foo", "foo,foo,foo" })
     @Disabled // TODO remove Disabled group byに同カラムが複数あるとtateyama-serverがクラッシュする
-    void selectGroupBySameKey(String groupKey) throws IOException {
+    void selectGroupBySameKey(String groupKey) throws Exception {
         var sql = "select foo, count(*) as cnt from " + TEST + " group by " + groupKey;
 
         var session = getSession();
@@ -177,7 +176,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "foo", "foo,foo" })
-    void selectKeyWithoutGroup(String key) throws IOException {
+    void selectKeyWithoutGroup(String key) throws Exception {
         var sql = "select " + key + ", count(*) from " + TEST; // without 'group by'
 
         var session = getSession();
@@ -195,7 +194,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
     }
 
     @Test
-    void errorGroupNameNotFound() throws IOException {
+    void errorGroupNameNotFound() throws Exception {
         var sql = "select foo as k, count(*) as cnt from " + TEST + " group by k";
 
         var session = getSession();

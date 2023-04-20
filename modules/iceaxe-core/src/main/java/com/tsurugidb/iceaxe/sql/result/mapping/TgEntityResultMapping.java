@@ -1389,7 +1389,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
 
 //  @ThreadSafe
     @Override
-    protected R convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    protected R convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         mergeColumnConverterMap(record);
 
         R entity = entitySupplier.get();
@@ -1403,7 +1403,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         return entity;
     }
 
-    protected synchronized void mergeColumnConverterMap(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    protected synchronized void mergeColumnConverterMap(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.columnConverterMap != null) {
             var nameList = record.getNameList();
             int i = 0;

@@ -3,8 +3,6 @@ package com.tsurugidb.iceaxe.test.table;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -19,7 +17,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbDropTableTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -30,7 +28,7 @@ class DbDropTableTest extends DbTestTableTester {
     private static final String SQL = "drop table " + TEST;
 
     @Test
-    void drop() throws IOException {
+    void drop() throws Exception {
         createTestTable();
 
         var session = getSession();
@@ -41,7 +39,7 @@ class DbDropTableTest extends DbTestTableTester {
     }
 
     @Test
-    void dropNotFound() throws IOException {
+    void dropNotFound() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(SQL)) {
@@ -54,7 +52,7 @@ class DbDropTableTest extends DbTestTableTester {
     }
 
     @Test
-    void rollback() throws IOException {
+    void rollback() throws Exception {
         createTestTable();
 
         var session = getSession();

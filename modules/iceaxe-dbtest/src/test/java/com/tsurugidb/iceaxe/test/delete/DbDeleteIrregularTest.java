@@ -3,8 +3,6 @@ package com.tsurugidb.iceaxe.test.delete;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -19,7 +17,7 @@ class DbDeleteIrregularTest extends DbTestTableTester {
     private static final int SIZE = 10;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -30,7 +28,7 @@ class DbDeleteIrregularTest extends DbTestTableTester {
     }
 
     @Test
-    void closePsBeforeCloseRc() throws IOException {
+    void closePsBeforeCloseRc() throws Exception {
         int number = SIZE / 2;
         var sql = "delete from " + TEST //
                 + " where foo = " + number;

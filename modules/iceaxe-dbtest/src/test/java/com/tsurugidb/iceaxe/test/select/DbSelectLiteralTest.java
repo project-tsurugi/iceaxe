@@ -25,7 +25,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbSelectLiteralTest extends DbTestTableTester {
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectLiteralTest.class);
         LOG.debug("init start");
 
@@ -39,7 +39,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
     private static final String COLUMN = "c";
 
     @Test
-    void nullLiteral() throws IOException {
+    void nullLiteral() throws Exception {
         test("null", entity -> {
             assertNull(entity.getStringOrNull(COLUMN));
             assertNull(entity.getIntOrNull(COLUMN));
@@ -47,7 +47,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
     }
 
     @Test
-    void longLiteral() throws IOException {
+    void longLiteral() throws Exception {
         long literal = 1;
         test(Long.toString(literal), entity -> {
             assertEquals(literal, entity.getLong(COLUMN));
@@ -58,7 +58,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
     }
 
     @Test
-    void doubleLiteral() throws IOException {
+    void doubleLiteral() throws Exception {
         double literal = 12.3;
         test(Double.toString(literal), entity -> {
             assertEquals(literal, entity.getDouble(COLUMN));
@@ -68,7 +68,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
     }
 
     @Test
-    void doubleLiteralError() throws IOException {
+    void doubleLiteralError() throws Exception {
         var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
             test("1e2", entity -> {
             });
@@ -78,7 +78,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
     }
 
     @Test
-    void stringLiteral() throws IOException {
+    void stringLiteral() throws Exception {
         String literal = "abc";
         test(String.format("'%s'", literal), entity -> {
             assertEquals(literal, entity.getString(COLUMN));
@@ -87,7 +87,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void booleanLiteral(boolean literal) throws IOException {
+    void booleanLiteral(boolean literal) throws Exception {
         test(Boolean.toString(literal), entity -> {
             assertEquals(literal, entity.getBoolean(COLUMN));
         });
@@ -95,7 +95,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
 
     // TODO date literal
 
-    private static void test(String literal, Consumer<TsurugiResultEntity> assertion) throws IOException {
+    private static void test(String literal, Consumer<TsurugiResultEntity> assertion) throws IOException, InterruptedException {
         var sql = "select " + literal + " as " + COLUMN + " from " + TEST;
 
         var session = getSession();

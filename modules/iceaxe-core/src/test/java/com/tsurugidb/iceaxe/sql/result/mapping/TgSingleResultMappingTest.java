@@ -258,7 +258,7 @@ class TgSingleResultMappingTest {
         };
         try {
             assertEquals(expectedValue, actual.convert(record));
-        } catch (IOException | TsurugiTransactionException e) {
+        } catch (IOException | InterruptedException | TsurugiTransactionException e) {
             throw new RuntimeException(e);
         }
     }

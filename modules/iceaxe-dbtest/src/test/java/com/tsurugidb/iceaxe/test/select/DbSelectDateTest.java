@@ -20,7 +20,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbSelectDateTest extends DbTestTableTester {
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectDateTest.class);
         LOG.debug("init start");
 
@@ -31,7 +31,7 @@ class DbSelectDateTest extends DbTestTableTester {
         LOG.debug("init end");
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  value date" //
@@ -39,7 +39,7 @@ class DbSelectDateTest extends DbTestTableTester {
         executeDdl(getSession(), sql);
     }
 
-    private static void insertTable(int size) throws IOException {
+    private static void insertTable(int size) throws Exception {
         var variable = TgBindVariable.ofDate("value");
         var sql = "insert into " + TEST + "(value) values (" + variable + ")";
         var mapping = TgParameterMapping.of(variable);
@@ -59,7 +59,7 @@ class DbSelectDateTest extends DbTestTableTester {
     }
 
     @Test
-    void whereEq() throws IOException {
+    void whereEq() throws Exception {
         var variable = TgBindVariable.ofDate("value");
         var sql = "select * from " + TEST + " where value=" + variable;
         var mapping = TgParameterMapping.of(variable);
@@ -75,7 +75,7 @@ class DbSelectDateTest extends DbTestTableTester {
     }
 
     @Test
-    void whereRange() throws IOException {
+    void whereRange() throws Exception {
         var start = TgBindVariable.ofDate("start");
         var end = TgBindVariable.ofDate("end");
         var sql = "select * from " + TEST + " where " + start + "<=value and value<=" + end + " order by value";

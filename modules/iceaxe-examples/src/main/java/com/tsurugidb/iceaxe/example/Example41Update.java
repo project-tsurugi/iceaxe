@@ -15,7 +15,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example41Update {
 
-    void main() throws IOException {
+    void main() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
             var tm = session.createTransactionManager(setting);
@@ -27,19 +27,19 @@ public class Example41Update {
         }
     }
 
-    void update_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void update_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         try (var ps = session.createStatement("update TEST set BAR = 0")) {
             int count = tm.executeAndGetCount(ps);
             System.out.println(count);
         }
     }
 
-    void update_tm_sql(TsurugiTransactionManager tm) throws IOException {
+    void update_tm_sql(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         int count = tm.executeAndGetCount("update TEST set BAR = 0");
         System.out.println(count);
     }
 
-    void updateBindParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void updateBindParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var foo = TgBindVariable.ofInt("foo");
         var add = TgBindVariable.ofLong("add");
 
@@ -55,7 +55,7 @@ public class Example41Update {
         }
     }
 
-    void updateEntity(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void updateEntity(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "update TEST set" //
                 + " BAR = :bar" //
                 + " ZZZ = :zzz" //

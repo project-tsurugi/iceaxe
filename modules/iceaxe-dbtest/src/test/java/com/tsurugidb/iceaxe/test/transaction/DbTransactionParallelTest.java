@@ -35,7 +35,7 @@ class DbTransactionParallelTest extends DbTestTableTester {
     private static final int TEST2_SIZE = 2;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -46,7 +46,7 @@ class DbTransactionParallelTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTest2Table() throws IOException {
+    private static void createTest2Table() throws IOException, InterruptedException {
         var sql = CREATE_TEST_SQL.replace(TEST, TEST2);
         executeDdl(getSession(), sql);
     }
@@ -161,7 +161,7 @@ class DbTransactionParallelTest extends DbTestTableTester {
             this.done = true;
         }
 
-        private void runInTransaction(TsurugiTransaction tx2, TsurugiSqlPreparedStatement<TestEntity> ps2) throws IOException, TsurugiTransactionException {
+        private void runInTransaction(TsurugiTransaction tx2, TsurugiSqlPreparedStatement<TestEntity> ps2) throws IOException, TsurugiTransactionException, InterruptedException {
             for (int i = 0; i < TEST2_SIZE; i++) {
                 var entity = createTestEntity(i);
                 tx2.executeAndGetCount(ps2, entity);

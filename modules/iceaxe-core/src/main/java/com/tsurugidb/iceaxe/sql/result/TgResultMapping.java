@@ -27,7 +27,7 @@ public abstract class TgResultMapping<R> {
     public static final TgResultMapping<TsurugiResultEntity> DEFAULT = new TgResultMapping<>() {
 
         @Override
-        protected TsurugiResultEntity convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+        protected TsurugiResultEntity convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
             return TsurugiResultEntity.of(record);
         }
     };
@@ -95,5 +95,5 @@ public abstract class TgResultMapping<R> {
     }
 
     // internal
-    protected abstract R convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException;
+    protected abstract R convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException;
 }

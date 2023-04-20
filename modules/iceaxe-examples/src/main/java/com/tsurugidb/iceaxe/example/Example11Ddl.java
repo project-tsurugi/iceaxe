@@ -11,7 +11,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example11Ddl {
 
-    void main() throws IOException {
+    void main() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             // TsurugiTransactionManagerのexecuteDdlメソッドを使う場合、
             // TgTmSettingが指定されていなかったら、暗黙にLTXとして実行する。
@@ -26,7 +26,7 @@ public class Example11Ddl {
         }
     }
 
-    void createTable(TsurugiTransactionManager tm) throws IOException {
+    void createTable(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "create table TEST" //
                 + "(" //
                 + "  FOO int," // INT4
@@ -37,12 +37,12 @@ public class Example11Ddl {
         tm.executeDdl(sql);
     }
 
-    void dropTable(TsurugiTransactionManager tm) throws IOException {
+    void dropTable(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "drop table TEST";
         tm.executeDdl(sql);
     }
 
-    void existsTable(TsurugiSession session) throws IOException {
+    void existsTable(TsurugiSession session) throws IOException, InterruptedException {
         var metadataOpt = session.findTableMetadata("TEST");
         if (metadataOpt.isPresent()) {
             System.out.println("table exists");
@@ -51,7 +51,7 @@ public class Example11Ddl {
         }
     }
 
-    void getTableMetadata(TsurugiSession session) throws IOException {
+    void getTableMetadata(TsurugiSession session) throws IOException, InterruptedException {
         var metadataOpt = session.findTableMetadata("TEST");
         if (metadataOpt.isPresent()) {
             var metadata = metadataOpt.get();
@@ -62,7 +62,7 @@ public class Example11Ddl {
         }
     }
 
-    void dropAndCreateTable(TsurugiSession session) throws IOException {
+    void dropAndCreateTable(TsurugiSession session) throws IOException, InterruptedException {
         // DDLをLTXで実行する場合は、writePreserveには何も指定しなくてよい。
         var tm = session.createTransactionManager(TgTxOption.ofLTX());
         tm.execute(transaction -> {

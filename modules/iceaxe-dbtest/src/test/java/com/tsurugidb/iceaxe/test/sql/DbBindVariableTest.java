@@ -24,7 +24,7 @@ class DbBindVariableTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -35,21 +35,21 @@ class DbBindVariableTest extends DbTestTableTester {
     }
 
     @Test
-    void bindInsert() throws IOException {
+    void bindInsert() throws Exception {
         bindInsert(":foo", ":bar", ":zzz");
     }
 
     @Test
-    void bindColonlessInsert1() throws IOException {
+    void bindColonlessInsert1() throws Exception {
         bindInsert("f", "b", "z");
     }
 
     @Test
-    void bindColonlessInsert2() throws IOException {
+    void bindColonlessInsert2() throws Exception {
         bindInsert("foo", "bar", "zzz");
     }
 
-    private void bindInsert(String f, String b, String z) throws IOException {
+    private void bindInsert(String f, String b, String z) throws IOException, InterruptedException {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(" + f + ", " + b + ", " + z + ")";
@@ -69,7 +69,7 @@ class DbBindVariableTest extends DbTestTableTester {
     }
 
     @Test
-    void insertEntityWithBindVariable() throws IOException {
+    void insertEntityWithBindVariable() throws Exception {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var zzz = TgBindVariable.ofString("zzz");
@@ -92,21 +92,21 @@ class DbBindVariableTest extends DbTestTableTester {
     }
 
     @Test
-    void bindCSelect() throws IOException {
+    void bindCSelect() throws Exception {
         bindSelect(":bar");
     }
 
     @Test
-    void bindColonlessSelect1() throws IOException {
+    void bindColonlessSelect1() throws Exception {
         bindSelect("b");
     }
 
     @Test
-    void bindColonlessSelect2() throws IOException {
+    void bindColonlessSelect2() throws Exception {
         bindSelect("bar");
     }
 
-    private void bindSelect(String b) throws IOException {
+    private void bindSelect(String b) throws IOException, InterruptedException {
         var bar = TgBindVariable.ofInt(trimColumn(b));
         var sql = SELECT_SQL + " where foo=" + b;
         var parameterMapping = TgParameterMapping.of(bar);
@@ -135,16 +135,16 @@ class DbBindVariableTest extends DbTestTableTester {
     }
 
     @Test
-    void singleVariable_class() throws IOException {
+    void singleVariable_class() throws Exception {
         singleVariable(TgParameterMapping.of("foo", int.class));
     }
 
     @Test
-    void singleVariable_type() throws IOException {
+    void singleVariable_type() throws Exception {
         singleVariable(TgParameterMapping.of("foo", TgDataType.INT));
     }
 
-    private void singleVariable(TgParameterMapping<Integer> parameterMapping) throws IOException {
+    private void singleVariable(TgParameterMapping<Integer> parameterMapping) throws IOException, InterruptedException {
         var sql = SELECT_SQL + " where foo = :foo";
 
         var session = getSession();
@@ -159,7 +159,7 @@ class DbBindVariableTest extends DbTestTableTester {
     }
 
     @Test
-    void emptyBind() throws IOException {
+    void emptyBind() throws Exception {
         var parameterMapping = TgParameterMapping.of();
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -171,7 +171,7 @@ class DbBindVariableTest extends DbTestTableTester {
     }
 
     @Test
-    void emptyBindNull() throws IOException {
+    void emptyBindNull() throws Exception {
         var parameterMapping = TgParameterMapping.of();
         var session = getSession();
         var tm = createTransactionManagerOcc(session);

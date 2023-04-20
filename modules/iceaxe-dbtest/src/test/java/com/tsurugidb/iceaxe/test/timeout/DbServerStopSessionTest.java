@@ -25,7 +25,7 @@ public class DbServerStopSessionTest extends DbTimetoutTest {
     // サーバーが停止した場合に即座にエラーが返ることを確認するテスト
     @RepeatedTest(6)
     @Timeout(value = EXPECTED_TIMEOUT, unit = TimeUnit.SECONDS)
-    void serverStop() throws IOException {
+    void serverStop() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {

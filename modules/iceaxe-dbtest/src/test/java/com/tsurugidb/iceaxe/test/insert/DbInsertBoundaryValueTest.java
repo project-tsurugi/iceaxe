@@ -21,7 +21,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbInsertBoundaryValueTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -30,7 +30,7 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  int4 int," //
@@ -43,7 +43,7 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { Integer.MIN_VALUE, Integer.MAX_VALUE })
-    void insertInt4(int value) throws IOException {
+    void insertInt4(int value) throws Exception {
         String name = "int4";
         var variable = TgBindVariable.ofInt("value");
 
@@ -69,7 +69,7 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(longs = { Long.MIN_VALUE, Long.MAX_VALUE })
-    void insertInt8(long value) throws IOException {
+    void insertInt8(long value) throws Exception {
         String name = "int8";
         var variable = TgBindVariable.ofLong("value");
 
@@ -95,7 +95,7 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(floats = { Float.MIN_VALUE, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN })
-    void insertFloat4(float value) throws IOException {
+    void insertFloat4(float value) throws Exception {
         String name = "float4";
         var variable = TgBindVariable.ofFloat("value");
 
@@ -121,7 +121,7 @@ class DbInsertBoundaryValueTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(doubles = { Double.MIN_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN })
-    void insertFloat8(double value) throws IOException {
+    void insertFloat8(double value) throws Exception {
         String name = "float8";
         var variable = TgBindVariable.ofDouble("value");
 

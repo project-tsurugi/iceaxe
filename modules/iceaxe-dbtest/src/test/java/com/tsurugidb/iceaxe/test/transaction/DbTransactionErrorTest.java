@@ -30,7 +30,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -41,7 +41,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void notCommitRollback() throws IOException, TsurugiTransactionException {
+    void notCommitRollback() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(123, 456, 'abc')";
@@ -60,7 +60,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void writeToReadOnly() throws IOException {
+    void writeToReadOnly() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(123, 456, 'abc')";
@@ -77,7 +77,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void ltxWithoutWritePreserve() throws IOException {
+    void ltxWithoutWritePreserve() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(123, 456, 'abc')";
@@ -94,7 +94,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void limitOver() throws IOException {
+    void limitOver() throws Exception {
         try (var session = DbTestConnector.createSession()) {
             for (int i = 0; i < 1000; i++) {
                 LOG.trace("i={}", i);
@@ -112,7 +112,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAfterCommit() throws IOException, TsurugiTransactionException {
+    void executeAfterCommit() throws Exception {
         var session = getSession();
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
 
@@ -126,7 +126,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAfterRollback() throws IOException, TsurugiTransactionException {
+    void executeAfterRollback() throws Exception {
         var session = getSession();
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
 
@@ -140,7 +140,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAfterError() throws IOException, TsurugiTransactionException {
+    void executeAfterError() throws Exception {
         var session = getSession();
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             try (var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
@@ -156,7 +156,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void commitAfterClose() throws IOException {
+    void commitAfterClose() throws Exception {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
@@ -165,7 +165,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void rollbackAfterClose() throws IOException {
+    void rollbackAfterClose() throws Exception {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
@@ -174,7 +174,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void addChildAfterClose() throws IOException {
+    void addChildAfterClose() throws Exception {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
@@ -187,7 +187,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void getLowAfterFutureClose() throws IOException {
+    void getLowAfterFutureClose() throws Exception {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
@@ -198,7 +198,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void getLowAfterClose() throws IOException {
+    void getLowAfterClose() throws Exception {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         var lowTx = transaction.getLowTransaction();
@@ -207,7 +207,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAfterClose() throws IOException {
+    void executeAfterClose() throws Exception {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();

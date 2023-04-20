@@ -12,9 +12,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -25,7 +25,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbInsertDecimalTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -34,7 +34,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  value decimal(5,2)" //
@@ -47,7 +47,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "123", "1.01" })
-    void normal(String s) throws IOException {
+    void normal(String s) throws Exception {
         var value = new BigDecimal(s);
         var variable = TgBindVariable.ofDecimal(VNAME);
         var mapping = TgParameterMapping.of(variable);
@@ -66,7 +66,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "1234", "1.001" })
-    void outOfRange(String s) throws IOException {
+    void outOfRange(String s) throws Exception {
         var value = new BigDecimal(s);
         var variable = TgBindVariable.ofDecimal(VNAME);
         var mapping = TgParameterMapping.of(variable);
@@ -84,7 +84,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "1.1", "1.01", "1.001" })
-    void scale(String s) throws IOException {
+    void scale(String s) throws Exception {
         var value = new BigDecimal(s);
         var variable = TgBindVariable.ofDecimal(VNAME, 2); // TgVariable with scale
         var mapping = TgParameterMapping.of(variable);
@@ -102,7 +102,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         assertEquals(expected, actual);
     }
 
-    private BigDecimal selectValue() throws IOException {
+    private BigDecimal selectValue() throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery("select value from " + TEST)) {

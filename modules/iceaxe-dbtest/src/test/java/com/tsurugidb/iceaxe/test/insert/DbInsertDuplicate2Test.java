@@ -42,7 +42,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
     private static final String TEST2 = "test2";
 
     @BeforeEach
-    void beforeEach() throws IOException {
+    void beforeEach() throws Exception {
         LOG.debug("init start");
 
         dropTestTable();
@@ -55,7 +55,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
         LOG.debug("init end");
     }
 
-    private static void createTest2Table() throws IOException {
+    private static void createTest2Table() throws IOException, InterruptedException {
         var sql = "create table " + TEST2 //
                 + "(" //
                 + "  key1 int," //
@@ -165,7 +165,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
         }
 
         private void execute(TsurugiTransaction transaction, TsurugiSqlQuery<TsurugiResultEntity> maxPs, TsurugiSqlPreparedStatement<TestEntity> insertPs,
-                TsurugiSqlPreparedStatement<TgBindParameters> insert2Ps) throws IOException, TsurugiTransactionException {
+                TsurugiSqlPreparedStatement<TgBindParameters> insert2Ps) throws IOException, InterruptedException, TsurugiTransactionException {
             var max = transaction.executeAndFindRecord(maxPs).get();
             int foo = max.getInt("foo");
 

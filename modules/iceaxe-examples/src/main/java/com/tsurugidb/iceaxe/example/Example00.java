@@ -23,7 +23,7 @@ public class Example00 {
 
     private static final String TABLE_NAME = "TEST";
 
-    public static void main(String... args) throws IOException {
+    public static void main(String... args) throws IOException, InterruptedException {
         // @see Example01Connector
         var endpoint = URI.create("tcp://localhost:12345");
         var credential = new UsernamePasswordCredential("user", "password");
@@ -41,7 +41,7 @@ public class Example00 {
     /**
      * @see Example11Ddl
      */
-    private static void executeCreateTable(TsurugiSession session) throws IOException {
+    private static void executeCreateTable(TsurugiSession session) throws IOException, InterruptedException {
         // DDLの場合は、LTXであってもwritePreserveを指定する必要は無い。
         var setting = TgTmSetting.of(TgTxOption.ofLTX());
         var tm = session.createTransactionManager(setting);
@@ -63,7 +63,7 @@ public class Example00 {
     /**
      * @see Example21Insert
      */
-    private static void executeInsert(TsurugiSession session) throws IOException {
+    private static void executeInsert(TsurugiSession session) throws IOException, InterruptedException {
         // 更新系のSQLをLTXで実行する場合は、更新対象のテーブル名をwritePreserveに指定する必要がある。
         var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX(TABLE_NAME));
         var tm = session.createTransactionManager(setting);
@@ -87,7 +87,7 @@ public class Example00 {
     /**
      * @see Example41Update
      */
-    private static void executeUpdate(TsurugiSession session) throws IOException {
+    private static void executeUpdate(TsurugiSession session) throws IOException, InterruptedException {
         // 更新系のSQLをLTXで実行する場合は、更新対象のテーブル名をwritePreserveに指定する必要がある。
         var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX(TABLE_NAME));
         var tm = session.createTransactionManager(setting);
@@ -110,7 +110,7 @@ public class Example00 {
     /**
      * @see Example31Select
      */
-    private static void executeSelect(TsurugiSession session) throws IOException {
+    private static void executeSelect(TsurugiSession session) throws IOException, InterruptedException {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
         var tm = session.createTransactionManager(setting);
 

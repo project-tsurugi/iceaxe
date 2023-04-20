@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -20,7 +18,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbInsertExplainTest extends DbTestTableTester {
 
     @BeforeAll
-    static void beforeAll(TestInfo info) throws IOException {
+    static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbInsertExplainTest.class);
         LOG.debug("{} init start", info.getDisplayName());
 

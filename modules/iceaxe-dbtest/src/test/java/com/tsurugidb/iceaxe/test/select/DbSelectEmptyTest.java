@@ -23,7 +23,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectEmptyTest.class);
         LOG.debug("init start");
 
@@ -34,7 +34,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
     }
 
     @Test
-    void selectEmpty() throws IOException {
+    void selectEmpty() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -48,7 +48,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
     }
 
     @Test
-    void selectEmptySameTx() throws IOException {
+    void selectEmptySameTx() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -65,11 +65,11 @@ class DbSelectEmptyTest extends DbTestTableTester {
     }
 
     @Test
-    void selectCount() throws IOException {
+    void selectCount() throws Exception {
         selectCount("");
     }
 
-    void selectCount(String where) throws IOException {
+    void selectCount(String where) throws IOException, InterruptedException {
         var sql = "select count(*) from " + TEST + where;
         var resultMapping = TgResultMapping.of(record -> record.nextInt());
 
@@ -82,11 +82,11 @@ class DbSelectEmptyTest extends DbTestTableTester {
     }
 
     @Test
-    void selectSum() throws IOException {
+    void selectSum() throws Exception {
         selectSum("");
     }
 
-    void selectSum(String where) throws IOException {
+    void selectSum(String where) throws IOException, InterruptedException {
         var sql = "select sum(bar) as sum, min(zzz) as zzz from " + TEST + where;
 
         var session = getSession();
@@ -99,11 +99,11 @@ class DbSelectEmptyTest extends DbTestTableTester {
     }
 
     @Test
-    void selectKeyCount() throws IOException {
+    void selectKeyCount() throws Exception {
         selectKeyCount("");
     }
 
-    void selectKeyCount(String where) throws IOException {
+    void selectKeyCount(String where) throws IOException, InterruptedException {
         var sql = "select foo, count(*) from " + TEST //
                 + where //
                 + " group by foo";
@@ -117,11 +117,11 @@ class DbSelectEmptyTest extends DbTestTableTester {
     }
 
     @Test
-    void selectKeySum() throws IOException {
+    void selectKeySum() throws Exception {
         selectKeySum("");
     }
 
-    void selectKeySum(String where) throws IOException {
+    void selectKeySum(String where) throws IOException, InterruptedException {
         var sql = "select foo, sum(bar) as sum, min(zzz) as zzz from " + TEST //
                 + where //
                 + " group by foo";

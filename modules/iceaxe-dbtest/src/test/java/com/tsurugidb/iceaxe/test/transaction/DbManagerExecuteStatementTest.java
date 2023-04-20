@@ -1,13 +1,10 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
@@ -19,7 +16,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     private static final int SIZE = 2;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -38,7 +35,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount_sql() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount_sql() throws Exception {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
@@ -49,7 +46,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount_setting_sql() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount_setting_sql() throws Exception {
         var session = getSession();
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
@@ -61,7 +58,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount_sql_parameter() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount_sql_parameter() throws Exception {
         var entity = createTestEntity(SIZE);
 
         var session = getSession();
@@ -74,7 +71,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount_setting_sql_parameter() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount_setting_sql_parameter() throws Exception {
         var entity = createTestEntity(SIZE);
 
         var session = getSession();
@@ -88,7 +85,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount_ps() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount_ps() throws Exception {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
@@ -102,7 +99,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount_setting_ps() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount_setting_ps() throws Exception {
         var session = getSession();
         var tm = session.createTransactionManager();
         var setting = TgTmSetting.of(TgTxOption.ofOCC());
@@ -117,7 +114,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount_ps_parameter() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount_ps_parameter() throws Exception {
         var entity = createTestEntity(SIZE);
 
         var session = getSession();
@@ -133,7 +130,7 @@ class DbManagerExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount_setting_ps_parameter() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount_setting_ps_parameter() throws Exception {
         var entity = createTestEntity(SIZE);
 
         var session = getSession();

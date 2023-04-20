@@ -26,7 +26,7 @@ import com.tsurugidb.iceaxe.test.util.TestEntity;
 class DbInsertTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -37,7 +37,7 @@ class DbInsertTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertConstant(boolean columns) throws IOException {
+    void insertConstant(boolean columns) throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
@@ -56,7 +56,7 @@ class DbInsertTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByBindVariables(boolean columns) throws IOException {
+    void insertByBindVariables(boolean columns) throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
@@ -84,7 +84,7 @@ class DbInsertTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByBind(boolean columns) throws IOException {
+    void insertByBind(boolean columns) throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var foo = TgBindVariable.ofInt("foo");
@@ -112,7 +112,7 @@ class DbInsertTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByEntityMapping(boolean columns) throws IOException {
+    void insertByEntityMapping(boolean columns) throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var sql = "insert into " + TEST //
@@ -135,7 +135,7 @@ class DbInsertTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void insertByEntityConverter(boolean columns) throws IOException {
+    void insertByEntityConverter(boolean columns) throws Exception {
         var variables = TgBindVariables.of().addInt("foo").addLong("bar").addString("zzz");
         var sql = "insert into " + TEST //
                 + (columns ? " (" + TEST_COLUMNS + ")" : "") //
@@ -156,7 +156,7 @@ class DbInsertTest extends DbTestTableTester {
     }
 
     @Test
-    void insertMany() throws IOException {
+    void insertMany() throws Exception {
         var entityList = List.of( //
                 new TestEntity(123, 456, "abc"), //
                 new TestEntity(234, 789, "def"));
@@ -184,16 +184,16 @@ class DbInsertTest extends DbTestTableTester {
     }
 
     @Test
-    void insertResultCheck() throws IOException {
+    void insertResultCheck() throws Exception {
         insertResultCheck(true);
     }
 
     @Test
-    void insertResultNoCheck() throws IOException {
+    void insertResultNoCheck() throws Exception {
         insertResultCheck(false);
     }
 
-    private void insertResultCheck(boolean resultCheck) throws IOException {
+    private void insertResultCheck(boolean resultCheck) throws IOException, InterruptedException {
         int size = 100;
 
         var session = getSession();
@@ -222,7 +222,7 @@ class DbInsertTest extends DbTestTableTester {
     }
 
     @Test
-    void insertPart() throws IOException {
+    void insertPart() throws Exception {
         int key = 1;
         var foo = TgBindVariable.ofInt("foo");
         var sql = "insert into " + TEST + "(foo) values(" + foo + ")";

@@ -19,7 +19,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 public class DbTimeoutRsCloseTest extends DbTimetoutTest {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -29,7 +29,7 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutDefault() throws IOException {
+    void timeoutDefault() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -39,7 +39,7 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSpecified() throws IOException {
+    void timeoutSpecified() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -49,7 +49,7 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSet() throws IOException {
+    void timeoutSet() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifyQueryResult(TsurugiQueryResult<?> result) {

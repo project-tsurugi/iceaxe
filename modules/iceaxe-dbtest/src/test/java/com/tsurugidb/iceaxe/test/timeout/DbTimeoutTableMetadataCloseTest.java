@@ -21,7 +21,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class DbTimeoutTableMetadataCloseTest extends DbTimetoutTest {
 
     @Test
-    void timeoutDefault() throws IOException {
+    void timeoutDefault() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -31,7 +31,7 @@ public class DbTimeoutTableMetadataCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSpecified() throws IOException {
+    void timeoutSpecified() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {

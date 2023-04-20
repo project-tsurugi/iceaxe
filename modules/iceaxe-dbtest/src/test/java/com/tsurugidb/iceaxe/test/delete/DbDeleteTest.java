@@ -30,7 +30,7 @@ class DbDeleteTest extends DbTestTableTester {
     static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -41,7 +41,7 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void deleteAll() throws IOException {
+    void deleteAll() throws Exception {
         var sql = "delete from " + TEST;
 
         var session = getSession();
@@ -55,7 +55,7 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void deleteConstant() throws IOException {
+    void deleteConstant() throws Exception {
         int number = 2;
         var sql = "delete from " + TEST //
                 + " where foo = " + number;
@@ -71,7 +71,7 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void deleteByBind() throws IOException {
+    void deleteByBind() throws Exception {
         int number = 2;
 
         var foo = TgBindVariable.ofInt("foo");
@@ -91,7 +91,7 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void delete2SeqTx() throws IOException {
+    void delete2SeqTx() throws Exception {
         int number = 2;
         var sql = "delete from " + TEST //
                 + " where foo = " + number;
@@ -110,7 +110,7 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void delete2SameTx() throws IOException {
+    void delete2SameTx() throws Exception {
         int number = 2;
         var sql = "delete from " + TEST //
                 + " where foo = " + number;
@@ -133,7 +133,7 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void delete2Range() throws IOException {
+    void delete2Range() throws Exception {
         var sql1 = "delete from " + TEST + " where 1 <= foo and foo <= 2";
         var sql2 = "delete from " + TEST + " where 2 <= foo and foo <= 3";
 
@@ -158,7 +158,7 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void deleteInsert() throws IOException {
+    void deleteInsert() throws Exception {
         int number = 2;
         var sql = "delete from " + TEST //
                 + " where foo = " + number;
@@ -184,20 +184,20 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void deleteInsertDeleteExists() throws IOException {
+    void deleteInsertDeleteExists() throws Exception {
         int number = 2;
         assert number < SIZE;
         deleteInsertDelete(number, 1);
     }
 
     @Test
-    void deleteInsertDeleteNotExists() throws IOException {
+    void deleteInsertDeleteNotExists() throws Exception {
         int number = 123;
         assert number >= SIZE;
         deleteInsertDelete(number, 0);
     }
 
-    private void deleteInsertDelete(int number, int expected1) throws IOException {
+    private void deleteInsertDelete(int number, int expected1) throws IOException, InterruptedException {
         var sql = "delete from " + TEST //
                 + " where foo = " + number;
 
@@ -226,7 +226,7 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    void insertDelete() throws IOException {
+    void insertDelete() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
         var sql = "delete from " + TEST + " where foo = " + entity.getFoo();
 
@@ -251,7 +251,7 @@ class DbDeleteTest extends DbTestTableTester {
 
     @Test
     @Disabled // FIXME issue106 2023-03-23 retry-over
-    void insertDeleteInsert() throws IOException {
+    void insertDeleteInsert() throws Exception {
         var entity1 = new TestEntity(123, 456, "abc");
         var entity2 = new TestEntity(entity1.getFoo(), 999, "zzz");
         var sql = "delete from " + TEST + " where foo = " + entity1.getFoo();
@@ -285,7 +285,7 @@ class DbDeleteTest extends DbTestTableTester {
         assertEqualsTestTable(expectedList);
     }
 
-    private void assertNothingInTx(TsurugiSession session, TsurugiTransaction transaction, int foo) throws IOException, TsurugiTransactionException {
+    private void assertNothingInTx(TsurugiSession session, TsurugiTransaction transaction, int foo) throws IOException, InterruptedException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo = " + foo;
         try (var ps = session.createQuery(sql)) {
             var actual = transaction.executeAndFindRecord(ps);
@@ -293,7 +293,7 @@ class DbDeleteTest extends DbTestTableTester {
         }
     }
 
-    private void assertEqualsInTx(TsurugiSession session, TsurugiTransaction transaction, TestEntity expected) throws IOException, TsurugiTransactionException {
+    private void assertEqualsInTx(TsurugiSession session, TsurugiTransaction transaction, TestEntity expected) throws IOException, InterruptedException, TsurugiTransactionException {
         var sql = SELECT_SQL + " where foo = " + expected.getFoo();
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
             var actual = transaction.executeAndFindRecord(ps).get();
@@ -301,7 +301,7 @@ class DbDeleteTest extends DbTestTableTester {
         }
     }
 
-    private void assertEqualsDelete(int... numbers) throws IOException {
+    private void assertEqualsDelete(int... numbers) throws IOException, InterruptedException {
         var deleteSet = Arrays.stream(numbers).boxed().collect(Collectors.toSet());
         var expectedList = new ArrayList<TestEntity>(SIZE - 1);
         for (int i = 0; i < SIZE; i++) {

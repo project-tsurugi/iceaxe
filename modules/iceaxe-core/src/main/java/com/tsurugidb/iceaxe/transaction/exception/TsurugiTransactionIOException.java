@@ -48,7 +48,7 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
     public String getTransactionId() {
         try {
             return transaction.getTransactionId();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             return null;
         }
     }

@@ -34,9 +34,10 @@ public class TsurugiResultEntity {
      * @param record Tsurugi Result Record
      * @return entity
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public static TsurugiResultEntity of(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    public static TsurugiResultEntity of(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         var entity = new TsurugiResultEntity();
         entity.setConvertUtil(record.getConvertUtil());
         while (record.moveCurrentColumnNext()) {

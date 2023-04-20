@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
@@ -30,7 +30,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbManagerCounterTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -41,7 +41,7 @@ class DbManagerCounterTest extends DbTestTableTester {
     }
 
     @Test
-    void simpleCounter() throws IOException {
+    void simpleCounter() throws Exception {
         var session = getSession();
         var tm = session.createTransactionManager();
 
@@ -72,7 +72,7 @@ class DbManagerCounterTest extends DbTestTableTester {
     }
 
     @Test
-    void labelCounter() throws IOException {
+    void labelCounter() throws Exception {
         var session = getSession();
         var tm = session.createTransactionManager();
 
@@ -178,7 +178,7 @@ class DbManagerCounterTest extends DbTestTableTester {
     }
 
     @Test
-    void mix() throws IOException {
+    void mix() throws Exception {
         var session = getSession();
         var tm = session.createTransactionManager();
 
@@ -192,7 +192,7 @@ class DbManagerCounterTest extends DbTestTableTester {
         assertLabelCounter(labelCounter);
     }
 
-    private void execute(TsurugiTransactionManager tm) throws IOException {
+    private void execute(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var setting1 = TgTmSetting.of(TgTxOption.ofLTX(TEST).label("tx1"));
         var setting2 = TgTmSetting.ofAlways(TgTxOption.ofOCC().label("tx2"), 3);
         var setting3 = TgTmSetting.ofAlways(TgTxOption.ofOCC().label("tran1"));

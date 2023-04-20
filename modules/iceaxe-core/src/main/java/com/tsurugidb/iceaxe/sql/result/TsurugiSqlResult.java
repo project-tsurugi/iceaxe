@@ -44,7 +44,7 @@ public abstract class TsurugiSqlResult implements AutoCloseable {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void close() throws IOException, TsurugiTransactionException {
+    public void close() throws IOException, InterruptedException, TsurugiTransactionException {
         ownerTransaction.removeChild(this);
     }
 }

@@ -22,7 +22,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 class TsurugiTransactionTest {
 
     @Test
-    void getLowTransactionError() throws IOException {
+    void getLowTransactionError() throws Exception {
         var session = new TsurugiSession(null, TgSessionOption.of());
         var future = new FutureResponse<Transaction>() {
             @Override

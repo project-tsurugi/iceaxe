@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -20,7 +18,7 @@ import com.tsurugidb.sql.proto.SqlCommon;
 class DbTableMetadataTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -29,7 +27,7 @@ class DbTableMetadataTest extends DbTestTableTester {
     }
 
     @Test
-    void found() throws IOException {
+    void found() throws Exception {
         var session = getSession();
         {
             var sql = "create table " + TEST //
@@ -86,7 +84,7 @@ class DbTableMetadataTest extends DbTestTableTester {
     }
 
     @Test
-    void notFound() throws IOException {
+    void notFound() throws Exception {
         var session = getSession();
         var metadataOpt = session.findTableMetadata(TEST);
         assertTrue(metadataOpt.isEmpty());

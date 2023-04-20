@@ -1,14 +1,11 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -19,7 +16,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
     private static final int SIZE = 2;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -30,7 +27,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeStatement() throws IOException, TsurugiTransactionException {
+    void executeStatement() throws Exception {
         var entity = createTestEntity(SIZE);
         var sql = "insert into " + TEST //
                 + " (" + TEST_COLUMNS + ")" //
@@ -50,7 +47,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executePreparedStatement() throws IOException, TsurugiTransactionException {
+    void executePreparedStatement() throws Exception {
         var session = getSession();
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
@@ -66,7 +63,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executeAndGetCount() throws IOException, TsurugiTransactionException {
+    void executeAndGetCount() throws Exception {
         var entity = createTestEntity(SIZE);
         var sql = "insert into " + TEST //
                 + " (" + TEST_COLUMNS + ")" //
@@ -86,7 +83,7 @@ class DbTransactionExecuteStatementTest extends DbTestTableTester {
     }
 
     @Test
-    void executePreparedAndGetCount() throws IOException, TsurugiTransactionException {
+    void executePreparedAndGetCount() throws Exception {
         var session = getSession();
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {

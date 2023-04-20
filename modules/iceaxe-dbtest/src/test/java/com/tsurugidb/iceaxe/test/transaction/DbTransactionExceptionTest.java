@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -28,7 +26,7 @@ class DbTransactionExceptionTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -39,7 +37,7 @@ class DbTransactionExceptionTest extends DbTestTableTester {
     }
 
     @Test
-    void insertConstant() throws IOException, TsurugiTransactionException {
+    void insertConstant() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(1, 456, 'abc')";
@@ -67,7 +65,7 @@ class DbTransactionExceptionTest extends DbTestTableTester {
     }
 
     @Test
-    void insertParameter() throws IOException, TsurugiTransactionException {
+    void insertParameter() throws Exception {
         var entity = new TestEntity(1, 456, "abc");
 
         var session = getSession();
@@ -93,7 +91,7 @@ class DbTransactionExceptionTest extends DbTestTableTester {
     }
 
     @Test
-    void insertResult() throws IOException, TsurugiTransactionException {
+    void insertResult() throws Exception {
         var entity = new TestEntity(1, 456, "abc");
 
         var session = getSession();

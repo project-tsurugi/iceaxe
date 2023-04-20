@@ -23,7 +23,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbInsertCharTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -32,7 +32,7 @@ class DbInsertCharTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  foo int primary key," //
@@ -43,7 +43,7 @@ class DbInsertCharTest extends DbTestTableTester {
     }
 
     @Test
-    void insertNull() throws IOException {
+    void insertNull() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -57,11 +57,11 @@ class DbInsertCharTest extends DbTestTableTester {
     }
 
     @Test
-    void insertOK() throws IOException {
+    void insertOK() throws Exception {
         insertOK(DbInsertCharTest::padTail);
     }
 
-    void insertOK(Function<String, String> pad) throws IOException {
+    void insertOK(Function<String, String> pad) throws Exception {
         var list = List.of("", "0123456789", "あいう", "あいう0", "\0\1\uffff");
 
         var session = getSession();
@@ -84,7 +84,7 @@ class DbInsertCharTest extends DbTestTableTester {
     }
 
     @Test
-    void insertError() throws IOException {
+    void insertError() throws Exception {
         // UTF-8でのバイト数がcharのサイズを超えるとエラー
         var list = List.of("0123456789A", "あいうえ", "あいう01");
 
@@ -106,11 +106,11 @@ class DbInsertCharTest extends DbTestTableTester {
     }
 
     @Test
-    void insertNulChar() throws IOException {
+    void insertNulChar() throws Exception {
         insertNulChar(DbInsertCharTest::padTail);
     }
 
-    void insertNulChar(Function<String, String> pad) throws IOException {
+    void insertNulChar(Function<String, String> pad) throws Exception {
         int size = 6;
         var session = getSession();
         var tm = createTransactionManagerOcc(session);

@@ -21,7 +21,7 @@ class DbUpdate2Test extends DbTestTableTester {
     private static final int SIZE = 10;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -31,7 +31,7 @@ class DbUpdate2Test extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  pk int primary key," //
@@ -41,7 +41,7 @@ class DbUpdate2Test extends DbTestTableTester {
         executeDdl(getSession(), sql);
     }
 
-    private static void insertTable() throws IOException {
+    private static void insertTable() throws IOException, InterruptedException {
         var sql = "insert into " + TEST //
                 + "(pk, value1, value2)" //
                 + "values(:pk, :value1, :value2)";
@@ -72,7 +72,7 @@ class DbUpdate2Test extends DbTestTableTester {
     }
 
     @Test
-    void update() throws IOException {
+    void update() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  value1 = value1 + 1," //
@@ -102,7 +102,7 @@ class DbUpdate2Test extends DbTestTableTester {
     }
 
     @Test
-    void swap() throws IOException {
+    void swap() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  value1 = value2," //

@@ -29,7 +29,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -39,7 +39,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         // no primary key
         var sql = "create table " + TEST //
                 + "(" //
@@ -51,7 +51,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void metadata() throws IOException {
+    void metadata() throws Exception {
         var session = getSession();
         var metadata = session.findTableMetadata(TEST).get();
         var actualSet = metadata.getLowColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
@@ -60,7 +60,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void explain() throws IOException {
+    void explain() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -73,7 +73,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void selectKey() throws IOException {
+    void selectKey() throws Exception {
         var sql = "select " + GENERATED_KEY + " from " + TEST;
 
         var session = getSession();
@@ -90,7 +90,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void selectKeyAs() throws IOException {
+    void selectKeyAs() throws Exception {
         var sql = "select " + GENERATED_KEY + " as k from " + TEST;
 
         var session = getSession();
@@ -107,7 +107,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void selectKeyExpression() throws IOException {
+    void selectKeyExpression() throws Exception {
         var sql = "select " + GENERATED_KEY + "+0 from " + TEST + " order by " + GENERATED_KEY;
 
         var session = getSession();
@@ -124,7 +124,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void selectGroupBy0() throws IOException {
+    void selectGroupBy0() throws Exception {
         var sql = "select " + GENERATED_KEY + "+0, count(*) as c from " + TEST + " group by " + GENERATED_KEY;
 
         var session = getSession();
@@ -141,7 +141,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void selectGroupBy() throws IOException {
+    void selectGroupBy() throws Exception {
         var sql = "select " + GENERATED_KEY + ", count(*) as c from " + TEST + " group by " + GENERATED_KEY;
 
         var session = getSession();
@@ -158,7 +158,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void update() throws IOException {
+    void update() throws Exception {
         int key = 2;
         var sql = "update " + TEST + " set bar=11 where " + GENERATED_KEY + "=" + key;
 
@@ -175,7 +175,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void updateKey() throws IOException {
+    void updateKey() throws Exception {
         int key = 2;
         var sql = "update " + TEST + " set " + GENERATED_KEY + "=1, bar=11 where " + GENERATED_KEY + "=" + key;
 
@@ -192,7 +192,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     }
 
     @Test
-    void selectAsGeneratedRowid() throws IOException {
+    void selectAsGeneratedRowid() throws Exception {
         dropTestTable();
         createTestTable();
         insertTestTable(SIZE);

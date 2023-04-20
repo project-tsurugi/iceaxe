@@ -68,7 +68,7 @@ public class TestEntity {
         return "TestEntity(foo=" + foo + ", bar=" + bar + ", zzz=" + zzz + ")";
     }
 
-    public static TestEntity of(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    public static TestEntity of(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         var entity = new TestEntity();
         entity.setFoo(record.getIntOrNull("foo"));
         entity.setBar(record.getLongOrNull("bar"));

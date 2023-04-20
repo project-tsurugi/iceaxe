@@ -9,14 +9,14 @@ import com.tsurugidb.iceaxe.util.function.TsurugiTransactionFunction;
 
 /**
  * Tsurugi Result Mapping
- * 
+ *
  * @param <R> result type
  */
 public class TgConverterResultMapping<R> extends TgResultMapping<R> {
 
     /**
      * create Result Mapping
-     * 
+     *
      * @param <R>             result type
      * @param resultConverter converter from TsurugiResultRecord to R
      * @return Result Mapping
@@ -29,7 +29,7 @@ public class TgConverterResultMapping<R> extends TgResultMapping<R> {
 
     /**
      * Tsurugi Result Mapping
-     * 
+     *
      * @param resultConverter converter from TsurugiResultRecord to R
      */
     public TgConverterResultMapping(TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter) {
@@ -37,7 +37,7 @@ public class TgConverterResultMapping<R> extends TgResultMapping<R> {
     }
 
     @Override
-    protected R convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    protected R convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         return resultConverter.apply(record);
     }
 }

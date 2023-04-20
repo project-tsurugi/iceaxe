@@ -3,8 +3,6 @@ package com.tsurugidb.iceaxe.test.update;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -23,7 +21,7 @@ class DbUpdateTest extends DbTestTableTester {
     private static final int SIZE = 10;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -34,7 +32,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updateAll() throws IOException {
+    void updateAll() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  bar = 0," //
@@ -56,7 +54,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updateAllNull() throws IOException {
+    void updateAllNull() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  bar = null," //
@@ -78,7 +76,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updateWhere() throws IOException {
+    void updateWhere() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  bar = 0," //
@@ -108,7 +106,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updateNothing() throws IOException {
+    void updateNothing() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  bar = 0," //
@@ -126,7 +124,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updateEntity() throws IOException {
+    void updateEntity() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  bar = :bar," //
@@ -161,7 +159,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updateExpression() throws IOException {
+    void updateExpression() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  bar = bar + 1";
@@ -184,7 +182,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updatePK() throws IOException {
+    void updatePK() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  foo = foo + 1"; // primary key
@@ -209,7 +207,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updatePKNoChange() throws IOException {
+    void updatePKNoChange() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  foo = foo"; // primary key
@@ -225,7 +223,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void insertUpdate() throws IOException {
+    void insertUpdate() throws Exception {
         var insertEntity = new TestEntity(123, 456, "abc");
         var sql = "update " + TEST //
                 + " set" //
@@ -273,7 +271,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void insertUpdateNoCheck() throws IOException {
+    void insertUpdateNoCheck() throws Exception {
         var insertEntity = new TestEntity(123, 456, "abc");
         var sql = "update " + TEST //
                 + " set" //
@@ -320,7 +318,7 @@ class DbUpdateTest extends DbTestTableTester {
     }
 
     @Test
-    void updateUpdate() throws IOException {
+    void updateUpdate() throws Exception {
         int foo = 1;
         var bar = TgBindVariable.ofLong("bar");
         var sql = "update " + TEST //

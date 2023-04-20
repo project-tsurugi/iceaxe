@@ -122,7 +122,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         }
     }
 
-    protected final synchronized void checkLowResult() throws IOException, TsurugiTransactionException {
+    protected final synchronized void checkLowResult() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.lowResultFuture != null) {
             LOG.trace("lowResult get start");
             Throwable occurred = null;
@@ -151,9 +151,10 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      *
      * @return the row count for SQL Data Manipulation Language (DML) statements
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public int getUpdateCount() throws IOException, TsurugiTransactionException {
+    public int getUpdateCount() throws IOException, InterruptedException, TsurugiTransactionException {
         checkLowResult();
         // FIXME 更新件数取得
         // 件数を保持し、何度呼ばれても返せるようにする
@@ -163,7 +164,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     }
 
     @Override
-    public void close() throws IOException, TsurugiTransactionException {
+    public void close() throws IOException, InterruptedException, TsurugiTransactionException {
         LOG.trace("statementResult close start");
 
         Throwable occurred = null;

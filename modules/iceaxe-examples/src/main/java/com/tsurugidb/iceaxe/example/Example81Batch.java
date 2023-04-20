@@ -16,14 +16,14 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example81Batch {
 
-    void main() throws IOException {
+    void main() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             batch1(session, List.of(/* entities */));
             batch2(session, List.of(/* entities */));
         }
     }
 
-    void batch1(TsurugiSession session, List<TestEntity> entityList) throws IOException {
+    void batch1(TsurugiSession session, List<TestEntity> entityList) throws IOException, InterruptedException {
         var deleteSql = "delete from TEST where FOO=:foo";
         var deleteMapping = TgParameterMapping.of(TestEntity.class) //
                 .addInt("foo", TestEntity::getFoo); // primary key
@@ -49,7 +49,7 @@ public class Example81Batch {
         }
     }
 
-    void batch2(TsurugiSession session, List<TestEntity> entityList) throws IOException {
+    void batch2(TsurugiSession session, List<TestEntity> entityList) throws IOException, InterruptedException {
         try (var batch = new Batch2(session)) {
             batch.execute(entityList);
         }
@@ -61,7 +61,7 @@ public class Example81Batch {
         private final TsurugiSqlPreparedStatement<TestEntity> insertPs;
         private final TsurugiTransactionManager transactionManager;
 
-        public Batch2(TsurugiSession session) throws IOException {
+        public Batch2(TsurugiSession session) throws IOException, InterruptedException {
             var deleteSql = "delete from TEST where FOO=:foo";
             var deleteMapping = TgParameterMapping.of(TestEntity.class) //
                     .addInt("foo", TestEntity::getFoo); // primary key
@@ -78,7 +78,7 @@ public class Example81Batch {
             this.transactionManager = session.createTransactionManager(setting);
         }
 
-        public void execute(List<TestEntity> entityList) throws IOException {
+        public void execute(List<TestEntity> entityList) throws IOException, InterruptedException {
             transactionManager.execute(transaction -> {
                 for (var entity : entityList) {
                     transaction.executeAndGetCount(deletePs, entity);

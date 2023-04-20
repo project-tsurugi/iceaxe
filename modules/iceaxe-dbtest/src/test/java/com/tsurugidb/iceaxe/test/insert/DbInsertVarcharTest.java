@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.insert;
 
-import java.io.IOException;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +14,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbInsertVarcharTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -25,22 +24,22 @@ class DbInsertVarcharTest extends DbTestTableTester {
     }
 
     @Test
-    void insertNull() throws IOException {
+    void insertNull() throws Exception {
         new DbInsertCharTest().insertNull();
     }
 
     @Test
-    void insertOK() throws IOException {
+    void insertOK() throws Exception {
         new DbInsertCharTest().insertOK(Function.identity());
     }
 
     @Test
-    void insertError() throws IOException {
+    void insertError() throws Exception {
         new DbInsertCharTest().insertError();
     }
 
     @Test
-    void insertNulChar() throws IOException {
+    void insertNulChar() throws Exception {
         new DbInsertCharTest().insertNulChar(Function.identity());
     }
 }

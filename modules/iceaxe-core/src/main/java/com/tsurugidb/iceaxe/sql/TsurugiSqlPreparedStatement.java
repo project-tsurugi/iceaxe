@@ -70,10 +70,11 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      * @param parameter   SQL parameter
      * @return SQL result
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see TsurugiTransaction#executeStatement(TsurugiSqlPreparedStatement, P)
      */
-    public TsurugiStatementResult execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
+    public TsurugiStatementResult execute(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();
 
         LOG.trace("execute start");
@@ -104,10 +105,11 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      * @param parameter   SQL parameter
      * @return row count
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
+    public int executeAndGetCount(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         return transaction.executeAndGetCount(this, parameter);
     }
 
@@ -118,9 +120,10 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      * @param parameter SQL parameter
      * @return row count
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransactionManager tm, P parameter) throws IOException {
+    public int executeAndGetCount(TsurugiTransactionManager tm, P parameter) throws IOException, InterruptedException {
         return tm.executeAndGetCount(this, parameter);
     }
 
@@ -132,9 +135,10 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      * @param parameter SQL parameter
      * @return row count
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException {
+    public int executeAndGetCount(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException, InterruptedException {
         return tm.executeAndGetCount(setting, this, parameter);
     }
 }

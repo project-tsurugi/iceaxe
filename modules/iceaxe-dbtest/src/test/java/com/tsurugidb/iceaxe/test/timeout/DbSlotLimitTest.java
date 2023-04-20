@@ -27,7 +27,7 @@ public class DbSlotLimitTest extends DbTimetoutTest {
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -37,7 +37,7 @@ public class DbSlotLimitTest extends DbTimetoutTest {
     }
 
     @Test
-    void slotLimit() throws IOException {
+    void slotLimit() throws Exception {
         testTimeout(new TimeoutModifier());
     }
 
@@ -79,7 +79,8 @@ public class DbSlotLimitTest extends DbTimetoutTest {
         }
     }
 
-    private void execute(TsurugiTransaction transaction, TsurugiSqlQuery<TsurugiResultEntity> ps, List<TsurugiQueryResult<?>> resultList) throws IOException, TsurugiTransactionException {
+    private void execute(TsurugiTransaction transaction, TsurugiSqlQuery<TsurugiResultEntity> ps, List<TsurugiQueryResult<?>> resultList)
+            throws IOException, InterruptedException, TsurugiTransactionException {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
             LOG.trace("i={}", i);
             try {

@@ -1,14 +1,13 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
-import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
+import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -59,7 +58,7 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
 
             var connector = getTsurugiConnector(pipeServer);
             var session = createSession(pipeServer, connector, modifier);
-            Closeable sessionCloser = () -> {
+            AutoCloseable sessionCloser = () -> {
                 if (closeSession) {
                     session.close();
                 }

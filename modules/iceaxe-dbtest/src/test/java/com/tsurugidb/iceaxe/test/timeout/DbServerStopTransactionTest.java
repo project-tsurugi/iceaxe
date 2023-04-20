@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Timeout;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
-import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * server stop (transaction) test
@@ -25,7 +25,7 @@ public class DbServerStopTransactionTest extends DbTimetoutTest {
     // サーバーが停止した場合に即座にエラーが返ることを確認するテスト
     @Test
     @Timeout(value = EXPECTED_TIMEOUT, unit = TimeUnit.SECONDS)
-    void serverStop() throws IOException {
+    void serverStop() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {

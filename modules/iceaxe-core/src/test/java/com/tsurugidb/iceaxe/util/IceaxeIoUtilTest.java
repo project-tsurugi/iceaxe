@@ -22,7 +22,7 @@ import com.tsurugidb.tsubakuro.exception.ServerException;
 class IceaxeIoUtilTest {
 
     @Test
-    void testGetAndCloseFuture() throws IOException {
+    void testGetAndCloseFuture() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -45,7 +45,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureEx() throws IOException {
+    void testGetAndCloseFutureEx() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -67,7 +67,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureIOEx() throws IOException {
+    void testGetAndCloseFutureIOEx() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -89,7 +89,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureIOEx2() throws IOException {
+    void testGetAndCloseFutureIOEx2() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -104,14 +104,13 @@ class IceaxeIoUtilTest {
         };
         var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
-        var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
+        var actual = assertThrowsExactly(InterruptedException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
-        assertEquals("abc", actual.getCause().getMessage());
         assertEquals(1, count.get());
     }
 
     @Test
-    void testGetAndCloseFutureCloseEx() throws IOException {
+    void testGetAndCloseFutureCloseEx() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -135,7 +134,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureCloseIOEx() throws IOException {
+    void testGetAndCloseFutureCloseIOEx() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -159,7 +158,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureCloseIOEx2() throws IOException {
+    void testGetAndCloseFutureCloseIOEx2() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -177,13 +176,12 @@ class IceaxeIoUtilTest {
         };
         var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
-        var actual = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
+        var actual = assertThrowsExactly(InterruptedException.class, () -> IceaxeIoUtil.getAndCloseFuture(future, timeout));
         assertEquals("abc", actual.getMessage());
-        assertEquals("abc", actual.getCause().getMessage());
     }
 
     @Test
-    void testGetAndCloseFutureExCloseEx() throws IOException {
+    void testGetAndCloseFutureExCloseEx() throws Exception {
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
             public String get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
@@ -206,7 +204,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureExCloseIOEx() throws IOException {
+    void testGetAndCloseFutureExCloseIOEx() throws Exception {
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
             public String get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
@@ -228,7 +226,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureExCloseIOEx2() throws IOException {
+    void testGetAndCloseFutureExCloseIOEx2() throws Exception {
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
             public String get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
@@ -250,7 +248,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureInTransaction() throws IOException, TsurugiTransactionException {
+    void testGetAndCloseFutureInTransaction() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -273,7 +271,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureInTransactionEx() throws IOException {
+    void testGetAndCloseFutureInTransactionEx() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -295,7 +293,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testGetAndCloseFutureCloseInTransactionEx() throws IOException {
+    void testGetAndCloseFutureCloseInTransactionEx() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<String>() {
             @Override
@@ -319,7 +317,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testCloseable() throws IOException {
+    void testCloseable() throws Exception {
         var count = new AtomicInteger(0);
         var future = new IceaxeFutureResponseTestMock<Void>() {
             @Override
@@ -333,7 +331,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testCloseableIOEx() throws IOException {
+    void testCloseableIOEx() throws Exception {
         var future = new IceaxeFutureResponseTestMock<Void>() {
             @Override
             public void close() throws IOException, ServerException, InterruptedException {
@@ -350,7 +348,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testCloseableIOEx2() throws IOException {
+    void testCloseableIOEx2() throws Exception {
         var future = new IceaxeFutureResponseTestMock<Void>() {
             @Override
             public void close() throws IOException, ServerException, InterruptedException {
@@ -371,7 +369,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testCloseRunnable() throws IOException {
+    void testCloseRunnable() throws Exception {
         {
             var count = new AtomicInteger(0);
             var closeableSet = new IceaxeCloseableSet();
@@ -502,7 +500,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testClose() throws IOException {
+    void testClose() throws Exception {
         var count = new AtomicInteger();
         AutoCloseable close1 = () -> count.addAndGet(1);
         AutoCloseable close2 = () -> count.addAndGet(2);
@@ -600,7 +598,7 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testCloseInTransaction() throws IOException, TsurugiTransactionException {
+    void testCloseInTransaction() throws Exception {
         var count = new AtomicInteger();
         AutoCloseable close1 = () -> count.addAndGet(1);
         AutoCloseable close2 = () -> count.addAndGet(2);

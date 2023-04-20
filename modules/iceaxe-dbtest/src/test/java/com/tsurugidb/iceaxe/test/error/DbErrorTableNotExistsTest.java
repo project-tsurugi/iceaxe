@@ -29,7 +29,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 200;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbErrorTableNotExistsTest.class);
         LOG.debug("init start");
 
@@ -39,7 +39,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     }
 
     @Test
-    void select() throws IOException {
+    void select() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL)) {
@@ -61,21 +61,21 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     }
 
     @Test
-    void insert() throws IOException {
+    void insert() throws Exception {
         var sql = "insert into " + TEST + "(" + TEST_COLUMNS + ") values(123, 456, 'abc')";
         var expected = "table_not_found table `test' is not found";
         statement(sql, expected);
     }
 
     @Test
-    void update() throws IOException {
+    void update() throws Exception {
         var sql = "update " + TEST + " set bar = 0";
         var expected = "table_not_found test.";
         statement(sql, expected);
     }
 
     @Test
-    void delete() throws IOException {
+    void delete() throws Exception {
         var sql = "delete from " + TEST;
         var expected = "table_not_found test.";
         statement(sql, expected);
@@ -102,7 +102,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     }
 
     @Test
-    void selectBind() throws IOException {
+    void selectBind() throws Exception {
         var foo = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo=" + foo;
         var parameterMapping = TgParameterMapping.of(foo);
@@ -130,14 +130,14 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     }
 
     @Test
-    void insertBind() throws IOException {
+    void insertBind() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
         var expected = "table_not_found table `test' is not found";
         preparedStatement(INSERT_SQL, INSERT_MAPPING, entity, expected);
     }
 
     @Test
-    void updateBind() throws IOException {
+    void updateBind() throws Exception {
         var bar = TgBindVariable.ofLong("bar");
         var sql = "update " + TEST + " set bar = " + bar;
         var mapping = TgParameterMapping.of(bar);
@@ -147,7 +147,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     }
 
     @Test
-    void deleteBind() throws IOException {
+    void deleteBind() throws Exception {
         var foo = TgBindVariable.ofInt("foo");
         var sql = "delete from " + TEST + " where foo=" + foo;
         var mapping = TgParameterMapping.of(foo);
@@ -156,7 +156,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         preparedStatement(sql, mapping, parameter, expected);
     }
 
-    private <P> void preparedStatement(String sql, TgParameterMapping<P> parameterMapping, P parameter, String expected) throws IOException {
+    private <P> void preparedStatement(String sql, TgParameterMapping<P> parameterMapping, P parameter, String expected) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {

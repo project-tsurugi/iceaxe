@@ -14,8 +14,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -26,7 +26,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbUpdateDecimalTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -35,7 +35,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws IOException, InterruptedException {
         var sql = "create table " + TEST //
                 + "(" //
                 + "  value decimal(5,2)" //
@@ -48,21 +48,21 @@ class DbUpdateDecimalTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
-    void div2(boolean cast) throws IOException {
+    void div2(boolean cast) throws Exception {
         div(2, cast, true);
     }
 
     @Test
-    void div3() throws IOException {
+    void div3() throws Exception {
         div(3, false, false);
     }
 
     @Test
-    void div3Cast() throws IOException {
+    void div3Cast() throws Exception {
         div(3, true, true);
     }
 
-    private void div(int divValue, boolean cast, boolean expectedSuccess) throws IOException {
+    private void div(int divValue, boolean cast, boolean expectedSuccess) throws IOException, InterruptedException {
         insert(BigDecimal.ONE);
 
         var div = TgBindVariable.ofDecimal("div");
@@ -100,7 +100,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
         }
     }
 
-    private void insert(BigDecimal value) throws IOException {
+    private void insert(BigDecimal value) throws IOException, InterruptedException {
         var variable = TgBindVariable.ofDecimal(VNAME);
         var mapping = TgParameterMapping.of(variable);
 
@@ -113,7 +113,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
         }
     }
 
-    private BigDecimal selectValue() throws IOException {
+    private BigDecimal selectValue() throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery("select value from " + TEST)) {

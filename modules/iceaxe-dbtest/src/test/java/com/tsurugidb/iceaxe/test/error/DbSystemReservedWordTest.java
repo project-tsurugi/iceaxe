@@ -2,8 +2,6 @@ package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -20,7 +18,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbSystemReservedWordTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -29,7 +27,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
     }
 
     @Test
-    void createTable() throws IOException {
+    void createTable() throws Exception {
         // TODO アンダースコア2個で始まるテーブル名はシステム予約でありユーザーが使用できないので、使ったらエラーになるべき
         String tableName = "__test";
         dropTable(tableName);
@@ -43,7 +41,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
     }
 
     @Test
-    void createTableColumn() throws IOException {
+    void createTableColumn() throws Exception {
         // TODO アンダースコア2個で始まるカラム名はシステム予約でありユーザーが使用できないので、使ったらエラーになるべき
         var sql = "create table " + TEST //
                 + "(" //
@@ -55,7 +53,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
     }
 
     @Test
-    void selectAs() throws IOException {
+    void selectAs() throws Exception {
         int size = 4;
         createTestTable();
         insertTestTable(size);

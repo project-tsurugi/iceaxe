@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.test.insert;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -14,7 +12,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbInsertIrregularTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -24,7 +22,7 @@ class DbInsertIrregularTest extends DbTestTableTester {
     }
 
     @Test
-    void closePsBeforeCloseRc() throws IOException {
+    void closePsBeforeCloseRc() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(123, 456, 'abc')";

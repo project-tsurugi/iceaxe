@@ -108,7 +108,7 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
     public @Nullable String getTransactionId() {
         try {
             return (transaction != null) ? transaction.getTransactionId() : null;
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             return null;
         }
     }

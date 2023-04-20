@@ -21,7 +21,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbCreateTableTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -38,14 +38,14 @@ class DbCreateTableTest extends DbTestTableTester {
             + ")";
 
     @Test
-    void create() throws IOException {
+    void create() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         tm.executeDdl(SQL);
     }
 
     @Test
-    void createExists() throws IOException {
+    void createExists() throws Exception {
         createTestTable();
 
         var session = getSession();
@@ -58,7 +58,7 @@ class DbCreateTableTest extends DbTestTableTester {
     }
 
     @Test
-    void rollback() throws IOException {
+    void rollback() throws Exception {
         var session = getSession();
         assertTrue(session.findTableMetadata(TEST).isEmpty());
 
@@ -76,28 +76,28 @@ class DbCreateTableTest extends DbTestTableTester {
     }
 
     @Test
-    void repeatOccWithPk() throws IOException {
+    void repeatOccWithPk() throws Exception {
         repeat(TgTxOption.ofOCC(), true);
     }
 
     @Test
     @Disabled // TODO remove Disabled たまにシリアライゼーションエラーが発生する
-    void repeatOccNoPk() throws IOException {
+    void repeatOccNoPk() throws Exception {
         repeat(TgTxOption.ofOCC(), false);
     }
 
     @Test
-    void repeatLtxWithPk() throws IOException {
+    void repeatLtxWithPk() throws Exception {
         repeat(TgTxOption.ofLTX(), true);
     }
 
     @Test
     @Disabled // TODO remove Disabled tateyama-serverがクラッシュする
-    void repeatLtxNoPk() throws IOException {
+    void repeatLtxNoPk() throws Exception {
         repeat(TgTxOption.ofLTX(), false);
     }
 
-    private void repeat(TgTxOption txOption, boolean hasPk) throws IOException {
+    private void repeat(TgTxOption txOption, boolean hasPk) throws IOException, InterruptedException {
         var createDdl = "create table " + TEST //
                 + "(" //
                 + "  foo int," //

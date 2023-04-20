@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.test.connector;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
@@ -13,7 +11,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbConnectorTest extends DbTestTableTester {
 
     @Test
-    void doNothing() throws IOException {
+    void doNothing() throws Exception {
         try (var socket = DbTestConnector.createSocket()) {
             // do nothing
         }

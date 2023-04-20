@@ -12,12 +12,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableLong;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
@@ -34,7 +34,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach() throws IOException {
+    void beforeEach() throws Exception {
         LOG.debug("init start");
 
         dropTestTable();
@@ -45,7 +45,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
     }
 
     @RepeatedTest(8)
-    void select1() throws IOException, TsurugiTransactionException {
+    void select1() throws Exception {
         var selectSql = "select * from " + TEST + " where foo=1";
         var bar = TgBindVariable.ofLong("bar");
         var updateSql = "update " + TEST + " set bar=" + bar + " where foo=1";
@@ -85,7 +85,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
     }
 
     @RepeatedTest(4)
-    void select2() throws IOException, TsurugiTransactionException {
+    void select2() throws Exception {
         var selectSql = "select * from " + TEST + " where foo=1";
         var bar = TgBindVariable.ofLong("bar");
         var updateSql = "update " + TEST + " set bar=" + bar + " where foo=1";
@@ -119,7 +119,8 @@ class DbSelectOtherTxTest extends DbTestTableTester {
         }
     }
 
-    private void updateOtherTxOcc(TsurugiSession session, TsurugiSqlPreparedStatement<TgBindParameters> updatePs, TgBindVariableLong bar, long value) throws IOException, TsurugiTransactionException {
+    private void updateOtherTxOcc(TsurugiSession session, TsurugiSqlPreparedStatement<TgBindParameters> updatePs, TgBindVariableLong bar, long value)
+            throws IOException, TsurugiTransactionException, InterruptedException {
         try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
             var parameter = TgBindParameters.of(bar.bind(value));
             int count = tx.executeAndGetCount(updatePs, parameter);
@@ -128,7 +129,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
         }
     }
 
-    private TestEntity select(TsurugiTransaction tx, TsurugiSqlQuery<TestEntity> selectPs) throws IOException, TsurugiTransactionException {
+    private TestEntity select(TsurugiTransaction tx, TsurugiSqlQuery<TestEntity> selectPs) throws IOException, TsurugiTransactionException, InterruptedException {
         return tx.executeAndFindRecord(selectPs).get();
     }
 }

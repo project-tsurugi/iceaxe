@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,11 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.sql.proto.SqlCommon.AtomType;
-import com.tsurugidb.tsubakuro.explain.PlanGraphException;
 
 /**
  * explain select test
@@ -28,7 +26,7 @@ class DbSelectExplainTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectExplainTest.class);
         LOG.debug("init start");
 
@@ -83,7 +81,7 @@ class DbSelectExplainTest extends DbTestTableTester {
     }
 
     @Test
-    void largeResult() throws IOException, PlanGraphException {
+    void largeResult() throws Exception {
         var sql = "select * from " + Stream.generate(() -> TEST).limit(6).collect(Collectors.joining(","));
 
         var session = getSession();

@@ -29,7 +29,7 @@ class DbMultiSessionTest extends DbTestTableTester {
     private static final int EXPECTED_SESSION_SIZE = getSystemProperty("expected.session.size", 100);
 
     @Test
-    void limit() throws IOException {
+    void limit() throws Exception {
         var list = new ArrayList<TsurugiSession>();
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
             var session = DbTestConnector.createSession();
@@ -65,21 +65,21 @@ class DbMultiSessionTest extends DbTestTableTester {
     }
 
     @Test
-    void manySession1() throws IOException {
+    void manySession1() throws Exception {
         manySession(false, false);
     }
 
     @Test
-    void manySession2() throws IOException {
+    void manySession2() throws Exception {
         manySession(true, false);
     }
 
     @Test
-    void manySession3() throws IOException {
+    void manySession3() throws Exception {
         manySession(false, true);
     }
 
-    private void manySession(boolean sqlClient, boolean transaction) throws IOException {
+    private void manySession(boolean sqlClient, boolean transaction) throws IOException, InterruptedException {
         LOG.debug("create session start");
         var list = new ArrayList<TsurugiSession>();
         for (int i = 0; i < 60; i++) {

@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 
@@ -24,7 +22,7 @@ class DbSelectFewTest extends DbTestTableTester {
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 200;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectFewTest.class);
         LOG.debug("init start");
 
@@ -36,7 +34,7 @@ class DbSelectFewTest extends DbTestTableTester {
     }
 
     @Test
-    void selectZero() throws IOException, TsurugiTransactionException {
+    void selectZero() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -53,7 +51,7 @@ class DbSelectFewTest extends DbTestTableTester {
     }
 
     @Test
-    void selectOne() throws IOException {
+    void selectOne() throws Exception {
         var expected = createTestEntity(0);
         var sql = "select * from " + TEST + " order by foo";
 
@@ -68,7 +66,7 @@ class DbSelectFewTest extends DbTestTableTester {
     }
 
     @Test
-    void selectOneSameTx() throws IOException {
+    void selectOneSameTx() throws Exception {
         var expected = createTestEntity(0);
         var sql = "select * from " + TEST + " order by foo";
 

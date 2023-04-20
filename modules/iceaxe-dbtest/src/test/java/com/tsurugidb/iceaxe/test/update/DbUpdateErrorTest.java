@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -24,7 +22,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
     private static final int SIZE = 10;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -37,7 +35,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void updatePKNull() throws IOException {
+    void updatePKNull() throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  foo = null" // primary key
@@ -65,7 +63,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 0, SIZE / 2, SIZE * 2 })
-    void updatePKSameValue(int newPk) throws IOException {
+    void updatePKSameValue(int newPk) throws Exception {
         var sql = "update " + TEST //
                 + " set" //
                 + "  foo = " + newPk; // primary key
@@ -88,7 +86,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void updateNullToNotNull() throws IOException {
+    void updateNullToNotNull() throws Exception {
         var session = getSession();
 
         var createSql = "create table " + TEST //

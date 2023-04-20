@@ -3,8 +3,6 @@ package com.tsurugidb.iceaxe.test.session;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
@@ -18,14 +16,14 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbSessionTest extends DbTestTableTester {
 
     @Test
-    void doNothing() throws IOException {
+    void doNothing() throws Exception {
         try (var session = DbTestConnector.createSession()) {
             // do nothing
         }
     }
 
     @Test
-    void isAlive() throws IOException {
+    void isAlive() throws Exception {
         // session作成直後にisAlive呼び出し
         try (var session = DbTestConnector.createSession()) {
             assertTrue(session.isAlive());
@@ -33,7 +31,7 @@ class DbSessionTest extends DbTestTableTester {
     }
 
     @Test
-    void preparedStatementOnly() throws IOException {
+    void preparedStatementOnly() throws Exception {
         var sql = "select * from " + TEST;
         try (var session = DbTestConnector.createSession()) {
             try (var ps = session.createQuery(sql, TgParameterMapping.of())) {
@@ -43,7 +41,7 @@ class DbSessionTest extends DbTestTableTester {
     }
 
     @Test
-    void transactionOnly() throws IOException {
+    void transactionOnly() throws Exception {
         try (var session = DbTestConnector.createSession()) {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                 assertTrue(session.isAlive());
@@ -52,7 +50,7 @@ class DbSessionTest extends DbTestTableTester {
     }
 
     @Test
-    void closeTwice() throws IOException {
+    void closeTwice() throws Exception {
         try (var session = DbTestConnector.createSession()) {
             session.getLowSqlClient();
             assertTrue(session.isAlive());

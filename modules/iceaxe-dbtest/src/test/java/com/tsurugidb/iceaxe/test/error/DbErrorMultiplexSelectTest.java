@@ -24,7 +24,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbErrorMultiplexSelectTest.class);
         LOG.debug("init start");
 
@@ -36,7 +36,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     }
 
     @Test
-    public void selectMultiRead1() throws IOException, TsurugiTransactionException {
+    public void selectMultiRead1() throws Exception {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
             selectMulti(1, ExecuteType.READ_ALL);
         }
@@ -44,12 +44,12 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    public void selectMultiReadN(int size) throws IOException, TsurugiTransactionException {
+    public void selectMultiReadN(int size) throws Exception {
         selectMulti(size, ExecuteType.READ_ALL);
     }
 
     @Test
-    public void selectMultiClose1() throws IOException, TsurugiTransactionException {
+    public void selectMultiClose1() throws Exception {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
             selectMulti(1, ExecuteType.CLOSE_ONLY);
         }
@@ -57,12 +57,12 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    public void selectMultiCloseN(int size) throws IOException, TsurugiTransactionException {
+    public void selectMultiCloseN(int size) throws Exception {
         selectMulti(size, ExecuteType.CLOSE_ONLY);
     }
 
     @Test
-    void selectMulti1() throws IOException, TsurugiTransactionException {
+    void selectMulti1() throws Exception {
         for (int i = 0; i < ATTEMPT_SIZE; i++) {
             selectMulti(1, ExecuteType.EXEUTE_ONLY);
         }
@@ -70,7 +70,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 15, 16, 255, 256 })
-    void selectMultiN(int size) throws IOException, TsurugiTransactionException {
+    void selectMultiN(int size) throws Exception {
         selectMulti(size, ExecuteType.EXEUTE_ONLY);
     }
 
@@ -78,7 +78,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
         READ_ALL, CLOSE_ONLY, EXEUTE_ONLY
     }
 
-    private void selectMulti(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
+    private void selectMulti(int size, ExecuteType type) throws IOException, InterruptedException, TsurugiTransactionException {
         int threshold = 255;
         try {
             selectMultiMain(size, type);
@@ -92,7 +92,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
         }
     }
 
-    private void selectMultiMain(int size, ExecuteType type) throws IOException, TsurugiTransactionException {
+    private void selectMultiMain(int size, ExecuteType type) throws IOException, InterruptedException, TsurugiTransactionException {
         var sql = "select * from " + TEST;
 
         try (var session = DbTestConnector.createSession()) {

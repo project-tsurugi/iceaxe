@@ -23,7 +23,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 public class DbConnectErrorTest {
 
     @Test
-    void connectError() throws IOException {
+    void connectError() throws Exception {
         try (var server = new ServerSocket(0)) {
             int port = server.getLocalPort();
 
@@ -39,7 +39,7 @@ public class DbConnectErrorTest {
         }
     }
 
-    private void connect(int port) throws IOException {
+    private void connect(int port) throws Exception {
         var endpoint = URI.create("tcp://localhost:" + port);
         var connector = TsurugiConnector.of(endpoint);
 

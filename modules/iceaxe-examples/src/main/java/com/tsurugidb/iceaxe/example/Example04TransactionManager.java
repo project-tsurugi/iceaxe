@@ -27,21 +27,21 @@ public class Example04TransactionManager {
      */
     private static final TgTmSetting SETTING = TgTmSetting.of(OCC, LTX);
 
-    void main() throws IOException {
+    void main() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             manager1(session);
             manager2(session);
         }
     }
 
-    void manager1(TsurugiSession session) throws IOException {
+    void manager1(TsurugiSession session) throws IOException, InterruptedException {
         var tm = session.createTransactionManager(SETTING);
         tm.execute(transaction -> {
 //          transaction.executeAndXxx(ps);
         });
     }
 
-    void manager2(TsurugiSession session) throws IOException {
+    void manager2(TsurugiSession session) throws IOException, InterruptedException {
         var tm = session.createTransactionManager();
         tm.execute(SETTING, transaction -> {
 //          transaction.executeAndXxx(ps);

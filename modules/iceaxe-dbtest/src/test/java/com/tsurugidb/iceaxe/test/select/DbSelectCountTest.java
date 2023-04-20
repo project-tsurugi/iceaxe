@@ -19,7 +19,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 class DbSelectCountTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -30,23 +30,23 @@ class DbSelectCountTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 3 })
-    void count_converter(int size) throws IOException {
+    void count_converter(int size) throws Exception {
         count(size, TgResultMapping.of(record -> record.nextInt()));
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 3 })
-    void count_singleColumn_class(int size) throws IOException {
+    void count_singleColumn_class(int size) throws Exception {
         count(size, TgResultMapping.of(int.class));
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 3 })
-    void count_singleColumn_type(int size) throws IOException {
+    void count_singleColumn_type(int size) throws Exception {
         count(size, TgResultMapping.of(TgDataType.INT));
     }
 
-    private void count(int size, TgResultMapping<Integer> resultMapping) throws IOException {
+    private void count(int size, TgResultMapping<Integer> resultMapping) throws IOException, InterruptedException {
         insertTestTable(size);
 
         var sql = "select count(*) from " + TEST;

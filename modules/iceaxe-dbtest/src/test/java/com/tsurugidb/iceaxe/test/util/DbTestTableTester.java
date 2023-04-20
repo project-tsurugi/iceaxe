@@ -51,7 +51,7 @@ public class DbTestTableTester {
     }
 
     @AfterAll
-    static void testerAfterAll() throws IOException {
+    static void testerAfterAll() throws IOException, InterruptedException {
         if (staticSession != null) {
             staticSession.close();
             staticSession = null;
@@ -82,18 +82,18 @@ public class DbTestTableTester {
 
     // utility
 
-    protected static void dropTestTable() throws IOException {
+    protected static void dropTestTable() throws IOException, InterruptedException {
         dropTable(TEST);
     }
 
-    protected static void dropTable(String tableName) throws IOException {
+    protected static void dropTable(String tableName) throws IOException, InterruptedException {
         if (existsTable(tableName)) {
             var sql = "drop table " + tableName;
             executeDdl(getSession(), sql);
         }
     }
 
-    protected static boolean existsTable(String tableName) throws IOException {
+    protected static boolean existsTable(String tableName) throws IOException, InterruptedException {
         var session = getSession();
         var opt = session.findTableMetadata(tableName);
         return opt.isPresent();
@@ -107,15 +107,15 @@ public class DbTestTableTester {
             + "  primary key(foo)" //
             + ")";
 
-    protected static void createTestTable() throws IOException {
+    protected static void createTestTable() throws IOException, InterruptedException {
         executeDdl(getSession(), CREATE_TEST_SQL);
     }
 
-    protected static void executeDdl(TsurugiSession session, String sql) throws IOException {
+    protected static void executeDdl(TsurugiSession session, String sql) throws IOException, InterruptedException {
         executeDdl(session, sql, TEST);
     }
 
-    protected static void executeDdl(TsurugiSession session, String sql, String tableName) throws IOException {
+    protected static void executeDdl(TsurugiSession session, String sql, String tableName) throws IOException, InterruptedException {
         // FIXME issue106 2023-03-23 retry-over
         // TODO retry-overが解消されたらfalseに戻す
         boolean workaround = true;
@@ -129,7 +129,7 @@ public class DbTestTableTester {
     }
 
     @Deprecated(forRemoval = true)
-    private static void executeDdlWorkaround(TsurugiSession session, String sql, String tableName) throws IOException {
+    private static void executeDdlWorkaround(TsurugiSession session, String sql, String tableName) throws IOException, InterruptedException {
         var tm = createTransactionManagerOcc(session, 3);
         tm.addEventListener(new TsurugiTmEventListener() {
             @Override
@@ -170,7 +170,7 @@ public class DbTestTableTester {
             .addLong("bar", TestEntity::getBar) //
             .addString("zzz", TestEntity::getZzz);
 
-    protected static void insertTestTable(int size) throws IOException {
+    protected static void insertTestTable(int size) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -188,7 +188,7 @@ public class DbTestTableTester {
         return new TestEntity(i, i, Integer.toString(i));
     }
 
-    protected static void insertTestTable(TestEntity entity) throws IOException {
+    protected static void insertTestTable(TestEntity entity) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -256,17 +256,17 @@ public class DbTestTableTester {
         return null;
     }
 
-    protected static void assertEqualsTestTable(TestEntity... expected) throws IOException {
+    protected static void assertEqualsTestTable(TestEntity... expected) throws IOException, InterruptedException {
         var expectedList = List.of(expected);
         assertEqualsTestTable(expectedList);
     }
 
-    protected static void assertEqualsTestTable(List<TestEntity> expected) throws IOException {
+    protected static void assertEqualsTestTable(List<TestEntity> expected) throws IOException, InterruptedException {
         var actual = selectAllFromTest();
         assertEquals(expected, actual);
     }
 
-    protected static void assertEqualsTestTable(int expectedSize) throws IOException {
+    protected static void assertEqualsTestTable(int expectedSize) throws IOException, InterruptedException {
         var actualList = selectAllFromTest();
         assertEqualsTestTable(expectedSize, actualList);
     }
@@ -286,7 +286,7 @@ public class DbTestTableTester {
         assertEquals(expected.getZzz(), actual.getStringOrNull("zzz"));
     }
 
-    protected static List<TestEntity> selectAllFromTest() throws IOException {
+    protected static List<TestEntity> selectAllFromTest() throws IOException, InterruptedException {
         var sql = SELECT_SQL + "\norder by " + TEST_COLUMNS;
 
         var session = getSession();
@@ -296,7 +296,7 @@ public class DbTestTableTester {
         }
     }
 
-    protected static TestEntity selectFromTest(int foo) throws IOException {
+    protected static TestEntity selectFromTest(int foo) throws IOException, InterruptedException {
         var where1 = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo=" + where1;
         var session = getSession();
@@ -307,11 +307,11 @@ public class DbTestTableTester {
         }
     }
 
-    protected static int selectCountFromTest() throws IOException {
+    protected static int selectCountFromTest() throws IOException, InterruptedException {
         return selectCountFrom(TEST);
     }
 
-    protected static int selectCountFrom(String tableName) throws IOException {
+    protected static int selectCountFrom(String tableName) throws IOException, InterruptedException {
         var sql = "select count(*) from " + tableName;
         var resultMapping = TgResultMapping.of(int.class);
 

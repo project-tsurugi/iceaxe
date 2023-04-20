@@ -20,7 +20,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example31Select {
 
-    void main() throws IOException {
+    void main() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
             var tm = session.createTransactionManager(setting);
@@ -46,7 +46,7 @@ public class Example31Select {
         }
     }
 
-    void selectLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         try (var ps = session.createQuery("select * from TEST")) {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
@@ -63,7 +63,7 @@ public class Example31Select {
         }
     }
 
-    void selectAsList_executeQuery(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsList_executeQuery(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         try (var ps = session.createQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
@@ -74,7 +74,7 @@ public class Example31Select {
         }
     }
 
-    void selectAsList_executeAndGetList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsList_executeAndGetList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         try (var ps = session.createQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 return transaction.executeAndGetList(ps);
@@ -83,19 +83,19 @@ public class Example31Select {
         }
     }
 
-    void selectAsList_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsList_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         try (var ps = session.createQuery("select * from TEST")) {
             List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
             System.out.println(list);
         }
     }
 
-    void selectAsList_tm_sql(TsurugiTransactionManager tm) throws IOException {
+    void selectAsList_tm_sql(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         List<TsurugiResultEntity> list = tm.executeAndGetList("select * from TEST");
         System.out.println(list);
     }
 
-    void selectAsEntityLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsEntityLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createQuery("select * from TEST", resultMapping)) {
             tm.execute(transaction -> {
@@ -140,7 +140,7 @@ public class Example31Select {
         }
     }
 
-    void selectAsEntityList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectAsEntityList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var resultMapping = resultMappingForTestEntity();
         try (var ps = session.createQuery("select * from TEST", resultMapping)) {
             List<TestEntity> list = tm.execute(transaction -> {
@@ -150,7 +150,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter1(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter1(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "select * from TEST where FOO = :foo";
         var variables = TgBindVariables.of().addInt("foo");
         Function<Integer, TgBindParameters> parameterConverter = foo -> TgBindParameters.of().add("foo", foo);
@@ -164,7 +164,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter1_singleVariable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter1_singleVariable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "select * from TEST where FOO = :foo";
         var parameterMapping = TgParameterMapping.of("foo", int.class);
         try (var ps = session.createQuery(sql, parameterMapping)) {
@@ -176,7 +176,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var variables = TgBindVariables.of().addInt("foo").addLong("bar");
         var parameterMapping = TgParameterMapping.of(variables);
@@ -189,7 +189,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2_bindVariable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_bindVariable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
 //      var sql = "select * from TEST where FOO = :foo and BAR <= :bar";
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
@@ -204,7 +204,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2_asEntityList_executeQuery(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_executeQuery(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
@@ -221,7 +221,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2_asEntityList_executeAndGetList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_executeAndGetList(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
@@ -236,7 +236,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2_asEntityList_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;
@@ -249,7 +249,7 @@ public class Example31Select {
         }
     }
 
-    void selectByParameter2_asEntityList_tm_sql(TsurugiTransactionManager tm) throws IOException {
+    void selectByParameter2_asEntityList_tm_sql(TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var sql = "select * from TEST where FOO = " + foo + " and BAR <= " + bar;

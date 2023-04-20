@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableInteger;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -38,7 +38,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
     private static final String TEST2 = "test2";
 
     @BeforeEach
-    void beforeEach() throws IOException {
+    void beforeEach() throws Exception {
         LOG.debug("init start");
 
         dropTestTable();
@@ -51,7 +51,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
         LOG.debug("init end");
     }
 
-    private static void createTest2Table() throws IOException {
+    private static void createTest2Table() throws IOException, InterruptedException {
         var sql = "create table " + TEST2 //
                 + "(" //
                 + "  group_id int," //
@@ -65,7 +65,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
     }
 
     @Test
-    void test() throws IOException, InterruptedException {
+    void test() throws Exception {
         int batchSize = 10;
         int onlineSize = 20;
 
@@ -122,7 +122,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
             return null;
         }
 
-        private void execute(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+        private void execute(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
             var groupId = TgBindVariable.ofInt("groupId");
             var id = TgBindVariable.ofInt("id");
             var fkFoo = TgBindVariable.ofInt("fkFoo");
@@ -192,7 +192,8 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
             return null;
         }
 
-        private void execute(TsurugiTransaction transaction, TsurugiSqlPreparedQuery<TgBindParameters, TsurugiResultEntity> ps, int groupId) throws IOException, TsurugiTransactionException {
+        private void execute(TsurugiTransaction transaction, TsurugiSqlPreparedQuery<TgBindParameters, TsurugiResultEntity> ps, int groupId)
+                throws IOException, InterruptedException, TsurugiTransactionException {
             var parameter = TgBindParameters.of(vGruopId.bind(groupId));
             transaction.executeAndGetList(ps, parameter);
         }

@@ -306,7 +306,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     }
 
     @Override
-    protected R convert(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    protected R convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         return resultConverter.apply(record);
     }
 }

@@ -2,8 +2,6 @@ package com.tsurugidb.iceaxe.test.update;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -18,7 +16,7 @@ class DbUpdateIrregularTest extends DbTestTableTester {
     private static final int SIZE = 10;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -29,7 +27,7 @@ class DbUpdateIrregularTest extends DbTestTableTester {
     }
 
     @Test
-    void closePsBeforeCloseRc() throws IOException {
+    void closePsBeforeCloseRc() throws Exception {
         int number = SIZE / 2;
         var sql = "update " + TEST //
                 + " set" //

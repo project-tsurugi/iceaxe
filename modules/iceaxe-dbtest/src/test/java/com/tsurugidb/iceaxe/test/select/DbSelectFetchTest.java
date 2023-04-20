@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
-import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
@@ -21,7 +21,7 @@ class DbSelectFetchTest extends DbTestTableTester {
     private static final int SIZE = 8300;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectTest.class);
         LOG.debug("init start");
 
@@ -37,13 +37,13 @@ class DbSelectFetchTest extends DbTestTableTester {
 
     private static final String TEST2 = "test2";
 
-    private static void createTest2Table() throws IOException {
+    private static void createTest2Table() throws IOException, InterruptedException {
         var sql = CREATE_TEST_SQL.replace(TEST, TEST2);
         executeDdl(getSession(), sql);
     }
 
     @Test
-    void fetch() throws IOException {
+    void fetch() throws Exception {
         var cond = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo=" + cond;
         var parameterMapping = TgParameterMapping.of(cond);

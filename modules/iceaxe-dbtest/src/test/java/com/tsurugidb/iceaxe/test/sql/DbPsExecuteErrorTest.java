@@ -2,8 +2,6 @@ package com.tsurugidb.iceaxe.test.sql;
 
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -24,7 +22,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -35,7 +33,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void intsertByExecuteQuery() throws IOException {
+    void intsertByExecuteQuery() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
                 + "values(123, 456, 'abc')";
@@ -53,7 +51,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void selectByExecuteStatement() throws IOException {
+    void selectByExecuteStatement() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -65,7 +63,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void insertParameterSizeUnmatch() throws IOException {
+    void insertParameterSizeUnmatch() throws Exception {
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var zzz = TgBindVariable.ofString("zzz");
@@ -89,7 +87,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void insertParameterTypeMismatch() throws IOException {
+    void insertParameterTypeMismatch() throws Exception {
         var foo = TgBindVariable.ofLong("foo"); // INT4 <-> Int8
         var bar = TgBindVariable.ofInt("bar"); // INT8 <-> Int4
         var zzz = TgBindVariable.ofInt("zzzi"); // CHARACTER <-> Int4

@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.test.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +26,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     private static TestEntity NULL_ENTITY = new TestEntity(123, null, null);
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectWhereExpressionTest.class);
         LOG.debug("init start");
 
@@ -40,7 +39,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     }
 
     @Test
-    void invalidExpression() throws IOException {
+    void invalidExpression() throws Exception {
         var sql = SELECT_SQL + " where foo != 1";
 
         var session = getSession();
@@ -56,7 +55,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "=", "<>", "<", ">", "<=", ">=" })
-    void eqNull(String expression) throws IOException {
+    void eqNull(String expression) throws Exception {
         var sql = SELECT_SQL + " where bar " + expression + " null";
 
         var session = getSession();
@@ -68,7 +67,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     }
 
     @Test
-    void isNull() throws IOException {
+    void isNull() throws Exception {
         var sql = SELECT_SQL + " where bar is null";
 
         var session = getSession();
@@ -85,7 +84,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     }
 
     @Test
-    void isNotNull() throws IOException {
+    void isNotNull() throws Exception {
         var sql = SELECT_SQL + " where bar is not null" + " order by foo";
 
         var session = getSession();
@@ -103,7 +102,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     }
 
     @Test
-    void in() throws IOException {
+    void in() throws Exception {
         var expectedList = List.of(2, 4, 5, 7);
         var sql = SELECT_SQL + " where foo in (" + expectedList.stream().map(n -> Integer.toString(n)).collect(Collectors.joining(",")) + ") order by foo";
 //      var sql = SELECT_SQL + " where " + expectedList.stream().map(n -> "foo=" + n).collect(Collectors.joining(" or ")) + " order by foo";
@@ -123,7 +122,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     }
 
     @Test
-    void between() throws IOException {
+    void between() throws Exception {
         int s = 4;
         int e = 6;
         var sql = SELECT_SQL + " where foo between " + s + " and " + e + " order by foo";

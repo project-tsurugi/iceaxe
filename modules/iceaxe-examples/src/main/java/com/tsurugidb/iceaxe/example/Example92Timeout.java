@@ -14,7 +14,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example92Timeout {
 
-    void timeoutBySessionOption(TsurugiConnector connector) throws IOException {
+    void timeoutBySessionOption(TsurugiConnector connector) throws IOException, InterruptedException {
         var sessionOption = TgSessionOption.of();
         sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
         sessionOption.setTimeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
@@ -28,7 +28,7 @@ public class Example92Timeout {
         }
     }
 
-    void timeoutByTmSetting(TsurugiConnector connector) throws IOException {
+    void timeoutByTmSetting(TsurugiConnector connector) throws IOException, InterruptedException {
         var sessionOption = TgSessionOption.of();
         sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
 
@@ -42,7 +42,7 @@ public class Example92Timeout {
         }
     }
 
-    void timeoutByTransaction(TsurugiConnector connector) throws IOException {
+    void timeoutByTransaction(TsurugiConnector connector) throws IOException, InterruptedException {
         var sessionOption = TgSessionOption.of();
         sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
 

@@ -143,12 +143,13 @@ public class TsurugiResultRecord {
      *
      * @return true if the next column exists
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see #getCurrentColumnName()
      * @see #getCurrentColumnType()
      * @see #fetchCurrentColumnValue()
      */
-    public boolean moveCurrentColumnNext() throws IOException, TsurugiTransactionException {
+    public boolean moveCurrentColumnNext() throws IOException, InterruptedException, TsurugiTransactionException {
         try {
             LOG.trace("nextLowColumn start");
             boolean exists = lowResultSet.nextColumn();
@@ -161,13 +162,10 @@ public class TsurugiResultRecord {
             return exists;
         } catch (ServerException e) {
             throw ownerResult.fillTsurugiException(new TsurugiTransactionException(e));
-        } catch (InterruptedException e) {
-            throw new IOException(e.getMessage(), e);
         }
     }
 
-    @Nonnull
-    protected Column getLowColumn(int index) throws IOException, TsurugiTransactionException {
+    protected @Nonnull Column getLowColumn(int index) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowColumnList = TsurugiQueryResult.getLowColumnList(ownerResult, lowResultSet);
         return lowColumnList.get(index);
     }
@@ -177,11 +175,11 @@ public class TsurugiResultRecord {
      *
      * @return column name
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see #moveCurrentColumnNext()
      */
-    @Nonnull
-    public String getCurrentColumnName() throws IOException, TsurugiTransactionException {
+    public @Nonnull String getCurrentColumnName() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowColumn = getLowColumn(currentColumnIndex);
         return TsurugiQueryResult.getColumnName(lowColumn, currentColumnIndex);
     }
@@ -191,17 +189,16 @@ public class TsurugiResultRecord {
      *
      * @return data type
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see #moveCurrentColumnNext()
      */
-    @Nonnull
-    public TgDataType getCurrentColumnType() throws IOException, TsurugiTransactionException {
+    public @Nonnull TgDataType getCurrentColumnType() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowType = getCurrentColumnLowType();
         return TgDataType.of(lowType);
     }
 
-    @Nonnull
-    protected AtomType getCurrentColumnLowType() throws IOException, TsurugiTransactionException {
+    protected @Nonnull AtomType getCurrentColumnLowType() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowColumn = getLowColumn(currentColumnIndex);
         return lowColumn.getAtomType();
     }
@@ -211,11 +208,11 @@ public class TsurugiResultRecord {
      *
      * @return value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see #moveCurrentColumnNext()
      */
-    @Nullable
-    public Object fetchCurrentColumnValue() throws IOException, TsurugiTransactionException {
+    public @Nullable Object fetchCurrentColumnValue() throws IOException, InterruptedException, TsurugiTransactionException {
         if (lowResultSet.isNull()) {
             return null;
         }
@@ -257,8 +254,6 @@ public class TsurugiResultRecord {
             }
         } catch (ServerException e) {
             throw ownerResult.fillTsurugiException(new TsurugiTransactionException(e));
-        } catch (InterruptedException e) {
-            throw new IOException(e.getMessage(), e);
         }
     }
 
@@ -271,15 +266,14 @@ public class TsurugiResultRecord {
      *
      * @return list of column name
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public List<String> getNameList() throws IOException, TsurugiTransactionException {
+    public @Nonnull List<String> getNameList() throws IOException, InterruptedException, TsurugiTransactionException {
         return TsurugiQueryResult.getNameList(ownerResult, lowResultSet);
     }
 
-    @Nonnull
-    protected Map<String, TsurugiResultColumnValue> getColumnMap() throws IOException, TsurugiTransactionException {
+    protected @Nonnull Map<String, TsurugiResultColumnValue> getColumnMap() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.columnMap == null) {
             this.columnMap = new LinkedHashMap<>();
         }
@@ -294,8 +288,7 @@ public class TsurugiResultRecord {
         return this.columnMap;
     }
 
-    @Nonnull
-    protected TsurugiResultColumnValue getColumn(String name) throws IOException, TsurugiTransactionException {
+    protected @Nonnull TsurugiResultColumnValue getColumn(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var map = getColumnMap();
         var column = map.get(name);
         if (column == null) {
@@ -310,10 +303,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Object getValue(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable Object getValue(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var column = getColumn(name);
         return column.value();
     }
@@ -324,10 +317,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return data type
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public TgDataType getType(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull TgDataType getType(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var column = getColumn(name);
         var lowColumn = getLowColumn(column.index());
         var lowType = lowColumn.getAtomType();
@@ -342,10 +335,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public boolean getBoolean(String name) throws IOException, TsurugiTransactionException {
+    public boolean getBoolean(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBooleanOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -358,9 +352,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public boolean getBoolean(String name, boolean defaultValue) throws IOException, TsurugiTransactionException {
+    public boolean getBoolean(String name, boolean defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBooleanOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -374,10 +369,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Boolean> findBoolean(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Boolean> findBoolean(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBooleanOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -388,10 +383,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Boolean getBooleanOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable Boolean getBooleanOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toBoolean(lowValue);
     }
@@ -404,10 +399,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public int getInt(String name) throws IOException, TsurugiTransactionException {
+    public int getInt(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getIntOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -420,9 +416,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public int getInt(String name, int defaultValue) throws IOException, TsurugiTransactionException {
+    public int getInt(String name, int defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getIntOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -436,10 +433,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Integer> findInt(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Integer> findInt(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getIntOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -450,10 +447,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Integer getIntOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable Integer getIntOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toInt(lowValue);
     }
@@ -466,10 +463,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public long getLong(String name) throws IOException, TsurugiTransactionException {
+    public long getLong(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getLongOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -482,9 +480,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public long getLong(String name, long defaultValue) throws IOException, TsurugiTransactionException {
+    public long getLong(String name, long defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getLongOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -498,10 +497,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Long> findLong(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Long> findLong(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getLongOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -512,10 +511,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Long getLongOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable Long getLongOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toLong(lowValue);
     }
@@ -528,10 +527,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public float getFloat(String name) throws IOException, TsurugiTransactionException {
+    public float getFloat(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getFloatOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -544,9 +544,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public float getFloat(String name, float defaultValue) throws IOException, TsurugiTransactionException {
+    public float getFloat(String name, float defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getFloatOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -560,10 +561,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Float> findFloat(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Float> findFloat(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getFloatOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -574,10 +575,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Float getFloatOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable Float getFloatOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toFloat(lowValue);
     }
@@ -590,10 +591,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public double getDouble(String name) throws IOException, TsurugiTransactionException {
+    public double getDouble(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDoubleOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -606,9 +608,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public double getDouble(String name, float defaultValue) throws IOException, TsurugiTransactionException {
+    public double getDouble(String name, float defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDoubleOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -622,10 +625,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Double> findDouble(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Double> findDouble(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDoubleOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -636,10 +639,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Double getDoubleOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable Double getDoubleOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toDouble(lowValue);
     }
@@ -652,11 +655,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public BigDecimal getDecimal(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull BigDecimal getDecimal(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDecimalOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -669,9 +672,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public BigDecimal getDecimal(String name, BigDecimal defaultValue) throws IOException, TsurugiTransactionException {
+    public BigDecimal getDecimal(String name, BigDecimal defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDecimalOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -685,10 +689,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<BigDecimal> findDecimal(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<BigDecimal> findDecimal(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDecimalOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -699,10 +703,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public BigDecimal getDecimalOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable BigDecimal getDecimalOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toDecimal(lowValue);
     }
@@ -715,11 +719,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public String getString(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull String getString(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getStringOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -732,9 +736,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public String getString(String name, String defaultValue) throws IOException, TsurugiTransactionException {
+    public String getString(String name, String defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getStringOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -748,10 +753,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<String> findString(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<String> findString(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getStringOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -762,10 +767,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public String getStringOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable String getStringOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toString(lowValue);
     }
@@ -778,11 +783,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public byte[] getBytes(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull byte[] getBytes(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBytesOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -795,9 +800,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public byte[] getBytes(String name, byte[] defaultValue) throws IOException, TsurugiTransactionException {
+    public byte[] getBytes(String name, byte[] defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBytesOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -811,10 +817,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<byte[]> findBytes(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<byte[]> findBytes(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBytesOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -825,10 +831,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public byte[] getBytesOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable byte[] getBytesOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toBytes(lowValue);
     }
@@ -841,11 +847,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public boolean[] getBits(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull boolean[] getBits(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBitsOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -858,9 +864,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public boolean[] getBits(String name, boolean[] defaultValue) throws IOException, TsurugiTransactionException {
+    public boolean[] getBits(String name, boolean[] defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBitsOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -874,10 +881,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<boolean[]> findBits(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<boolean[]> findBits(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBitsOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -888,10 +895,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public boolean[] getBitsOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable boolean[] getBitsOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toBits(lowValue);
     }
@@ -904,11 +911,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public LocalDate getDate(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull LocalDate getDate(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDateOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -921,9 +928,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public LocalDate getDate(String name, LocalDate defaultValue) throws IOException, TsurugiTransactionException {
+    public LocalDate getDate(String name, LocalDate defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDateOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -937,10 +945,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<LocalDate> findDate(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<LocalDate> findDate(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDateOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -951,10 +959,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public LocalDate getDateOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable LocalDate getDateOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toDate(lowValue);
     }
@@ -967,11 +975,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public LocalTime getTime(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull LocalTime getTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -984,9 +992,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public LocalTime getTime(String name, LocalTime defaultValue) throws IOException, TsurugiTransactionException {
+    public LocalTime getTime(String name, LocalTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getTimeOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -1000,10 +1009,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<LocalTime> findTime(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<LocalTime> findTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getTimeOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -1014,10 +1023,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public LocalTime getTimeOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable LocalTime getTimeOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toTime(lowValue);
     }
@@ -1030,11 +1039,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public LocalDateTime getDateTime(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull LocalDateTime getDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDateTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -1047,9 +1056,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public LocalDateTime getDateTime(String name, LocalDateTime defaultValue) throws IOException, TsurugiTransactionException {
+    public LocalDateTime getDateTime(String name, LocalDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDateTimeOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -1063,10 +1073,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<LocalDateTime> findDateTime(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<LocalDateTime> findDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDateTimeOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -1077,10 +1087,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public LocalDateTime getDateTimeOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable LocalDateTime getDateTimeOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toDateTime(lowValue);
     }
@@ -1093,11 +1103,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public OffsetTime getOffsetTime(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull OffsetTime getOffsetTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getOffsetTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -1110,9 +1120,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public OffsetTime getOffsetTime(String name, OffsetTime defaultValue) throws IOException, TsurugiTransactionException {
+    public OffsetTime getOffsetTime(String name, OffsetTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getOffsetTimeOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -1126,10 +1137,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<OffsetTime> findOffsetTime(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<OffsetTime> findOffsetTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getOffsetTimeOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -1140,10 +1151,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public OffsetTime getOffsetTimeOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable OffsetTime getOffsetTimeOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toOffsetTime(lowValue);
     }
@@ -1156,11 +1167,11 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public OffsetDateTime getOffsetDateTime(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull OffsetDateTime getOffsetDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getOffsetDateTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -1173,9 +1184,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public OffsetDateTime getOffsetDateTime(String name, OffsetDateTime defaultValue) throws IOException, TsurugiTransactionException {
+    public OffsetDateTime getOffsetDateTime(String name, OffsetDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getOffsetDateTimeOrNull(name);
         if (value == null) {
             return defaultValue;
@@ -1189,10 +1201,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<OffsetDateTime> findOffsetDateTime(String name) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<OffsetDateTime> findOffsetDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getOffsetDateTimeOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -1203,10 +1215,10 @@ public class TsurugiResultRecord {
      * @param name column name
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public OffsetDateTime getOffsetDateTimeOrNull(String name) throws IOException, TsurugiTransactionException {
+    public @Nullable OffsetDateTime getOffsetDateTimeOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toOffsetDateTime(lowValue);
     }
@@ -1220,11 +1232,11 @@ public class TsurugiResultRecord {
      * @param zone time-zone
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public ZonedDateTime getZonedDateTime(String name, ZoneId zone) throws IOException, TsurugiTransactionException {
+    public @Nonnull ZonedDateTime getZonedDateTime(String name, ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getZonedDateTimeOrNull(name, zone);
         Objects.requireNonNull(value);
         return value;
@@ -1238,9 +1250,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public ZonedDateTime getZonedDateTime(String name, ZoneId zone, ZonedDateTime defaultValue) throws IOException, TsurugiTransactionException {
+    public ZonedDateTime getZonedDateTime(String name, ZoneId zone, ZonedDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getZonedDateTimeOrNull(name, zone);
         if (value == null) {
             return defaultValue;
@@ -1255,10 +1268,10 @@ public class TsurugiResultRecord {
      * @param zone time-zone
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<ZonedDateTime> findZonedDateTime(String name, ZoneId zone) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<ZonedDateTime> findZonedDateTime(String name, ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getZonedDateTimeOrNull(name, zone);
         return Optional.ofNullable(value);
     }
@@ -1270,10 +1283,10 @@ public class TsurugiResultRecord {
      * @param zone time-zone
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public ZonedDateTime getZonedDateTimeOrNull(String name, ZoneId zone) throws IOException, TsurugiTransactionException {
+    public @Nullable ZonedDateTime getZonedDateTimeOrNull(String name, ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = getValue(name);
         return convertUtil.toZonedDateTime(lowValue, zone);
     }
@@ -1286,18 +1299,18 @@ public class TsurugiResultRecord {
      * move next column
      *
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws IllegalStateException       if not found next column
      */
-    public void nextColumn() throws IOException, TsurugiTransactionException {
+    public void nextColumn() throws IOException, InterruptedException, TsurugiTransactionException {
         boolean exists = moveCurrentColumnNext();
         if (!exists) {
             throw new IllegalStateException("not found next column");
         }
     }
 
-    @Nullable
-    protected Object nextLowValue() throws IOException, TsurugiTransactionException {
+    protected @Nullable Object nextLowValue() throws IOException, InterruptedException, TsurugiTransactionException {
         nextColumn();
         return fetchCurrentColumnValue();
     }
@@ -1309,10 +1322,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public boolean nextBoolean() throws IOException, TsurugiTransactionException {
+    public boolean nextBoolean() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBooleanOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1324,9 +1338,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public boolean nextBoolean(boolean defaultValue) throws IOException, TsurugiTransactionException {
+    public boolean nextBoolean(boolean defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBooleanOrNull();
         if (value == null) {
             return defaultValue;
@@ -1339,10 +1354,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Boolean> nextBooleanOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Boolean> nextBooleanOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBooleanOrNull();
         return Optional.ofNullable(value);
     }
@@ -1352,10 +1367,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Boolean nextBooleanOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable Boolean nextBooleanOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toBoolean(lowValue);
     }
@@ -1367,10 +1382,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public int nextInt() throws IOException, TsurugiTransactionException {
+    public int nextInt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextIntOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1382,9 +1398,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public int nextInt(int defaultValue) throws IOException, TsurugiTransactionException {
+    public int nextInt(int defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextIntOrNull();
         if (value == null) {
             return defaultValue;
@@ -1397,10 +1414,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Integer> nextIntOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Integer> nextIntOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextIntOrNull();
         return Optional.ofNullable(value);
     }
@@ -1410,10 +1427,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Integer nextIntOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable Integer nextIntOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toInt(lowValue);
     }
@@ -1425,10 +1442,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public long nextLong() throws IOException, TsurugiTransactionException {
+    public long nextLong() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextLongOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1440,9 +1458,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public long nextLong(long defaultValue) throws IOException, TsurugiTransactionException {
+    public long nextLong(long defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextLongOrNull();
         if (value == null) {
             return defaultValue;
@@ -1455,10 +1474,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Long> nextLongOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Long> nextLongOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextLongOrNull();
         return Optional.ofNullable(value);
     }
@@ -1468,10 +1487,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Long nextLongOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable Long nextLongOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toLong(lowValue);
     }
@@ -1483,10 +1502,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public float nextFloat() throws IOException, TsurugiTransactionException {
+    public float nextFloat() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextFloatOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1498,9 +1518,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public float nextFloat(int defaultValue) throws IOException, TsurugiTransactionException {
+    public float nextFloat(int defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextFloatOrNull();
         if (value == null) {
             return defaultValue;
@@ -1513,10 +1534,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Float> nextFloatOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Float> nextFloatOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextFloatOrNull();
         return Optional.ofNullable(value);
     }
@@ -1526,10 +1547,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Float nextFloatOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable Float nextFloatOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toFloat(lowValue);
     }
@@ -1541,10 +1562,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    public double nextDouble() throws IOException, TsurugiTransactionException {
+    public double nextDouble() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDoubleOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1556,9 +1578,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public double nextDouble(int defaultValue) throws IOException, TsurugiTransactionException {
+    public double nextDouble(int defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDoubleOrNull();
         if (value == null) {
             return defaultValue;
@@ -1571,10 +1594,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<Double> nextDoubleOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<Double> nextDoubleOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDoubleOrNull();
         return Optional.ofNullable(value);
     }
@@ -1584,10 +1607,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public Double nextDoubleOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable Double nextDoubleOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toDouble(lowValue);
     }
@@ -1599,11 +1622,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public BigDecimal nextDecimal() throws IOException, TsurugiTransactionException {
+    public @Nonnull BigDecimal nextDecimal() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDecimalOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1615,9 +1638,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public BigDecimal nextDecimal(BigDecimal defaultValue) throws IOException, TsurugiTransactionException {
+    public BigDecimal nextDecimal(BigDecimal defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDecimalOrNull();
         if (value == null) {
             return defaultValue;
@@ -1630,10 +1654,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<BigDecimal> nextDecimalOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<BigDecimal> nextDecimalOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDecimalOrNull();
         return Optional.ofNullable(value);
     }
@@ -1643,10 +1667,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public BigDecimal nextDecimalOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable BigDecimal nextDecimalOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toDecimal(lowValue);
     }
@@ -1658,11 +1682,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public String nextString() throws IOException, TsurugiTransactionException {
+    public @Nonnull String nextString() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextStringOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1674,9 +1698,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public String nextString(String defaultValue) throws IOException, TsurugiTransactionException {
+    public String nextString(String defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextStringOrNull();
         if (value == null) {
             return defaultValue;
@@ -1689,10 +1714,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<String> nextStringOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<String> nextStringOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextStringOrNull();
         return Optional.ofNullable(value);
     }
@@ -1702,10 +1727,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public String nextStringOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable String nextStringOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toString(lowValue);
     }
@@ -1717,11 +1742,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public byte[] nextBytes() throws IOException, TsurugiTransactionException {
+    public @Nonnull byte[] nextBytes() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBytesOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1733,9 +1758,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public byte[] nextBytes(byte[] defaultValue) throws IOException, TsurugiTransactionException {
+    public byte[] nextBytes(byte[] defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBytesOrNull();
         if (value == null) {
             return defaultValue;
@@ -1748,10 +1774,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<byte[]> nextBytesOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<byte[]> nextBytesOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBytesOrNull();
         return Optional.ofNullable(value);
     }
@@ -1761,10 +1787,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public byte[] nextBytesOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable byte[] nextBytesOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toBytes(lowValue);
     }
@@ -1776,11 +1802,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public boolean[] nextBits() throws IOException, TsurugiTransactionException {
+    public @Nonnull boolean[] nextBits() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBitsOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1792,9 +1818,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public boolean[] nextBits(boolean[] defaultValue) throws IOException, TsurugiTransactionException {
+    public boolean[] nextBits(boolean[] defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBitsOrNull();
         if (value == null) {
             return defaultValue;
@@ -1807,10 +1834,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<boolean[]> nextBitsOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<boolean[]> nextBitsOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBitsOrNull();
         return Optional.ofNullable(value);
     }
@@ -1820,10 +1847,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public boolean[] nextBitsOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable boolean[] nextBitsOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toBits(lowValue);
     }
@@ -1835,11 +1862,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public LocalDate nextDate() throws IOException, TsurugiTransactionException {
+    public @Nonnull LocalDate nextDate() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDateOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1851,9 +1878,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public LocalDate nextDate(LocalDate defaultValue) throws IOException, TsurugiTransactionException {
+    public LocalDate nextDate(LocalDate defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDateOrNull();
         if (value == null) {
             return defaultValue;
@@ -1866,10 +1894,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<LocalDate> nextDateOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<LocalDate> nextDateOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDateOrNull();
         return Optional.ofNullable(value);
     }
@@ -1879,10 +1907,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public LocalDate nextDateOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable LocalDate nextDateOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toDate(lowValue);
     }
@@ -1894,11 +1922,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public LocalTime nextTime() throws IOException, TsurugiTransactionException {
+    public @Nonnull LocalTime nextTime() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextTimeOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1910,9 +1938,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public LocalTime nextTime(LocalTime defaultValue) throws IOException, TsurugiTransactionException {
+    public LocalTime nextTime(LocalTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextTimeOrNull();
         if (value == null) {
             return defaultValue;
@@ -1925,10 +1954,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<LocalTime> nextTimeOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<LocalTime> nextTimeOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextTimeOrNull();
         return Optional.ofNullable(value);
     }
@@ -1938,10 +1967,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public LocalTime nextTimeOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable LocalTime nextTimeOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toTime(lowValue);
     }
@@ -1953,11 +1982,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public LocalDateTime nextDateTime() throws IOException, TsurugiTransactionException {
+    public @Nonnull LocalDateTime nextDateTime() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDateTimeOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -1969,9 +1998,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public LocalDateTime nextDateTime(LocalDateTime defaultValue) throws IOException, TsurugiTransactionException {
+    public LocalDateTime nextDateTime(LocalDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDateTimeOrNull();
         if (value == null) {
             return defaultValue;
@@ -1984,10 +2014,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<LocalDateTime> nextDateTimeOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<LocalDateTime> nextDateTimeOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDateTimeOrNull();
         return Optional.ofNullable(value);
     }
@@ -1997,10 +2027,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public LocalDateTime nextDateTimeOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable LocalDateTime nextDateTimeOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toDateTime(lowValue);
     }
@@ -2012,11 +2042,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public OffsetTime nextOffsetTime() throws IOException, TsurugiTransactionException {
+    public @Nonnull OffsetTime nextOffsetTime() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextOffsetTimeOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -2028,9 +2058,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public OffsetTime nextOffsetTime(OffsetTime defaultValue) throws IOException, TsurugiTransactionException {
+    public OffsetTime nextOffsetTime(OffsetTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextOffsetTimeOrNull();
         if (value == null) {
             return defaultValue;
@@ -2043,10 +2074,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<OffsetTime> nextOffsetTimeOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<OffsetTime> nextOffsetTimeOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextOffsetTimeOrNull();
         return Optional.ofNullable(value);
     }
@@ -2056,10 +2087,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public OffsetTime nextOffsetTimeOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable OffsetTime nextOffsetTimeOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toOffsetTime(lowValue);
     }
@@ -2071,11 +2102,11 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public OffsetDateTime nextOffsetDateTime() throws IOException, TsurugiTransactionException {
+    public @Nonnull OffsetDateTime nextOffsetDateTime() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextOffsetDateTimeOrNull();
         Objects.requireNonNull(value);
         return value;
@@ -2087,9 +2118,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public OffsetDateTime nextOffsetDateTime(OffsetDateTime defaultValue) throws IOException, TsurugiTransactionException {
+    public OffsetDateTime nextOffsetDateTime(OffsetDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextOffsetDateTimeOrNull();
         if (value == null) {
             return defaultValue;
@@ -2102,10 +2134,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<OffsetDateTime> nextOffsetDateTimeOpt() throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<OffsetDateTime> nextOffsetDateTimeOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextOffsetDateTimeOrNull();
         return Optional.ofNullable(value);
     }
@@ -2115,10 +2147,10 @@ public class TsurugiResultRecord {
      *
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public OffsetDateTime nextOffsetDateTimeOrNull() throws IOException, TsurugiTransactionException {
+    public @Nullable OffsetDateTime nextOffsetDateTimeOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toOffsetDateTime(lowValue);
     }
@@ -2131,11 +2163,11 @@ public class TsurugiResultRecord {
      * @param zone time-zone
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @throws NullPointerException        if value is null
      */
-    @Nonnull
-    public ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone) throws IOException, TsurugiTransactionException {
+    public @Nonnull ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextZonedDateTimeOrNull(zone);
         Objects.requireNonNull(value);
         return value;
@@ -2148,9 +2180,10 @@ public class TsurugiResultRecord {
      * @param defaultValue value to return if column value is null
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone, ZonedDateTime defaultValue) throws IOException, TsurugiTransactionException {
+    public ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone, ZonedDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextZonedDateTimeOrNull(zone);
         if (value == null) {
             return defaultValue;
@@ -2166,8 +2199,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    @Nonnull
-    public Optional<ZonedDateTime> nextZonedDateTimeOpt(@Nonnull ZoneId zone) throws IOException, TsurugiTransactionException {
+    public @Nonnull Optional<ZonedDateTime> nextZonedDateTimeOpt(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextZonedDateTimeOrNull(zone);
         return Optional.ofNullable(value);
     }
@@ -2180,8 +2212,7 @@ public class TsurugiResultRecord {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    @Nullable
-    public ZonedDateTime nextZonedDateTimeOrNull(@Nonnull ZoneId zone) throws IOException, TsurugiTransactionException {
+    public @Nullable ZonedDateTime nextZonedDateTimeOrNull(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowValue = nextLowValue();
         return convertUtil.toZonedDateTime(lowValue, zone);
     }

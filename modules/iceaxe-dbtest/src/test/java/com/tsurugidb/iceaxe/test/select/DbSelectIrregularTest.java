@@ -2,8 +2,6 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -18,7 +16,7 @@ class DbSelectIrregularTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectIrregularTest.class);
         LOG.debug("init start");
 
@@ -30,7 +28,7 @@ class DbSelectIrregularTest extends DbTestTableTester {
     }
 
     @Test
-    void closePsBeforeCloseRs() throws IOException {
+    void closePsBeforeCloseRs() throws Exception {
         var sql = "select * from " + TEST;
 
         var session = getSession();

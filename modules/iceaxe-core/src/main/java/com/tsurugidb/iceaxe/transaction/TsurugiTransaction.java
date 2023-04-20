@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.transaction;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +41,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 /**
  * Tsurugi Transaction
  */
-public class TsurugiTransaction implements Closeable {
+public class TsurugiTransaction implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransaction.class);
 
     private static final AtomicInteger TRANSACTION_COUNT = new AtomicInteger(0);
@@ -275,7 +274,7 @@ public class TsurugiTransaction implements Closeable {
 
     // internal
 //  @ThreadSafe
-    public final synchronized Transaction getLowTransaction() throws IOException {
+    public final synchronized Transaction getLowTransaction() throws IOException, InterruptedException {
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
             if (this.lowFutureException != null) {
@@ -307,8 +306,9 @@ public class TsurugiTransaction implements Closeable {
      *
      * @return the id String for this transaction
      * @throws IOException
+     * @throws InterruptedException
      */
-    public String getTransactionId() throws IOException {
+    public String getTransactionId() throws IOException, InterruptedException {
         if (this.transactionId == null) {
             var lowTx = getLowTransaction();
             if (this.transactionId == null) {
@@ -368,9 +368,10 @@ public class TsurugiTransaction implements Closeable {
      *
      * @param sql DDL
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public void executeDdl(String sql) throws IOException, TsurugiTransactionException {
+    public void executeDdl(String sql) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_DDL;
         int txExecuteId = getNewIceaxeTxExecuteId();
         try (var ps = ownerSession.createStatement(sql)) {
@@ -403,12 +404,13 @@ public class TsurugiTransaction implements Closeable {
      * @param ps  SQL statement
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see #executeAndForEach(TsurugiSqlQuery, TsurugiTransactionConsumer)
      * @see #executeAndFindRecord(TsurugiSqlQuery)
      * @see #executeAndGetList(TsurugiSqlQuery)
      */
-    public <R> TsurugiQueryResult<R> executeQuery(TsurugiSqlQuery<R> ps) throws IOException, TsurugiTransactionException {
+    public <R> TsurugiQueryResult<R> executeQuery(TsurugiSqlQuery<R> ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_QUERY;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
@@ -441,12 +443,13 @@ public class TsurugiTransaction implements Closeable {
      * @param parameter SQL parameter
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see #executeAndForEach(TsurugiSqlPreparedQuery, P, TsurugiTransactionConsumer)
      * @see #executeAndFindRecord(TsurugiSqlPreparedQuery, P)
      * @see #executeAndGetList(TsurugiSqlPreparedQuery, P)
      */
-    public <P, R> TsurugiQueryResult<R> executeQuery(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+    public <P, R> TsurugiQueryResult<R> executeQuery(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_QUERY;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
@@ -476,10 +479,11 @@ public class TsurugiTransaction implements Closeable {
      * @param ps SQL statement
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see #executeAndGetCount(TsurugiSqlStatement)
      */
-    public TsurugiStatementResult executeStatement(TsurugiSqlStatement ps) throws IOException, TsurugiTransactionException {
+    public TsurugiStatementResult executeStatement(TsurugiSqlStatement ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_SATTEMENT;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
@@ -511,10 +515,11 @@ public class TsurugiTransaction implements Closeable {
      * @param parameter SQL parameter
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see #executeAndGetCount(TsurugiSqlPreparedStatement, P)
      */
-    public <P> TsurugiStatementResult executeStatement(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, TsurugiTransactionException {
+    public <P> TsurugiStatementResult executeStatement(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_SATTEMENT;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
@@ -546,9 +551,10 @@ public class TsurugiTransaction implements Closeable {
      * @param parameter SQL parameter
      * @param action    The action to be performed for each record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public <R> void executeAndForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+    public <R> void executeAndForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FOR_EACH;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
@@ -581,9 +587,10 @@ public class TsurugiTransaction implements Closeable {
      * @param parameter SQL parameter
      * @param action    The action to be performed for each record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, TsurugiTransactionException {
+    public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FOR_EACH;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
@@ -614,9 +621,10 @@ public class TsurugiTransaction implements Closeable {
      * @param ps  SQL statement
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public <R> List<R> executeAndGetList(TsurugiSqlQuery<R> ps) throws IOException, TsurugiTransactionException {
+    public <R> List<R> executeAndGetList(TsurugiSqlQuery<R> ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_LIST;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
@@ -649,9 +657,10 @@ public class TsurugiTransaction implements Closeable {
      * @param parameter SQL parameter
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public <P, R> List<R> executeAndGetList(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+    public <P, R> List<R> executeAndGetList(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_LIST;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
@@ -682,9 +691,10 @@ public class TsurugiTransaction implements Closeable {
      * @param ps  SQL statement
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public <R> Optional<R> executeAndFindRecord(TsurugiSqlQuery<R> ps) throws IOException, TsurugiTransactionException {
+    public <R> Optional<R> executeAndFindRecord(TsurugiSqlQuery<R> ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FIND_RECORD;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
@@ -717,9 +727,10 @@ public class TsurugiTransaction implements Closeable {
      * @param parameter SQL parameter
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public <P, R> Optional<R> executeAndFindRecord(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, TsurugiTransactionException {
+    public <P, R> Optional<R> executeAndFindRecord(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FIND_RECORD;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
@@ -749,9 +760,10 @@ public class TsurugiTransaction implements Closeable {
      * @param ps SQL statement
      * @return row count
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public int executeAndGetCount(TsurugiSqlStatement ps) throws IOException, TsurugiTransactionException {
+    public int executeAndGetCount(TsurugiSqlStatement ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_COUNT;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
@@ -783,9 +795,10 @@ public class TsurugiTransaction implements Closeable {
      * @param parameter SQL parameter
      * @return row count
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public <P> int executeAndGetCount(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, TsurugiTransactionException {
+    public <P> int executeAndGetCount(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_COUNT;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
@@ -816,7 +829,7 @@ public class TsurugiTransaction implements Closeable {
     }
 
     // internal
-    public <R> R executeLow(LowTransactionTask<R> task) throws IOException {
+    public <R> R executeLow(LowTransactionTask<R> task) throws IOException, InterruptedException {
         checkClose();
         return task.run(getLowTransaction());
     }
@@ -877,9 +890,10 @@ public class TsurugiTransaction implements Closeable {
      *
      * @return true: available
      * @throws IOException
+     * @throws InterruptedException
      */
 //  @ThreadSafe
-    public final synchronized boolean available() throws IOException {
+    public final synchronized boolean available() throws IOException, InterruptedException {
         if (isClosed()) {
             return false;
         }
@@ -894,9 +908,10 @@ public class TsurugiTransaction implements Closeable {
      *
      * @param commitType commit type
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public synchronized void commit(TgCommitType commitType) throws IOException, TsurugiTransactionException {
+    public synchronized void commit(TgCommitType commitType) throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();
         if (this.committed) {
             return;
@@ -933,9 +948,10 @@ public class TsurugiTransaction implements Closeable {
      * do rollback
      *
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
-    public synchronized void rollback() throws IOException, TsurugiTransactionException {
+    public synchronized void rollback() throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();
         if (this.committed || this.rollbacked) {
             return;
@@ -964,7 +980,7 @@ public class TsurugiTransaction implements Closeable {
         LOG.trace("transaction rollback end");
     }
 
-    protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, TsurugiTransactionException {
+    protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, InterruptedException, TsurugiTransactionException {
         var transaction = getLowTransaction();
         var lowResultFuture = finisher.apply(transaction);
         closeTimeout.apply(lowResultFuture);
@@ -1001,7 +1017,7 @@ public class TsurugiTransaction implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException, InterruptedException {
         this.closed = true;
 
 //      if (!(this.committed || this.rollbacked)) {

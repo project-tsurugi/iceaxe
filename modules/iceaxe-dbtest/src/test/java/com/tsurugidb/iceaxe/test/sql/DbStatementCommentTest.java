@@ -15,7 +15,7 @@ class DbStatementCommentTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
-    void comment(boolean prepared) throws IOException {
+    void comment(boolean prepared) throws Exception {
         var list1 = List.of("", "-- comment1\n", "/*comment1*/");
         var list2 = List.of("", "-- comment2\n", "/*comment2*/");
         var list3 = List.of("", "-- comment3", "-- comment3\n", "/*comment3*/");
@@ -41,7 +41,7 @@ class DbStatementCommentTest extends DbTestTableTester {
         }
     }
 
-    private void test(String sql, boolean prepared) throws IOException {
+    private void test(String sql, boolean prepared) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         var entity = createTestEntity(0);

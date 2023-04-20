@@ -16,7 +16,7 @@ import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
  */
 public class Example02Session {
 
-    void createSession(URI endpoint, Credential credential) throws IOException {
+    void createSession(URI endpoint, Credential credential) throws IOException, InterruptedException {
         var sessionOption = TgSessionOption.of();
         var connector = TsurugiConnector.of(endpoint, credential, sessionOption);
         try (var session = connector.createSession()) {
@@ -25,7 +25,7 @@ public class Example02Session {
         }
     }
 
-    void createSession_option(URI endpoint, Credential credential) throws IOException {
+    void createSession_option(URI endpoint, Credential credential) throws IOException, InterruptedException {
         var connector = TsurugiConnector.of(endpoint, credential);
         var sessionOption = TgSessionOption.of();
         try (var session = connector.createSession(sessionOption)) {
@@ -34,7 +34,7 @@ public class Example02Session {
         }
     }
 
-    void createSession_credential(URI endpoint, Credential credential) throws IOException {
+    void createSession_credential(URI endpoint, Credential credential) throws IOException, InterruptedException {
         var connector = TsurugiConnector.of(endpoint);
         var sessionOption = TgSessionOption.of();
         try (var session = connector.createSession(credential, sessionOption)) {

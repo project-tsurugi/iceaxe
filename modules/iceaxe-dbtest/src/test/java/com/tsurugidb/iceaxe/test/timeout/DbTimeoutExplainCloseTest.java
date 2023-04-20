@@ -11,11 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
-import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
@@ -29,7 +29,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbTimeoutExplainCloseTest.class);
         LOG.debug("init start");
 
@@ -40,7 +40,7 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutDefault() throws IOException {
+    void timeoutDefault() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -50,7 +50,7 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSpecified() throws IOException {
+    void timeoutSpecified() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -60,7 +60,7 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSet() throws IOException {
+    void timeoutSet() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifyPs(TsurugiSqlPrepared<?> ps) {

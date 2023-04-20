@@ -36,7 +36,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     private static final String TEST2 = "test2";
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -48,7 +48,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTest2Table() throws IOException {
+    private static void createTest2Table() throws IOException, InterruptedException {
         dropTable(TEST2);
         var sql = "create table " + TEST2 //
                 + "(" //
@@ -94,7 +94,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
     @Disabled // FIXME issue106 2023-03-23 retry-over
-    void insertMultiTxOcc1(boolean prepare) throws IOException, InterruptedException {
+    void insertMultiTxOcc1(boolean prepare) throws Exception {
 //      insertMultiTx(100, 1, TgTmSetting.of(TgTxOption.ofOCC()), prepare);
         insertMultiTxOcc(1, prepare);
     }
@@ -102,13 +102,13 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
     @Disabled // FIXME issue106 2023-03-23 retry-over
-    void insertMultiTxOcc30(boolean prepare) throws IOException, InterruptedException {
+    void insertMultiTxOcc30(boolean prepare) throws Exception {
         insertMultiTxOcc(30, prepare);
     }
 
     @RepeatedTest(4)
     @Disabled // TODO remove Disabled たまにtateyama-serverでstd::bad_allocが発生する
-    void insertMultiTxOcc30False() throws IOException, InterruptedException {
+    void insertMultiTxOcc30False() throws Exception {
         insertMultiTxOcc(30, false);
     }
 
@@ -124,11 +124,11 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
-    void insertMultiTxLtx(boolean prepare) throws IOException, InterruptedException {
+    void insertMultiTxLtx(boolean prepare) throws Exception {
         insertMultiTx(100, 30, TgTmSetting.of(TgTxOption.ofLTX(TEST2)), prepare);
     }
 
-    private void insertMultiTx(int recordSize, int threadSize, TgTmSetting setting, boolean prepare) throws IOException {
+    private void insertMultiTx(int recordSize, int threadSize, TgTmSetting setting, boolean prepare) throws IOException, InterruptedException {
         var key1 = TgBindVariable.ofInt("key1");
         var deleteSql = "delete from " + TEST2 + " where key1=" + key1;
         var deleteMapping = TgParameterMapping.of(key1);
@@ -225,10 +225,12 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
             } catch (IOException e) {
                 this.exception = e;
                 throw new UncheckedIOException(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
 
-        private void runInTransaction(TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+        private void runInTransaction(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
             var parameter = TgBindParameters.of(TgBindParameter.of("key1", number));
             transaction.executeAndGetCount(deletePs, parameter);
 

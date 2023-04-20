@@ -25,7 +25,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 public class DbInsertConstraintTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -35,7 +35,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     }
 
     @Test
-    void insertSequentialTx() throws IOException {
+    void insertSequentialTx() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();
@@ -54,7 +54,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     }
 
     @Test
-    void insertSameTx() throws IOException {
+    void insertSameTx() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();
@@ -80,7 +80,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     }
 
     @Test
-    void insertSameTxIgnoreEx() throws IOException {
+    void insertSameTxIgnoreEx() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();
@@ -106,7 +106,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     }
 
     @Test
-    void insertSameTxLazyCheck() throws IOException {
+    void insertSameTxLazyCheck() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -116,7 +116,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         }
     }
 
-    private void insertSameTxLazyCheck(TsurugiTransactionManager tm, TsurugiSqlPreparedStatement<TestEntity> ps) throws IOException {
+    private void insertSameTxLazyCheck(TsurugiTransactionManager tm, TsurugiSqlPreparedStatement<TestEntity> ps) throws IOException, InterruptedException {
         var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var entity = createTestEntity(1);
@@ -141,7 +141,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     }
 
     @Test
-    void insertParallelTx() throws IOException {
+    void insertParallelTx() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();
@@ -179,7 +179,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     }
 
     @Test
-    void insertParallelTxRollback() throws IOException, TsurugiTransactionException {
+    void insertParallelTxRollback() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
 
         var session = getSession();

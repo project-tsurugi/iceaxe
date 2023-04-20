@@ -21,7 +21,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
 
     @Test
-    void timeoutDefault() throws IOException {
+    void timeoutDefault() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -31,7 +31,7 @@ public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSpecified() throws IOException {
+    void timeoutSpecified() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -41,7 +41,7 @@ public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
     }
 
     @Test
-    void timeoutSet() throws IOException {
+    void timeoutSet() throws Exception {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySession(TsurugiSession session) {

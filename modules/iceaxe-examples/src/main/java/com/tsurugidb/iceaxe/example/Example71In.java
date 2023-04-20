@@ -18,7 +18,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example71In {
 
-    void main() throws IOException {
+    void main() throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
             var tm = session.createTransactionManager(setting);
@@ -27,7 +27,7 @@ public class Example71In {
         }
     }
 
-    void in1(TsurugiSession session, TsurugiTransactionManager tm, List<Integer> fooList) throws IOException {
+    void in1(TsurugiSession session, TsurugiTransactionManager tm, List<Integer> fooList) throws IOException, InterruptedException {
         var variables = TgBindVariables.of();
         var parameter = TgBindParameters.of();
         int i = 0;

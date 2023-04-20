@@ -10,5 +10,5 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
  */
 @FunctionalInterface
 public interface TsurugiTransactionConsumer<T> {
-    void accept(T t) throws IOException, TsurugiTransactionException;
+    void accept(T t) throws IOException, InterruptedException, TsurugiTransactionException;
 }

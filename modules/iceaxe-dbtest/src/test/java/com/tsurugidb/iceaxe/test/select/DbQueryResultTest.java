@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.test.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +23,7 @@ class DbQueryResultTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbQueryResultTest.class);
         LOG.debug("init start");
 
@@ -36,7 +35,7 @@ class DbQueryResultTest extends DbTestTableTester {
     }
 
     @Test
-    void whileEach() throws IOException {
+    void whileEach() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
@@ -59,7 +58,7 @@ class DbQueryResultTest extends DbTestTableTester {
     }
 
     @Test
-    void getRecordList() throws IOException {
+    void getRecordList() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
@@ -78,7 +77,7 @@ class DbQueryResultTest extends DbTestTableTester {
     }
 
     @Test
-    void findRecord() throws IOException {
+    void findRecord() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL + " order by foo", SELECT_MAPPING)) {
@@ -99,7 +98,7 @@ class DbQueryResultTest extends DbTestTableTester {
     }
 
     @Test
-    void iterator() throws IOException {
+    void iterator() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
@@ -123,7 +122,7 @@ class DbQueryResultTest extends DbTestTableTester {
     }
 
     @Test
-    void forEach() throws IOException {
+    void forEach() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {

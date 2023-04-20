@@ -31,7 +31,7 @@ class DbTransactionTest extends DbTestTableTester {
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -42,7 +42,7 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @Test
-    void transactionId() throws IOException {
+    void transactionId() throws Exception {
         var session = getSession();
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             var id = transaction.getTransactionId();
@@ -52,7 +52,7 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @RepeatedTest(6)
-    void doNothing() throws IOException {
+    void doNothing() throws Exception {
         try (var session = DbTestConnector.createSession()) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
@@ -63,7 +63,7 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @Test
-    void commit() throws IOException, TsurugiTransactionException {
+    void commit() throws Exception {
         var session = getSession();
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
@@ -81,7 +81,7 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @Test
-    void commitTm() throws IOException {
+    void commitTm() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -99,7 +99,7 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @Test
-    void rollback() throws IOException, TsurugiTransactionException {
+    void rollback() throws Exception {
         var session = getSession();
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                 var transaction = session.createTransaction(TgTxOption.ofOCC())) {
@@ -117,7 +117,7 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @Test
-    void rollbackTmByException() throws IOException {
+    void rollbackTmByException() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -139,7 +139,7 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @Test
-    void rollbackTmExplicit() throws IOException {
+    void rollbackTmExplicit() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -158,7 +158,7 @@ class DbTransactionTest extends DbTestTableTester {
         assertEqualsTestTable(SIZE);
     }
 
-    private static void assertSelect(int expected, TsurugiSession session, TsurugiTransaction transaction) throws IOException, TsurugiTransactionException {
+    private static void assertSelect(int expected, TsurugiSession session, TsurugiTransaction transaction) throws IOException, TsurugiTransactionException, InterruptedException {
         try (var ps = session.createQuery(SELECT_SQL)) {
             var list = transaction.executeAndGetList(ps);
             assertEquals(expected, list.size());

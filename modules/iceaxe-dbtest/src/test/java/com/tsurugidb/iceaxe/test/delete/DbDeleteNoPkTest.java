@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.test.delete;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -16,7 +14,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOE
 class DbDeleteNoPkTest extends DbTestTableTester {
 
     @BeforeEach
-    void beforeEach(TestInfo info) throws IOException {
+    void beforeEach(TestInfo info) throws Exception {
         LOG.debug("{} init start", info.getDisplayName());
 
         dropTestTable();
@@ -26,7 +24,7 @@ class DbDeleteNoPkTest extends DbTestTableTester {
         LOG.debug("{} init end", info.getDisplayName());
     }
 
-    private static void createTable() throws IOException {
+    private static void createTable() throws Exception {
         // no primary key
         var sql = "create table " + TEST //
                 + "(" //
@@ -38,22 +36,22 @@ class DbDeleteNoPkTest extends DbTestTableTester {
     }
 
     @Test
-    void deleteAll() throws IOException {
+    void deleteAll() throws Exception {
         new DbDeleteTest().deleteAll();
     }
 
     @Test
-    void deleteConstant() throws IOException {
+    void deleteConstant() throws Exception {
         new DbDeleteTest().deleteConstant();
     }
 
     @Test
-    void deleteByBind() throws IOException {
+    void deleteByBind() throws Exception {
         new DbDeleteTest().deleteByBind();
     }
 
     @RepeatedTest(15)
-    void delete2SeqTx() throws IOException {
+    void delete2SeqTx() throws Exception {
         try {
             new DbDeleteTest().delete2SeqTx();
         } catch (TsurugiTransactionRetryOverIOException e) {
@@ -68,37 +66,37 @@ class DbDeleteNoPkTest extends DbTestTableTester {
     }
 
     @Test
-    void delete2SameTx() throws IOException {
+    void delete2SameTx() throws Exception {
         new DbDeleteTest().delete2SameTx();
     }
 
     @Test
-    void delete2Range() throws IOException {
+    void delete2Range() throws Exception {
         new DbDeleteTest().delete2Range();
     }
 
     @Test
-    void deleteInsert() throws IOException {
+    void deleteInsert() throws Exception {
         new DbDeleteTest().deleteInsert();
     }
 
     @Test
-    void deleteInsertDeleteExists() throws IOException {
+    void deleteInsertDeleteExists() throws Exception {
         new DbDeleteTest().deleteInsertDeleteExists();
     }
 
     @Test
-    void deleteInsertDeleteNotExists() throws IOException {
+    void deleteInsertDeleteNotExists() throws Exception {
         new DbDeleteTest().deleteInsertDeleteNotExists();
     }
 
     @Test
-    void insertDelete() throws IOException {
+    void insertDelete() throws Exception {
         new DbDeleteTest().insertDelete();
     }
 
     @Test
-    void insertDeleteInsert() throws IOException {
+    void insertDeleteInsert() throws Exception {
         new DbDeleteTest().insertDeleteInsert();
     }
 }

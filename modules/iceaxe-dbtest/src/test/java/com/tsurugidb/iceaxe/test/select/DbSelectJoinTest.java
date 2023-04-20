@@ -29,7 +29,7 @@ class DbSelectJoinTest extends DbTestTableTester {
     private static final String DETAIL = "detail";
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectJoinTest.class);
         LOG.debug("init start");
 
@@ -40,12 +40,12 @@ class DbSelectJoinTest extends DbTestTableTester {
         LOG.debug("init end");
     }
 
-    private static void dropMasterDetail() throws IOException {
+    private static void dropMasterDetail() throws IOException, InterruptedException {
         dropTable(MASTER);
         dropTable(DETAIL);
     }
 
-    private static void createMasterDetail() throws IOException {
+    private static void createMasterDetail() throws IOException, InterruptedException {
         var session = getSession();
         {
             var sql = "create table " + MASTER //
@@ -82,7 +82,7 @@ class DbSelectJoinTest extends DbTestTableTester {
             new DetailEntity(40, 4, "master nothing"), //
             new DetailEntity(90, null, "master null"));
 
-    private static void insertMasterDetail() throws IOException {
+    private static void insertMasterDetail() throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);
         tm.execute(transaction -> {
@@ -157,7 +157,7 @@ class DbSelectJoinTest extends DbTestTableTester {
             .addString("d_memo", DetailEntity::getMemo);
 
     @Test
-    void simpleJoin() throws IOException {
+    void simpleJoin() throws Exception {
         var sql = "select * from " + DETAIL + " d, " + MASTER + " m\n" //
                 + "where m.m_id = d.d_master_id\n" //
                 + "order by d_id";
@@ -179,7 +179,7 @@ class DbSelectJoinTest extends DbTestTableTester {
     }
 
     @Test
-    void innerJoin() throws IOException {
+    void innerJoin() throws Exception {
         var sql = "select * from " + DETAIL + " d\n" //
                 + "inner join " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";
@@ -201,7 +201,7 @@ class DbSelectJoinTest extends DbTestTableTester {
     }
 
     @Test
-    void leftJoin() throws IOException {
+    void leftJoin() throws Exception {
         var sql = "select * from " + DETAIL + " d\n" //
                 + "left join " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";

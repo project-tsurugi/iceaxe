@@ -23,7 +23,7 @@ public class Example04TransactionManagerCounter {
      */
     private static final TgTmSetting SETTING = TgTmSetting.of(OCC, LTX);
 
-    void simpleCounter(TsurugiSession session) throws IOException {
+    void simpleCounter(TsurugiSession session) throws IOException, InterruptedException {
         var counter = new TgTmSimpleCounter();
 
         var tm = session.createTransactionManager(SETTING);
@@ -37,7 +37,7 @@ public class Example04TransactionManagerCounter {
         System.out.println(count);
     }
 
-    void labelCounter(TsurugiSession session) throws IOException {
+    void labelCounter(TsurugiSession session) throws IOException, InterruptedException {
         var counter = new TgTmLabelCounter();
 
         var tm = session.createTransactionManager(SETTING);
@@ -51,7 +51,7 @@ public class Example04TransactionManagerCounter {
         System.out.println(count1);
     }
 
-    void useSetting(TsurugiSession session) throws IOException {
+    void useSetting(TsurugiSession session) throws IOException, InterruptedException {
         var counter = new TgTmSimpleCounter();
 
         var tm = session.createTransactionManager();

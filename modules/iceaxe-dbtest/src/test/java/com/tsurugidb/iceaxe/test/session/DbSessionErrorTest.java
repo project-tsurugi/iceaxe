@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
@@ -22,7 +20,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbSessionErrorTest extends DbTestTableTester {
 
     @Test
-    void createQueryAfterClose() throws IOException {
+    void createQueryAfterClose() throws Exception {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
@@ -32,7 +30,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void createPreparedQueryAfterClose() throws IOException {
+    void createPreparedQueryAfterClose() throws Exception {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
@@ -42,7 +40,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void createStatementAfterClose() throws IOException {
+    void createStatementAfterClose() throws Exception {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
@@ -52,7 +50,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void createPreparedStatementAfterClose() throws IOException {
+    void createPreparedStatementAfterClose() throws Exception {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
@@ -62,7 +60,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void createTransactionAfterClose() throws IOException {
+    void createTransactionAfterClose() throws Exception {
         var session = createClosedSession();
 
         var e = assertThrowsExactly(TsurugiIOException.class, () -> {
@@ -72,13 +70,13 @@ class DbSessionErrorTest extends DbTestTableTester {
     }
 
     @Test
-    void craeteTmAfterClose() throws IOException {
+    void craeteTmAfterClose() throws Exception {
         var session = createClosedSession();
 
         session.createTransactionManager(); // not thrown
     }
 
-    private TsurugiSession createClosedSession() throws IOException {
+    private TsurugiSession createClosedSession() throws Exception {
         var session = DbTestConnector.createSession();
         try {
             assertTrue(session.isAlive());

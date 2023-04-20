@@ -76,10 +76,11 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param parameter   SQL parameter
      * @return SQL result
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      * @see TsurugiTransaction#executeQuery(TsurugiSqlPreparedQuery, P)
      */
-    public TsurugiQueryResult<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
+    public TsurugiQueryResult<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();
 
         LOG.trace("execute start");
@@ -111,10 +112,11 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param parameter   SQL parameter
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
+    public Optional<R> executeAndFindRecord(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         return transaction.executeAndFindRecord(this, parameter);
     }
 
@@ -125,9 +127,10 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param parameter SQL parameter
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, P parameter) throws IOException {
+    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, P parameter) throws IOException, InterruptedException {
         return tm.executeAndFindRecord(this, parameter);
     }
 
@@ -139,9 +142,10 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param parameter SQL parameter
      * @return record
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException {
+    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException, InterruptedException {
         return tm.executeAndFindRecord(setting, this, parameter);
     }
 
@@ -152,10 +156,11 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param parameter   SQL parameter
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransaction transaction, P parameter) throws IOException, TsurugiTransactionException {
+    public List<R> executeAndGetList(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         return transaction.executeAndGetList(this, parameter);
     }
 
@@ -166,9 +171,10 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param parameter SQL parameter
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransactionManager tm, P parameter) throws IOException {
+    public List<R> executeAndGetList(TsurugiTransactionManager tm, P parameter) throws IOException, InterruptedException {
         return tm.executeAndGetList(this, parameter);
     }
 
@@ -180,9 +186,10 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param parameter SQL parameter
      * @return list of record
      * @throws IOException
+     * @throws InterruptedException
      */
     @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException {
+    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException, InterruptedException {
         return tm.executeAndGetList(setting, this, parameter);
     }
 }

@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.session;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 /**
  * Tsurugi Session
  */
-public class TsurugiSession implements Closeable {
+public class TsurugiSession implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSession.class);
 
     private final TgSessionOption sessionOption;
@@ -167,7 +166,7 @@ public class TsurugiSession implements Closeable {
 
     // internal
 //  @ThreadSafe
-    public final synchronized SqlClient getLowSqlClient() throws IOException {
+    public final synchronized SqlClient getLowSqlClient() throws IOException, InterruptedException {
         if (this.lowSqlClient == null) {
             var lowSession = getLowSession();
             LOG.trace("SqlClient.attach start");
@@ -179,7 +178,7 @@ public class TsurugiSession implements Closeable {
     }
 
 //  @ThreadSafe
-    protected final synchronized Session getLowSession() throws IOException {
+    protected final synchronized Session getLowSession() throws IOException, InterruptedException {
         if (this.lowSession == null) {
             if (this.lowFutureException != null) {
                 throw new TsurugiIOException(IceaxeErrorCode.SESSION_LOW_ERROR, lowFutureException);
@@ -208,7 +207,7 @@ public class TsurugiSession implements Closeable {
     public boolean isAlive() {
         try {
             return getLowSession().isAlive();
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             LOG.trace("exception in isAlive()", e);
             return false;
         }
@@ -241,9 +240,10 @@ public class TsurugiSession implements Closeable {
      * @param tableName table name
      * @return table metadata (empty if table not found)
      * @throws IOException
+     * @throws InterruptedException
      */
 //  @ThreadSafe
-    public Optional<TgTableMetadata> findTableMetadata(String tableName) throws IOException {
+    public Optional<TgTableMetadata> findTableMetadata(String tableName) throws IOException, InterruptedException {
         var helper = getTableMetadataHelper();
         return helper.findTableMetadata(this, tableName);
     }
@@ -307,9 +307,10 @@ public class TsurugiSession implements Closeable {
      * @param parameterMapping parameter mapping
      * @return SQL prepared query
      * @throws IOException
+     * @throws InterruptedException
      */
 //  @ThreadSafe
-    public <P> TsurugiSqlPreparedQuery<P, TsurugiResultEntity> createQuery(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
+    public <P> TsurugiSqlPreparedQuery<P, TsurugiResultEntity> createQuery(String sql, TgParameterMapping<P> parameterMapping) throws IOException, InterruptedException {
         return createQuery(sql, parameterMapping, TgResultMapping.DEFAULT);
     }
 
@@ -323,9 +324,10 @@ public class TsurugiSession implements Closeable {
      * @param resultMapping    result mapping
      * @return SQL prepared query
      * @throws IOException
+     * @throws InterruptedException
      */
 //  @ThreadSafe
-    public <P, R> TsurugiSqlPreparedQuery<P, R> createQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException {
+    public <P, R> TsurugiSqlPreparedQuery<P, R> createQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException, InterruptedException {
         checkClose();
         LOG.trace("createQuery start. sql={}", sql);
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
@@ -360,9 +362,10 @@ public class TsurugiSession implements Closeable {
      * @param parameterMapping parameter mapping
      * @return SQL prepared statement
      * @throws IOException
+     * @throws InterruptedException
      */
 //  @ThreadSafe
-    public <P> TsurugiSqlPreparedStatement<P> createStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException {
+    public <P> TsurugiSqlPreparedStatement<P> createStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException, InterruptedException {
         checkClose();
         LOG.trace("createStatement start. sql={}", sql);
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
@@ -414,9 +417,10 @@ public class TsurugiSession implements Closeable {
      * @param txOption transaction option
      * @return Transaction
      * @throws IOException
+     * @throws InterruptedException
      */
 //  @ThreadSafe
-    public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption) throws IOException {
+    public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption) throws IOException, InterruptedException {
         return createTransaction(txOption, null);
     }
 
@@ -427,9 +431,10 @@ public class TsurugiSession implements Closeable {
      * @param initializer transaction initializer
      * @return Transaction
      * @throws IOException
+     * @throws InterruptedException
      */
 //  @ThreadSafe
-    public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption, @Nullable Consumer<TsurugiTransaction> initializer) throws IOException {
+    public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption, @Nullable Consumer<TsurugiTransaction> initializer) throws IOException, InterruptedException {
         checkClose();
 
         var lowOption = txOption.toLowTransactionOption();
@@ -445,18 +450,18 @@ public class TsurugiSession implements Closeable {
     }
 
     // internal
-    public void addChild(Closeable closeable) throws IOException {
+    public void addChild(AutoCloseable closeable) throws IOException {
         checkClose();
         closeableSet.add(closeable);
     }
 
     // internal
-    public void removeChild(Closeable closeable) {
+    public void removeChild(AutoCloseable closeable) {
         closeableSet.remove(closeable);
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException, InterruptedException {
         this.closed = true;
 
         LOG.trace("session close start");
