@@ -146,7 +146,8 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         }
     }
 
-    protected final synchronized ResultSet getLowResultSet() throws IOException, InterruptedException, TsurugiTransactionException {
+    // internal
+    public final synchronized ResultSet getLowResultSet() throws IOException, InterruptedException, TsurugiTransactionException {
         this.calledGetLowResultSet = true;
         if (this.lowResultSet == null) {
             LOG.trace("lowResultSet get start");

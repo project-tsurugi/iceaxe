@@ -67,7 +67,7 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
                 var result = ps.execute(transaction);
                 modifier.modifyQueryResult(result);
 
-                // result.getRecordList();
+                result.getLowResultSet();
 
                 pipeServer.setPipeWrite(false);
                 try {
