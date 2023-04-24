@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
@@ -84,6 +86,7 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
 
     protected TsurugiSession createSession(PipeServerThtread pipeServer, TsurugiConnector connector, TimeoutModifier modifier) throws IOException {
         var sessionOption = TgSessionOption.of();
+        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 10, TimeUnit.SECONDS);
         modifier.modifySessionInfo(sessionOption);
 
         TsurugiSession session = null;

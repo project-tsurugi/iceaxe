@@ -69,6 +69,7 @@ public class DbTimeoutResultCheckTest extends DbTimetoutTest {
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(0);
+                ps.explain(entity); // getLowPreparedStatement()
 
                 pipeServer.setPipeWrite(false);
                 try (var result = ps.execute(transaction, entity)) {
@@ -84,6 +85,8 @@ public class DbTimeoutResultCheckTest extends DbTimetoutTest {
                         pipeServer.setPipeWrite(true);
                     }
                     fail("didn't time out");
+                } finally {
+                    pipeServer.setPipeWrite(true);
                 }
             }
         }

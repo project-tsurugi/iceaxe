@@ -68,6 +68,8 @@ public class DbTimeoutTransactionBeginTest extends DbTimetoutTest {
                 pipeServer.setPipeWrite(true);
             }
             fail("didn't time out");
+        } finally {
+            pipeServer.setPipeWrite(true);
         }
     }
 }
