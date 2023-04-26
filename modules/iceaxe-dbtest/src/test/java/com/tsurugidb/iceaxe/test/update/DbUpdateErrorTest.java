@@ -23,7 +23,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(info);
 
         dropTestTable();
         if (!info.getDisplayName().equals("updateNullToNotNull()")) {
@@ -31,7 +31,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
             insertTestTable(SIZE);
         }
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(info);
     }
 
     @Test

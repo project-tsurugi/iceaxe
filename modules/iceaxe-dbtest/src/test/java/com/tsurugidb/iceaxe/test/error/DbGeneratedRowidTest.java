@@ -30,13 +30,13 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(info);
 
         dropTestTable();
         createTable();
         insertTestTable(SIZE);
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(info);
     }
 
     private static void createTable() throws IOException, InterruptedException {

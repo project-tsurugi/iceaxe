@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -25,17 +24,17 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
  * select boundary value test
  */
 class DbSelectBoundaryValueTest extends DbTestTableTester {
-    private static final Logger LOG = LoggerFactory.getLogger(DbSelectBoundaryValueTest.class);
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
-        LOG.debug("{} init start", info.getDisplayName());
+        var LOG = LoggerFactory.getLogger(DbSelectBoundaryValueTest.class);
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTable();
         insertTable();
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(LOG, info);
     }
 
     private static void createTable() throws IOException, InterruptedException {

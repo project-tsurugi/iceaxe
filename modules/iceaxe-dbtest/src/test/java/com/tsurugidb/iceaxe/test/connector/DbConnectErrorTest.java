@@ -15,12 +15,13 @@ import org.opentest4j.AssertionFailedError;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * connect error test
  */
-public class DbConnectErrorTest {
+public class DbConnectErrorTest extends DbTestTableTester {
 
     @Test
     void connectError() throws Exception {

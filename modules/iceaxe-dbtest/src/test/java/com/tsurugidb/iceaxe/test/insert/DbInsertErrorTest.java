@@ -24,14 +24,14 @@ class DbInsertErrorTest extends DbTestTableTester {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(info);
 
         dropTestTable();
         if (!info.getDisplayName().equals("insertNullToNotNull()")) {
             createTestTable();
         }
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(info);
     }
 
     @Test

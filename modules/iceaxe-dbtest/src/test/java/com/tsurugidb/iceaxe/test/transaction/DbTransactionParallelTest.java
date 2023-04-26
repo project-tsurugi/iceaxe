@@ -36,14 +36,14 @@ class DbTransactionParallelTest extends DbTestTableTester {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(info);
 
         dropTestTable();
         createTestTable();
         dropTable(TEST2);
         createTest2Table();
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(info);
     }
 
     private static void createTest2Table() throws IOException, InterruptedException {

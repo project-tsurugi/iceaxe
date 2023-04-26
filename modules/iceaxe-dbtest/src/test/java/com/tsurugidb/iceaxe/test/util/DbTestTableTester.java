@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -50,6 +51,24 @@ public class DbTestTableTester {
         return staticSession;
     }
 
+    private static final boolean START_END_LOG_INFO = true;
+
+    protected static void logInitStart(Logger log, TestInfo info) {
+        if (START_END_LOG_INFO) {
+            log.info("init all start");
+        } else {
+            log.debug("init all start");
+        }
+    }
+
+    protected static void logInitEnd(Logger log, TestInfo info) {
+        if (START_END_LOG_INFO) {
+            log.info("init all end");
+        } else {
+            log.debug("init all end");
+        }
+    }
+
     @AfterAll
     static void testerAfterAll() throws IOException, InterruptedException {
         if (staticSession != null) {
@@ -58,14 +77,47 @@ public class DbTestTableTester {
         }
     }
 
+    protected void logInitStart(TestInfo info) {
+        if (START_END_LOG_INFO) {
+            LOG.info("{} init start", getDisplayName(info));
+        } else {
+            LOG.debug("{} init start", getDisplayName(info));
+        }
+    }
+
+    protected void logInitEnd(TestInfo info) {
+        if (START_END_LOG_INFO) {
+            LOG.info("{} init end", getDisplayName(info));
+        } else {
+            LOG.debug("{} init end", getDisplayName(info));
+        }
+    }
+
     @BeforeEach
     void tetsterBeforeEach(TestInfo info) {
-        LOG.debug("{} start", info.getDisplayName());
+        if (START_END_LOG_INFO) {
+            LOG.info("{} start", getDisplayName(info));
+        } else {
+            LOG.debug("{} start", getDisplayName(info));
+        }
     }
 
     @AfterEach
     void testerAfterEach(TestInfo info) {
-        LOG.debug("{} end", info.getDisplayName());
+        if (START_END_LOG_INFO) {
+            LOG.info("{} end", getDisplayName(info));
+        } else {
+            LOG.debug("{} end", getDisplayName(info));
+        }
+    }
+
+    private static String getDisplayName(TestInfo info) {
+        String d = info.getDisplayName();
+        String m = info.getTestMethod().map(Method::getName).orElse(null);
+        if (m != null && !d.startsWith(m)) {
+            return m + "() " + d;
+        }
+        return d;
     }
 
     // property

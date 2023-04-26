@@ -37,7 +37,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(info);
 
         dropTestTable();
         createTestTable();
@@ -45,7 +45,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
 
         createTest2Table();
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(info);
     }
 
     private static void createTest2Table() throws IOException, InterruptedException {

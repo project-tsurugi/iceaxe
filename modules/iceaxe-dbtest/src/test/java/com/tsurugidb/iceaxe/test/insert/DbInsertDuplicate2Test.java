@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +43,8 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
     private static final String TEST2 = "test2";
 
     @BeforeEach
-    void beforeEach() throws Exception {
-        LOG.debug("init start");
+    void beforeEach(TestInfo info) throws Exception {
+        logInitStart(info);
 
         dropTestTable();
         createTestTable();
@@ -52,7 +53,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
         dropTable(TEST2);
         createTest2Table();
 
-        LOG.debug("init end");
+        logInitEnd(info);
     }
 
     private static void createTest2Table() throws IOException, InterruptedException {

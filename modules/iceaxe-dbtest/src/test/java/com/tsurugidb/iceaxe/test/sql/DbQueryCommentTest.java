@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
@@ -20,15 +21,15 @@ class DbQueryCommentTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeAll
-    static void beforeAll() throws Exception {
+    static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbQueryCommentTest.class);
-        LOG.debug("init start");
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTestTable();
         insertTestTable(SIZE);
 
-        LOG.debug("init end");
+        logInitEnd(LOG, info);
     }
 
     @ParameterizedTest

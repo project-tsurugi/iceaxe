@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -21,9 +22,9 @@ class DbSelectFetchTest extends DbTestTableTester {
     private static final int SIZE = 8300;
 
     @BeforeAll
-    static void beforeAll() throws Exception {
-        var LOG = LoggerFactory.getLogger(DbSelectTest.class);
-        LOG.debug("init start");
+    static void beforeAll(TestInfo info) throws Exception {
+        var LOG = LoggerFactory.getLogger(DbSelectFetchTest.class);
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTestTable();
@@ -32,7 +33,7 @@ class DbSelectFetchTest extends DbTestTableTester {
         dropTable(TEST2);
         createTest2Table();
 
-        LOG.debug("init end");
+        logInitEnd(LOG, info);
     }
 
     private static final String TEST2 = "test2";

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
@@ -34,14 +35,14 @@ class DbSelectOtherTxTest extends DbTestTableTester {
     private static final int SIZE = 4;
 
     @BeforeEach
-    void beforeEach() throws Exception {
-        LOG.debug("init start");
+    void beforeEach(TestInfo info) throws Exception {
+        logInitStart(info);
 
         dropTestTable();
         createTestTable();
         insertTestTable(SIZE);
 
-        LOG.debug("init end");
+        logInitEnd(info);
     }
 
     @RepeatedTest(8)

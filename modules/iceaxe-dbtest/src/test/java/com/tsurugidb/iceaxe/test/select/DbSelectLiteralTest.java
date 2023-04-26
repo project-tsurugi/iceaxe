@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
@@ -25,15 +26,15 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 class DbSelectLiteralTest extends DbTestTableTester {
 
     @BeforeAll
-    static void beforeAll() throws Exception {
+    static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectLiteralTest.class);
-        LOG.debug("init start");
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTestTable();
         insertTestTable(1);
 
-        LOG.debug("init end");
+        logInitEnd(LOG, info);
     }
 
     private static final String COLUMN = "c";

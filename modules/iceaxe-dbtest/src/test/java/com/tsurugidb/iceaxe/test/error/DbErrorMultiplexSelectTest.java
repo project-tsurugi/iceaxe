@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
@@ -24,15 +25,15 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeAll
-    static void beforeAll() throws Exception {
+    static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbErrorMultiplexSelectTest.class);
-        LOG.debug("init start");
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTestTable();
         insertTestTable(1);
 
-        LOG.debug("init end");
+        logInitEnd(LOG, info);
     }
 
     @Test

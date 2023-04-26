@@ -20,12 +20,12 @@ class DbInsertExplainTest extends DbTestTableTester {
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbInsertExplainTest.class);
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTestTable();
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(LOG, info);
     }
 
     @Test

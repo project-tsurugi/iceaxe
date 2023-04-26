@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
@@ -26,16 +27,16 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     private static TestEntity NULL_ENTITY = new TestEntity(123, null, null);
 
     @BeforeAll
-    static void beforeAll() throws Exception {
+    static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectWhereExpressionTest.class);
-        LOG.debug("init start");
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTestTable();
         insertTestTable(SIZE);
         insertTestTable(NULL_ENTITY);
 
-        LOG.debug("init end");
+        logInitEnd(LOG, info);
     }
 
     @Test

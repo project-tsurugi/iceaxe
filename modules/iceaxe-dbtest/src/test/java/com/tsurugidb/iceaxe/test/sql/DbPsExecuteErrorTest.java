@@ -23,13 +23,13 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(info);
 
         dropTestTable();
         createTestTable();
         insertTestTable(SIZE);
 
-        LOG.debug("{} end start", info.getDisplayName());
+        logInitEnd(info);
     }
 
     @Test

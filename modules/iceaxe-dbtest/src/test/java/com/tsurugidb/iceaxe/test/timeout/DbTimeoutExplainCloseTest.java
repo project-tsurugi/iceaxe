@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
@@ -29,14 +30,14 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
 
     @BeforeAll
-    static void beforeAll() throws Exception {
+    static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbTimeoutExplainCloseTest.class);
-        LOG.debug("init start");
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTestTable();
 
-        LOG.debug("init end");
+        logInitEnd(LOG, info);
     }
 
     @Test

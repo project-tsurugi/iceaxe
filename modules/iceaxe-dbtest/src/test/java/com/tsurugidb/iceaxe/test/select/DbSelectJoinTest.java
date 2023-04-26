@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
@@ -29,15 +30,15 @@ class DbSelectJoinTest extends DbTestTableTester {
     private static final String DETAIL = "detail";
 
     @BeforeAll
-    static void beforeAll() throws Exception {
+    static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbSelectJoinTest.class);
-        LOG.debug("init start");
+        logInitStart(LOG, info);
 
         dropMasterDetail();
         createMasterDetail();
         insertMasterDetail();
 
-        LOG.debug("init end");
+        logInitEnd(LOG, info);
     }
 
     private static void dropMasterDetail() throws IOException, InterruptedException {

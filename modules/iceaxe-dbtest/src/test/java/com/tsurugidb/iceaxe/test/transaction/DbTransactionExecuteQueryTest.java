@@ -27,13 +27,13 @@ class DbTransactionExecuteQueryTest extends DbTestTableTester {
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
         var LOG = LoggerFactory.getLogger(DbTransactionExecuteQueryTest.class);
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(LOG, info);
 
         dropTestTable();
         createTestTable();
         insertTestTable(SIZE);
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(LOG, info);
     }
 
     @Test

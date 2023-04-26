@@ -15,13 +15,13 @@ class DbDeleteNoPkTest extends DbTestTableTester {
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
-        LOG.debug("{} init start", info.getDisplayName());
+        logInitStart(info);
 
         dropTestTable();
         createTable();
         insertTestTable(DbDeleteTest.SIZE);
 
-        LOG.debug("{} init end", info.getDisplayName());
+        logInitEnd(info);
     }
 
     private static void createTable() throws Exception {

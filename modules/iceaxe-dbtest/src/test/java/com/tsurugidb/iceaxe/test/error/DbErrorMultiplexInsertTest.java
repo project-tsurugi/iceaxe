@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -24,15 +25,15 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
     private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
 
     @BeforeEach
-    void beforeEach() throws Exception {
-        LOG.debug("init start");
+    void beforeEach(TestInfo info) throws Exception {
+        logInitStart(info);
 
         dropTestTable();
         createTestTable();
         var entity = new TestEntity(1024, 456, "abc");
         insertTestTable(entity);
 
-        LOG.debug("init end");
+        logInitEnd(info);
     }
 
     @Test
