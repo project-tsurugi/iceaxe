@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -330,6 +331,8 @@ public class TsurugiTransaction implements AutoCloseable {
         EXECUTE_QUERY("executeQuery"),
         /** execute statement */
         EXECUTE_SATTEMENT("executeStatement"),
+        /** execute batch */
+        EXECUTE_BATCH("executeBatch"),
         /** execute and for each */
         EXECUTE_FOR_EACH("executeAndForEach"),
         /** execute and get list */
@@ -540,6 +543,42 @@ public class TsurugiTransaction implements AutoCloseable {
             var finalResult = result;
             var finalOccurred = occurred;
             event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
+        }
+    }
+
+    /**
+     * execute batch.
+     *
+     * @param <P>           parameter type
+     * @param ps            SQL statement
+     * @param parameterList SQL parameter
+     * @return SQL result ({@link java.io.Closeable})
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     * @see #executeAndGetCount(TsurugiSqlPreparedStatement, Collection)
+     */
+    public <P> TsurugiStatementResult executeBatch(TsurugiSqlPreparedStatement<P> ps, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {
+        var method = TgTxMethod.EXECUTE_BATCH;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameterList));
+
+        TsurugiStatementResult result = null;
+        Throwable occurred = null;
+        try {
+            result = ps.executeBatch(this, parameterList);
+            return result;
+        } catch (TsurugiTransactionException e) {
+            occurred = e;
+            e.setTxMethod(method, txExecuteId);
+            throw e;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalResult = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameterList, finalResult, finalOccurred));
         }
     }
 
@@ -819,6 +858,41 @@ public class TsurugiTransaction implements AutoCloseable {
             var finalResult = result;
             var finalOccurred = occurred;
             event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
+        }
+    }
+
+    /**
+     * execute batch.
+     *
+     * @param <P>           parameter type
+     * @param ps            SQL statement
+     * @param parameterList SQL parameter
+     * @return row count
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
+    public <P> int executeAndGetCount(TsurugiSqlPreparedStatement<P> ps, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {
+        var method = TgTxMethod.EXECUTE_GET_COUNT;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameterList));
+
+        TsurugiStatementResult result = null;
+        Throwable occurred = null;
+        try (var rs = ps.executeBatch(this, parameterList)) {
+            result = rs;
+            return rs.getUpdateCount();
+        } catch (TsurugiTransactionException e) {
+            occurred = e;
+            e.setTxMethod(method, txExecuteId);
+            throw e;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalResult = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameterList, finalResult, finalOccurred));
         }
     }
 

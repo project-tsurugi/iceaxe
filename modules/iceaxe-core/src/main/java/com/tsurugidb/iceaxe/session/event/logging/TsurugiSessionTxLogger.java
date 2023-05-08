@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.session.event.logging;
 
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -92,8 +93,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void executeEnd(TsurugiTransaction transaction, TgTxMethod method, int iceaxeTxExecuteId, TsurugiSql ps, Object parameter, TsurugiSqlResult result,
-                @Nullable Throwable occurred) {
+        public void executeEnd(TsurugiTransaction transaction, TgTxMethod method, int iceaxeTxExecuteId, TsurugiSql ps, Object parameter, TsurugiSqlResult result, @Nullable Throwable occurred) {
             doLogTransactionSqlEnd(transaction, method, iceaxeTxExecuteId, ps, parameter, result, occurred);
         }
 
@@ -247,6 +247,31 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
 
         @Override
         public void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Object parameter, TsurugiStatementResult result, Throwable occurred) {
+            doLogSqlClose(transaction, result, occurred);
+        }
+
+        @Override
+        public void executeBatchStart(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Collection<Object> parameterList, int iceaxeSqlExecuteId) {
+            doLogSqlStart(transaction, iceaxeSqlExecuteId, ps, parameterList);
+        }
+
+        @Override
+        public void executeBatchStartException(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Collection<Object> parameterList, int iceaxeSqlExecuteId, Throwable occurred) {
+            doLogSqlStartException(transaction, iceaxeSqlExecuteId, occurred);
+        }
+
+        @Override
+        public void executeBatchStarted2(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Collection<Object> parameterList, TsurugiStatementResult result) {
+            doLogSqlStarted(transaction, result);
+        }
+
+        @Override
+        public void executeBatchEnd(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Collection<Object> parameterList, TsurugiStatementResult result, Throwable occurred) {
+            doLogSqlEnd(transaction, result, occurred);
+        }
+
+        @Override
+        public void executeBatchClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Collection<Object> parameterList, TsurugiStatementResult result, Throwable occurred) {
             doLogSqlClose(transaction, result, occurred);
         }
     };

@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.sql;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -16,6 +17,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -95,6 +97,44 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
         }
 
         event(null, listener -> listener.executeStatementStarted(transaction, this, parameter, result));
+        return result;
+    }
+
+    /**
+     * execute batch
+     *
+     * @param transaction   Transaction
+     * @param parameterList SQL parameter
+     * @return SQL result
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     * @see TsurugiTransaction#executeBatch(TsurugiSqlPreparedStatement, Collection)
+     */
+    public TsurugiStatementResult executeBatch(TsurugiTransaction transaction, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {
+        checkClose();
+
+        LOG.trace("executeBatch start");
+        int sqlExecuteId = getNewIceaxeSqlExecuteId();
+        event(null, listener -> listener.executeBatchStart(transaction, this, parameterList, sqlExecuteId));
+
+        TsurugiStatementResult result;
+        try {
+            var lowPs = getLowPreparedStatement();
+            var lowParameterList = new ArrayList<List<Parameter>>(parameterList.size());
+            for (P parameter : parameterList) {
+                lowParameterList.add(getLowParameterList(parameter));
+            }
+            var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.batch(lowPs, lowParameterList));
+            LOG.trace("executeBatch started");
+
+            result = new TsurugiStatementResult(sqlExecuteId, transaction, this, parameterList, lowResultFuture);
+        } catch (Throwable e) {
+            event(e, listener -> listener.executeBatchStartException(transaction, this, parameterList, sqlExecuteId, e));
+            throw e;
+        }
+
+        event(null, listener -> listener.executeBatchStarted(transaction, this, parameterList, result));
         return result;
     }
 
