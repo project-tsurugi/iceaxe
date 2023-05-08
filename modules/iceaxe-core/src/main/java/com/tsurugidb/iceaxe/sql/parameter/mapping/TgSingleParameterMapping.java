@@ -18,7 +18,8 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecima
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
-import com.tsurugidb.sql.proto.SqlRequest.Placeholder;;
+import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
+import com.tsurugidb.tsubakuro.sql.Placeholders;;
 
 /**
  * Tsurugi Parameter Mapping for single variable
@@ -280,7 +281,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
 
     @Override
     public List<Placeholder> toLowPlaceholderList() {
-        var lowPlaceholder = Placeholder.newBuilder().setName(name).setAtomType(type.getLowDataType()).build();
+        var lowPlaceholder = Placeholders.of(name, type.getLowDataType());
         return List.of(lowPlaceholder);
     }
 
