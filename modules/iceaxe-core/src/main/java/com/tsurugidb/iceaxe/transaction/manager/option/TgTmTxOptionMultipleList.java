@@ -83,4 +83,27 @@ public class TgTmTxOptionMultipleList extends TgTmTxOptionSupplier {
         }
         return TgTmTxOption.execute(txOption);
     }
+
+    @Override
+    protected String getDefaultDescription() {
+        var sb = new StringBuilder(128);
+
+        int prev = -1;
+        for (var entry : txOptionMap.entrySet()) {
+            int n = entry.getKey();
+            var txOption = entry.getValue();
+            int count = n - prev;
+
+            if (sb.length() != 0) {
+                sb.append(", ");
+            }
+            sb.append(txOption);
+            sb.append("*");
+            sb.append(count);
+
+            prev = n;
+        }
+
+        return sb.toString();
+    }
 }

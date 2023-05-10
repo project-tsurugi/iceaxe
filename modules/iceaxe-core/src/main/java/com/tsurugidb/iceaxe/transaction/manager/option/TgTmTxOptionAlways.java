@@ -51,4 +51,9 @@ public class TgTmTxOptionAlways extends TgTmTxOptionSupplier {
         }
         return TgTmTxOption.retryOver();
     }
+
+    @Override
+    protected String getDefaultDescription() {
+        return "always(" + txOption + ", " + attemtMaxCount + ")";
+    }
 }

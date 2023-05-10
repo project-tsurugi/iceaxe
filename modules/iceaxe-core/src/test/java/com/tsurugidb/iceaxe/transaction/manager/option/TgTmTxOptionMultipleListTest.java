@@ -88,6 +88,22 @@ class TgTmTxOptionMultipleListTest {
         }
     }
 
+    @Test
+    void description() {
+        {
+            var target = TgTmTxOptionMultipleList.of().add(TgTxOption.ofOCC(), 3);
+            assertEquals("OCC{}*3", target.getDescription());
+        }
+        {
+            var target = TgTmTxOptionMultipleList.of().add(TgTxOption.ofOCC(), 3).add(TgTxOption.ofLTX(), 2);
+            assertEquals("OCC{}*3, LTX{writePreserve=[]}*2", target.getDescription());
+        }
+        {
+            var target = TgTmTxOptionMultipleList.of().add(TgTxOption.ofOCC(), 3).add(TgTxOption.ofRTX(), 2).add(TgTxOption.ofLTX(), 1);
+            assertEquals("OCC{}*3, RTX{}*2, LTX{writePreserve=[]}*1", target.getDescription());
+        }
+    }
+
     private static void assertEqualsOcc(TgTxOption actual) {
         assertEquals("OCC", actual.typeName());
     }

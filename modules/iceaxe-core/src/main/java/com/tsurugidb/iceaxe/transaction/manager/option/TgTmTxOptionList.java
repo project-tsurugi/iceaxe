@@ -62,4 +62,9 @@ public class TgTmTxOptionList extends TgTmTxOptionSupplier {
         }
         return TgTmTxOption.retryOver();
     }
+
+    @Override
+    protected String getDefaultDescription() {
+        return txOptionList.toString();
+    }
 }

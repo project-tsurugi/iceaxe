@@ -87,6 +87,7 @@ public abstract class TgTmTxOptionSupplier {
 
     private BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> retryPredicate;
     private TgTmOptionListener tmOptionListener;
+    private String description;
 
     /**
      * Creates a new instance.
@@ -167,5 +168,36 @@ public abstract class TgTmTxOptionSupplier {
      */
     protected boolean isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) {
         return retryPredicate.test(transaction, e);
+    }
+
+    /**
+     * set description
+     *
+     * @param description description
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * get description
+     *
+     * @return description
+     */
+    public String getDescription() {
+        if (this.description != null) {
+            return this.description;
+        }
+        return getDefaultDescription();
+    }
+
+    protected String getDefaultDescription() {
+        // do override
+        return getClass().getSimpleName();
+    }
+
+    @Override
+    public String toString() {
+        return getDescription();
     }
 }
