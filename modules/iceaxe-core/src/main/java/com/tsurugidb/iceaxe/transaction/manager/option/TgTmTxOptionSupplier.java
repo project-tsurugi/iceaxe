@@ -38,12 +38,12 @@ public abstract class TgTmTxOptionSupplier {
     /**
      * create TgTmTxOptionSupplier
      *
-     * @param txOption       transaction option
-     * @param attemtMaxCount attempt max count
+     * @param txOption        transaction option
+     * @param attemptMaxCount attempt max count
      * @return supplier
      */
-    public static TgTmTxOptionSupplier ofAlways(TgTxOption txOption, int attemtMaxCount) {
-        return TgTmTxOptionAlways.of(txOption, attemtMaxCount);
+    public static TgTmTxOptionSupplier ofAlways(TgTxOption txOption, int attemptMaxCount) {
+        return TgTmTxOptionAlways.of(txOption, attemptMaxCount);
     }
 
     /**
