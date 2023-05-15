@@ -115,7 +115,7 @@ Iceaxeには、`getLowSesssion`や`getLowTransaction`メソッドといった、
 
 メソッド名に`Low`が付いているのは、Iceaxeから見るとTsubakuroは低レベルAPIという位置付けな為。
 
-これらのメソッドの中にはpublicになっているものもあるが、実装の都合でpublicになっているだけであり、アプリケーション開発者に公開する目的のメソッドではない。
+これらのメソッドの中には可視性がpublicになっているものもあるが、実装の都合でpublicになっているだけであり、アプリケーション開発者に公開する目的のメソッドではない。
 
 ### タイムアウトの扱い
 
@@ -232,17 +232,21 @@ DDLを実行するには、`TsurugiTransacion`の`executeDdl`メソッドを使�
 
 ## SQL（DML）の実行方法について
 
-`TsurugiSql`の具象クラスは、SQLがselect文か更新系SQL（insert・update・delete文）か、バインド変数が有るか無いかによって異なる。
+`TsurugiSql`の具象クラスは、SQLがselect文か更新系SQL（insert・update・delete文）か、SQL文をDBサーバーに事前に登録するか否かによって異なる。
 こうした分け方になっているのは、TsubakuroのSQL実行方法の違いに依る。
 
-内部的には、バインド変数がある形式とは「Tsubakuroの`PreparedStatement`を使う方式」であり、バインド変数が無い形式とは「SQL文を直接渡す`execute`系メソッドを使う方式」である。
+内部的には、SQL文をDBサーバーに事前に登録する方式とは「Tsubakuroの`PreparedStatement`を使う方式」であり、事前に登録しない方式とは「実行時にSQL文を渡す`execute`系メソッドを使う方式」である。
 
-| SQLの内容                   | `TsurugiSql`の具象クラス      | TsubakuroでのSQL実行方法                      |
-| --------------------------- | ----------------------------- | --------------------------------------------- |
-| select文・バインド変数なし  | `TsurugiSqlQuery`             | `transaction.executeQuery(sql)`               |
-| select文・バインド変数あり  | `TsurugiSqlPreparedQuery`     | `transaction.executeQuery(ps, parameter)`     |
-| 更新系SQL・バインド変数なし | `TsurugiSqlStatement`         | `transaction.executeStatement(sql)`           |
-| 更新系SQL・バインド変数あり | `TsurugiSqlPreparedStatement` | `transaction.executeStatement(ps, parameter)` |
+| SQLの内容               | `TsurugiSql`の具象クラス      | TsubakuroでのSQL実行方法                      |
+| ----------------------- | ----------------------------- | --------------------------------------------- |
+| select文・事前登録なし  | `TsurugiSqlQuery`             | `transaction.executeQuery(sql)`               |
+| select文・事前登録あり  | `TsurugiSqlPreparedQuery`     | `transaction.executeQuery(ps, parameter)`     |
+| 更新系SQL・事前登録なし | `TsurugiSqlStatement`         | `transaction.executeStatement(sql)`           |
+| 更新系SQL・事前登録あり | `TsurugiSqlPreparedStatement` | `transaction.executeStatement(ps, parameter)` |
+
+### `TsurugiSql`が「`TsurugiSession`が同一の`TsurugiTransaction`」でしか使えない件について
+
+少なくとも、`TsurugiSession`がクローズされたらそのインスタンスから作られた`TsurugiSql`はクローズされて使用不可になるので、別の`TsurugiSession`で作られた`TsurugiTransaction`では使用できない。
 
 ### SQLの実行完了の確認方法について
 

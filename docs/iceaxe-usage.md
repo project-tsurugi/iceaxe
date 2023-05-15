@@ -1,11 +1,11 @@
-# Iceaxe使用方法（2023-05-12）
+# Iceaxe使用方法（2023-05-15）
 
 Iceaxeの使用方法（Tsurugiのデータベース（DB）に対してSQLを実行する方法）の概要を説明する。
 
 - IceaxeはJava11以降に対応。
 - [iceaxe-examples]にIceaxeを使った実装例がある。
 - Iceaxeの概要や当ドキュメントで使っている用語については[about-iceaxe.md](about-iceaxe.md)を参照。
-- Iceaxeの内部構造については[iceaxe-internal.md](iceaxe-internal.md)を参照。
+- Iceaxeの内部構造に関する補足については[iceaxe-internal.md](iceaxe-internal.md)を参照。
 
 [iceaxe-examples]:../modules/iceaxe-examples/src/main/java/com/tsurugidb/iceaxe/example
 
@@ -182,7 +182,7 @@ try (var session = connector.createSession()) {
 - `TsurugiTransaction`は`TsurugiSession`から生成する。
   - 使用終了後にクローズする必要がある。（明示的にクローズしない場合、`TsurugiSession`のクローズ時にクローズされる）
   - `TsurugiTransactionManager`を使用する場合は、その内部で生成・クローズされる。
-- SQLを実行する際に`TsurugiTransaction`を使用する。
+- SQL（`TsurugiSql`）を実行する際に`TsurugiTransaction`を使用する。
 - `TsurugiTransaction`の状態取得メソッドや`execute`系メソッド（`TsurugiSql`の実行）・コミット・ロールバックはスレッドセーフ。
 
 トランザクションは`TsurugiTransaction`生成と同時に開始され、コミットまたはロールバックで終了する。その後`TsurugiTransaction`をクローズする。
@@ -485,38 +485,40 @@ DDLの例は、[iceaxe-examples]の`Example11Ddl`を参照。
 - `TsurugiSql`は`TsurugiSession`から生成する。
   - 使用終了後にクローズする必要がある。（明示的にクローズしない場合、`TsurugiSession`のクローズ時にクローズされる）
 - `TsurugiTransaction`の`execute`系メソッドに`TsurugiSql`を渡してSQLを実行する。
+  - `TsurugiSql`は、「`TsurugiSql`が作られたのと同じ`TsurugiSession`」から作られた`TsurugiTransaction`に対してしか実行できない。
 - `TsurugiSql`（具象クラスを含む）は、SQL実行に関してスレッドセーフ。
 
-SQLがselect文か更新系SQL（insert・update・delete文）か、バインド変数が有るか無いかによって、`TsurugiSql`を生成するメソッドが異なる。
+SQLがselect文か更新系SQL（insert・update・delete文）か、SQL文をDBサーバーに事前に登録するか否かによって、`TsurugiSql`を生成するメソッドが異なる。
 
-| SQLの内容                   | `TsurugSql`生成メソッド                             | 返ってくる具象クラス          |
-| --------------------------- | --------------------------------------------------- | ----------------------------- |
-| select文・バインド変数なし  | `createQuery(sql, resultMapping)`                   | `TsurugiSqlQuery`             |
-| select文・バインド変数あり  | `createQuery(sql, parameterMapping, resultMapping)` | `TsurugiSqlPreparedQuery`     |
-| 更新系SQL・バインド変数なし | `createStatement(sql)`                              | `TsurugiSqlStatement`         |
-| 更新系SQL・バインド変数あり | `createStatement(sql, parameterMapping)`            | `TsurugiSqlPreparedStatement` |
+> **Note**
+>
+> SQL文をDBサーバーに事前に登録する方式は、SQL文の解釈が登録時に一度行われるだけなので、何度も同じSQLを実行したい場合に使用する。
+>
+> SQL文をDBサーバーに事前に登録しない方式だと、SQLを実行する度にSQL文をDBサーバーに渡すので毎回SQL文の解釈が行われることになるが、一度しか実行しない場合はこちらの方式で問題ない。
+
+SQL文をDBサーバーに事前に登録する方式の場合、バインド変数（SQL文の中に変数を埋め込み、SQL実行時にSQL文の外から値を決定する仕組み）の定義が必須。
+SQL文をDBサーバーに事前に登録しない方式の場合、バインド変数は使用できない。
+
+| SQLの内容               | `TsurugSql`生成メソッド                             | 返ってくる具象クラス          |
+| ----------------------- | --------------------------------------------------- | ----------------------------- |
+| select文・事前登録なし  | `createQuery(sql, resultMapping)`                   | `TsurugiSqlQuery`             |
+| select文・事前登録あり  | `createQuery(sql, parameterMapping, resultMapping)` | `TsurugiSqlPreparedQuery`     |
+| 更新系SQL・事前登録なし | `createStatement(sql)`                              | `TsurugiSqlStatement`         |
+| 更新系SQL・事前登録あり | `createStatement(sql, parameterMapping)`            | `TsurugiSqlPreparedStatement` |
 
 - 生成メソッドの引数
   - `sql`（必須）
     - SQL文の文字列
-  - `parameterMapping`（バインド変数を使う場合は必須）
+  - `parameterMapping`（SQL文をDBサーバーに事前に登録する場合は必須）
     - バインド変数の変数名とデータ型の定義
-  - `resultMapping`
+  - `resultMapping`（select文のみ）
     - select文の実行結果のレコードをアプリケーション開発者が用意するEntityクラスに変換する為の定義
     - 省略時は、Iceaxeが用意している`TsurugiResultEntity`に変換される。
-
-> **Note**
->
-> 実際には、バインド変数がある形式とは「事前にDB側にSQL文を登録しておく方式」であり、バインド変数が無い形式とは「毎回SQL文をDBに送信して実行する方式」である。
->
-> したがって、バインド変数定義（`parameterMapping`）を空にすれば、バインド変数が無いSQLでも「事前にDB側にSQL文を登録しておく方式」を使うことが出来る。
->
-> 「毎回SQL文をDBに送信して実行する方式」では、実行する度にDBサーバー側でSQL文の解析・コンパイルが行われるので、何度も実行するSQLなら「事前にDB側にSQL文を登録しておく方式」の方が良い。
 
 ### `TsurugiSql`の実行方法
 
 `TsurugiTransaction`の`execute`系メソッドに`TsurugiSql`を渡してSQLを実行する。
-バインド変数がある場合は、その値をパラメーターとして渡す。
+バインド変数が定義されている`TsurugiSql`の場合は、バインド変数に代入する値をパラメーターとして渡す。
 
 | 内容                          | SQL実行メソッド        | 備考                                                 |
 | ----------------------------- | ---------------------- | ---------------------------------------------------- |
@@ -553,21 +555,22 @@ SQLの実行完了を確認する方法は、実行結果クラスをクロー�
 
 `TsurugiTransaction`の`executeAnd`系メソッドを使うと、更新の成功可否チェックや実行結果クラスのクローズはメソッド内部で処理される。
 
+基本的には、`executeQuery`や`executeStatement`メソッドより、`executeAnd`系メソッドの使用を推奨する。
+
 > **Note**
 >
 > `TsurugiTransactionManager`にも同名の`executeAnd`系メソッドがあり、ひとつのトランザクション内でひとつのSQLしか実行しない場合は、こちらを利用することも出来る。
 
 ----
 
-`TsurugiSql`は、`TsurugiSql`が作られた`TsurugiSession`と同じインスタンスから作られた`TsurugiTransaction`に対してしか実行できない。
-（`TsurugiSession`がクローズされたらそのインスタンスで作られた`TsurugiSql`はクローズされて使用不可になるので、別の`TsurugiSession`で作られた`TsurugiTransaction`では使用できない）
-
 select文の例は[iceaxe-examples]の`Example31Select`, `Example32Count`を参照。
 更新系SQLの例は[iceaxe-examples]の`Example21Insert`, `Example41Update`を参照。
 
 
 
-### バインド変数を使わない更新系SQLの例
+### SQL文の事前登録を行わない場合の更新系SQLの例
+
+SQL文をDBサーバーに事前に登録せずに更新系SQLを実行する例。
 
 ```java
 var sql = "update TEST set BAR = 1 where FOO = 123";
@@ -587,13 +590,15 @@ try (var ps = session.createStatement(sql)) {
 > `executeStatement`メソッドの戻り値を無視すると、実行結果クラスのクローズが漏れてしまう。
 > クローズが漏れても`TsurugiTransaction`クローズ時にクローズされるが、SQLの実行完了を待たないことになるので、SQLが順次実行されることを期待していた場合は予期せぬ挙動になる可能性がある。
 >
-> そのため、基本的には`executeAndGetCount`メソッドの使用を推奨する。（`executeAndGetCount`メソッドは内部で実行結果クラスを必ずクローズする為）
+> そのため、基本的には`executeAndGetCount`メソッドの使用を推奨する。（`executeAndGetCount`メソッドは内部で実行結果クラスが必ずクローズされる為）
 
 
 
 ### バインド変数の使用方法（select文・更新系SQL共通）
 
 バインド変数は、SQL文の中に変数を埋め込んでおき、SQL実行時にSQL文の外から値を決定する仕組みである。
+
+バインド変数を使う場合は、SQL文をDBサーバーに事前に登録しておく必要がある。その際にバインド変数の定義も一緒に登録する。
 
 バインド変数の使い方は以下のようになる。
 
@@ -667,9 +672,9 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 >
 > `bind`メソッドの引数は、定義時に決められたデータ型しか受け付けないので、他の型で指定してしまうようなミスを起こしにくい。
 
-#### バインド変数の例（変数が1つだけの場合）
+#### バインド変数の例（変数が1個だけの場合）
 
-バインド変数を1つだけしか使用しない場合は、`TgParameterMapping`に変数名とデータ型を指定することで、パラメーターに値を直接指定することが出来る。
+バインド変数を1個だけしか使用しない場合は、`TgParameterMapping`の`of`メソッドに変数名とデータ型を指定することで、パラメーターに値を直接指定することが出来る。
 
 ```java
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
@@ -683,6 +688,28 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
     });
 }
 ```
+
+#### バインド変数の例（変数が0個の場合）
+
+バインド変数が無いSQL文をDBサーバーに事前に登録する場合は、`TgParameterMapping`を空にすればよい。
+
+```java
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+
+var sql = "update TEST set BAR = 1 where FOO = 123";
+var parameterMapping = TgParameterMapping.of();
+try (var ps = session.createStatement(sql, parameterMapping)) {
+    tm.execute(transaction -> {
+        var parameter = TgBindParameters.of();
+        transaction.executeAndGetCount(ps, parameter);
+    });
+}
+```
+
+パラメーターには`TgBindParameters.of()`または`null`を指定する。
+
+
 
 #### バインド変数の例（Entityを変換する方法）
 
@@ -768,7 +795,7 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 
 
 
-### select文の実行方法（バインド変数の有無に関わらず共通）
+### select文の実行方法（SQL文のDBサーバーへの事前登録有無に関わらず共通）
 
 select文を実行すると、DBから（複数の）レコードが返ってくる。
 返ってきたレコードは、アプリケーション開発者が用意するEntityクラス（setterメソッドを持つクラス）に変換される。
@@ -777,7 +804,7 @@ select文を実行すると、DBから（複数の）レコードが返ってく
 アプリケーション開発者がEntityクラスを用意する代わりに`TsurugiResultEntity`を使うことも出来る。
 `TsurugiSession`の`createQuery`メソッドで引数の`resultMapping`を省略すると、`TsurugiResultEntity`に変換されるようになる。
 
-#### 結果取得の例（`TsurugiResultEntity`を使用する方法・カラム名指定方式）
+#### select結果取得の例（`TsurugiResultEntity`を使用する方法・カラム名指定方式）
 
 Iceaxeが用意している`TsurugiResultEntity`を使う例。
 
@@ -808,7 +835,7 @@ try (var ps = session.createQuery(sql)) {
 | `getデータ型orNull(name)`         | 値を取得する。値が`null`の場合は`null`が返る。               |
 | `findデータ型(name)`              | 値を`Optional`で取得する。                                   |
 
-#### 結果取得の例（`TsurugiResultEntity`を使用する方法・カラムの並び順依存方式）
+#### select結果取得の例（`TsurugiResultEntity`を使用する方法・カラムの並び順依存方式）
 
 `TsurugiResultEntity`からカラムの位置（index）を指定して値を取得する例。
 
@@ -837,7 +864,7 @@ try (var ps = session.createQuery(sql)) {
 >
 > `TsurugiResultEntity`の`getNameList`メソッドでカラム名一覧を取得できる。
 
-#### 結果変換の例（Entityに変換する方法・カラム名指定方式）
+#### select結果変換の例（Entityに変換する方法・カラム名指定方式）
 
 アプリケーション開発者が用意するEntityクラス（setterメソッドを持つクラス）に変換する例。
 
@@ -858,7 +885,7 @@ try (var ps = session.createQuery(sql, resultMapping)) {
 
 `TgResultMapping`の`of`メソッドにEntityのコンストラクターを渡し、`add`系メソッドでカラム名とsetterメソッドを追加していく。
 
-#### 結果変換の例（Entityに変換する方法・カラムの並び順依存方式）
+#### select結果変換の例（Entityに変換する方法・カラムの並び順依存方式）
 
 `TgResultMapping`の`add`系メソッドでカラム名を省略すると、カラムの並び順依存になる。
 
@@ -876,9 +903,9 @@ try (var ps = session.createQuery(sql, resultMapping)) {
 }
 ```
 
-#### 結果変換の例（1カラムだけ取得する場合）
+#### select結果変換の例（1カラムだけ取得する場合）
 
-1カラムだけしか取得しない場合は、`TgResultMapping`にカラムのデータ型を指定することで、その値を直接取得することが出来る。
+1カラムだけしか取得しない場合は、`TgResultMapping`の`of`メソッドにカラムのデータ型を指定することで、その値を直接取得することが出来る。
 
 ```java
 import java.util.Optional;
@@ -898,11 +925,11 @@ try (var ps = session.createQuery(sql, resultMapping)) {
 >
 > この例のSQLではselect結果が常に1件だと分かっているので、1件だけ取得する`executeAndFindRecord`メソッドを使い、返ってきた`Optional`がemptyかどうかを確認せずに値を取り出している。
 
-#### 結果変換の例（`TsurugiResultRecord`から変換する方法）
+#### select結果変換の例（`TsurugiResultRecord`から変換する方法）
 
 `TsurugiResultRecord`クラスは、Iceaxeが1レコード分のデータを処理するクラス。（使用上の注意点については後述）
 
-この`TsurugiResultRecord`からEntityへ変換する関数を用意する例。
+この`TsurugiResultRecord`からEntityクラスへ変換する関数を用意する例。
 
 ```java
 import java.io.IOException;
@@ -911,7 +938,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 
 class TestEntity {
-    public static TestEntity of(TsurugiResultRecord record) throws IOException, TsurugiTransactionException {
+    public static TestEntity of(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         var entity = new TestEntity();
         entity.setFoo(record.getInt("FOO"));
         entity.setBar(record.getLongOrNull("BAR"));
@@ -930,7 +957,7 @@ try (var ps = session.createQuery(sql, resultMapping)) {
 }
 ```
 
-`TgResultMapping`の`of`メソッドに、`TsurugiResultRecord`からEntityへ変換する関数を渡す。
+`TgResultMapping`の`of`メソッドに、`TsurugiResultRecord`からEntityクラスへ変換する関数を渡す。
 
 
 
@@ -949,7 +976,7 @@ Iceaxeの大多数のクラスと異なり、`TsurugiQueryResult`と`TsurugiResu
 したがって、アプリケーション開発者が各レコードの値を保存する目的で`TsurugiResultRecord`インスタンスを保持する（`List`に`add`していく）ような使い方は出来ない。
 また、`TsurugiTransaction`の`executeAnd`系メソッドの外に`TsurugiResultRecord`を出すことも出来ない（`executeAnd`系メソッドが終了しているということは、`TsurugiQueryResult`はクローズされている為）。
 
-そのため、`TsurugiQueryResult`からレコードを返す際は、`TsurugiResultRecord`を必ずEntityクラス（1レコード分の値を保持するクラス）に変換する（レコード毎にEntityインスタンスを生成する）。
+そのため、`TsurugiQueryResult`からレコードを返す際は、`TsurugiResultRecord`を必ずEntityクラスに変換する（レコード毎に、1レコード分の値を保持するEntityインスタンスを生成する）。
 
 > **Note**
 >
@@ -970,7 +997,7 @@ Iceaxeの大多数のクラスと異なり、`TsurugiQueryResult`と`TsurugiResu
 > }
 > ```
 
-`TgResultMapping`でEntityに変換すると、`TsurugiResultRecord`の処理が隠蔽されるので、上記の注意点をアプリケーション開発者が気にする必要は無い。（`TsurugiResultRecord`から変換する関数をアプリケーション開発者が書く場合を除く）
+`TgResultMapping`でEntityクラスに変換すると、`TsurugiResultRecord`の処理が隠蔽されるので、上記の注意点をアプリケーション開発者が気にする必要は無い。（`TsurugiResultRecord`から変換する関数をアプリケーション開発者が書く場合を除く）
 
 `TsurugiTransaction`の`executeAnd`系メソッドを使うと、`TsurugiQueryResult`の処理が隠蔽されるので、上記の注意点をアプリケーション開発者が気にする必要は無い。
 
@@ -1086,7 +1113,7 @@ try (var ps = session.createQuery(sql, parameterMapping)) {
 
 > **Warning**
 >
-> `TsurugiSqlQuery`と`TsurugiSqlStatement`（バインド変数が無いSQL）では、実行計画取得は未実装。UnsupportedOperationExceptionが発生する。
+> `TsurugiSqlQuery`と`TsurugiSqlStatement`（SQL文をDBサーバーに事前に登録しない方式）では、実行計画取得は未実装。UnsupportedOperationExceptionが発生する。
 
 
 
