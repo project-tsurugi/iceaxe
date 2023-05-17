@@ -2,11 +2,82 @@ package com.tsurugidb.iceaxe.session.event.logging.file;
 
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link TsurugiSessionTxFileLogger} config.
  */
 public class TsurugiSessionTxFileLogConfig {
+
+    /** default {@link TsurugiSessionTxFileLogger} config */
+    public static final TsurugiSessionTxFileLogConfig DEFAULT;
+    static {
+        Path logDir;
+        try {
+            logDir = getDefaultLogDir();
+        } catch (Exception e) {
+            Logger logger = LoggerFactory.getLogger(TsurugiSessionTxFileLogConfig.class);
+            logger.warn("iceaxe.tx.log.dir error (ignore)", e);
+            logDir = null;
+        }
+
+        TsurugiSessionTxFileLogConfig config = null;
+        if (logDir != null) {
+            config = ofDefault(logDir);
+
+            Logger logger = LoggerFactory.getLogger(TsurugiSessionTxFileLogConfig.class);
+            logger.debug("iceaxe.tx.log={}", config);
+        }
+        DEFAULT = config;
+    }
+
+    /**
+     * Get log directory from system property.
+     *
+     * @return log directory
+     */
+    public static Path getDefaultLogDir() {
+        String s = System.getProperty("iceaxe.tx.log.dir"); //$NON-NLS-1$
+        if (s != null) {
+            return Path.of(s);
+        }
+        return null;
+    }
+
+    /**
+     * Create a new instance from system properties.
+     *
+     * @param outputDir output directory
+     * @return config
+     */
+    public static TsurugiSessionTxFileLogConfig ofDefault(Path outputDir) {
+        var config = of(outputDir);
+        setConfig("iceaxe.tx.log.sub_dir", s -> config.subDirType(TgTxFileLogSubDirType.valueOf(s.toUpperCase()))); // $NON-NLS-1$
+        setConfig("iceaxe.tx.log.write_sql_file", s -> config.writeSqlFile(Boolean.parseBoolean(s))); // $NON-NLS-1$
+        setConfig("iceaxe.tx.log.header_format", s -> config.headerFormatter(DateTimeFormatter.ofPattern(s))); // $NON-NLS-1$
+        setConfig("iceaxe.tx.log.sql_max_length", s -> config.sqlMaxLength(Integer.parseInt(s))); // $NON-NLS-1$
+        setConfig("iceaxe.tx.log.arg_max_length", s -> config.argMaxLength(Integer.parseInt(s))); // $NON-NLS-1$
+        setConfig("iceaxe.tx.log.explain", s -> config.writeExplain(Integer.parseInt(s))); // $NON-NLS-1$
+        setConfig("iceaxe.tx.log.record", s -> config.writeReadRecord(Boolean.parseBoolean(s))); // $NON-NLS-1$
+        setConfig("iceaxe.tx.log.read_progress", s -> config.readProgress(Integer.parseInt(s))); // $NON-NLS-1$
+        setConfig("iceaxe.tx.log.auto_flush", s -> config.autoFlush(Boolean.parseBoolean(s))); // $NON-NLS-1$
+        return config;
+    }
+
+    private static void setConfig(String key, Consumer<String> configSetter) {
+        try {
+            String s = System.getProperty(key);
+            if (s != null) {
+                configSetter.accept(s.trim());
+            }
+        } catch (Exception e) {
+            Logger logger = LoggerFactory.getLogger(TsurugiSessionTxFileLogConfig.class);
+            logger.warn(key + " error (ignore)", e);
+        }
+    }
 
     /**
      * Creates a new instance.
