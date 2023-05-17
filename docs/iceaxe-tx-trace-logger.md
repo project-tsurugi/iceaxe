@@ -45,7 +45,7 @@ JavaVMのシステムプロパティー（javaコマンドの`-D`）でTsurugiSe
     - `TM_TX`
       - トランザクションマネージャーのexecuteメソッド呼び出し毎にサブディレクトリーを作成し、その下にトランザクション毎のサブディレクトリーを作成する。
 - `iceaxe.tx.log.write_sql_file`
-  - SQLステートメントを作成する毎にSQL文をファイルに出力するかどうか。
+  - TsurugiSqlを作成する毎にSQL文をファイルに出力するかどうか。
     - `true`
       - 出力する。
       - 出力する場合、`出力先ディレクトリー/sql_statement/ss-N.sql`というファイルが出力される。
@@ -129,15 +129,15 @@ java -Diceaxe.tx.log.dir=/tmp/iceaxe-tx-log -Diceaxe.tx.log.explain=1 ～
 - トランザクションのクローズ時
   - トランザクションがクローズされるとトレースログファイルもクローズするので、それ以降にさらにクローズが呼ばれた場合、ログファイルには出力されない。
 
-### SQLステートメント
+### SQL（TsurugiSql）
 
-SQLステートメント（TsurugiSqlPreparedQuery・TsurugiSqlPreparedStatement等）からは以下のタイミングでログを出力する。
+TsurugiSql（TsurugiSqlPreparedQuery・TsurugiSqlPreparedStatement等）からは以下のタイミングでログを出力する。
 
 - SQLの実行開始時
   - TsurugiSqlPreparedQuery#execute()やTsurugiSqlPreparedStatement#execute()等の開始時
   - 実行計画を出力する場合は、SQLの実行開始時に出力する（SQLのパラメーターによって実行計画が変わる可能性があるので、実行時に毎回出力する）
 
-SQLの実行が開始されると『SQL実行結果』が返されるので、SQLステートメントには「終了時のログ出力」は無い。
+SQLの実行が開始されると『SQL実行結果』が返されるので、TsurugiSqlには「終了時のログ出力」は無い。
 
 ### SQL実行結果
 
@@ -245,13 +245,13 @@ TsurugiTransaction(OCC{}, iceaxeTxId=3, iceaxeTmExecuteId=3, attempt=0, transact
 TsurugiTransactionのexecuteXxxメソッド（上記の例ではexecuteAndGetCount）を開始したログが出力される。
 iceaxeTxExecuteIdは、executeXxxメソッド呼び出し毎にIceaxeで採番されるID。（JavaVM内でexecuteXxx呼び出しとして一意となる連番）
 
-「sql start」は、SQLステートメント（TsurugiSqlPreparedQuery・TsurugiSqlPreparedStatement等）でSQLの実行を開始したことを表す。
+「sql start」は、TsurugiSqlでSQLの実行を開始したことを表す。
 
 `[sql-N]`のNは、iceaxeSqlExecuteId。（SQL実行毎にIceaxeで採番されるID。JavaVM内でSQL実行として一意となる連番）
 （常にシングルスレッドで実行されればiceaxeSqlExecuteIdとiceaxeTxExecuteIdは同じ値になるが、マルチスレッドならすぐずれる）
 
-`[ss-N]`のNは、iceaxeSqlId。（SQLステートメント作成毎にIceaxeで採番されるID。JavaVM内でSQLステートメントとして一意となる連番）
-SQLステートメントをファイル出力する設定になっている場合、`出力先ディレクトリー/sql_statement`の下に「ss-N.sql」というファイル名で出力される。
+`[ss-N]`のNは、iceaxeSqlId。（TsurugiSql作成毎にIceaxeで採番されるID。JavaVM内でTsurugiSqlとして一意となる連番）
+TsurugiSqlをファイル出力する設定になっている場合、`出力先ディレクトリー/sql_statement`の下に「ss-N.sql」というファイル名で出力される。
 
 startの行に、実行するSQL文が出力される。
 SQL文が指定された最大文字数より大きい場合、それ以降はカットされる。
@@ -309,7 +309,7 @@ closeの後ろの時間は、クローズ処理の実行時間。
 executeXxxの後ろの時間は、TsurugiTransaction#executeXxxメソッドの実行時間。
 
 「TX-N」の行において、実行した「sql-N」の番号が出力されている。
-TsurugiTransactionのexecuteXxxメソッド（上記の例ではexecuteAndGetCount）を開始した時点ではSQLステートメント側のID（sql-N）は採番されていなかったが、終了時点ではどのSQLを実行したか分かっている為。
+TsurugiTransactionのexecuteXxxメソッド（上記の例ではexecuteAndGetCount）を開始した時点ではTsurugiSql側のID（sql-N）は採番されていなかったが、終了時点ではどのSQLを実行したか分かっている為。
 
 TsurugiTransactionのexecuteQuery()とexecuteStatement()では、そのメソッドからSQL実行結果（sql-N）を返すので、executeQuery()やexecuteStatement()が終わった後にsql-Nが終了する。
 その他のexecuteXxxメソッド（executeAndGetListやexecuteAndGetCount等）では、sql-Nが終わった後にexecuteXxxが終了する。

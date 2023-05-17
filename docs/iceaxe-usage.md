@@ -1,6 +1,6 @@
-# Iceaxe使用方法（2023-05-15）
+# Iceaxe使用方法（2023-05-17）
 
-Iceaxeの使用方法（Tsurugiのデータベース（DB）に対してSQLを実行する方法）の概要を説明する。
+Iceaxeの使用方法（Tsurugiのデータベース（Tsurugi DB）に対してSQLを実行する方法）の概要を説明する。
 
 - IceaxeはJava11以降に対応。
 - [iceaxe-examples]にIceaxeを使った実装例がある。
@@ -554,14 +554,14 @@ SQL文をDBサーバーに事前に登録しない方式の場合、バインド
 `TsurugiTransaction`の`execute`系メソッドに`TsurugiSql`を渡してSQLを実行する。
 バインド変数が定義されている`TsurugiSql`の場合は、バインド変数に代入する値をパラメーターとして渡す。
 
-| SQLの内容                     | メソッド               | 説明                                                 |
-| ----------------------------- | ---------------------- | ---------------------------------------------------- |
-| select文・全件取得            | `executeAndGetList`    | 全レコードの`List`を返す                             |
-| select文・1件取得             | `executeAndFindRecord` | 1レコードを`Optional`で返す                          |
-| select文・1件ずつ処理         | `executeAndForEach`    | レコードを処理する関数を渡す                         |
-| 更新系SQL                     | `executeAndGetCount`   | 処理件数を返す（という想定だが、現在は常に-1を返す） |
-| select文・実行結果クラス取得  | `executeQuery`         | 実行結果クラス（`TsurugiQueryResult`）を返す         |
-| 更新系SQL・実行結果クラス取得 | `executeStatement`     | 実行結果クラス（`TsurugiStatementResult`）を返す     |
+| SQLの内容                  | メソッド               | 説明                                                 |
+| -------------------------- | ---------------------- | ---------------------------------------------------- |
+| select文・全件取得         | `executeAndGetList`    | 全レコードの`List`を返す                             |
+| select文・1件取得          | `executeAndFindRecord` | 1レコードを`Optional`で返す                          |
+| select文・1件ずつ処理      | `executeAndForEach`    | レコードを処理する関数を渡す                         |
+| 更新系SQL                  | `executeAndGetCount`   | 処理件数を返す（という想定だが、現在は常に-1を返す） |
+| select文・SQL実行結果取得  | `executeQuery`         | SQL実行結果（`TsurugiQueryResult`）を返す            |
+| 更新系SQL・SQL実行結果取得 | `executeStatement`     | SQL実行結果（`TsurugiStatementResult`）を返す        |
 
 > **Warning**
 >
@@ -569,20 +569,20 @@ SQL文をDBサーバーに事前に登録しない方式の場合、バインド
 
 #### `executeQuery`・`executeStatement`メソッド
 
-`TsurugiSql`を実行する基本的な方法は、`executeQuery`・`executeStatement`メソッドを使って実行結果クラスを取得する方法である。
+`TsurugiSql`を実行する基本的な方法は、`executeQuery`・`executeStatement`メソッドを使って`TsurugiSqlResult`（SQL実行結果）を取得する方法である。
 
-- select文の場合、実行結果クラス（`TsurugiQueryResult`）からselect結果のレコードを取得する。
-- 更新系SQLの場合、実行結果クラス（`TsurugiStatementResult`）の`getUpdateCount`メソッドを呼び出して、更新が成功したかどうかを確認する。
+- select文の場合、`TsurugiSqlResult`の具象クラスである`TsurugiQueryResult`からselect結果のレコードを取得する。
+- 更新系SQLの場合、`TsurugiSqlResult`の具象クラスである`TsurugiStatementResult`の`getUpdateCount`メソッドを呼び出して、更新が成功したかどうかを確認する。
 
-実行結果クラスは、使い終わったらクローズする必要がある。（明示的にクローズしない場合は、`TsurugiTransaction`のコミット前やロールバック前、あるいはクローズ時にクローズされる）
+`TsurugiQueryResult`・`TsurugiStatementResult`は、使い終わったらクローズする必要がある。（明示的にクローズしない場合は、`TsurugiTransaction`のコミット前やロールバック前、あるいはクローズ時にクローズされる）
 
 #### `executeAnd`系メソッド
 
-`executeAnd`系メソッドを使うと、実行結果クラスを介さずに結果を取得できる。
+`executeAnd`系メソッドを使うと、`TsurugiSqlResult`を介さずに結果を取得できる。
 
 > **Note**
 >
-> `executeAnd`系メソッドは内部で実行結果クラスを操作しており、更新の成功可否チェックや実行結果クラスのクローズも実施する。
+> `executeAnd`系メソッドは内部で`TsurugiSqlResult`を操作しており、更新の成功可否チェックや`TsurugiSqlResult`のクローズも実施する。
 
 `TsurugiTransactionManager`にも同名の`executeAnd`系メソッドがあり、1回のトランザクションで1個しかSQLを実行しない場合は、こちらを利用することも出来る。
 
@@ -625,12 +625,12 @@ try (var ps = session.createStatement(sql)) {
 >
 > 更新系SQLを実行するメソッドには、`executeStatement`と`executeAndGetCount`がある。
 >
-> 後者は処理件数を返すメソッドなので、処理件数が不要な場合は前者で実行したくなるかもしれないが、前者は実行結果クラスを返すメソッドである。
+> 後者は処理件数を返すメソッドなので、処理件数が不要な場合は前者で実行したくなるかもしれないが、前者は`TsurugiStatementResult`を返すメソッドである。
 >
-> 実行結果クラスはクローズする必要があるが、`executeStatement`メソッドの戻り値（実行結果クラス）を無視すると、クローズが漏れてしまう。
+> `TsurugiStatementResult`はクローズする必要があるが、`executeStatement`メソッドの戻り値（`TsurugiStatementResult`）を無視すると、クローズが漏れてしまう。
 > クローズが漏れても`TsurugiTransaction`クローズ時にクローズされるが、SQLの実行完了を待たないことになるので、SQLが順次実行されることを期待していた場合は予期せぬ挙動になる可能性がある。
 >
-> そのため、基本的には`executeAndGetCount`メソッドの使用を推奨する。（`executeAndGetCount`メソッドは内部で実行結果クラスが必ずクローズされる為）
+> そのため、基本的には`executeAndGetCount`メソッドの使用を推奨する。（`executeAndGetCount`メソッドは内部で`TsurugiStatementResult`が必ずクローズされる為）
 
 
 

@@ -74,7 +74,7 @@ Iceaxeのドキュメントでは以下のような用語を使っている。
 | エンドポイント               | どのTsurugi DBに接続するかという情報と接続方法。             | URI                                                          |
 | 認証情報                     | Tsurugi DBに接続する為のユーザー名とパスワードや、アクセストークン等。 | Credential                                                   |
 | セッション                   | DB接続。                                                     | TsurugiSession                                               |
-| SQLステートメント            | SQL文およびバインド変数の定義・select結果の変換方法の定義を合わせたもの。 | TsurugiSql                                                   |
+| SQL定義                      | SQL文およびバインド変数の定義・select結果の変換方法の定義を合わせたもの。 | TsurugiSql                                                   |
 | DDL                          | データの定義を行うSQL。create tableやdrop table等。          | executeDdl()                                                 |
 | DML                          | データの操作を行うSQL。クエリーと更新系SQL。                 |                                                              |
 | クエリー                     | select文。                                                   | TsurugiSqlQuery<br />TsurugiSqlPreparedQuery<br />TsurugiQueryResult |
