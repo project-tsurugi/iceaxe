@@ -50,6 +50,21 @@ Iceaxeの主要なクラスは、Tsubakuroのクラスをラップ（内包）�
 | TsurugiQueryResult<br>TsurugiResultRecord              | ResultSet                                                  |
 | TgDataType                                             | SqlCommon.AtomType                                         |
 
+### API方式
+
+Tsubakuroは非同期APIである。すなわち、Tsubakuroのメソッドを呼び出すとFuture（実体としてはTsubakuro独自の`FutureResponse`）が返ってくる。
+
+一般に、非同期APIより同期APIの方がアプリケーション開発者にとって扱いやすいので、Iceaxeは同期APIになっている。
+
+Iceaxeで「Tsubakuroの`FutureResponse`を返すメソッド」を呼び出すほとんどのクラスは、内部で`FutureResponse`を保持する。
+必要になった時点で`FutureResponse`から値を取り出して使用する。（いわゆる遅延評価）
+
+> **Note**
+>
+> `FutureResponse`が作られるのは、Tsubakuroが通信を行う為である。通信の結果（応答）が`FutureResponse`から取得できる。
+>
+> 遅延評価するようにすれば、Tsubakuroが通信を行っている間に、クライアント側で他の処理を実施できる。
+
 ### エンドポイント
 
 どのTsurugi DBに接続するかという情報と接続方法を表すエンドポイントの内容は、Tsubakuroの仕様に準ずる。
@@ -59,10 +74,12 @@ Tsurugi DBへの接続方法には、TCP接続とIPC接続がある。
 
 - TCP接続
   - データ通信にTCP/IP（ソケット通信）を用いる方法。
+  - リモートから接続可能。
   - 現時点のTCP接続は暫定実装という位置付けであり、性能はあまり良くない。
 - IPC接続
   - データ通信にLinuxのプロセス間通信（共有メモリー）を用いる方法。
-  - Tsurugi DBと同一マシン上でないと使用できないが、現時点ではTCP接続よりも高速。
+  - Tsurugi DBと同一マシン上でないと使用できない。
+  - 現時点ではTCP接続よりも高速。
 
 TCP接続の場合は、URIのスキーマ名をtcpとし、TCP接続エンドポイントのIPアドレス（ホスト名）とTCPポート番号を指定する。
 例：`tcp://localhost:12345`
@@ -81,6 +98,22 @@ IPC接続の場合は、URIのスキーマ名をipcとし、IPC接続エンド�
 
 [ipc_endpoint]
     database_name=tateyama
+```
+
+### セッション数の上限
+
+DBサーバーに接続するセッション数は、DBサーバー側に上限がある。
+
+最大セッション数は、Tsurugi DBを起動する際に読み込まれる設定ファイルの `stream_endpoint` や `ipc_endpoint` に記述されている。
+
+#### Tsurugi DBの設定ファイルの例
+
+```
+[stream_endpoint]
+    threads=60
+
+[ipc_endpoint]
+    threads=60
 ```
 
 ### トランザクション種別
@@ -123,9 +156,17 @@ Tsubakuroのメソッドを呼び出して返ってくる`FutureResonse`から�
 
 ただし、Iceaxeのデフォルトのタイムアウト時間は`Long.MAX_VALUE`ナノ秒（実質、無限）である。
 
+### スレッドの使用
+
+Tsubakuroはデータ受信の為に`Session`毎にスレッドを1つ作成する。
+
+Iceaxeはスレッドを作成する箇所は無い。
 
 
-## トランザクション種別について
+
+## トランザクションオプションについて
+
+### トランザクション種別
 
 Tsurugiでは、トランザクション開始時にトランザクション種別（OCC・LTX・RTXのいずれか）を指定する。
 
@@ -143,12 +184,8 @@ Tsurugiでは、トランザクション開始時にトランザクション種�
   - 実行時間が長いトランザクション
     - Tsubakuroの`TransactionType.LONG`に該当する。
   - 更新（insert, update, delete）する対象のテーブルを全てwrite preserveに指定する必要がある。
-    - write preserveに指定したテーブルを更新しなくてもエラーになるようなことは無い。
-    - 先に始まったLTXがwrite preserveで指定したテーブルを、後に始まったLTXが操作（select, insert, update, delete）した場合、後に始まったLTXは先に始まったLTXの完了まで待たされる。
-      - 処理結果が競合していないかどうかは、優先度が高い（先に始まった）LTXが完了しないと判断できない為。
-      - read areaを指定することで緩和される可能性はある。
   - LTX開始時点のデータが読まれる。
-    - selectのみのLTXも可能。OCCほどアボートしないが、コミット時に他LTXとの待ち合わせが発生しうる。
+    - selectのみのLTXも可能。OCCほどアボートしないが、コミット時に他LTXの完了待ちが発生しうる。
   - OCCと競合した場合、特殊な場合を除いてOCCがシリアライゼーションエラーになる。
   - LTX同士が競合した場合、後からトランザクション実行を開始した方がシリアライゼーションエラーになる。
 - RTX（read only transaction）
@@ -158,7 +195,26 @@ Tsurugiでは、トランザクション開始時にトランザクション種�
     - 先に開始したLTXの開始時点で他に実行中のLTXがあったら、最悪の場合はそれら全ての開始前になるので、かなり古いデータが読まれることもある。
   - 他のトランザクションと競合しない。
 
+### write preserve
 
+write preserveは、LTXで更新（insert, update, delete）する対象のテーブルを指定する。
+
+- write preserveに指定したテーブルを更新しなくてもエラーになるようなことは無い。
+- 先に始まったLTXがwrite preserveで指定したテーブルを、後に始まったLTXが操作（select, insert, update, delete）した場合、後に始まったLTXは先に始まったLTXの完了まで待たされる。
+  - 処理結果が競合していないかどうかは、優先度が高い（先に始まった）LTXが完了しないと判断できない為。
+  - read areaを指定することで緩和される可能性はある。
+
+### read area
+
+read areaは、LTXやRTXで参照（select, insert, update, delete）する/しない対象のテーブルを指定する。
+
+これにより、「他トランザクションの処理対象テーブルが競合しないこと」がすぐに判明する場合がある。
+
+read areaを指定しなくてもテーブルを参照することは出来るが、トランザクションが完了するまでどのテーブルを参照するか判明しない為、他トランザクションが完了を待つことが発生しうる。
+
+> **Note**
+>
+> 本来DBサーバー側としては参照しないテーブル（exclusive read area）を求めているのだが、実務上はクライアント側で参照しないテーブルを全て列挙するのは困難な為、参照するテーブル（inclusive read rea）を指定することがほとんどであろう。
 
 ## コミットについて
 
@@ -192,7 +248,7 @@ create tableやdrop table等のDDLを実行する際もトランザクション�
 
 DDLであっても、DBサーバー内部ではメタデータ登録の為にトランザクションIDが必要となる為。
 
-そして、システムテーブルへメタデータを書き込む際にシリアライゼーションエラーが発生する可能性がある。
+そして、DBサーバーがシステムテーブルへメタデータを書き込む際にシリアライゼーションエラーが発生する可能性がある。
 
 ### `executeDdl`メソッド
 
@@ -225,6 +281,11 @@ DDLを実行するには、`TsurugiTransacion`の`executeDdl`メソッドを使�
 > 現時点では、WITH TIME ZONEにはタイムゾーンオフセットしか保持されない。（「Asia/Tokyo」のようなタイムゾーン情報は保持しない）
 >
 > IceaxeはZonedDateTimeに対応しているが、DB内ではタイムゾーンオフセットしか保持されないので、ZonedDateTimeで取得する場合はZoneIdを別途指定する必要がある。
+>
+> ```java
+> var resultMapping = TgResultMapping.of(ZonedExapmleEntity.class)
+>     .addZonedDateTime("date_time_with_timezone", ZonedExapmleEntity::setDateTime, ZoneId.of("Asia/Tokyo"));
+> ```
 
 テーブル名やカラム名の先頭にアンダースコア2つを付けるのは非推奨。（システムで予約されている）
 
@@ -247,16 +308,6 @@ DDLを実行するには、`TsurugiTransacion`の`executeDdl`メソッドを使�
 ### `TsurugiSql`が「`TsurugiSession`が同一の`TsurugiTransaction`」でしか使えない件について
 
 少なくとも、`TsurugiSession`がクローズされたらそのインスタンスから作られた`TsurugiSql`はクローズされて使用不可になるので、別の`TsurugiSession`で作られた`TsurugiTransaction`では使用できない。
-
-### SQLの実行完了の確認方法について
-
-SQLの実行完了を確認する方法は「実行結果クラスのクローズが成功すること」としているが、内部的には以下のような条件である。
-
-- select文の場合、全件読み終わること
-  - 実行結果クラス（`TsurugiQueryResult`）をクローズするとTsubakuroの`ResultSet`をクローズするが、`ResultSet`のクローズ処理では、読まれなかった残りのレコードがあっても全て読まれる。したがって、`TsurugiQueryResult`をクローズすることが「全件読み終わること」の条件に合致する。
-- 更新系SQLの場合、更新の成功可否をチェックすること（更新が成功したなら、SQLの実行が完了している）
-  - 実行結果クラス（`TsurugiStatementResult`）の`getUpdateCount`メソッドを呼び出すと、更新の成功可否がチェックされる。
-  - `getUpdateCount`メソッドを一度も呼び出していない場合でも、`TsurugiStatementResult`のクローズ処理内で`getUpdateCount`メソッドを呼び出している。したがって、`TsurugiStatementResult`をクローズすることが「更新の成功可否をチェックすること」の条件に合致する。
 
 ### `TsurugiQueryResult`・`TsurugiResultRecord`について
 

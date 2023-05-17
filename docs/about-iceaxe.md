@@ -8,18 +8,18 @@ Iceaxeの概要を説明する。
 
 『Iceaxe（アイスアックス）』は、Java（Java11以降）でTsurugiのデータベース（DB）に対してSQLを実行する為のライブラリー（API）。
 
-Iceaxeの内部では、Tsurugi DBとの通信を行う通信ライブラリーである『Tsubakuro』を使用している。
+Iceaxeの内部では、TsurugiのDBサーバーとの通信を行う通信ライブラリーである『Tsubakuro』を使用している。
 SQLを実行すること自体はTsubakuroのみでも可能だが、Iceaxeはアプリケーション開発者の利便性を高める機能を用意している。
 このため、Iceaxeを高レベルAPI、Tsubakuroを低レベルAPIと呼ぶことがある。
 
 Iceaxeは以下のようなコンセプトに基づいて作られている。
 
-- IceaxeはTsubakuroを隠蔽する。
 - IceaxeはTsurugiの機能を自然な形で使えるようにする。
+- IceaxeはTsubakuroを隠蔽する。
 - Iceaxeは多機能なフレームワークではなく、JDBCと同程度とする。
   - IceaxeはORMのような高度な抽象化レイヤー機能は持たない。
     例えば、アプリケーション開発者が用意したEntityクラスからSQL文を生成したり、SQL文からEntityクラスを生成したりするような機能は対象外。
-  - ただし、Entityクラスとの変換を定義する仕組みを提供する。
+  - ただし、アプリケーション開発者が用意するEntityクラスとの変換を定義する仕組みを提供する。
 - Iceaxeでは、トランザクションがシリアライゼーションエラー（リトライ可能なアボート）になった場合に自動的に再実行する仕組みを提供する。
 
 
@@ -32,17 +32,15 @@ Iceaxeの目的のひとつはTsurugiの機能を普通に使えるようにす�
 
 - 
   Tsurugiのトランザクションでは開始時やコミット時にオプションを指定する必要があるが、JDBCではその手段が無い。
-- SQLのバインド変数（プレースホルダー）の指定方法がJDBCとは異なる。
+- TsurugiではSQLのバインド変数（プレースホルダー）の指定方法がJDBCとは異なる。
   - プレースホルダーはJDBCでは `?` だが、Tsurugiでは `:変数名` という形式。
   - Tsurugiではバインド変数を定義するときにデータ型も指定する必要がある。
 
-Tsubakuroは通信ライブラリーなので、アプリケーション開発者から渡されたSQL文やバインド変数をそのままDBサーバーに渡すようになっており、SQL文の解析はDBサーバー側で行う。
-
-IceaxeはいわばTsubakuroのラッパーであり、IceaxeでSQL文をJDBC形式からTsurugi形式へ変換するのはコストが大きいので、IceaxeもSQL文やバインド変数をTsubakuroにそのまま渡す方針になっている。
+TsurugiのSQLエンジンはJDBCの形式を受け入れられるようになっておらず、IceaxeでSQL文をJDBC形式からTsurugi形式へ変換したりバインド変数のデータ型を決定したりするのは難しい為、IceaxeではJDBCでなくTsurugi独自の方法をそのまま使う方針としている。
 
 > **Note**
 >
-> TsurugiでJDBCを使用したい場合は、PostgreSQLをTsurugiのフロントとして用意し、PostgreSQLのJDBCを使用するという方法がある。
+> JDBCを使ってTsurugiにアクセスしたい場合は、PostgreSQLをTsurugiのフロントとして用意し、PostgreSQLのJDBCドライバーを使用するという方法がある。
 
 
 
@@ -62,12 +60,7 @@ IceaxeとTsubakuroの主な違いは以下のようなものである。
 | ResultSet | select文の実行結果のデータ型をアプリケーション開発者が利用したい型に変換して取得する機能がある。カラム名を指定して取得することも可能。 | select文の実行結果を取得する際は、返ってきたデータ型で取得する必要がある。また、カラム名を指定することは出来ず、カラムの並び順に従って取得する。各カラムのデータは一度だけしか取得できない。 |
 
 IceaxeはTsubakuroをラップしているので、Iceaxeを使用する場合は、ユーザープログラムには基本的にTsubakuroのクラスは現れない。
-ただし、一部のクラスや列挙型（認証情報のCredentialクラスやエラーコード等）では、Tsubakuroのクラスをアプリケーション開発者が直接使用することもある。
-
-ほとんどのIceaxeのクラスは、Tsubakuroのメソッドを呼び出し、返ってきたFutureを内部で保持する。
-必要になった時点でFutureから値を取り出して使用する。（いわゆる遅延評価）
-
-Tsubakuroはデータ受信の為にセッション毎にスレッドを作成するが、Iceaxeはスレッドを作成する箇所は無い。
+ただし、一部のクラスや列挙型（認証情報の`Credential`クラスやエラーコード等）では、Tsubakuroのクラスをアプリケーション開発者が直接使用することもある。
 
 
 
@@ -81,12 +74,12 @@ Iceaxeのドキュメントでは以下のような用語を使っている。
 | エンドポイント               | どのTsurugi DBに接続するかという情報と接続方法。             | URI                                                          |
 | 認証情報                     | Tsurugi DBに接続する為のユーザー名とパスワードや、アクセストークン等。 | Credential                                                   |
 | セッション                   | DB接続。                                                     | TsurugiSession                                               |
-| SQLステートメント            | SQL文およびバインド変数の定義を合わせたもの。                | TsurugiSql                                                   |
+| SQLステートメント            | SQL文およびバインド変数の定義・select結果の変換方法の定義を合わせたもの。 | TsurugiSql                                                   |
 | DDL                          | データの定義を行うSQL。create tableやdrop table等。          | executeDdl()                                                 |
 | DML                          | データの操作を行うSQL。クエリーと更新系SQL。                 |                                                              |
 | クエリー                     | select文。                                                   | TsurugiSqlQuery<br />TsurugiSqlPreparedQuery<br />TsurugiQueryResult |
 | 更新系SQL                    | insert, update, delete文の総称。                             | TsurugiSqlStatement<br />TsurugiSqlPreparedStatement<br />TsurugiStatementResult |
-| バインド変数                 | SQL文の中に埋め込む変数。SQL実行時にSQL文の外から値を渡せる。 | TgBindVariable<br />TgBindParameters                         |
+| バインド変数                 | SQL文の中に埋め込む変数。その変数に対してSQL実行時にSQL文の外から値を代入できる。 | TgBindVariable<br />TgBindParameters                         |
 | トランザクション             | SQLを実行し、コミットまたはロールバックを行うまでの一連の処理。 | TsurugiTransaction                                           |
 | トランザクション種別         | OCC・LTX・RTXの3種類ある。どの時点のデータを読むかや、他トランザクションとの競合時にどちらがアボートするか（優先されるか）が異なる。 | TgTxOption                                                   |
 | OCC                          | 実行時間が短いトランザクション。最新のデータを読む。他トランザクションとの競合時にアボートしやすい（優先度が低い）。 | TgTxOptionOcc                                                |
