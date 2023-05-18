@@ -610,8 +610,6 @@ select文の例は[iceaxe-examples]の`Example31Select`, `Example32Count`を参�
 
 SQL文をDBサーバーに事前に登録しない方式で、更新系SQLを実行する例。
 
-`TsurugiSession`の`createStatement`メソッドの引数`parameterMapping`を省略すると、SQL文をDBサーバーに事前に登録しない方式になる。
-
 ```java
 var sql = "update TEST set BAR = 1 where FOO = 123";
 try (var ps = session.createStatement(sql)) {
@@ -620,6 +618,10 @@ try (var ps = session.createStatement(sql)) {
     });
 }
 ```
+
+`TsurugiSession`の`createStatement`メソッドで引数の`parameterMapping`を省略すると、SQL文をDBサーバーに事前に登録しない方式で`TsurugiSql`が作られる。
+
+`TsurugiTransaction`の`executeAndGetCount`メソッド等に`TsurugiSql`を渡して更新系SQLを実行する。
 
 > **Note**
 >
@@ -631,6 +633,273 @@ try (var ps = session.createStatement(sql)) {
 > クローズが漏れても`TsurugiTransaction`クローズ時にクローズされるが、SQLの実行完了を待たないことになるので、SQLが順次実行されることを期待していた場合は予期せぬ挙動になる可能性がある。
 >
 > そのため、基本的には`executeAndGetCount`メソッドの使用を推奨する。（`executeAndGetCount`メソッドでは内部で`TsurugiStatementResult`が必ずクローズされる為）
+
+
+
+### select文の実行方法（SQL文のDBサーバーへの事前登録有無に関わらず共通）
+
+select文は`TsurugiTransaction`の`executeAndGetList`メソッド等で実行するが、select文を実行するとDBから（複数の）レコードが返ってくる。
+返ってきたレコードは、アプリケーション開発者が用意するEntityクラス（setterメソッドを持つクラス）に変換される。
+`TgResultMapping`はこの変換の定義を行うクラス。
+
+アプリケーション開発者がEntityクラスを用意する代わりに`TsurugiResultEntity`を使うことも出来る。
+
+Entityクラスへの変換を定義する方法は何通りか存在する。
+
+#### select結果取得の例（`TsurugiResultEntity`を使用する方法・カラム名指定方式）
+
+Iceaxeが用意している`TsurugiResultEntity`を使う例。
+
+```java
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+
+var sql = "select FOO, BAR, ZZZ from TEST";
+try (var ps = session.createQuery(sql)) {
+    tm.execute(transaction -> {
+        List<TsurugiResultEntity> list = transaction.executeAndGetList(ps);
+        for (var entity: list) {
+            System.out.println(entity.getInt("FOO"));
+            System.out.println(entity.getLongOrNull("BAR"));
+            System.out.println(entity.getStringOrNull("ZZZ"));
+        }
+    });
+}
+```
+
+`TsurugiSession`の`createQuery`メソッドで引数の`resultMapping`を省略すると、`TsurugiResultEntity`に変換されるようになる。
+
+`TsurugiResultEntity`のgetterメソッドにカラム名を指定して値を取得する。
+
+`TsurugiResultEntity`のgetterメソッドには以下のような種類がある。
+
+| メソッド                          | 説明                                                         |
+| --------------------------------- | ------------------------------------------------------------ |
+| `getデータ型(name)`               | 値を取得する。値が`null`の場合は`NullPointerException`が発生する。 |
+| `getデータ型(name, defaultValue)` | 値を取得する。値が`null`の場合は`defaultValue`が返る。       |
+| `getデータ型orNull(name)`         | 値を取得する。値が`null`の場合は`null`が返る。               |
+| `findデータ型(name)`              | 値を`Optional`で取得する。                                   |
+
+#### select結果取得の例（`TsurugiResultEntity`を使用する方法・カラムの並び順依存方式）
+
+`TsurugiResultEntity`からカラムの位置（index）を指定して値を取得する例。
+
+```java
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+
+var sql = "select ZZZ, count(*) from TEST group by ZZZ";
+try (var ps = session.createQuery(sql)) {
+    tm.execute(transaction -> {
+        List<TsurugiResultEntity> list = transaction.executeAndGetList(ps);
+        for (var entity: list) {
+            System.out.println(entity.getStringOrNull(entity.getName(0)));
+            System.out.println(entity.getInt(entity.getName(1)));
+        }
+    });
+}
+```
+
+`TsurugiResultEntity`の`getName`メソッドで、指定された位置のカラム名を取得できる。
+
+> **Note**
+>
+> select文で明示的にカラム名が指定されていない場合は、Iceaxeが適当な名前を生成する。
+
+> **Note**
+>
+> `TsurugiResultEntity`の`getNameList`メソッドでカラム名一覧を取得できる。
+
+#### select結果変換の例（Entityに変換する方法・カラム名指定方式）
+
+アプリケーション開発者が用意するEntityクラス（setterメソッドを持つクラス）に変換する例。
+
+```java
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+
+var sql = "select FOO, BAR, ZZZ from TEST";
+var resultMapping = TgResultMapping.of(TestEntity::new)
+    .addInt("FOO", TestEntity::setFoo)
+    .addLong("BAR", TestEntity::setBar)
+    .addString("ZZZ", TestEntity::setZzz);
+try (var ps = session.createQuery(sql, resultMapping)) {
+    tm.execute(transaction -> {
+        List<TestEntity> list = transaction.executeAndGetList(ps);
+    });
+}
+```
+
+`TgResultMapping`の`of`メソッドにEntityのコンストラクターを渡し、`add`系メソッドでカラム名とsetterメソッドを追加していく。
+
+#### select結果変換の例（Entityに変換する方法・カラムの並び順依存方式）
+
+`TgResultMapping`の`add`系メソッドでカラム名を省略すると、カラムの並び順依存になる。
+
+```java
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+
+var sql = "select ZZZ, count(*) from TEST group by ZZZ";
+var resultMapping = TgResultMapping.of(TestCountByZzzEntity::new)
+    .addString(TestCountByZzzEntity::setZzz)
+    .addInt(TestCountByZzzEntity::setCount);
+try (var ps = session.createQuery(sql, resultMapping)) {
+    tm.execute(transaction -> {
+        List<TestCountByZzzEntity> list = transaction.executeAndGetList(ps);
+    });
+}
+```
+
+#### select結果変換の例（1カラムだけ取得する場合）
+
+1カラムだけしか取得しない場合は、`TgResultMapping`の`of`メソッドにカラムのデータ型を指定することで、その値を直接取得することが出来る。
+
+```java
+import java.util.Optional;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+
+var sql = "select count(*) from TEST";
+var resultMapping = TgResultMapping.of(int.class);
+try (var ps = session.createQuery(sql, resultMapping)) {
+    tm.execute(transaction -> {
+        Optional<Integer> countOpt = transaction.executeAndFindRecord(ps);
+        int count = countOpt.get();
+    });
+}
+```
+
+> **Note**
+>
+> この例のSQLではselect結果が常に1件だと分かっているので、1件だけ取得する`executeAndFindRecord`メソッドを使い、返ってきた`Optional`がemptyかどうかを確認せずに値を取り出している。
+
+#### select結果変換の例（`TsurugiResultRecord`から変換する方法）
+
+`TsurugiResultRecord`クラスは、Iceaxeが1レコード分のデータを処理するクラス。（使用上の注意点については後述）
+
+この`TsurugiResultRecord`からEntityクラスへ変換する関数を用意する例。
+
+```java
+import java.io.IOException;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+
+class TestEntity {
+    public static TestEntity of(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
+        var entity = new TestEntity();
+        entity.setFoo(record.getInt("FOO"));
+        entity.setBar(record.getLongOrNull("BAR"));
+        entity.setZzz(record.getStringOrNull("ZZZ"));
+        return entity;
+    }
+    ～
+}
+
+var sql = "select FOO, BAR, ZZZ from TEST";
+var resultMapping = TgResultMapping.of(TestEntity::of);
+try (var ps = session.createQuery(sql, resultMapping)) {
+    tm.execute(transaction -> {
+        List<TestEntity> list = transaction.executeAndGetList(ps);
+    });
+}
+```
+
+`TgResultMapping`の`of`メソッドに、`TsurugiResultRecord`からEntityクラスへ変換する関数を渡す。
+
+
+
+### `TsurugiQueryResult`・`TsurugiResultRecord`
+
+`TsurugiQueryResult`は、`TsurugiTransaction`の`executeQuery`メソッドを実行したときに作られる、select結果を扱うクラス。
+`TsurugiResultRecord`は`TsurugiQueryResult`内部で使用される、1レコード分のデータを処理するクラス。
+Iceaxeではこの2つのクラスを使ってselect結果を処理する。
+
+> **Note**
+>
+> `TsurugiTransaction`の`executeAnd`系メソッドを使えばこれらのクラスはメソッド内部に隠蔽されるが、`executeQuery`メソッド（`TsurugiQueryResult`が返る）を使う場合や`TgResultMapping`で「`TsurugiResultRecord`からEntityクラスに変換する関数」を使う場合は、アプリケーション開発者がこれらのクラスを直接扱う必要がある。
+
+Iceaxeの大多数のクラスと異なり、`TsurugiQueryResult`と`TsurugiResultRecord`は**スレッドセーフではない**。
+
+`TsurugiQueryResult`はselect結果の複数レコードを先頭から順番に処理していく。各レコードは一度しか読むことが出来ない。
+
+`TsurugiResultRecord`は1レコード分のデータを処理するが、インスタンスは`TsurugiQueryResult`の中でひとつしか生成されず、複数レコード間で同じインスタンスが使い回される。
+また、`TsurugiQueryResult`をクローズすると、`TsurugiResultRecord`も使用できなくなる。
+
+したがって、アプリケーション開発者が各レコードの値を保存する目的で`TsurugiResultRecord`インスタンスを保持する（`List`に`add`していく）ような使い方は出来ない。
+また、`TsurugiTransaction`の`executeAnd`系メソッドの外に`TsurugiResultRecord`を出すことも出来ない（`executeAnd`系メソッドが終了しているということは、`TsurugiQueryResult`はクローズされている為）。
+
+そのため、`TsurugiQueryResult`からレコードを返す際は、`TsurugiResultRecord`を必ずEntityクラスに変換する（レコード毎に、1レコード分の値を保持するEntityインスタンスを生成する）。
+
+> **Note**
+>
+> `TsurugiResultRecord`を1レコードずつ処理するだけであれば、必ずしもEntityクラスに変換しなくてもよい。変換しない分、処理速度は向上する。
+>
+> ```java
+> var sql = "select FOO, BAR, ZZZ from TEST";
+> var resultMapping = TgResultMapping.of(record -> record); // Entityに変換しない
+> try (var ps = session.createQuery(sql, resultMapping)) {
+>     tm.execute(transaction -> {
+>         // TsurugiResultRecordを直接使って1レコードずつ処理
+>         transaction.executeAndForEach(ps, record -> {
+>             int foo = record.nextInt();
+>             Long bar = record.nextLongOrNull();
+>             String zzz = record.nextStringOrNull();
+>         });
+>     });
+> }
+> ```
+
+#### `TsurugiResultRecord`の使用方法
+
+`TsurugiResultRecord`から値を取得するメソッド群は、3種類に分類される。ある群のメソッドを使用したら、他の群のメソッドは基本的に使用不可。
+
+##### 現在カラム系
+
+メソッド名に `CurrentColumn` が入っているメソッド群。
+
+select文の複数カラムに対し、`moveCurrentColumnNext`メソッドによって現在カラムを移動しながら順番に値を取得していく。各カラムの値は一度しか取得できない。
+
+select文のカラム数やデータ型に関係なく汎用的に取得する方法である。
+
+```java
+while (record.moveCurrentColumnNext()) { // カラムが存在している間ループ
+    String name = record.getCurrentColumnName(); // 現在位置のカラム名取得
+    Object value = record.fetchCurrentColumnValue(); // 現在位置の値取得
+}
+```
+
+値を取得する`fetchCurrentColumnValue`メソッドは、`moveCurrentColumnNext`メソッドの呼び出し1回につき一度しか実行できない。
+
+##### カラム名指定系
+
+メソッド名が `getデータ型` あるいは `findデータ型` で始まっているメソッド群。
+
+select文のカラム名を指定して値を取得する方法である。
+
+```java
+entity.setFoo(record.getIntOrNull("FOO"));
+entity.setBar(record.getLongOrNull("BAR"));
+entity.setZzz(record.getStringOrNull("ZZZ"));
+```
+
+> **Note**
+>
+> このメソッドを使用した場合、内部では一旦全カラムを読み込んで、カラム名をキーとする`Map`を作っている。
+> 他のメソッド群ではこういった`Map`は作っていない。
+> したがって、他のメソッド群と共存できない。
+
+##### next系
+
+メソッド名が `nextデータ型` で始まっているメソッド群。
+
+select文の複数カラムに対し、順番に値を取得しながら現在カラムを移動していく。各カラムの値は一度しか取得できない。
+
+`next`系メソッドを呼んだ直後に`getCurrentColumnName`（現在位置のカラム名取得）, `getCurrentColumnType`（現在位置のデータ型取得）メソッドは使用可能。
+
+カラム名を使用せず、select文のカラムの並び順とカラム数に依存した取得方法である。
+
+```java
+entity.setFoo(record.nextIntOrNull());
+entity.setBar(record.nextLongOrNull());
+entity.setZzz(record.nextStringOrNull());
+```
 
 
 
@@ -843,274 +1112,7 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 }
 ```
 
-変換関数の他に、バインド変数の定義（`TgBindVariables`）は必要。
-
-
-
-### select文の実行方法（SQL文のDBサーバーへの事前登録有無に関わらず共通）
-
-select文を実行すると、DBから（複数の）レコードが返ってくる。
-返ってきたレコードは、アプリケーション開発者が用意するEntityクラス（setterメソッドを持つクラス）に変換される。
-`TgResultMapping`はこの変換の定義を行うクラス。
-
-アプリケーション開発者がEntityクラスを用意する代わりに`TsurugiResultEntity`を使うことも出来る。
-
-select結果を取得する方法（Entityクラスに変換する方法）は何通りか存在する。
-
-#### select結果取得の例（`TsurugiResultEntity`を使用する方法・カラム名指定方式）
-
-Iceaxeが用意している`TsurugiResultEntity`を使う例。
-
-`TsurugiSession`の`createQuery`メソッドで引数の`resultMapping`を省略すると、`TsurugiResultEntity`に変換される。
-
-```java
-import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
-
-var sql = "select FOO, BAR, ZZZ from TEST";
-try (var ps = session.createQuery(sql)) {
-    tm.execute(transaction -> {
-        List<TsurugiResultEntity> list = transaction.executeAndGetList(ps);
-        for (var entity: list) {
-            System.out.println(entity.getInt("FOO"));
-            System.out.println(entity.getLongOrNull("BAR"));
-            System.out.println(entity.getStringOrNull("ZZZ"));
-        }
-    });
-}
-```
-
-`TsurugiResultEntity`のgetterメソッドにカラム名を指定して値を取得する。
-
-`TsurugiResultEntity`のgetterメソッドには以下のような種類がある。
-
-| メソッド                          | 説明                                                         |
-| --------------------------------- | ------------------------------------------------------------ |
-| `getデータ型(name)`               | 値を取得する。値が`null`の場合は`NullPointerException`が発生する。 |
-| `getデータ型(name, defaultValue)` | 値を取得する。値が`null`の場合は`defaultValue`が返る。       |
-| `getデータ型orNull(name)`         | 値を取得する。値が`null`の場合は`null`が返る。               |
-| `findデータ型(name)`              | 値を`Optional`で取得する。                                   |
-
-#### select結果取得の例（`TsurugiResultEntity`を使用する方法・カラムの並び順依存方式）
-
-`TsurugiResultEntity`からカラムの位置（index）を指定して値を取得する例。
-
-```java
-import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
-
-var sql = "select ZZZ, count(*) from TEST group by ZZZ";
-try (var ps = session.createQuery(sql)) {
-    tm.execute(transaction -> {
-        List<TsurugiResultEntity> list = transaction.executeAndGetList(ps);
-        for (var entity: list) {
-            System.out.println(entity.getStringOrNull(entity.getName(0)));
-            System.out.println(entity.getInt(entity.getName(1)));
-        }
-    });
-}
-```
-
-`TsurugiResultEntity`の`getName`メソッドで、指定された位置のカラム名を取得できる。
-
-> **Note**
->
-> select文で明示的にカラム名が指定されていない場合は、Iceaxeが適当な名前を生成する。
-
-> **Note**
->
-> `TsurugiResultEntity`の`getNameList`メソッドでカラム名一覧を取得できる。
-
-#### select結果変換の例（Entityに変換する方法・カラム名指定方式）
-
-アプリケーション開発者が用意するEntityクラス（setterメソッドを持つクラス）に変換する例。
-
-```java
-import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
-
-var sql = "select FOO, BAR, ZZZ from TEST";
-var resultMapping = TgResultMapping.of(TestEntity::new)
-    .addInt("FOO", TestEntity::setFoo)
-    .addLong("BAR", TestEntity::setBar)
-    .addString("ZZZ", TestEntity::setZzz);
-try (var ps = session.createQuery(sql, resultMapping)) {
-    tm.execute(transaction -> {
-        List<TestEntity> list = transaction.executeAndGetList(ps);
-    });
-}
-```
-
-`TgResultMapping`の`of`メソッドにEntityのコンストラクターを渡し、`add`系メソッドでカラム名とsetterメソッドを追加していく。
-
-#### select結果変換の例（Entityに変換する方法・カラムの並び順依存方式）
-
-`TgResultMapping`の`add`系メソッドでカラム名を省略すると、カラムの並び順依存になる。
-
-```java
-import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
-
-var sql = "select ZZZ, count(*) from TEST group by ZZZ";
-var resultMapping = TgResultMapping.of(TestCountByZzzEntity::new)
-    .addString(TestCountByZzzEntity::setZzz)
-    .addInt(TestCountByZzzEntity::setCount);
-try (var ps = session.createQuery(sql, resultMapping)) {
-    tm.execute(transaction -> {
-        List<TestCountByZzzEntity> list = transaction.executeAndGetList(ps);
-    });
-}
-```
-
-#### select結果変換の例（1カラムだけ取得する場合）
-
-1カラムだけしか取得しない場合は、`TgResultMapping`の`of`メソッドにカラムのデータ型を指定することで、その値を直接取得することが出来る。
-
-```java
-import java.util.Optional;
-import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
-
-var sql = "select count(*) from TEST";
-var resultMapping = TgResultMapping.of(int.class);
-try (var ps = session.createQuery(sql, resultMapping)) {
-    tm.execute(transaction -> {
-        Optional<Integer> countOpt = transaction.executeAndFindRecord(ps);
-        int count = countOpt.get();
-    });
-}
-```
-
-> **Note**
->
-> この例のSQLではselect結果が常に1件だと分かっているので、1件だけ取得する`executeAndFindRecord`メソッドを使い、返ってきた`Optional`がemptyかどうかを確認せずに値を取り出している。
-
-#### select結果変換の例（`TsurugiResultRecord`から変換する方法）
-
-`TsurugiResultRecord`クラスは、Iceaxeが1レコード分のデータを処理するクラス。（使用上の注意点については後述）
-
-この`TsurugiResultRecord`からEntityクラスへ変換する関数を用意する例。
-
-```java
-import java.io.IOException;
-import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
-import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-
-class TestEntity {
-    public static TestEntity of(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
-        var entity = new TestEntity();
-        entity.setFoo(record.getInt("FOO"));
-        entity.setBar(record.getLongOrNull("BAR"));
-        entity.setZzz(record.getStringOrNull("ZZZ"));
-        return entity;
-    }
-    ～
-}
-
-var sql = "select FOO, BAR, ZZZ from TEST";
-var resultMapping = TgResultMapping.of(TestEntity::of);
-try (var ps = session.createQuery(sql, resultMapping)) {
-    tm.execute(transaction -> {
-        List<TestEntity> list = transaction.executeAndGetList(ps);
-    });
-}
-```
-
-`TgResultMapping`の`of`メソッドに、`TsurugiResultRecord`からEntityクラスへ変換する関数を渡す。
-
-
-
-### `TsurugiQueryResult`・`TsurugiResultRecord`
-
-`TsurugiQueryResult`は、select文を実行したときに作られる、select結果を受け取るクラス。
-`TsurugiResultRecord`は`TsurugiQueryResult`内部で使用される、1レコード分のデータを処理するクラス。
-Iceaxeではこの2つのクラスを使ってselect結果を処理する。
-
-> **Note**
->
-> `TsurugiTransaction`の`executeAnd`系メソッドを使えばこれらのクラスはメソッド内部に隠蔽されるが、`executeQuery`メソッド（`TsurugiQueryResult`が返る）を使う場合や`TgResultMapping`で「`TsurugiResultRecord`からEntityクラスに変換する関数」を使う場合は、アプリケーション開発者がこれらのクラスを直接扱う必要がある。
-
-Iceaxeの大多数のクラスと異なり、`TsurugiQueryResult`と`TsurugiResultRecord`は**スレッドセーフではない**。
-
-`TsurugiQueryResult`はselect結果の複数レコードを先頭から順番に処理していく。各レコードは一度しか読むことが出来ない。
-
-`TsurugiResultRecord`は1レコード分のデータを処理するが、インスタンスは`TsurugiQueryResult`の中でひとつしか生成されず、複数レコード間で同じインスタンスが使い回される。
-また、`TsurugiQueryResult`をクローズすると、`TsurugiResultRecord`も使用できなくなる。
-
-したがって、アプリケーション開発者が各レコードの値を保存する目的で`TsurugiResultRecord`インスタンスを保持する（`List`に`add`していく）ような使い方は出来ない。
-また、`TsurugiTransaction`の`executeAnd`系メソッドの外に`TsurugiResultRecord`を出すことも出来ない（`executeAnd`系メソッドが終了しているということは、`TsurugiQueryResult`はクローズされている為）。
-
-そのため、`TsurugiQueryResult`からレコードを返す際は、`TsurugiResultRecord`を必ずEntityクラスに変換する（レコード毎に、1レコード分の値を保持するEntityインスタンスを生成する）。
-
-> **Note**
->
-> `TsurugiResultRecord`を1レコードずつ処理するだけであれば、必ずしもEntityクラスに変換しなくてもよい。変換しない分、処理速度は向上する。
->
-> ```java
-> var sql = "select FOO, BAR, ZZZ from TEST";
-> var resultMapping = TgResultMapping.of(record -> record); // Entityに変換しない
-> try (var ps = session.createQuery(sql, resultMapping)) {
->      tm.execute(transaction -> {
->            // TsurugiResultRecordを直接使って1レコードずつ処理
->            transaction.executeAndForEach(ps, record -> {
->                int foo = record.nextInt();
->                Long bar = record.nextLongOrNull();
->                String zzz = record.nextStringOrNull();
->            });
->      });
-> }
-> ```
-
-#### `TsurugiResultRecord`の使用方法
-
-`TsurugiResultRecord`から値を取得するメソッド群は、3種類に分類される。ある群のメソッドを使用したら、他の群のメソッドは基本的に使用不可。
-
-##### 現在カラム系
-
-メソッド名に `CurrentColumn` が入っているメソッド群。
-
-select文の複数カラムに対し、`moveCurrentColumnNext`メソッドによって現在カラムを移動しながら順番に値を取得していく。各カラムの値は一度しか取得できない。
-
-select文のカラム数やデータ型に関係なく汎用的に取得する方法である。
-
-```java
-while (record.moveCurrentColumnNext()) { // カラムが存在している間ループ
-    String name = record.getCurrentColumnName(); // 現在位置のカラム名取得
-    Object value = record.fetchCurrentColumnValue(); // 現在位置の値取得
-}
-```
-
-値を取得する`fetchCurrentColumnValue`メソッドは、`moveCurrentColumnNext`メソッドの呼び出し1回につき一度しか実行できない。
-
-##### カラム名指定系
-
-メソッド名が `getデータ型` あるいは `findデータ型` で始まっているメソッド群。
-
-select文のカラム名を指定して値を取得する方法である。
-
-```java
-entity.setFoo(record.getIntOrNull("FOO"));
-entity.setBar(record.getLongOrNull("BAR"));
-entity.setZzz(record.getStringOrNull("ZZZ"));
-```
-
-> **Note**
->
-> このメソッドを使用した場合、内部では一旦全カラムを読み込んで、カラム名をキーとする`Map`を作っている。
->他のメソッド群ではこういった`Map`は作っていない。
-> したがって、他のメソッド群と共存できない。
-
-##### next系
-
-メソッド名が `nextデータ型` で始まっているメソッド群。
-
-select文の複数カラムに対し、順番に値を取得しながら現在カラムを移動していく。各カラムの値は一度しか取得できない。
-
-`next`系メソッドを呼んだ直後に`getCurrentColumnName`（現在位置のカラム名取得）, `getCurrentColumnType`（現在位置のデータ型取得）メソッドは使用可能。
-
-カラム名を使用せず、select文のカラムの並び順とカラム数に依存した取得方法である。
-
-```java
-entity.setFoo(record.nextIntOrNull());
-entity.setBar(record.nextLongOrNull());
-entity.setZzz(record.nextStringOrNull());
-```
+変換関数の他に、`TgBindVariables`（バインド変数の定義）は必要。
 
 
 
