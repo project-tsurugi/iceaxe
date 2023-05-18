@@ -362,11 +362,11 @@ try (var transaction = session.createTransaction(txOption)) {
 | --------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | `int getIceaxeTxId()`                               | `TsurugiTransaction`に付けられた番号                         | `TsurugiTransaction`に関してIceaxe（JavaVM）内でユニークな番号。デバッガー等で識別するときに利用できる |
 | `TgTxOption getTransactionOption()`                 | `TsurugiTransaction`生成時に指定された`TgTxOption`           |                                                              |
-| `TsurugiTransactionManager getTransactionManager()` | `TsurugiTransaction`を生成した`TsurugiTransactionManager`    | `TsurugiTransactionManager`経由でない場合はnull              |
-| `int getIceaxeTmExecuteId()`                        | `TsurugiTransactionManager`の `execute`メソッドを実行する際に付けられた番号 | `TsurugiTransaction`実行に関してIceaxe（JavaVM）内でユニークな番号。シリアライゼーションエラーによって再実行しても変わらないので、一連のトランザクションを識別したいときに利用できる。<br />`TsurugiTransactionManager`経由でない場合は0 |
-| `int getAttempt()`                                  | 試行番号（`TsurugiTransactionManager`での再実行回数）        | 初回は0で、シリアライゼーションエラーによって再実行する度に増えていく。<br />`TsurugiTransactionManager`経由でない場合は常に0 |
+| `TsurugiTransactionManager getTransactionManager()` | `TsurugiTransaction`を生成した`TsurugiTransactionManager`    | `TsurugiTransactionManager`経由でない場合は`null`            |
+| `int getIceaxeTmExecuteId()`                        | `TsurugiTransactionManager`の `execute`メソッドを実行する際に付けられた番号 | `TsurugiTransaction`実行に関してIceaxe（JavaVM）内でユニークな番号。シリアライゼーションエラーによって再実行しても変わらないので、一連のトランザクションを識別したいときに利用できる。<br />`TsurugiTransactionManager`経由でない場合は`0` |
+| `int getAttempt()`                                  | 試行番号（`TsurugiTransactionManager`での再実行回数）        | 初回は0で、シリアライゼーションエラーによって再実行する度に増えていく。<br />`TsurugiTransactionManager`経由でない場合は常に`0` |
 | `String getTransactionId()`                         | DB側が採番したトランザクションID                             | DBサーバー側のログでもこのトランザクションIDが出力されるので、紐付けるのに利用できる。<br />トランザクションIDは`toString`メソッドが返す文字列内にもあるが、そちらは、DBサーバーから取得していない時点では`null` |
-| `boolean available()`                               | `TsurugiTransaction`が有効かどうか（DBと通信可能かどうか）   | DBサーバー側でエラー（一意制約違反等）が発生した場合にトランザクションがinactiveになることがあるが、それはこのメソッドでは検知できない |
+| `boolean available()`                               | `TsurugiTransaction`が有効かどうか（DBサーバーと通信可能かどうか） | DBサーバー側でエラー（一意制約違反等）が発生した場合にトランザクションがinactiveになることがあるが、それはこのメソッドでは検知できない |
 | `boolean isCommitted()`                             | `TsurugiTransaction`がコミットされたかどうか                 |                                                              |
 | `boolean isRollbacked()`                            | `TsurugiTransaction`がロールバックされたかどうか             |                                                              |
 
@@ -511,7 +511,7 @@ DDLの例は、[iceaxe-examples]の`Example11Ddl`を参照。
 
 ## SQL（DML）の実行方法
 
-`TsurugiSql`は、SQL文を管理・実行するクラス。
+`TsurugiSql`は、SQL文を管理するクラス。`TsurugiSql`を使ってSQLを実行する。
 
 - `TsurugiSql`は`TsurugiSession`から生成する。
   - 使用終了後にクローズする必要がある。（明示的にクローズしない場合、`TsurugiSession`のクローズ時にクローズされる）
@@ -519,7 +519,7 @@ DDLの例は、[iceaxe-examples]の`Example11Ddl`を参照。
   - `TsurugiSql`は、「`TsurugiSql`が作られたのと同じ`TsurugiSession`」から作られた`TsurugiTransaction`に対してしか実行できない。
 - `TsurugiSql`（具象クラスを含む）は、SQL実行に関してスレッドセーフ。
 
-SQLがselect文か更新系SQL（insert・update・delete文）か、SQL文をDBサーバーに事前に登録するか否かによって、`TsurugiSql`を生成するメソッドが異なる。
+SQLがselect文か更新系SQL（insert・update・delete文）か、SQL文をDBサーバーに事前に登録するか否かによって、`TsurugiSql`の具象クラスやそれを生成するメソッドが異なる。
 
 > **Note**
 >
@@ -625,12 +625,12 @@ try (var ps = session.createStatement(sql)) {
 >
 > 更新系SQLを実行するメソッドには、`executeStatement`と`executeAndGetCount`がある。
 >
-> 後者は処理件数を返すメソッドなので、処理件数が不要な場合は前者で実行したくなるかもしれないが、前者は`TsurugiStatementResult`を返すメソッドである。
+> 後者は処理件数を返すメソッドなので、処理件数が不要な場合は前者で実行したくなるかもしれないが、前者は`TsurugiStatementResult`を返すメソッドなので戻り値を無視するのは不適切。
 >
 > `TsurugiStatementResult`はクローズする必要があるが、`executeStatement`メソッドの戻り値（`TsurugiStatementResult`）を無視すると、クローズが漏れてしまう。
 > クローズが漏れても`TsurugiTransaction`クローズ時にクローズされるが、SQLの実行完了を待たないことになるので、SQLが順次実行されることを期待していた場合は予期せぬ挙動になる可能性がある。
 >
-> そのため、基本的には`executeAndGetCount`メソッドの使用を推奨する。（`executeAndGetCount`メソッドは内部で`TsurugiStatementResult`が必ずクローズされる為）
+> そのため、基本的には`executeAndGetCount`メソッドの使用を推奨する。（`executeAndGetCount`メソッドでは内部で`TsurugiStatementResult`が必ずクローズされる為）
 
 
 
@@ -644,8 +644,9 @@ try (var ps = session.createStatement(sql)) {
 
 1. SQL文の中にコロンで始まる変数名（ `:変数名` という形式）を入れる。
    - 変数名に使える文字は、1文字目は英字またはアンダースコアで、2文字目以降は英数字またはアンダースコア。大文字小文字は区別される。
-2. 変数名とそのデータ型を`TgParameterMapping`クラスで定義し、`TsurugiSession`の`createQuery`や`createStatement`メソッドに渡して`TsurugiSql`を生成する。（バインド変数の登録）
-3. バインド変数に代入する具体的な値（パラメーター）を`TsurugiTransaction`の`execute`系メソッドに渡してSQLを実行する。
+2. 変数名とそのデータ型を`TgParameterMapping`で定義する。
+3. `TsurugiSession`の`createQuery`や`createStatement`メソッドにSQL文と`TgParameterMapping`を渡して`TsurugiSql`を生成する。（バインド変数の定義がDBサーバーに登録される）
+4. `TsurugiTransaction`の`execute`系メソッドに`TsurugiSql`とバインド変数に代入する具体的な値（パラメーター）を渡してSQLを実行する。
 
 
 
@@ -735,7 +736,7 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 
 #### バインド変数の例（変数が0個の場合）
 
-バインド変数が無いSQL文をDBサーバーに事前に登録する場合は、`TgParameterMapping`を空にすればよい。
+バインド変数が無いSQL文をDBサーバーに事前に登録したい場合は、`TgParameterMapping`を空にすればよい。
 
 ```java
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -813,7 +814,7 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 #### バインド変数の例（`TgBindVariables`と変換関数を用意してEntityを変換する方法）
 
 「Entityクラスから`TgBindParameters`に変換する関数」を`TgParameterMapping`に登録しておく方式。
-変換関数を用意するので、関数内に複雑な条件等を記述することが出来る。
+変換関数を用意するので、関数内に複雑な処理を記述することが出来る。
 
 ```java
 import java.util.function.Function;
@@ -823,10 +824,16 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 
 var variables = TgBindVariables.of().addInt("foo").addLong("bar").addString("zzz");
 var sql = "insert into TEST (FOO, BAR, ZZZ) values(" + variables.getSqlNames() + ")";
-Function<TestEntity, TgBindParameters> parameterConverter = entity -> TgBindParameters.of()
-    .add("foo", entity.getFoo())
-    .add("bar", entity.getBar())
-    .add("zzz", entity.getZzz());
+Function<TestEntity, TgBindParameters> parameterConverter = entity -> {
+    String zzz = entity.getZzz();
+    if (zzz == null) {
+        zzz = "default";
+    }
+    return TgBindParameters.of()
+        .add("foo", entity.getFoo())
+        .add("bar", entity.getBar())
+        .add("zzz", zzz);
+};
 var parameterMapping = TgParameterMapping.of(variables, parameterConverter);
 try (var ps = session.createStatement(sql, parameterMapping)) {
     tm.execute(transaction -> {
@@ -1017,7 +1024,7 @@ Iceaxeではこの2つのクラスを使ってselect結果を処理する。
 
 > **Note**
 >
-> `TsurugiTransaction`の`executeAnd`系メソッドを使えばこれらのクラスはメソッド内部に隠蔽されるが、`executeQuery`メソッドを使う場合（`TsurugiQueryResult`が返る）や`TgParameterMapping`で`TsurugiResultRecord`から変換する方法を使う場合は、アプリケーション開発者がこれらのクラスを直接扱う必要がある。
+> `TsurugiTransaction`の`executeAnd`系メソッドを使えばこれらのクラスはメソッド内部に隠蔽されるが、`executeQuery`メソッド（`TsurugiQueryResult`が返る）を使う場合や`TgResultMapping`で「`TsurugiResultRecord`からEntityクラスに変換する関数」を使う場合は、アプリケーション開発者がこれらのクラスを直接扱う必要がある。
 
 Iceaxeの大多数のクラスと異なり、`TsurugiQueryResult`と`TsurugiResultRecord`は**スレッドセーフではない**。
 
@@ -1168,7 +1175,7 @@ try (var ps = session.createQuery(sql, parameterMapping)) {
 
 ### タイムアウト時間の設定
 
-DBと通信する箇所では、タイムアウト時間を指定できる。
+DBサーバーと通信する箇所では、タイムアウト時間を指定できる。
 
 > **Note**
 >
@@ -1528,9 +1535,9 @@ var resultMapping = TgResultMapping.of(TestEntity::new)
   - 指定することは出来るが、効果は無い。
 - コミットオプションは未実装。
   - 何かを指定する必要はあるが、効果は無い。
-- `TsurugiTransaction`の`executeDdl`メソッド・バインド変数なしの`executeQuery`, `executeStatement`メソッドを実行して、DBサーバー側で文法エラー等のエラーが発生した際に、エラーメッセージに詳細情報が含まれない。
-  - 「error in db_->create_executable()」というエラーメッセージが返る。（`PreparedStatement`（バインド変数あり）の場合は詳細なエラーメッセージが返る）
-- `TsurugiSqlQuery`と`TsurugiSqlStatement`（バインド変数が無いSQL）では、実行計画の取得処理（`explain`メソッド）は未実装。
+- `TsurugiTransaction`の`executeDdl`メソッド・SQL文をDBサーバーに事前に登録しない方式の`executeQuery`, `executeStatement`メソッドを実行して、DBサーバー側で文法エラー等のエラーが発生した際に、エラーメッセージに詳細情報が含まれない。
+  - 「error in db_->create_executable()」というエラーメッセージが返る。（SQL文をDBサーバーに事前に登録する方式の場合は詳細なエラーメッセージが返る）
+- `TsurugiSqlQuery`と`TsurugiSqlStatement`（SQL文をDBサーバーに事前に登録しない方式の`TsurugiSql`）では、実行計画の取得処理（`explain`メソッド）は未実装。
   - 使用すると、Tsubakuroで`UnsupportedOperationException`が発生する。
 - コミット処理中にタイムアウト等の例外が発生してロールバックを呼び出しても、ロールバックされない。
   - Tsubakuroでは、コミットを開始した後にロールバックを呼んでも、何もせずに正常終了を返す。
