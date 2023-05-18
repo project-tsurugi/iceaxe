@@ -1,4 +1,4 @@
-name: Iceaxe-CI
+name: Iceaxe-CI-Publish
 
 on:
   push:
@@ -49,29 +49,16 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GHA_PAT }}
 
-      - id: Assemble
-        name: Assemble
+      - id: Publish
+        name: Publish
+        if: contains(github.ref, '/heads/master')
         run: |
-          ./gradlew -i iceaxe-core:showTsubakuroManifest clean assemble
-
-      - id: Check
-        name: Check
-        run: |
-          ./gradlew -i check -x :iceaxe-dbtest:check  --continue
-
-      - id: Generate_Annotations
-        name: Generate_Annotations
-        uses: ./.github/actions/tsurugi-annotations-action
-        if: always()
-        with:
-          junit_input: '**/build/test-results/**/TEST-*.xml'
-          spotbugs_input: '**/build/reports/spotbugs/main/*.xml'
-          checkstyle_input: '**/build/reports/checkstyle/main.xml'
+          ./gradlew -i iceaxe-core:showTsubakuroManifest clean publish
 
       - id: Notify_Slack
         name: Notify_Slack
         uses: ./.github/actions/tsurugi-slack-action
-        if: always() && (github.event.pull_request.draft == false) && (contains(github.ref, '/tags/') || contains(github.ref, '/pull/') || contains(github.ref, '/heads/master'))
+        if: always() && (contains(github.ref, '/tags/') ||  contains(github.ref, '/heads/master'))
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
@@ -80,9 +67,3 @@ jobs:
           status: ${{ job.status }}
           step_context: ${{ toJson(steps) }}
           username: ${{ github.workflow }}
-
-  Publish:
-    uses: ./.github/workflows/ci-publish.yml
-    if: (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
-    needs: Build
-    secrets: inherit
