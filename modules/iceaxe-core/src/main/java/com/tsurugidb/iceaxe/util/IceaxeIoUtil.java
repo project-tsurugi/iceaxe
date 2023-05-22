@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.util;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -91,13 +90,22 @@ public final class IceaxeIoUtil {
     }
 
     /**
+     * Closeable for FutureResponse
+     */
+    public interface IceaxeFutureResponseCloseable extends AutoCloseable {
+        @Override
+        void close() throws IOException, InterruptedException /* , TsurugiIOException */;
+    }
+
+    /**
      * wrap with Closeable
      *
      * @param future future
      * @return Closeable
      */
-    public static Closeable closeable(FutureResponse<?> future) {
+    public static IceaxeFutureResponseCloseable closeable(FutureResponse<?> future) {
         return () -> {
+            // ServerException -> TsurugiIOException
             IceaxeIoUtil.close(future);
         };
     }
@@ -147,7 +155,7 @@ public final class IceaxeIoUtil {
      * @param closeables AutoCloseable
      * @throws IOException
      */
-    public static void close(AutoCloseable... closeables) throws IOException {
+    public static void close(AutoCloseable... closeables) throws IOException, InterruptedException {
         close(closeables, TsurugiIOException.class, TsurugiIOException::new);
     }
 
@@ -158,11 +166,11 @@ public final class IceaxeIoUtil {
      * @throws IOException
      * @throws TsurugiTransactionException
      */
-    public static void closeInTransaction(AutoCloseable... closeables) throws IOException, TsurugiTransactionException {
+    public static void closeInTransaction(AutoCloseable... closeables) throws IOException, InterruptedException, TsurugiTransactionException {
         close(closeables, TsurugiTransactionException.class, TsurugiTransactionException::new);
     }
 
-    private static <E extends Exception> void close(AutoCloseable[] closeables, Class<E> classE, Function<ServerException, E> serverExceptionWrapper) throws IOException, E {
+    private static <E extends Exception> void close(AutoCloseable[] closeables, Class<E> classE, Function<ServerException, E> serverExceptionWrapper) throws IOException, InterruptedException, E {
         Throwable occurred = null;
 
         for (var closeable : closeables) {
@@ -179,7 +187,7 @@ public final class IceaxeIoUtil {
                 } else {
                     occurred.addSuppressed(wrapper);
                 }
-            } catch (IOException | RuntimeException | Error e) {
+            } catch (IOException | InterruptedException | RuntimeException | Error e) {
                 if (occurred == null) {
                     occurred = e;
                 } else {
@@ -203,6 +211,9 @@ public final class IceaxeIoUtil {
             }
             if (occurred instanceof Error) {
                 throw (Error) occurred;
+            }
+            if (occurred instanceof InterruptedException) {
+                throw (InterruptedException) occurred;
             }
             throw (IOException) occurred;
         }

@@ -82,7 +82,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         statement(sql, expected);
     }
 
-    private void statement(String sql, String expected) throws IOException {
+    private void statement(String sql, String expected) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {

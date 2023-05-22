@@ -331,24 +331,22 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testCloseableIOEx() throws Exception {
+    void testCloseableIntEx() throws Exception {
         var future = new IceaxeFutureResponseTestMock<Void>() {
             @Override
             public void close() throws IOException, ServerException, InterruptedException {
                 throw new InterruptedException("abc");
             }
         };
-        var e = assertThrowsExactly(IOException.class, () -> {
+        var e = assertThrowsExactly(InterruptedException.class, () -> {
             try (var closeable = IceaxeIoUtil.closeable(future)) {
             }
         });
         assertEquals("abc", e.getMessage());
-        var c = e.getCause();
-        assertInstanceOf(InterruptedException.class, c);
     }
 
     @Test
-    void testCloseableIOEx2() throws Exception {
+    void testCloseableIOEx() throws Exception {
         var future = new IceaxeFutureResponseTestMock<Void>() {
             @Override
             public void close() throws IOException, ServerException, InterruptedException {
@@ -362,10 +360,8 @@ class IceaxeIoUtilTest {
         });
         assertEquals("abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
-        assertInstanceOf(IOException.class, s0);
-        var c = s0.getCause();
-        assertInstanceOf(InterruptedException.class, c);
-        assertEquals("def", c.getMessage());
+        assertInstanceOf(InterruptedException.class, s0);
+        assertEquals("def", s0.getMessage());
     }
 
     @Test
@@ -552,16 +548,15 @@ class IceaxeIoUtilTest {
     }
 
     @Test
-    void testCloseIOEx2() {
+    void testCloseIntEx2() {
         AutoCloseable close1 = () -> {
             throw new InterruptedException("abc");
         };
         AutoCloseable close2 = () -> {
             throw new InterruptedException("def");
         };
-        var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(close1, close2));
+        var e = assertThrowsExactly(InterruptedException.class, () -> IceaxeIoUtil.close(close1, close2));
         assertEquals("abc", e.getMessage());
-        assertInstanceOf(InterruptedException.class, e.getCause());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(InterruptedException.class, s0);
         assertEquals("def", s0.getMessage());

@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.sql;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,7 +20,7 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 /**
  * Tsurugi SQL statement
  */
-public abstract class TsurugiSql implements Closeable {
+public abstract class TsurugiSql implements AutoCloseable {
 
     private static final AtomicInteger SQL_STATEMENT_COUNT = new AtomicInteger(0);
     private static final AtomicInteger SQL_EXECUTE_COUNT = new AtomicInteger(0);
@@ -145,7 +144,7 @@ public abstract class TsurugiSql implements Closeable {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void close() throws IOException {
+    public void close() throws IOException, InterruptedException {
         ownerSession.removeChild(this);
         this.closed = true;
     }

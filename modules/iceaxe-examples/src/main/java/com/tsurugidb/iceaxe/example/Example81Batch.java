@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.example;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class Example81Batch {
         }
     }
 
-    static class Batch2 implements Closeable {
+    static class Batch2 implements AutoCloseable {
 
         private final TsurugiSqlPreparedStatement<TestEntity> deletePs;
         private final TsurugiSqlPreparedStatement<TestEntity> insertPs;
@@ -88,8 +87,8 @@ public class Example81Batch {
         }
 
         @Override
-        public void close() throws IOException {
-            try (var c1 = deletePs; var c2 = insertPs) {
+        public void close() throws IOException, InterruptedException {
+            try (deletePs; insertPs) {
                 // close
             }
         }

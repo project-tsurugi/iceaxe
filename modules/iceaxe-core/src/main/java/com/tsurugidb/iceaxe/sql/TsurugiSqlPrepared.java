@@ -144,7 +144,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
 
     @Override
     @OverridingMethodsMustInvokeSuper
-    public void close() throws IOException {
+    public void close() throws IOException, InterruptedException {
         log.trace("lowPs close start");
         // not try-finally
         IceaxeIoUtil.close(lowPreparedStatement, lowPreparedStatementFuture);
