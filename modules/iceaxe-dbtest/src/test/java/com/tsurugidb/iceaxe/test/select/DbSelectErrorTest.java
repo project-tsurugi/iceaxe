@@ -131,7 +131,7 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove @Disabled このテストの実行後にdrop tableでtateyama-serverが落ちることがある
+    @Disabled // TODO remove Disabled. このテストの実行後にdrop tableでtateyama-serverが落ちることがある
     void selectAfterTransactionClose() throws Exception {
         var sql = "select * from " + TEST;
 

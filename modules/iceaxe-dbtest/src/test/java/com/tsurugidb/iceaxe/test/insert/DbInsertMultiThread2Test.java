@@ -107,7 +107,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     }
 
     @RepeatedTest(4)
-    @Disabled // TODO remove Disabled たまにtateyama-serverでstd::bad_allocが発生する
+    @Disabled // TODO remove Disabled. たまにtateyama-serverでstd::bad_allocが発生する
     void insertMultiTxOcc30False() throws Exception {
         insertMultiTxOcc(30, false);
     }

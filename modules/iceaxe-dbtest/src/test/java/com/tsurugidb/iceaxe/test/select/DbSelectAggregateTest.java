@@ -159,7 +159,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "foo,foo", "foo,foo,foo" })
-    @Disabled // TODO remove Disabled group byに同カラムが複数あるとtateyama-serverがクラッシュする
+    @Disabled // TODO remove Disabled. group byに同カラムが複数あるとtateyama-serverがクラッシュする
     void selectGroupBySameKey(String groupKey) throws Exception {
         var sql = "select foo, count(*) as cnt from " + TEST + " group by " + groupKey;
 
