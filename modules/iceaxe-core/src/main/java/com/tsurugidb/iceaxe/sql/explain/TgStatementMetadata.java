@@ -47,9 +47,10 @@ public class TgStatementMetadata {
      *
      * @return SQL arguments
      */
-    @SuppressWarnings("unchecked")
     public <P> @Nullable P getArguments() {
-        return (P) this.arguments;
+        @SuppressWarnings("unchecked")
+        var r = (P) this.arguments;
+        return r;
     }
 
     /**

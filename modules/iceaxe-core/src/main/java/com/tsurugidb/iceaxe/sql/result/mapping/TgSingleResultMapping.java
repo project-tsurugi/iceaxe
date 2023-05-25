@@ -259,37 +259,42 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
      * @param type result type
      * @return result mapping
      */
-    @SuppressWarnings("unchecked")
     public static <R> TgSingleResultMapping<R> of(TgDataType type) {
+        @SuppressWarnings("unchecked")
+        var r = (TgSingleResultMapping<R>) ofSingleRaw(type);
+        return r;
+    }
+
+    private static TgSingleResultMapping<?> ofSingleRaw(TgDataType type) {
         switch (type) {
         case BOOLEAN:
-            return (TgSingleResultMapping<R>) ofBoolean();
+            return ofBoolean();
         case INT:
-            return (TgSingleResultMapping<R>) ofInt();
+            return ofInt();
         case LONG:
-            return (TgSingleResultMapping<R>) ofLong();
+            return ofLong();
         case FLOAT:
-            return (TgSingleResultMapping<R>) ofFloat();
+            return ofFloat();
         case DOUBLE:
-            return (TgSingleResultMapping<R>) ofDouble();
+            return ofDouble();
         case DECIMAL:
-            return (TgSingleResultMapping<R>) ofDecimal();
+            return ofDecimal();
         case STRING:
-            return (TgSingleResultMapping<R>) ofString();
+            return ofString();
         case BYTES:
-            return (TgSingleResultMapping<R>) ofBytes();
+            return ofBytes();
         case BITS:
-            return (TgSingleResultMapping<R>) ofBits();
+            return ofBits();
         case DATE:
-            return (TgSingleResultMapping<R>) ofDate();
+            return ofDate();
         case TIME:
-            return (TgSingleResultMapping<R>) ofTime();
+            return ofTime();
         case DATE_TIME:
-            return (TgSingleResultMapping<R>) ofDateTime();
+            return ofDateTime();
         case OFFSET_TIME:
-            return (TgSingleResultMapping<R>) ofOffsetTime();
+            return ofOffsetTime();
         case OFFSET_DATE_TIME:
-            return (TgSingleResultMapping<R>) ofOffsetDateTime();
+            return ofOffsetDateTime();
         case ZONED_DATE_TIME:
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));

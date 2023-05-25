@@ -30,11 +30,10 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param priority priority
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T priority(TransactionPriority priority) {
         this.lowPriority = priority;
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**
@@ -52,11 +51,10 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param tableName table name
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T addInclusiveReadArea(String tableName) {
         inclusiveReadAreaList.add(tableName);
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**
@@ -65,13 +63,12 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param tableNames table name
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T addInclusiveReadArea(String... tableNames) {
         for (var tableName : tableNames) {
             inclusiveReadAreaList.add(tableName);
         }
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**
@@ -80,13 +77,12 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param tableNames table name
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T addInclusiveReadArea(Collection<String> tableNames) {
         for (var tableName : tableNames) {
             inclusiveReadAreaList.add(tableName);
         }
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**
@@ -95,11 +91,10 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param tableNames table name
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T addInclusiveReadArea(Stream<String> tableNames) {
         tableNames.forEachOrdered(inclusiveReadAreaList::add);
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**
@@ -117,11 +112,10 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param tableName table name
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T addExclusiveReadArea(String tableName) {
         exclusiveReadAreaList.add(tableName);
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**
@@ -130,13 +124,12 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param tableNames table name
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T addExclusiveReadArea(String... tableNames) {
         for (var tableName : tableNames) {
             exclusiveReadAreaList.add(tableName);
         }
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**
@@ -145,13 +138,12 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param tableNames table name
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T addExclusiveReadArea(Collection<String> tableNames) {
         for (var tableName : tableNames) {
             exclusiveReadAreaList.add(tableName);
         }
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**
@@ -160,11 +152,10 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
      * @param tableNames table name
      * @return this
      */
-    @SuppressWarnings("unchecked")
     public synchronized T addExclusiveReadArea(Stream<String> tableNames) {
         tableNames.forEachOrdered(exclusiveReadAreaList::add);
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     /**

@@ -224,39 +224,44 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @param type parameter type
      * @return parameter mapping
      */
-    @SuppressWarnings("unchecked")
     public static <P> TgSingleParameterMapping<P> of(String name, TgDataType type) {
+        @SuppressWarnings("unchecked")
+        var r = (TgSingleParameterMapping<P>) ofSingleRaw(name, type);
+        return r;
+    }
+
+    private static TgSingleParameterMapping<?> ofSingleRaw(String name, TgDataType type) {
         switch (type) {
         case BOOLEAN:
-            return (TgSingleParameterMapping<P>) ofBoolean(name);
+            return ofBoolean(name);
         case INT:
-            return (TgSingleParameterMapping<P>) ofInt(name);
+            return ofInt(name);
         case LONG:
-            return (TgSingleParameterMapping<P>) ofLong(name);
+            return ofLong(name);
         case FLOAT:
-            return (TgSingleParameterMapping<P>) ofFloat(name);
+            return ofFloat(name);
         case DOUBLE:
-            return (TgSingleParameterMapping<P>) ofDouble(name);
+            return ofDouble(name);
         case DECIMAL:
-            return (TgSingleParameterMapping<P>) ofDecimal(name);
+            return ofDecimal(name);
         case STRING:
-            return (TgSingleParameterMapping<P>) ofString(name);
+            return ofString(name);
         case BYTES:
-            return (TgSingleParameterMapping<P>) ofBytes(name);
+            return ofBytes(name);
         case BITS:
-            return (TgSingleParameterMapping<P>) ofBits(name);
+            return ofBits(name);
         case DATE:
-            return (TgSingleParameterMapping<P>) ofDate(name);
+            return ofDate(name);
         case TIME:
-            return (TgSingleParameterMapping<P>) ofTime(name);
+            return ofTime(name);
         case DATE_TIME:
-            return (TgSingleParameterMapping<P>) ofDateTime(name);
+            return ofDateTime(name);
         case OFFSET_TIME:
-            return (TgSingleParameterMapping<P>) ofOffsetTime(name);
+            return ofOffsetTime(name);
         case OFFSET_DATE_TIME:
-            return (TgSingleParameterMapping<P>) ofOffsetDateTime(name);
+            return ofOffsetDateTime(name);
         case ZONED_DATE_TIME:
-            return (TgSingleParameterMapping<P>) ofZonedDateTime(name);
+            return ofZonedDateTime(name);
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
         }

@@ -22,9 +22,10 @@ public class TgEmptyParameterMapping<P> extends TgParameterMapping<P> {
      * @param <P> parameter type
      * @return Tsurugi Parameter Mapping
      */
-    @SuppressWarnings("unchecked")
     public static <P> TgEmptyParameterMapping<P> of() {
-        return (TgEmptyParameterMapping<P>) INSTANCE;
+        @SuppressWarnings("unchecked")
+        var r = (TgEmptyParameterMapping<P>) INSTANCE;
+        return r;
     }
 
     @Override

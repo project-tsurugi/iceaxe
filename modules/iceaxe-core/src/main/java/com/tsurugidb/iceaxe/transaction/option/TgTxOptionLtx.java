@@ -38,7 +38,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
      */
     public synchronized TgTxOptionLtx addWritePreserve(String tableName) {
         writePreserveList.add(tableName);
-        reset();
+        resetTransactionOption();
         return this;
     }
 
@@ -52,7 +52,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
         for (var tableName : tableNames) {
             writePreserveList.add(tableName);
         }
-        reset();
+        resetTransactionOption();
         return this;
     }
 
@@ -66,7 +66,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
         for (var tableName : tableNames) {
             writePreserveList.add(tableName);
         }
-        reset();
+        resetTransactionOption();
         return this;
     }
 
@@ -78,7 +78,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
      */
     public synchronized TgTxOptionLtx addWritePreserve(Stream<String> tableNames) {
         tableNames.forEachOrdered(writePreserveList::add);
-        reset();
+        resetTransactionOption();
         return this;
     }
 

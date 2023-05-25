@@ -17,12 +17,17 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
 
     private TransactionOption lowTransactionOption;
 
+    protected final T self() {
+        @SuppressWarnings("unchecked")
+        var r = (T) this;
+        return r;
+    }
+
     @Override
-    @SuppressWarnings("unchecked")
     public synchronized T label(String label) {
         this.label = label;
-        reset();
-        return (T) this;
+        resetTransactionOption();
+        return self();
     }
 
     @Override
@@ -30,7 +35,7 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
         return this.label;
     }
 
-    protected final void reset() {
+    protected final void resetTransactionOption() {
         this.lowTransactionOption = null;
     }
 
@@ -55,16 +60,17 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public T clone() {
         T txOption;
         try {
-            txOption = (T) super.clone();
+            @SuppressWarnings("unchecked")
+            var clone = (T) super.clone();
+            txOption = clone;
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e);
         }
 
-        txOption.reset();
+        txOption.resetTransactionOption();
         return txOption;
     }
 
