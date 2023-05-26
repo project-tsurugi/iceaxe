@@ -1,0 +1,32 @@
+plugins {
+    id 'iceaxe.libs-conventions'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+dependencies {
+    implementation project(':iceaxe-core')
+}
+
+shadowJar {
+    archiveBaseName = 'iceaxe'
+    archiveClassifier = 'all'
+    mergeServiceFiles()
+}
+
+components.java.withVariantsFromConfiguration(configurations.apiElements) {
+    skip()
+}
+components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
+    skip()
+}
+components.java.withVariantsFromConfiguration(configurations.sourcesElements) {
+    skip()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = "${rootProject.name}"
+        }
+    }
+}
