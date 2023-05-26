@@ -21,11 +21,6 @@ publishing {
             artifactId = project.name
 
             from components.java
-
-            artifact sourcesJar {
-                classifier = 'sources'
-                archiveExtension  = 'jar'
-            }
         }
     }
 }
