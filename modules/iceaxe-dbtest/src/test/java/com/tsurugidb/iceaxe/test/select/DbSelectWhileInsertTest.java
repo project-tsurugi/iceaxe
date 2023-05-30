@@ -7,7 +7,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,6 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 /**
  * select while delete-insert test
  */
-@Disabled // TODO remove Disabled. ERR_DATA_CORRUPTIONが発生する
 class DbSelectWhileInsertTest extends DbTestTableTester {
 
     private static final int SIZE = 100;
