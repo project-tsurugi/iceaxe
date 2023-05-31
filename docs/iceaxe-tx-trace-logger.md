@@ -364,15 +364,12 @@ TsurugiTransactionManager.execute()に渡されたアプリケーションの処
 
 ## 実行計画のJSONファイルの変換
 
-SQLの実行計画のJSONファイルは、SQLコンソール（Tanzawa）の`explain`サブコマンドで、人間が見やすい形式に変換できる。
+SQLの実行計画のJSONファイルは、SQLコンソール（Tanzawa）の`--explain`オプションで、人間が見やすい形式に変換できる。
 
-`explain`サブコマンドは隠し機能なので、引数無しの `tgsql` を実行した際に表示されるヘルプには出てこない。
-`tgsql explain` を実行すると、`explain`サブコマンドのヘルプが表示される。
+`--explain`オプションは隠し機能なので、ヘルプには出てこない。
+`--explain`に関するオプションは以下の通り。
 
 ```bash
-$ tgsql explain
-[main] ERROR com.tsurugidb.console.cli.Main - The following option is required: [--input | -i]
-Usage: explain [options]
   Options:
   * --input, -i
       explain json file
@@ -411,7 +408,7 @@ Usage: explain [options]
 ### 例
 
 ```bash
-$ tgsql explain -i sql-15826.explain.json --report
+$ tgsql --explain -i sql-15826.explain.json --report
 1. scan (scan) {source: table, table: item_construction_master, access: range-scan}
 2. group (group_exchange) {whole: true, sorted: true}
 3. emit (emit)
