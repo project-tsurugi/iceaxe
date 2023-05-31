@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmRetryOverIOException;
 
 /**
  * delete (table without primary key) test
@@ -54,7 +54,7 @@ class DbDeleteNoPkTest extends DbTestTableTester {
     void delete2SeqTx() throws Exception {
         try {
             new DbDeleteTest().delete2SeqTx();
-        } catch (TsurugiTransactionRetryOverIOException e) {
+        } catch (TsurugiTmRetryOverIOException e) {
             // TODO ERR_PHANTOMが解消したら、catchを削除する
             var c = e.getCause();
             if (c.getMessage().contains("ERR_PHANTOM")) {

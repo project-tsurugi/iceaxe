@@ -7,6 +7,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -57,12 +58,12 @@ public class TgTmSimpleCounter implements TsurugiTmEventListener {
     }
 
     @Override
-    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextTxOption) {
+    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
         counter.incrementRetryCount();
     }
 
     @Override
-    public void transactionRetryOver(TsurugiTransaction transaction, Exception cause) {
+    public void transactionRetryOver(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
         counter.incrementRetryOverCount();
     }
 

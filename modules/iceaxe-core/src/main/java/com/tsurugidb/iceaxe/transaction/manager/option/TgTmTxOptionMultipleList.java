@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -67,21 +68,21 @@ public class TgTmTxOptionMultipleList extends TgTmTxOptionSupplier {
     }
 
     @Override
-    protected TgTmTxOption computeFirstTmOption() {
+    protected TgTmTxOption computeFirstTmOption(Object executeInfo) {
         var txOption = findTxOption(0);
         if (txOption == null) {
             throw new IllegalStateException("unspecified txOption");
         }
-        return TgTmTxOption.execute(txOption);
+        return TgTmTxOption.execute(txOption, null);
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
         var txOption = findTxOption(attempt);
         if (txOption == null) {
-            return TgTmTxOption.retryOver();
+            return TgTmTxOption.retryOver(retryInstruction);
         }
-        return TgTmTxOption.execute(txOption);
+        return TgTmTxOption.execute(txOption, retryInstruction);
     }
 
     @Override

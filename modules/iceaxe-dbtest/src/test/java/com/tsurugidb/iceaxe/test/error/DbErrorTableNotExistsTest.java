@@ -17,8 +17,8 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -46,7 +46,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         try (var ps = session.createQuery(SELECT_SQL)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 LOG.trace("i={}", i);
-                var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                     tm.execute((TsurugiTransactionAction) transaction -> {
                         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             transaction.executeAndGetList(ps);
@@ -87,7 +87,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
-                var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                     tm.execute((TsurugiTransactionAction) transaction -> {
                         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             transaction.executeAndGetCount(ps);

@@ -429,17 +429,18 @@ tm.execute(transaction -> {
 
 どのようなエラーコードをシリアライゼーションエラーとするかの判定も`TgTmTxOptionSupplier`に設定できる。
 
-シリアライゼーションエラーによってトランザクションを再実行する際に、`TgTmTxOptionSupplier`で設定されることになる実行回数を超えた場合、`TsurugiTransactionManager`は`TsurugiTransactionRetryOverIOException`（リトライ回数オーバーの例外）をスローする。
+シリアライゼーションエラーによってトランザクションを再実行する際に、`TgTmTxOptionSupplier`で設定されることになる実行回数を超えた場合、`TsurugiTransactionManager`は`TsurugiTmRetryOverIOException`（リトライ回数オーバーの例外）をスローする。
 
 `TgTmTxOptionSupplier`を生成するメソッドは以下のようなものがある。
 
-| 生成メソッド                             | 説明                                                         | 実行回数                            |
-| ---------------------------------------- | ------------------------------------------------------------ | ----------------------------------- |
-| `of(txOption)`                           | 初回の`TgTxOption`を指定する。                               | 1回（再実行はしない）               |
-| `of(txOptions...)`                       | `TgTxOption`の一覧を指定する。n個目の`TgTxOption`がn回目の実行時に使われる。 | 指定された`TgTxOption`の個数        |
-| `ofAlways(txOption)`                     | 常に指定された`TgTxOption`で実行される。                     | `Integer.MAX_VALUE`回（実質、無限） |
-| `ofAlways(txOption, attemptMaxCount)`    | 常に指定された`TgTxOption`で実行される。                     | `attemptMaxCount`回                 |
-| `of(txOption1, size1, txOption2, size2)` | `txOption1`を`size1`回実行した後で、`txOption2`を`size2`回実行する。 | `size1 + size2`回                   |
+| 生成メソッド                                       | 説明                                                         | 実行回数                            |
+| -------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------- |
+| `of(txOption)`                                     | 初回の`TgTxOption`を指定する。                               | 1回（再実行はしない）               |
+| `of(txOptions...)`                                 | `TgTxOption`の一覧を指定する。n個目の`TgTxOption`がn回目の実行時に使われる。 | 指定された`TgTxOption`の個数        |
+| `ofAlways(txOption)`                               | 常に指定された`TgTxOption`で実行される。                     | `Integer.MAX_VALUE`回（実質、無限） |
+| `ofAlways(txOption, attemptMaxCount)`              | 常に指定された`TgTxOption`で実行される。                     | `attemptMaxCount`回                 |
+| `of(txOption1, size1, txOption2, size2)`           | `txOption1`を`size1`回実行した後で、`txOption2`を`size2`回実行する。 | `size1 + size2`回                   |
+| `ofOccLtx(occOption, occSize, ltxOption, ltxSize)` | `occOption`を`occSize`回実行した後で、`ltxOption`を`ltxSize`回実行する。`occOption`にはOCCを、`ltxOption`にはLTXまたはRTXを指定する。<br />OCCが他LTXのwrite preserveの範囲に入った事によって再実行する場合は`ltxOption`に切り替える。 | `occSize + ltxSize`回               |
 
 `TgTmSetting`にも同様のメソッドがあり、そちらを使うと、下記の例のように`TgTmTxOptionSupplier`の生成がソースコード上は省略できる。（`TgTmSetting`の内部で`TgTmTxOptionSupplier`を生成している）
 
@@ -1359,9 +1360,9 @@ DBサーバーとの通信中に発生した`IOException`および`InterruptedEx
 
 `TsurugiTransactionManager`は、`TsurugiTransactionException`から取得したエラーコードを用いてシリアライゼーションエラー（リトライ可能なアボート）かどうかを判定する。
 
-シリアライゼーションエラーだった場合に`TsurugiTransactionManager`はトランザクションの再実行を行うが、実行回数が指定回数を超えた場合は、`TsurugiTransactionManager`の`execute`系メソッドから`TsurugiTransactionRetryOverIOException`（リトライ回数オーバーの例外）がスローされる。
+シリアライゼーションエラーだった場合に`TsurugiTransactionManager`はトランザクションの再実行を行うが、実行回数が指定回数を超えた場合は、`TsurugiTransactionManager`の`execute`系メソッドから`TsurugiTmRetryOverIOException`（リトライ回数オーバーの例外）がスローされる。
 
-`TsurugiTransaction`で発生した`TsurugiTransactionException`がシリアライゼーションエラーでない場合は、`TsurugiTransactionManager`の`execute`系メソッドからは`TsurugiTransactionIOException`がスローされる。
+`TsurugiTransaction`で発生した`TsurugiTransactionException`がシリアライゼーションエラーでない場合は、`TsurugiTransactionManager`の`execute`系メソッドからは`TsurugiTmIOException`がスローされる。
 
 > **Note**
 >
@@ -1418,17 +1419,24 @@ public boolean isRetryable(TsurugiTransaction e) {
 class MyTxOptionSupplier extends TgTmTxOptionSupplier {
 
     @Override
-    protected TgTmTxOption computeFirstTmOption() {
+    public Object createExecuteInfo(int iceaxeTmExecuteId) {
+        return new MyExecuteInfo();
+    }
+
+    @Override
+    protected TgTmTxOption computeFirstTmOption(Object executeInfo) {
+        var info = (MyExecuteInfo)executeInfo;
         return TgTmTxOption.execute(TgTxOption.ofOCC());
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
+        var info = (MyExecuteInfo)executeInfo;
         return TgTmTxOption.execute(TgTxOption.ofLTX("table1", "table2"));
     }
 
     @Override
-    protected boolean isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmRetryInstruction isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) {
         return super.isRetryable(transaction, e);
     }
 }
@@ -1438,19 +1446,27 @@ var setting = TgTmSetting.of(new MyTxOptionSupplier());
 
 `isRetryable`メソッドで、再実行可能かどうか（発生した例外がシリアライゼーションエラー（リトライ可能なアボート）かどうか）を判定する。
 
-`isRetryable`メソッドのデフォルトでは、`TgTmTxOptionSupplier`の`setRetryPredicate`メソッドでセットされた判定関数が呼ばれる。
-判定関数を明示的にセットしていない場合は、`TsurugiDefaultRetryPredicate`のシングルトンインスタンスが使われる。このシングルトンインスタンスは変更可能なので、Iceaxe全体で再実行判定を変更したい場合は、ここを差し替えればよい。
+- `isRetryable`メソッドは`TgTmRetryInstruction`を返す。これは、どのような種類の再実行が可能なのかと、その理由となるメッセージを保持している。
+  - 例えば、通常の再実行可能と、OCCが他LTXのwrite preserveの範囲だった場合の再実行可能の区別が出来る。
+- `isRetryable`メソッドのデフォルトでは、`TgTmTxOptionSupplier`の`setRetryPredicate`メソッドでセットされた判定関数が呼ばれる。
+  - 判定関数を明示的にセットしていない場合は、`TsurugiDefaultRetryPredicate`のシングルトンインスタンスが使われる。このシングルトンインスタンスは変更可能なので、Iceaxe全体で再実行判定を変更したい場合は、ここを差し替えればよい。
 
 `computeFirstTmOption`メソッドで初回実行用の`TgTmTxOption`を返し、`computeRetryTmOption`メソッドで再実行用の`TgTmTxOption`を返す。
 `computeRetryTmOption`メソッドは、`isRetryable`メソッドによって再実行可能と判定されたときのみ呼ばれる。
 
 `TgTmTxOption`は`TgTmTxOptionSupplier`からトランザクションオプションを返す為に使用するクラスで、以下のような生成メソッドを持つ。
 
-| 生成メソッド        | 説明                                                         |
-| ------------------- | ------------------------------------------------------------ |
-| `execute(txOption)` | トランザクションが実行可能な場合に、使用する`TgTxOption`を保持する。 |
-| `retryOver()`       | 再実行回数を超えた（リトライ回数オーバーになった）ことを表す。 |
-| `notRetryable()`    | トランザクションが再実行できない（シリアライゼーションエラーでない例外が発生した）ことを表す。 |
+| 生成メソッド                          | 説明                                                         |
+| ------------------------------------- | ------------------------------------------------------------ |
+| `execute(txOption, retryInstruction)` | トランザクションが実行可能な場合に、使用する`TgTxOption`を保持する。 |
+| `retryOver(retryInstruction)`         | 再実行回数を超えた（リトライ回数オーバーになった）ことを表す。 |
+| `notRetryable(retryInstruction)`      | トランザクションが再実行できない（シリアライゼーションエラーでない例外が発生した）ことを表す。 |
+
+トランザクション再実行判定の間で共有したいデータがある場合は、`createExecuteInfo`メソッドをオーバーライドし、アプリケーション開発者が共有したいオブジェクトを生成して返す。共有したいデータが無い場合は`null`を返せばよい。
+
+- `createExecuteInfo`メソッドは、`TsurugiTransactionManager`の`execute`メソッドが呼ばれる毎に1回だけ呼ばれる。
+- `createExecuteInfo`メソッドから返されたオブジェクトは`computeFirstTmOption`や`computeRetryTmOption`メソッドに渡される。
+  - 渡される共有データの型は`Object`なので、アプリケーション開発者が使用する型にキャストする必要がある。
 
 
 

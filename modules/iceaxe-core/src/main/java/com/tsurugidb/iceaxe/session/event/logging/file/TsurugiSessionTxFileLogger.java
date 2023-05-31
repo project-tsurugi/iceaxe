@@ -25,7 +25,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
-import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.util.function.IoSupplier;
 
 /**
@@ -403,13 +403,15 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected void logTmExecuteRetry(TgSessionTxLog txLog, Exception cause, TgTxOption nextTxOption) {
+    protected void logTmExecuteRetry(TgSessionTxLog txLog, Exception cause, TgTmTxOption nextTmOption) {
         var writer = getWriter(txLog);
 
         var transaction = txLog.getTransaction();
         var tmExecuteId = transaction.getIceaxeTmExecuteId();
         var attempt = transaction.getAttempt();
-        writer.println(TM_HEADER + " tm.execute(iceaxeTmExecuteId=%d, attempt=%d) retry. nextTx=%s", tmExecuteId, tmExecuteId, attempt, nextTxOption);
+        var nextTxOption = nextTmOption.getTransactionOption();
+        var retryInstruction = nextTmOption.getRetryInstruction();
+        writer.println(TM_HEADER + " tm.execute(iceaxeTmExecuteId=%d, attempt=%d) retry. nextTx=%s, instruction=%s", tmExecuteId, tmExecuteId, attempt, nextTxOption, retryInstruction);
     }
 
     @Override

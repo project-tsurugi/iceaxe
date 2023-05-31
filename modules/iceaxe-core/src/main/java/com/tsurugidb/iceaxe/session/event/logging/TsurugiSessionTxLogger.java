@@ -32,6 +32,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -55,13 +56,13 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextTxOption) {
-            doLogTmExecuteRetry(transaction, cause, nextTxOption);
+        public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
+            doLogTmExecuteRetry(transaction, cause, nextTmOption);
         }
 
         @Override
-        public void transactionRetryOver(TsurugiTransaction transaction, Exception cause) {
-            doLogTmExecuteRetry(transaction, cause, null);
+        public void transactionRetryOver(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
+            doLogTmExecuteRetry(transaction, cause, nextTmOption);
         }
 
         @Override
@@ -400,13 +401,13 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         // do override
     }
 
-    protected void doLogTmExecuteRetry(TsurugiTransaction transaction, Exception cause, @Nullable TgTxOption nextOption) {
+    protected void doLogTmExecuteRetry(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
         }
 
-        logTmExecuteRetry(txLog, cause, nextOption);
+        logTmExecuteRetry(txLog, cause, nextTmOption);
     }
 
     /**
@@ -414,9 +415,9 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      *
      * @param txLog        transaction log
      * @param cause        retry exception
-     * @param nextTxOption next transaction option
+     * @param nextTmOption next transaction option
      */
-    protected void logTmExecuteRetry(TgSessionTxLog txLog, Exception cause, @Nullable TgTxOption nextTxOption) {
+    protected void logTmExecuteRetry(TgSessionTxLog txLog, Exception cause, TgTmTxOption nextTmOption) {
         // do override
     }
 

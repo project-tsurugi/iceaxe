@@ -1,27 +1,30 @@
-package com.tsurugidb.iceaxe.transaction.exception;
+package com.tsurugidb.iceaxe.transaction.manager.exception;
 
 import java.io.IOException;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * Tsurugi Transaction IOException
+ * Tsurugi TransactionManager IOException
  */
 @SuppressWarnings("serial")
-public class TsurugiTransactionIOException extends TsurugiIOException {
+public class TsurugiTmIOException extends TsurugiIOException {
 
     private final TsurugiTransaction transaction;
+    private final TgTmTxOption nextTmOption;
 
     // internal
-    public TsurugiTransactionIOException(String message, TsurugiTransaction transaction, Exception cause) {
-        super(createMessage(message, transaction), cause);
+    public TsurugiTmIOException(String message, TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
+        super(createMessage(message, transaction, nextTmOption), cause);
         this.transaction = transaction;
+        this.nextTmOption = nextTmOption;
     }
 
-    private static String createMessage(String message, TsurugiTransaction transaction) {
-        return message + ". " + transaction;
+    private static String createMessage(String message, TsurugiTransaction transaction, TgTmTxOption nextTmOption) {
+        return message + ". " + transaction + ", nextTx=" + nextTmOption;
     }
 
     @Override
@@ -51,5 +54,14 @@ public class TsurugiTransactionIOException extends TsurugiIOException {
         } catch (IOException | InterruptedException e) {
             return null;
         }
+    }
+
+    /**
+     * get next transaction option
+     *
+     * @return next transaction option
+     */
+    public TgTmTxOption getNextTmOption() {
+        return this.nextTmOption;
     }
 }

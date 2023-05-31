@@ -25,9 +25,10 @@ import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -173,7 +174,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
                 var tm = session.createTransactionManager(setting);
                 tm.addEventListener(new TsurugiTmEventListener() {
                     @Override
-                    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextTxOption) {
+                    public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
 //                      LOG.info("OCC retry: " + cause.getMessage());
                     }
                 });
@@ -184,7 +185,7 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
                         tm.execute(transaction -> {
                             execute(transaction, ps, groupId);
                         });
-                    } catch (TsurugiTransactionIOException e) {
+                    } catch (TsurugiTmIOException e) {
                         LOG.error("online task error: {}", e.getMessage());
                         throw e;
                     }

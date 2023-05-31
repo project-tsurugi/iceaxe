@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -50,7 +50,7 @@ class DbCreateTableTest extends DbTestTableTester {
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             tm.executeDdl(SQL);
         });
         assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);

@@ -29,8 +29,8 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -150,7 +150,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                         tm.execute(transaction -> {
                             execute(transaction, maxPs, insertPs, insert2Ps);
                         });
-                    } catch (TsurugiTransactionIOException e) {
+                    } catch (TsurugiTmIOException e) {
                         if (e.getDiagnosticCode() == SqlServiceCode.ERR_ALREADY_EXISTS) {
 //                          LOG.info("ERR_ALREADY_EXISTS {}", i);
                             continue;

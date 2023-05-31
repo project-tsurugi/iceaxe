@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -70,7 +70,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
 
     @Test
     void doubleLiteralError() throws Exception {
-        var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             test("1e2", entity -> {
             });
         });

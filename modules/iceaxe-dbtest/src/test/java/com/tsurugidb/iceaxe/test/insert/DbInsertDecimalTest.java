@@ -16,7 +16,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -75,7 +75,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(SQL, mapping)) {
             var parameter = TgBindParameters.of(variable.bind(value));
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> tm.executeAndGetCount(ps, parameter));
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps, parameter));
             assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
             String expected = "ERR_EXPRESSION_EVALUATION_FAILURE: SQL--0017: .";
             assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認

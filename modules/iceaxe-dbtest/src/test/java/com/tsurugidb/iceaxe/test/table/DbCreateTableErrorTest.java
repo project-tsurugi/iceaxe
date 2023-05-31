@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -101,9 +101,9 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + ")";
     }
 
-    private static TsurugiTransactionIOException executeErrorDdl(String sql) throws IOException {
+    private static TsurugiTmIOException executeErrorDdl(String sql) throws IOException {
         var tm = createTransactionManagerOcc(getSession());
-        return assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+        return assertThrowsExactly(TsurugiTmIOException.class, () -> {
             tm.executeDdl(sql);
         });
     }

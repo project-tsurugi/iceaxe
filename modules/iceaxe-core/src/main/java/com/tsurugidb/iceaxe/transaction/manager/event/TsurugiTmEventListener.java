@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -68,29 +69,31 @@ public interface TsurugiTmEventListener {
      *
      * @param transaction  transaction
      * @param cause        exception
-     * @param nextTxOption next transaction option
+     * @param nextTmOption next transaction option
      */
-    default void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTxOption nextTxOption) {
+    default void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
         // do override
     }
 
     /**
      * called when transaction retry over
      *
-     * @param transaction transaction
-     * @param cause       exception
+     * @param transaction  transaction
+     * @param cause        exception
+     * @param nextTmOption next transaction option
      */
-    default void transactionRetryOver(TsurugiTransaction transaction, Exception cause) {
+    default void transactionRetryOver(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
         // do override
     }
 
     /**
      * called when transaction exception is not retryable
      *
-     * @param transaction transaction
-     * @param cause       exception
+     * @param transaction  transaction
+     * @param cause        exception
+     * @param nextTmOption next transaction option
      */
-    default void transactionNotRetryable(TsurugiTransaction transaction, Exception cause) {
+    default void transactionNotRetryable(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
         // do override
     }
 

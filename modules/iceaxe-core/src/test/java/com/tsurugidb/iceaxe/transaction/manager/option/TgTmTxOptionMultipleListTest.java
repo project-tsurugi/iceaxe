@@ -7,9 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 class TgTmTxOptionMultipleListTest {
+
+    private final Object executeInfo = null;
+    private final TgTmRetryInstruction retryInstruction = TgTmRetryInstruction.ofRetryable("test");
 
     @Test
     void findTxOption1() {
@@ -37,18 +41,18 @@ class TgTmTxOptionMultipleListTest {
     void computeFirstTmOption() {
         var target = TgTmTxOptionMultipleList.of().add(TgTxOption.ofOCC(), 3).add(TgTxOption.ofLTX(), 2);
 
-        assertEqualsOcc(target.computeFirstTmOption().getTransactionOption());
+        assertEqualsOcc(target.computeFirstTmOption(executeInfo).getTransactionOption());
     }
 
     @Test
     void computeRetryTmOption() {
         var target = TgTmTxOptionMultipleList.of().add(TgTxOption.ofOCC(), 3).add(TgTxOption.ofLTX(), 2);
 
-        assertEqualsOcc(target.computeRetryTmOption(1, null).getTransactionOption());
-        assertEqualsOcc(target.computeRetryTmOption(2, null).getTransactionOption());
-        assertEqualsLtx(target.computeRetryTmOption(3, null).getTransactionOption());
-        assertEqualsLtx(target.computeRetryTmOption(4, null).getTransactionOption());
-        assertTrue(target.computeRetryTmOption(5, null).isRetryOver());
+        assertEqualsOcc(target.computeRetryTmOption(executeInfo, 1, null, retryInstruction).getTransactionOption());
+        assertEqualsOcc(target.computeRetryTmOption(executeInfo, 2, null, retryInstruction).getTransactionOption());
+        assertEqualsLtx(target.computeRetryTmOption(executeInfo, 3, null, retryInstruction).getTransactionOption());
+        assertEqualsLtx(target.computeRetryTmOption(executeInfo, 4, null, retryInstruction).getTransactionOption());
+        assertTrue(target.computeRetryTmOption(executeInfo, 5, null, retryInstruction).isRetryOver());
     }
 
     @Test

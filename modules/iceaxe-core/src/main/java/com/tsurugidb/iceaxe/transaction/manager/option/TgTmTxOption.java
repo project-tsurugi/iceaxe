@@ -1,8 +1,12 @@
 package com.tsurugidb.iceaxe.transaction.manager.option;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -10,17 +14,14 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public final class TgTmTxOption {
 
-    private static final TgTmTxOption RETRY_OVER = new TgTmTxOption(true, null);
-    private static final TgTmTxOption NOT_RETRYABLE = new TgTmTxOption(false, null);
-
     /**
      * Creates a new instance.
      *
-     * @param txOption transaction option
+     * @param txOption transaction option, {@code null} if first transaction
      * @return tm option
      */
-    public static TgTmTxOption execute(@Nonnull TgTxOption txOption) {
-        return new TgTmTxOption(false, txOption);
+    public static TgTmTxOption execute(@Nonnull TgTxOption txOption, @Nullable TgTmRetryInstruction retryInstruction) {
+        return new TgTmTxOption(false, Objects.requireNonNull(txOption), retryInstruction);
     }
 
     /**
@@ -28,8 +29,8 @@ public final class TgTmTxOption {
      *
      * @return tm option
      */
-    public static TgTmTxOption retryOver() {
-        return RETRY_OVER;
+    public static TgTmTxOption retryOver(@Nonnull TgTmRetryInstruction retryInstruction) {
+        return new TgTmTxOption(true, null, Objects.requireNonNull(retryInstruction));
     }
 
     /**
@@ -37,16 +38,18 @@ public final class TgTmTxOption {
      *
      * @return tm option
      */
-    public static TgTmTxOption notRetryable() {
-        return NOT_RETRYABLE;
+    public static TgTmTxOption notRetryable(@Nonnull TgTmRetryInstruction retryInstruction) {
+        return new TgTmTxOption(false, null, Objects.requireNonNull(retryInstruction));
     }
 
     private final boolean isRetryOver;
     private final TgTxOption txOption;
+    private final TgTmRetryInstruction retryInstruction;
 
-    private TgTmTxOption(boolean isRetryOver, TgTxOption txOption) {
+    private TgTmTxOption(boolean isRetryOver, TgTxOption txOption, TgTmRetryInstruction retryInstruction) {
         this.isRetryOver = isRetryOver;
         this.txOption = txOption;
+        this.retryInstruction = retryInstruction;
     }
 
     /**
@@ -76,14 +79,32 @@ public final class TgTmTxOption {
         return this.txOption;
     }
 
+    /**
+     * get retry instruction
+     *
+     * @return retry instruction
+     */
+    public @Nullable TgTmRetryInstruction getRetryInstruction() {
+        return this.retryInstruction;
+    }
+
     @Override
     public String toString() {
+        var sb = new StringBuilder(128);
         if (this.isRetryOver) {
-            return "RETRY_OVER";
+            sb.append("RETRY_OVER");
+        } else if (this.txOption == null) {
+            sb.append("NOT_RETRYABLE");
+        } else {
+            sb.append(txOption);
         }
-        if (this.txOption == null) {
-            return "NOT_RETRYABLE";
+
+        sb.append("(");
+        if (this.retryInstruction != null) {
+            sb.append(retryInstruction);
         }
-        return txOption.toString();
+        sb.append(")");
+
+        return sb.toString();
     }
 }

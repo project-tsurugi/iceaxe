@@ -22,8 +22,7 @@ public interface TsurugiDiagnosticCodeProvider {
      *
      * @return DiagnosticCode (null if not found)
      */
-    @Nullable
-    public DiagnosticCode getDiagnosticCode();
+    public @Nullable DiagnosticCode getDiagnosticCode();
 
     // utility
 
@@ -57,8 +56,7 @@ public interface TsurugiDiagnosticCodeProvider {
      * @param e ServerException
      * @return message
      */
-    @Nullable
-    public static String createMessage(ServerException e) {
+    public static @Nullable String createMessage(ServerException e) {
         var code = e.getDiagnosticCode();
         if (code != null) {
             return code.name() + ": " + e.getMessage();
@@ -73,8 +71,7 @@ public interface TsurugiDiagnosticCodeProvider {
      * @param code DiagnosticCode
      * @return message
      */
-    @Nullable
-    public static String createMessage(DiagnosticCode code) {
+    public static @Nullable String createMessage(DiagnosticCode code) {
         if (code == null) {
             return null;
         }

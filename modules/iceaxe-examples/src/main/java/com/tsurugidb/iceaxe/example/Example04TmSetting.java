@@ -4,6 +4,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionSupplier;
+import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -110,15 +111,15 @@ public class Example04TmSetting {
     void supplierCustom(TgTxOption firstTxOption, TgTxOption laterTxOption) {
         var supplier = new TgTmTxOptionSupplier() {
             @Override
-            protected TgTmTxOption computeFirstTmOption() {
+            protected TgTmTxOption computeFirstTmOption(Object executeInfo) {
                 // 初回はfirstOptionでトランザクション実行
-                return TgTmTxOption.execute(firstTxOption);
+                return TgTmTxOption.execute(firstTxOption, null);
             }
 
             @Override
-            protected TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e) {
+            protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
                 // 2回目以降でリトライ可能な場合はlaterOptionでトランザクション実行
-                return TgTmTxOption.execute(laterTxOption);
+                return TgTmTxOption.execute(laterTxOption, retryInstruction);
             }
         };
         var setting = TgTmSetting.of(supplier);

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.TestInfo;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 
 /**
  * generated rowid test
@@ -79,7 +79,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
             assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
@@ -96,7 +96,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
             assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
@@ -113,7 +113,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
             assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
@@ -130,7 +130,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
             assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
@@ -147,7 +147,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
             assertContains("ERR_COMPILER_ERROR: SQL--0005: error in db_->create_executable()", e.getMessage());
@@ -165,7 +165,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
             assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
@@ -182,7 +182,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
             assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());

@@ -13,9 +13,9 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -44,7 +44,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             int count1 = tm.executeAndGetCount(ps, entity);
             assertUpdateCount(1, count1);
 
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps, entity);
             });
             assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
@@ -60,7 +60,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.execute((TsurugiTransactionAction) transaction -> {
                     int count1 = transaction.executeAndGetCount(ps, entity);
                     assertUpdateCount(1, count1);
@@ -86,7 +86,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.execute(transaction -> {
                     int count1 = transaction.executeAndGetCount(ps, entity);
                     assertUpdateCount(1, count1);
@@ -117,7 +117,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
     }
 
     private void insertSameTxLazyCheck(TsurugiTransactionManager tm, TsurugiSqlPreparedStatement<TestEntity> ps) throws IOException, InterruptedException {
-        var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+        var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             tm.execute((TsurugiTransactionAction) transaction -> {
                 var entity = createTestEntity(1);
                 var r1 = ps.execute(transaction, entity);

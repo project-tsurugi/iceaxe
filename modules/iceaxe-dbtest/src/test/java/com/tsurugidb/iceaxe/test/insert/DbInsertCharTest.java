@@ -14,7 +14,7 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -96,7 +96,7 @@ class DbInsertCharTest extends DbTestTableTester {
                 assert zzz.getBytes(StandardCharsets.UTF_8).length > ZZZ_SIZE;
 
                 var entity = new TestEntity(++i, i, zzz);
-                var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                     tm.executeAndGetCount(ps, entity);
                 });
                 assertEqualsCode(SqlServiceCode.ERR_TYPE_MISMATCH, e);

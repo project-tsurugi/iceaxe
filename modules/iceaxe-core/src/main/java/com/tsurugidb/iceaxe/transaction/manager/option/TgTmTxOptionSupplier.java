@@ -1,13 +1,13 @@
 package com.tsurugidb.iceaxe.transaction.manager.option;
 
-import java.util.function.BiPredicate;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
+import com.tsurugidb.iceaxe.transaction.manager.retry.TsurugiDefaultRetryPredicate;
+import com.tsurugidb.iceaxe.transaction.manager.retry.TsurugiTmRetryPredicate;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -71,6 +71,31 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
+     * create TgTmTxOptionSupplier
+     *
+     * @param occSize   occ size
+     * @param ltxOption transaction option for LTX or RTX
+     * @param ltxSize   ltx size
+     * @return supplier
+     */
+    public static TgTmTxOptionSupplier ofOccLtx(int occSize, TgTxOption ltxOption, int ltxSize) {
+        return TgTmTxOptionOccLtx.of(TgTxOption.ofOCC(), occSize, ltxOption, ltxSize);
+    }
+
+    /**
+     * create TgTmTxOptionSupplier
+     *
+     * @param occOption transaction option for OCC
+     * @param occSize   occ size
+     * @param ltxOption transaction option for LTX or RTX
+     * @param ltxSize   ltx size
+     * @return supplier
+     */
+    public static TgTmTxOptionSupplier ofOccLtx(TgTxOption occOption, int occSize, TgTxOption ltxOption, int ltxSize) {
+        return TgTmTxOptionOccLtx.of(occOption, occSize, ltxOption, ltxSize);
+    }
+
+    /**
      * {@link TgTmTxOption} listener
      */
     @FunctionalInterface
@@ -85,7 +110,7 @@ public abstract class TgTmTxOptionSupplier {
         public void accept(int attempt, TsurugiTransactionException e, TgTmTxOption tmOption);
     }
 
-    private BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> retryPredicate;
+    private TsurugiTmRetryPredicate retryPredicate;
     private TgTmOptionListener tmOptionListener;
     private String description;
 
@@ -101,7 +126,7 @@ public abstract class TgTmTxOptionSupplier {
      *
      * @param predicate retry predicate
      */
-    public TgTmTxOptionSupplier(BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> predicate) {
+    public TgTmTxOptionSupplier(TsurugiTmRetryPredicate predicate) {
         setRetryPredicate(predicate);
     }
 
@@ -110,11 +135,20 @@ public abstract class TgTmTxOptionSupplier {
      *
      * @param predicate retry predicate
      */
-    public void setRetryPredicate(@Nonnull BiPredicate<TsurugiTransaction, TsurugiDiagnosticCodeProvider> predicate) {
+    public void setRetryPredicate(@Nonnull TsurugiTmRetryPredicate predicate) {
         if (predicate == null) {
             throw new IllegalArgumentException("predicate is null");
         }
         this.retryPredicate = predicate;
+    }
+
+    /**
+     * get retry predicate
+     *
+     * @return retry predicate
+     */
+    public TsurugiTmRetryPredicate getRetryPredicate() {
+        return this.retryPredicate;
     }
 
     /**
@@ -127,37 +161,49 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
+     * create execute information
+     *
+     * @param iceaxeTmExecuteId iceaxe tm executeId
+     * @return execute information
+     */
+    public Object createExecuteInfo(int iceaxeTmExecuteId) {
+        return null; // do override
+    }
+
+    /**
      * get tm option
      *
+     * @param executeInfo {@link #createExecuteInfo(int)}
      * @param attempt     attempt number
      * @param transaction transaction (null if attempt==0)
      * @param e           transaction exception (null if attempt==0)
      * @return Transaction Option
      */
     @Nonnull
-    public final TgTmTxOption get(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
-        var tmOption = computeTmOption(attempt, transaction, e);
+    public final TgTmTxOption get(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+        var tmOption = computeTmOption(executeInfo, attempt, transaction, e);
         if (this.tmOptionListener != null) {
             tmOptionListener.accept(attempt, e, tmOption);
         }
         return tmOption;
     }
 
-    protected TgTmTxOption computeTmOption(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmTxOption computeTmOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
         if (attempt == 0) {
-            return computeFirstTmOption();
+            return computeFirstTmOption(executeInfo);
         }
 
-        if (isRetryable(transaction, e)) {
-            return computeRetryTmOption(attempt, e);
+        var retryInstruction = isRetryable(transaction, e);
+        if (retryInstruction.isRetryable()) {
+            return computeRetryTmOption(executeInfo, attempt, e, retryInstruction);
         }
 
-        return TgTmTxOption.notRetryable();
+        return TgTmTxOption.notRetryable(retryInstruction);
     }
 
-    protected abstract TgTmTxOption computeFirstTmOption();
+    protected abstract TgTmTxOption computeFirstTmOption(Object executeInfo);
 
-    protected abstract TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e);
+    protected abstract TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction);
 
     /**
      * whether to retry
@@ -166,8 +212,8 @@ public abstract class TgTmTxOptionSupplier {
      * @param e           Transaction Exception
      * @return true: retryable
      */
-    protected boolean isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) {
-        return retryPredicate.test(transaction, e);
+    protected TgTmRetryInstruction isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) {
+        return getRetryPredicate().apply(transaction, e);
     }
 
     /**

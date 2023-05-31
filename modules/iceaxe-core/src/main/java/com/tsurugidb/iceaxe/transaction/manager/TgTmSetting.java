@@ -19,27 +19,27 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
- * Tsurugi Transaction Manager Settings
+ * Tsurugi TransactionManager Settings
  *
  * @see TsurugiTransactionManager
  */
 public class TgTmSetting {
 
     /**
-     * create Transaction Manager Settings
+     * create TransactionManager Settings
      *
      * @param txOptionSupplier transaction option supplier
-     * @returnTransaction Manager Settings
+     * @returnTransactionManager Settings
      */
     public static TgTmSetting of(TgTmTxOptionSupplier txOptionSupplier) {
         return new TgTmSetting().txOptionSupplier(txOptionSupplier);
     }
 
     /**
-     * create Transaction Manager Settings
+     * create TransactionManager Settings
      *
      * @param txOptions transaction options
-     * @return Transaction Manager Settings
+     * @return TransactionManager Settings
      */
     public static TgTmSetting of(TgTxOption... txOptions) {
         var supplier = TgTmTxOptionList.of(txOptions);
@@ -47,10 +47,10 @@ public class TgTmSetting {
     }
 
     /**
-     * create Transaction Manager Settings
+     * create TransactionManager Settings
      *
      * @param txOption transaction option
-     * @return Transaction Manager Settings
+     * @return TransactionManager Settings
      */
     public static TgTmSetting ofAlways(TgTxOption txOption) {
         var supplier = TgTmTxOptionSupplier.ofAlways(txOption);
@@ -58,11 +58,11 @@ public class TgTmSetting {
     }
 
     /**
-     * create Transaction Manager Settings
+     * create TransactionManager Settings
      *
      * @param txOption       transaction option
      * @param attemtMaxCount attempt max count
-     * @return Transaction Manager Settings
+     * @return TransactionManager Settings
      */
     public static TgTmSetting ofAlways(TgTxOption txOption, int attemtMaxCount) {
         var supplier = TgTmTxOptionSupplier.ofAlways(txOption, attemtMaxCount);
@@ -70,11 +70,11 @@ public class TgTmSetting {
     }
 
     /**
-     * create Transaction Manager Settings
+     * create TransactionManager Settings
      *
      * @param txOption transaction option
      * @param size     size
-     * @return Transaction Manager Settings
+     * @return TransactionManager Settings
      */
     public static TgTmSetting of(TgTxOption txOption, int size) {
         var supplier = TgTmTxOptionSupplier.of(txOption, size);
@@ -82,16 +82,43 @@ public class TgTmSetting {
     }
 
     /**
-     * create Transaction Manager Settings
+     * create TransactionManager Settings
      *
      * @param txOption1 transaction option
      * @param size1     size
      * @param txOption2 transaction option
      * @param size2     size
-     * @return Transaction Manager Settings
+     * @return TransactionManager Settings
      */
     public static TgTmSetting of(TgTxOption txOption1, int size1, TgTxOption txOption2, int size2) {
         var supplier = TgTmTxOptionSupplier.of(txOption1, size1, txOption2, size2);
+        return of(supplier);
+    }
+
+    /**
+     * create TransactionManager Settings
+     *
+     * @param occSize   occ size
+     * @param ltxOption transaction option for LTX or RTX
+     * @param ltxSize   ltx size
+     * @return TransactionManager Settings
+     */
+    public static TgTmSetting ofOccLtx(int occSize, TgTxOption ltxOption, int ltxSize) {
+        var supplier = TgTmTxOptionSupplier.ofOccLtx(occSize, ltxOption, ltxSize);
+        return of(supplier);
+    }
+
+    /**
+     * create TransactionManager Settings
+     *
+     * @param occOption transaction option for OCC
+     * @param occSize   occ size
+     * @param ltxOption transaction option for LTX or RTX
+     * @param ltxSize   ltx size
+     * @return TransactionManager Settings
+     */
+    public static TgTmSetting ofOccLtx(TgTxOption occOption, int occSize, TgTxOption ltxOption, int ltxSize) {
+        var supplier = TgTmTxOptionSupplier.ofOccLtx(occOption, occSize, ltxOption, ltxSize);
         return of(supplier);
     }
 
@@ -104,7 +131,7 @@ public class TgTmSetting {
     private List<TsurugiTmEventListener> eventListenerList = null;
 
     /**
-     * Tsurugi Transaction Manager Settings
+     * Tsurugi TransactionManager Settings
      */
     public TgTmSetting() {
         // do nothing
@@ -153,10 +180,11 @@ public class TgTmSetting {
     /**
      * get first transaction option
      *
+     * @param executeInfo {@link TgTmTxOptionSupplier#createExecuteInfo(int)}
      * @return transaction option
      */
-    public TgTxOption getFirstTransactionOption() {
-        var tmOption = getTransactionOption(0, null, null);
+    public TgTxOption getFirstTransactionOption(Object executeInfo) {
+        var tmOption = getTransactionOption(executeInfo, 0, null, null);
         var txOption = tmOption.getTransactionOption();
         if (txOption == null) {
             throw new IllegalStateException(MessageFormat.format("tmOption is not execute. tmOption={0}", tmOption));
@@ -170,21 +198,22 @@ public class TgTmSetting {
     /**
      * get transaction option
      *
+     * @param executeInfo {@link TgTmTxOptionSupplier#createExecuteInfo(int)}
      * @param attempt     attempt number
      * @param transaction transaction
      * @param e           transaction exception
      * @return tm option
      * @see TgTmTxOptionSupplier
      */
-    public TgTmTxOption getTransactionOption(int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+    public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
         if (this.txOptionSupplier == null) {
             throw new IllegalStateException("txOptionSupplier is not specifed");
         }
-        var tmOption = txOptionSupplier.get(attempt, transaction, e);
+        var tmOption = txOptionSupplier.get(executeInfo, attempt, transaction, e);
         if (tmOption.isExecute()) {
             var txOption = tmOption.getTransactionOption();
             if (txOption.label() == null && this.transactionLabel != null) {
-                tmOption = TgTmTxOption.execute(txOption.clone(transactionLabel));
+                return TgTmTxOption.execute(txOption.clone(transactionLabel), tmOption.getRetryInstruction());
             }
         }
         return tmOption;

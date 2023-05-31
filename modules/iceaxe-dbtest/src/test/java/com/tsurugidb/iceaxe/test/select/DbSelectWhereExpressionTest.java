@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -46,7 +46,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
@@ -74,7 +74,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 var list = tm.executeAndGetList(ps);
                 assertEquals(1, list.size());
                 var entity = list.get(0);
@@ -91,7 +91,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 var list = tm.executeAndGetList(ps);
                 assertEquals(SIZE, list.size());
                 for (int i = 0; i < SIZE; i++) {
@@ -111,7 +111,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 var list = tm.executeAndGetList(ps);
                 assertEquals(expectedList.size(), list.size());
                 for (int i = 0; i < list.size(); i++) {
@@ -132,7 +132,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e0 = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+            var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 var list = tm.executeAndGetList(ps);
                 assertEquals(e - s + 1, list.size());
                 for (int i = 0; i < list.size(); i++) {

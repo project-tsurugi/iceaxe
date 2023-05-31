@@ -14,8 +14,8 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -45,7 +45,7 @@ class DbTransactionExceptionTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
         try (var ps = session.createStatement(sql)) {
-            var e0 = assertThrows(TsurugiTransactionIOException.class, () -> tm.execute((TsurugiTransactionAction) transaction -> {
+            var e0 = assertThrows(TsurugiTmIOException.class, () -> tm.execute((TsurugiTransactionAction) transaction -> {
                 var e = assertThrows(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
                 assertEquals(transaction.getIceaxeTxId(), e.getIceaxeTxId());
                 assertEquals(transaction.getIceaxeTmExecuteId(), e.getIceaxeTmExecuteId());
@@ -71,7 +71,7 @@ class DbTransactionExceptionTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-            var e0 = assertThrows(TsurugiTransactionIOException.class, () -> tm.execute((TsurugiTransactionAction) transaction -> {
+            var e0 = assertThrows(TsurugiTmIOException.class, () -> tm.execute((TsurugiTransactionAction) transaction -> {
                 var e = assertThrows(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps, entity));
                 assertEquals(transaction.getIceaxeTxId(), e.getIceaxeTxId());
                 assertEquals(transaction.getIceaxeTmExecuteId(), e.getIceaxeTmExecuteId());
@@ -98,7 +98,7 @@ class DbTransactionExceptionTest extends DbTestTableTester {
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             TsurugiStatementResult[] result = { null };
-            var e0 = assertThrows(TsurugiTransactionIOException.class, () -> tm.execute((TsurugiTransactionAction) transaction -> {
+            var e0 = assertThrows(TsurugiTmIOException.class, () -> tm.execute((TsurugiTransactionAction) transaction -> {
                 var e = assertThrows(TsurugiTransactionException.class, () -> {
                     result[0] = transaction.executeStatement(ps, entity);
                     result[0].getUpdateCount();

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -51,16 +52,16 @@ public class TgTmTxOptionList extends TgTmTxOptionSupplier {
     }
 
     @Override
-    protected TgTmTxOption computeFirstTmOption() {
-        return TgTmTxOption.execute(txOptionList.get(0));
+    protected TgTmTxOption computeFirstTmOption(Object executeInfo) {
+        return TgTmTxOption.execute(txOptionList.get(0), null);
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(int attempt, TsurugiTransactionException e) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
         if (attempt < txOptionList.size()) {
-            return TgTmTxOption.execute(txOptionList.get(attempt));
+            return TgTmTxOption.execute(txOptionList.get(attempt), retryInstruction);
         }
-        return TgTmTxOption.retryOver();
+        return TgTmTxOption.retryOver(retryInstruction);
     }
 
     @Override

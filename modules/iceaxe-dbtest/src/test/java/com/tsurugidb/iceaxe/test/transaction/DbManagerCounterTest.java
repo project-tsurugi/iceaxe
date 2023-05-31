@@ -14,13 +14,13 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.event.counter.TgTmCount;
 import com.tsurugidb.iceaxe.transaction.manager.event.counter.TgTmLabelCounter;
 import com.tsurugidb.iceaxe.transaction.manager.event.counter.TgTmSimpleCounter;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -209,7 +209,7 @@ class DbManagerCounterTest extends DbTestTableTester {
                 var param1 = TgBindParameters.of(bar.bind(111));
                 tx1.executeAndGetCount(ps, param1);
 
-                var e = assertThrowsExactly(TsurugiTransactionRetryOverIOException.class, () -> {
+                var e = assertThrowsExactly(TsurugiTmRetryOverIOException.class, () -> {
                     tm.execute(setting2, tx2 -> {
                         var param2 = TgBindParameters.of(bar.bind(222));
                         tx2.executeAndGetCount(ps, param2);

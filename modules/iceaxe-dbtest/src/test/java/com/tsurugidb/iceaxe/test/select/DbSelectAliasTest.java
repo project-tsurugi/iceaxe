@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionIOException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -64,7 +64,7 @@ class DbSelectAliasTest extends DbTestTableTester {
     @Test
     void selectName() throws Exception {
         var sql = "select count(*) cnt from " + TEST;
-        var e = assertThrowsExactly(TsurugiTransactionIOException.class, () -> {
+        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             selectCount(sql, "cnt");
         });
         assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e); // TODO as無し別名実装待ち
