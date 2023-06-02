@@ -83,7 +83,7 @@ public class Example32Count {
     }
 
     void countAllAsInteger_singleColumn(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var resultMapping = TgResultMapping.of(int.class);
+        var resultMapping = TgResultMapping.ofSingle(int.class);
         try (var ps = session.createQuery("select count(*) from TEST", resultMapping)) {
             int count = tm.execute(transaction -> {
                 Optional<Integer> countOpt = transaction.executeAndFindRecord(ps);

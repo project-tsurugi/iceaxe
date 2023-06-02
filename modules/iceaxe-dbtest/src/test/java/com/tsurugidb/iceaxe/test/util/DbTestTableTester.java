@@ -365,7 +365,7 @@ public class DbTestTableTester {
 
     protected static int selectCountFrom(String tableName) throws IOException, InterruptedException {
         var sql = "select count(*) from " + tableName;
-        var resultMapping = TgResultMapping.of(int.class);
+        var resultMapping = TgResultMapping.ofSingle(int.class);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 3);

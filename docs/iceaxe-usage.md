@@ -752,25 +752,20 @@ try (var ps = session.createQuery(sql, resultMapping)) {
 
 #### select結果変換の例（1カラムだけ取得する場合）
 
-1カラムだけしか取得しない場合は、`TgResultMapping`の`of`メソッドにカラムのデータ型を指定することで、その値を直接取得することが出来る。
+1カラムだけしか取得しない場合は、`TgResultMapping`の`ofSingle`メソッドにカラムのデータ型を指定することで、その値を直接取得することが出来る。
 
 ```java
 import java.util.Optional;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 
-var sql = "select count(*) from TEST";
-var resultMapping = TgResultMapping.of(int.class);
+var sql = "select FOO from TEST";
+var resultMapping = TgResultMapping.ofSingle(int.class);
 try (var ps = session.createQuery(sql, resultMapping)) {
     tm.execute(transaction -> {
-        Optional<Integer> countOpt = transaction.executeAndFindRecord(ps);
-        int count = countOpt.get();
+        List<Integer> fooList = transaction.executeAndFindRecord(ps);
     });
 }
 ```
-
-> **Note**
->
-> この例のSQLではselect結果が常に1件だと分かっているので、1件だけ取得する`executeAndFindRecord`メソッドを使い、返ってきた`Optional`がemptyかどうかを確認せずに値を取り出している。
 
 #### select結果変換の例（`TsurugiResultRecord`から変換する方法）
 
@@ -1030,13 +1025,13 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 
 #### バインド変数の例（変数が1個だけの場合）
 
-バインド変数を1個だけしか使用しない場合は、`TgParameterMapping`の`of`メソッドに変数名とデータ型を指定することで、パラメーターに値を直接指定することが出来る。
+バインド変数を1個だけしか使用しない場合は、`TgParameterMapping`の`ofSingle`メソッドに変数名とデータ型を指定することで、パラメーターに値を直接指定することが出来る。
 
 ```java
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 
 var sql = "update TEST set BAR = 1 where FOO = :foo";
-var parameterMapping = TgParameterMapping.of("foo", int.class);
+var parameterMapping = TgParameterMapping.ofSingle("foo", int.class);
 try (var ps = session.createStatement(sql, parameterMapping)) {
     tm.execute(transaction -> {
         int parameter = 123;

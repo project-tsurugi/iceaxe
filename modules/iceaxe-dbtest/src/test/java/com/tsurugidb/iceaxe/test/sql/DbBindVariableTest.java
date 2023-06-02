@@ -136,12 +136,12 @@ class DbBindVariableTest extends DbTestTableTester {
 
     @Test
     void singleVariable_class() throws Exception {
-        singleVariable(TgParameterMapping.of("foo", int.class));
+        singleVariable(TgParameterMapping.ofSingle("foo", int.class));
     }
 
     @Test
     void singleVariable_type() throws Exception {
-        singleVariable(TgParameterMapping.of("foo", TgDataType.INT));
+        singleVariable(TgParameterMapping.ofSingle("foo", TgDataType.INT));
     }
 
     private void singleVariable(TgParameterMapping<Integer> parameterMapping) throws IOException, InterruptedException {

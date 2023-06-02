@@ -166,7 +166,7 @@ public class Example31Select {
 
     void selectByParameter1_singleVariable(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
         var sql = "select * from TEST where FOO = :foo";
-        var parameterMapping = TgParameterMapping.of("foo", int.class);
+        var parameterMapping = TgParameterMapping.ofSingle("foo", int.class);
         try (var ps = session.createQuery(sql, parameterMapping)) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 int parameter = 123;

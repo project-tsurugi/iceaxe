@@ -125,7 +125,7 @@ class DbSelectTest extends DbTestTableTester {
     @Test
     void selectColumn_single() throws Exception {
         var sql = "select foo from " + TEST;
-        var resultMapping = TgResultMapping.of(int.class);
+        var resultMapping = TgResultMapping.ofSingle(int.class);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -138,7 +138,7 @@ class DbSelectTest extends DbTestTableTester {
     @Test
     void selectMultiColumn_single() throws Exception {
         var sql = "select foo, bar, zzz from " + TEST;
-        var resultMapping = TgResultMapping.of(int.class);
+        var resultMapping = TgResultMapping.ofSingle(int.class);
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
