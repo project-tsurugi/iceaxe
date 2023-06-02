@@ -1,4 +1,4 @@
-# Iceaxe使用方法（2023-05-17）
+# Iceaxe使用方法（2023-06-02）
 
 Iceaxeの使用方法（Tsurugiのデータベース（Tsurugi DB）に対してSQLを実行する方法）の概要を説明する。
 
@@ -301,7 +301,7 @@ var rtx = TgTxOption.ofRTX().label("example");
 
 ### `TgCommitType`
 
-`TgCommitType`は、`TsurugiTransaction`のコミット時に指定する列挙型。
+`TgCommitType`は、`TsurugiTransaction`の`commit`メソッドに指定する列挙型。
 
 DBサーバー内でどこまで処理したら`commit`メソッドから制御が返るかを表す。
 
@@ -584,6 +584,8 @@ SQL文をDBサーバーに事前に登録しない方式の場合、バインド
 > **Note**
 >
 > `executeAnd`系メソッドは内部で`TsurugiSqlResult`を操作しており、更新の成功可否チェックや`TsurugiSqlResult`のクローズも実施する。
+>
+> このため、基本的には`executeQuery`・`executeStatement`メソッドより`executeAnd`系メソッドの使用を推奨する。
 
 `TsurugiTransactionManager`にも同名の`executeAnd`系メソッドがあり、1回のトランザクションで1個しかSQLを実行しない場合は、こちらを利用することも出来る。
 
@@ -806,31 +808,68 @@ try (var ps = session.createQuery(sql, resultMapping)) {
 
 
 
-### `TsurugiQueryResult`・`TsurugiResultRecord`
+### `TsurugiQueryResult`
 
-`TsurugiQueryResult`は、`TsurugiTransaction`の`executeQuery`メソッドを実行したときに作られる、select結果を扱うクラス。
-`TsurugiResultRecord`は`TsurugiQueryResult`内部で使用される、1レコード分のデータを処理するクラス。
-Iceaxeではこの2つのクラスを使ってselect結果を処理する。
+`TsurugiQueryResult`はselect結果を扱うクラス。
 
 > **Note**
 >
-> `TsurugiTransaction`の`executeAnd`系メソッドを使えばこれらのクラスはメソッド内部に隠蔽されるが、`executeQuery`メソッド（`TsurugiQueryResult`が返る）を使う場合や`TgResultMapping`で「`TsurugiResultRecord`からEntityクラスに変換する関数」を使う場合は、アプリケーション開発者がこれらのクラスを直接扱う必要がある。
+> `TsurugiQueryResult`で実行できる処理は、基本的に`TsurugiTransaction`の`executeAnd`系メソッドで実行できる。
+>
+> `executeAnd`系メソッドは`TsurugiQueryResult`を隠蔽し、クローズ処理も行うので、基本的には`TsurugiQueryResult`を操作するより`executeAnd`系メソッドの使用を推奨する。
 
-Iceaxeの大多数のクラスと異なり、`TsurugiQueryResult`と`TsurugiResultRecord`は**スレッドセーフではない**。
+- `TsurugiQueryResult`は`TsurugiTransaction`の`executeQuery`メソッドから返される。
+  - 使用終了後にクローズする必要がある。（明示的にクローズしない場合、`TsurugiTransaction`のクローズ時にクローズされる）
+- `TsurugiQueryResult`からselect結果を取得する。
+  - `TsurugiQueryResult`はselect結果の複数レコードを先頭から順番に処理していく。各レコードは一度しか読むことが出来ない。
+- `TsurugiQueryResult`は**スレッドセーフではない**。
 
-`TsurugiQueryResult`はselect結果の複数レコードを先頭から順番に処理していく。各レコードは一度しか読むことが出来ない。
+`TsurugiQueryResult`からselect結果を取得するメソッドには以下のようなものがある。
+
+| メソッド        | 説明                                                         | 代替メソッド                              |
+| --------------- | ------------------------------------------------------------ | ----------------------------------------- |
+| `getRecordList` | 全レコードの`List`を返す。                                   | `TsurugiTransaction.executeAndGetList`    |
+| `findRecord`    | 1レコードを`Optional`で返す。                                | `TsurugiTransaction.executeAndFindRecord` |
+| `iterator`      | `Iterator`を返す。（非推奨※1）                               |                                           |
+| `forEach`       | レコードを処理する関数を渡す。（非推奨※1）<br />`whileEach`メソッドを推奨。 |                                           |
+| `whileEach`     | レコードを処理する関数を渡す。                               | `TsurugiTransaction.executeAndForEach`    |
+
+> **Note** ※1
+>
+> `TsurugiQueryResult`は`Iterable`を実装しているので`Iterable`として振る舞うことが出来るが、例外発生時は非チェック例外に変換する必要があり、非チェック例外は受け取る側で処理が漏れる危険性がある為、`Iterable`として使用することはあまり推奨しない。
+
+その他に、`TsurugiQueryResult`から情報を取得するメソッドがある。
+
+| メソッド        | 説明                                                         |
+| --------------- | ------------------------------------------------------------ |
+| `getNameList`   | カラム名一覧を返す。<br />select文でカラム名が明示されていなかった場合は、Iceaxeが適当なカラム名を付ける。 |
+| `getReadCount`  | 読み込んだレコード数を返す。                                 |
+| `getHasNextRow` | 次のレコードを取得する必要があるかどうか（最後のレコードまで取得したかどうか）を返す。<br />一度も取得していないと`empty`、処理中は`true`、全レコードを取得し終わったら`false`になる。 |
+
+### `TsurugiResultRecord`
+
+`TsurugiResultRecord`は1レコード分のデータを処理するクラス。
+
+> **Note**
+>
+> `TsurugiTransaction`の`executeAnd`系メソッドや`TsurugiQueryResult`のselect結果取得系メソッドを使えば`TsurugiResultRecord`は隠蔽されるが、`TgResultMapping`で「`TsurugiResultRecord`からEntityクラスに変換する関数」を使う場合は、アプリケーション開発者が`TsurugiResultRecord`を扱う必要がある。
+
+- `TsurugiResultRecord`は`TsurugiQueryResult`内部で生成される。
+  - 生成元の`TsurugiQueryResult`がクローズされると使用できなくなる。
+- select結果の1レコード分のデータを取得する為に使用する。
+- `TsurugiResultRecord`は**スレッドセーフではない**。
 
 `TsurugiResultRecord`は1レコード分のデータを処理するが、インスタンスは`TsurugiQueryResult`の中でひとつしか生成されず、複数レコード間で同じインスタンスが使い回される。
 また、`TsurugiQueryResult`をクローズすると、`TsurugiResultRecord`も使用できなくなる。
 
 したがって、アプリケーション開発者が各レコードの値を保存する目的で`TsurugiResultRecord`インスタンスを保持する（`List`に`add`していく）ような使い方は出来ない。
-また、`TsurugiTransaction`の`executeAnd`系メソッドの外に`TsurugiResultRecord`を出すことも出来ない（`executeAnd`系メソッドが終了しているということは、`TsurugiQueryResult`はクローズされている為）。
+また、`TsurugiTransaction`の`executeAnd`系メソッドの外に`TsurugiResultRecord`インスタンスを出してはいけない。（`executeAnd`系メソッドが終了する際に`TsurugiQueryResult`がクローズされて`TsurugiResultRecord`も使用不可となる為）
 
-そのため、`TsurugiQueryResult`からレコードを返す際は、`TsurugiResultRecord`を必ずEntityクラスに変換する（レコード毎に、1レコード分の値を保持するEntityインスタンスを生成する）。
+そのため、`TsurugiQueryResult`からレコードを返す際は、`TsurugiResultRecord`を1レコード分の値を保持するEntityクラスへ変換する。すなわち、レコード毎にEntityインスタンスを生成して、`TsurugiResultRecord`から値を移送する。
 
 > **Note**
 >
-> `TsurugiResultRecord`を1レコードずつ処理するだけであれば、必ずしもEntityクラスに変換しなくてもよい。変換しない分、処理速度は向上する。
+> `TsurugiResultRecord`を1レコードずつ処理するのであれば、必ずしもEntityクラスに変換しなくてもよい。変換しない分、処理速度は向上する。
 >
 > ```java
 > var sql = "select FOO, BAR, ZZZ from TEST";
@@ -908,7 +947,7 @@ entity.setZzz(record.nextStringOrNull());
 
 バインド変数は、SQL文の中に変数を埋め込んでおき、SQL実行時にその変数に対してSQL文の外から値を代入する仕組みである。
 
-バインド変数を使う場合は、SQL文をDBサーバーに事前に登録する必要がある。その際にバインド変数の定義も一緒に登録する。
+バインド変数を使う場合は、SQL文とバインド変数の定義をDBサーバーに事前に登録する必要がある。
 
 バインド変数の使い方は以下のようになる。
 
