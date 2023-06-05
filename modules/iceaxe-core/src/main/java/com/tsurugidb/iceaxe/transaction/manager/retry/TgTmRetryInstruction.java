@@ -54,6 +54,15 @@ public /* record */ final class TgTmRetryInstruction {
     /**
      * Creates a new instance.
      *
+     * @param reasonMessage reason message
+     */
+    public static TgTmRetryInstruction ofRetryableLtx(@Nonnull String reasonMessage) {
+        return new TgTmRetryInstruction(TgTmRetryStandardCode.RETRYABLE_LTX, reasonMessage);
+    }
+
+    /**
+     * Creates a new instance.
+     *
      * @param code diagnostic code
      */
     public static TgTmRetryInstruction ofNotRetryable(@Nonnull DiagnosticCode code) {

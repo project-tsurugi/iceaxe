@@ -10,7 +10,7 @@ public enum TgTmRetryStandardCode implements TgTmRetryCode {
 
     /** retryable. by ERR_ABORTED_RETRYABLE */
     RETRYABLE(true),
-    /** retryable to LTX. by ERR_CONFLICT_ON_WRITE_PRESERVE */
+    /** retryable to LTX. by ERR_CONFLICT_ON_WRITE_PRESERVE, CC_OCC_WP_VERIFY */
     RETRYABLE_LTX(true),
 
     ;

@@ -3,11 +3,11 @@ package com.tsurugidb.iceaxe.transaction.manager.retry;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
-import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -37,63 +37,106 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     }
 
     @Override
-    public TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiDiagnosticCodeProvider e) {
-        TgTmRetryInstruction reason = testCommon(transaction, e);
-        if (reason != null) {
-            return reason;
-        }
+    public final TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiTransactionException e) {
+        var instruction = test(transaction, e);
+        Objects.requireNonNull(instruction);
+        return instruction;
+    }
+
+    protected TgTmRetryInstruction test(TsurugiTransaction transaction, TsurugiTransactionException e) {
+        TgTmRetryInstruction instruction;
 
         var txOption = transaction.getTransactionOption();
         var type = txOption.type();
         if (type == null) {
-            return testOther(transaction, e);
+            type = TransactionType.TRANSACTION_TYPE_UNSPECIFIED;
         }
         switch (type) {
         case SHORT:
-            return testOcc(transaction, e);
+            instruction = testOcc(transaction, e);
+            checkRetryInstruction(instruction, "OCC", e);
+            break;
         case LONG:
-            return testLtx(transaction, e);
+            instruction = testLtx(transaction, e);
+            checkRetryInstruction(instruction, "LTX", e);
+            break;
         case READ_ONLY:
-            return testRtx(transaction, e);
+            instruction = testRtx(transaction, e);
+            checkRetryInstruction(instruction, "RTX", e);
+            break;
         default:
-            return testOther(transaction, e);
+            instruction = testOther(transaction, e);
+            checkRetryInstruction(instruction, "OTHER", e);
+            break;
+        }
+
+        return instruction;
+    }
+
+    protected static final void checkRetryInstruction(TgTmRetryInstruction instruction, String position, TsurugiTransactionException e) {
+        if (instruction == null) {
+            throw new IllegalStateException(position + " retryInstruction is null", e);
         }
     }
 
-    protected @Nullable TgTmRetryInstruction testCommon(TsurugiTransaction transaction, TsurugiDiagnosticCodeProvider e) {
-        var lowCode = e.getDiagnosticCode();
-        if (lowCode == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
-            return TgTmRetryInstruction.ofRetryable(lowCode);
+    protected TgTmRetryInstruction testOcc(TsurugiTransaction transaction, TsurugiTransactionException e) {
+        if (isOccOnWp(e)) {
+            return TgTmRetryInstruction.ofRetryableLtx("OCC ltx retry. " + e.getMessage());
         }
-        return null;
+
+        return testCommon("OCC", transaction, e);
     }
 
-    protected TgTmRetryInstruction testOcc(TsurugiTransaction transaction, TsurugiDiagnosticCodeProvider e) {
-        var lowCode = e.getDiagnosticCode();
-        if (lowCode == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE) {
-            return TgTmRetryInstruction.of(TgTmRetryStandardCode.RETRYABLE_LTX, "OCC diagnosticCode=" + lowCode);
+    protected TgTmRetryInstruction testLtx(TsurugiTransaction transaction, TsurugiTransactionException e) {
+        if (isOccOnWp(e)) {
+            throw new IllegalStateException("illegal code. " + e.getMessage());
         }
-        return TgTmRetryInstruction.ofNotRetryable("OCC diagnosticCode=" + lowCode);
+
+        return testCommon("LTX", transaction, e);
     }
 
-    protected TgTmRetryInstruction testLtx(TsurugiTransaction transaction, TsurugiDiagnosticCodeProvider e) {
-        var lowCode = e.getDiagnosticCode();
-        if (lowCode == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE) {
-            throw new IllegalStateException("illegal diagnosticCode. " + e.toString());
+    protected TgTmRetryInstruction testRtx(TsurugiTransaction transaction, TsurugiTransactionException e) {
+        if (isOccOnWp(e)) {
+            throw new IllegalStateException("illegal code. " + e.getMessage());
         }
-        return TgTmRetryInstruction.ofNotRetryable("LTX diagnosticCode=" + lowCode);
+
+        return testCommon("RTX", transaction, e);
     }
 
-    protected TgTmRetryInstruction testRtx(TsurugiTransaction transaction, TsurugiDiagnosticCodeProvider e) {
-        var lowCode = e.getDiagnosticCode();
-        if (lowCode == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE) {
-            throw new IllegalStateException("illegal diagnosticCode. " + e.toString());
-        }
-        return TgTmRetryInstruction.ofNotRetryable("RTX diagnosticCode=" + lowCode);
+    protected TgTmRetryInstruction testOther(TsurugiTransaction transaction, TsurugiTransactionException e) {
+        return testCommon("OTHER", transaction, e);
     }
 
-    protected TgTmRetryInstruction testOther(TsurugiTransaction transaction, TsurugiDiagnosticCodeProvider e) {
-        var lowCode = e.getDiagnosticCode();
-        return TgTmRetryInstruction.ofNotRetryable("OTHER diagnosticCode=" + lowCode);
+    protected TgTmRetryInstruction testCommon(String position, TsurugiTransaction transaction, TsurugiTransactionException e) {
+        if (isAbortedRetryable(e)) {
+            return TgTmRetryInstruction.ofRetryable(position + " retry. " + e.getMessage());
+        }
+        return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + e.getMessage());
+    }
+
+    //
+
+    protected boolean isAbortedRetryable(TsurugiTransactionException e) {
+        var code = e.getDiagnosticCode();
+        if (code == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean isOccOnWp(TsurugiTransactionException e) {
+        var code = e.getDiagnosticCode();
+        if (code == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE) {
+            return true;
+        }
+        if (code == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
+            String message = e.getMessage();
+            if (message.contains("shirakami response Status=ERR_CC")) {
+                if (message.contains("reason_code:CC_OCC_WP_VERIFY")) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
