@@ -1,4 +1,4 @@
-# Iceaxe使用方法（2023-06-02）
+# Iceaxe使用方法（2023-06-08）
 
 Iceaxeの使用方法（Tsurugiのデータベース（Tsurugi DB）に対してSQLを実行する方法）の概要を説明する。
 
@@ -285,13 +285,13 @@ var rtx = TgTxOption.ofRTX().label("example");
           - 自分の実行中に新しいトランザクションを実行可能。
         - `EXCLUDE`あり
           - 自分の実行中に新しいトランザクションは実行できない（failさせる）。
+- LTXのみ
+  - write preserve
+    - 更新対象の（insert/update/deleteを実行する対象の）テーブル名
   - inclusive read area
     - 参照する（select/insert/update/deleteを実行する対象の）テーブル名
   - exclusive read area
     - 参照しない（select/insert/update/deleteを実行しない対象の）テーブル名
-- LTXのみ
-  - write preserve
-    - 更新対象の（insert/update/deleteを実行する対象の）テーブル名
 
 > **Warning**
 >

@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.sql.proto.SqlRequest.ReadArea;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 import com.tsurugidb.sql.proto.SqlRequest.WritePreserve;
@@ -19,6 +20,8 @@ import com.tsurugidb.sql.proto.SqlRequest.WritePreserve;
 public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
 
     private List<String> writePreserveList = new ArrayList<>();
+    private List<String> inclusiveReadAreaList = new ArrayList<>();
+    private List<String> exclusiveReadAreaList = new ArrayList<>();
 
     @Override
     public String typeName() {
@@ -91,6 +94,128 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
         return this.writePreserveList;
     }
 
+    /**
+     * add inclusive read area
+     *
+     * @param tableName table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addInclusiveReadArea(String tableName) {
+        inclusiveReadAreaList.add(tableName);
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * add inclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addInclusiveReadArea(String... tableNames) {
+        for (var tableName : tableNames) {
+            inclusiveReadAreaList.add(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * add inclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addInclusiveReadArea(Collection<String> tableNames) {
+        for (var tableName : tableNames) {
+            inclusiveReadAreaList.add(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * add inclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addInclusiveReadArea(Stream<String> tableNames) {
+        tableNames.forEachOrdered(inclusiveReadAreaList::add);
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * get inclusive read area
+     *
+     * @return inclusive read area
+     */
+    public List<String> inclusiveReadArea() {
+        return this.inclusiveReadAreaList;
+    }
+
+    /**
+     * add exclusive read area
+     *
+     * @param tableName table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addExclusiveReadArea(String tableName) {
+        exclusiveReadAreaList.add(tableName);
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * add exclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addExclusiveReadArea(String... tableNames) {
+        for (var tableName : tableNames) {
+            exclusiveReadAreaList.add(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * add exclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addExclusiveReadArea(Collection<String> tableNames) {
+        for (var tableName : tableNames) {
+            exclusiveReadAreaList.add(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * add exclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx addExclusiveReadArea(Stream<String> tableNames) {
+        tableNames.forEachOrdered(exclusiveReadAreaList::add);
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * get exclusive read area
+     *
+     * @return exclusive read area
+     */
+    public List<String> exclusiveReadArea() {
+        return this.exclusiveReadAreaList;
+    }
+
     @Override
     @OverridingMethodsMustInvokeSuper
     protected void initializeLowTransactionOption(TransactionOption.Builder lowBuilder) {
@@ -100,12 +225,22 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
             var value = WritePreserve.newBuilder().setTableName(name).build();
             lowBuilder.addWritePreserves(value);
         }
+        for (String name : inclusiveReadAreaList) {
+            var value = ReadArea.newBuilder().setTableName(name).build();
+            lowBuilder.addInclusiveReadAreas(value);
+        }
+        for (String name : exclusiveReadAreaList) {
+            var value = ReadArea.newBuilder().setTableName(name).build();
+            lowBuilder.addExclusiveReadAreas(value);
+        }
     }
 
     @Override
     public synchronized TgTxOptionLtx clone() {
         TgTxOptionLtx txOption = super.clone();
         txOption.writePreserveList = new ArrayList<>(this.writePreserveList);
+        txOption.inclusiveReadAreaList = new ArrayList<>(this.inclusiveReadAreaList);
+        txOption.exclusiveReadAreaList = new ArrayList<>(this.exclusiveReadAreaList);
         return txOption;
     }
 
@@ -115,5 +250,11 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
         super.toString(sb);
 
         appendString(sb, "writePreserve", writePreserveList);
+        if (!inclusiveReadAreaList.isEmpty()) {
+            appendString(sb, "inclusiveReadArea", inclusiveReadAreaList);
+        }
+        if (!exclusiveReadAreaList.isEmpty()) {
+            appendString(sb, "exclusiveReadArea", exclusiveReadAreaList);
+        }
     }
 }

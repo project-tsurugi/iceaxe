@@ -56,10 +56,6 @@ public class Example03TxOption {
         return TgTxOption.ofRTX().priority(TransactionPriority.WAIT);
     }
 
-    TgTxOptionRtx rtx_readArea() {
-        return TgTxOption.ofRTX().addInclusiveReadArea("tableName1");
-    }
-
     // label
     TgTxOption label() {
         return TgTxOption.ofOCC().label("transaction label");
