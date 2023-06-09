@@ -397,7 +397,7 @@ SQLの実行計画のJSONファイルは、SQLコンソール（Tanzawa）の`--
   - 実行計画の出力内容に詳細な情報を追加する。
 - `-D` key=value
   - Graphvizのdotコマンドに渡す引数
-    - SQLコンソール（`console`サブコマンド）で指定するものと同じ。
+    - コンソールモード（`--console`）で指定するものと同じ。
   - `dot.executable`=パス
     - Graphvizのdotコマンドのパス
   - `dot.graph.randir=TB`
@@ -412,5 +412,9 @@ $ tgsql --explain -i sql-15826.explain.json --report
 1. scan (scan) {source: table, table: item_construction_master, access: range-scan}
 2. group (group_exchange) {whole: true, sorted: true}
 3. emit (emit)
+```
+
+```bash
+$ tgsql --explain -Ddot.executable=/usr/bin/dot -Ddot.graph.rankdir=TB -i sql-15826.explain.json -o sql-15826.explain.png
 ```
 
