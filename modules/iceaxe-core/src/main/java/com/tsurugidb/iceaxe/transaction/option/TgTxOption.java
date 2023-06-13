@@ -60,6 +60,15 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
+     * create transaction option for DDL(LTX)
+     *
+     * @return transaction option
+     */
+    public static TgTxOptionLtx ofDDL() {
+        return new TgTxOptionLtx().includeDdl(true);
+    }
+
+    /**
      * get transaction type name
      *
      * @return transaction type

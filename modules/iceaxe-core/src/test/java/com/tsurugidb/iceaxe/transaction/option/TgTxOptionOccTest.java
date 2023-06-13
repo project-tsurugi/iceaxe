@@ -66,6 +66,6 @@ class TgTxOptionOccTest extends TgTxOptionTester {
         assertEquals(expectedType, txOption.type());
         assertEquals(label, txOption.label());
 
-        assertLowOption(label, null, List.of(), List.of(), List.of(), txOption);
+        assertLowOption(label, null, false, List.of(), List.of(), List.of(), txOption);
     }
 }

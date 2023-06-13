@@ -16,11 +16,13 @@ public class TgTxOptionTester {
         this.expectedType = type;
     }
 
-    protected void assertLowOption(String label, TransactionPriority priority, List<String> writePreserve, List<String> inclusiveReadArea, List<String> exclusiveReadArea, TgTxOption txOption) {
+    protected void assertLowOption(String label, TransactionPriority priority, boolean includeDdl, List<String> writePreserve, List<String> inclusiveReadArea, List<String> exclusiveReadArea,
+            TgTxOption txOption) {
         var builder = txOption.toLowTransactionOption();
         assertEquals(expectedType, builder.getType());
         assertEquals((label != null) ? label : "", builder.getLabel());
         assertEquals((priority != null) ? priority : TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED, builder.getPriority());
+        assertEquals(includeDdl, builder.getModifiesDefinitions());
         assertEquals(writePreserve, builder.getWritePreservesList().stream().map(wp -> wp.getTableName()).collect(Collectors.toList()));
         assertEquals(inclusiveReadArea, builder.getInclusiveReadAreasList().stream().map(ra -> ra.getTableName()).collect(Collectors.toList()));
         assertEquals(exclusiveReadArea, builder.getExclusiveReadAreasList().stream().map(ra -> ra.getTableName()).collect(Collectors.toList()));

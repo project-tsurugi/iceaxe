@@ -1,4 +1,4 @@
-# Iceaxe使用方法（2023-06-08）
+# Iceaxe使用方法（2023-06-13）
 
 Iceaxeの使用方法（Tsurugiのデータベース（Tsurugi DB）に対してSQLを実行する方法）の概要を説明する。
 
@@ -243,6 +243,7 @@ try (var session = connector.createSession()) {
 `TgTxOption`は、`TsurugiTransction`生成時に指定するトランザクションオプションを表すクラス。
 
 - `TgTxOption`は、トランザクション種別（OCC・LTX・RTX）に応じた`of`系メソッドで生成する。
+  - LTXでDDLを実行する場合は`ofDDL`メソッドで生成できる。
 - `TgTxOption`は`TsurugiTransaction`生成時に指定する。
 - `TgTxOption`はスレッドセーフ。
 
@@ -259,6 +260,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 var occ = TgTxOption.ofOCC();
 var ltx = TgTxOption.ofLTX("table1", "table2"); // write preserve table
 var rtx = TgTxOption.ofRTX().label("example");
+var ddl = TgTxOption.ofDDL(); // LTXでDDLを実行する場合（ofLTX().includeDdl(true)と同じ）
 ```
 
 `ofLTX`メソッドでは、引数でwrite preserveを指定できる。
@@ -286,6 +288,8 @@ var rtx = TgTxOption.ofRTX().label("example");
         - `EXCLUDE`あり
           - 自分の実行中に新しいトランザクションは実行できない（failさせる）。
 - LTXのみ
+  - include ddl
+    - DDLを実行するか否か
   - write preserve
     - 更新対象の（insert/update/deleteを実行する対象の）テーブル名
   - inclusive read area
@@ -484,14 +488,11 @@ DDLの実行でもシリアライゼーションエラーが発生する可能�
 
 DDLは`TsurugiTransaction`の`executeDdl`メソッドで実行できる。
 
-LTXでDDLを実行する場合、write preserve（更新対象テーブル）を指定する必要は無い。
-
-> **Warning**
->
-> 将来的には、LTXでDDLを実行する旨のオプションを指定しないといけなくなる予定。
+LTXでDDLを実行する場合、write preserve（更新対象テーブル）を指定する必要は無いが、include ddlを指定する必要がある。
+`TgTxOption`の`ofDDL`メソッドを使うと、include ddlが指定されたLTXのトランザクションオプションが作られる。
 
 ```java
-var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX());
+var setting = TgTmSetting.ofAlways(TgTxOption.ofDDL());
 var tm = session.createTransactionManager(setting);
 tm.execute(transaction -> {
     transaction.executeDdl("create table TEST(FOO int primary key, BAR bigint, ZZZ varchar(10))");

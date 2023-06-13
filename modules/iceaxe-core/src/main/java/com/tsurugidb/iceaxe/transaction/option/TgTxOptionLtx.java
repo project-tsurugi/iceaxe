@@ -19,6 +19,7 @@ import com.tsurugidb.sql.proto.SqlRequest.WritePreserve;
 @ThreadSafe
 public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
 
+    private boolean includeDdl = false;
     private List<String> writePreserveList = new ArrayList<>();
     private List<String> inclusiveReadAreaList = new ArrayList<>();
     private List<String> exclusiveReadAreaList = new ArrayList<>();
@@ -31,6 +32,27 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     @Override
     public TransactionType type() {
         return TransactionType.LONG;
+    }
+
+    /**
+     * set include ddl
+     *
+     * @param includeDDl {@code true} if include ddl
+     * @return this
+     */
+    public TgTxOptionLtx includeDdl(boolean includeDDl) {
+        this.includeDdl = includeDDl;
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * get include ddl
+     *
+     * @return {@code true} if include ddl
+     */
+    public boolean includeDdl() {
+        return this.includeDdl;
     }
 
     /**
@@ -221,6 +243,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     protected void initializeLowTransactionOption(TransactionOption.Builder lowBuilder) {
         super.initializeLowTransactionOption(lowBuilder);
 
+        lowBuilder.setModifiesDefinitions(this.includeDdl);
         for (String name : writePreserveList) {
             var value = WritePreserve.newBuilder().setTableName(name).build();
             lowBuilder.addWritePreserves(value);
@@ -249,7 +272,14 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     protected void toString(StringBuilder sb) {
         super.toString(sb);
 
-        appendString(sb, "writePreserve", writePreserveList);
+        if (this.includeDdl) {
+            appendString(sb, "includeDdl", includeDdl);
+            if (!writePreserveList.isEmpty()) {
+                appendString(sb, "writePreserve", writePreserveList);
+            }
+        } else {
+            appendString(sb, "writePreserve", writePreserveList);
+        }
         if (!inclusiveReadAreaList.isEmpty()) {
             appendString(sb, "inclusiveReadArea", inclusiveReadAreaList);
         }

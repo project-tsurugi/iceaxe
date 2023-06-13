@@ -59,6 +59,14 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
     }
 
     @Test
+    void ofDDL() {
+        TgTxOptionLtx txOption = TgTxOption.ofDDL();
+        String expected = "LTX{includeDdl=true}";
+        assertOption(expected, null, null, true, List.of(), List.of(), List.of(), //
+                txOption);
+    }
+
+    @Test
     void label() {
         TgTxOptionLtx txOption = TgTxOption.ofLTX().label("abc");
         String expected = "LTX{label=abc, writePreserve=[]}";
@@ -71,6 +79,22 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         TgTxOptionLtx txOption = TgTxOption.ofLTX().priority(TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED);
         String expected = "LTX{priority=DEFAULT, writePreserve=[]}";
         assertOption(expected, null, TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED, List.of(), List.of(), List.of(), //
+                txOption);
+    }
+
+    @Test
+    void includeDdl() {
+        TgTxOptionLtx txOption = TgTxOption.ofLTX().includeDdl(true);
+        String expected = "LTX{includeDdl=true}";
+        assertOption(expected, null, null, true, List.of(), List.of(), List.of(), //
+                txOption);
+    }
+
+    @Test
+    void includeDdlWp() {
+        TgTxOptionLtx txOption = TgTxOption.ofLTX().includeDdl(true).addWritePreserve("t1");
+        String expected = "LTX{includeDdl=true, writePreserve=[t1]}";
+        assertOption(expected, null, null, true, List.of("t1"), List.of(), List.of(), //
                 txOption);
     }
 
@@ -177,14 +201,16 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
 
         txOption.label(null);
         txOption.priority(null);
+        txOption.includeDdl(true);
         txOption.addWritePreserve("t2");
         txOption.addInclusiveReadArea("in2");
         txOption.addExclusiveReadArea("ex2");
-        assertOption("LTX{writePreserve=[t1, t2], inclusiveReadArea=[in1, in2], exclusiveReadArea=[ex1, ex2]}", null, null, List.of("t1", "t2"), List.of("in1", "in2"), List.of("ex1", "ex2"), //
+        assertOption("LTX{includeDdl=true, writePreserve=[t1, t2], inclusiveReadArea=[in1, in2], exclusiveReadArea=[ex1, ex2]}", //
+                null, null, true, List.of("t1", "t2"), List.of("in1", "in2"), List.of("ex1", "ex2"), //
                 txOption);
 
         String expected = "LTX{label=abc, priority=INTERRUPT, writePreserve=[t1], inclusiveReadArea=[in1], exclusiveReadArea=[ex1]}";
-        assertOption(expected, "abc", TransactionPriority.INTERRUPT, List.of("t1"), List.of("in1"), List.of("ex1"), //
+        assertOption(expected, "abc", TransactionPriority.INTERRUPT, false, List.of("t1"), List.of("in1"), List.of("ex1"), //
                 clone);
     }
 
@@ -203,14 +229,20 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
 
     private void assertOption(String text, String label, TransactionPriority priority, List<String> writePreserve, List<String> inclusiveReadArea, List<String> exclusiveReadArea,
             TgTxOptionLtx txOption) {
+        assertOption(text, label, priority, false, writePreserve, inclusiveReadArea, exclusiveReadArea, txOption);
+    }
+
+    private void assertOption(String text, String label, TransactionPriority priority, boolean includeDdl, List<String> writePreserve, List<String> inclusiveReadArea, List<String> exclusiveReadArea,
+            TgTxOptionLtx txOption) {
         assertEquals(text, txOption.toString());
         assertEquals(expectedType, txOption.type());
         assertEquals(label, txOption.label());
         assertEquals(priority, txOption.priority());
+        assertEquals(includeDdl, txOption.includeDdl());
         assertEquals(writePreserve, txOption.writePreserve());
         assertEquals(inclusiveReadArea, txOption.inclusiveReadArea());
         assertEquals(exclusiveReadArea, txOption.exclusiveReadArea());
 
-        assertLowOption(label, priority, writePreserve, inclusiveReadArea, exclusiveReadArea, txOption);
+        assertLowOption(label, priority, includeDdl, writePreserve, inclusiveReadArea, exclusiveReadArea, txOption);
     }
 }

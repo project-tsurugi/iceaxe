@@ -56,6 +56,11 @@ public class Example03TxOption {
         return TgTxOption.ofRTX().priority(TransactionPriority.WAIT);
     }
 
+    // DDL(LTX)
+    TgTxOptionLtx ddl() {
+        return TgTxOption.ofDDL();
+    }
+
     // label
     TgTxOption label() {
         return TgTxOption.ofOCC().label("transaction label");

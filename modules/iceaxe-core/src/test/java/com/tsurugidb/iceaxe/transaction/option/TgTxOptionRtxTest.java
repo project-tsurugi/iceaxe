@@ -76,6 +76,6 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         assertEquals(label, txOption.label());
         assertEquals(priority, txOption.priority());
 
-        assertLowOption(label, priority, List.of(), List.of(), List.of(), txOption);
+        assertLowOption(label, priority, false, List.of(), List.of(), List.of(), txOption);
     }
 }
