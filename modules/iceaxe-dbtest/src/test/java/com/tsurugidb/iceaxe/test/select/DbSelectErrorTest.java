@@ -1,11 +1,14 @@
 package com.tsurugidb.iceaxe.test.select;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
@@ -17,7 +20,9 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -27,7 +32,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbSelectErrorTest extends DbTestTableTester {
 
-    private static final int SIZE = 4;
+    private static final int SIZE = 100;
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
@@ -104,15 +109,15 @@ class DbSelectErrorTest extends DbTestTableTester {
 
     @Test
     void ps0ExecuteAfterTxFutureClose() throws Exception {
-        ps0ExecuteAfterTxClose(false, "Future is already closed");
+        ps0ExecuteAfterTxClose(false);
     }
 
     @Test
     void ps0ExecuteAfterTxClose() throws Exception {
-        ps0ExecuteAfterTxClose(true, "already closed");
+        ps0ExecuteAfterTxClose(true);
     }
 
-    private void ps0ExecuteAfterTxClose(boolean getLow, String expected) throws IOException, InterruptedException {
+    private void ps0ExecuteAfterTxClose(boolean getLow) throws IOException, InterruptedException {
         var sql = "select * from " + TEST;
 
         var session = getSession();
@@ -126,12 +131,11 @@ class DbSelectErrorTest extends DbTestTableTester {
                 transaction.executeAndGetList(ps);
             });
             assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
-//          assertEquals(expected, e.getMessage());
+            assertEquals("transaction already closed", e.getMessage());
         }
     }
 
     @Test
-    @Disabled // TODO remove Disabled. このテストの実行後にdrop tableでtateyama-serverが落ちることがある
     void selectAfterTransactionClose() throws Exception {
         var sql = "select * from " + TEST;
 
@@ -139,12 +143,12 @@ class DbSelectErrorTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql)) {
             TsurugiQueryResult<TsurugiResultEntity> result;
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-                result = ps.execute(transaction);
+                result = transaction.executeQuery(ps);
             }
             var e = assertThrowsExactly(IOException.class, () -> {
                 result.getRecordList();
             });
-            assertMatches("Future .+ is already closed", e.getMessage());
+            assertEquals("resultSet already closed", e.getMessage());
         }
     }
 
@@ -155,15 +159,60 @@ class DbSelectErrorTest extends DbTestTableTester {
         var session = getSession();
         try (var ps = session.createQuery(sql)) {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-                try (var result = ps.execute(transaction)) {
+                try (var result = transaction.executeQuery(ps)) {
                     var i = result.iterator();
                     i.next();
                     transaction.close();
-                    while (i.hasNext()) {
-                        i.next();
-                    }
+                    var e = assertThrowsExactly(UncheckedIOException.class, () -> {
+                        while (i.hasNext()) {
+                            i.next();
+                        }
+                    });
+                    assertEquals("resultSet already closed", e.getMessage());
                 }
             }
         }
+    }
+
+    @Test
+    void closeWithSelectThead() throws Throwable {
+        Thread thread;
+        Throwable[] threadException = { null };
+        try (var session = DbTestConnector.createSession();) {
+            var started = new AtomicBoolean(false);
+            thread = new Thread(() -> {
+                try {
+                    var setting = TgTmSetting.of(TgTxOption.ofOCC());
+                    var tm = session.createTransactionManager(setting);
+                    tm.execute(transaction -> {
+                        try (var ps = session.createQuery(SELECT_SQL)) {
+                            started.set(true);
+                            transaction.executeAndGetList(ps);
+                        }
+                    });
+                } catch (Throwable e) {
+                    threadException[0] = e;
+                }
+            });
+            thread.start();
+            while (!started.get()) {
+            }
+        } // session close (with resultSet, transaction, statement close)
+
+        thread.join();
+
+        Throwable e = threadException[0];
+        assertNotNull(e);
+        String message = e.getMessage();
+        if (message != null) {
+            try {
+                assertContains("already closed", message);
+            } catch (Throwable t) {
+                t.addSuppressed(e);
+                throw t;
+            }
+            return;
+        }
+        throw e;
     }
 }
