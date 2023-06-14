@@ -63,8 +63,7 @@ public class Example11Ddl {
     }
 
     void dropAndCreateTable(TsurugiSession session) throws IOException, InterruptedException {
-        // DDLをLTXで実行する場合は、writePreserveには何も指定しなくてよい。
-        var tm = session.createTransactionManager(TgTxOption.ofLTX());
+        var tm = session.createTransactionManager(TgTxOption.ofDDL());
         tm.execute(transaction -> {
             if (transaction.getSession().findTableMetadata("TEST").isPresent()) {
                 transaction.executeDdl("drop table TEST");
