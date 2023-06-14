@@ -1,7 +1,6 @@
 package com.tsurugidb.iceaxe.test.update;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -44,21 +43,35 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            // TODO updatePK null
-//          var e = assertThrowsExactly(TsurugiIOException.class, () -> tm.executeAndGetCount(ps));
-//          assertEqualsCode(null, e); // TODO エラーコード
-            tm.executeAndGetCount(ps);
+            tm.execute(transaction -> {
+                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
+                assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+                String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
+                assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+            });
         }
 
-//      assertEqualsTestTable(SIZE);
-        var actual = selectAllFromTest();
-        for (var entity : actual) {
-            if (entity.getBar() == 5) {
-                assertNull(entity.getFoo());
-            } else {
-                assertEquals((int) (long) entity.getBar(), entity.getFoo());
-            }
+        assertEqualsTestTable(SIZE);
+    }
+
+    @Test
+    void updatePKNullAll() throws Exception {
+        var sql = "update " + TEST //
+                + " set" //
+                + "  foo = null"; // primary key
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createStatement(sql)) {
+            tm.execute(transaction -> {
+                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
+                assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+                String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
+                assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+            });
         }
+
+        assertEqualsTestTable(SIZE);
     }
 
     @ParameterizedTest
@@ -72,9 +85,11 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
             // TODO updatePK same value
-//          var e = assertThrowsExactly(TsurugiIOException.class, () -> tm.executeAndGetCount(ps));
-//          assertEqualsCode(null, e); // TODO エラーコード
-            tm.executeAndGetCount(ps);
+            tm.execute(transaction -> {
+                transaction.executeAndGetCount(ps);
+//              var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
+//              assertEqualsCode(null, e); // TODO エラーコード
+            });
         }
 
 //      assertEqualsTestTable(SIZE);
@@ -106,12 +121,12 @@ class DbUpdateErrorTest extends DbTestTableTester {
 
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-                tm.executeAndGetCount(ps);
+            tm.execute(transaction -> {
+                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
+                assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+                String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
+                assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
             });
-            assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-            String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016: .";
-            assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
         }
 
         assertEqualsTestTable(SIZE);
