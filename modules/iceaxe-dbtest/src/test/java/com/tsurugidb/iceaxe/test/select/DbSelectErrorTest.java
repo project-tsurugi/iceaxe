@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
@@ -174,7 +175,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         }
     }
 
-    @Test
+    @RepeatedTest(5)
     void closeWithSelectThead() throws Throwable {
         Thread thread;
         Throwable[] threadException = { null };
