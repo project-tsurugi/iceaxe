@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.sql.parameter;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,25 +14,42 @@ import com.tsurugidb.iceaxe.sql.TgDataType;
 class TgBindVariablesTest {
 
     @Test
-    void testOf() {
+    void of() {
         var variables = TgBindVariables.of();
         assertVariable(Map.of(), variables);
         assertEquals("TgBindVariables[]", variables.toString());
     }
 
     @Test
-    void testOfArray() {
+    void ofArray() {
         var v1 = TgBindVariable.ofInt("foo");
         var variables = TgBindVariables.of(v1);
         assertVariable(Map.of("foo", TgDataType.INT), variables);
     }
 
     @Test
-    void testOfCollection() {
+    void ofCollection() {
         var v1 = TgBindVariable.ofInt("foo");
         var v2 = TgBindVariable.ofLong("bar");
         var variables = TgBindVariables.of(v1, v2);
         assertVariable(Map.of("foo", TgDataType.INT, "bar", TgDataType.LONG), variables);
+    }
+
+    @Test
+    void toSqlNamesArray() {
+        var v1 = TgBindVariable.ofInt("foo");
+        var v2 = TgBindVariable.ofLong("bar");
+        assertEquals(":foo,:bar", TgBindVariables.toSqlNames(v1, v2));
+        assertEquals(":foo, :bar", TgBindVariables.toSqlNames(", ", v1, v2));
+    }
+
+    @Test
+    void toSqlNamesCollection() {
+        var v1 = TgBindVariable.ofInt("foo");
+        var v2 = TgBindVariable.ofLong("bar");
+        var list = List.of(v1, v2);
+        assertEquals(":foo,:bar", TgBindVariables.toSqlNames(list));
+        assertEquals(":foo, :bar", TgBindVariables.toSqlNames(", ", list));
     }
 
     @Test
@@ -165,7 +183,7 @@ class TgBindVariablesTest {
     }
 
     @Test
-    void testAddTgVariabls() {
+    void addTgVariabls() {
         var variable1 = new TgBindVariables() //
                 .addInt("foo") //
                 .addLong("bar");
@@ -183,7 +201,7 @@ class TgBindVariablesTest {
     }
 
     @Test
-    void testGetSqlNames() {
+    void getSqlNames() {
         var variables = new TgBindVariables() //
                 .addInt("foo") //
                 .addLong("bar") //

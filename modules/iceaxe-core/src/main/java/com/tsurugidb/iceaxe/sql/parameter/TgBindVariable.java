@@ -638,8 +638,7 @@ public abstract class TgBindVariable<T> {
      *
      * @return name
      */
-    @Nonnull
-    public String name() {
+    public @Nonnull String name() {
         return this.name;
     }
 
@@ -648,8 +647,7 @@ public abstract class TgBindVariable<T> {
      *
      * @return name
      */
-    @Nonnull
-    public String sqlName() {
+    public @Nonnull String sqlName() {
         return ":" + this.name;
     }
 
@@ -658,8 +656,7 @@ public abstract class TgBindVariable<T> {
      *
      * @return type
      */
-    @Nonnull
-    public TgDataType type() {
+    public @Nonnull TgDataType type() {
         return this.type;
     }
 
@@ -669,8 +666,7 @@ public abstract class TgBindVariable<T> {
      * @param value value
      * @return bind parameter
      */
-    @Nonnull
-    public abstract TgBindParameter bind(@Nullable T value);
+    public abstract @Nonnull TgBindParameter bind(@Nullable T value);
 
     /**
      * copy with the same type
@@ -678,8 +674,7 @@ public abstract class TgBindVariable<T> {
      * @param name name
      * @return bind variable
      */
-    @Nonnull
-    public abstract TgBindVariable<T> clone(@Nonnull String name);
+    public abstract @Nonnull TgBindVariable<T> clone(@Nonnull String name);
 
     @Override
     public String toString() {

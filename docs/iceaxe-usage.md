@@ -1101,7 +1101,7 @@ var bar = TgBindVariable.ofLong("bar");
 var zzz = TgBindVariable.ofString("zzz");
 
 var sql = "insert into TEST (FOO, BAR, ZZZ)"
-    + " values(" + TgBindVariables.of(foo, bar, zzz).getSqlNames() + ")";
+    + " values(" + TgBindVariables.toSqlNames(foo, bar, zzz) + ")";
 var parameterMapping = TgParameterMapping.of(TestEntity.class)
     .add(foo, TestEntity::getFoo)
     .add(bar, TestEntity::getBar)
@@ -1116,7 +1116,7 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 
 `TgParameterMapping`の`add`メソッドを使い、第1引数に`TgBindVariable`を渡す。
 
-`TgBindVariables`の`getSqlNames`メソッドは、`:変数名`形式のバインド変数名をカンマ区切りで結合した文字列を返す。
+`TgBindVariables`の`toSqlNames`メソッドは、`:変数名`形式のバインド変数名をカンマ区切りで結合した文字列を返す。
 
 #### バインド変数の例（`TgBindVariables`と変換関数を用意してEntityを変換する方法）
 
@@ -1151,6 +1151,8 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 ```
 
 変換関数の他に、`TgBindVariables`（バインド変数の定義）は必要。
+
+`TgBindVariables`の`getSqlNames`メソッドは、`:変数名`形式のバインド変数名をカンマ区切りで結合した文字列を返す。
 
 
 

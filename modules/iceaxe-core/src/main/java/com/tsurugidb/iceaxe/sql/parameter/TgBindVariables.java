@@ -58,6 +58,64 @@ public class TgBindVariables {
         return bv;
     }
 
+    /**
+     * convert to sql names
+     *
+     * @param variables bind variable
+     * @return sql names
+     */
+    public static String toSqlNames(TgBindVariable<?>... variables) {
+        return toSqlNames(",", variables);
+    }
+
+    /**
+     * convert to sql names
+     *
+     * @param delimiter the delimiter to be used between each element
+     * @param variables bind variable
+     * @return sql names
+     */
+    public static String toSqlNames(String delimiter, TgBindVariable<?>... variables) {
+        var sb = new StringBuilder();
+        for (var variable : variables) {
+            if (sb.length() != 0) {
+                sb.append(delimiter);
+            }
+            sb.append(":");
+            sb.append(variable.name());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * convert to sql names
+     *
+     * @param variables bind variable
+     * @return sql names
+     */
+    public static String toSqlNames(Collection<? extends TgBindVariable<?>> variables) {
+        return toSqlNames(",", variables);
+    }
+
+    /**
+     * convert to sql names
+     *
+     * @param delimiter the delimiter to be used between each element
+     * @param variables bind variable
+     * @return sql names
+     */
+    public static String toSqlNames(String delimiter, Collection<? extends TgBindVariable<?>> variables) {
+        var sb = new StringBuilder();
+        for (var variable : variables) {
+            if (sb.length() != 0) {
+                sb.append(delimiter);
+            }
+            sb.append(":");
+            sb.append(variable.name());
+        }
+        return sb.toString();
+    }
+
     private final List<Placeholder> lowPlaceholderList = new ArrayList<>();
     /** Map&lt;name, type&gt; */
     private Map<String, TgDataType> typeMap;

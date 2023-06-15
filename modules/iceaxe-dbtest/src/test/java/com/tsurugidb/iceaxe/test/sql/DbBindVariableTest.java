@@ -75,7 +75,7 @@ class DbBindVariableTest extends DbTestTableTester {
         var zzz = TgBindVariable.ofString("zzz");
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
-                + "values(" + TgBindVariables.of(foo, bar, zzz).getSqlNames() + ")";
+                + "values(" + TgBindVariables.toSqlNames(foo, bar, zzz) + ")";
         var parameterMapping = TgParameterMapping.of(TestEntity.class) //
                 .add(foo, TestEntity::getFoo) //
                 .add(bar, TestEntity::getBar) //
