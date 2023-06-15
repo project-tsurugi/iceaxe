@@ -1083,7 +1083,7 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 }
 ```
 
-`TgParameterMapping`の`of`メソッドに、パラメーターとして使いたいクラスを指定する。その後、`add`系メソッドでバインド変数名とgettterメソッドを追加していく。
+`TgParameterMapping`の`of`メソッドに、パラメーターとして使いたいクラスを指定する。その後、`add`系メソッドでバインド変数名とgetterメソッドを追加していく。
 
 実行時のパラメーターには、`TgParameterMapping`の`of`メソッドで指定したクラスのオブジェクトが直接指定できる。
 
