@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -43,12 +44,15 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            tm.execute(transaction -> {
-                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
-                assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+            var t = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.execute(transaction -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
+                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
+                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+                });
             });
+            assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, t);
         }
 
         assertEqualsTestTable(SIZE);
@@ -63,12 +67,15 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            tm.execute(transaction -> {
-                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
-                assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+            var t = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.execute(transaction -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
+                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
+                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+                });
             });
+            assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, t);
         }
 
         assertEqualsTestTable(SIZE);
@@ -121,12 +128,15 @@ class DbUpdateErrorTest extends DbTestTableTester {
 
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            tm.execute(transaction -> {
-                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
-                assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+            var t = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.execute(transaction -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
+                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
+                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+                });
             });
+            assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, t);
         }
 
         assertEqualsTestTable(SIZE);
