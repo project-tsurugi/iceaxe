@@ -763,7 +763,7 @@ var sql = "select FOO from TEST";
 var resultMapping = TgResultMapping.ofSingle(int.class);
 try (var ps = session.createQuery(sql, resultMapping)) {
     tm.execute(transaction -> {
-        List<Integer> fooList = transaction.executeAndFindRecord(ps);
+        List<Integer> fooList = transaction.executeAndGetList(ps);
     });
 }
 ```
@@ -1267,7 +1267,7 @@ tm.execute(transaction -> {
 
 `TsurugiTransactionManager`で生成する`TsurugiTransaction`に対しては、`TgTmSetting`でタイムアウト時間を指定することが出来る。
 
-##### トランザクションマネージャーでタイムアウト時間を指定する例
+##### `TsurugiTransactionManager`でタイムアウト時間を指定する例
 
 ```java
 import java.util.concurrent.TimeUnit;
@@ -1517,7 +1517,7 @@ Iceaxeで処理を行うクラス（`TsurugiConnector`や`TsurugiSession`・`Tsu
 ```java
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 
-// トランザクションマネージャーでリトライされたときにログを出力する例
+// TsurugiTransactionManagerでリトライされたときにログを出力する例
 var tm = session.createTransactionManager(setting);
 tm.addEventListener(new TsurugiTmEventListener() {
     @Override
@@ -1570,7 +1570,7 @@ var resultMapping = TgResultMapping.of(TestEntity::new)
 
 ## 制限事項
 
-2023-04-30時点でのIceaxeの制限事項。
+2023-06-01時点でのIceaxeの制限事項。
 
 - `TsurugiTransaction`の`executeAndGetCount`メソッドや`TsurugiStatementResult`の`getUpdateCount`メソッドの戻り値は、更新系SQLで処理された件数を返す想定だが、現時点ではDBサーバー側にその実装が無い為、常に-1を返す。
   - `executeAndGetCount`メソッドや`getUpdateCount`メソッド内で、更新系SQLの処理が完了したかどうかの確認は行われる。
