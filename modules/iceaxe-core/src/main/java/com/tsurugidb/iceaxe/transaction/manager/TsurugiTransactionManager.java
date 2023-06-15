@@ -34,7 +34,6 @@ import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
-import com.tsurugidb.sql.proto.SqlRequest.TransactionPriority;
 
 /**
  * Tsurugi Transaction Manager
@@ -338,7 +337,7 @@ public class TsurugiTransactionManager {
      */
     public void executeDdl(String sql) throws IOException, InterruptedException {
         var setting = (this.defaultSetting != null) ? this.defaultSetting : //
-                TgTmSetting.of(TgTxOption.ofDDL().label("iceaxe ddl").priority(TransactionPriority.WAIT_EXCLUDE));
+                TgTmSetting.of(TgTxOption.ofDDL().label("iceaxe ddl"));
         execute(setting, transaction -> {
             transaction.executeDdl(sql);
         });
