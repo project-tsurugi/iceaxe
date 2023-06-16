@@ -158,7 +158,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         tx2.commit(TgCommitType.DEFAULT);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
+                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
 
                     try (var tx3 = session.createTransaction(TgTxOption.ofOCC())) {
                         int count3 = tx3.executeAndGetCount(ps, entity);

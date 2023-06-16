@@ -67,7 +67,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         tx2.executeAndFindRecord(selectPs).get();
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
+                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
 
                     tx2.rollback();
                 }
@@ -116,7 +116,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         tx2.executeAndGetCount(updatePs2);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
+                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
 
                     tx2.rollback();
                 }
@@ -172,7 +172,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                             throw ee.getCause();
                         }
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
+                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
                 }
             }
         }
@@ -198,7 +198,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         tx2.commit(TgCommitType.DEFAULT);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
+                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
                 }
             }
         }
@@ -224,9 +224,9 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                             tx2.executeAndGetCount(deletePs);
                         }
                     });
-//TODO              assertEqualsCode(SqlServiceCode.ERR_ABORTED_RETRYABLE, e);
+//TODO              assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
                     var code = e.getDiagnosticCode();
-                    assertTrue(code == SqlServiceCode.ERR_ABORTED_RETRYABLE || code == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE);
+                    assertTrue(code == SqlServiceCode.ERR_SERIALIZATION_FAILURE || code == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE);
 
                     tx2.rollback();
                 }

@@ -17,12 +17,12 @@ public class Example04TmRetryPredicate {
         var supplier = setting.getTransactionOptionSupplier();
         supplier.setRetryPredicate(new TsurugiDefaultRetryPredicate() {
             @Override
-            protected boolean isAbortedRetryable(TsurugiTransactionException e) {
+            protected boolean isRetryable(TsurugiTransactionException e) {
                 var code = e.getDiagnosticCode();
                 if (code == SqlServiceCode.ERR_ABORTED) {
                     return true;
                 }
-                return super.isAbortedRetryable(e);
+                return super.isRetryable(e);
             }
         });
     }

@@ -108,7 +108,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     }
 
     protected TgTmRetryInstruction testCommon(String position, TsurugiTransaction transaction, TsurugiTransactionException e) {
-        if (isAbortedRetryable(e)) {
+        if (isRetryable(e)) {
             return TgTmRetryInstruction.ofRetryable(position + " retry. " + e.getMessage());
         }
         return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + e.getMessage());
@@ -116,9 +116,9 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
 
     //
 
-    protected boolean isAbortedRetryable(TsurugiTransactionException e) {
+    protected boolean isRetryable(TsurugiTransactionException e) {
         var code = e.getDiagnosticCode();
-        if (code == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
+        if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
             return true;
         }
         return false;
@@ -129,7 +129,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
         if (code == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE) {
             return true;
         }
-        if (code == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
+        if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
             String message = e.getMessage();
             if (message.contains("shirakami response Status=ERR_CC")) {
                 if (message.contains("reason_code:CC_OCC_WP_VERIFY")) {

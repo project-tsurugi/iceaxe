@@ -1413,7 +1413,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 public boolean isRetryable(TsurugiTransaction e) {
     var code = e.getDiagnosticCode();
-    if (code == SqlServiceCode.ERR_ABORTED_RETRYABLE) {
+    if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
         // シリアライゼーションエラー（リトライ可能なアボート）
         return true;
     }
