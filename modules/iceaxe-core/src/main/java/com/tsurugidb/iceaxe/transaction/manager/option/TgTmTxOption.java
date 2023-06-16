@@ -75,7 +75,7 @@ public final class TgTmTxOption {
      *
      * @return transaction option
      */
-    public TgTxOption getTransactionOption() {
+    public @Nullable TgTxOption getTransactionOption() {
         return this.txOption;
     }
 
@@ -90,21 +90,21 @@ public final class TgTmTxOption {
 
     @Override
     public String toString() {
-        var sb = new StringBuilder(128);
-        if (this.isRetryOver) {
-            sb.append("RETRY_OVER");
-        } else if (this.txOption == null) {
-            sb.append("NOT_RETRYABLE");
-        } else {
-            sb.append(txOption);
+        if (this.isRetryOver || this.txOption == null) {
+            if (this.retryInstruction != null) {
+                return retryInstruction.toString();
+            }
+            if (this.isRetryOver) {
+                return "RETRY_OVER";
+            } else {
+                return "NOT_RETRYABLE";
+            }
         }
 
-        sb.append("(");
         if (this.retryInstruction != null) {
-            sb.append(retryInstruction);
+            return txOption + "(" + retryInstruction + ")";
+        } else {
+            return txOption.toString();
         }
-        sb.append(")");
-
-        return sb.toString();
     }
 }
