@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
+import com.tsurugidb.iceaxe.metadata.TsurugiTableListHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
@@ -46,6 +47,10 @@ public class TgSessionOption {
         /** {@link TsurugiSession} close */
         SESSION_CLOSE,
 
+        /** {@link TsurugiTableListHelper} connect */
+        TABLE_LIST_CONNECT,
+        /** {@link TsurugiTableListHelper} close */
+        TABLE_LIST_CLOSE,
         /** {@link TsurugiTableMetadataHelper} connect */
         METADATA_CONNECT,
         /** {@link TsurugiTableMetadataHelper} close */

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
+import com.tsurugidb.iceaxe.metadata.TsurugiTableListHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
@@ -51,6 +52,7 @@ public class TsurugiSession implements AutoCloseable {
     private Session lowSession;
     private Throwable lowFutureException = null;
     private SqlClient lowSqlClient;
+    private TsurugiTableListHelper tableListHelper = null;
     private TsurugiTableMetadataHelper tableMetadataHelper = null;
     private TsurugiExplainHelper explainHelper = null;
     private IceaxeConvertUtil convertUtil = null;
@@ -211,6 +213,41 @@ public class TsurugiSession implements AutoCloseable {
             LOG.trace("exception in isAlive()", e);
             return false;
         }
+    }
+
+    /**
+     * set TsurugiTableListHelper.
+     *
+     * @param helper TsurugiTableListHelper
+     */
+    public void setTableListHelper(TsurugiTableListHelper helper) {
+        this.tableListHelper = helper;
+    }
+
+    /**
+     * get TsurugiTableListHelper.
+     *
+     * @return TsurugiTableListHelper
+     */
+    public TsurugiTableListHelper getTableListHelper() {
+        if (this.tableListHelper == null) {
+            this.tableListHelper = new TsurugiTableListHelper();
+        }
+        return this.tableListHelper;
+    }
+
+    /**
+     * get table names.
+     *
+     * @return table names
+     * @throws IOException
+     * @throws InterruptedException
+     */
+//  @ThreadSafe
+    public List<String> getTableNameList() throws IOException, InterruptedException {
+        var helper = getTableListHelper();
+        var tableList = helper.getTableList(this);
+        return tableList.getTableNameList();
     }
 
     /**

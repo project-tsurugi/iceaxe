@@ -1158,6 +1158,16 @@ try (var ps = session.createStatement(sql, parameterMapping)) {
 
 ## その他の機能
 
+### テーブル一覧の取得
+
+テーブル名の一覧を取得することが出来る。
+
+```java
+import java.util.List;
+
+List<String> tableNameList = session.getTableNameList();
+```
+
 ### テーブルメタデータの取得
 
 テーブルメタデータ（テーブルの定義情報）を取得することが出来る。
@@ -1411,7 +1421,7 @@ DBサーバーとの通信中に発生した`IOException`および`InterruptedEx
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
-public boolean isRetryable(TsurugiTransaction e) {
+public boolean isRetryable(TsurugiTransactionException e) {
     var code = e.getDiagnosticCode();
     if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
         // シリアライゼーションエラー（リトライ可能なアボート）
