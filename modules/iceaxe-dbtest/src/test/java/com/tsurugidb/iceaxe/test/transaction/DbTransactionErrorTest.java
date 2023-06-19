@@ -147,7 +147,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
                     var selectPs = session.createQuery(SELECT_SQL)) {
                 var entity = createTestEntity(1);
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(insertPs, entity));
-                assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e1);
+                assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e1);
 
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetList(selectPs));
                 assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);

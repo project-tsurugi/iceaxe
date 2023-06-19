@@ -47,7 +47,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps, entity);
             });
-            assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
+            assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e);
         }
 
         assertEqualsTestTable(entity);
@@ -68,12 +68,12 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         transaction.executeAndGetCount(ps, entity);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
+                    assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e);
                     throw e;
                 });
             });
 
-            assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e0);
+            assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e0);
         }
 
         assertEqualsTestTable();
@@ -94,7 +94,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         transaction.executeAndGetCount(ps, entity);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
+                    assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e);
                     // throw e; // ignore exception
                 });
             });
@@ -129,12 +129,12 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         r2.getUpdateCount();
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
+                    assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e);
                     throw e;
                 }
             });
         });
-        assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e0);
+        assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e0);
 //      assertContains("TODO", e0.getMessage()); // TODO エラー詳細情報の確認
 
         assertEqualsTestTable(0);
@@ -166,13 +166,13 @@ public class DbInsertConstraintTest extends DbTestTableTester {
                         var e3 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             tx3.commit(TgCommitType.DEFAULT);
                         });
-                        assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e3);
+                        assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e3);
                         throw e3;
                     }
                 }
             });
 
-            assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e0);
+            assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e0);
         }
 
         assertEqualsTestTable(entity);

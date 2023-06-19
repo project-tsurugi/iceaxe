@@ -151,8 +151,8 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                             execute(transaction, maxPs, insertPs, insert2Ps);
                         });
                     } catch (TsurugiTmIOException e) {
-                        if (e.getDiagnosticCode() == SqlServiceCode.ERR_ALREADY_EXISTS) {
-//                          LOG.info("ERR_ALREADY_EXISTS {}", i);
+                        if (e.getDiagnosticCode() == SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION) {
+//                          LOG.info("ERR_UNIQUE_CONSTRAINT_VIOLATION {}", i);
                             continue;
                         }
                         LOG.error("online task error: {}", e.getMessage());
