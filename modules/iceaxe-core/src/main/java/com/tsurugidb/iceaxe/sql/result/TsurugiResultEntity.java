@@ -71,8 +71,7 @@ public class TsurugiResultEntity {
      *
      * @return list of column name
      */
-    @Nonnull
-    public List<String> getNameList() {
+    public @Nonnull List<String> getNameList() {
         if (this.nameList == null) {
             var set = valueMap.keySet();
             this.nameList = List.of(set.toArray(new String[set.size()]));
@@ -91,8 +90,7 @@ public class TsurugiResultEntity {
         return getNameList().get(index);
     }
 
-    @Nullable
-    protected Object getValue(String name) {
+    protected @Nullable Object getValue(String name) {
         var value = valueMap.get(name);
         if (value == null) {
             if (!valueMap.containsKey(name)) {
@@ -138,8 +136,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<Boolean> findBoolean(String name) {
+    public @Nonnull Optional<Boolean> findBoolean(String name) {
         var value = getBooleanOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -150,8 +147,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public Boolean getBooleanOrNull(String name) {
+    public @Nullable Boolean getBooleanOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toBoolean(value);
     }
@@ -192,8 +188,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<Integer> findInt(String name) {
+    public @Nonnull Optional<Integer> findInt(String name) {
         var value = getIntOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -204,8 +199,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public Integer getIntOrNull(String name) {
+    public @Nullable Integer getIntOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toInt(value);
     }
@@ -246,8 +240,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<Long> findLong(String name) {
+    public @Nonnull Optional<Long> findLong(String name) {
         var value = getLongOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -258,8 +251,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public Long getLongOrNull(String name) {
+    public @Nullable Long getLongOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toLong(value);
     }
@@ -300,8 +292,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<Float> findFloat(String name) {
+    public @Nonnull Optional<Float> findFloat(String name) {
         var value = getFloatOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -312,8 +303,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public Float getFloatOrNull(String name) {
+    public @Nullable Float getFloatOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toFloat(value);
     }
@@ -354,8 +344,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<Double> findDouble(String name) {
+    public @Nonnull Optional<Double> findDouble(String name) {
         var value = getDoubleOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -366,8 +355,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public Double getDoubleOrNull(String name) {
+    public @Nullable Double getDoubleOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toDouble(value);
     }
@@ -381,8 +369,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public BigDecimal getDecimal(String name) {
+    public @Nonnull BigDecimal getDecimal(String name) {
         var value = getDecimalOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -409,8 +396,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<BigDecimal> findDecimal(String name) {
+    public @Nonnull Optional<BigDecimal> findDecimal(String name) {
         var value = getDecimalOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -421,8 +407,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public BigDecimal getDecimalOrNull(String name) {
+    public @Nullable BigDecimal getDecimalOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toDecimal(value);
     }
@@ -436,8 +421,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public String getString(String name) {
+    public @Nonnull String getString(String name) {
         var value = getStringOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -464,8 +448,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<String> findString(String name) {
+    public @Nonnull Optional<String> findString(String name) {
         var value = getStringOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -476,8 +459,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public String getStringOrNull(String name) {
+    public @Nullable String getStringOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toString(value);
     }
@@ -491,8 +473,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public byte[] getBytes(String name) {
+    public @Nonnull byte[] getBytes(String name) {
         var value = getBytesOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -519,8 +500,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<byte[]> findBytes(String name) {
+    public @Nonnull Optional<byte[]> findBytes(String name) {
         var value = getBytesOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -531,8 +511,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public byte[] getBytesOrNull(String name) {
+    public @Nullable byte[] getBytesOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toBytes(value);
     }
@@ -546,8 +525,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public boolean[] getBits(String name) {
+    public @Nonnull boolean[] getBits(String name) {
         var value = getBitsOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -574,8 +552,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<boolean[]> findBits(String name) {
+    public @Nonnull Optional<boolean[]> findBits(String name) {
         var value = getBitsOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -586,8 +563,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public boolean[] getBitsOrNull(String name) {
+    public @Nullable boolean[] getBitsOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toBits(value);
     }
@@ -601,8 +577,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public LocalDate getDate(String name) {
+    public @Nonnull LocalDate getDate(String name) {
         var value = getDateOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -629,8 +604,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<LocalDate> findDate(String name) {
+    public @Nonnull Optional<LocalDate> findDate(String name) {
         var value = getDateOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -641,8 +615,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public LocalDate getDateOrNull(String name) {
+    public @Nullable LocalDate getDateOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toDate(value);
     }
@@ -656,8 +629,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public LocalTime getTime(String name) {
+    public @Nonnull LocalTime getTime(String name) {
         var value = getTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -684,8 +656,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<LocalTime> findTime(String name) {
+    public @Nonnull Optional<LocalTime> findTime(String name) {
         var value = getTimeOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -696,8 +667,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public LocalTime getTimeOrNull(String name) {
+    public @Nullable LocalTime getTimeOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toTime(value);
     }
@@ -711,8 +681,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public LocalDateTime getDateTime(String name) {
+    public @Nonnull LocalDateTime getDateTime(String name) {
         var value = getDateTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -739,8 +708,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<LocalDateTime> findDateTime(String name) {
+    public @Nonnull Optional<LocalDateTime> findDateTime(String name) {
         var value = getDateTimeOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -751,8 +719,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public LocalDateTime getDateTimeOrNull(String name) {
+    public @Nullable LocalDateTime getDateTimeOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toDateTime(value);
     }
@@ -766,8 +733,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public OffsetTime getOffsetTime(String name) {
+    public @Nonnull OffsetTime getOffsetTime(String name) {
         var value = getOffsetTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -794,8 +760,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<OffsetTime> findOffsetTime(String name) {
+    public @Nonnull Optional<OffsetTime> findOffsetTime(String name) {
         var value = getOffsetTimeOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -806,8 +771,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public OffsetTime getOffsetTimeOrNull(String name) {
+    public @Nullable OffsetTime getOffsetTimeOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toOffsetTime(value);
     }
@@ -821,8 +785,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public OffsetDateTime getOffsetDateTime(String name) {
+    public @Nonnull OffsetDateTime getOffsetDateTime(String name) {
         var value = getOffsetDateTimeOrNull(name);
         Objects.requireNonNull(value);
         return value;
@@ -849,8 +812,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nonnull
-    public Optional<OffsetDateTime> findOffsetDateTime(String name) {
+    public @Nonnull Optional<OffsetDateTime> findOffsetDateTime(String name) {
         var value = getOffsetDateTimeOrNull(name);
         return Optional.ofNullable(value);
     }
@@ -861,8 +823,7 @@ public class TsurugiResultEntity {
      * @param name column name
      * @return column value
      */
-    @Nullable
-    public OffsetDateTime getOffsetDateTimeOrNull(String name) {
+    public @Nullable OffsetDateTime getOffsetDateTimeOrNull(String name) {
         var value = getValue(name);
         return convertUtil.toOffsetDateTime(value);
     }
@@ -877,8 +838,7 @@ public class TsurugiResultEntity {
      * @return column value
      * @throws NullPointerException if value is null
      */
-    @Nonnull
-    public ZonedDateTime getZonedDateTime(String name, @Nonnull ZoneId zone) {
+    public @Nonnull ZonedDateTime getZonedDateTime(String name, @Nonnull ZoneId zone) {
         var value = getZonedDateTimeOrNull(name, zone);
         Objects.requireNonNull(value);
         return value;
@@ -907,8 +867,7 @@ public class TsurugiResultEntity {
      * @param zone time-zone
      * @return column value
      */
-    @Nonnull
-    public Optional<ZonedDateTime> findZonedDateTime(String name, @Nonnull ZoneId zone) {
+    public @Nonnull Optional<ZonedDateTime> findZonedDateTime(String name, @Nonnull ZoneId zone) {
         var value = getZonedDateTimeOrNull(name, zone);
         return Optional.ofNullable(value);
     }
@@ -920,8 +879,7 @@ public class TsurugiResultEntity {
      * @param zone time-zone
      * @return column value
      */
-    @Nullable
-    public ZonedDateTime getZonedDateTimeOrNull(String name, @Nonnull ZoneId zone) {
+    public @Nullable ZonedDateTime getZonedDateTimeOrNull(String name, @Nonnull ZoneId zone) {
         var value = getValue(name);
         return convertUtil.toZonedDateTime(value, zone);
     }
