@@ -1418,7 +1418,7 @@ DBサーバーとの通信中に発生した`IOException`および`InterruptedEx
 #### エラーコードを取得する例
 
 ```java
-import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 public boolean isRetryable(TsurugiTransactionException e) {
