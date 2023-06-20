@@ -10,7 +10,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -55,6 +59,35 @@ class DbCreateTableTest extends DbTestTableTester {
         });
         assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
         assertContains("duplicate_table table `test' is already defined.", e.getMessage());
+    }
+
+    @Test
+    void alreadyExists() throws Exception {
+        var session = getSession();
+        var txOption = TgTxOption.ofDDL();
+
+        // preparedStatementを作る際にテーブルが存在していないので、ERR_COMPILER_ERRORにならない
+        try (var ps = session.createStatement(CREATE_TEST_SQL, TgParameterMapping.of())) {
+            Thread.sleep(100); // preparedStatement作成がDBサーバー側で処理されるのを待つ
+            // テーブルを作成する
+            createTestTable();
+
+            // テーブルが作られた後にpreparedStatementのDDLを実行するとERR_ALREADY_EXISTSになる
+            try (var transaction = session.createTransaction(txOption)) {
+                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps, TgBindParameters.of()));
+                assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
+                transaction.rollback();
+            }
+        }
+
+        try (var ps = session.createStatement(CREATE_TEST_SQL, TgParameterMapping.of())) {
+            try (var transaction = session.createTransaction(txOption)) {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> transaction.executeAndGetCount(ps, TgBindParameters.of()));
+                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                assertContains("duplicate_table table `test' is already defined", e.getMessage());
+                transaction.rollback();
+            }
+        }
     }
 
     @Test
