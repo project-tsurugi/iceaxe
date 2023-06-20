@@ -100,7 +100,7 @@ class DbInsertCharTest extends DbTestTableTester {
                     tm.executeAndGetCount(ps, entity);
                 });
                 assertEqualsCode(SqlServiceCode.ERR_TYPE_MISMATCH, e);
-                assertContains("SQL--0019: .", e.getMessage()); // TODO エラー詳細情報の確認
+                assertContains("ERR_TYPE_MISMATCH: SQL--0019:", e.getMessage()); // TODO エラー詳細情報の確認
             }
         }
     }
