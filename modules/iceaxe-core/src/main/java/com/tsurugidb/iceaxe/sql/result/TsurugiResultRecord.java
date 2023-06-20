@@ -327,6 +327,10 @@ public class TsurugiResultRecord {
         return TgDataType.of(lowType);
     }
 
+    private static void requireNonNull(String name, Object value, String getterName) {
+        Objects.requireNonNull(value, () -> "TsurugiResultRecord." + getterName + "(" + name + ") is null");
+    }
+
     // boolean
 
     /**
@@ -341,7 +345,7 @@ public class TsurugiResultRecord {
      */
     public boolean getBoolean(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBooleanOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getBoolean");
         return value;
     }
 
@@ -405,7 +409,7 @@ public class TsurugiResultRecord {
      */
     public int getInt(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getIntOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getInt");
         return value;
     }
 
@@ -469,7 +473,7 @@ public class TsurugiResultRecord {
      */
     public long getLong(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getLongOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getLong");
         return value;
     }
 
@@ -533,7 +537,7 @@ public class TsurugiResultRecord {
      */
     public float getFloat(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getFloatOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getFloat");
         return value;
     }
 
@@ -597,7 +601,7 @@ public class TsurugiResultRecord {
      */
     public double getDouble(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDoubleOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getDouble");
         return value;
     }
 
@@ -661,7 +665,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull BigDecimal getDecimal(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDecimalOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getDecimal");
         return value;
     }
 
@@ -725,7 +729,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull String getString(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getStringOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getString");
         return value;
     }
 
@@ -789,7 +793,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull byte[] getBytes(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBytesOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getBytes");
         return value;
     }
 
@@ -853,7 +857,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull boolean[] getBits(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBitsOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getBits");
         return value;
     }
 
@@ -917,7 +921,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull LocalDate getDate(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDateOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getDate");
         return value;
     }
 
@@ -981,7 +985,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull LocalTime getTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getTimeOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getTime");
         return value;
     }
 
@@ -1045,7 +1049,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull LocalDateTime getDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getDateTimeOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getDateTime");
         return value;
     }
 
@@ -1109,7 +1113,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull OffsetTime getOffsetTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getOffsetTimeOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getOffsetTime");
         return value;
     }
 
@@ -1173,7 +1177,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull OffsetDateTime getOffsetDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getOffsetDateTimeOrNull(name);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getOffsetDateTime");
         return value;
     }
 
@@ -1238,7 +1242,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull ZonedDateTime getZonedDateTime(String name, ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getZonedDateTimeOrNull(name, zone);
-        Objects.requireNonNull(value);
+        requireNonNull(name, value, "getZonedDateTime");
         return value;
     }
 
@@ -1315,6 +1319,10 @@ public class TsurugiResultRecord {
         return fetchCurrentColumnValue();
     }
 
+    private static void requireNonNull(Object value, String getterName) {
+        Objects.requireNonNull(value, () -> "TsurugiResultRecord." + getterName + "() is null");
+    }
+
     // boolean
 
     /**
@@ -1328,7 +1336,7 @@ public class TsurugiResultRecord {
      */
     public boolean nextBoolean() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBooleanOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextBoolean");
         return value;
     }
 
@@ -1388,7 +1396,7 @@ public class TsurugiResultRecord {
      */
     public int nextInt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextIntOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextInt");
         return value;
     }
 
@@ -1448,7 +1456,7 @@ public class TsurugiResultRecord {
      */
     public long nextLong() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextLongOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextLong");
         return value;
     }
 
@@ -1508,7 +1516,7 @@ public class TsurugiResultRecord {
      */
     public float nextFloat() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextFloatOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextFloat");
         return value;
     }
 
@@ -1568,7 +1576,7 @@ public class TsurugiResultRecord {
      */
     public double nextDouble() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDoubleOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextDouble");
         return value;
     }
 
@@ -1628,7 +1636,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull BigDecimal nextDecimal() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDecimalOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextDecimal");
         return value;
     }
 
@@ -1688,7 +1696,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull String nextString() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextStringOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextString");
         return value;
     }
 
@@ -1748,7 +1756,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull byte[] nextBytes() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBytesOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextBytes");
         return value;
     }
 
@@ -1808,7 +1816,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull boolean[] nextBits() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBitsOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextBits");
         return value;
     }
 
@@ -1868,7 +1876,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull LocalDate nextDate() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDateOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextDate");
         return value;
     }
 
@@ -1928,7 +1936,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull LocalTime nextTime() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextTimeOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextTime");
         return value;
     }
 
@@ -1988,7 +1996,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull LocalDateTime nextDateTime() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextDateTimeOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextDateTime");
         return value;
     }
 
@@ -2048,7 +2056,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull OffsetTime nextOffsetTime() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextOffsetTimeOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextOffsetTime");
         return value;
     }
 
@@ -2108,7 +2116,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull OffsetDateTime nextOffsetDateTime() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextOffsetDateTimeOrNull();
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextOffsetDateTime");
         return value;
     }
 
@@ -2169,7 +2177,7 @@ public class TsurugiResultRecord {
      */
     public @Nonnull ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextZonedDateTimeOrNull(zone);
-        Objects.requireNonNull(value);
+        requireNonNull(value, "nextZonedDateTime");
         return value;
     }
 

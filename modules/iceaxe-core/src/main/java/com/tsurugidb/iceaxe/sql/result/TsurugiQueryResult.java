@@ -349,7 +349,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             record.reset();
             R result = convertRecord(record);
             event(null, listener -> listener.readRecord(this, result));
-            return Optional.of(result);
+            return Optional.ofNullable(result);
         } else {
             return Optional.empty();
         }

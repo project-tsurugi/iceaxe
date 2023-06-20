@@ -68,21 +68,29 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
 
     @Test
     void occ() throws Exception {
-        test(TgTxOption.ofOCC(), 30, 500);
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
+        test(setting, 30, 500);
     }
 
     @Test
     void ltx() throws Exception {
-        test(TgTxOption.ofLTX(TEST, TEST2), 30, 500);
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX(TEST, TEST2));
+        test(setting, 30, 500);
     }
 
-    private void test(TgTxOption txOption, int threadSize, int attemptSize) throws Exception {
+    @Test
+    void mix() throws Exception {
+        var setting = TgTmSetting.of(TgTxOption.ofOCC(), 3, TgTxOption.ofLTX(TEST, TEST2), 1);
+        test(setting, 30, 500);
+    }
+
+    private void test(TgTmSetting setting, int threadSize, int attemptSize) throws Exception {
         try (var sessions = new DbTestSessions(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
             var counter = new AtomicInteger(0);
 
             var onlineList = new ArrayList<OnlineTask>(threadSize);
             for (int i = 0; i < threadSize; i++) {
-                var task = new OnlineTask(sessions.createSession(), txOption, attemptSize, counter);
+                var task = new OnlineTask(sessions.createSession(), setting, attemptSize, counter);
                 onlineList.add(task);
             }
 
@@ -115,13 +123,13 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
         private static final TgBindVariableString vZzz2 = TgBindVariable.ofString("zzz2");
 
         private final TsurugiSession session;
-        private final TgTxOption txOption;
+        private final TgTmSetting setting;
         private final int attemptSize;
         private final AtomicInteger counter;
 
-        public OnlineTask(TsurugiSession session, TgTxOption txOption, int attemptSize, AtomicInteger counter) {
+        public OnlineTask(TsurugiSession session, TgTmSetting setting, int attemptSize, AtomicInteger counter) {
             this.session = session;
-            this.txOption = txOption;
+            this.setting = setting;
             this.attemptSize = attemptSize;
             this.counter = counter;
         }
@@ -139,7 +147,6 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
             try (var maxPs = session.createQuery(maxSql); //
                     var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
                     var insert2Ps = session.createStatement(insert2Sql, insert2Mapping)) {
-                var setting = TgTmSetting.ofAlways(txOption);
                 var tm = session.createTransactionManager(setting);
 
                 for (;;) {
@@ -151,9 +158,17 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                             execute(transaction, maxPs, insertPs, insert2Ps);
                         });
                     } catch (TsurugiTmIOException e) {
-                        if (e.getDiagnosticCode() == SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION) {
+                        var code = e.getDiagnosticCode();
+                        if (code == SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION) {
 //                          LOG.info("ERR_UNIQUE_CONSTRAINT_VIOLATION {}", i);
                             continue;
+                        }
+                        if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+                            String message = e.getMessage();
+                            if (message.contains("reason_code:KVS_INSERT")) {
+//                              LOG.info("ERR_SERIALIZATION_FAILURE:KVS_INSERT {}", i);
+                                continue;
+                            }
                         }
                         LOG.error("online task error: {}", e.getMessage());
                         throw e;
