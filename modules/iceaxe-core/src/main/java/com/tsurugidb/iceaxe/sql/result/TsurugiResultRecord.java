@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.sql.result;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -328,7 +329,7 @@ public class TsurugiResultRecord {
     }
 
     private static void requireNonNull(String name, Object value, String getterName) {
-        Objects.requireNonNull(value, () -> "TsurugiResultRecord." + getterName + "(" + name + ") is null");
+        Objects.requireNonNull(value, () -> MessageFormat.format("TsurugiResultRecord.{0}({1}) is null", getterName, name));
     }
 
     // boolean
@@ -1319,8 +1320,8 @@ public class TsurugiResultRecord {
         return fetchCurrentColumnValue();
     }
 
-    private static void requireNonNull(Object value, String getterName) {
-        Objects.requireNonNull(value, () -> "TsurugiResultRecord." + getterName + "() is null");
+    private void requireNonNull(Object value, String getterName) {
+        Objects.requireNonNull(value, () -> MessageFormat.format("TsurugiResultRecord.{0}({1}) is null", getterName, currentColumnIndex));
     }
 
     // boolean
