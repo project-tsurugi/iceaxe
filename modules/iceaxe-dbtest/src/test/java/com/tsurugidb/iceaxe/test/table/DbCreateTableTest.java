@@ -121,13 +121,24 @@ class DbCreateTableTest extends DbTestTableTester {
 
     @Test
     void repeatLtxWithPk() throws Exception {
-        repeat(TgTxOption.ofLTX(), true);
+        repeat(TgTxOption.ofLTX().includeDdl(false), true);
     }
 
     @Test
     @Disabled // TODO remove Disabled tateyama-serverがクラッシュする
     void repeatLtxNoPk() throws Exception {
-        repeat(TgTxOption.ofLTX(), false);
+        repeat(TgTxOption.ofLTX().includeDdl(false), false);
+    }
+
+    @Test
+    void repeatDdlWithPk() throws Exception {
+        repeat(TgTxOption.ofDDL(), true);
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled tateyama-serverがクラッシュする
+    void repeatDdlNoPk() throws Exception {
+        repeat(TgTxOption.ofDDL(), false);
     }
 
     private void repeat(TgTxOption txOption, boolean hasPk) throws IOException, InterruptedException {
