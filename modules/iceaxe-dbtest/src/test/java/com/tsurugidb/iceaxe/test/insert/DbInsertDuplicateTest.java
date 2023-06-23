@@ -2,11 +2,9 @@ package com.tsurugidb.iceaxe.test.insert;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +19,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableInteger;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableString;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
@@ -129,10 +128,10 @@ class DbInsertDuplicateTest extends DbTestTableTester {
         public Void call() throws Exception {
             var maxSql = "select max(foo) + 1 as foo from " + TEST;
 
-            var insert2List = List.of(vKey1, vKey2, vZzz2);
+            var insert2List = TgBindVariables.of(vKey1, vKey2, vZzz2);
             var insert2Sql = "insert into " + TEST2 //
                     + "(key1, key2, zzz2)" //
-                    + "values(" + insert2List.stream().map(v -> v.sqlName()).collect(Collectors.joining(", ")) + ")";
+                    + "values(" + insert2List.getSqlNames() + ")";
             var insert2Mapping = TgParameterMapping.of(insert2List);
 
             try (var maxPs = session.createQuery(maxSql); //

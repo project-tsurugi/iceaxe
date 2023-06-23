@@ -2,11 +2,9 @@ package com.tsurugidb.iceaxe.test.error;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +17,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableInteger;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
@@ -130,10 +129,10 @@ class DbErrorInactiveTxTest extends DbTestTableTester {
             var fkFoo = TgBindVariable.ofInt("fkFoo");
             var value1 = TgBindVariable.ofDecimal("value1");
             var value2 = TgBindVariable.ofDecimal("value2");
-            var vlist = List.of(groupId, id, fkFoo, value1, value2);
+            var vlist = TgBindVariables.of(groupId, id, fkFoo, value1, value2);
             var sql = "insert into " + TEST2 //
                     + "(group_id, id, fk_foo, value1, value2)" //
-                    + "values(" + vlist.stream().map(v -> v.sqlName()).collect(Collectors.joining(",")) + ")";
+                    + "values(" + vlist.getSqlNames() + ")";
             var parameterMapping = TgParameterMapping.of(vlist);
             try (var ps = session.createStatement(sql, parameterMapping)) {
                 for (int i = 0; i < 50; i++) {
