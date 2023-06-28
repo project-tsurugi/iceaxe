@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
@@ -80,7 +79,6 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled. `select max`でnullが返ることがある
     void mix() throws Exception {
         var setting = TgTmSetting.of(TgTxOption.ofOCC(), 3, TgTxOption.ofLTX(TEST, TEST2), 1);
         test(setting, 10, 500);
