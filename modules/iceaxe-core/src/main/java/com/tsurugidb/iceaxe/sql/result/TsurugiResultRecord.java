@@ -35,13 +35,13 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * Tsurugi Result Record for {@link TsurugiQueryResult}
  *
  * <p>
- * TODO+++翻訳: 当クラスのメソッド群は以下の3種類に分類される。ある群のメソッドを使用したら、他の群のメソッドは基本的に使用不可。
+ * The methods of this class are classified into the following three groups. If you use a certain group of methods, you basically cannot use the other group's methods.
  * </p>
  * <ul>
- * <li>current column系
+ * <li><code>current column</code> group
  * <ul>
- * <li>{@link #moveCurrentColumnNext()}によって現在カラムを移動しながら値を取得する。<br>
- * 各カラムの値は一度しか取得できない。</li>
+ * <li>Get the value while moving the current column by {@link #moveCurrentColumnNext()}.<br>
+ * Each column value can be retrieved only once.</li>
  * <li>
  *
  * <pre>
@@ -53,9 +53,9 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  *
  * </li>
  * </ul>
- * <li>name系
+ * <li><code>name</code> group
  * <ul>
- * <li>カラム名を指定して値を取得する。</li>
+ * <li>Get the value by specifying the column name.</li>
  * <li>
  *
  * <pre>
@@ -66,11 +66,11 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  *
  * </li>
  * </ul>
- * <li>next系</li>
+ * <li><code>next</code> group</li>
  * <ul>
- * <li>現在カラムの値を取得し、次のカラムへ移動する。<br>
- * 各カラムの値は一度しか取得できない。<br>
- * next系メソッドを呼んだ直後に{@link #getCurrentColumnName()},{@link #getCurrentColumnType()}は使用可能。</li>
+ * <li>Move to the next column and get the value of the current column.<br>
+ * Each column value can be retrieved only once.<br>
+ * {@link #getCurrentColumnName()} and {@link #getCurrentColumnType()} can be used immediately after calling the next group method.</li>
  * <li>
  *
  * <pre>
@@ -83,16 +83,16 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * </ul>
  * </ul>
  * <p>
- * 当クラスは{@link TsurugiQueryResult}と連動しており、インスタンスは複数レコード間で共有される。<br>
- * そのため、レコードの値を保持する目的で、当インスタンスをユーザープログラムで保持してはならない。<br>
- * また、{@link TsurugiQueryResult}のクローズ後に当クラスは使用できない。
+ * This class is linked with {@link TsurugiQueryResult} and the instance is shared among multiple records.<br>
+ * Therefore, this instance must not be held by the user program for the purpose of holding the value of the record.<br>
+ * Also, this class cannot be used after closing {@link TsurugiQueryResult}.
  * </p>
  */
 @NotThreadSafe
 public class TsurugiResultRecord {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiResultRecord.class);
 
-    protected static class TsurugiResultColumnValue { // record
+    protected /* record */ static class TsurugiResultColumnValue {
         private final int index;
         private final Object value;
 
