@@ -26,21 +26,49 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbMultiSessionTest extends DbTestTableTester {
 
     private static final int ATTEMPT_SIZE = 260;
-    private static final int EXPECTED_SESSION_SIZE = getSystemProperty("expected.session.size", 100);
+    private static final int EXPECTED_SESSION_SIZE = getSystemProperty("tsurugi.dbtest.expected.session.size", 100);
 
     @Test
     void limit() throws Exception {
-        var list = new ArrayList<TsurugiSession>();
-        for (int i = 0; i < ATTEMPT_SIZE; i++) {
-            var session = DbTestConnector.createSession();
-            list.add(session);
-        }
-
+        var sessionList = new ArrayList<TsurugiSession>();
+        Throwable occurred = null;
         try {
-            limit(list);
+            for (int i = 0; i < ATTEMPT_SIZE; i++) {
+                TsurugiSession session;
+                try {
+                    session = DbTestConnector.createSession();
+                } catch (IOException e) {
+                    assertEquals("the server has declined the connection request", e.getMessage());
+                    int count = sessionList.size();
+                    if (count < EXPECTED_SESSION_SIZE) {
+                        fail(MessageFormat.format("less session.size expected: {1} but was: {0}", count, EXPECTED_SESSION_SIZE));
+                    }
+                    return;
+                }
+                sessionList.add(session);
+            }
+
+            limit(sessionList);
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
         } finally {
-            for (var session : list) {
-                session.close();
+            var exceptionList = new ArrayList<Exception>();
+            for (var session : sessionList) {
+                try {
+                    session.close();
+                } catch (Exception e) {
+                    exceptionList.add(e);
+                }
+            }
+            if (!exceptionList.isEmpty()) {
+                var e = new Exception("session close error. errorCount=" + exceptionList.size());
+                exceptionList.forEach(e::addSuppressed);
+                if (occurred != null) {
+                    occurred.addSuppressed(e);
+                } else {
+                    throw e;
+                }
             }
         }
     }
