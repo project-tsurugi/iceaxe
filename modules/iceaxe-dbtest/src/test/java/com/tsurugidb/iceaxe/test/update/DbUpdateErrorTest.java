@@ -89,7 +89,7 @@ class DbUpdateErrorTest extends DbTestTableTester {
                 + "  foo = " + newPk; // primary key
 
         var session = getSession();
-        var tm = createTransactionManagerOcc(session);
+        var tm = createTransactionManagerOcc(session, 2);
         try (var ps = session.createStatement(sql)) {
             // TODO updatePK same value
             tm.execute(transaction -> {

@@ -264,7 +264,7 @@ public class DbTestTableTester {
     }
 
     protected static TsurugiTransactionManager createTransactionManagerOcc(TsurugiSession session, int max) {
-        return session.createTransactionManager(TgTmSetting.ofAlways(TgTxOption.ofOCC(), 3));
+        return session.createTransactionManager(TgTmSetting.ofAlways(TgTxOption.ofOCC(), max));
     }
 
     // assertion
