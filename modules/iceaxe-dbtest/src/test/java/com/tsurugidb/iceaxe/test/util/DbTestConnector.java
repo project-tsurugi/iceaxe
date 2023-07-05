@@ -8,12 +8,19 @@ import java.net.Socket;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 
 public class DbTestConnector {
+    private static final Logger LOG = LoggerFactory.getLogger(DbTestConnector.class);
 
     private static final String SYSPROP_DBTEST_ENDPOINT = "tsurugi.dbtest.endpoint";
 
@@ -48,8 +55,30 @@ public class DbTestConnector {
         sessionOption.setTimeout(TgTimeoutKey.DEFAULT, time, unit);
 
         var connector = createConnector();
-        return connector.createSession(sessionOption);
+        var session = connector.createSession(sessionOption);
+//      session.addEventListener(SESSION_LISTENER);
+        return session;
     }
+
+    @SuppressWarnings("unused")
+    private static final TsurugiSessionEventListener SESSION_LISTENER = new TsurugiSessionEventListener() {
+        private final TsurugiTransactionEventListener TRANSACTION_LISTENER = new TsurugiTransactionEventListener() {
+            @Override
+            public void lowTransactionGetEnd(TsurugiTransaction transaction, String transactionId, Throwable occurred) {
+                LOG.info("transactionId={}, {}", transactionId, transaction.getTransactionOption());
+            }
+        };
+
+        @Override
+        public void createTransaction(TsurugiTransaction transaction) {
+//          transaction.addEventListener(TRANSACTION_LISTENER);
+            try {
+                LOG.info("transactionId={}, {}", transaction.getTransactionId(), transaction.getTransactionOption());
+            } catch (IOException | InterruptedException e) {
+                LOG.info("getTransactionId error {}", transaction.getTransactionOption(), e);
+            }
+        }
+    };
 
     public static Socket createSocket() {
         URI endpoint = assumeEndpointTcp();

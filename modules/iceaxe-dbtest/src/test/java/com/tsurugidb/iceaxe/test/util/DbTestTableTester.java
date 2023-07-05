@@ -176,13 +176,13 @@ public class DbTestTableTester {
             return;
         }
 
-        var tm = createTransactionManagerOcc(session);
+        var tm = createTransactionManagerOcc(session, "executeDdl", 1);
         tm.executeDdl(sql);
     }
 
     @Deprecated(forRemoval = true)
     private static void executeDdlWorkaround(TsurugiSession session, String sql, String tableName) throws IOException, InterruptedException {
-        var tm = createTransactionManagerOcc(session, 3);
+        var tm = createTransactionManagerOcc(session, "executeDdlWorkaround", 3);
         tm.addEventListener(new TsurugiTmEventListener() {
             @Override
             public void transactionException(TsurugiTransaction transaction, Throwable e) {
@@ -224,7 +224,7 @@ public class DbTestTableTester {
 
     protected static void insertTestTable(int size) throws IOException, InterruptedException {
         var session = getSession();
-        var tm = createTransactionManagerOcc(session, 3);
+        var tm = createTransactionManagerOcc(session, "insertTestTable", 3);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
@@ -242,7 +242,7 @@ public class DbTestTableTester {
 
     protected static void insertTestTable(TestEntity entity) throws IOException, InterruptedException {
         var session = getSession();
-        var tm = createTransactionManagerOcc(session, 3);
+        var tm = createTransactionManagerOcc(session, "insertTestTable", 3);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
                 transaction.executeAndGetCount(ps, entity);
@@ -265,6 +265,10 @@ public class DbTestTableTester {
 
     protected static TsurugiTransactionManager createTransactionManagerOcc(TsurugiSession session, int max) {
         return session.createTransactionManager(TgTmSetting.ofAlways(TgTxOption.ofOCC(), max));
+    }
+
+    protected static TsurugiTransactionManager createTransactionManagerOcc(TsurugiSession session, String txLabel, int max) {
+        return session.createTransactionManager(TgTmSetting.ofAlways(TgTxOption.ofOCC().label(txLabel), max));
     }
 
     // assertion
@@ -342,7 +346,7 @@ public class DbTestTableTester {
         var sql = SELECT_SQL + "\norder by " + TEST_COLUMNS;
 
         var session = getSession();
-        var tm = createTransactionManagerOcc(session, 3);
+        var tm = createTransactionManagerOcc(session, "selectAllFromTest", 3);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
             return tm.executeAndGetList(ps);
         }
@@ -352,7 +356,7 @@ public class DbTestTableTester {
         var where1 = TgBindVariable.ofInt("foo");
         var sql = SELECT_SQL + " where foo=" + where1;
         var session = getSession();
-        var tm = createTransactionManagerOcc(session, 3);
+        var tm = createTransactionManagerOcc(session, "selectFromTest", 3);
         try (var ps = session.createQuery(sql, TgParameterMapping.of(where1), SELECT_MAPPING)) {
             var parameter = TgBindParameters.of(where1.bind(foo));
             return tm.executeAndFindRecord(ps, parameter).orElse(null);
@@ -368,7 +372,7 @@ public class DbTestTableTester {
         var resultMapping = TgResultMapping.ofSingle(int.class);
 
         var session = getSession();
-        var tm = createTransactionManagerOcc(session, 3);
+        var tm = createTransactionManagerOcc(session, "selectCountFrom", 3);
         try (var ps = session.createQuery(sql, resultMapping)) {
             return tm.executeAndFindRecord(ps).get();
         }
