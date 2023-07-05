@@ -179,8 +179,9 @@ class DbSelectErrorTest extends DbTestTableTester {
     void closeWithSelectThead() throws Throwable {
         Thread thread;
         Throwable[] threadException = { null };
-        try (var session = DbTestConnector.createSession();) {
+        try (var session = DbTestConnector.createSession()) {
             var started = new AtomicBoolean(false);
+            var ended = new AtomicBoolean(false);
             thread = new Thread(() -> {
                 try {
                     var setting = TgTmSetting.of(TgTxOption.ofOCC());
@@ -193,10 +194,12 @@ class DbSelectErrorTest extends DbTestTableTester {
                     });
                 } catch (Throwable e) {
                     threadException[0] = e;
+                } finally {
+                    ended.set(true);
                 }
             });
             thread.start();
-            while (!started.get()) {
+            while (!started.get() && !ended.get()) {
             }
         } // session close (with resultSet, transaction, statement close)
 
