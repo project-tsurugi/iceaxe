@@ -1,13 +1,6 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +10,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
@@ -117,33 +108,12 @@ class DbTransactionConflictRtxTest extends DbTestTableTester {
                 try (var tx2 = session.createTransaction(LTX)) {
                     tx2.executeAndGetCount(updatePs2);
 
-//                  tx2.commit(TgCommitType.DEFAULT); // TODO 本来は待たずに完了すべき
-                    var start2 = new AtomicBoolean(false);
-                    var done2 = new AtomicBoolean(false);
-                    var future2 = Executors.newFixedThreadPool(1).submit(() -> {
-                        start2.set(true);
-                        try {
-                            tx2.commit(TgCommitType.DEFAULT);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e.getMessage(), e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        } catch (TsurugiTransactionException e) {
-                            throw new TsurugiTransactionRuntimeException(e);
-                        } finally {
-                            done2.set(true);
-                        }
-                    });
+                    tx2.commit(TgCommitType.DEFAULT);
 
                     var entity12 = tx1.executeAndFindRecord(selectPs).get();
                     assertEquals(BAR_BEFORE, entity12.getBar());
 
-                    assertTrue(start2.get());
-                    assertFalse(done2.get());
                     tx1.commit(TgCommitType.DEFAULT);
-
-                    future2.get();
-                    assertTrue(done2.get());
                 }
             }
         }
@@ -223,33 +193,12 @@ class DbTransactionConflictRtxTest extends DbTestTableTester {
                         tx2.executeAndGetCount(deletePs);
                     }
 
-//                  tx2.commit(TgCommitType.DEFAULT); // TODO 本来は待たずに完了すべき
-                    var start2 = new AtomicBoolean(false);
-                    var done2 = new AtomicBoolean(false);
-                    var future2 = Executors.newFixedThreadPool(1).submit(() -> {
-                        start2.set(true);
-                        try {
-                            tx2.commit(TgCommitType.DEFAULT);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e.getMessage(), e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        } catch (TsurugiTransactionException e) {
-                            throw new TsurugiTransactionRuntimeException(e);
-                        } finally {
-                            done2.set(true);
-                        }
-                    });
+                    tx2.commit(TgCommitType.DEFAULT);
 
                     var list12 = tx1.executeAndGetList(selectPs);
                     assertEquals(SIZE, list12.size());
 
-                    assertTrue(start2.get());
-                    assertFalse(done2.get());
                     tx1.commit(TgCommitType.DEFAULT);
-
-                    future2.get();
-                    assertTrue(done2.get());
                 }
             }
         }
