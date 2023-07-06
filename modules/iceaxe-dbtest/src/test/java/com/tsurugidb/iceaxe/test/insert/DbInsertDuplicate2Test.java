@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,19 +99,21 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
             var futureList = new ArrayList<Future<?>>(threadSize);
             onlineList.forEach(task -> futureList.add(service.submit(task)));
 
-            RuntimeException save = null;
+            var exceptionList = new ArrayList<Exception>();
             for (var future : futureList) {
                 try {
                     future.get();
                 } catch (Exception e) {
-                    if (save == null) {
-                        save = new RuntimeException("future exception");
-                    }
-                    save.addSuppressed(e);
+                    exceptionList.add(e);
                 }
             }
-            if (save != null) {
-                throw save;
+            if (!exceptionList.isEmpty()) {
+                if (exceptionList.size() == 1) {
+                    throw exceptionList.get(0);
+                }
+                var e = new Exception(exceptionList.stream().map(Exception::getMessage).collect(Collectors.joining("\n")));
+                exceptionList.stream().forEach(e::addSuppressed);
+                throw e;
             }
         }
     }
