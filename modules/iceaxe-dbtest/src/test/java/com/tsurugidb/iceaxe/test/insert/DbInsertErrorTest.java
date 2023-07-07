@@ -13,6 +13,8 @@ import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -45,14 +47,18 @@ class DbInsertErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            tm.execute(transaction -> {
-                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                    transaction.executeAndGetCount(ps);
+            var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.execute((TsurugiTransactionAction) transaction -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                        transaction.executeAndGetCount(ps);
+                    });
+                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
+                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報（テーブル名等）の確認
+                    throw e;
                 });
-                assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
             });
+            assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e0);
         }
 
         assertEqualsTestTable(SIZE);
@@ -73,15 +79,19 @@ class DbInsertErrorTest extends DbTestTableTester {
 
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-            tm.execute(transaction -> {
-                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                    var entity = new TestEntity(123, null, null);
-                    transaction.executeAndGetCount(ps, entity);
+            var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.execute((TsurugiTransactionAction) transaction -> {
+                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                        var entity = new TestEntity(123, null, null);
+                        transaction.executeAndGetCount(ps, entity);
+                    });
+                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
+                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
+                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報（テーブル名等）の確認
+                    throw e;
                 });
-                assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
             });
+            assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e0);
         }
 
         assertEqualsTestTable(0);
