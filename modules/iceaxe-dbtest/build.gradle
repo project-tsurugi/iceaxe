@@ -9,4 +9,5 @@ dependencies {
 
 tasks.named('test') {
     systemProperty 'tsurugi.dbtest.endpoint', findProperty('dbtest.endpoint') ?: 'tcp://localhost:12345'
+    systemProperty 'com.tsurugidb.tsubakuro.jniverify', 'false'
 }
