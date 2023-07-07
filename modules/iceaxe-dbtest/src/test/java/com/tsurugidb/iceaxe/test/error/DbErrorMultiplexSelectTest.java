@@ -15,6 +15,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -44,7 +45,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 15, 16, 255, 256 })
+    @ValueSource(ints = { 240, 241, 255, 256, 300 })
     public void selectMultiReadN(int size) throws Exception {
         selectMulti(size, ExecuteType.READ_ALL);
     }
@@ -57,7 +58,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 15, 16, 255, 256 })
+    @ValueSource(ints = { 240, 241, 255, 256, 300 })
     public void selectMultiCloseN(int size) throws Exception {
         selectMulti(size, ExecuteType.CLOSE_ONLY);
     }
@@ -70,7 +71,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 15, 16, 255, 256 })
+    @ValueSource(ints = { 240, 241, 255, 256, 300 })
     void selectMultiN(int size) throws Exception {
         selectMulti(size, ExecuteType.EXEUTE_ONLY);
     }
@@ -80,16 +81,28 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
     }
 
     private void selectMulti(int size, ExecuteType type) throws IOException, InterruptedException, TsurugiTransactionException {
-        int threshold = 255;
         try {
             selectMultiMain(size, type);
         } catch (TsurugiIOException e) {
-            if (size < threshold) {
-                throw e;
+            if (DbTestConnector.isTcp()) {
+                if (size <= 280) {
+                    throw e;
+                }
+                assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
+                LOG.info("(TCP)err_resource_limit_reached occur. size={}, type={}", size, type);
+                return;
             }
-            assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
-            assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
-            LOG.warn("err_resource_limit_reached occur. size={}, type={}", size, type);
+            throw e;
+        } catch (IOException e) {
+            if (DbTestConnector.isIpc()) {
+                if (size <= 240) {
+                    throw e;
+                }
+                assertEqualsCode(CoreServiceCode.RESOURCE_LIMIT_REACHED, e);
+                LOG.info("(IPC)resource_limit_reached occur. size={}, type={}", size, type);
+                return;
+            }
+            throw e;
         }
     }
 
@@ -110,12 +123,12 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
                     transaction.executeAndGetList(ps);
                     break;
                 case CLOSE_ONLY:
-                    try (var result = ps.execute(transaction)) {
+                    try (var result = transaction.executeQuery(ps)) {
                     }
                     break;
                 case EXEUTE_ONLY:
                     @SuppressWarnings("unused")
-                    var result = ps.execute(transaction);
+                    var result = transaction.executeQuery(ps);
                     // result.close is called on ps.close
                     break;
                 }

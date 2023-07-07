@@ -34,6 +34,18 @@ public class DbTestConnector {
         return staticEndpoint;
     }
 
+    public static boolean isIpc() {
+        URI endpoint = getEndPoint();
+        String scheme = endpoint.getScheme();
+        return scheme.equals("ipc");
+    }
+
+    public static boolean isTcp() {
+        URI endpoint = getEndPoint();
+        String scheme = endpoint.getScheme();
+        return scheme.equals("tcp");
+    }
+
     public static URI assumeEndpointTcp() {
         URI endpoint = getEndPoint();
         String scheme = endpoint.getScheme();
