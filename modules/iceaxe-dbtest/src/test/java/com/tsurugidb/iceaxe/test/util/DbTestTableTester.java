@@ -3,10 +3,16 @@ package com.tsurugidb.iceaxe.test.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterAll;
@@ -43,12 +49,29 @@ public class DbTestTableTester {
     public static final int ZZZ_SIZE = 10;
 
     private static TsurugiSession staticSession;
+    private static ExecutorService staticService;
 
     protected static TsurugiSession getSession() throws IOException {
-        if (staticSession == null) {
-            staticSession = DbTestConnector.createSession();
+        synchronized (DbTestTableTester.class) {
+            if (staticSession == null) {
+                staticSession = DbTestConnector.createSession();
+            }
         }
         return staticSession;
+    }
+
+    @AfterAll
+    static void testerAfterAll() throws IOException, InterruptedException {
+        try (var c1 = staticSession; var c2 = (Closeable) () -> {
+            if (staticService != null) {
+                staticService.shutdownNow();
+            }
+        }) {
+            // close only
+        } finally {
+            staticSession = null;
+            staticService = null;
+        }
     }
 
     private static final boolean START_END_LOG_INFO = true;
@@ -66,14 +89,6 @@ public class DbTestTableTester {
             log.info("init all end");
         } else {
             log.debug("init all end");
-        }
-    }
-
-    @AfterAll
-    static void testerAfterAll() throws IOException, InterruptedException {
-        if (staticSession != null) {
-            staticSession.close();
-            staticSession = null;
         }
     }
 
@@ -256,6 +271,28 @@ public class DbTestTableTester {
             .addInt("foo", TestEntity::setFoo) //
             .addLong("bar", TestEntity::setBar) //
             .addString("zzz", TestEntity::setZzz);
+
+    protected static <T> Future<T> executeFuture(Callable<T> task) {
+        synchronized (DbTestTableTester.class) {
+            if (staticService == null) {
+                staticService = Executors.newCachedThreadPool();
+            }
+        }
+
+        var started = new AtomicBoolean(false);
+        var future = staticService.submit(() -> {
+            started.set(true);
+            return task.call();
+        });
+        while (!started.get()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return future;
+    }
 
     // transaction manager
 

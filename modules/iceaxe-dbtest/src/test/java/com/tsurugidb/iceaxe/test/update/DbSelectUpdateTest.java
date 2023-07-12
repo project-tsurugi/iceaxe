@@ -1,12 +1,11 @@
 package com.tsurugidb.iceaxe.test.update;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,16 +116,13 @@ class DbSelectUpdateTest extends DbTestTableTester {
 
                 try (var tx2 = session.createTransaction(txOption2.label("tx2"))) {
                     tx2.executeAndGetCount(updatePs, 9L);
-                    var started = new AtomicBoolean(false);
-                    var future2 = Executors.newFixedThreadPool(1).submit(() -> {
-                        started.set(true);
+                    var future2 = executeFuture(() -> {
                         tx2.commit(TgCommitType.DEFAULT);
                         return null;
                     });
-                    while (!started.get()) {
-                    }
 
                     tx1.executeAndGetCount(updatePs, entity.getBar() + 1);
+                    assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
                     var e = assertThrows(ExecutionException.class, () -> future2.get());

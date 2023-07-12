@@ -5,11 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +16,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -141,31 +136,18 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                 try (var tx2 = session.createTransaction(LTX)) {
                     tx2.executeAndGetCount(updatePs2);
 
-                    var start2 = new AtomicBoolean(false);
-                    var done2 = new AtomicBoolean(false);
-                    var future2 = Executors.newFixedThreadPool(1).submit(() -> {
-                        start2.set(true);
-                        try {
-                            tx2.commit(TgCommitType.DEFAULT);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e.getMessage(), e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        } catch (TsurugiTransactionException e) {
-                            throw new TsurugiTransactionRuntimeException(e);
-                        } finally {
-                            done2.set(true);
-                        }
+                    var future2 = executeFuture(() -> {
+                        tx2.commit(TgCommitType.DEFAULT);
+                        return null;
                     });
 
                     var entity12 = tx1.executeAndFindRecord(selectPs).get();
                     assertEquals(BAR_AFTER1, entity12.getBar());
 
-                    assertTrue(start2.get());
-                    assertFalse(done2.get());
+                    assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
-                    var e = assertThrows(TsurugiTransactionRuntimeException.class, () -> {
+                    var e = assertThrows(TsurugiTransactionException.class, () -> {
                         try {
                             future2.get();
                         } catch (ExecutionException ee) {
@@ -258,32 +240,18 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                         tx2.executeAndGetCount(deletePs);
                     }
 
-                    var start2 = new AtomicBoolean(false);
-                    var done2 = new AtomicBoolean(false);
-                    var future2 = Executors.newFixedThreadPool(1).submit(() -> {
-                        start2.set(true);
-                        try {
-                            tx2.commit(TgCommitType.DEFAULT);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e.getMessage(), e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        } catch (TsurugiTransactionException e) {
-                            throw new TsurugiTransactionRuntimeException(e);
-                        } finally {
-                            done2.set(true);
-                        }
+                    var future2 = executeFuture(() -> {
+                        tx2.commit(TgCommitType.DEFAULT);
+                        return null;
                     });
 
                     var list12 = tx1.executeAndGetList(selectPs);
                     assertEquals(SIZE, list12.size());
 
-                    assertTrue(start2.get());
-                    assertFalse(done2.get());
+                    assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
                     future2.get();
-                    assertTrue(done2.get());
                 }
             }
         }

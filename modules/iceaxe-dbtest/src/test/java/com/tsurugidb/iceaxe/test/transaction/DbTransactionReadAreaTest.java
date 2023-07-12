@@ -1,12 +1,10 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -16,7 +14,6 @@ import org.junit.jupiter.api.TestInfo;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -144,36 +141,25 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
                     tx2.executeAndGetCount(update2Ps);
 //x                 tx2.commit(TgCommitType.DEFAULT);
 
-                    var start2 = new AtomicBoolean(false);
-                    var done2 = new AtomicBoolean(false);
-                    var future2 = Executors.newFixedThreadPool(1).submit(() -> {
-                        start2.set(true);
-                        try {
-                            tx2.commit(TgCommitType.DEFAULT);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e.getMessage(), e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        } catch (TsurugiTransactionException e) {
-                            throw new TsurugiTransactionRuntimeException(e);
-                        } finally {
-                            done2.set(true);
-                        }
+                    var future2 = executeFuture(() -> {
+                        tx2.commit(TgCommitType.DEFAULT);
+                        return null;
                     });
 
-                    while (!start2.get())
-                        ;
-                    assertFalse(done2.get());
+                    Thread.sleep(100);
+                    assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
                     future2.get();
                 }
             }
         }
+
+        assertTable(TEST);
+        assertTable(TEST2);
     }
 
     @Test
-    @Disabled // TODO remove Disabled. read area修正待ち
     void readArea2() throws Exception {
         var session = getSession();
         try (var update1Ps = session.createStatement(UPDATE1_SQL); //
@@ -186,6 +172,90 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
                     tx2.commit(TgCommitType.DEFAULT);
 
                     tx1.commit(TgCommitType.DEFAULT);
+                }
+            }
+        }
+
+        assertTable(TEST);
+        assertTable(TEST2);
+    }
+
+    @Test
+    void readArea2_1() throws Exception {
+        var session = getSession();
+        try (var select2Ps = session.createQuery(SELECT2_SQL); //
+                var update1Ps = session.createStatement(UPDATE1_SQL); //
+                var update2Ps = session.createStatement(UPDATE2_SQL)) {
+            var tx1Option = TgTxOption.ofLTX(TEST).addInclusiveReadArea(TEST, TEST2);
+            var tx2Option = TgTxOption.ofLTX(TEST2).addInclusiveReadArea(TEST2);
+            try (var tx1 = session.createTransaction(tx1Option)) {
+                tx1.executeAndGetList(select2Ps);
+                tx1.executeAndGetCount(update1Ps);
+
+                try (var tx2 = session.createTransaction(tx2Option)) {
+                    tx2.executeAndGetCount(update2Ps);
+
+                    var future2 = executeFuture(() -> {
+                        tx2.commit(TgCommitType.DEFAULT);
+                        return null;
+                    });
+
+                    Thread.sleep(100);
+                    assertFalse(future2.isDone());
+                    tx1.commit(TgCommitType.DEFAULT);
+
+                    future2.get();
+                }
+            }
+        }
+
+        assertTable(TEST);
+        assertTable(TEST2);
+    }
+
+    @Test
+    void readArea2_2() throws Exception {
+        var session = getSession();
+        try (var select1Ps = session.createQuery(SELECT1_SQL); //
+                var update1Ps = session.createStatement(UPDATE1_SQL); //
+                var update2Ps = session.createStatement(UPDATE2_SQL)) {
+            var tx1Option = TgTxOption.ofLTX(TEST).addInclusiveReadArea(TEST);
+            var tx2Option = TgTxOption.ofLTX(TEST2).addInclusiveReadArea(TEST, TEST2);
+            try (var tx1 = session.createTransaction(tx1Option)) {
+                tx1.executeAndGetCount(update1Ps);
+
+                try (var tx2 = session.createTransaction(tx2Option)) {
+                    tx2.executeAndGetList(select1Ps);
+                    tx2.executeAndGetCount(update2Ps);
+
+                    var future2 = executeFuture(() -> {
+                        tx2.commit(TgCommitType.DEFAULT);
+                        return null;
+                    });
+
+                    Thread.sleep(100);
+                    assertFalse(future2.isDone());
+                    tx1.commit(TgCommitType.DEFAULT);
+
+                    future2.get();
+                }
+            }
+        }
+
+        assertTable(TEST);
+        assertTable(TEST2);
+    }
+
+    private static void assertTable(String tableName) throws IOException, InterruptedException {
+        var session = getSession();
+        try (var ps = session.createQuery(SELECT_SQL.replace(TEST, tableName), SELECT_MAPPING)) {
+            var tm = createTransactionManagerOcc(session);
+            var list = tm.executeAndGetList(ps);
+            for (var entity : list) {
+                if (entity.getFoo() == KEY) {
+                    assertEquals(789L, entity.getBar());
+                } else {
+                    assertEquals(createTestEntity(entity.getFoo()), entity);
                 }
             }
         }
