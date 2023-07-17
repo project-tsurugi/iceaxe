@@ -17,6 +17,7 @@ import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
@@ -191,6 +192,16 @@ class TgSingleParameterMappingTest {
     @Test
     void testOfDataType() {
         var mapping = TgSingleParameterMapping.of("foo", TgDataType.INT);
+
+        var type = TgDataType.INT;
+        assertMapping(type, null, mapping);
+        assertMapping(type, 123, mapping);
+    }
+
+    @Test
+    void testOfVariable() {
+        var variable = TgBindVariable.ofInt("foo");
+        var mapping = TgSingleParameterMapping.of(variable);
 
         var type = TgDataType.INT;
         assertMapping(type, null, mapping);

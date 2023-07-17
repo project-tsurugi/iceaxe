@@ -119,6 +119,18 @@ public abstract class TgParameterMapping<P> {
     /**
      * create Parameter Mapping (single variable)
      *
+     * @param <P>      parameter type
+     * @param variable bind variable
+     * @return parameter mapping
+     * @see TgSingleParameterMapping
+     */
+    public static <P> TgParameterMapping<P> ofSingle(TgBindVariable<P> variable) {
+        return TgSingleParameterMapping.of(variable);
+    }
+
+    /**
+     * create Parameter Mapping (single variable)
+     *
      * @param <P>  parameter type
      * @param name bind variable name
      * @param type parameter type

@@ -14,6 +14,7 @@ import java.util.function.BiFunction;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.IceaxeLowParameterUtil;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
@@ -265,6 +266,17 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
         }
+    }
+
+    /**
+     * create parameter mapping
+     *
+     * @param <P>      parameter type
+     * @param variable bind variable
+     * @return parameter mapping
+     */
+    public static <P> TgSingleParameterMapping<P> of(TgBindVariable<P> variable) {
+        return new TgSingleParameterMapping<>(variable.name(), variable.type(), (name, value) -> variable.bind(value).toLowParameter());
     }
 
     private final String name;
