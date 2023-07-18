@@ -156,7 +156,7 @@ public class DbTestTableTester {
     protected static void dropTable(String tableName) throws IOException, InterruptedException {
         if (existsTable(tableName)) {
             var sql = "drop table " + tableName;
-            executeDdl(getSession(), sql);
+            executeDdl(getSession(), sql, tableName);
         }
     }
 
@@ -175,17 +175,26 @@ public class DbTestTableTester {
             + ")";
 
     protected static void createTestTable() throws IOException, InterruptedException {
-        executeDdl(getSession(), CREATE_TEST_SQL);
+        executeDdl(getSession(), CREATE_TEST_SQL, TEST);
     }
 
     protected static void executeDdl(TsurugiSession session, String sql) throws IOException, InterruptedException {
-        executeDdl(session, sql, TEST);
+        String tableName;
+        if (sql.startsWith("create")) {
+            int s = sql.indexOf("table");
+            int e = sql.indexOf('(');
+            tableName = sql.substring(s + "table".length(), e).trim();
+        } else if (sql.startsWith("drop")) {
+            int s = sql.indexOf("table");
+            tableName = sql.substring(s + "table".length()).trim();
+        } else {
+            throw new IllegalArgumentException(sql);
+        }
+        executeDdl(session, sql, tableName);
     }
 
     protected static void executeDdl(TsurugiSession session, String sql, String tableName) throws IOException, InterruptedException {
-        // FIXME issue106 2023-03-23 retry-over
-        // TODO retry-overが解消されたらfalseに戻す
-        boolean workaround = true;
+        boolean workaround = false;
         if (workaround) {
             executeDdlWorkaround(session, sql, tableName);
             return;
@@ -212,7 +221,8 @@ public class DbTestTableTester {
                     return;
                 } catch (TsurugiTmIOException e) {
                     // duplicate_table（ERR_PHANTOM）が発生したら、リトライ
-                    if (e.getMessage().contains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: duplicate_table table")) {
+                    String message = e.getMessage();
+                    if (message.contains("ERR_COMPILER_ERROR: SQL--0005") && message.contains("translating statement failed: duplicate_table table")) {
                         var line = Arrays.stream(e.getStackTrace()).filter(elem -> {
                             String fullName = elem.getClassName();
                             return fullName.startsWith("com.tsurugidb.iceaxe.test.") && fullName.endsWith("Test");

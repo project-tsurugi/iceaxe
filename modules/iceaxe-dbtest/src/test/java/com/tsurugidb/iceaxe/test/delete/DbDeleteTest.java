@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -250,7 +249,6 @@ class DbDeleteTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // FIXME issue106 2023-03-23 retry-over
     void insertDeleteInsert() throws Exception {
         var entity1 = new TestEntity(123, 456, "abc");
         var entity2 = new TestEntity(entity1.getFoo(), 999, "zzz");

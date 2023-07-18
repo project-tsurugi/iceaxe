@@ -93,7 +93,6 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
-    @Disabled // FIXME issue106 2023-03-23 retry-over
     void insertMultiTxOcc1(boolean prepare) throws Exception {
 //      insertMultiTx(100, 1, TgTmSetting.of(TgTxOption.ofOCC()), prepare);
         insertMultiTxOcc(1, prepare);
@@ -101,13 +100,13 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
-    @Disabled // FIXME issue106 2023-03-23 retry-over
+    @Disabled // TODO remove Disabled. CC_OCC_PHANTOM_AVOIDANCE retry-over
     void insertMultiTxOcc30(boolean prepare) throws Exception {
         insertMultiTxOcc(30, prepare);
     }
 
     @RepeatedTest(4)
-    @Disabled // TODO remove Disabled. たまにtateyama-serverでstd::bad_allocが発生する
+    @Disabled // TODO remove Disabled. CC_OCC_PHANTOM_AVOIDANCE retry-over
     void insertMultiTxOcc30False() throws Exception {
         insertMultiTxOcc(30, false);
     }
