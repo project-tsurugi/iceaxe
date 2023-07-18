@@ -37,6 +37,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.diagnostic.JMXAgent;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 
@@ -71,6 +72,14 @@ public class DbTestTableTester {
         } finally {
             staticSession = null;
             staticService = null;
+        }
+
+        // TODO remove JMX sessionInfo
+        System.gc();
+        String info = JMXAgent.sessionInfo().getSessionInfo();
+        if (!info.isEmpty()) {
+            var log = LoggerFactory.getLogger(DbTestTableTester.class);
+            log.warn("tsubakuro.sessionInfo={}", info);
         }
     }
 
