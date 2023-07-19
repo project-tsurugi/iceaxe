@@ -7,9 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
@@ -83,49 +84,69 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
                 tx1.commit(TgCommitType.DEFAULT);
             }
         }
+
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
-    @Disabled // TODO remove Disabled. read area修正待ち
-    void readArea1Select() throws Exception {
+    void readArea1Select_error() throws Exception {
         var session = getSession();
         try (var select2Ps = session.createQuery(SELECT2_SQL, SELECT_MAPPING)) {
             try (var tx1 = session.createTransaction(LTX1)) {
-                for (int i = 0; i < 3; i++) {
-                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetList(select2Ps));
-                    assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
-                }
-                tx1.commit(TgCommitType.DEFAULT);
+                var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetList(select2Ps));
+                assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e1);
+//              assertContains("TODO", e1.getMessage()); // TODO エラーになったテーブルの確認
+                var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetList(select2Ps));
+                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
             }
         }
+
+        assertEqualsTestTable(SIZE);
     }
 
-    @Test
-    void readArea1Update_nothing() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { "nothing", "read_area" })
+    void readArea1Update(String pattern) throws Exception {
+        var txOption = getTxOption(pattern);
         var session = getSession();
         try (var update1Ps = session.createStatement(UPDATE1_SQL)) {
-            try (var tx1 = session.createTransaction(LTX1_NOTHING)) {
+            try (var tx1 = session.createTransaction(txOption)) {
                 for (int i = 1; i < 3; i++) {
                     tx1.executeAndGetCount(update1Ps);
                 }
                 tx1.commit(TgCommitType.DEFAULT);
             }
         }
+
+        assertTable(TEST);
     }
 
-    @Test
-    @Disabled // TODO remove Disabled. read area修正待ち
-    void readArea1Update() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { "nothing", "read_area" })
+    void readArea1Update_error(String pattern) throws Exception {
+        var txOption = getTxOption(pattern);
         var session = getSession();
-        try (var update1Ps = session.createStatement(UPDATE1_SQL)) {
-            try (var tx1 = session.createTransaction(LTX1)) {
-                tx1.executeAndGetCount(update1Ps);
-
-                for (int i = 0; i < 3; i++) {
-                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetCount(update1Ps));
-                    assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
-                }
+        try (var update2Ps = session.createStatement(UPDATE2_SQL)) {
+            try (var tx1 = session.createTransaction(txOption)) {
+                var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetCount(update2Ps));
+                assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e1);
+//              assertContains("TODO", e1.getMessage()); // TODO エラーになったテーブルの確認
+                var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetCount(update2Ps));
+                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
             }
+        }
+
+        assertEqualsTestTable(SIZE);
+    }
+
+    private TgTxOption getTxOption(String pattern) {
+        switch (pattern) {
+        case "nothing":
+            return LTX1_NOTHING;
+        case "read_area":
+            return LTX1;
+        default:
+            throw new AssertionError(pattern);
         }
     }
 
@@ -139,7 +160,6 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
 
                 try (var tx2 = session.createTransaction(LTX2_NOTHING)) {
                     tx2.executeAndGetCount(update2Ps);
-//x                 tx2.commit(TgCommitType.DEFAULT);
 
                     var future2 = executeFuture(() -> {
                         tx2.commit(TgCommitType.DEFAULT);
