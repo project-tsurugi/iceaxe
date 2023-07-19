@@ -16,28 +16,28 @@ public class TgTmTxOptionAlways extends TgTmTxOptionSupplier {
      * create TgTmTxOptionAlways
      *
      * @param txOption       transaction option
-     * @param attemtMaxCount attempt max count
+     * @param attemptMaxCount attempt max count
      * @return TgTmTxOptionAlways
      */
-    public static TgTmTxOptionAlways of(TgTxOption txOption, int attemtMaxCount) {
+    public static TgTmTxOptionAlways of(TgTxOption txOption, int attemptMaxCount) {
         if (txOption == null) {
             throw new IllegalArgumentException("txOption is null");
         }
-        return new TgTmTxOptionAlways(txOption, attemtMaxCount);
+        return new TgTmTxOptionAlways(txOption, attemptMaxCount);
     }
 
     protected final TgTxOption txOption;
-    protected final int attemtMaxCount;
+    protected final int attemptMaxCount;
 
     /**
      * TgTxOption list
      *
      * @param txOption       transaction option
-     * @param attemtMaxCount attempt max count
+     * @param attemptMaxCount attempt max count
      */
-    public TgTmTxOptionAlways(TgTxOption txOption, int attemtMaxCount) {
+    public TgTmTxOptionAlways(TgTxOption txOption, int attemptMaxCount) {
         this.txOption = txOption;
-        this.attemtMaxCount = attemtMaxCount;
+        this.attemptMaxCount = attemptMaxCount;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class TgTmTxOptionAlways extends TgTmTxOptionSupplier {
 
     @Override
     protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
-        if (attempt < attemtMaxCount) {
+        if (attempt < attemptMaxCount) {
             return TgTmTxOption.execute(txOption, retryInstruction);
         }
         return TgTmTxOption.retryOver(retryInstruction);
@@ -55,6 +55,6 @@ public class TgTmTxOptionAlways extends TgTmTxOptionSupplier {
 
     @Override
     protected String getDefaultDescription() {
-        return "always(" + txOption + ", " + attemtMaxCount + ")";
+        return "always(" + txOption + ", " + attemptMaxCount + ")";
     }
 }

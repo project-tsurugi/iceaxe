@@ -61,11 +61,11 @@ public class TgTmSetting {
      * create TransactionManager Settings
      *
      * @param txOption       transaction option
-     * @param attemtMaxCount attempt max count
+     * @param attemptMaxCount attempt max count
      * @return TransactionManager Settings
      */
-    public static TgTmSetting ofAlways(TgTxOption txOption, int attemtMaxCount) {
-        var supplier = TgTmTxOptionSupplier.ofAlways(txOption, attemtMaxCount);
+    public static TgTmSetting ofAlways(TgTxOption txOption, int attemptMaxCount) {
+        var supplier = TgTmTxOptionSupplier.ofAlways(txOption, attemptMaxCount);
         return of(supplier);
     }
 
