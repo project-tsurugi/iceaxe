@@ -92,6 +92,7 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
         TsurugiSession session = null;
         try {
             session = connector.createSession(sessionOption);
+            DbTestConnector.addSession(session);
             modifier.modifySession(session);
         } catch (Throwable t) {
             if (session != null) {

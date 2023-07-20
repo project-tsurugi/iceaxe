@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.net.URI;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ public class DbTestConnector {
     private static final String SYSPROP_DBTEST_ENDPOINT = "tsurugi.dbtest.endpoint";
 
     private static URI staticEndpoint;
+    private static final List<TsurugiSession> staticSessionList = new CopyOnWriteArrayList<>();
 
     private static URI getEndPoint() {
         if (staticEndpoint == null) {
@@ -68,8 +71,14 @@ public class DbTestConnector {
 
         var connector = createConnector();
         var session = connector.createSession(sessionOption);
+        addSession(session);
 //      session.addEventListener(SESSION_LISTENER);
         return session;
+    }
+
+    public static void addSession(TsurugiSession session) {
+        staticSessionList.add(session);
+        session.addEventListener(SESSION_CLOSE_LISTENER);
     }
 
     @SuppressWarnings("unused")
@@ -92,12 +101,39 @@ public class DbTestConnector {
         }
     };
 
+    private static final TsurugiSessionEventListener SESSION_CLOSE_LISTENER = new TsurugiSessionEventListener() {
+        @Override
+        public void closeSession(TsurugiSession session, Throwable occurred) {
+            staticSessionList.remove(session);
+        }
+    };
+
     public static Socket createSocket() {
         URI endpoint = assumeEndpointTcp();
         try {
             return new Socket(endpoint.getHost(), endpoint.getPort());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    public static void closeLeakSession() {
+        int leak = 0;
+        var list = List.copyOf(staticSessionList);
+        for (var session : list) {
+            if (!session.isClosed()) {
+                LOG.error("session leak! {}", session);
+                leak++;
+                try {
+                    session.close();
+                } catch (Throwable e) {
+                    LOG.warn("session close error", e);
+                }
+            }
+        }
+
+        if (leak > 0) {
+            throw new AssertionError("session leak! " + leak);
         }
     }
 }
