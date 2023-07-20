@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.session;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -64,7 +65,7 @@ public class TsurugiSession implements AutoCloseable {
 
     // internal
     public TsurugiSession(FutureResponse<? extends Session> lowSessionFuture, TgSessionOption sessionOption) {
-        this.sessionOption = sessionOption;
+        this.sessionOption = Objects.requireNonNull(sessionOption);
         this.lowSessionFuture = lowSessionFuture;
         this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CLOSE);
@@ -132,9 +133,13 @@ public class TsurugiSession implements AutoCloseable {
         applyCloseTimeout();
     }
 
-    // internal
-    public final TgSessionOption getSessionOption() {
-        return sessionOption;
+    /**
+     * get session option
+     *
+     * @return session option
+     */
+    public final @Nonnull TgSessionOption getSessionOption() {
+        return this.sessionOption;
     }
 
     /**
@@ -531,5 +536,14 @@ public class TsurugiSession implements AutoCloseable {
         if (isClosed()) {
             throw new TsurugiIOException(IceaxeErrorCode.SESSION_ALREADY_CLOSED);
         }
+    }
+
+    @Override
+    public String toString() {
+        String label = sessionOption.getLabel();
+        if (label == null) {
+            return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode());
+        }
+        return getClass().getSimpleName() + "(" + label + ")";
     }
 }

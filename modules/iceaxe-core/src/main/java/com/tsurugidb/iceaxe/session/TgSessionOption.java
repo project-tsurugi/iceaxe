@@ -85,6 +85,7 @@ public class TgSessionOption {
         RESULT_CLOSE,
     }
 
+    private String sessionLabel;
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
     private TgCommitType commitType = TgCommitType.DEFAULT;
 
@@ -93,6 +94,26 @@ public class TgSessionOption {
      */
     public TgSessionOption() {
         timeoutMap.put(TgTimeoutKey.DEFAULT, TgTimeValue.of(Long.MAX_VALUE, TimeUnit.NANOSECONDS));
+    }
+
+    /**
+     * set session label
+     *
+     * @param label session label
+     * @return this
+     */
+    public TgSessionOption setLabel(String label) {
+        this.sessionLabel = label;
+        return this;
+    }
+
+    /**
+     * get session label
+     *
+     * @return session label
+     */
+    public String getLabel() {
+        return this.sessionLabel;
     }
 
     /**
@@ -145,6 +166,6 @@ public class TgSessionOption {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{timeout=" + timeoutMap + ", commitType=" + commitType + "}";
+        return getClass().getSimpleName() + "{label=" + sessionLabel + ", timeout=" + timeoutMap + ", commitType=" + commitType + "}";
     }
 }

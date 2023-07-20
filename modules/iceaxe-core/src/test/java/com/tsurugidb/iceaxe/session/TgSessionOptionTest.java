@@ -37,9 +37,9 @@ class TgSessionOptionTest {
     @Test
     void testToString() {
         var empty = new TgSessionOption();
-        assertEquals("TgSessionOption{timeout={DEFAULT=9223372036854775807nanoseconds}, commitType=DEFAULT}", empty.toString());
+        assertEquals("TgSessionOption{label=null, timeout={DEFAULT=9223372036854775807nanoseconds}, commitType=DEFAULT}", empty.toString());
 
-        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS).setCommitType(TgCommitType.STORED);
-        assertEquals("TgSessionOption{timeout={DEFAULT=123seconds}, commitType=STORED}", sessionOption.toString());
+        var sessionOption = TgSessionOption.of().setLabel("test").setTimeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS).setCommitType(TgCommitType.STORED);
+        assertEquals("TgSessionOption{label=test, timeout={DEFAULT=123seconds}, commitType=STORED}", sessionOption.toString());
     }
 }
