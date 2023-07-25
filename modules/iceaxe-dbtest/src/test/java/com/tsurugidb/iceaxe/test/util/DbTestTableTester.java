@@ -232,7 +232,8 @@ public class DbTestTableTester {
                         var log = LoggerFactory.getLogger(DbTestTableTester.class);
                         log.warn("executeDdl duplicate_table retry{} at {}", i, line);
 
-                        dropTable(tableName);
+                        // リトライ時にテーブルは消えているはずなので、自分でdropはしない
+                        // dropTable(tableName);
                         continue;
                     }
                     throw e;
