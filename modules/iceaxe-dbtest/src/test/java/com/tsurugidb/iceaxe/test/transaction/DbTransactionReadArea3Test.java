@@ -1,24 +1,21 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
-import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * transaction read area test
  */
-@Disabled // TODO remove Disabled. ERR_DATA_CORRUPTIONが発生する
 class DbTransactionReadArea3Test extends DbTestTableTester {
 
     private static final String TABLE_A = TEST;
@@ -84,9 +81,81 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
 
                         tx3.executeAndGetList(selectAps);
                         tx3.executeAndGetCount(insertBps, ENTITY0);
-                        tx3.commit(TgCommitType.DEFAULT);
+                        var future3 = executeFuture(() -> {
+                            tx3.commit(TgCommitType.DEFAULT);
+                            return null;
+                        });
 
+                        assertFalse(future3.isDone());
                         tx1.commit(TgCommitType.DEFAULT);
+
+                        future3.get();
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void case11() throws Exception {
+        var session = getSession();
+        try (var insertAps = session.createStatement(INSERT_A_SQL, INSERT_MAPPING); //
+                var selectAps = session.createQuery(SELECT_A_SQL, SELECT_MAPPING); //
+                var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING)) {
+            try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).label("t1"))) {
+                tx1.getTransactionId();
+                try (var tx2 = session.createTransaction(TgTxOption.ofLTX().addExclusiveReadArea(TABLE_B).label("t2"))) {
+                    tx2.getTransactionId();
+                    try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
+                        tx3.getTransactionId();
+
+                        tx3.executeAndGetList(selectAps); // yellow conflict
+                        tx3.executeAndGetCount(insertBps, ENTITY0);
+                        var future3 = executeFuture(() -> {
+                            // t3はt1のWPを踏んだがyellowなので待つ
+                            tx3.commit(TgCommitType.DEFAULT);
+                            return null;
+                        });
+
+                        tx1.executeAndGetCount(insertAps, ENTITY0);
+                        assertFalse(future3.isDone());
+                        tx1.commit(TgCommitType.DEFAULT);
+
+                        future3.get();
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void case12() throws Exception {
+        var session = getSession();
+        try (var insertAps = session.createStatement(INSERT_A_SQL, INSERT_MAPPING); //
+                var selectAps = session.createQuery(SELECT_A_SQL, SELECT_MAPPING); //
+                var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING)) {
+            try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).addExclusiveReadArea(TABLE_B).label("t1"))) {
+                tx1.getTransactionId();
+                try (var tx2 = session.createTransaction(TgTxOption.ofLTX().addExclusiveReadArea(TABLE_B).label("t2"))) {
+                    tx2.getTransactionId();
+                    try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
+                        tx3.getTransactionId();
+
+                        tx1.executeAndGetCount(insertAps, ENTITY0);
+
+                        tx3.executeAndGetList(selectAps); // red conflict
+                        // t3はt1のred conflictが（未コミットだが）確定
+                        tx3.executeAndGetCount(insertBps, ENTITY0);
+                        var future3 = executeFuture(() -> {
+                            // t1がBを読まないことも確定だが、WPの決着はcommitまで持ち越すので待つ
+                            tx3.commit(TgCommitType.DEFAULT);
+                            return null;
+                        });
+
+                        assertFalse(future3.isDone());
+                        tx1.commit(TgCommitType.DEFAULT);
+
+                        future3.get();
                     }
                 }
             }
@@ -112,19 +181,91 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                         tx3.executeAndGetList(selectAps);
                         tx3.executeAndGetCount(insertBps, ENTITY0);
                         var future3 = executeFuture(() -> {
-                            tx3.commit(TgCommitType.DEFAULT); // wait for tx2
+                            tx3.commit(TgCommitType.DEFAULT);
                             return null;
                         });
 
                         tx1.commit(TgCommitType.DEFAULT);
 
                         tx2.executeAndGetList(selectBps);
-
-                        // before tx2 commit
-                        var e3 = assertThrows(TsurugiTransactionException.class, () -> future3.get());
-                        assertEqualsCode(null, e3); // TODO sqlCode
-
+                        assertFalse(future3.isDone());
                         tx2.commit(TgCommitType.DEFAULT);
+
+                        future3.get();
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void case21() throws Exception {
+        var session = getSession();
+        try (var insertAps = session.createStatement(INSERT_A_SQL, INSERT_MAPPING); //
+                var selectAps = session.createQuery(SELECT_A_SQL, SELECT_MAPPING); //
+                var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING); //
+                var selectBps = session.createQuery(SELECT_B_SQL, SELECT_MAPPING)) {
+            try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).label("t1"))) {
+                tx1.getTransactionId();
+                try (var tx2 = session.createTransaction(TgTxOption.ofLTX().label("t2"))) {
+                    tx2.getTransactionId();
+                    try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
+                        tx3.getTransactionId();
+
+                        tx3.executeAndGetList(selectAps); // yellow conflict
+                        tx3.executeAndGetCount(insertBps, ENTITY0);
+                        var future3 = executeFuture(() -> {
+                            // t3はt1のWPを踏んだがyellowなので待つ
+                            tx3.commit(TgCommitType.DEFAULT);
+                            return null;
+                        });
+
+                        tx1.executeAndGetCount(insertAps, ENTITY0);
+
+                        assertFalse(future3.isDone());
+                        tx1.commit(TgCommitType.DEFAULT);
+
+                        assertFalse(future3.isDone());
+                        tx2.commit(TgCommitType.DEFAULT);
+
+                        future3.get();
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void case22() throws Exception {
+        var session = getSession();
+        try (var insertAps = session.createStatement(INSERT_A_SQL, INSERT_MAPPING); //
+                var selectAps = session.createQuery(SELECT_A_SQL, SELECT_MAPPING); //
+                var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING); //
+                var selectBps = session.createQuery(SELECT_B_SQL, SELECT_MAPPING)) {
+            try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).addExclusiveReadArea(TABLE_B).label("t1"))) {
+                tx1.getTransactionId();
+                try (var tx2 = session.createTransaction(TgTxOption.ofLTX().label("t2"))) {
+                    tx2.getTransactionId();
+                    try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
+                        tx3.getTransactionId();
+
+                        tx1.executeAndGetCount(insertAps, ENTITY0);
+
+                        tx3.executeAndGetList(selectAps); // red conflict
+                        // t3 は t1 の red conflictが（未コミットだが）確定。ただしcommitまで確定待ち
+                        tx3.executeAndGetCount(insertBps, ENTITY0);
+                        var future3 = executeFuture(() -> {
+                            tx3.commit(TgCommitType.DEFAULT);
+                            return null;
+                        });
+
+                        assertFalse(future3.isDone());
+                        tx1.commit(TgCommitType.DEFAULT);
+
+                        assertFalse(future3.isDone());
+                        tx2.commit(TgCommitType.DEFAULT);
+
+                        future3.get();
                     }
                 }
             }
