@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -395,12 +396,32 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
         if (txOption instanceof TgTxOptionLtx) {
             var src = (TgTxOptionLtx) txOption;
             includeDdl(src.includeDdl());
-            addWritePreserve(src.writePreserve());
-            addInclusiveReadArea(src.inclusiveReadArea());
-            addExclusiveReadArea(src.exclusiveReadArea());
+            addWritePreserve(src.writePreserveList);
+            addInclusiveReadArea(src.inclusiveReadAreaList);
+            addExclusiveReadArea(src.exclusiveReadAreaList);
         }
 
         return this;
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public int hashCode() {
+        return super.hashCode() ^ Objects.hash(includeDdl, writePreserveList, inclusiveReadAreaList, exclusiveReadAreaList);
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public boolean equals(Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (obj instanceof TgTxOptionLtx) {
+            var that = (TgTxOptionLtx) obj;
+            return includeDdl == that.includeDdl() && writePreserveList.equals(that.writePreserveList) && inclusiveReadAreaList.equals(that.inclusiveReadAreaList)
+                    && exclusiveReadAreaList.equals(that.exclusiveReadAreaList);
+        }
+        return false;
     }
 
     @Override

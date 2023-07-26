@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.transaction.option;
 
+import java.util.Objects;
+
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -58,6 +60,25 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
         }
 
         return self();
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public int hashCode() {
+        return super.hashCode() ^ Objects.hash(priority());
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public boolean equals(Object obj) {
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (obj instanceof AbstractTgTxOptionLong) {
+            var that = (AbstractTgTxOptionLong<?>) obj;
+            return Objects.equals(priority(), that.priority());
+        }
+        return false;
     }
 
     @Override

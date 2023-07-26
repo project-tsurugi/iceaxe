@@ -18,5 +18,10 @@
     <Method name="~.*addBoolean.*" />
     <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
   </Match>
+  <Match>
+    <Class name="com.tsurugidb.iceaxe.transaction.option.TgTxOptionLtx" />
+    <Method name="~.*fillFrom.*" />
+    <Bug pattern="OVERRIDING_METHODS_MUST_INVOKE_SUPER" />
+  </Match>
 
 </FindBugsFilter>

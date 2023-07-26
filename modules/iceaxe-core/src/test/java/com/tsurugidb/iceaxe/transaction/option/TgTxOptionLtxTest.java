@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -64,6 +65,8 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         TgTxOptionOcc srcTxOption = TgTxOption.ofOCC().label("abc");
         TgTxOptionLtx txOption = TgTxOption.ofLTX(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "LTX{label=abc, writePreserve=[]}";
         assertOption(expected, "abc", null, List.of(), List.of(), List.of(), //
                 txOption);
@@ -74,6 +77,9 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         TgTxOptionLtx srcTxOption = TgTxOption.ofLTX("test").label("abc").priority(TransactionPriority.INTERRUPT).addInclusiveReadArea("i1", "i2").addExclusiveReadArea("e1", "e2");
         TgTxOptionLtx txOption = TgTxOption.ofLTX(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertEquals(srcTxOption.hashCode(), txOption.hashCode());
+        assertEquals(srcTxOption, txOption);
+
         String expected = "LTX{label=abc, priority=INTERRUPT, writePreserve=[test], inclusiveReadArea=[i1, i2], exclusiveReadArea=[e1, e2]}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, List.of("test"), List.of("i1", "i2"), List.of("e1", "e2"), //
                 txOption);
@@ -84,6 +90,8 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         TgTxOptionRtx srcTxOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
         TgTxOptionLtx txOption = TgTxOption.ofLTX(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "LTX{label=abc, priority=INTERRUPT, writePreserve=[]}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, List.of(), List.of(), List.of(), //
                 txOption);
@@ -102,6 +110,8 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         TgTxOptionOcc srcTxOption = TgTxOption.ofOCC().label("abc");
         TgTxOptionLtx txOption = TgTxOption.ofDDL(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "LTX{label=abc, includeDdl=true}";
         assertOption(expected, "abc", null, true, List.of(), List.of(), List.of(), //
                 txOption);
@@ -112,6 +122,8 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         TgTxOptionLtx srcTxOption = TgTxOption.ofLTX("test").label("abc").priority(TransactionPriority.INTERRUPT).addInclusiveReadArea("i1", "i2").addExclusiveReadArea("e1", "e2");
         TgTxOptionLtx txOption = TgTxOption.ofDDL(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "LTX{label=abc, priority=INTERRUPT, includeDdl=true, writePreserve=[test], inclusiveReadArea=[i1, i2], exclusiveReadArea=[e1, e2]}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, true, List.of("test"), List.of("i1", "i2"), List.of("e1", "e2"), //
                 txOption);
@@ -122,6 +134,8 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         TgTxOptionRtx srcTxOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
         TgTxOptionLtx txOption = TgTxOption.ofDDL(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "LTX{label=abc, priority=INTERRUPT, includeDdl=true}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, true, List.of(), List.of(), List.of(), //
                 txOption);
@@ -340,6 +354,9 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
     void clone0() {
         TgTxOptionLtx txOption = TgTxOption.ofLTX("t1").label("abc").priority(TransactionPriority.INTERRUPT).addInclusiveReadArea("in1").addExclusiveReadArea("ex1");
         TgTxOptionLtx clone = txOption.clone();
+        assertNotSame(txOption, clone);
+        assertEquals(txOption.hashCode(), clone.hashCode());
+        assertEquals(txOption, clone);
 
         txOption.label(null);
         txOption.priority(null);
@@ -350,6 +367,7 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         assertOption("LTX{includeDdl=true, writePreserve=[t1, t2], inclusiveReadArea=[in1, in2], exclusiveReadArea=[ex1, ex2]}", //
                 null, null, true, List.of("t1", "t2"), List.of("in1", "in2"), List.of("ex1", "ex2"), //
                 txOption);
+        assertNotEquals(txOption, clone);
 
         String expected = "LTX{label=abc, priority=INTERRUPT, writePreserve=[t1], inclusiveReadArea=[in1], exclusiveReadArea=[ex1]}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, false, List.of("t1"), List.of("in1"), List.of("ex1"), //

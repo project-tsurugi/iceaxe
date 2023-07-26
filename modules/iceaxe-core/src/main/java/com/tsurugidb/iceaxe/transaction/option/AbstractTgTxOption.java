@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.transaction.option;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.concurrent.ThreadSafe;
@@ -86,6 +88,22 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
     protected T fillFrom(@Nonnull TgTxOption txOption) {
         label(txOption.label());
         return self();
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public int hashCode() {
+        return Objects.hash(type(), label());
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public boolean equals(Object obj) {
+        if (obj instanceof AbstractTgTxOption) {
+            var that = (AbstractTgTxOption<?>) obj;
+            return Objects.equals(type(), that.type()) && Objects.equals(label(), that.label());
+        }
+        return false;
     }
 
     @Override

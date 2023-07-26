@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -37,6 +38,9 @@ class TgTxOptionOccTest extends TgTxOptionTester {
         TgTxOptionOcc srcTxOption = TgTxOption.ofOCC().label("abc");
         TgTxOptionOcc txOption = TgTxOption.ofOCC(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertEquals(srcTxOption.hashCode(), txOption.hashCode());
+        assertEquals(srcTxOption, txOption);
+
         String expected = "OCC{label=abc}";
         assertOption(expected, "abc", txOption);
     }
@@ -46,6 +50,8 @@ class TgTxOptionOccTest extends TgTxOptionTester {
         TgTxOptionLtx srcTxOption = TgTxOption.ofLTX("test").label("abc");
         TgTxOptionOcc txOption = TgTxOption.ofOCC(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "OCC{label=abc}";
         assertOption(expected, "abc", txOption);
     }
@@ -55,6 +61,8 @@ class TgTxOptionOccTest extends TgTxOptionTester {
         TgTxOptionRtx srcTxOption = TgTxOption.ofRTX().label("abc");
         TgTxOptionOcc txOption = TgTxOption.ofOCC(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "OCC{label=abc}";
         assertOption(expected, "abc", txOption);
     }
@@ -70,9 +78,13 @@ class TgTxOptionOccTest extends TgTxOptionTester {
     void clone0() {
         TgTxOptionOcc txOption = TgTxOption.ofOCC().label("abc");
         TgTxOptionOcc clone = txOption.clone();
+        assertNotSame(txOption, clone);
+        assertEquals(txOption.hashCode(), clone.hashCode());
+        assertEquals(txOption, clone);
 
         txOption.label(null);
         assertOption("OCC{}", null, txOption);
+        assertNotEquals(txOption, clone);
 
         String expected = "OCC{label=abc}";
         assertOption(expected, "abc", clone);

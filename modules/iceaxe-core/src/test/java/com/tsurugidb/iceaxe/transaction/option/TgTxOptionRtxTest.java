@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,6 +39,8 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         TgTxOptionOcc srcTxOption = TgTxOption.ofOCC().label("abc");
         TgTxOptionRtx txOption = TgTxOption.ofRTX(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "RTX{label=abc}";
         assertOption(expected, "abc", null, txOption);
     }
@@ -47,6 +50,8 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         TgTxOptionLtx srcTxOption = TgTxOption.ofLTX("test").label("abc").priority(TransactionPriority.INTERRUPT);
         TgTxOptionRtx txOption = TgTxOption.ofRTX(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertNotEquals(srcTxOption, txOption);
+
         String expected = "RTX{label=abc, priority=INTERRUPT}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, txOption);
     }
@@ -56,6 +61,9 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         TgTxOptionRtx srcTxOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
         TgTxOptionRtx txOption = TgTxOption.ofRTX(srcTxOption);
         assertNotSame(srcTxOption, txOption);
+        assertEquals(srcTxOption.hashCode(), txOption.hashCode());
+        assertEquals(srcTxOption, txOption);
+
         String expected = "RTX{label=abc, priority=INTERRUPT}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, txOption);
     }
@@ -78,10 +86,14 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
     void clone0() {
         TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
         TgTxOptionRtx clone = txOption.clone();
+        assertNotSame(txOption, clone);
+        assertEquals(txOption.hashCode(), clone.hashCode());
+        assertEquals(txOption, clone);
 
         txOption.label(null);
         txOption.priority(null);
         assertOption("RTX{}", null, null, txOption);
+        assertNotEquals(txOption, clone);
 
         String expected = "RTX{label=abc, priority=INTERRUPT}";
         assertOption(expected, "abc", TransactionPriority.INTERRUPT, clone);
