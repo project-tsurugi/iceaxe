@@ -108,12 +108,52 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
+     * remove write preserve
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeWritePreserve(String... tableNames) {
+        for (var tableName : tableNames) {
+            writePreserveList.remove(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * remove write preserve
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeWritePreserve(Collection<String> tableNames) {
+        for (var tableName : tableNames) {
+            writePreserveList.remove(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * remove write preserve
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeWritePreserve(Stream<String> tableNames) {
+        tableNames.forEachOrdered(writePreserveList::remove);
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
      * get write preserve
      *
      * @return list of table name
      */
     public List<String> writePreserve() {
-        return this.writePreserveList;
+        return List.copyOf(this.writePreserveList);
     }
 
     /**
@@ -169,12 +209,52 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
+     * remove inclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeInclusiveReadArea(String... tableNames) {
+        for (var tableName : tableNames) {
+            inclusiveReadAreaList.remove(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * remove inclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeInclusiveReadArea(Collection<String> tableNames) {
+        for (var tableName : tableNames) {
+            inclusiveReadAreaList.remove(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * remove inclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeInclusiveReadArea(Stream<String> tableNames) {
+        tableNames.forEachOrdered(inclusiveReadAreaList::remove);
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
      * get inclusive read area
      *
      * @return inclusive read area
      */
     public List<String> inclusiveReadArea() {
-        return this.inclusiveReadAreaList;
+        return List.copyOf(this.inclusiveReadAreaList);
     }
 
     /**
@@ -230,12 +310,52 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
+     * remove exclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeExclusiveReadArea(String... tableNames) {
+        for (var tableName : tableNames) {
+            exclusiveReadAreaList.remove(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * remove exclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeExclusiveReadArea(Collection<String> tableNames) {
+        for (var tableName : tableNames) {
+            exclusiveReadAreaList.remove(tableName);
+        }
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
+     * remove exclusive read area
+     *
+     * @param tableNames table name
+     * @return this
+     */
+    public synchronized TgTxOptionLtx removeExclusiveReadArea(Stream<String> tableNames) {
+        tableNames.forEachOrdered(exclusiveReadAreaList::remove);
+        resetTransactionOption();
+        return this;
+    }
+
+    /**
      * get exclusive read area
      *
      * @return exclusive read area
      */
     public List<String> exclusiveReadArea() {
-        return this.exclusiveReadAreaList;
+        return List.copyOf(this.exclusiveReadAreaList);
     }
 
     @Override
