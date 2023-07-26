@@ -47,6 +47,11 @@ public class Example03TxOption {
         return TgTxOption.ofLTX("tableName1").addInclusiveReadArea("tableName2");
     }
 
+    TgTxOptionLtx ltx_defaultOption() {
+        var defaultOption = TgTxOption.ofLTX().addExclusiveReadArea("test1", "test2");
+        return TgTxOption.ofLTX(defaultOption).addWritePreserve("tableName1");
+    }
+
     // READ ONLY
     TgTxOptionRtx rtx() {
         return TgTxOption.ofRTX();
