@@ -269,6 +269,22 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
 
     @Override
     @OverridingMethodsMustInvokeSuper
+    protected TgTxOptionLtx fillFrom(TgTxOption txOption) {
+        super.fillFrom(txOption);
+
+        if (txOption instanceof TgTxOptionLtx) {
+            var src = (TgTxOptionLtx) txOption;
+            includeDdl(src.includeDdl());
+            addWritePreserve(src.writePreserve());
+            addInclusiveReadArea(src.inclusiveReadArea());
+            addExclusiveReadArea(src.exclusiveReadArea());
+        }
+
+        return this;
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
     protected void toString(StringBuilder sb) {
         super.toString(sb);
 

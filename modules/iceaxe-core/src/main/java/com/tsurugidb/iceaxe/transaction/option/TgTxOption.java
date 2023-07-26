@@ -1,7 +1,10 @@
 package com.tsurugidb.iceaxe.transaction.option;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
@@ -18,6 +21,17 @@ public interface TgTxOption extends Cloneable {
      */
     public static TgTxOptionOcc ofOCC() {
         return new TgTxOptionOcc();
+    }
+
+    /**
+     * create transaction option for short transaction
+     *
+     * @param txOption source transaction option
+     * @return transaction option
+     */
+    public static TgTxOptionOcc ofOCC(@Nonnull TgTxOption txOption) {
+        Objects.requireNonNull(txOption);
+        return new TgTxOptionOcc().fillFrom(txOption);
     }
 
     /**
@@ -51,6 +65,17 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
+     * create transaction option for long transaction
+     *
+     * @param txOption source transaction option
+     * @return transaction option
+     */
+    public static TgTxOptionLtx ofLTX(@Nonnull TgTxOption txOption) {
+        Objects.requireNonNull(txOption);
+        return new TgTxOptionLtx().fillFrom(txOption);
+    }
+
+    /**
      * create transaction option for read only transaction
      *
      * @return transaction option
@@ -60,12 +85,34 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
+     * create transaction option for read only transaction
+     *
+     * @param txOption source transaction option
+     * @return transaction option
+     */
+    public static TgTxOptionRtx ofRTX(@Nonnull TgTxOption txOption) {
+        Objects.requireNonNull(txOption);
+        return new TgTxOptionRtx().fillFrom(txOption);
+    }
+
+    /**
      * create transaction option for DDL(LTX)
      *
      * @return transaction option
      */
     public static TgTxOptionLtx ofDDL() {
         return new TgTxOptionLtx().includeDdl(true);
+    }
+
+    /**
+     * create transaction option for DDL(LTX)
+     *
+     * @param txOption source transaction option
+     * @return transaction option
+     */
+    public static TgTxOptionLtx ofDDL(@Nonnull TgTxOption txOption) {
+        Objects.requireNonNull(txOption);
+        return ofLTX(txOption).includeDdl(true);
     }
 
     /**

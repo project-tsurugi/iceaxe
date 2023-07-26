@@ -49,6 +49,19 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
 
     @Override
     @OverridingMethodsMustInvokeSuper
+    protected T fillFrom(TgTxOption txOption) {
+        super.fillFrom(txOption);
+
+        if (txOption instanceof AbstractTgTxOptionLong) {
+            var src = (AbstractTgTxOptionLong<?>) txOption;
+            priority(src.priority());
+        }
+
+        return self();
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
     protected void toString(StringBuilder sb) {
         super.toString(sb);
 

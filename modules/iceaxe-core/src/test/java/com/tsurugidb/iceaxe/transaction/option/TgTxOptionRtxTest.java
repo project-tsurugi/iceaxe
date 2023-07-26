@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -30,6 +31,33 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         TgTxOptionRtx txOption = TgTxOption.ofRTX();
         String expected = "RTX{}";
         assertOption(expected, null, null, txOption);
+    }
+
+    @Test
+    void ofTxOptionOcc() {
+        TgTxOptionOcc srcTxOption = TgTxOption.ofOCC().label("abc");
+        TgTxOptionRtx txOption = TgTxOption.ofRTX(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "RTX{label=abc}";
+        assertOption(expected, "abc", null, txOption);
+    }
+
+    @Test
+    void ofTxOptionLtx() {
+        TgTxOptionLtx srcTxOption = TgTxOption.ofLTX("test").label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionRtx txOption = TgTxOption.ofRTX(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "RTX{label=abc, priority=INTERRUPT}";
+        assertOption(expected, "abc", TransactionPriority.INTERRUPT, txOption);
+    }
+
+    @Test
+    void ofTxOptionRtx() {
+        TgTxOptionRtx srcTxOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionRtx txOption = TgTxOption.ofRTX(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "RTX{label=abc, priority=INTERRUPT}";
+        assertOption(expected, "abc", TransactionPriority.INTERRUPT, txOption);
     }
 
     @Test

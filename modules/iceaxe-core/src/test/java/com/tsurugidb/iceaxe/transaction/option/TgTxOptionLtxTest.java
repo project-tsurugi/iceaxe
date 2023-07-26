@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -59,10 +60,70 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
     }
 
     @Test
+    void ofTxOptionOcc() {
+        TgTxOptionOcc srcTxOption = TgTxOption.ofOCC().label("abc");
+        TgTxOptionLtx txOption = TgTxOption.ofLTX(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "LTX{label=abc, writePreserve=[]}";
+        assertOption(expected, "abc", null, List.of(), List.of(), List.of(), //
+                txOption);
+    }
+
+    @Test
+    void ofTxOptionLtx() {
+        TgTxOptionLtx srcTxOption = TgTxOption.ofLTX("test").label("abc").priority(TransactionPriority.INTERRUPT).addInclusiveReadArea("i1", "i2").addExclusiveReadArea("e1", "e2");
+        TgTxOptionLtx txOption = TgTxOption.ofLTX(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "LTX{label=abc, priority=INTERRUPT, writePreserve=[test], inclusiveReadArea=[i1, i2], exclusiveReadArea=[e1, e2]}";
+        assertOption(expected, "abc", TransactionPriority.INTERRUPT, List.of("test"), List.of("i1", "i2"), List.of("e1", "e2"), //
+                txOption);
+    }
+
+    @Test
+    void ofTxOptionRtx() {
+        TgTxOptionRtx srcTxOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionLtx txOption = TgTxOption.ofLTX(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "LTX{label=abc, priority=INTERRUPT, writePreserve=[]}";
+        assertOption(expected, "abc", TransactionPriority.INTERRUPT, List.of(), List.of(), List.of(), //
+                txOption);
+    }
+
+    @Test
     void ofDDL() {
         TgTxOptionLtx txOption = TgTxOption.ofDDL();
         String expected = "LTX{includeDdl=true}";
         assertOption(expected, null, null, true, List.of(), List.of(), List.of(), //
+                txOption);
+    }
+
+    @Test
+    void ofDDLTxOptionOcc() {
+        TgTxOptionOcc srcTxOption = TgTxOption.ofOCC().label("abc");
+        TgTxOptionLtx txOption = TgTxOption.ofDDL(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "LTX{label=abc, includeDdl=true}";
+        assertOption(expected, "abc", null, true, List.of(), List.of(), List.of(), //
+                txOption);
+    }
+
+    @Test
+    void ofDDLTxOptionLtx() {
+        TgTxOptionLtx srcTxOption = TgTxOption.ofLTX("test").label("abc").priority(TransactionPriority.INTERRUPT).addInclusiveReadArea("i1", "i2").addExclusiveReadArea("e1", "e2");
+        TgTxOptionLtx txOption = TgTxOption.ofDDL(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "LTX{label=abc, priority=INTERRUPT, includeDdl=true, writePreserve=[test], inclusiveReadArea=[i1, i2], exclusiveReadArea=[e1, e2]}";
+        assertOption(expected, "abc", TransactionPriority.INTERRUPT, true, List.of("test"), List.of("i1", "i2"), List.of("e1", "e2"), //
+                txOption);
+    }
+
+    @Test
+    void ofDDLTxOptionRtx() {
+        TgTxOptionRtx srcTxOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionLtx txOption = TgTxOption.ofDDL(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "LTX{label=abc, priority=INTERRUPT, includeDdl=true}";
+        assertOption(expected, "abc", TransactionPriority.INTERRUPT, true, List.of(), List.of(), List.of(), //
                 txOption);
     }
 

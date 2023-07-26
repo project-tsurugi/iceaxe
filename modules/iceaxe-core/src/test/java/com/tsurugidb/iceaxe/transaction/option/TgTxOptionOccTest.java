@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction.option;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -29,6 +30,33 @@ class TgTxOptionOccTest extends TgTxOptionTester {
         TgTxOptionOcc txOption = TgTxOption.ofOCC();
         String expected = "OCC{}";
         assertOption(expected, null, txOption);
+    }
+
+    @Test
+    void ofTxOptionOcc() {
+        TgTxOptionOcc srcTxOption = TgTxOption.ofOCC().label("abc");
+        TgTxOptionOcc txOption = TgTxOption.ofOCC(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "OCC{label=abc}";
+        assertOption(expected, "abc", txOption);
+    }
+
+    @Test
+    void ofTxOptionLtx() {
+        TgTxOptionLtx srcTxOption = TgTxOption.ofLTX("test").label("abc");
+        TgTxOptionOcc txOption = TgTxOption.ofOCC(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "OCC{label=abc}";
+        assertOption(expected, "abc", txOption);
+    }
+
+    @Test
+    void ofTxOptionRtx() {
+        TgTxOptionRtx srcTxOption = TgTxOption.ofRTX().label("abc");
+        TgTxOptionOcc txOption = TgTxOption.ofOCC(srcTxOption);
+        assertNotSame(srcTxOption, txOption);
+        String expected = "OCC{label=abc}";
+        assertOption(expected, "abc", txOption);
     }
 
     @Test
