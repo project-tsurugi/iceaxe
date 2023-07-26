@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -108,40 +110,32 @@ class DbCreateTableTest extends DbTestTableTester {
         assertTrue(session.findTableMetadata(TEST).isPresent());
     }
 
-    @Test
-    void repeatOccWithPk() throws Exception {
-        repeat(TgTxOption.ofOCC(), true);
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void repeatOcc(boolean hasPk) throws Exception {
+        repeat(TgTxOption.ofOCC(), hasPk, null);
     }
 
-    @Test
-    @Disabled // TODO remove Disabled たまにシリアライゼーションエラーが発生する
-    void repeatOccNoPk() throws Exception {
-        repeat(TgTxOption.ofOCC(), false);
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void repeatLtx(boolean hasPk) throws Exception {
+        Consumer<TsurugiTmIOException> error = null;
+        if (!hasPk) {
+            error = e -> {
+                assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
+                assertContains("writing sequence metadata to system storage failed", e.getMessage());
+            };
+        }
+        repeat(TgTxOption.ofLTX().includeDdl(false), hasPk, error);
     }
 
-    @Test
-    void repeatLtxWithPk() throws Exception {
-        repeat(TgTxOption.ofLTX().includeDdl(false), true);
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void repeatDdl(boolean hasPk) throws Exception {
+        repeat(TgTxOption.ofDDL(), hasPk, null);
     }
 
-    @Test
-    @Disabled // TODO remove Disabled tateyama-serverがクラッシュする
-    void repeatLtxNoPk() throws Exception {
-        repeat(TgTxOption.ofLTX().includeDdl(false), false);
-    }
-
-    @Test
-    void repeatDdlWithPk() throws Exception {
-        repeat(TgTxOption.ofDDL(), true);
-    }
-
-    @Test
-    @Disabled // TODO remove Disabled tateyama-serverがクラッシュする
-    void repeatDdlNoPk() throws Exception {
-        repeat(TgTxOption.ofDDL(), false);
-    }
-
-    private void repeat(TgTxOption txOption, boolean hasPk) throws IOException, InterruptedException {
+    private void repeat(TgTxOption txOption, boolean hasPk, Consumer<TsurugiTmIOException> error) throws IOException, InterruptedException {
         var createDdl = "create table " + TEST //
                 + "(" //
                 + "  foo int," //
@@ -158,7 +152,44 @@ class DbCreateTableTest extends DbTestTableTester {
                 tm.executeDdl(dropDdl);
             }
 
-            tm.executeDdl(createDdl);
+            if (error == null) {
+                tm.executeDdl(createDdl);
+                assertTrue(session.findTableMetadata(TEST).isPresent());
+            } else {
+                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                    tm.executeDdl(createDdl);
+                });
+                error.accept(e);
+                assertTrue(session.findTableMetadata(TEST).isEmpty());
+            }
         }
+    }
+
+    @Test
+    void createLtxNoPk() throws Exception {
+        var createDdl = "create table " + TEST //
+                + "(" //
+                + "  foo int," //
+                + "  bar bigint," //
+                + "  zzz varchar(10)" //
+                + ")";
+
+        var session = getSession();
+        var tm = session.createTransactionManager(TgTxOption.ofLTX().includeDdl(false));
+        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+            tm.execute(transaction -> {
+                var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                    transaction.executeDdl(createDdl);
+                });
+                assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e1);
+                assertContains("writing sequence metadata to system storage failed", e1.getMessage());
+
+                var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                    transaction.executeDdl(createDdl);
+                });
+                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
+            });
+        });
+        assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e);
     }
 }
