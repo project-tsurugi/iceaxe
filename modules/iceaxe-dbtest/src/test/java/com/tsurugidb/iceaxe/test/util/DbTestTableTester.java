@@ -60,6 +60,13 @@ public class DbTestTableTester {
         return staticSession;
     }
 
+    protected static synchronized void closeStaticSession() throws IOException, InterruptedException {
+        if (staticSession != null) {
+            staticSession.close();
+            staticSession = null;
+        }
+    }
+
     @AfterAll
     static void testerAfterAll() throws IOException, InterruptedException {
         try (var c1 = staticSession; var c2 = (Closeable) () -> {

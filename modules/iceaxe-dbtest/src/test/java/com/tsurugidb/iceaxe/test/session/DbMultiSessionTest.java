@@ -26,10 +26,14 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbMultiSessionTest extends DbTestTableTester {
 
     private static final int ATTEMPT_SIZE = 260;
-    private static final int EXPECTED_SESSION_SIZE = getSystemProperty("tsurugi.dbtest.expected.session.size", 100);
+
+    // TODO 最大接続数は、実行環境（tsurugidbの構成定義ファイルの内容）によって変わるので、本当はDBサーバーから取得したい
+    private static final int EXPECTED_SESSION_SIZE = getSystemProperty("tsurugi.dbtest.expected.session.size", 104);
 
     @Test
     void limit() throws Exception {
+        closeStaticSession();
+
         var sessionList = new ArrayList<TsurugiSession>();
         Throwable occurred = null;
         try {
