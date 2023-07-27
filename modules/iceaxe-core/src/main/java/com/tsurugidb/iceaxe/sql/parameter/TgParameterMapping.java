@@ -92,20 +92,6 @@ public abstract class TgParameterMapping<P> {
     /**
      * create Parameter Mapping (single variable)
      *
-     * @param <P>   parameter type
-     * @param name  bind variable name
-     * @param clazz parameter type
-     * @return parameter mapping
-     * @see #ofSingle(String, Class)
-     */
-    @Deprecated(forRemoval = true)
-    public static <P> TgParameterMapping<P> of(String name, Class<P> clazz) {
-        return ofSingle(name, clazz);
-    }
-
-    /**
-     * create Parameter Mapping (single variable)
-     *
      * @param <P>  parameter type
      * @param name bind variable name
      * @param type parameter type
@@ -126,20 +112,6 @@ public abstract class TgParameterMapping<P> {
      */
     public static <P> TgParameterMapping<P> ofSingle(TgBindVariable<P> variable) {
         return TgSingleParameterMapping.of(variable);
-    }
-
-    /**
-     * create Parameter Mapping (single variable)
-     *
-     * @param <P>  parameter type
-     * @param name bind variable name
-     * @param type parameter type
-     * @return parameter mapping
-     * @see #ofSingle(String, TgDataType)
-     */
-    @Deprecated(forRemoval = true)
-    public static <P> TgParameterMapping<P> of(String name, TgDataType type) {
-        return ofSingle(name, type);
     }
 
     private IceaxeConvertUtil convertUtil = null;

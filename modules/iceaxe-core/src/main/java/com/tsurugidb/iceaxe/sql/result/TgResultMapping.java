@@ -68,38 +68,12 @@ public abstract class TgResultMapping<R> {
     /**
      * create result mapping (single column)
      *
-     * @param <R>   result type
-     * @param clazz result type
-     * @return result mapping
-     * @see #ofSingle(Class)
-     */
-    @Deprecated(forRemoval = true)
-    public static <R> TgResultMapping<R> of(Class<R> clazz) {
-        return ofSingle(clazz);
-    }
-
-    /**
-     * create result mapping (single column)
-     *
      * @param <R>  result type
      * @param type result type
      * @return result mapping
      */
     public static <R> TgResultMapping<R> ofSingle(TgDataType type) {
         return TgSingleResultMapping.of(type);
-    }
-
-    /**
-     * create result mapping (single column)
-     *
-     * @param <R>  result type
-     * @param type result type
-     * @return result mapping
-     * @see #ofSingle(TgDataType)
-     */
-    @Deprecated(forRemoval = true)
-    public static <R> TgResultMapping<R> of(TgDataType type) {
-        return ofSingle(type);
     }
 
     private IceaxeConvertUtil convertUtil = null;

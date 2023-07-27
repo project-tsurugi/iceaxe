@@ -15,8 +15,6 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
-import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
@@ -136,49 +134,5 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
 
         event(null, listener -> listener.executeBatchStarted(transaction, this, parameterList, result));
         return result;
-    }
-
-    /**
-     * execute statement
-     *
-     * @param transaction Transaction
-     * @param parameter   SQL parameter
-     * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
-     */
-    @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
-        return transaction.executeAndGetCount(this, parameter);
-    }
-
-    /**
-     * execute statement
-     *
-     * @param tm        Transaction Manager
-     * @param parameter SQL parameter
-     * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransactionManager tm, P parameter) throws IOException, InterruptedException {
-        return tm.executeAndGetCount(this, parameter);
-    }
-
-    /**
-     * execute statement
-     *
-     * @param tm        Transaction Manager
-     * @param setting   transaction manager setting
-     * @param parameter SQL parameter
-     * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException, InterruptedException {
-        return tm.executeAndGetCount(setting, this, parameter);
     }
 }

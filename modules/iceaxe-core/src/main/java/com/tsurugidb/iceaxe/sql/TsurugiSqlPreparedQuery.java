@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.sql;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -16,8 +15,6 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
-import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -103,93 +100,5 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
 
         event(null, listener -> listener.executeQueryStarted(transaction, this, parameter, result));
         return result;
-    }
-
-    /**
-     * execute query
-     *
-     * @param transaction Transaction
-     * @param parameter   SQL parameter
-     * @return record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
-     */
-    @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
-        return transaction.executeAndFindRecord(this, parameter);
-    }
-
-    /**
-     * execute query
-     *
-     * @param tm        Transaction Manager
-     * @param parameter SQL parameter
-     * @return record
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, P parameter) throws IOException, InterruptedException {
-        return tm.executeAndFindRecord(this, parameter);
-    }
-
-    /**
-     * execute query
-     *
-     * @param tm        Transaction Manager
-     * @param setting   transaction manager settings
-     * @param parameter SQL parameter
-     * @return record
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @Deprecated(forRemoval = true)
-    public Optional<R> executeAndFindRecord(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException, InterruptedException {
-        return tm.executeAndFindRecord(setting, this, parameter);
-    }
-
-    /**
-     * execute query
-     *
-     * @param transaction Transaction
-     * @param parameter   SQL parameter
-     * @return list of record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
-     */
-    @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
-        return transaction.executeAndGetList(this, parameter);
-    }
-
-    /**
-     * execute query
-     *
-     * @param tm        Transaction Manager
-     * @param parameter SQL parameter
-     * @return list of record
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransactionManager tm, P parameter) throws IOException, InterruptedException {
-        return tm.executeAndGetList(this, parameter);
-    }
-
-    /**
-     * execute query
-     *
-     * @param tm        Transaction Manager
-     * @param setting   transaction manager settings
-     * @param parameter SQL parameter
-     * @return list of record
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @Deprecated(forRemoval = true)
-    public List<R> executeAndGetList(TsurugiTransactionManager tm, TgTmSetting setting, P parameter) throws IOException, InterruptedException {
-        return tm.executeAndGetList(setting, this, parameter);
     }
 }

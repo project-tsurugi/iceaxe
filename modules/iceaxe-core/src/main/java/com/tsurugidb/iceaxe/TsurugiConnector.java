@@ -34,31 +34,6 @@ public class TsurugiConnector {
      *
      * @param endpoint the end-point URI
      * @return connector
-     * @see #of(URI, Credential, TgSessionOption)
-     */
-    @Deprecated(forRemoval = true)
-    public static TsurugiConnector createConnector(String endpoint) {
-        var uri = URI.create(endpoint);
-        return createConnector(uri);
-    }
-
-    /**
-     * create connector
-     *
-     * @param endpoint the end-point URI
-     * @return connector
-     * @see #of(URI, Credential, TgSessionOption)
-     */
-    @Deprecated(forRemoval = true)
-    public static TsurugiConnector createConnector(URI endpoint) {
-        return of(endpoint, null, null);
-    }
-
-    /**
-     * create connector
-     *
-     * @param endpoint the end-point URI
-     * @return connector
      */
     public static TsurugiConnector of(String endpoint) {
         var uri = URI.create(endpoint);

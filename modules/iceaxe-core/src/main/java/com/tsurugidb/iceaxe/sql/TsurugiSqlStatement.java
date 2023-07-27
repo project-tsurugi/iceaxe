@@ -13,8 +13,6 @@ import com.tsurugidb.iceaxe.sql.event.TsurugiSqlStatementEventListener;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
-import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 
 /**
  * Tsurugi SQL statement (insert/update/delete, DDL)
@@ -88,46 +86,5 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
 
         event(null, listener -> listener.executeStatementStarted(transaction, this, result));
         return result;
-    }
-
-    /**
-     * execute statement
-     *
-     * @param transaction Transaction
-     * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
-     */
-    @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {
-        return transaction.executeAndGetCount(this);
-    }
-
-    /**
-     * execute statement
-     *
-     * @param tm Transaction Manager
-     * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        return tm.executeAndGetCount(this);
-    }
-
-    /**
-     * execute statement
-     *
-     * @param tm      Transaction Manager
-     * @param setting transaction manager settings
-     * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @Deprecated(forRemoval = true)
-    public int executeAndGetCount(TsurugiTransactionManager tm, TgTmSetting setting) throws IOException, InterruptedException {
-        return tm.executeAndGetCount(setting, this);
     }
 }

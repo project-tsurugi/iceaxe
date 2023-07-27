@@ -911,55 +911,6 @@ public class TsurugiTransaction implements AutoCloseable {
     // commit, rollback
 
     /**
-     * add before-commit listener
-     *
-     * @param listener listener
-     */
-    @Deprecated(forRemoval = true)
-    public void addBeforeCommitListener(Consumer<TsurugiTransaction> listener) {
-        addEventListener(new TsurugiTransactionEventListener() {
-            @Override
-            public void commitStart(TsurugiTransaction transaction, TgCommitType commitType) {
-                listener.accept(transaction);
-            }
-        });
-    }
-
-    /**
-     * add commit listener
-     *
-     * @param listener listener
-     */
-    @Deprecated(forRemoval = true)
-    public void addCommitListener(Consumer<TsurugiTransaction> listener) {
-        addEventListener(new TsurugiTransactionEventListener() {
-            @Override
-            public void commitEnd(TsurugiTransaction transaction, TgCommitType commitType, Throwable occurred) {
-                if (occurred == null) {
-                    listener.accept(transaction);
-                }
-            }
-        });
-    }
-
-    /**
-     * add rollback listener
-     *
-     * @param listener listener
-     */
-    @Deprecated(forRemoval = true)
-    public void addRollbackListener(Consumer<TsurugiTransaction> listener) {
-        addEventListener(new TsurugiTransactionEventListener() {
-            @Override
-            public void rollbackEnd(TsurugiTransaction transaction, Throwable occurred) {
-                if (occurred == null) {
-                    listener.accept(transaction);
-                }
-            }
-        });
-    }
-
-    /**
      * Whether transaction is available
      *
      * @return true: available
