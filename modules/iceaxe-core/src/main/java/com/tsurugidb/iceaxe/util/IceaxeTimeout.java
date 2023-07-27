@@ -8,7 +8,10 @@ import com.tsurugidb.tsubakuro.util.ServerResource;
 import com.tsurugidb.tsubakuro.util.Timeout;
 import com.tsurugidb.tsubakuro.util.Timeout.Policy;
 
-// internal
+/**
+ * Iceaxe timeout
+ */
+@IceaxeInternal
 public class IceaxeTimeout {
 
     private final TgSessionOption sessionOption;

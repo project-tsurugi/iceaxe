@@ -20,6 +20,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
 /**
@@ -614,7 +615,12 @@ public class TgBindParameters {
         return this;
     }
 
-    // internal
+    /**
+     * convert to {@link Parameter} list
+     *
+     * @return parameter list
+     */
+    @IceaxeInternal
     public List<Parameter> toLowParameterList() {
         var list = new ArrayList<Parameter>(parameterList.size());
         for (var parameter : parameterList) {

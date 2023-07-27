@@ -7,6 +7,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
  * Tsurugi SQL Result
@@ -18,7 +19,16 @@ public abstract class TsurugiSqlResult implements AutoCloseable {
     private final TsurugiSql sqlStatement;
     private final Object sqlParameter;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param sqlExecuteId iceaxe SQL executeId
+     * @param transaction  transaction
+     * @param ps           SQL definition
+     * @param parameter    SQL parameter
+     * @throws IOException
+     */
+    @IceaxeInternal
     public TsurugiSqlResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter) throws IOException {
         this.iceaxeSqlExecuteId = sqlExecuteId;
         this.ownerTransaction = transaction;
@@ -36,8 +46,14 @@ public abstract class TsurugiSqlResult implements AutoCloseable {
         return this.iceaxeSqlExecuteId;
     }
 
-    // internal
-    public TsurugiTransactionException fillTsurugiException(TsurugiTransactionException e) {
+    /**
+     * fill information in exception
+     *
+     * @param e exception
+     * @return exception
+     */
+    @IceaxeInternal
+    public TsurugiTransactionException fillToTsurugiException(TsurugiTransactionException e) {
         e.setSql(ownerTransaction, sqlStatement, sqlParameter, this);
         return e;
     }

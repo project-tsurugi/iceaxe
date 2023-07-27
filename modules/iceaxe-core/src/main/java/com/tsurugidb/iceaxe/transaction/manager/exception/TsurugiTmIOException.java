@@ -6,6 +6,7 @@ import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
  * Tsurugi TransactionManager IOException
@@ -16,7 +17,15 @@ public class TsurugiTmIOException extends TsurugiIOException {
     private final TsurugiTransaction transaction;
     private final TgTmTxOption nextTmOption;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param message      the detail message
+     * @param transaction  transaction
+     * @param cause        the cause
+     * @param nextTmOption next transaction option
+     */
+    @IceaxeInternal
     public TsurugiTmIOException(String message, TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
         super(createMessage(message, transaction, nextTmOption), cause);
         this.transaction = transaction;

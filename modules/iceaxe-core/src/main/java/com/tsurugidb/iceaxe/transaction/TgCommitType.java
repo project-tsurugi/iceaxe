@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.transaction;
 
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.CommitStatus;
 
 /**
@@ -44,7 +45,12 @@ public enum TgCommitType {
         this.lowCommitStatus = lowCommitStatus;
     }
 
-    // internal
+    /**
+     * get {@link CommitStatus}
+     *
+     * @return commit status
+     */
+    @IceaxeInternal
     public CommitStatus getLowCommitStatus() {
         return this.lowCommitStatus;
     }

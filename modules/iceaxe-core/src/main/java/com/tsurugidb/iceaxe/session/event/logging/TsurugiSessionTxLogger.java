@@ -334,11 +334,11 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     // Session
 
     /**
-     * called when create SQL statement
+     * called when create SQL definition
      *
-     * @param sqlStatement SQL statement
+     * @param ps SQL definition
      */
-    protected void logCreateSqlStatement(TsurugiSql sqlStatement) {
+    protected void logCreateSqlStatement(TsurugiSql ps) {
         // do override
     }
 
@@ -542,7 +542,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param method    execute method
      * @param txLog     transaction log
      * @param exLog     transaction SQL execute log
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      */
     protected void logTransactionSqlStart(TgTxMethod method, TgSessionTxLog txLog, TgSessionTxExecuteLog exLog, TsurugiSql ps, Object parameter) {
@@ -571,7 +571,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param method    execute method
      * @param txLog     transaction log
      * @param exLog     transaction SQL execute log
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @param result    SQL result
      * @param occurred  exception
@@ -784,7 +784,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param <R>    result type
      * @param txLog  transaction log
      * @param sqlLog SQL log
-     * @param ps     SQL statement
+     * @param ps     SQL definition
      * @param result SQL result
      * @param record record
      */

@@ -47,7 +47,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      * called when execute query started
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      */
     default void executeQueryStarted2(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result) {
@@ -58,7 +58,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      * called when execute query read record
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      * @param record      record
      */
@@ -70,7 +70,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      * called when execute query read error
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      * @param occurred    exception
      */
@@ -82,7 +82,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      * called when execute query end
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      */
     default void executeQueryEnd(TsurugiTransaction transaction, TsurugiSqlQuery<R> ps, TsurugiQueryResult<R> result) {
@@ -93,7 +93,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
      * called when close result
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      * @param occurred    exception
      */

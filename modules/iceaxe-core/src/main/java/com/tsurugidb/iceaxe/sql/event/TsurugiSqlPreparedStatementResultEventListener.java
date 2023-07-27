@@ -57,7 +57,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
      * called when execute statement started
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      */
@@ -69,7 +69,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
      * called when execute statement end
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      * @param occurred    exception
@@ -82,7 +82,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
      * called when close result
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      * @param occurred    exception
@@ -95,7 +95,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
      * called when execute statement started
      *
      * @param transaction   transaction
-     * @param ps            SQL statement
+     * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @param result        SQL result
      */
@@ -107,7 +107,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
      * called when execute statement end
      *
      * @param transaction   transaction
-     * @param ps            SQL statement
+     * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @param result        SQL result
      * @param occurred      exception
@@ -120,7 +120,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
      * called when close result
      *
      * @param transaction   transaction
-     * @param ps            SQL statement
+     * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @param result        SQL result
      * @param occurred      exception

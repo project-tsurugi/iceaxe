@@ -15,6 +15,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
@@ -29,7 +30,16 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
 
     private List<TsurugiSqlPreparedStatementEventListener<P>> eventListenerList = null;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param session                    session
+     * @param sql                        SQL
+     * @param lowPreparedStatementFuture future of PreparedStatement
+     * @param parameterMapping           parameter mapping
+     * @throws IOException
+     */
+    @IceaxeInternal
     public TsurugiSqlPreparedStatement(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) throws IOException {
         super(session, sql, lowPreparedStatementFuture, parameterMapping);
     }

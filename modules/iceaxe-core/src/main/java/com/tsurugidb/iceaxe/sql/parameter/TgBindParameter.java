@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
 /**
@@ -271,7 +272,12 @@ public class TgBindParameter {
         this.stringSupplier = stringSupplier;
     }
 
-    // internal
+    /**
+     * convert to {@link Parameter}
+     *
+     * @return parameter
+     */
+    @IceaxeInternal
     public Parameter toLowParameter() {
         return this.lowParameter;
     }

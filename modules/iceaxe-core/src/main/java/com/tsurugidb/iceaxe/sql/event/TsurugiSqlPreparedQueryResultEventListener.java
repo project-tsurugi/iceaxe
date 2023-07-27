@@ -48,7 +48,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
      * called when execute query started
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      */
@@ -60,7 +60,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
      * called when execute query read record
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      * @param record      record
@@ -73,7 +73,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
      * called when execute query read error
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      * @param occurred    exception
@@ -86,7 +86,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
      * called when execute query end
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      */
@@ -98,7 +98,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
      * called when close result
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      * @param occurred    exception

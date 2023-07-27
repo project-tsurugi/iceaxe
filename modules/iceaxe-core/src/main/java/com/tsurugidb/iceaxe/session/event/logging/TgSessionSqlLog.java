@@ -11,7 +11,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 public class TgSessionSqlLog {
 
     private int iceaxeSqlExecuteId;
-    private TsurugiSql sqlStatement;
+    private TsurugiSql sqlDefinition;
     private Object sqlParameter;
     private TsurugiSqlResult result;
 
@@ -38,23 +38,23 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * set SQL statement
+     * set SQL definition
      *
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      */
     public void setSqlStatement(TsurugiSql ps, Object parameter) {
-        this.sqlStatement = ps;
+        this.sqlDefinition = ps;
         this.sqlParameter = parameter;
     }
 
     /**
-     * get SQL statement
+     * get SQL definition
      *
-     * @return SQL statement
+     * @return SQL definition
      */
     public TsurugiSql getSqlStatement() {
-        return this.sqlStatement;
+        return this.sqlDefinition;
     }
 
     /**
@@ -72,7 +72,7 @@ public class TgSessionSqlLog {
      * @return SQL statementId
      */
     public int getIceaxeSqlStatementId() {
-        return this.sqlStatement.getIceaxeSqlId();
+        return this.sqlDefinition.getIceaxeSqlId();
     }
 
     /**

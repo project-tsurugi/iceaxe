@@ -13,16 +13,24 @@ import com.tsurugidb.iceaxe.sql.event.TsurugiSqlStatementEventListener;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
- * Tsurugi SQL statement (insert/update/delete, DDL)
+ * Tsurugi SQL definition (insert/update/delete, DDL)
  */
 public class TsurugiSqlStatement extends TsurugiSqlDirect {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSqlStatement.class);
 
     private List<TsurugiSqlStatementEventListener> eventListenerList = null;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param session session
+     * @param sql     SQL
+     * @throws IOException
+     */
+    @IceaxeInternal
     public TsurugiSqlStatement(TsurugiSession session, String sql) throws IOException {
         super(session, sql);
     }

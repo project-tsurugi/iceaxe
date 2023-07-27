@@ -11,6 +11,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 
@@ -27,7 +28,12 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
     private Object sqlParameter;
     private TsurugiSqlResult sqlResult;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param cause the cause
+     */
+    @IceaxeInternal
     public TsurugiTransactionException(ServerException cause) {
         super(TsurugiDiagnosticCodeProvider.createMessage(cause), cause);
     }
@@ -39,6 +45,7 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
      * @param code    diagnostic code
      * @param cause   the cause
      */
+    @IceaxeInternal
     public TsurugiTransactionException(String message, DiagnosticCode code, Throwable cause) {
         super(message, new ServerException(TsurugiDiagnosticCodeProvider.createMessage(code), cause) {
             @Override
@@ -62,7 +69,7 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
      * set SQL.
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      */

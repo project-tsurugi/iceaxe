@@ -130,7 +130,11 @@ public class TsurugiResultRecord {
         }
     }
 
-    // internal
+    /**
+     * get convert type utility
+     *
+     * @return convert type utility
+     */
     public IceaxeConvertUtil getConvertUtil() {
         return this.convertUtil;
     }
@@ -162,7 +166,7 @@ public class TsurugiResultRecord {
             }
             return exists;
         } catch (ServerException e) {
-            throw ownerResult.fillTsurugiException(new TsurugiTransactionException(e));
+            throw ownerResult.fillToTsurugiException(new TsurugiTransactionException(e));
         }
     }
 
@@ -254,7 +258,7 @@ public class TsurugiResultRecord {
                 throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);
             }
         } catch (ServerException e) {
-            throw ownerResult.fillTsurugiException(new TsurugiTransactionException(e));
+            throw ownerResult.fillToTsurugiException(new TsurugiTransactionException(e));
         }
     }
 

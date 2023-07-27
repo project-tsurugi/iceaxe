@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlCommon.Column;
 import com.tsurugidb.tsubakuro.explain.PlanGraph;
 import com.tsurugidb.tsubakuro.explain.PlanGraphException;
@@ -23,10 +24,11 @@ public class TgStatementMetadata {
     /**
      * Creates a new instance.
      *
-     * @param source               SQL statement
+     * @param source               SQL
      * @param arguments            SQL arguments
      * @param lowStatementMetadata low StatementMetadata
      */
+    @IceaxeInternal
     public TgStatementMetadata(String source, @Nullable Object arguments, StatementMetadata lowStatementMetadata) {
         this.source = source;
         this.arguments = arguments;

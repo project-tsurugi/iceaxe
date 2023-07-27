@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 import com.tsurugidb.tsubakuro.sql.Placeholders;
 
@@ -370,7 +371,12 @@ public class TgBindVariables {
         return lowPlaceholderList.stream().map(ph -> ":" + ph.getName()).collect(Collectors.joining(delimiter));
     }
 
-    // internal
+    /**
+     * convert to {@link Placeholder} list
+     *
+     * @return placeholder list
+     */
+    @IceaxeInternal
     public List<Placeholder> toLowPlaceholderList() {
         return this.lowPlaceholderList;
     }

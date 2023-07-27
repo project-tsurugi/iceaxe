@@ -14,9 +14,10 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
- * Tsurugi SQL query (select)
+ * Tsurugi SQL definition (select)
  *
  * @param <R> result type
  */
@@ -26,7 +27,15 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
     private final TgResultMapping<R> resultMapping;
     private List<TsurugiSqlQueryEventListener<R>> eventListenerList = null;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param session       session
+     * @param sql           SQL
+     * @param resultMapping result mapping
+     * @throws IOException
+     */
+    @IceaxeInternal
     public TsurugiSqlQuery(TsurugiSession session, String sql, TgResultMapping<R> resultMapping) throws IOException {
         super(session, sql);
         this.resultMapping = resultMapping;

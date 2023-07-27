@@ -10,6 +10,7 @@ import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEmptyParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgSingleParameterMapping;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 
@@ -126,14 +127,30 @@ public abstract class TgParameterMapping<P> {
         return this;
     }
 
-    // internal
+    /**
+     * get convert type utility
+     *
+     * @return convert type utility
+     */
     public IceaxeConvertUtil getConvertUtil() {
         return this.convertUtil;
     }
 
-    // internal
+    /**
+     * convert to {@link Placeholder} list
+     *
+     * @return placeholder list
+     */
+    @IceaxeInternal
     public abstract List<Placeholder> toLowPlaceholderList();
 
-    // internal
+    /**
+     * convert to {@link Parameter} list
+     *
+     * @param parameter   parameter
+     * @param convertUtil convert type utility
+     * @return parameter list
+     */
+    @IceaxeInternal
     public abstract List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil);
 }

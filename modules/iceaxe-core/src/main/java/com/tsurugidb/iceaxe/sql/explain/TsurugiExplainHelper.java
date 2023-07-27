@@ -26,7 +26,7 @@ public class TsurugiExplainHelper {
      * Retrieves execution plan of the statement.
      *
      * @param session tsurugi session
-     * @param source  SQL statement
+     * @param source  SQL
      * @return statement metadata
      * @throws IOException
      * @throws InterruptedException
@@ -42,7 +42,7 @@ public class TsurugiExplainHelper {
      * Retrieves execution plan of the statement.
      *
      * @param session        tsurugi session
-     * @param source         SQL statement
+     * @param source         SQL
      * @param connectTimeout connect timeout
      * @param closeTimeout   close timeout
      * @return statement metadata
@@ -65,7 +65,7 @@ public class TsurugiExplainHelper {
      * Retrieves execution plan of the statement.
      *
      * @param session        tsurugi session
-     * @param source         SQL statement
+     * @param source         SQL
      * @param arguments      SQL arguments
      * @param lowPs          PreparedStatement
      * @param lowParameter   list of Parameter

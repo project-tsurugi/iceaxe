@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 
@@ -186,6 +187,11 @@ public interface TgTxOption extends Cloneable {
      */
     public TgTxOption clone(String label);
 
-    // internal
+    /**
+     * convert to {@link TransactionOption}
+     *
+     * @return transaction option
+     */
+    @IceaxeInternal
     public TransactionOption toLowTransactionOption();
 }

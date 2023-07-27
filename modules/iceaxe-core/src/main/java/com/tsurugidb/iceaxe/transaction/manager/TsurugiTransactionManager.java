@@ -32,6 +32,7 @@ import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
 
@@ -51,7 +52,13 @@ public class TsurugiTransactionManager {
     private final TgTmSetting defaultSetting;
     private List<TsurugiTmEventListener> eventListenerList = null;
 
-    // internal
+    /**
+     * Creates a new instance
+     *
+     * @param session        session
+     * @param defaultSetting default setting
+     */
+    @IceaxeInternal
     public TsurugiTransactionManager(TsurugiSession session, TgTmSetting defaultSetting) {
         this.ownerSession = session;
         this.defaultSetting = defaultSetting;

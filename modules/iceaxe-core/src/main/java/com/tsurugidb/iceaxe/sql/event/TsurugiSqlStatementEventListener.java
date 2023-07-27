@@ -13,7 +13,7 @@ public interface TsurugiSqlStatementEventListener {
      * called when execute statement start
      *
      * @param transaction        transaction
-     * @param ps                 SQL statement
+     * @param ps                 SQL definition
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      */
     default void executeStatementStart(TsurugiTransaction transaction, TsurugiSqlStatement ps, int iceaxeSqlExecuteId) {
@@ -24,7 +24,7 @@ public interface TsurugiSqlStatementEventListener {
      * called when execute statement start
      *
      * @param transaction        transaction
-     * @param ps                 SQL statement
+     * @param ps                 SQL definition
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      * @param occurred           exception
      */
@@ -36,7 +36,7 @@ public interface TsurugiSqlStatementEventListener {
      * called when execute statement started
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      */
     default void executeStatementStarted(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result) {

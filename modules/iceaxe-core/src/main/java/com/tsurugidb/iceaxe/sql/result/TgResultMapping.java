@@ -89,11 +89,14 @@ public abstract class TgResultMapping<R> {
         return this;
     }
 
-    // internal
+    /**
+     * get convert type utility
+     *
+     * @return convert type utility
+     */
     public IceaxeConvertUtil getConvertUtil() {
         return this.convertUtil;
     }
 
-    // internal
     protected abstract R convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException;
 }

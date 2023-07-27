@@ -13,24 +13,24 @@ import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 
 /**
- * DiagnosticCode provider
+ * diagnostic code provider
  */
 public interface TsurugiDiagnosticCodeProvider {
 
     /**
-     * get DiagnosticCode
+     * get diagnostic code
      *
-     * @return DiagnosticCode (null if not found)
+     * @return diagnostic code (null if not found)
      */
     public @Nullable DiagnosticCode getDiagnosticCode();
 
     // utility
 
     /**
-     * get DiagnosticCode provider
+     * get diagnostic code provider
      *
      * @param e Throwable
-     * @return DiagnosticCode provider
+     * @return diagnostic code provider
      */
     public static Optional<TsurugiDiagnosticCodeProvider> findDiagnosticCodeProvider(Throwable e) {
         for (Throwable t = e; t != null; t = t.getCause()) {
@@ -68,7 +68,7 @@ public interface TsurugiDiagnosticCodeProvider {
     /**
      * create message
      *
-     * @param code DiagnosticCode
+     * @param code diagnostic code
      * @return message
      */
     public static @Nullable String createMessage(DiagnosticCode code) {
@@ -147,9 +147,9 @@ public interface TsurugiDiagnosticCodeProvider {
     }
 
     /**
-     * get SQL statement.
+     * get SQL definition.
      *
-     * @return SQL statement
+     * @return SQL definition
      */
     public default @Nullable TsurugiSql getSqlStatement() {
         return findTransactionException().map(e -> e.getSqlStatement()).orElse(null);

@@ -57,17 +57,17 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected void logCreateSqlStatement(TsurugiSql sqlStatement) {
+    protected void logCreateSqlStatement(TsurugiSql ps) {
         if (!config.writeSqlFile()) {
             return;
         }
 
-        int ssId = sqlStatement.getIceaxeSqlId();
+        int ssId = ps.getIceaxeSqlId();
         String fileName = String.format("ss-%d.sql", ssId);
         var outputDir = config.outputDir().resolve("sql_statement");
         try {
             Files.createDirectories(outputDir);
-            Files.writeString(outputDir.resolve(fileName), sqlStatement.getSql(), StandardCharsets.UTF_8);
+            Files.writeString(outputDir.resolve(fileName), ps.getSql(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }

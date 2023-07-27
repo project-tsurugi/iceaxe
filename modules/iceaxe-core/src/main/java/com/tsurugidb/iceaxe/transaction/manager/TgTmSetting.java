@@ -16,6 +16,7 @@ import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionList;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOptionSupplier;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
@@ -60,7 +61,7 @@ public class TgTmSetting {
     /**
      * create TransactionManager Settings
      *
-     * @param txOption       transaction option
+     * @param txOption        transaction option
      * @param attemptMaxCount attempt max count
      * @return TransactionManager Settings
      */
@@ -401,7 +402,12 @@ public class TgTmSetting {
         return this.eventListenerList;
     }
 
-    // internal
+    /**
+     * initialize transaction
+     *
+     * @param transaction transaction
+     */
+    @IceaxeInternal
     public void initializeTransaction(TsurugiTransaction transaction) {
         if (beginTimeout != null) {
             transaction.setBeginTimeout(beginTimeout);

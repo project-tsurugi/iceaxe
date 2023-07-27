@@ -39,7 +39,7 @@ public interface TsurugiTransactionEventListener {
      * @param transaction       transaction
      * @param method            execute method
      * @param iceaxeTxExecuteId iceaxe tx executeId
-     * @param ps                SQL statement
+     * @param ps                SQL definition
      * @param parameter         SQL parameter
      */
     default void executeStart(TsurugiTransaction transaction, TgTxMethod method, int iceaxeTxExecuteId, TsurugiSql ps, @Nullable Object parameter) {
@@ -52,7 +52,7 @@ public interface TsurugiTransactionEventListener {
      * @param transaction       transaction
      * @param method            execute method
      * @param iceaxeTxExecuteId iceaxe tx executeId
-     * @param ps                SQL statement
+     * @param ps                SQL definition
      * @param parameter         SQL parameter
      * @param result            SQL result
      * @param occurred          exception

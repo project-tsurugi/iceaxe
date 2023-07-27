@@ -11,10 +11,14 @@ import java.time.ZonedDateTime;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
-// internal
+/**
+ * {@link Parameter} utility.
+ */
+@IceaxeInternal
 public final class IceaxeLowParameterUtil {
 
     private IceaxeLowParameterUtil() {

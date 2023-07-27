@@ -31,6 +31,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -69,7 +70,15 @@ public class TsurugiTransaction implements AutoCloseable {
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
     private boolean closed = false;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param session              session
+     * @param lowTransactionFuture future of Transaction
+     * @param txOption             transaction option
+     * @throws IOException
+     */
+    @IceaxeInternal
     public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption txOption) throws IOException {
         this.iceaxeTxId = TRANSACTION_COUNT.incrementAndGet();
         this.ownerSession = session;
@@ -268,12 +277,23 @@ public class TsurugiTransaction implements AutoCloseable {
         }
     }
 
-    // internal
+    /**
+     * get session option
+     *
+     * @return session option
+     */
     public final TgSessionOption getSessionOption() {
         return ownerSession.getSessionOption();
     }
 
-    // internal
+    /**
+     * convert to {@link Transaction}
+     *
+     * @return transaction
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @IceaxeInternal
 //  @ThreadSafe
     public final synchronized Transaction getLowTransaction() throws IOException, InterruptedException {
         this.calledGetLowTransaction = true;
@@ -404,7 +424,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute query.
      *
      * @param <R> result type
-     * @param ps  SQL statement
+     * @param ps  SQL definition
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
      * @throws InterruptedException
@@ -442,7 +462,7 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @param <P>       parameter type
      * @param <R>       result type
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
@@ -479,7 +499,7 @@ public class TsurugiTransaction implements AutoCloseable {
     /**
      * execute statement.
      *
-     * @param ps SQL statement
+     * @param ps SQL definition
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
      * @throws InterruptedException
@@ -514,7 +534,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute statement.
      *
      * @param <P>       parameter type
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
@@ -550,7 +570,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute batch.
      *
      * @param <P>           parameter type
-     * @param ps            SQL statement
+     * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @return SQL result ({@link java.io.Closeable})
      * @throws IOException
@@ -586,7 +606,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute query.
      *
      * @param <R>       result type
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @param action    The action to be performed for each record
      * @throws IOException
@@ -622,7 +642,7 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @param <P>       parameter type
      * @param <R>       result type
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @param action    The action to be performed for each record
      * @throws IOException
@@ -657,7 +677,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute query.
      *
      * @param <R> result type
-     * @param ps  SQL statement
+     * @param ps  SQL definition
      * @return list of record
      * @throws IOException
      * @throws InterruptedException
@@ -692,7 +712,7 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @param <P>       parameter type
      * @param <R>       result type
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return list of record
      * @throws IOException
@@ -727,7 +747,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute query.
      *
      * @param <R> result type
-     * @param ps  SQL statement
+     * @param ps  SQL definition
      * @return record
      * @throws IOException
      * @throws InterruptedException
@@ -762,7 +782,7 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @param <P>       parameter type
      * @param <R>       result type
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return record
      * @throws IOException
@@ -796,7 +816,7 @@ public class TsurugiTransaction implements AutoCloseable {
     /**
      * execute statement.
      *
-     * @param ps SQL statement
+     * @param ps SQL definition
      * @return row count
      * @throws IOException
      * @throws InterruptedException
@@ -830,7 +850,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute statement.
      *
      * @param <P>       parameter type
-     * @param ps        SQL statement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return row count
      * @throws IOException
@@ -865,7 +885,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute batch.
      *
      * @param <P>           parameter type
-     * @param ps            SQL statement
+     * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @return row count
      * @throws IOException
@@ -896,13 +916,34 @@ public class TsurugiTransaction implements AutoCloseable {
         }
     }
 
-    // internal
+    /**
+     * transaction task
+     *
+     * @param <R> type of return value
+     */
+    @IceaxeInternal
     @FunctionalInterface
     public interface LowTransactionTask<R> {
+        /**
+         * execute transaction task
+         *
+         * @param lowTransaction transaction
+         * @return return value
+         * @throws IOException
+         */
         R run(Transaction lowTransaction) throws IOException;
     }
 
-    // internal
+    /**
+     * execute transaction task
+     *
+     * @param <R>  type of return value
+     * @param task transaction task
+     * @return return value
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @IceaxeInternal
     public <R> R executeLow(LowTransactionTask<R> task) throws IOException, InterruptedException {
         checkClose();
         return task.run(getLowTransaction());
@@ -1030,13 +1071,24 @@ public class TsurugiTransaction implements AutoCloseable {
         return this.rollbacked;
     }
 
-    // internal
+    /**
+     * add child object
+     *
+     * @param closeable child object
+     * @throws IOException
+     */
+    @IceaxeInternal
     public void addChild(AutoCloseable closeable) throws IOException {
         checkClose();
         closeableSet.add(closeable);
     }
 
-    // internal
+    /**
+     * remove child object
+     *
+     * @param closeable child object
+     */
+    @IceaxeInternal
     public void removeChild(AutoCloseable closeable) {
         closeableSet.remove(closeable);
     }

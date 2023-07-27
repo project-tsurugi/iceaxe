@@ -35,7 +35,7 @@ public interface TsurugiSqlStatementResultEventListener extends TsurugiSqlStatem
      * called when execute statement started
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      */
     default void executeStatementStarted2(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result) {
@@ -46,7 +46,7 @@ public interface TsurugiSqlStatementResultEventListener extends TsurugiSqlStatem
      * called when execute statement end
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      * @param occurred    exception
      */
@@ -58,7 +58,7 @@ public interface TsurugiSqlStatementResultEventListener extends TsurugiSqlStatem
      * called when close result
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param result      SQL result
      * @param occurred    exception
      */

@@ -18,6 +18,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
 import com.tsurugidb.iceaxe.sql.result.event.TsurugiStatementResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -38,7 +39,17 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     private final IceaxeTimeout closeTimeout;
     private List<TsurugiStatementResultEventListener> eventListenerList = null;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param sqlExecuteId    iceaxe SQL executeId
+     * @param transaction     transaction
+     * @param ps              SQL definition
+     * @param parameter       SQL parameter
+     * @param lowResultFuture future of Void
+     * @throws IOException
+     */
+    @IceaxeInternal
     public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<Void> lowResultFuture) throws IOException {
         super(sqlExecuteId, transaction, ps, parameter);
         this.lowResultFuture = lowResultFuture;
@@ -130,7 +141,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
                 IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout);
             } catch (TsurugiTransactionException e) {
                 occurred = e;
-                fillTsurugiException(e);
+                fillToTsurugiException(e);
                 throw e;
             } catch (Throwable e) {
                 occurred = e;
@@ -179,7 +190,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
                 IceaxeIoUtil.closeInTransaction(lowResultFuture);
                 super.close();
             } catch (TsurugiTransactionException e) {
-                fillTsurugiException(e);
+                fillToTsurugiException(e);
                 if (occurred != null) {
                     occurred.addSuppressed(e);
                 } else {

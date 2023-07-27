@@ -35,6 +35,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -63,7 +64,13 @@ public class TsurugiSession implements AutoCloseable {
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
     private boolean closed = false;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param lowSessionFuture future of session
+     * @param sessionOption    session option
+     */
+    @IceaxeInternal
     public TsurugiSession(FutureResponse<? extends Session> lowSessionFuture, TgSessionOption sessionOption) {
         this.sessionOption = Objects.requireNonNull(sessionOption);
         this.lowSessionFuture = lowSessionFuture;
@@ -88,7 +95,11 @@ public class TsurugiSession implements AutoCloseable {
         this.convertUtil = convertUtil;
     }
 
-    // internal
+    /**
+     * get convert type utility
+     *
+     * @return convert type utility
+     */
     public IceaxeConvertUtil getConvertUtil() {
         return this.convertUtil;
     }
@@ -171,7 +182,14 @@ public class TsurugiSession implements AutoCloseable {
         }
     }
 
-    // internal
+    /**
+     * get SQL service client
+     *
+     * @return SQL service client
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @IceaxeInternal
 //  @ThreadSafe
     public final synchronized SqlClient getLowSqlClient() throws IOException, InterruptedException {
         if (this.lowSqlClient == null) {
@@ -184,8 +202,16 @@ public class TsurugiSession implements AutoCloseable {
         return this.lowSqlClient;
     }
 
+    /**
+     * get session
+     *
+     * @return session
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @IceaxeInternal
 //  @ThreadSafe
-    protected final synchronized Session getLowSession() throws IOException, InterruptedException {
+    public final synchronized Session getLowSession() throws IOException, InterruptedException {
         if (this.lowSession == null) {
             if (this.lowFutureException != null) {
                 throw new TsurugiIOException(IceaxeErrorCode.SESSION_LOW_ERROR, lowFutureException);
@@ -381,10 +407,10 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create SQL statement
+     * create SQL definition
      *
      * @param sql SQL
-     * @return SQL statement
+     * @return SQL definition
      * @throws IOException
      */
 //  @ThreadSafe
@@ -491,13 +517,24 @@ public class TsurugiSession implements AutoCloseable {
         return transaction;
     }
 
-    // internal
+    /**
+     * add child object
+     *
+     * @param closeable child object
+     * @throws IOException
+     */
+    @IceaxeInternal
     public void addChild(AutoCloseable closeable) throws IOException {
         checkClose();
         closeableSet.add(closeable);
     }
 
-    // internal
+    /**
+     * remove child object
+     *
+     * @param closeable child object
+     */
+    @IceaxeInternal
     public void removeChild(AutoCloseable closeable) {
         closeableSet.remove(closeable);
     }

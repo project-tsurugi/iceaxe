@@ -24,6 +24,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
@@ -58,7 +59,19 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     private Optional<Boolean> hasNextRow = Optional.empty();
     private boolean calledEndEvent = false;
 
-    // internal
+    /**
+     * Creates a new instance.
+     *
+     * @param sqlExecuteId       iceaxe SQL executeId
+     * @param transaction        transaction
+     * @param ps                 SQL definition
+     * @param parameter          SQL parameter
+     * @param lowResultSetFuture future of ResultSet
+     * @param resultMapping      result mapping
+     * @param convertUtil        convert type utility
+     * @throws IOException
+     */
+    @IceaxeInternal
     public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping,
             IceaxeConvertUtil convertUtil) throws IOException {
         super(sqlExecuteId, transaction, ps, parameter);
@@ -146,7 +159,15 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         }
     }
 
-    // internal
+    /**
+     * get {@link ResultSet}
+     *
+     * @return SQL result set
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
+    @IceaxeInternal
     public final synchronized ResultSet getLowResultSet() throws IOException, InterruptedException, TsurugiTransactionException {
         this.calledGetLowResultSet = true;
         if (this.lowResultSet == null) {
@@ -154,7 +175,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             try {
                 this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout);
             } catch (TsurugiTransactionException e) {
-                fillTsurugiException(e);
+                fillToTsurugiException(e);
                 throw e;
             }
             LOG.trace("lowResultSet get end");
@@ -176,7 +197,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             }
         } catch (ServerException e) {
             event(e, listener -> listener.readException(this, e));
-            throw fillTsurugiException(new TsurugiTransactionException(e));
+            throw fillToTsurugiException(new TsurugiTransactionException(e));
         } catch (Throwable e) {
             event(e, listener -> listener.readException(this, e));
             throw e;
@@ -228,7 +249,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             result = resultMapping.convert(record);
         } catch (TsurugiTransactionException e) {
             event(e, listener -> listener.readException(this, e));
-            fillTsurugiException(e);
+            fillToTsurugiException(e);
             throw e;
         } catch (Throwable e) {
             event(e, listener -> listener.readException(this, e));
@@ -283,7 +304,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             var lowMetadata = lowResultSet.getMetadata();
             return lowMetadata.getColumns();
         } catch (ServerException e) {
-            throw rs.fillTsurugiException(new TsurugiTransactionException(e));
+            throw rs.fillToTsurugiException(new TsurugiTransactionException(e));
         }
     }
 
@@ -473,7 +494,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
                 IceaxeIoUtil.closeInTransaction(lowResultSet, lowResultSetFuture);
                 super.close();
             } catch (TsurugiTransactionException e) {
-                fillTsurugiException(e);
+                fillToTsurugiException(e);
                 if (occurred != null) {
                     occurred.addSuppressed(e);
                 } else {

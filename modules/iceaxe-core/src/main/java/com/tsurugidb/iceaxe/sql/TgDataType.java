@@ -12,6 +12,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 
 /**
@@ -90,7 +91,12 @@ public enum TgDataType {
         this.classList = classList;
     }
 
-    // internal
+    /**
+     * get {@link AtomType}
+     *
+     * @return atom type
+     */
+    @IceaxeInternal
     public AtomType getLowDataType() {
         return this.lowType;
     }
@@ -110,7 +116,7 @@ public enum TgDataType {
      * get data type
      *
      * @param clazz class
-     * @return Tsurugi Data Type
+     * @return data type
      */
     public static TgDataType of(Class<?> clazz) {
         var type = TYPE_MAP.get(clazz);
@@ -130,7 +136,13 @@ public enum TgDataType {
         LOW_TYPE_MAP = map;
     }
 
-    // internal
+    /**
+     * get data type
+     *
+     * @param lowType atom type
+     * @return data type
+     */
+    @IceaxeInternal
     public static TgDataType of(AtomType lowType) {
         var type = LOW_TYPE_MAP.get(lowType);
         if (type == null) {

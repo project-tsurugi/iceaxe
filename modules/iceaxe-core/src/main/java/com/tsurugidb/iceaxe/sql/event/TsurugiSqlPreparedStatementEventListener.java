@@ -17,7 +17,7 @@ public interface TsurugiSqlPreparedStatementEventListener<P> {
      * called when execute statement start
      *
      * @param transaction        transaction
-     * @param ps                 SQL statement
+     * @param ps                 SQL definition
      * @param parameter          SQL parameter
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      */
@@ -29,7 +29,7 @@ public interface TsurugiSqlPreparedStatementEventListener<P> {
      * called when execute statement start error
      *
      * @param transaction        transaction
-     * @param ps                 SQL statement
+     * @param ps                 SQL definition
      * @param parameter          SQL parameter
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      * @param occurred           exception
@@ -42,7 +42,7 @@ public interface TsurugiSqlPreparedStatementEventListener<P> {
      * called when execute statement started
      *
      * @param transaction transaction
-     * @param ps          SQL statement
+     * @param ps          SQL definition
      * @param parameter   SQL parameter
      * @param result      SQL result
      */
@@ -54,7 +54,7 @@ public interface TsurugiSqlPreparedStatementEventListener<P> {
      * called when execute statement start
      *
      * @param transaction        transaction
-     * @param ps                 SQL statement
+     * @param ps                 SQL definition
      * @param parameterList      SQL parameter
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      */
@@ -66,7 +66,7 @@ public interface TsurugiSqlPreparedStatementEventListener<P> {
      * called when execute statement start error
      *
      * @param transaction        transaction
-     * @param ps                 SQL statement
+     * @param ps                 SQL definition
      * @param parameterList      SQL parameter
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      * @param occurred           exception
@@ -79,7 +79,7 @@ public interface TsurugiSqlPreparedStatementEventListener<P> {
      * called when execute statement started
      *
      * @param transaction   transaction
-     * @param ps            SQL statement
+     * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @param result        SQL result
      */
