@@ -130,6 +130,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
             return true;
         }
         if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+            // FIXME sub error code
             String message = e.getMessage();
             if (message.contains("shirakami response Status=ERR_CC")) {
                 if (message.contains("reason_code:CC_OCC_WP_VERIFY")) {
