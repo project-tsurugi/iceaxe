@@ -206,7 +206,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
         int ssId = sqlLog.getIceaxeSqlStatementId();
-        var ps = sqlLog.getSqlStatement();
+        var ps = sqlLog.getSqlDefinition();
         {
             int maxLength = config.sqlMaxLength();
             if (maxLength == 0) {

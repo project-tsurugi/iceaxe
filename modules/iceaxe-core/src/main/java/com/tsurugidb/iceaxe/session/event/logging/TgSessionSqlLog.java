@@ -53,7 +53,7 @@ public class TgSessionSqlLog {
      *
      * @return SQL definition
      */
-    public TsurugiSql getSqlStatement() {
+    public TsurugiSql getSqlDefinition() {
         return this.sqlDefinition;
     }
 

@@ -53,13 +53,13 @@ class DbTransactionExceptionTest extends DbTestTableTester {
                 assertSame(transaction.getTransactionOption(), e.getTransactionOption());
                 assertEquals(transaction.getTransactionId(), e.getTransactionId());
                 assertEquals(TgTxMethod.EXECUTE_GET_COUNT, e.getTxMethod());
-                assertSame(ps, e.getSqlStatement());
+                assertSame(ps, e.getSqlDefinition());
                 assertNull(e.getSqlParameter());
 
                 throw e;
             }));
             assertEquals(TgTxMethod.EXECUTE_GET_COUNT, e0.getTxMethod());
-            assertSame(ps, e0.getSqlStatement());
+            assertSame(ps, e0.getSqlDefinition());
             assertNull(e0.getSqlParameter());
         }
     }
@@ -79,13 +79,13 @@ class DbTransactionExceptionTest extends DbTestTableTester {
                 assertSame(transaction.getTransactionOption(), e.getTransactionOption());
                 assertEquals(transaction.getTransactionId(), e.getTransactionId());
                 assertEquals(TgTxMethod.EXECUTE_GET_COUNT, e.getTxMethod());
-                assertSame(ps, e.getSqlStatement());
+                assertSame(ps, e.getSqlDefinition());
                 assertSame(entity, e.getSqlParameter());
 
                 throw e;
             }));
             assertEquals(TgTxMethod.EXECUTE_GET_COUNT, e0.getTxMethod());
-            assertSame(ps, e0.getSqlStatement());
+            assertSame(ps, e0.getSqlDefinition());
             assertSame(entity, e0.getSqlParameter());
         }
     }
@@ -109,14 +109,14 @@ class DbTransactionExceptionTest extends DbTestTableTester {
                 assertSame(transaction.getTransactionOption(), e.getTransactionOption());
                 assertEquals(transaction.getTransactionId(), e.getTransactionId());
                 assertNull(e.getTxMethod());
-                assertSame(ps, e.getSqlStatement());
+                assertSame(ps, e.getSqlDefinition());
                 assertSame(entity, e.getSqlParameter());
                 assertEquals(result[0].getIceaxeSqlExecuteId(), e.getIceaxeSqlExecuteId());
 
                 throw e;
             }));
             assertNull(e0.getTxMethod());
-            assertSame(ps, e0.getSqlStatement());
+            assertSame(ps, e0.getSqlDefinition());
             assertSame(entity, e0.getSqlParameter());
             assertEquals(result[0].getIceaxeSqlExecuteId(), e0.getIceaxeSqlExecuteId());
         }

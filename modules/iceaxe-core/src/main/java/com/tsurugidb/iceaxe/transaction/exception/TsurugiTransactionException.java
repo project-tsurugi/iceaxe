@@ -131,7 +131,7 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
     }
 
     @Override
-    public @Nullable TsurugiSql getSqlStatement() {
+    public @Nullable TsurugiSql getSqlDefinition() {
         return this.sqlStatement;
     }
 

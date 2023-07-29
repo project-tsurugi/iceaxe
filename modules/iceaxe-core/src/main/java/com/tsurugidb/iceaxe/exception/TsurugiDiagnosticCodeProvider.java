@@ -151,8 +151,8 @@ public interface TsurugiDiagnosticCodeProvider {
      *
      * @return SQL definition
      */
-    public default @Nullable TsurugiSql getSqlStatement() {
-        return findTransactionException().map(e -> e.getSqlStatement()).orElse(null);
+    public default @Nullable TsurugiSql getSqlDefinition() {
+        return findTransactionException().map(e -> e.getSqlDefinition()).orElse(null);
     }
 
     /**
