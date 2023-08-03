@@ -129,7 +129,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
                 case EXEUTE_ONLY:
                     @SuppressWarnings("unused")
                     var result = transaction.executeQuery(ps);
-                    // result.close is called on ps.close
+                    // result.close is called on transaction.close
                     break;
                 }
 
