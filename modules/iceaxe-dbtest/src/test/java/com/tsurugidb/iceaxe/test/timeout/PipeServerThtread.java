@@ -18,15 +18,15 @@ class PipeServerThtread extends TimeoutServerThread {
     private volatile boolean write = true;
 
     public PipeServerThtread() {
-        super("pipeServer");
+        super("iceaxe-dbtest.pipeServer");
     }
 
     @Override
     protected void run(ServerSocket server) throws IOException, InterruptedException {
         try (var dbSocket = DbTestConnector.createSocket(); //
                 var socket = server.accept()) {
-            new PipeStreamThread("client->db", "send", socket, dbSocket).start();
-            new PipeStreamThread("db->client", "recv", dbSocket, socket).start();
+            new PipeStreamThread("iceaxe-dbtest.client->db", "send", socket, dbSocket).start();
+            new PipeStreamThread("iceaxe-dbtest.db->client", "recv", dbSocket, socket).start();
 
             setPriority(MIN_PRIORITY);
             while (!isStop()) {
@@ -40,13 +40,11 @@ class PipeServerThtread extends TimeoutServerThread {
             return;
         }
 
-        if (write == false) {
-            try {
-                // false（writeしない）に切り替えるまでに行われた通信が処理されるまで充分待つ
-                TimeUnit.MILLISECONDS.sleep(300);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            // フラグを切り替えるまでに行われた通信が処理されるまで充分待つ
+            TimeUnit.MILLISECONDS.sleep(300);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         this.write = write;
