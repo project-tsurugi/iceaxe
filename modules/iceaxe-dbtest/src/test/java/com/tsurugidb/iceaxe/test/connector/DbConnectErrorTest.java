@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
+import java.net.SocketException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -132,8 +133,12 @@ public class DbConnectErrorTest extends DbTestTableTester {
                 os.write(buf);
                 os.flush();
                 try (var is = socket.getInputStream()) {
-                    int len = is.read(buf);
-                    assertEquals(-1, len);
+                    try {
+                        int len = is.read(buf);
+                        assertEquals(-1, len);
+                    } catch (SocketException e) {
+                        assertEquals("Connection reset", e.getMessage());
+                    }
                 }
             }
         }
