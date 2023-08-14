@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -108,6 +110,34 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
 
         String expected = "RTX{label=def, priority=INTERRUPT}";
         assertOption(expected, "def", TransactionPriority.INTERRUPT, clone);
+    }
+
+    @Test
+    void as() {
+        TgTxOption txOption = TgTxOption.ofRTX();
+        assertThrows(ClassCastException.class, () -> txOption.as(TgTxOptionOcc.class));
+        assertThrows(ClassCastException.class, () -> txOption.as(TgTxOptionLtx.class));
+        TgTxOptionRtx cast = txOption.as(TgTxOptionRtx.class);
+        assertSame(txOption, cast);
+    }
+
+    @Test
+    void asOccOption() {
+        TgTxOption txOption = TgTxOption.ofRTX();
+        assertThrows(ClassCastException.class, () -> txOption.asOccOption());
+    }
+
+    @Test
+    void asLtxOption() {
+        TgTxOption txOption = TgTxOption.ofRTX();
+        assertThrows(ClassCastException.class, () -> txOption.asLtxOption());
+    }
+
+    @Test
+    void asRtxOption() {
+        TgTxOption txOption = TgTxOption.ofRTX();
+        TgTxOptionRtx cast = txOption.asRtxOption();
+        assertSame(txOption, cast);
     }
 
     private void assertOption(String text, String label, TransactionPriority priority, TgTxOptionRtx txOption) {

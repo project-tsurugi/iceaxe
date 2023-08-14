@@ -188,6 +188,51 @@ public interface TgTxOption extends Cloneable {
     public TgTxOption clone(String label);
 
     /**
+     * Casts this to the class represented by transaction option Class object.
+     *
+     * @param <T>           transaction option type
+     * @param txOptionClass transaction option class
+     * @return this after casting
+     * @throws ClassCastException if this is not assignable to the type T
+     */
+    public default <T extends TgTxOption> T as(Class<T> txOptionClass) throws ClassCastException {
+        return txOptionClass.cast(this);
+    }
+
+    /**
+     * Casts this to OCC option class.
+     *
+     * @return this after casting
+     * @throws ClassCastException if this is not assignable to OCC option
+     * @see #isOCC()
+     */
+    public default TgTxOptionOcc asOccOption() throws ClassCastException {
+        return (TgTxOptionOcc) this;
+    }
+
+    /**
+     * Casts this to LTX option class.
+     *
+     * @return this after casting
+     * @throws ClassCastException if this is not assignable to LTX option
+     * @see #isLTX()
+     */
+    public default TgTxOptionLtx asLtxOption() throws ClassCastException {
+        return (TgTxOptionLtx) this;
+    }
+
+    /**
+     * Casts this to RTX option class.
+     *
+     * @return this after casting
+     * @throws ClassCastException if this is not assignable to RTX option
+     * @see #isRTX()
+     */
+    public default TgTxOptionRtx asRtxOption() throws ClassCastException {
+        return (TgTxOptionRtx) this;
+    }
+
+    /**
      * convert to {@link TransactionOption}
      *
      * @return transaction option

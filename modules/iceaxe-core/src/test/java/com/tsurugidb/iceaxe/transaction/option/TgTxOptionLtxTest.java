@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -385,6 +387,34 @@ class TgTxOptionLtxTest extends TgTxOptionTester {
         String expected = "LTX{label=def, writePreserve=[t1]}";
         assertOption(expected, "def", null, List.of("t1"), List.of(), List.of(), //
                 clone);
+    }
+
+    @Test
+    void as() {
+        TgTxOption txOption = TgTxOption.ofLTX();
+        assertThrows(ClassCastException.class, () -> txOption.as(TgTxOptionOcc.class));
+        TgTxOptionLtx cast = txOption.as(TgTxOptionLtx.class);
+        assertSame(txOption, cast);
+        assertThrows(ClassCastException.class, () -> txOption.as(TgTxOptionRtx.class));
+    }
+
+    @Test
+    void asOccOption() {
+        TgTxOption txOption = TgTxOption.ofLTX();
+        assertThrows(ClassCastException.class, () -> txOption.asOccOption());
+    }
+
+    @Test
+    void asLtxOption() {
+        TgTxOption txOption = TgTxOption.ofLTX();
+        TgTxOptionLtx cast = txOption.asLtxOption();
+        assertSame(txOption, cast);
+    }
+
+    @Test
+    void asRtxOption() {
+        TgTxOption txOption = TgTxOption.ofLTX();
+        assertThrows(ClassCastException.class, () -> txOption.asRtxOption());
     }
 
     private void assertOption(String text, String label, TransactionPriority priority, List<String> writePreserve, List<String> inclusiveReadArea, List<String> exclusiveReadArea,

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -99,6 +101,34 @@ class TgTxOptionOccTest extends TgTxOptionTester {
 
         String expected = "OCC{label=def}";
         assertOption(expected, "def", clone);
+    }
+
+    @Test
+    void as() {
+        TgTxOption txOption = TgTxOption.ofOCC();
+        TgTxOptionOcc cast = txOption.as(TgTxOptionOcc.class);
+        assertSame(txOption, cast);
+        assertThrows(ClassCastException.class, () -> txOption.as(TgTxOptionLtx.class));
+        assertThrows(ClassCastException.class, () -> txOption.as(TgTxOptionRtx.class));
+    }
+
+    @Test
+    void asOccOption() {
+        TgTxOption txOption = TgTxOption.ofOCC();
+        TgTxOptionOcc cast = txOption.asOccOption();
+        assertSame(txOption, cast);
+    }
+
+    @Test
+    void asLtxOption() {
+        TgTxOption txOption = TgTxOption.ofOCC();
+        assertThrows(ClassCastException.class, () -> txOption.asLtxOption());
+    }
+
+    @Test
+    void asRtxOption() {
+        TgTxOption txOption = TgTxOption.ofOCC();
+        assertThrows(ClassCastException.class, () -> txOption.asRtxOption());
     }
 
     private void assertOption(String text, String label, TgTxOptionOcc txOption) {
