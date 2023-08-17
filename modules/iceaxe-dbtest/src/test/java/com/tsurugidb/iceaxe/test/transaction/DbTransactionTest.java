@@ -80,6 +80,25 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @Test
+    void transactionStatus_parseError() throws Exception {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            String sql = "insertinto " + TEST + " values(" + SIZE + ", 1, 'a')"; // parse error
+            try (var ps = session.createStatement(sql)) {
+                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                    transaction.executeAndGetCount(ps);
+                });
+                assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
+            }
+            var status = transaction.getTransactionStatus();
+            assertTrue(status.isNormal());
+            assertFalse(status.isError());
+            assertNull(status.getDiagnosticCode());
+            assertNull(status.getLowSqlServiceException());
+        }
+    }
+
+    @Test
     void transactionStatus_error() throws Exception {
         var session = getSession();
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
