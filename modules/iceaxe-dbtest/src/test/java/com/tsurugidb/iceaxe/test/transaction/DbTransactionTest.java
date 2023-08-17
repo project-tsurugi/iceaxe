@@ -3,7 +3,9 @@ package com.tsurugidb.iceaxe.test.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
@@ -12,6 +14,8 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -21,6 +25,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * transaction test
@@ -48,6 +53,84 @@ class DbTransactionTest extends DbTestTableTester {
             var id = transaction.getTransactionId();
             assertNotNull(id);
             assertFalse(id.isEmpty());
+        }
+    }
+
+    @Test
+    void transactionStatus_normal() throws Exception {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            var status = transaction.getTransactionStatus();
+            assertTrue(status.isNormal());
+            assertFalse(status.isError());
+            assertNull(status.getDiagnosticCode());
+            assertNull(status.getLowSqlServiceException());
+
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
+                var entity = createTestEntity(SIZE);
+                transaction.executeAndGetCount(ps, entity);
+
+                var status2 = transaction.getTransactionStatus();
+                assertTrue(status2.isNormal());
+                assertFalse(status2.isError());
+                assertNull(status2.getDiagnosticCode());
+                assertNull(status2.getLowSqlServiceException());
+            }
+        }
+    }
+
+    @Test
+    void transactionStatus_error() throws Exception {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
+                var entity = createTestEntity(0);
+                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                    transaction.executeAndGetCount(ps, entity);
+                });
+                assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e);
+            }
+            var status = transaction.getTransactionStatus();
+            assertFalse(status.isNormal());
+            assertTrue(status.isError());
+            assertEquals(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, status.getDiagnosticCode());
+            assertNotNull(status.getLowSqlServiceException());
+        }
+    }
+
+    @Test
+    void transactionStatus_error2() throws Exception {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
+                var entity = createTestEntity(0);
+                var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                    transaction.executeAndGetCount(ps, entity);
+                });
+                assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e1);
+
+                var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                    transaction.executeAndGetCount(ps, entity);
+                });
+                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
+            }
+            var status = transaction.getTransactionStatus();
+            assertFalse(status.isNormal());
+            assertTrue(status.isError());
+            assertEquals(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, status.getDiagnosticCode());
+            assertNotNull(status.getLowSqlServiceException());
+        }
+    }
+
+    @Test
+    void transactionStatus_afterClose() throws Exception {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            transaction.close();
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                transaction.getTransactionStatus();
+            });
+            assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
         }
     }
 

@@ -16,6 +16,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
@@ -74,6 +75,10 @@ public class TgSessionOption {
         TRANSACTION_ROLLBACK,
         /** {@link TsurugiTransaction} close */
         TRANSACTION_CLOSE,
+        /** {@link TsurugiTransactionStatusHelper} connect */
+        TX_STATUS_CONNECT,
+        /** {@link TsurugiTransactionStatusHelper} close */
+        TX_STATUS_CLOSE,
 
         /** {@link TsurugiQueryResult} connect */
         RS_CONNECT,

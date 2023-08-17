@@ -33,6 +33,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
@@ -57,6 +58,7 @@ public class TsurugiSession implements AutoCloseable {
     private TsurugiTableListHelper tableListHelper = null;
     private TsurugiTableMetadataHelper tableMetadataHelper = null;
     private TsurugiExplainHelper explainHelper = null;
+    private TsurugiTransactionStatusHelper txStatusHelper = null;
     private IceaxeConvertUtil convertUtil = null;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
@@ -335,6 +337,27 @@ public class TsurugiSession implements AutoCloseable {
             this.explainHelper = new TsurugiExplainHelper();
         }
         return this.explainHelper;
+    }
+
+    /**
+     * set TransactionStatusHelper.
+     *
+     * @param helper TransactionStatusHelper
+     */
+    public void setTransactionStatusHelper(TsurugiTransactionStatusHelper helper) {
+        this.txStatusHelper = helper;
+    }
+
+    /**
+     * get TransactionStatusHelper.
+     *
+     * @return TransactionStatusHelper
+     */
+    public TsurugiTransactionStatusHelper getTransactionStatusHelper() {
+        if (this.txStatusHelper == null) {
+            this.txStatusHelper = new TsurugiTransactionStatusHelper();
+        }
+        return this.txStatusHelper;
     }
 
     /**
