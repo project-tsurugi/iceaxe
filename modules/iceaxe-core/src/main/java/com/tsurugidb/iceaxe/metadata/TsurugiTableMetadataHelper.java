@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -47,8 +48,8 @@ public class TsurugiTableMetadataHelper {
         try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {
 
             var sessionOption = session.getSessionOption();
-            var connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CONNECT);
-            var closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CLOSE);
+            var connectTimeout = getConnectTimeout(sessionOption);
+            var closeTimeout = getCloseTimeout(sessionOption);
             closeTimeout.apply(lowTableMetadataFuture);
 
             var lowTableMetadata = IceaxeIoUtil.getAndCloseFuture(lowTableMetadataFuture, connectTimeout);
@@ -63,6 +64,14 @@ public class TsurugiTableMetadataHelper {
             }
             throw e;
         }
+    }
+
+    protected IceaxeTimeout getConnectTimeout(TgSessionOption sessionOption) {
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CONNECT);
+    }
+
+    protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CLOSE);
     }
 
     protected TgTableMetadata newTableMetadata(TableMetadata lowTableMetadata) {

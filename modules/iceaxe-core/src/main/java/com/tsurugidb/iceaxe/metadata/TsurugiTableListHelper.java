@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -43,8 +44,8 @@ public class TsurugiTableListHelper {
         try (var closeable = IceaxeIoUtil.closeable(lowTableListFuture)) {
 
             var sessionOption = session.getSessionOption();
-            var connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_LIST_CONNECT);
-            var closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_LIST_CLOSE);
+            var connectTimeout = getConnectTimeout(sessionOption);
+            var closeTimeout = getCloseTimeout(sessionOption);
             closeTimeout.apply(lowTableListFuture);
 
             var lowTableList = IceaxeIoUtil.getAndCloseFuture(lowTableListFuture, connectTimeout);
@@ -52,6 +53,14 @@ public class TsurugiTableListHelper {
 
             return newTableList(lowTableList);
         }
+    }
+
+    protected IceaxeTimeout getConnectTimeout(TgSessionOption sessionOption) {
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_LIST_CONNECT);
+    }
+
+    protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_LIST_CLOSE);
     }
 
     protected TgTableList newTableList(TableList lowTableList) {

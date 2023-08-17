@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -33,9 +34,17 @@ public class TsurugiExplainHelper {
      */
     public TgStatementMetadata explain(TsurugiSession session, String source) throws IOException, InterruptedException {
         var sessionOption = session.getSessionOption();
-        var connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CONNECT);
-        var closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CLOSE);
+        var connectTimeout = getConnectTimeout(sessionOption);
+        var closeTimeout = getCloseTimeout(sessionOption);
         return explain(session, source, connectTimeout, closeTimeout);
+    }
+
+    protected IceaxeTimeout getConnectTimeout(TgSessionOption sessionOption) {
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CONNECT);
+    }
+
+    protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CLOSE);
     }
 
     /**

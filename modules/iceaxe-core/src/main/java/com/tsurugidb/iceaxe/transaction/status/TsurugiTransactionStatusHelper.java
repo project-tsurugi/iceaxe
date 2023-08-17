@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -30,12 +31,12 @@ public class TsurugiTransactionStatusHelper {
     public TgTransactionStatus getTransactionStatus(TsurugiTransaction transaction) throws IOException, InterruptedException {
         var lowTx = transaction.getLowTransaction();
         LOG.trace("getTransactionStatus start. tx={}", transaction);
-        var lowFuture = getSqlServiceException(lowTx);
+        var lowFuture = getLowSqlServiceException(lowTx);
         LOG.trace("getTransactionStatus started");
         return getTransactionStatus(transaction, lowFuture);
     }
 
-    protected FutureResponse<SqlServiceException> getSqlServiceException(Transaction lowTx) throws IOException {
+    protected FutureResponse<SqlServiceException> getLowSqlServiceException(Transaction lowTx) throws IOException {
         return lowTx.getSqlServiceException();
     }
 
@@ -43,8 +44,8 @@ public class TsurugiTransactionStatusHelper {
         try (var closeable = IceaxeIoUtil.closeable(lowFuture)) {
 
             var sessionOption = transaction.getSession().getSessionOption();
-            var connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CONNECT);
-            var closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CLOSE);
+            var connectTimeout = getConnectTimeout(sessionOption);
+            var closeTimeout = getCloseTimeout(sessionOption);
             closeTimeout.apply(lowFuture);
 
             var lowStatus = IceaxeIoUtil.getAndCloseFuture(lowFuture, connectTimeout);
@@ -52,6 +53,14 @@ public class TsurugiTransactionStatusHelper {
 
             return newTgTransactionStatus(lowStatus);
         }
+    }
+
+    protected IceaxeTimeout getConnectTimeout(TgSessionOption sessionOption) {
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CONNECT);
+    }
+
+    protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CLOSE);
     }
 
     protected TgTransactionStatus newTgTransactionStatus(SqlServiceException lowStatus) {
