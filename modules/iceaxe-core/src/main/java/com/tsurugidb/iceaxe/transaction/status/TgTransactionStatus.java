@@ -61,4 +61,9 @@ public class TgTransactionStatus {
     public @Nullable SqlServiceException getLowSqlServiceException() {
         return this.lowException;
     }
+
+    @Override
+    public String toString() {
+        return "TgTransactionStatus(" + lowException + ")";
+    }
 }
