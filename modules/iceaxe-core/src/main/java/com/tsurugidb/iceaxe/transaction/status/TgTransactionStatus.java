@@ -2,24 +2,25 @@ package com.tsurugidb.iceaxe.transaction.status;
 
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
+import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
-import com.tsurugidb.tsubakuro.sql.SqlServiceException;
 
 /**
  * Tsurugi transaction status
  */
 public class TgTransactionStatus {
 
-    private final SqlServiceException lowException;
+    private final TsurugiTransactionException exception;
 
     /**
      * Creates a new instance.
      *
-     * @param lowException low exception
+     * @param exception transaction exception
      */
-    public TgTransactionStatus(@Nullable SqlServiceException lowException) {
-        this.lowException = lowException;
+    public TgTransactionStatus(@Nullable TsurugiTransactionException exception) {
+        this.exception = exception;
     }
 
     /**
@@ -28,7 +29,8 @@ public class TgTransactionStatus {
      * @return {@code true} if status is normal
      */
     public boolean isNormal() {
-        return this.lowException == null;
+        var code = getDiagnosticCode();
+        return code == null || code == SqlServiceCode.OK;
     }
 
     /**
@@ -37,33 +39,33 @@ public class TgTransactionStatus {
      * @return {@code true} if status is error
      */
     public boolean isError() {
-        return this.lowException != null;
+        return !isNormal();
     }
 
     /**
      * get diagnostic code.
      *
-     * @return diagnostic code. {@code null} if status is normal
+     * @return diagnostic code. {@code null} if exception is null
      */
-    public @Nullable SqlServiceCode getDiagnosticCode() {
-        if (this.lowException == null) {
+    public @Nullable DiagnosticCode getDiagnosticCode() {
+        if (this.exception == null) {
             return null;
         }
-        return lowException.getDiagnosticCode();
+        return exception.getDiagnosticCode();
     }
 
     /**
-     * get low exception.
+     * get exception.
      *
-     * @return low exception
+     * @return exception
      */
     @IceaxeInternal
-    public @Nullable SqlServiceException getLowSqlServiceException() {
-        return this.lowException;
+    public @Nullable TsurugiTransactionException getTransactionException() {
+        return this.exception;
     }
 
     @Override
     public String toString() {
-        return "TgTransactionStatus(" + lowException + ")";
+        return "TgTransactionStatus(" + exception + ")";
     }
 }

@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.transaction.manager;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -183,8 +184,10 @@ public class TgTmSetting {
      *
      * @param executeInfo {@link TgTmTxOptionSupplier#createExecuteInfo(int)}
      * @return transaction option
+     * @throws IOException
+     * @throws InterruptedException
      */
-    public TgTxOption getFirstTransactionOption(Object executeInfo) {
+    public TgTxOption getFirstTransactionOption(Object executeInfo) throws IOException, InterruptedException {
         var tmOption = getTransactionOption(executeInfo, 0, null, null);
         var txOption = tmOption.getTransactionOption();
         if (txOption == null) {
@@ -204,9 +207,11 @@ public class TgTmSetting {
      * @param transaction transaction
      * @param e           transaction exception
      * @return tm option
+     * @throws IOException
+     * @throws InterruptedException
      * @see TgTmTxOptionSupplier
      */
-    public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+    public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         if (this.txOptionSupplier == null) {
             throw new IllegalStateException("txOptionSupplier is not specifed");
         }

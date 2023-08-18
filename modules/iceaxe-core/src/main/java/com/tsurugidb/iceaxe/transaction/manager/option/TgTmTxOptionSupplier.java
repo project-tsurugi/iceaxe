@@ -1,5 +1,7 @@
 package com.tsurugidb.iceaxe.transaction.manager.option;
 
+import java.io.IOException;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -178,9 +180,11 @@ public abstract class TgTmTxOptionSupplier {
      * @param transaction transaction (null if attempt==0)
      * @param e           transaction exception (null if attempt==0)
      * @return Transaction Option
+     * @throws IOException
+     * @throws InterruptedException
      */
     @Nonnull
-    public final TgTmTxOption get(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+    public final TgTmTxOption get(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         var tmOption = computeTmOption(executeInfo, attempt, transaction, e);
         if (this.tmOptionListener != null) {
             tmOptionListener.accept(attempt, e, tmOption);
@@ -188,7 +192,7 @@ public abstract class TgTmTxOptionSupplier {
         return tmOption;
     }
 
-    protected TgTmTxOption computeTmOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmTxOption computeTmOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         if (attempt == 0) {
             return computeFirstTmOption(executeInfo);
         }
@@ -211,8 +215,10 @@ public abstract class TgTmTxOptionSupplier {
      * @param transaction transaction
      * @param e           Transaction Exception
      * @return true: retryable
+     * @throws IOException
+     * @throws InterruptedException
      */
-    protected TgTmRetryInstruction isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmRetryInstruction isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         return getRetryPredicate().apply(transaction, e);
     }
 

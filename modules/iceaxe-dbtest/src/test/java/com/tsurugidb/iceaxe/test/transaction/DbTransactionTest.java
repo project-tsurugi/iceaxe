@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -67,7 +66,7 @@ class DbTransactionTest extends DbTestTableTester {
             assertTrue(status.isNormal());
             assertFalse(status.isError());
             assertNull(status.getDiagnosticCode());
-            assertNull(status.getLowSqlServiceException());
+            assertNull(status.getTransactionException());
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(SIZE);
@@ -77,7 +76,7 @@ class DbTransactionTest extends DbTestTableTester {
                 assertTrue(status2.isNormal());
                 assertFalse(status2.isError());
                 assertNull(status2.getDiagnosticCode());
-                assertNull(status2.getLowSqlServiceException());
+                assertNull(status2.getTransactionException());
             }
         }
     }
@@ -97,7 +96,7 @@ class DbTransactionTest extends DbTestTableTester {
             assertFalse(status.isNormal());
             assertTrue(status.isError());
             assertEquals(SqlServiceCode.ERR_PARSE_ERROR, status.getDiagnosticCode());
-            assertNotNull(status.getLowSqlServiceException());
+            assertNotNull(status.getTransactionException());
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(SIZE);
@@ -110,7 +109,7 @@ class DbTransactionTest extends DbTestTableTester {
             assertFalse(status2.isNormal());
             assertTrue(status2.isError());
             assertEquals(SqlServiceCode.ERR_PARSE_ERROR, status2.getDiagnosticCode());
-            assertNotNull(status2.getLowSqlServiceException());
+            assertNotNull(status2.getTransactionException());
         }
     }
 
@@ -129,7 +128,7 @@ class DbTransactionTest extends DbTestTableTester {
             assertTrue(status.isNormal());
             assertFalse(status.isError());
             assertNull(status.getDiagnosticCode());
-            assertNull(status.getLowSqlServiceException());
+            assertNull(status.getTransactionException());
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(SIZE);
@@ -139,7 +138,7 @@ class DbTransactionTest extends DbTestTableTester {
             assertTrue(status2.isNormal());
             assertFalse(status2.isError());
             assertNull(status2.getDiagnosticCode());
-            assertNull(status2.getLowSqlServiceException());
+            assertNull(status2.getTransactionException());
         }
     }
 
@@ -158,7 +157,7 @@ class DbTransactionTest extends DbTestTableTester {
             assertFalse(status.isNormal());
             assertTrue(status.isError());
             assertEquals(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, status.getDiagnosticCode());
-            assertNotNull(status.getLowSqlServiceException());
+            assertNotNull(status.getTransactionException());
         }
     }
 
@@ -182,12 +181,11 @@ class DbTransactionTest extends DbTestTableTester {
             assertFalse(status.isNormal());
             assertTrue(status.isError());
             assertEquals(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, status.getDiagnosticCode());
-            assertNotNull(status.getLowSqlServiceException());
+            assertNotNull(status.getTransactionException());
         }
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void transactionStatus_afterCommit() throws Exception {
         var session = getSession();
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
@@ -198,7 +196,6 @@ class DbTransactionTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled
     void transactionStatus_afterRollback() throws Exception {
         var session = getSession();
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {

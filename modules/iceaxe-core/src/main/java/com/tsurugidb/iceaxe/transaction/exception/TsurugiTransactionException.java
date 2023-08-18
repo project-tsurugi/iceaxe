@@ -24,7 +24,7 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
     private TsurugiTransaction transaction;
     private TgTxMethod txMethod;
     private int iceaxeTxExecuteId;
-    private TsurugiSql sqlStatement;
+    private TsurugiSql sqlDefinition;
     private Object sqlParameter;
     private TsurugiSqlResult sqlResult;
 
@@ -75,7 +75,7 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
      */
     public void setSql(TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TsurugiSqlResult result) {
         this.transaction = transaction;
-        this.sqlStatement = ps;
+        this.sqlDefinition = ps;
         this.sqlParameter = parameter;
         this.sqlResult = result;
     }
@@ -132,7 +132,7 @@ public class TsurugiTransactionException extends Exception implements TsurugiDia
 
     @Override
     public @Nullable TsurugiSql getSqlDefinition() {
-        return this.sqlStatement;
+        return this.sqlDefinition;
     }
 
     @Override

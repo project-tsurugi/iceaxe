@@ -25,11 +25,12 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
-import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
+import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
+import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.status.TgTransactionStatus;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -296,31 +297,19 @@ class DbSelect2LoopTest extends DbTestTableTester {
                 TsurugiSqlPreparedQuery<TgBindParameters, TsurugiResultEntity> select1Ps) throws IOException, InterruptedException {
             var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
-            TgTransactionStatus[] status = { null }; // TODO remove status (into TsurugiDefaultRetryPredicate)
-            try {
-                tm.execute(transaction -> {
-                    var parameter = TgBindParameters.of(key.bind(this.key1));
-                    try {
-                        transaction.executeAndForEach(selectPs, parameter, entity -> {
-                            var parameter1 = TgBindParameters.of(foo.bind(entity.getFoo()));
-                            transaction.executeAndGetList(select1Ps, parameter1);
-                        });
-                    } catch (TsurugiTransactionException e) {
-                        if (e.getDiagnosticCode() == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
-                            status[0] = transaction.getTransactionStatus();
-                        }
-                        throw e;
-                    }
-                });
-            } catch (TsurugiTmIOException e) {
-                if (e.getDiagnosticCode() == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
-                    if (status[0].getDiagnosticCode() == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
-                        LOG.debug("ERR_INACTIVE_TRANSACTION with ERR_SERIALIZATION_FAILURE");
-                        return;
-                    }
+            tm.addEventListener(new TsurugiTmEventListener() {
+                @Override
+                public void transactionRetry(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
+                    LOG.debug("tm.retry {}", nextTmOption.getRetryInstruction());
                 }
-                throw e;
-            }
+            });
+            tm.execute(transaction -> {
+                var parameter = TgBindParameters.of(key.bind(this.key1));
+                transaction.executeAndForEach(selectPs, parameter, entity -> {
+                    var parameter1 = TgBindParameters.of(foo.bind(entity.getFoo()));
+                    transaction.executeAndGetList(select1Ps, parameter1);
+                });
+            });
         }
     }
 }

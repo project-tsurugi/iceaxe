@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.tsubakuro.sql.SqlServiceException;
@@ -51,7 +53,12 @@ public class TsurugiTransactionStatusHelper {
             var lowStatus = IceaxeIoUtil.getAndCloseFuture(lowFuture, connectTimeout);
             LOG.trace("getTransactionStatus end");
 
-            return newTgTransactionStatus(lowStatus);
+            var exception = newTransactionException(lowStatus);
+            if (exception != null) {
+                exception.setSql(transaction, null, null, null);
+                exception.setTxMethod(TgTxMethod.GET_TRANSACTION_STATUS, 0);
+            }
+            return newTgTransactionStatus(exception);
         }
     }
 
@@ -63,7 +70,14 @@ public class TsurugiTransactionStatusHelper {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CLOSE);
     }
 
-    protected TgTransactionStatus newTgTransactionStatus(SqlServiceException lowStatus) {
-        return new TgTransactionStatus(lowStatus);
+    protected TsurugiTransactionException newTransactionException(SqlServiceException lowException) {
+        if (lowException == null) {
+            return null;
+        }
+        return new TsurugiTransactionException(lowException);
+    }
+
+    protected TgTransactionStatus newTgTransactionStatus(TsurugiTransactionException exception) {
+        return new TgTransactionStatus(exception);
     }
 }

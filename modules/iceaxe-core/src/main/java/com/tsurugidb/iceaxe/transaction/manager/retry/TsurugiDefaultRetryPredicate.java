@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.transaction.manager.retry;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -37,13 +38,13 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     }
 
     @Override
-    public final TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiTransactionException e) {
+    public final TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         var instruction = test(transaction, e);
         Objects.requireNonNull(instruction);
         return instruction;
     }
 
-    protected TgTmRetryInstruction test(TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmRetryInstruction test(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         TgTmRetryInstruction instruction;
 
         var txOption = transaction.getTransactionOption();
@@ -79,7 +80,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
         }
     }
 
-    protected TgTmRetryInstruction testOcc(TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmRetryInstruction testOcc(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         if (isOccOnWp(e)) {
             return TgTmRetryInstruction.ofRetryableLtx("OCC ltx retry. " + e.getMessage());
         }
@@ -87,7 +88,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
         return testCommon("OCC", transaction, e);
     }
 
-    protected TgTmRetryInstruction testLtx(TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmRetryInstruction testLtx(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         if (isOccOnWp(e)) {
             throw new IllegalStateException("illegal code. " + e.getMessage());
         }
@@ -95,7 +96,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
         return testCommon("LTX", transaction, e);
     }
 
-    protected TgTmRetryInstruction testRtx(TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmRetryInstruction testRtx(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         if (isOccOnWp(e)) {
             throw new IllegalStateException("illegal code. " + e.getMessage());
         }
@@ -103,14 +104,25 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
         return testCommon("RTX", transaction, e);
     }
 
-    protected TgTmRetryInstruction testOther(TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmRetryInstruction testOther(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         return testCommon("OTHER", transaction, e);
     }
 
-    protected TgTmRetryInstruction testCommon(String position, TsurugiTransaction transaction, TsurugiTransactionException e) {
+    protected TgTmRetryInstruction testCommon(String position, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         if (isRetryable(e)) {
             return TgTmRetryInstruction.ofRetryable(position + " retry. " + e.getMessage());
         }
+        if (isInactiveTransaction(e)) {
+            var status = transaction.getTransactionStatus();
+            var statusException = status.getTransactionException();
+            if (statusException != null) {
+                if (isRetryable(statusException)) {
+                    return TgTmRetryInstruction.ofRetryable(position + " retry. " + statusException.getMessage() + " with " + e.getMessage());
+                }
+                return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + statusException.getMessage() + " with " + e.getMessage());
+            }
+        }
+
         return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + e.getMessage());
     }
 
@@ -137,6 +149,14 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
                     return true;
                 }
             }
+        }
+        return false;
+    }
+
+    protected boolean isInactiveTransaction(TsurugiTransactionException e) {
+        var code = e.getDiagnosticCode();
+        if (code == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
+            return true;
         }
         return false;
     }

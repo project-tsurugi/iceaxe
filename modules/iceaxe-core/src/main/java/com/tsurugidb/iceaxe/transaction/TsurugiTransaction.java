@@ -365,7 +365,9 @@ public class TsurugiTransaction implements AutoCloseable {
         /** commit */
         COMMIT("commit"),
         /** rollback */
-        ROLLBACK("rollback");
+        ROLLBACK("rollback"),
+        /** get transaction status */
+        GET_TRANSACTION_STATUS("getTransactionStatus");
 
         private final String methodName;
 

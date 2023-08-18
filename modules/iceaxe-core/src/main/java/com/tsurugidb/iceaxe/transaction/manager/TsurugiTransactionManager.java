@@ -267,7 +267,7 @@ public class TsurugiTransactionManager {
     }
 
     private TgTxOption processTransactionException(TgTmSetting setting, Object executeInfo, TsurugiTransaction transaction, Exception cause, TgTxOption txOption, TsurugiTransactionException e)
-            throws IOException {
+            throws IOException, InterruptedException {
         boolean calledRollback = false;
         try {
             int attempt = transaction.getAttempt();
