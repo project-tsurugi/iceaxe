@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -138,6 +139,28 @@ class DbTransactionTest extends DbTestTableTester {
             assertTrue(status.isError());
             assertEquals(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, status.getDiagnosticCode());
             assertNotNull(status.getLowSqlServiceException());
+        }
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled
+    void transactionStatus_afterCommit() throws Exception {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            transaction.commit(TgCommitType.DEFAULT);
+            var status = transaction.getTransactionStatus();
+            assertTrue(status.isNormal());
+        }
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled
+    void transactionStatus_afterRollback() throws Exception {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            transaction.rollback();
+            var status = transaction.getTransactionStatus();
+            assertTrue(status.isNormal());
         }
     }
 
