@@ -9,9 +9,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInfo;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -22,14 +22,18 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.status.TgTransactionStatus;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * select 2-loop test
  */
-@Disabled // TODO remove Disabled. 稀にERR_INACTIVE_TRANSACTIONが発生する
 class DbSelect2LoopTest extends DbTestTableTester {
+    static final Logger LOG = LoggerFactory.getLogger(DbSelect2LoopTest.class);
 
     private static final int SIZE = 100;
     private static final String TEST2 = "test2";
@@ -242,13 +246,31 @@ class DbSelect2LoopTest extends DbTestTableTester {
                 var tm = session.createTransactionManager(setting);
 
                 while (threadCounter.get() > 0) {
-                    tm.execute(transaction -> {
-                        var parameter = TgBindParameters.of(key.bind(this.key1));
-                        transaction.executeAndForEach(selectPs, parameter, entity -> {
-                            var parameter1 = TgBindParameters.of(foo.bind(entity.getFoo()));
-                            transaction.executeAndGetList(select1Ps, parameter1);
+                    TgTransactionStatus[] status = { null };
+                    try {
+                        tm.execute(transaction -> {
+                            var parameter = TgBindParameters.of(key.bind(this.key1));
+                            try {
+                                transaction.executeAndForEach(selectPs, parameter, entity -> {
+                                    var parameter1 = TgBindParameters.of(foo.bind(entity.getFoo()));
+                                    transaction.executeAndGetList(select1Ps, parameter1);
+                                });
+                            } catch (TsurugiTransactionException e) {
+                                if (e.getDiagnosticCode() == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
+                                    status[0] = transaction.getTransactionStatus();
+                                }
+                                throw e;
+                            }
                         });
-                    });
+                    } catch (TsurugiTmIOException e) {
+                        if (e.getDiagnosticCode() == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
+                            if (status[0].getDiagnosticCode() == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+//                              LOG.info("ERR_INACTIVE_TRANSACTION with ERR_SERIALIZATION_FAILURE");
+                                continue;
+                            }
+                        }
+                        throw e;
+                    }
                 }
             }
         }
