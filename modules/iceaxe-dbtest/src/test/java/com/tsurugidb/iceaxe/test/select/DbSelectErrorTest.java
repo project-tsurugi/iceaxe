@@ -59,7 +59,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            assertContains("error in db_->create_executable()", e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found hoge", e.getMessage());
         }
     }
 
@@ -74,7 +74,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
-            assertContains("error in db_->create_executable()", e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: invalid_aggregation_column target column must be aggregated", e.getMessage()); // TODO カラム名が欲しい
         }
     }
 

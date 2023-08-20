@@ -50,7 +50,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
-            assertContains("error in db_->create_executable()", e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("ERR_PARSE_ERROR: SQL--0003: parsing statement failed: mismatched input '!=' expecting <EOF> (<input>:1:41)", e.getMessage());
         }
     }
 

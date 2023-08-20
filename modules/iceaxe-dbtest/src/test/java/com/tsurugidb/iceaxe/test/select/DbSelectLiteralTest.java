@@ -75,7 +75,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
             });
         });
         assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
-        assertContains("error in db_->create_executable()", e.getMessage()); // TODO エラー詳細情報の確認
+        assertContains("ERR_PARSE_ERROR: SQL--0003: parsing statement failed: missing K_FROM at 'e2' (<input>:1:8)", e.getMessage());
     }
 
     @Test
