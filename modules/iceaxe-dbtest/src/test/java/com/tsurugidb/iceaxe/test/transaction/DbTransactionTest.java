@@ -18,6 +18,8 @@ import org.junit.jupiter.api.TestInfo;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
+import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
@@ -92,10 +94,52 @@ class DbTransactionTest extends DbTestTableTester {
                 assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
             }
             var status = transaction.getTransactionStatus();
+            assertFalse(status.isNormal());
+            assertTrue(status.isError());
+            assertEquals(SqlServiceCode.ERR_PARSE_ERROR, status.getDiagnosticCode());
+            assertNotNull(status.getLowSqlServiceException());
+
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
+                var entity = createTestEntity(SIZE);
+                var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                    transaction.executeAndGetCount(ps, entity);
+                });
+                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e);
+            }
+            var status2 = transaction.getTransactionStatus();
+            assertFalse(status2.isNormal());
+            assertTrue(status2.isError());
+            assertEquals(SqlServiceCode.ERR_PARSE_ERROR, status2.getDiagnosticCode());
+            assertNotNull(status2.getLowSqlServiceException());
+        }
+    }
+
+    @Test
+    void transactionStatus_parseError_prepared() throws Exception {
+        var session = getSession();
+        try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+            String sql = "insertinto " + TEST + " values(" + SIZE + ", 1, 'a')"; // parse error
+            try (var ps = session.createStatement(sql, TgParameterMapping.of())) {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                    transaction.executeAndGetCount(ps, TgBindParameters.of());
+                });
+                assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
+            }
+            var status = transaction.getTransactionStatus();
             assertTrue(status.isNormal());
             assertFalse(status.isError());
             assertNull(status.getDiagnosticCode());
             assertNull(status.getLowSqlServiceException());
+
+            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
+                var entity = createTestEntity(SIZE);
+                transaction.executeAndGetCount(ps, entity);
+            }
+            var status2 = transaction.getTransactionStatus();
+            assertTrue(status2.isNormal());
+            assertFalse(status2.isError());
+            assertNull(status2.getDiagnosticCode());
+            assertNull(status2.getLowSqlServiceException());
         }
     }
 

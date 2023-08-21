@@ -15,6 +15,7 @@ import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
@@ -98,8 +99,16 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         applyCloseTimeout();
     }
 
+    /**
+     * get low PreparedStatement
+     *
+     * @return PreparedStatement
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    @IceaxeInternal
 //  @ThreadSafe
-    protected final synchronized PreparedStatement getLowPreparedStatement() throws IOException, InterruptedException {
+    public final synchronized PreparedStatement getLowPreparedStatement() throws IOException, InterruptedException {
         if (this.lowPreparedStatement == null) {
             if (lowFutureException != null) {
                 throw new TsurugiIOException(IceaxeErrorCode.PS_LOW_ERROR, lowFutureException);
