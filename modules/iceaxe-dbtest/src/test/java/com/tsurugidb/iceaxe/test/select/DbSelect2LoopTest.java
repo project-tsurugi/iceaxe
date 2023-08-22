@@ -15,10 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableInteger;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -33,7 +36,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  * select 2-loop test
  */
 class DbSelect2LoopTest extends DbTestTableTester {
-    static final Logger LOG = LoggerFactory.getLogger(DbSelect2LoopTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DbSelect2LoopTest.class);
 
     private static final int SIZE = 100;
     private static final String TEST2 = "test2";
@@ -104,6 +107,15 @@ class DbSelect2LoopTest extends DbTestTableTester {
 
     @RepeatedTest(4)
     void test() throws Throwable {
+        test(false);
+    }
+
+    @RepeatedTest(4)
+    void testTm() throws Throwable {
+        test(true);
+    }
+
+    private void test(boolean useTm) throws Throwable {
         var service = Executors.newFixedThreadPool(OCC_THREAD_SIZE + LTX_THREAD_SIZE);
         var sessionList = new ArrayList<TsurugiSession>(OCC_THREAD_SIZE + LTX_THREAD_SIZE);
         var futureList = new ArrayList<Future<Void>>(OCC_THREAD_SIZE + LTX_THREAD_SIZE);
@@ -119,7 +131,7 @@ class DbSelect2LoopTest extends DbTestTableTester {
             for (int i = 0; i < OCC_THREAD_SIZE; i++) {
                 var session = DbTestConnector.createSession();
                 sessionList.add(session);
-                var future = service.submit(new OccThread(session, 0, ltxThreadCounter));
+                var future = service.submit(new OccThread(session, 0, ltxThreadCounter, useTm));
                 futureList.add(future);
             }
         } catch (Throwable e) {
@@ -216,11 +228,13 @@ class DbSelect2LoopTest extends DbTestTableTester {
         private final TsurugiSession session;
         private final int key1;
         private final AtomicInteger threadCounter;
+        private final boolean useTm;
 
-        public OccThread(TsurugiSession session, int key1, AtomicInteger threadCounter) {
+        public OccThread(TsurugiSession session, int key1, AtomicInteger threadCounter, boolean useTm) {
             this.session = session;
             this.key1 = key1;
             this.threadCounter = threadCounter;
+            this.useTm = useTm;
         }
 
         @Override
@@ -242,36 +256,70 @@ class DbSelect2LoopTest extends DbTestTableTester {
             var select1Mapping = TgParameterMapping.of(foo);
             try (var selectPs = session.createQuery(selectSql, selectMapping, selectResultMapping); //
                     var select1Ps = session.createQuery(select1Sql, select1Mapping)) {
-                var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
-                var tm = session.createTransactionManager(setting);
-
                 while (threadCounter.get() > 0) {
-                    TgTransactionStatus[] status = { null };
+                    if (useTm) {
+                        execute1Tm(key, foo, selectPs, select1Ps);
+                    } else {
+                        execute1(key, foo, selectPs, select1Ps);
+                    }
+                }
+            }
+        }
+
+        private void execute1(TgBindVariableInteger key, TgBindVariableInteger foo, TsurugiSqlPreparedQuery<TgBindParameters, Test2Entity> selectPs,
+                TsurugiSqlPreparedQuery<TgBindParameters, TsurugiResultEntity> select1Ps) throws IOException, InterruptedException, TsurugiTransactionException {
+            try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+                var parameter = TgBindParameters.of(key.bind(this.key1));
+                try {
+                    transaction.executeAndForEach(selectPs, parameter, entity -> {
+                        var parameter1 = TgBindParameters.of(foo.bind(entity.getFoo()));
+                        transaction.executeAndGetList(select1Ps, parameter1);
+                    });
+                } catch (TsurugiTransactionException e) {
+                    var code = e.getDiagnosticCode();
+                    if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+                        return;
+                    }
+                    if (code == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
+                        var status = transaction.getTransactionStatus();
+                        if (status.getDiagnosticCode() == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+                            LOG.debug("ERR_INACTIVE_TRANSACTION with ERR_SERIALIZATION_FAILURE");
+                            return;
+                        }
+                    }
+                    throw e;
+                }
+            }
+        }
+
+        private void execute1Tm(TgBindVariableInteger key, TgBindVariableInteger foo, TsurugiSqlPreparedQuery<TgBindParameters, Test2Entity> selectPs,
+                TsurugiSqlPreparedQuery<TgBindParameters, TsurugiResultEntity> select1Ps) throws IOException, InterruptedException {
+            var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
+            var tm = session.createTransactionManager(setting);
+            TgTransactionStatus[] status = { null }; // TODO remove status (into TsurugiDefaultRetryPredicate)
+            try {
+                tm.execute(transaction -> {
+                    var parameter = TgBindParameters.of(key.bind(this.key1));
                     try {
-                        tm.execute(transaction -> {
-                            var parameter = TgBindParameters.of(key.bind(this.key1));
-                            try {
-                                transaction.executeAndForEach(selectPs, parameter, entity -> {
-                                    var parameter1 = TgBindParameters.of(foo.bind(entity.getFoo()));
-                                    transaction.executeAndGetList(select1Ps, parameter1);
-                                });
-                            } catch (TsurugiTransactionException e) {
-                                if (e.getDiagnosticCode() == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
-                                    status[0] = transaction.getTransactionStatus();
-                                }
-                                throw e;
-                            }
+                        transaction.executeAndForEach(selectPs, parameter, entity -> {
+                            var parameter1 = TgBindParameters.of(foo.bind(entity.getFoo()));
+                            transaction.executeAndGetList(select1Ps, parameter1);
                         });
-                    } catch (TsurugiTmIOException e) {
+                    } catch (TsurugiTransactionException e) {
                         if (e.getDiagnosticCode() == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
-                            if (status[0].getDiagnosticCode() == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
-//                              LOG.info("ERR_INACTIVE_TRANSACTION with ERR_SERIALIZATION_FAILURE");
-                                continue;
-                            }
+                            status[0] = transaction.getTransactionStatus();
                         }
                         throw e;
                     }
+                });
+            } catch (TsurugiTmIOException e) {
+                if (e.getDiagnosticCode() == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
+                    if (status[0].getDiagnosticCode() == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+                        LOG.debug("ERR_INACTIVE_TRANSACTION with ERR_SERIALIZATION_FAILURE");
+                        return;
+                    }
                 }
+                throw e;
             }
         }
     }
