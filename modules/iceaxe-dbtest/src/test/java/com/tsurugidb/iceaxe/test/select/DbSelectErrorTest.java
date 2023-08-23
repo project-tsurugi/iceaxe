@@ -176,9 +176,9 @@ class DbSelectErrorTest extends DbTestTableTester {
         }
     }
 
-    @RepeatedTest(5)
+    @RepeatedTest(60)
     @Disabled // TODO remove Disabled. 挙動が不安定
-    void closeWithSelectThead() throws Throwable {
+    void closeWithSelectThread() throws Throwable {
         Thread thread;
         Throwable[] threadException = { null };
         try (var session = DbTestConnector.createSession()) {
