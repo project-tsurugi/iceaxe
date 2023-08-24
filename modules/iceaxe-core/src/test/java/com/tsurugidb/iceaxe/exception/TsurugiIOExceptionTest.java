@@ -34,7 +34,7 @@ class TsurugiIOExceptionTest {
     void constructCodeIOException() {
         var se = new IceaxeServerExceptionTestMock("test", IceaxeErrorCode.TX_ALREADY_CLOSED);
         var target = new TsurugiIOException(IceaxeErrorCode.TX_LOW_ERROR, new IOException(se.getMessage(), se));
-        assertEquals(IceaxeErrorCode.TX_LOW_ERROR.getMessage(), target.getMessage());
+        assertEquals(IceaxeErrorCode.TX_LOW_ERROR.getMessage() + ": " + se.getMessage(), target.getMessage());
         assertEquals(IceaxeErrorCode.TX_LOW_ERROR, target.getDiagnosticCode());
     }
 }
