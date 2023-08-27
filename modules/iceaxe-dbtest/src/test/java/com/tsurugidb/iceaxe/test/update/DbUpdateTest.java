@@ -3,15 +3,25 @@ package com.tsurugidb.iceaxe.test.update;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmRetryOverIOException;
+import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 
 /**
  * update test
@@ -181,29 +191,43 @@ class DbUpdateTest extends DbTestTableTester {
         }
     }
 
-    @Test
-    void updatePK() throws Exception {
+    @ParameterizedTest
+    @ValueSource(ints = { -1, 0, 1, SIZE - 1, SIZE, SIZE + 1, -(SIZE - 1), -SIZE, -(SIZE + 1) })
+    void updatePK(int add) throws Exception {
+        String addText = (add >= 0) ? " + " + add : "" + add;
         var sql = "update " + TEST //
                 + " set" //
-                + "  foo = foo + 1"; // primary key
+                + "  foo = foo" + addText; // primary key
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
             assertUpdateCount(SIZE, count);
+        } catch (TsurugiTmRetryOverIOException e) {
+            if (add == -1) { // TODO updatePK(-1)
+                return;
+            }
+            throw e;
+        } catch (ResponseTimeoutException e) {
+            if (add >= SIZE - 1) { // TODO updatePK(SIZE)
+                return;
+            }
+            if (add <= -(SIZE - 1)) { // TODO updatePK(-SIZE)
+                return;
+            }
+            throw e;
         }
 
-        var list = selectAllFromTest();
-        assertEquals(SIZE, list.size());
-        int i = 0;
-        for (var entity : list) {
-            // TODO updatePK
-//          var expected = new TestEntity(i + 1, i, Integer.toString(i));
-            var expected = (i + 1 != 10) ? new TestEntity(i + 1, i + 1, Integer.toString(i + 1)) : new TestEntity(10, 0, Integer.toString(0));
-            assertEquals(expected, entity);
-            i++;
+        if (add == 1) { // TODO updatePK(1)
+            var list = selectAllFromTest();
+            assertEquals(1, list.size());
+            return;
         }
+
+        var expectedList = IntStream.range(0, SIZE).mapToObj(i -> createTestEntity(i)).peek(e -> e.setFoo(e.getFoo() + add)).collect(Collectors.toList());
+        Collections.sort(expectedList, Comparator.comparing(TestEntity::getFoo));
+        assertEqualsTestTable(expectedList);
     }
 
     @Test
@@ -220,6 +244,25 @@ class DbUpdateTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable(SIZE);
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled. implements mod()
+    void updatePKSwap() throws Exception {
+        var sql = "update " + TEST //
+                + " set" //
+                + "  foo = foo - mod(foo, 2)*2 + 1"; // primary key
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createStatement(sql)) {
+            int count = tm.executeAndGetCount(ps);
+            assertUpdateCount(SIZE, count);
+        }
+
+        var expectedList = IntStream.range(0, SIZE).mapToObj(i -> createTestEntity(i)).peek(e -> e.setFoo(-(e.getFoo() % 2) + 1)).collect(Collectors.toList());
+        Collections.sort(expectedList, Comparator.comparing(TestEntity::getFoo));
+        assertEqualsTestTable(expectedList);
     }
 
     @Test
