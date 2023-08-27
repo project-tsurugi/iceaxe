@@ -30,7 +30,7 @@ import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.iceaxe.transaction.status.TgTransactionStatus;
+import com.tsurugidb.iceaxe.transaction.status.TgTxStatus;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -980,7 +980,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @throws InterruptedException
      */
 //  @ThreadSafe
-    public TgTransactionStatus getTransactionStatus() throws IOException, InterruptedException {
+    public TgTxStatus getTransactionStatus() throws IOException, InterruptedException {
         checkClose();
         var helper = getSession().getTransactionStatusHelper();
         return helper.getTransactionStatus(this);

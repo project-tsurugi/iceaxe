@@ -30,7 +30,7 @@ public class TsurugiTransactionStatusHelper {
      * @throws IOException
      * @throws InterruptedException
      */
-    public TgTransactionStatus getTransactionStatus(TsurugiTransaction transaction) throws IOException, InterruptedException {
+    public TgTxStatus getTransactionStatus(TsurugiTransaction transaction) throws IOException, InterruptedException {
         var lowTx = transaction.getLowTransaction();
         LOG.trace("getTransactionStatus start. tx={}", transaction);
         var lowFuture = getLowSqlServiceException(lowTx);
@@ -42,7 +42,7 @@ public class TsurugiTransactionStatusHelper {
         return lowTx.getSqlServiceException();
     }
 
-    protected TgTransactionStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowFuture) throws IOException, InterruptedException {
+    protected TgTxStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowFuture) throws IOException, InterruptedException {
         try (var closeable = IceaxeIoUtil.closeable(lowFuture)) {
 
             var sessionOption = transaction.getSession().getSessionOption();
@@ -77,7 +77,7 @@ public class TsurugiTransactionStatusHelper {
         return new TsurugiTransactionException(lowException);
     }
 
-    protected TgTransactionStatus newTgTransactionStatus(TsurugiTransactionException exception) {
-        return new TgTransactionStatus(exception);
+    protected TgTxStatus newTgTransactionStatus(TsurugiTransactionException exception) {
+        return new TgTxStatus(exception);
     }
 }

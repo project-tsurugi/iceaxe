@@ -10,7 +10,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 /**
  * Tsurugi transaction status
  */
-public class TgTransactionStatus {
+public class TgTxStatus {
 
     private final TsurugiTransactionException exception;
 
@@ -19,7 +19,7 @@ public class TgTransactionStatus {
      *
      * @param exception transaction exception
      */
-    public TgTransactionStatus(@Nullable TsurugiTransactionException exception) {
+    public TgTxStatus(@Nullable TsurugiTransactionException exception) {
         this.exception = exception;
     }
 
