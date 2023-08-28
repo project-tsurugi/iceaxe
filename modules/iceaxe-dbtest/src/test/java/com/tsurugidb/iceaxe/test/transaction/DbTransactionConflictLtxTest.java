@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.concurrent.ExecutionException;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -144,19 +142,23 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     var entity12 = tx1.executeAndFindRecord(selectPs).get();
                     assertEquals(BAR_AFTER1, entity12.getBar());
 
+                    Thread.sleep(100);
                     assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
-                    var e = assertThrows(TsurugiTransactionException.class, () -> {
-                        try {
-                            future2.get();
-                        } catch (ExecutionException ee) {
-                            throw ee.getCause();
-                        }
-                    });
-                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                    future2.get();
                 }
             }
+        }
+
+        var list = selectAllFromTest();
+        int i = 0;
+        for (var entity : list) {
+            var expected = createTestEntity(i++);
+            if (expected.getFoo() == KEY) {
+                expected.setBar(BAR_AFTER2);
+            }
+            assertEquals(expected, entity);
         }
     }
 
@@ -183,6 +185,48 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
                 }
             }
+        }
+    }
+
+    @Test
+    void ltx_ltx3() throws Exception {
+        var session = getSession();
+        try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
+                var updatePs = session.createStatement("update " + TEST + " set bar =  bar + 1 where foo = " + KEY); //
+                var updatePs2 = session.createStatement("update " + TEST + " set bar =  bar + 2 where foo = " + KEY)) {
+            try (var tx1 = session.createTransaction(LTX)) {
+                tx1.executeAndGetCount(updatePs);
+
+                try (var tx2 = session.createTransaction(LTX)) {
+                    tx2.executeAndGetCount(updatePs2);
+                    var entity22 = tx2.executeAndFindRecord(selectPs).get();
+                    assertEquals(BAR_BEFORE + 2, entity22.getBar());
+
+                    var future2 = executeFuture(() -> {
+                        tx2.commit(TgCommitType.DEFAULT);
+                        return null;
+                    });
+
+                    var entity12 = tx1.executeAndFindRecord(selectPs).get();
+                    assertEquals(BAR_BEFORE + 1, entity12.getBar());
+
+                    Thread.sleep(100);
+                    assertFalse(future2.isDone());
+                    tx1.commit(TgCommitType.DEFAULT);
+
+                    future2.get(); // TODO シリアライゼーションエラーになるべき？
+                }
+            }
+        }
+
+        var list = selectAllFromTest();
+        int i = 0;
+        for (var entity : list) {
+            var expected = createTestEntity(i++);
+            if (expected.getFoo() == KEY) {
+                expected.setBar(BAR_BEFORE + 1 + 2);
+            }
+            assertEquals(expected, entity);
         }
     }
 

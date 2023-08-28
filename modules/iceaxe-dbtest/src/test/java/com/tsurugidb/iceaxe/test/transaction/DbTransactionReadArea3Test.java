@@ -86,6 +86,7 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                             return null;
                         });
 
+                        Thread.sleep(100);
                         assertFalse(future3.isDone());
                         tx1.commit(TgCommitType.DEFAULT);
 
@@ -152,6 +153,7 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                             return null;
                         });
 
+                        Thread.sleep(100);
                         assertFalse(future3.isDone());
                         tx1.commit(TgCommitType.DEFAULT);
 

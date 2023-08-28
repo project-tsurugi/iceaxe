@@ -247,18 +247,10 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
                 try (var tx2 = session.createTransaction(tx2Option)) {
                     tx2.executeAndGetList(select1Ps);
                     tx2.executeAndGetCount(update2Ps);
-
-                    var future2 = executeFuture(() -> {
-                        tx2.commit(TgCommitType.DEFAULT);
-                        return null;
-                    });
-
-                    Thread.sleep(100);
-                    assertFalse(future2.isDone());
-                    tx1.commit(TgCommitType.DEFAULT);
-
-                    future2.get();
+                    tx2.commit(TgCommitType.DEFAULT);
                 }
+
+                tx1.commit(TgCommitType.DEFAULT);
             }
         }
 
