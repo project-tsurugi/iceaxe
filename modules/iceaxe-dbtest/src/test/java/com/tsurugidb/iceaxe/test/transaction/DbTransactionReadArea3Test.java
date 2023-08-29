@@ -147,17 +147,9 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                         tx3.executeAndGetList(selectAps); // red conflict
                         // t3はt1のred conflictが（未コミットだが）確定
                         tx3.executeAndGetCount(insertBps, ENTITY0);
-                        var future3 = executeFuture(() -> {
-                            // t1がBを読まないことも確定だが、WPの決着はcommitまで持ち越すので待つ
-                            tx3.commit(TgCommitType.DEFAULT);
-                            return null;
-                        });
+                        tx3.commit(TgCommitType.DEFAULT); // 前置確定＋readなしなので、commitできる
 
-                        Thread.sleep(100);
-                        assertFalse(future3.isDone());
                         tx1.commit(TgCommitType.DEFAULT);
-
-                        future3.get();
                     }
                 }
             }
