@@ -19,6 +19,7 @@ public abstract class TsurugiSqlDirect extends TsurugiSql {
      */
     protected TsurugiSqlDirect(TsurugiSession session, String sql) throws IOException {
         super(session, sql);
+        initialize(null);
     }
 
     @Override

@@ -84,6 +84,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RS_CLOSE);
 
         applyCloseTimeout();
+        initialize(lowResultSetFuture);
     }
 
     private void applyCloseTimeout() {

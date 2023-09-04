@@ -56,6 +56,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.PS_CLOSE);
 
         applyCloseTimeout();
+        initialize(lowPreparedStatementFuture);
     }
 
     @Override

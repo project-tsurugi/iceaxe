@@ -64,7 +64,7 @@ public class TsurugiSession implements AutoCloseable {
     private final IceaxeTimeout closeTimeout;
     private List<TsurugiSessionEventListener> eventListenerList = null;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
-    private boolean closed = false;
+    private volatile boolean closed = false;
 
     /**
      * Creates a new instance.

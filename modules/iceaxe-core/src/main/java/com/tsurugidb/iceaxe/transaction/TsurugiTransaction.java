@@ -69,7 +69,7 @@ public class TsurugiTransaction implements AutoCloseable {
     private boolean committed = false;
     private boolean rollbacked = false;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
-    private boolean closed = false;
+    private volatile boolean closed = false;
 
     /**
      * Creates a new instance.
@@ -85,7 +85,6 @@ public class TsurugiTransaction implements AutoCloseable {
         this.ownerSession = session;
         this.lowTransactionFuture = lowTransactionFuture;
         this.txOption = txOption;
-        session.addChild(this);
 
         var sessionOption = session.getSessionOption();
         this.beginTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TRANSACTION_BEGIN);
@@ -94,11 +93,36 @@ public class TsurugiTransaction implements AutoCloseable {
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TRANSACTION_CLOSE);
 
         applyCloseTimeout();
+        initialize(lowTransactionFuture);
     }
 
     private void applyCloseTimeout() {
         closeTimeout.apply(lowTransaction);
         closeTimeout.apply(lowTransactionFuture);
+    }
+
+    /**
+     * initialize.
+     * <p>
+     * call from constructor after applyCloseTimeout()
+     * </p>
+     *
+     * @param future future to close when an error occurs
+     * @throws IOException if session already closed
+     */
+    protected void initialize(FutureResponse<Transaction> future) throws IOException {
+        try {
+            ownerSession.addChild(this);
+        } catch (Throwable e) {
+            LOG.trace("transaction.initialize close start", e);
+            try {
+                IceaxeIoUtil.close(future);
+            } catch (Throwable c) {
+                e.addSuppressed(c);
+            }
+            LOG.trace("transaction.initialize close end");
+            throw e;
+        }
     }
 
     /**

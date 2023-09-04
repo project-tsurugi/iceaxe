@@ -59,6 +59,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
 
         applyCloseTimeout();
+        initialize(lowResultFuture);
     }
 
     private void applyCloseTimeout() {
