@@ -1,11 +1,15 @@
 package com.tsurugidb.iceaxe.metadata;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
@@ -13,7 +17,6 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.tsubakuro.sql.SqlClient;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 import com.tsurugidb.tsubakuro.sql.TableMetadata;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -22,6 +25,21 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
  */
 public class TsurugiTableMetadataHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTableMetadataHelper.class);
+
+    private TsurugiExceptionUtil exceptionUtil = TsurugiExceptionUtil.getInstance();
+
+    /**
+     * set exception utility
+     *
+     * @param execptionUtil exception utility
+     */
+    public void setExceptionUtil(@Nonnull TsurugiExceptionUtil execptionUtil) {
+        this.exceptionUtil = Objects.requireNonNull(execptionUtil);
+    }
+
+    protected TsurugiExceptionUtil getExceptionUtil() {
+        return this.exceptionUtil;
+    }
 
     /**
      * get table metadata.
@@ -57,8 +75,7 @@ public class TsurugiTableMetadataHelper {
 
             return Optional.of(newTableMetadata(lowTableMetadata));
         } catch (TsurugiIOException e) {
-            var code = e.getDiagnosticCode();
-            if (code == SqlServiceCode.ERR_NOT_FOUND) {
+            if (exceptionUtil.isTargetNotFound(e)) {
                 LOG.trace("getTableMetadata end (tableName={} not found)", tableName);
                 return Optional.empty();
             }

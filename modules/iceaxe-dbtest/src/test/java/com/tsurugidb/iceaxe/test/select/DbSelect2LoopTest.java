@@ -14,6 +14,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -31,7 +32,6 @@ import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * select 2-loop test
@@ -277,13 +277,13 @@ class DbSelect2LoopTest extends DbTestTableTester {
                         transaction.executeAndGetList(select1Ps, parameter1);
                     });
                 } catch (TsurugiTransactionException e) {
-                    var code = e.getDiagnosticCode();
-                    if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+                    var exceptionUtil = TsurugiExceptionUtil.getInstance();
+                    if (exceptionUtil.isSerializationFailure(e)) {
                         return;
                     }
-                    if (code == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
+                    if (exceptionUtil.isInactiveTransaction(e)) {
                         var status = transaction.getTransactionStatus();
-                        if (status.getDiagnosticCode() == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+                        if (exceptionUtil.isSerializationFailure(status.getTransactionException())) {
                             LOG.debug("ERR_INACTIVE_TRANSACTION with ERR_SERIALIZATION_FAILURE");
                             return;
                         }

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
@@ -31,7 +32,6 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * insert duplicate bug test
@@ -149,8 +149,8 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                             execute(transaction, maxPs, insertPs, insert2Ps);
                         });
                     } catch (TsurugiTmIOException e) {
-                        if (e.getDiagnosticCode() == SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION) {
-//                          LOG.info("ERR_UNIQUE_CONSTRAINT_VIOLATION {}", i);
+                        if (TsurugiExceptionUtil.getInstance().isUniqueConstraintViolation(e)) {
+//                          LOG.info("UNIQUE_CONSTRAINT_VIOLATION {}", i);
                             i--;
                             continue;
                         }

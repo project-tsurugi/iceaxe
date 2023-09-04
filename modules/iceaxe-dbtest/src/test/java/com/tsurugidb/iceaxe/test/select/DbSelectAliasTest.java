@@ -67,7 +67,7 @@ class DbSelectAliasTest extends DbTestTableTester {
         var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             selectCount(sql, "cnt");
         });
-        assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e); // TODO as無し別名実装待ち
+        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e); // TODO as無し別名実装待ち
     }
 
     @Test

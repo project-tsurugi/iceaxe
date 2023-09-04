@@ -69,7 +69,8 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var tm = session.createTransactionManager(TgTxOption.ofRTX());
         try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
-            assertEqualsCode(SqlServiceCode.ERR_UNSUPPORTED, e);
+            assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_UNSUPPORTED
+            assertContains("Unexpected error occurred. status:err_unsupported", e.getMessage());
         }
 
         // expected: auto rollback
@@ -86,7 +87,8 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var tm = session.createTransactionManager(TgTxOption.ofLTX()); // no WritePreserve
         try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
-            assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
+            assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_ILLEGAL_OPERATION
+            assertContains("Unexpected error occurred. status:err_illegal_operation", e.getMessage());
         }
 
         // expected: auto rollback
@@ -102,7 +104,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
                 try {
                     tx.getLowTransaction();
                 } catch (TsurugiIOException e) {
-                    assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
+                    assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e); // TODO ERR_RESOURCE_LIMIT_REACHED
                     assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
                     return;
                 }
@@ -147,10 +149,10 @@ class DbTransactionErrorTest extends DbTestTableTester {
                     var selectPs = session.createQuery(SELECT_SQL)) {
                 var entity = createTestEntity(1);
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(insertPs, entity));
-                assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e1);
+                assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e1);
 
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetList(selectPs));
-                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
+                assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e2);
             }
         }
     }

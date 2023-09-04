@@ -44,7 +44,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
+            assertEqualsCode(SqlServiceCode.INCONSISTENT_STATEMENT_EXCEPTION, e);
         }
 
         assertEqualsTestTable(SIZE);
@@ -79,7 +79,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
                 var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456) /* ,zzz */);
                 tm.executeAndGetCount(ps, parameter);
             });
-            assertEqualsCode(SqlServiceCode.ERR_UNRESOLVED_HOST_VARIABLE, e);
+            assertEqualsCode(SqlServiceCode.UNRESOLVED_PLACEHOLDER_EXCEPTION, e);
             assertContains("Value is not assigned for host variable 'zzz'.", e.getMessage());
         }
 
@@ -103,7 +103,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
                 var parameter = TgBindParameters.of(foo.bind(123), bar.bind(456), zzz.bind(789));
                 tm.executeAndGetCount(ps, parameter);
             });
-            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
             assertContains("inconsistent_type int4() (expected: {character_string})", e.getMessage()); // TODO カラム名の確認
         }
 

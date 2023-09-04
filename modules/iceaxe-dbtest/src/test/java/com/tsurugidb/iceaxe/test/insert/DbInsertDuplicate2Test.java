@@ -15,6 +15,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
@@ -33,7 +34,6 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * insert duplicate bug test
@@ -162,15 +162,15 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                             execute(transaction, maxPs, insertPs, insert2Ps);
                         });
                     } catch (TsurugiTmIOException e) {
-                        var code = e.getDiagnosticCode();
-                        if (code == SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION) {
-//                          LOG.info("ERR_UNIQUE_CONSTRAINT_VIOLATION {}", i);
+                        var exceptionUtil = TsurugiExceptionUtil.getInstance();
+                        if (exceptionUtil.isUniqueConstraintViolation(e)) {
+//                          LOG.info("UNIQUE_CONSTRAINT_VIOLATION: {}", e.getMessage());
                             continue;
                         }
-                        if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+                        if (exceptionUtil.isSerializationFailure(e)) {
                             String message = e.getMessage();
                             if (message.contains("reason_code:KVS_INSERT")) {
-//                              LOG.info("ERR_SERIALIZATION_FAILURE:KVS_INSERT {}", i);
+//                              LOG.info("CC_EXCEPTION:KVS_INSERT: {}", message);
                                 continue;
                             }
                         }

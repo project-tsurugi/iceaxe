@@ -1,10 +1,10 @@
 package com.tsurugidb.iceaxe.example;
 
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.retry.TsurugiDefaultRetryPredicate;
 import com.tsurugidb.iceaxe.transaction.manager.retry.TsurugiTmRetryPredicate;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * {@link TsurugiTmRetryPredicate} example.
@@ -18,8 +18,8 @@ public class Example04TmRetryPredicate {
         supplier.setRetryPredicate(new TsurugiDefaultRetryPredicate() {
             @Override
             protected boolean isRetryable(TsurugiTransactionException e) {
-                var code = e.getDiagnosticCode();
-                if (code == SqlServiceCode.ERR_ABORTED) {
+                var exceptionUtil = TsurugiExceptionUtil.getInstance();
+                if (exceptionUtil.isSerializationFailure(e)) {
                     return true;
                 }
                 return super.isRetryable(e);

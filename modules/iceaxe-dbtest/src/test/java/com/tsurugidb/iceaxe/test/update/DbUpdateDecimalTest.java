@@ -89,7 +89,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         transaction.executeAndGetCount(ps, parameter);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_EXPRESSION_EVALUATION_FAILURE, e);
+                    assertEqualsCode(SqlServiceCode.VALUE_EVALUATION_EXCEPTION, e);
 
                     try (var selectPs = session.createQuery("select value from " + TEST)) {
                         var list = transaction.executeAndGetList(selectPs);

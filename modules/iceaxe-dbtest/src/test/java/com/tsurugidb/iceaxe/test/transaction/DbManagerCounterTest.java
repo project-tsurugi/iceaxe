@@ -215,7 +215,7 @@ class DbManagerCounterTest extends DbTestTableTester {
                         tx2.executeAndGetCount(ps, param2);
                     });
                 });
-                assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
 
                 for (int i = 0; i < 4; i++) {
                     tm.execute(setting3, tx3 -> {

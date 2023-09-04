@@ -90,12 +90,12 @@ class DbTransactionTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeAndGetCount(ps);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
             }
             var status = transaction.getTransactionStatus();
             assertFalse(status.isNormal());
             assertTrue(status.isError());
-            assertEquals(SqlServiceCode.ERR_PARSE_ERROR, status.getDiagnosticCode());
+            assertEquals(SqlServiceCode.COMPILE_EXCEPTION, status.getDiagnosticCode());
             assertNotNull(status.getTransactionException());
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -103,12 +103,13 @@ class DbTransactionTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeAndGetCount(ps, entity);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e);
+                assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_INACTIVE_TRANSACTION
+                assertContains("Unexpected error occurred. status:err_inactive_transaction", e.getMessage());
             }
             var status2 = transaction.getTransactionStatus();
             assertFalse(status2.isNormal());
             assertTrue(status2.isError());
-            assertEquals(SqlServiceCode.ERR_PARSE_ERROR, status2.getDiagnosticCode());
+            assertEquals(SqlServiceCode.COMPILE_EXCEPTION, status2.getDiagnosticCode());
             assertNotNull(status2.getTransactionException());
         }
     }
@@ -122,7 +123,7 @@ class DbTransactionTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetCount(ps, TgBindParameters.of());
                 });
-                assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
             }
             var status = transaction.getTransactionStatus();
             assertTrue(status.isNormal());
@@ -151,12 +152,12 @@ class DbTransactionTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeAndGetCount(ps, entity);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e);
+                assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e);
             }
             var status = transaction.getTransactionStatus();
             assertFalse(status.isNormal());
             assertTrue(status.isError());
-            assertEquals(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, status.getDiagnosticCode());
+            assertEquals(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, status.getDiagnosticCode());
             assertNotNull(status.getTransactionException());
         }
     }
@@ -170,17 +171,18 @@ class DbTransactionTest extends DbTestTableTester {
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeAndGetCount(ps, entity);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, e1);
+                assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e1);
 
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeAndGetCount(ps, entity);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
+                assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e2); // TODO ERR_INACTIVE_TRANSACTION
+                assertContains("Unexpected error occurred. status:err_inactive_transaction", e2.getMessage());
             }
             var status = transaction.getTransactionStatus();
             assertFalse(status.isNormal());
             assertTrue(status.isError());
-            assertEquals(SqlServiceCode.ERR_UNIQUE_CONSTRAINT_VIOLATION, status.getDiagnosticCode());
+            assertEquals(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, status.getDiagnosticCode());
             assertNotNull(status.getTransactionException());
         }
     }

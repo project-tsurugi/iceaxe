@@ -59,7 +59,7 @@ class DbCreateTableTest extends DbTestTableTester {
         var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             tm.executeDdl(SQL);
         });
-        assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
         assertContains("duplicate_table table `test' is already defined.", e.getMessage());
     }
 
@@ -77,7 +77,7 @@ class DbCreateTableTest extends DbTestTableTester {
             // テーブルが作られた後にpreparedStatementのDDLを実行するとERR_ALREADY_EXISTSになる
             try (var transaction = session.createTransaction(txOption)) {
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps, TgBindParameters.of()));
-                assertEqualsCode(SqlServiceCode.ERR_ALREADY_EXISTS, e);
+                assertEqualsCode(SqlServiceCode.TARGET_ALREADY_EXISTS_EXCEPTION, e);
                 transaction.rollback();
             }
         }
@@ -85,7 +85,7 @@ class DbCreateTableTest extends DbTestTableTester {
         try (var ps = session.createStatement(CREATE_TEST_SQL, TgParameterMapping.of())) {
             try (var transaction = session.createTransaction(txOption)) {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> transaction.executeAndGetCount(ps, TgBindParameters.of()));
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                 assertContains("duplicate_table table `test' is already defined", e.getMessage());
                 transaction.rollback();
             }
@@ -122,7 +122,7 @@ class DbCreateTableTest extends DbTestTableTester {
         Consumer<TsurugiTmIOException> error = null;
         if (!hasPk) {
             error = e -> {
-                assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e);
+                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e);
                 assertContains("writing sequence metadata to system storage failed", e.getMessage());
             };
         }
@@ -181,15 +181,16 @@ class DbCreateTableTest extends DbTestTableTester {
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeDdl(createDdl);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e1);
+                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e1);
                 assertContains("writing sequence metadata to system storage failed", e1.getMessage());
 
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeDdl(createDdl);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
+                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e2); // TODO INACTIVE_TRANSACTION_EXCEPTION
+                assertContains("creating sequence failed with status:err_inactive_transaction error:scan failed", e2.getMessage());
             });
         });
-        assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e);
+        assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e);
     }
 }

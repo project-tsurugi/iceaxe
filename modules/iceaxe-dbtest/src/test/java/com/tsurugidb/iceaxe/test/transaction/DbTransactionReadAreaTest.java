@@ -94,10 +94,10 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
         try (var select2Ps = session.createQuery(SELECT2_SQL, SELECT_MAPPING)) {
             try (var tx1 = session.createTransaction(LTX1)) {
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetList(select2Ps));
-                assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e1);
-//              assertContains("TODO", e1.getMessage()); // TODO エラーになったテーブルの確認
+                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e1); // TODO ERR_ILLEGAL_OPERATION
+                assertContains("creating transaction failed with error:err_illegal_operation", e1.getMessage()); // TODO エラーになったテーブルの確認
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetList(select2Ps));
-                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
+                assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e2);
             }
         }
 
@@ -129,10 +129,10 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
         try (var update2Ps = session.createStatement(UPDATE2_SQL)) {
             try (var tx1 = session.createTransaction(txOption)) {
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetCount(update2Ps));
-                assertEqualsCode(SqlServiceCode.ERR_ILLEGAL_OPERATION, e1);
+                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e1);
 //              assertContains("TODO", e1.getMessage()); // TODO エラーになったテーブルの確認
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetCount(update2Ps));
-                assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, e2);
+                assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e2);
             }
         }
 

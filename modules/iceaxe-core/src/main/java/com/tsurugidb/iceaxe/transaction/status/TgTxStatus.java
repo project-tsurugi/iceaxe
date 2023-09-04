@@ -1,11 +1,14 @@
 package com.tsurugidb.iceaxe.transaction.status;
 
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * Tsurugi transaction status
@@ -13,6 +16,20 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 public class TgTxStatus {
 
     private final TsurugiTransactionException exception;
+    private TsurugiExceptionUtil exceptionUtil = TsurugiExceptionUtil.getInstance();
+
+    /**
+     * set exception utility
+     *
+     * @param execptionUtil exception utility
+     */
+    public void setExceptionUtil(@Nonnull TsurugiExceptionUtil execptionUtil) {
+        this.exceptionUtil = Objects.requireNonNull(execptionUtil);
+    }
+
+    protected TsurugiExceptionUtil getExceptionUtil() {
+        return this.exceptionUtil;
+    }
 
     /**
      * Creates a new instance.
@@ -29,8 +46,13 @@ public class TgTxStatus {
      * @return {@code true} if status is normal
      */
     public boolean isNormal() {
-        var code = getDiagnosticCode();
-        return code == null || code == SqlServiceCode.OK;
+        if (this.exception == null) {
+            return true;
+        }
+        if (exceptionUtil.isOk(this.exception)) {
+            return true;
+        }
+        return false;
     }
 
     /**

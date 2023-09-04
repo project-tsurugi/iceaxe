@@ -87,7 +87,7 @@ class DbErrorMultiplexInsertTest extends DbTestTableTester {
             if (size < threshold) {
                 throw e;
             }
-            assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
+            assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_RESOURCE_LIMIT_REACHED
             assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
             LOG.warn("err_resource_limit_reached occur. size={}, type={}", size, type);
         }

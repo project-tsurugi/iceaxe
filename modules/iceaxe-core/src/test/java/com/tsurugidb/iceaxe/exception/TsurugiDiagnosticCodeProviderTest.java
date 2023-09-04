@@ -42,6 +42,6 @@ class TsurugiDiagnosticCodeProviderTest {
     @Test
     void testCreateMessageDiagnosticCode() {
         assertNull(TsurugiDiagnosticCodeProvider.createMessage((DiagnosticCode) null));
-        assertEquals("SQL-00000 (OK)", TsurugiDiagnosticCodeProvider.createMessage(SqlServiceCode.OK));
+        assertEquals("SQL-01000 (SQL_SERVICE_EXCEPTION)", TsurugiDiagnosticCodeProvider.createMessage(SqlServiceCode.SQL_SERVICE_EXCEPTION));
     }
 }

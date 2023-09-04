@@ -63,9 +63,8 @@ class DbSelectOtherTxTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     updateOtherTxOcc(session, updatePs, bar, 222);
                 });
-//              assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e); // TODO ERR_CONFLICT_ON_WRITE_PRESERVEは無くなるかも
                 var code = findDiagnosticCode(e);
-                var expectedCode = List.of(SqlServiceCode.ERR_SERIALIZATION_FAILURE, SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE);
+                var expectedCode = List.of(SqlServiceCode.CC_EXCEPTION, SqlServiceCode.CONFLICT_ON_WRITE_PRESERVE_EXCEPTION);
                 if (!expectedCode.contains(code)) {
                     fail(MessageFormat.format("expected: {1} but was: <{0}>", code, expectedCode));
                 }
@@ -103,7 +102,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     updateOtherTxOcc(session, updatePs, bar, 222);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
 
                 var entity2 = select(tx, selectPs);
                 assertEquals(111L, entity2.getBar());

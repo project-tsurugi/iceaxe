@@ -6,10 +6,10 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * default retry predicate
@@ -35,6 +35,21 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      */
     public static void setInstance(@Nonnull TsurugiTmRetryPredicate defaultRetryPredicate) {
         instance = Objects.requireNonNull(defaultRetryPredicate);
+    }
+
+    private TsurugiExceptionUtil exceptionUtil = TsurugiExceptionUtil.getInstance();
+
+    /**
+     * set exception utility
+     *
+     * @param execptionUtil exception utility
+     */
+    public void setExceptionUtil(@Nonnull TsurugiExceptionUtil execptionUtil) {
+        this.exceptionUtil = Objects.requireNonNull(execptionUtil);
+    }
+
+    protected TsurugiExceptionUtil getExceptionUtil() {
+        return this.exceptionUtil;
     }
 
     @Override
@@ -81,7 +96,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     }
 
     protected TgTmRetryInstruction testOcc(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        if (isOccOnWp(e)) {
+        if (isConflictOnWritePreserve(e)) {
             return TgTmRetryInstruction.ofRetryableLtx("OCC ltx retry. " + e.getMessage());
         }
 
@@ -89,7 +104,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     }
 
     protected TgTmRetryInstruction testLtx(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        if (isOccOnWp(e)) {
+        if (isConflictOnWritePreserve(e)) {
             throw new IllegalStateException("illegal code. " + e.getMessage());
         }
 
@@ -97,7 +112,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     }
 
     protected TgTmRetryInstruction testRtx(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        if (isOccOnWp(e)) {
+        if (isConflictOnWritePreserve(e)) {
             throw new IllegalStateException("illegal code. " + e.getMessage());
         }
 
@@ -129,19 +144,17 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     //
 
     protected boolean isRetryable(TsurugiTransactionException e) {
-        var code = e.getDiagnosticCode();
-        if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+        if (exceptionUtil.isSerializationFailure(e)) {
             return true;
         }
         return false;
     }
 
-    protected boolean isOccOnWp(TsurugiTransactionException e) {
-        var code = e.getDiagnosticCode();
-        if (code == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE) {
+    protected boolean isConflictOnWritePreserve(TsurugiTransactionException e) {
+        if (exceptionUtil.isConflictOnWritePreserve(e)) {
             return true;
         }
-        if (code == SqlServiceCode.ERR_SERIALIZATION_FAILURE) {
+        if (exceptionUtil.isSerializationFailure(e)) {
             // FIXME sub error code
             String message = e.getMessage();
             if (message.contains("shirakami response Status=ERR_CC")) {
@@ -154,8 +167,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     }
 
     protected boolean isInactiveTransaction(TsurugiTransactionException e) {
-        var code = e.getDiagnosticCode();
-        if (code == SqlServiceCode.ERR_INACTIVE_TRANSACTION) {
+        if (exceptionUtil.isInactiveTransaction(e)) {
             return true;
         }
         return false;

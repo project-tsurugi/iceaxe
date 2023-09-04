@@ -73,7 +73,7 @@ class DbSelectUpdateTest extends DbTestTableTester {
                             tx2.executeAndGetCount(updatePs, 9L);
                             tx2.commit(TgCommitType.DEFAULT);
                         });
-                        assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                        assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                         tx2.rollback();
                     } else {
                         tx2.executeAndGetCount(updatePs, 9L);
@@ -86,7 +86,7 @@ class DbSelectUpdateTest extends DbTestTableTester {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         tx1.commit(TgCommitType.DEFAULT);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                 } else {
                     tx1.commit(TgCommitType.DEFAULT);
                 }

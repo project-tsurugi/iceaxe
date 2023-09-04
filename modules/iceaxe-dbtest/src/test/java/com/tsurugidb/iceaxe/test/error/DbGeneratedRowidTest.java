@@ -15,6 +15,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * generated rowid test
@@ -82,7 +83,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -98,7 +100,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -114,7 +117,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -130,7 +134,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -146,7 +151,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -163,7 +169,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
-            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -180,7 +187,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
-            assertContains("ERR_COMPILER_ERROR: SQL--0005: translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);

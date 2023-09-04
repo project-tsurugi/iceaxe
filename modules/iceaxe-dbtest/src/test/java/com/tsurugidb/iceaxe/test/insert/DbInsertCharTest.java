@@ -99,8 +99,8 @@ class DbInsertCharTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                     tm.executeAndGetCount(ps, entity);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_TYPE_MISMATCH, e);
-                assertContains("ERR_TYPE_MISMATCH: SQL--0019:", e.getMessage()); // TODO エラー詳細情報の確認
+                assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_TYPE_MISMATCH
+                assertContains("Unexpected error occurred", e.getMessage()); // TODO エラー詳細情報の確認
             }
         }
     }

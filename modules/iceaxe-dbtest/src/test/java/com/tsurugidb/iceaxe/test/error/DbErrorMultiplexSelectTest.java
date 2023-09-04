@@ -88,7 +88,8 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
                 if (size <= 280) {
                     throw e;
                 }
-                assertEqualsCode(SqlServiceCode.ERR_RESOURCE_LIMIT_REACHED, e);
+                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e); // TODO ERR_RESOURCE_LIMIT_REACHED
+                assertContains("TODO", e.getMessage());
                 LOG.info("(TCP)err_resource_limit_reached occur. size={}, type={}", size, type);
                 return;
             }

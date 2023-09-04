@@ -36,7 +36,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  primary key(goo)" //
                 + ")";
         var e = executeErrorDdl(sql);
-        assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
         assertContains("translating statement failed: column_not_found primary key column \"goo\" is not found", e.getMessage());
     }
 
@@ -50,7 +50,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  primary key(foo)" //
                 + ")";
         var e = executeErrorDdl(sql);
-        assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
         assertContains("translating statement failed: invalid_default_value primary key definition must be upto one", e.getMessage());
     }
 

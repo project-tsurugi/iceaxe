@@ -46,7 +46,7 @@ class DbDropTableTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
-            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
             assertContains("table_not_found table `test' is not found", e.getMessage());
         }
     }

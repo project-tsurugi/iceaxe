@@ -51,11 +51,11 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             transaction.executeAndGetList(ps);
                         });
-                        assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                         throw e;
                     });
                 });
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e0);
 //              assertContains("table_not_found test", e0.getMessage()); // TODO エラー詳細情報の確認
             }
         }
@@ -92,11 +92,11 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             transaction.executeAndGetCount(ps);
                         });
-                        assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                         throw e;
                     });
                 });
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e0);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e0);
                 assertContains(expected, e0.getMessage());
             }
         }
@@ -116,7 +116,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetList(ps, parameter);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                 assertContains("table_not_found test", e.getMessage());
             });
             tm.execute(transaction -> {
@@ -125,7 +125,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     transaction.executeAndGetList(ps, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e.getCause());
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e.getCause());
             });
         }
     }
@@ -165,7 +165,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetCount(ps, parameter);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                 assertContains(expected, e.getMessage());
             });
             tm.execute(transaction -> {
@@ -173,7 +173,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     transaction.executeAndGetCount(ps, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e.getCause());
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e.getCause());
             });
         }
     }

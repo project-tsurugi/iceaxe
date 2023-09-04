@@ -108,7 +108,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
                 var e = assertThrows(TsurugiTransactionException.class, () -> {
                     tx1.commit(TgCommitType.DEFAULT);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
             }
         }
     }
@@ -151,7 +151,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
                 var e = assertThrows(TsurugiTransactionException.class, () -> {
                     tx1.commit(TgCommitType.DEFAULT);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
             }
         }
 
@@ -220,7 +220,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
                 var e = assertThrows(TsurugiTransactionException.class, () -> {
                     tx1.commit(TgCommitType.DEFAULT);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
             }
         }
     }
@@ -249,7 +249,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
                         var e = assertThrows(TsurugiTransactionException.class, () -> {
                             tx1.executeAndGetCount(updatePs);
                         });
-                        assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                        assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                         tx1.rollback();
                     }
 
@@ -275,7 +275,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
                 var e = assertThrows(TsurugiTransactionException.class, () -> {
                     tx1.commit(TgCommitType.DEFAULT);
                 });
-                assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
             }
         }
     }
@@ -300,7 +300,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         tx2.commit(TgCommitType.DEFAULT);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                 }
             }
         }
@@ -321,7 +321,7 @@ class DbTransactionConflictOccTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         tx1.executeAndFindRecord(selectPs).get();
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                     tx1.rollback();
 
                     tx2.commit(TgCommitType.DEFAULT);

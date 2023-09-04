@@ -47,12 +47,11 @@ class DbUpdateErrorTest extends DbTestTableTester {
             var t = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.execute(transaction -> {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
-                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+                    assertEqualsCode(SqlServiceCode.NOT_NULL_CONSTRAINT_VIOLATION_EXCEPTION, e);
+                    assertContains("Null assigned for non-nullable field", e.getMessage()); // TODO エラー詳細情報の確認
                 });
             });
-            assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, t);
+            assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, t);
         }
 
         assertEqualsTestTable(SIZE);
@@ -70,12 +69,11 @@ class DbUpdateErrorTest extends DbTestTableTester {
             var t = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.execute(transaction -> {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
-                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+                    assertEqualsCode(SqlServiceCode.NOT_NULL_CONSTRAINT_VIOLATION_EXCEPTION, e);
+                    assertContains("Null assigned for non-nullable field", e.getMessage()); // TODO エラー詳細情報の確認
                 });
             });
-            assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, t);
+            assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, t);
         }
 
         assertEqualsTestTable(SIZE);
@@ -131,12 +129,11 @@ class DbUpdateErrorTest extends DbTestTableTester {
             var t = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.execute(transaction -> {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
-                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報の確認
+                    assertEqualsCode(SqlServiceCode.NOT_NULL_CONSTRAINT_VIOLATION_EXCEPTION, e);
+                    assertContains("Null assigned for non-nullable field", e.getMessage()); // TODO エラー詳細情報の確認
                 });
             });
-            assertEqualsCode(SqlServiceCode.ERR_INACTIVE_TRANSACTION, t);
+            assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, t);
         }
 
         assertEqualsTestTable(SIZE);

@@ -74,8 +74,8 @@ class DbSelectLiteralTest extends DbTestTableTester {
             test("1e2", entity -> {
             });
         });
-        assertEqualsCode(SqlServiceCode.ERR_PARSE_ERROR, e);
-        assertContains("ERR_PARSE_ERROR: SQL--0003: parsing statement failed: missing K_FROM at 'e2' (<input>:1:8)", e.getMessage());
+        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+        assertContains("parsing statement failed: missing K_FROM at 'e2' (<input>:1:8)", e.getMessage());
     }
 
     @Test

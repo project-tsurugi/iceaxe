@@ -186,4 +186,18 @@ public interface TsurugiDiagnosticCodeProvider {
         }
         return Optional.empty();
     }
+
+    /**
+     * get low ServerException.
+     *
+     * @return ServerException
+     */
+    public default Optional<ServerException> findLowServerException() {
+        for (var t = (Throwable) this; t != null; t = t.getCause()) {
+            if (t instanceof ServerException) {
+                return Optional.of((ServerException) t);
+            }
+        }
+        return Optional.empty();
+    }
 }

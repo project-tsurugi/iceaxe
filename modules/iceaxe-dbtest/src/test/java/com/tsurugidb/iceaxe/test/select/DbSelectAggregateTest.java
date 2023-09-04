@@ -54,7 +54,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql, resultMapping)) {
             if (order.contains("order by")) { // TODO 集約のorder by実装待ち
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndFindRecord(ps));
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                 return;
             }
             int count = tm.executeAndFindRecord(ps).get();
@@ -72,7 +72,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql)) {
             if (order.contains("order by")) { // TODO 集約のorder by実装待ち
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndFindRecord(ps));
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                 return;
             }
             TsurugiResultEntity entity = tm.executeAndFindRecord(ps).get();
@@ -91,7 +91,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql)) {
             if (order.contains("order by")) { // TODO 集約のorder by実装待ち
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetList(ps));
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                 return;
             }
             var list = tm.executeAndGetList(ps);
@@ -118,7 +118,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql)) {
             if (order.contains("order by")) { // TODO 集約のorder by実装待ち
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetList(ps));
-                assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
                 return;
             }
             var list = tm.executeAndGetList(ps);
@@ -186,7 +186,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                 tm.executeAndGetList(ps, TgBindParameters.of());
             });
-            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
             // TODO 複数エラーがある場合のエラーメッセージ結合方法
             int size = key.split(",").length;
             String expected = "translating statement failed: " + Stream.generate(() -> "invalid_aggregation_column target column must be aggregated").limit(size).collect(Collectors.joining());
@@ -204,7 +204,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.ERR_COMPILER_ERROR, e);
+            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
 //TODO      assertContains("translating statement failed: variable_not_found k)", e.getMessage());
         }
     }

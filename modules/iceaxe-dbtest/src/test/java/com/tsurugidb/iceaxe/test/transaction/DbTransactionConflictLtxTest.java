@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.test.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,7 +59,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         tx2.executeAndFindRecord(selectPs).get();
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
 
                     tx2.rollback();
                 }
@@ -109,7 +108,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         tx2.executeAndGetCount(updatePs2);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
 
                     tx2.rollback();
                 }
@@ -182,7 +181,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     var e = assertThrows(TsurugiTransactionException.class, () -> {
                         tx2.commit(TgCommitType.DEFAULT);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                 }
             }
         }
@@ -250,9 +249,13 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                             tx2.executeAndGetCount(deletePs);
                         }
                     });
-//TODO              assertEqualsCode(SqlServiceCode.ERR_SERIALIZATION_FAILURE, e);
+//TODO              assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                     var code = e.getDiagnosticCode();
-                    assertTrue(code == SqlServiceCode.ERR_SERIALIZATION_FAILURE || code == SqlServiceCode.ERR_CONFLICT_ON_WRITE_PRESERVE);
+                    if (code == SqlServiceCode.CC_EXCEPTION || code == SqlServiceCode.CONFLICT_ON_WRITE_PRESERVE_EXCEPTION) {
+                        // success
+                    } else {
+                        throw e;
+                    }
 
                     tx2.rollback();
                 }

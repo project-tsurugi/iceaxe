@@ -52,13 +52,12 @@ class DbInsertErrorTest extends DbTestTableTester {
                     var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                         transaction.executeAndGetCount(ps);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報（テーブル名等）の確認
+                    assertEqualsCode(SqlServiceCode.NOT_NULL_CONSTRAINT_VIOLATION_EXCEPTION, e);
+                    assertContains("Null assigned for non-nullable field", e.getMessage()); // TODO エラー詳細情報（カラム名等）の確認
                     throw e;
                 });
             });
-            assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e0);
+            assertEqualsCode(SqlServiceCode.NOT_NULL_CONSTRAINT_VIOLATION_EXCEPTION, e0);
         }
 
         assertEqualsTestTable(SIZE);
@@ -85,13 +84,12 @@ class DbInsertErrorTest extends DbTestTableTester {
                         var entity = new TestEntity(123, null, null);
                         transaction.executeAndGetCount(ps, entity);
                     });
-                    assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e);
-                    String expected = "ERR_INTEGRITY_CONSTRAINT_VIOLATION: SQL--0016:";
-                    assertContains(expected, e.getMessage()); // TODO エラー詳細情報（テーブル名等）の確認
+                    assertEqualsCode(SqlServiceCode.NOT_NULL_CONSTRAINT_VIOLATION_EXCEPTION, e);
+                    assertContains("Null assigned for non-nullable field", e.getMessage()); // TODO エラー詳細情報（カラム名等）の確認
                     throw e;
                 });
             });
-            assertEqualsCode(SqlServiceCode.ERR_INTEGRITY_CONSTRAINT_VIOLATION, e0);
+            assertEqualsCode(SqlServiceCode.NOT_NULL_CONSTRAINT_VIOLATION_EXCEPTION, e0);
         }
 
         assertEqualsTestTable(0);
