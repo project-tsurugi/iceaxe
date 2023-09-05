@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.update;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -89,20 +88,12 @@ class DbUpdateErrorTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, 2);
         try (var ps = session.createStatement(sql)) {
-            // TODO updatePK same value
-            tm.execute(transaction -> {
-                transaction.executeAndGetCount(ps);
-//              var e = assertThrowsExactly(TsurugiTransactionException.class, () -> transaction.executeAndGetCount(ps));
-//              assertEqualsCode(null, e); // TODO エラーコード
-            });
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
+            assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e);
+            assertContains("Unique constraint violation occurred", e.getMessage()); // TODO エラー詳細情報（カラム名あるいは制約名）の確認
         }
 
-//      assertEqualsTestTable(SIZE);
-        var actual = selectAllFromTest();
-        assertEquals(1, actual.size());
-        for (var entity : actual) {
-            assertEquals(newPk, entity.getFoo());
-        }
+        assertEqualsTestTable(SIZE);
     }
 
     @Test
