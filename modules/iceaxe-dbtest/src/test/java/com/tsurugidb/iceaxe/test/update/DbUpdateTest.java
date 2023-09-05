@@ -2,8 +2,8 @@ package com.tsurugidb.iceaxe.test.update;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -21,8 +21,10 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * update test
@@ -203,32 +205,26 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
-            int count = tm.executeAndGetCount(ps);
-            assertUpdateCount(SIZE, count);
+            if (1 <= add && add <= SIZE - 1) {
+                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
+                assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e);
+                assertEqualsTestTable(SIZE);
+                return;
+            } else {
+                int count = tm.executeAndGetCount(ps);
+                assertUpdateCount(SIZE, count);
+            }
         } catch (TsurugiTmRetryOverIOException e) {
             if (add == -1) { // TODO updatePK(-1)
                 return;
             }
-            if (add >= SIZE - 1) { // TODO updatePK(SIZE)
+            if (add >= SIZE) { // TODO updatePK(SIZE)
                 return;
             }
             if (add <= -(SIZE - 1)) { // TODO updatePK(-SIZE)
                 return;
             }
             throw e;
-        }
-
-        if (add == 1) { // TODO updatePK(1)
-            var map = IntStream.range(0, SIZE).mapToObj(i -> createTestEntity(i)).collect(Collectors.toMap(e -> e.getFoo(), e -> e));
-            for (int i = 0; i < SIZE; i++) {
-                var e = map.remove(i);
-                e.setFoo(e.getFoo() + add);
-                map.put(e.getFoo(), e);
-            }
-            var expectedList = new ArrayList<>(map.values());
-            Collections.sort(expectedList, Comparator.comparing(TestEntity::getFoo));
-            assertEqualsTestTable(expectedList);
-            return;
         }
 
         var expectedList = IntStream.range(0, SIZE).mapToObj(i -> createTestEntity(i)).peek(e -> e.setFoo(e.getFoo() + add)).collect(Collectors.toList());
@@ -247,21 +243,15 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = session.createTransactionManager(TgTxOption.ofLTX(TEST));
         try (var ps = session.createStatement(sql)) {
-            int count = tm.executeAndGetCount(ps);
-            assertUpdateCount(SIZE, count);
-        }
-
-        if (1 <= add && add <= SIZE - 1) { // TODO updatePK_ltx(1)
-            var map = IntStream.range(0, SIZE).mapToObj(i -> createTestEntity(i)).collect(Collectors.toMap(e -> e.getFoo(), e -> e));
-            for (int i = 0; i < SIZE; i++) {
-                var e = map.remove(i);
-                e.setFoo(e.getFoo() + add);
-                map.put(e.getFoo(), e);
+            if (1 <= add && add <= SIZE - 1) {
+                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
+                assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e);
+                assertEqualsTestTable(SIZE);
+                return;
+            } else {
+                int count = tm.executeAndGetCount(ps);
+                assertUpdateCount(SIZE, count);
             }
-            var expectedList = new ArrayList<>(map.values());
-            Collections.sort(expectedList, Comparator.comparing(TestEntity::getFoo));
-            assertEqualsTestTable(expectedList);
-            return;
         }
 
         var expectedList = IntStream.range(0, SIZE).mapToObj(i -> createTestEntity(i)).peek(e -> e.setFoo(e.getFoo() + add)).collect(Collectors.toList());
