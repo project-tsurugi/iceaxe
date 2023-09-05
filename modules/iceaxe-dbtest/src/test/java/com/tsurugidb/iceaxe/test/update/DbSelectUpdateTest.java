@@ -2,7 +2,10 @@ package com.tsurugidb.iceaxe.test.update;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
+import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,7 +125,11 @@ class DbSelectUpdateTest extends DbTestTableTester {
                     assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
-                    future2.get();
+                    var e = assertThrowsExactly(ExecutionException.class, () -> {
+                        future2.get();
+                    });
+                    assertInstanceOf(TsurugiTransactionException.class, e.getCause());
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                 }
             }
         }
@@ -132,7 +139,7 @@ class DbSelectUpdateTest extends DbTestTableTester {
         for (var entity : list) {
             var expected = createTestEntity(i++);
             if (expected.getFoo() == key) {
-                expected.setBar(9L);
+                expected.setBar(expected.getBar() + 1);
             }
             assertEquals(expected, entity);
         }
@@ -204,7 +211,11 @@ class DbSelectUpdateTest extends DbTestTableTester {
                     assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
-                    future2.get(); // TODO シリアライゼーションエラーになるべき？
+                    var e = assertThrowsExactly(ExecutionException.class, () -> {
+                        future2.get();
+                    });
+                    assertInstanceOf(TsurugiTransactionException.class, e.getCause());
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                 }
             }
         }
@@ -214,7 +225,7 @@ class DbSelectUpdateTest extends DbTestTableTester {
         for (var entity : list) {
             var expected = createTestEntity(i++);
             if (expected.getFoo() == key) {
-                expected.setBar(expected.getBar() + 1 + 9);
+                expected.setBar(expected.getBar() + 1);
             }
             assertEquals(expected, entity);
         }

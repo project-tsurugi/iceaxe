@@ -57,8 +57,7 @@ class DbSelectOtherTxTest extends DbTestTableTester {
             updateOtherTxOcc(session, updatePs, bar, 111);
 
             try (var tx = session.createTransaction(TgTxOption.ofLTX(TEST))) {
-//              var entity1 = select(tx, selectPs); // do not call
-//              assertEquals(111L, entity1.getBar());
+                tx.getLowTransaction();
 
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     updateOtherTxOcc(session, updatePs, bar, 222);

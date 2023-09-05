@@ -2,7 +2,11 @@ package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
+import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -145,7 +149,11 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
-                    future2.get();
+                    var e = assertThrowsExactly(ExecutionException.class, () -> {
+                        future2.get();
+                    });
+                    assertInstanceOf(TsurugiTransactionException.class, e.getCause());
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                 }
             }
         }
@@ -155,7 +163,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
         for (var entity : list) {
             var expected = createTestEntity(i++);
             if (expected.getFoo() == KEY) {
-                expected.setBar(BAR_AFTER2);
+                expected.setBar(BAR_AFTER1);
             }
             assertEquals(expected, entity);
         }
@@ -213,7 +221,11 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
-                    future2.get(); // TODO シリアライゼーションエラーになるべき？
+                    var e = assertThrowsExactly(ExecutionException.class, () -> {
+                        future2.get();
+                    });
+                    assertInstanceOf(TsurugiTransactionException.class, e.getCause());
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                 }
             }
         }
@@ -223,7 +235,7 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
         for (var entity : list) {
             var expected = createTestEntity(i++);
             if (expected.getFoo() == KEY) {
-                expected.setBar(BAR_BEFORE + 1 + 2);
+                expected.setBar(BAR_BEFORE + 1);
             }
             assertEquals(expected, entity);
         }
@@ -298,11 +310,15 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
-                    future2.get();
+                    var e = assertThrowsExactly(ExecutionException.class, () -> {
+                        future2.get();
+                    });
+                    assertInstanceOf(TsurugiTransactionException.class, e.getCause());
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
                 }
             }
         }
 
-        assertEqualsTestTable(SIZE + add);
+        assertEqualsTestTable(SIZE);
     }
 }
