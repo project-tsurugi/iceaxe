@@ -18,6 +18,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -85,17 +86,22 @@ class DbUpdateDecimalTest extends DbTestTableTester {
                 var expected = BigDecimal.ONE.divide(BigDecimal.valueOf(divValue), 2, RoundingMode.DOWN);
                 assertEquals(expected, actual);
             } else {
-                tm.execute(transaction -> {
-                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                        transaction.executeAndGetCount(ps, parameter);
+                var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                    tm.execute(transaction -> {
+                        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                            transaction.executeAndGetCount(ps, parameter);
+                        });
+                        assertEqualsCode(SqlServiceCode.VALUE_EVALUATION_EXCEPTION, e);
+                        assertContains("An error occurred in evaluating values", e.getMessage()); // TODO エラー詳細情報
                     });
-                    assertEqualsCode(SqlServiceCode.VALUE_EVALUATION_EXCEPTION, e);
-
-                    try (var selectPs = session.createQuery("select value from " + TEST)) {
-                        var list = transaction.executeAndGetList(selectPs);
-                        assertEquals(0, list.size()); // TODO 1 (even if ERR_EXPRESSION_EVALUATION_FAILURE)
-                    }
                 });
+                assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e0);
+
+                try (var selectPs = session.createQuery("select value from " + TEST)) {
+                    var list = tm.executeAndGetList(selectPs);
+                    assertEquals(1, list.size());
+                    assertEquals(BigDecimal.ONE.setScale(2), list.get(0).getDecimal("value"));
+                }
             }
         }
     }
