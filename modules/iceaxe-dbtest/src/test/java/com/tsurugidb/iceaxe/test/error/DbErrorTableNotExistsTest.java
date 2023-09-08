@@ -51,12 +51,12 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             transaction.executeAndGetList(ps);
                         });
-                        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
                         throw e;
                     });
                 });
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e0);
-//              assertContains("table_not_found test", e0.getMessage()); // TODO エラー詳細情報の確認
+                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e0);
+                assertContains("compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)", e0.getMessage());
             }
         }
     }
@@ -64,21 +64,21 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     @Test
     void insert() throws Exception {
         var sql = "insert into " + TEST + "(" + TEST_COLUMNS + ") values(123, 456, 'abc')";
-        var expected = "table_not_found table `test' is not found";
+        var expected = "compile failed with error:table_not_found message:\"table `" + TEST + "' is not found\" location:(unknown)";
         statement(sql, expected);
     }
 
     @Test
     void update() throws Exception {
         var sql = "update " + TEST + " set bar = 0";
-        var expected = "table_not_found test.";
+        var expected = "compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)";
         statement(sql, expected);
     }
 
     @Test
     void delete() throws Exception {
         var sql = "delete from " + TEST;
-        var expected = "table_not_found test.";
+        var expected = "compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)";
         statement(sql, expected);
     }
 
@@ -92,11 +92,11 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                             transaction.executeAndGetCount(ps);
                         });
-                        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
                         throw e;
                     });
                 });
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e0);
+                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e0);
                 assertContains(expected, e0.getMessage());
             }
         }
@@ -116,8 +116,8 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetList(ps, parameter);
                 });
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-                assertContains("table_not_found test", e.getMessage());
+                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+                assertContains("compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)", e.getMessage());
             });
             tm.execute(transaction -> {
                 var parameter = TgBindParameters.of(foo.bind(1));
@@ -125,7 +125,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     transaction.executeAndGetList(ps, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e.getCause());
+                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e.getCause());
             });
         }
     }
@@ -133,7 +133,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     @Test
     void insertBind() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
-        var expected = "table_not_found table `test' is not found";
+        var expected = "compile failed with error:table_not_found message:\"table `" + TEST + "' is not found\" location:(unknown)";
         preparedStatement(INSERT_SQL, INSERT_MAPPING, entity, expected);
     }
 
@@ -143,7 +143,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var sql = "update " + TEST + " set bar = " + bar;
         var mapping = TgParameterMapping.of(bar);
         var parameter = TgBindParameters.of(bar.bind(0));
-        var expected = "table_not_found test";
+        var expected = "compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)";
         preparedStatement(sql, mapping, parameter, expected);
     }
 
@@ -153,7 +153,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var sql = "delete from " + TEST + " where foo=" + foo;
         var mapping = TgParameterMapping.of(foo);
         var parameter = TgBindParameters.of(foo.bind(1));
-        var expected = "table_not_found test";
+        var expected = "compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)";
         preparedStatement(sql, mapping, parameter, expected);
     }
 
@@ -165,7 +165,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetCount(ps, parameter);
                 });
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
                 assertContains(expected, e.getMessage());
             });
             tm.execute(transaction -> {
@@ -173,7 +173,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                     transaction.executeAndGetCount(ps, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e.getCause());
+                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e.getCause());
             });
         }
     }

@@ -83,8 +83,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -100,8 +100,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -117,8 +117,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -134,8 +134,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -151,8 +151,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -169,8 +169,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);
@@ -187,8 +187,8 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: variable_not_found " + GENERATED_KEY, e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
         }
 
         assertEqualsTestTable(SIZE);

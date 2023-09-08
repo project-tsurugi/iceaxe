@@ -60,7 +60,7 @@ class DbCreateTableTest extends DbTestTableTester {
             tm.executeDdl(SQL);
         });
         assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-        assertContains("duplicate_table table `test' is already defined.", e.getMessage());
+        assertContains("compile failed with error:duplicate_table message:\"table `" + TEST + "' is already defined\" location:(unknown)", e.getMessage());
     }
 
     @Test
@@ -86,7 +86,7 @@ class DbCreateTableTest extends DbTestTableTester {
             try (var transaction = session.createTransaction(txOption)) {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> transaction.executeAndGetCount(ps, TgBindParameters.of()));
                 assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-                assertContains("duplicate_table table `test' is already defined", e.getMessage());
+                assertContains("compile failed with error:duplicate_table message:\"table `" + TEST + "' is already defined\" location:(unknown)", e.getMessage());
                 transaction.rollback();
             }
         }

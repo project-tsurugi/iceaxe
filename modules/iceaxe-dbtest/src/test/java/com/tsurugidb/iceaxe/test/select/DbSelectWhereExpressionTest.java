@@ -49,7 +49,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e);
             assertContains("parsing statement failed: mismatched input '!=' expecting <EOF> (<input>:1:41)", e.getMessage());
         }
     }
@@ -80,7 +80,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 var entity = list.get(0);
                 assertEquals(NULL_ENTITY, entity);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e); // TODO is null実装待ち
+            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO is null実装待ち
         }
     }
 
@@ -98,7 +98,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                     assertEquals(i, list.get(i).getFoo());
                 }
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e); // TODO is not null実装待ち
+            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO is not null実装待ち
         }
     }
 
@@ -118,7 +118,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                     assertEquals(expectedList.get(i), list.get(i).getFoo());
                 }
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e); // TODO in実装待ち
+            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO in実装待ち
         }
     }
 
@@ -139,7 +139,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                     assertEquals(s + i, list.get(i).getFoo());
                 }
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e0); // TODO between実装待ち
+            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e0); // TODO between実装待ち
         }
     }
 }

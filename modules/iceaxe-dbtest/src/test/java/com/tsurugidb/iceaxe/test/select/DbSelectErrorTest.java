@@ -58,8 +58,8 @@ class DbSelectErrorTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: variable_not_found hoge", e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"hoge\" location:(unknown)", e.getMessage());
         }
     }
 
@@ -74,7 +74,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("translating statement failed: invalid_aggregation_column target column must be aggregated", e.getMessage()); // TODO カラム名が欲しい
+            assertContains("compile failed with error:invalid_aggregation_column message:\"target column must be aggregated\" location:(unknown)", e.getMessage()); // TODO カラム名が欲しい
         }
     }
 

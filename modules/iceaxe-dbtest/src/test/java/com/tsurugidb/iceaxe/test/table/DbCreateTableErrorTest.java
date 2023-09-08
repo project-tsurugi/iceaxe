@@ -36,8 +36,8 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  primary key(goo)" //
                 + ")";
         var e = executeErrorDdl(sql);
-        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-        assertContains("translating statement failed: column_not_found primary key column \"goo\" is not found", e.getMessage());
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+        assertContains("compile failed with error:column_not_found message:\"primary key column \"goo\" is not found\" location:(unknown)", e.getMessage());
     }
 
     @Test
@@ -51,7 +51,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + ")";
         var e = executeErrorDdl(sql);
         assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-        assertContains("translating statement failed: invalid_default_value primary key definition must be upto one", e.getMessage());
+        assertContains("compile failed with error:invalid_default_value message:\"primary key definition must be upto one\" location:(unknown)", e.getMessage());
     }
 
     @Test

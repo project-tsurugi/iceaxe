@@ -90,12 +90,12 @@ class DbTransactionTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeAndGetCount(ps);
                 });
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e);
             }
             var status = transaction.getTransactionStatus();
             assertFalse(status.isNormal());
             assertTrue(status.isError());
-            assertEquals(SqlServiceCode.COMPILE_EXCEPTION, status.getDiagnosticCode());
+            assertEquals(SqlServiceCode.SYNTAX_EXCEPTION, status.getDiagnosticCode());
             assertNotNull(status.getTransactionException());
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
@@ -109,7 +109,7 @@ class DbTransactionTest extends DbTestTableTester {
             var status2 = transaction.getTransactionStatus();
             assertFalse(status2.isNormal());
             assertTrue(status2.isError());
-            assertEquals(SqlServiceCode.COMPILE_EXCEPTION, status2.getDiagnosticCode());
+            assertEquals(SqlServiceCode.SYNTAX_EXCEPTION, status2.getDiagnosticCode());
             assertNotNull(status2.getTransactionException());
         }
     }
@@ -123,7 +123,7 @@ class DbTransactionTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetCount(ps, TgBindParameters.of());
                 });
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e);
             }
             var status = transaction.getTransactionStatus();
             assertTrue(status.isNormal());
@@ -194,6 +194,7 @@ class DbTransactionTest extends DbTestTableTester {
             transaction.commit(TgCommitType.DEFAULT);
             var status = transaction.getTransactionStatus();
             assertTrue(status.isNormal());
+            assertNull(status.getTransactionException());
         }
     }
 
@@ -204,6 +205,7 @@ class DbTransactionTest extends DbTestTableTester {
             transaction.rollback();
             var status = transaction.getTransactionStatus();
             assertTrue(status.isNormal());
+            assertNull(status.getTransactionException());
         }
     }
 

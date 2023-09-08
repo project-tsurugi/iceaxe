@@ -89,7 +89,7 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
                     throw e;
                 }
                 assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e); // TODO ERR_RESOURCE_LIMIT_REACHED
-                assertContains("creating transaction failed with error:err_resource_limit_reached>", e.getMessage());
+                assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
                 LOG.info("(TCP)err_resource_limit_reached occur. size={}, type={}", size, type);
                 return;
             }

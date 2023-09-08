@@ -3,9 +3,7 @@ package com.tsurugidb.iceaxe.test.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -54,7 +52,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql, resultMapping)) {
             if (order.contains("order by")) { // TODO 集約のorder by実装待ち
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndFindRecord(ps));
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
                 return;
             }
             int count = tm.executeAndFindRecord(ps).get();
@@ -72,7 +70,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql)) {
             if (order.contains("order by")) { // TODO 集約のorder by実装待ち
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndFindRecord(ps));
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
                 return;
             }
             TsurugiResultEntity entity = tm.executeAndFindRecord(ps).get();
@@ -91,7 +89,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql)) {
             if (order.contains("order by")) { // TODO 集約のorder by実装待ち
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetList(ps));
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
                 return;
             }
             var list = tm.executeAndGetList(ps);
@@ -118,7 +116,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql)) {
             if (order.contains("order by")) { // TODO 集約のorder by実装待ち
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetList(ps));
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+                assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
                 return;
             }
             var list = tm.executeAndGetList(ps);
@@ -187,10 +185,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
                 tm.executeAndGetList(ps, TgBindParameters.of());
             });
             assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            // TODO 複数エラーがある場合のエラーメッセージ結合方法
-            int size = key.split(",").length;
-            String expected = "translating statement failed: " + Stream.generate(() -> "invalid_aggregation_column target column must be aggregated").limit(size).collect(Collectors.joining());
-            assertContains(expected, e.getMessage());
+            assertContains("compile failed with error:invalid_aggregation_column message:\"target column must be aggregated\" location:(unknown)", e.getMessage()); // TODO エラー情報詳細
         }
     }
 
@@ -204,8 +199,8 @@ class DbSelectAggregateTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-//TODO      assertContains("translating statement failed: variable_not_found k)", e.getMessage());
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:variable_not_found message:\"k\" location:(unknown))", e.getMessage());
         }
     }
 }
