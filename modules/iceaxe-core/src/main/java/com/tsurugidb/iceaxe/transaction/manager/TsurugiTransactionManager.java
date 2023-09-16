@@ -343,8 +343,8 @@ public class TsurugiTransactionManager {
      * @throws InterruptedException
      */
     public void executeDdl(String sql) throws IOException, InterruptedException {
-        var setting = (this.defaultSetting != null) ? this.defaultSetting : //
-                TgTmSetting.of(TgTxOption.ofDDL().label("iceaxe ddl"));
+        var setting = (this.defaultSetting != null) ? this.defaultSetting
+            : TgTmSetting.of(TgTxOption.ofDDL().label("iceaxe ddl"));
         execute(setting, transaction -> {
             transaction.executeDdl(sql);
         });
