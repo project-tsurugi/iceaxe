@@ -40,7 +40,7 @@ To use on Gradle, add Iceaxe library to dependencies.
 
 ```
 dependencies {
-    api 'com.tsurugidb.iceaxe:iceaxe-core:0.0.1-SNAPSHOT'
+    api 'com.tsurugidb.iceaxe:iceaxe-core:1.0.0-SNAPSHOT'
 }
 ```
 
