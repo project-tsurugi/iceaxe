@@ -1,12 +1,12 @@
 name: Iceaxe-CI-Publish
 
-on:
-  workflow_dispatch:
-  workflow_call:
+on: [workflow_dispatch, workflow_call]
 
 jobs:
   Publish:
     runs-on: [self-hosted, docker]
+    permissions:
+      packages: write
     timeout-minutes: 30
     container:
       image: ghcr.io/project-tsurugi/oltp-sandbox:ubuntu-22.04
@@ -24,45 +24,18 @@ jobs:
       GPR_KEY: ${{ secrets.GHCR_PAT }}
 
     steps:
-      - id: Setup_Java
-        name: Setup_Java
+      - name: Setup_Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '11'
 
-      - id: Checkout
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v3
         with:
-          submodules: recursive
           token: ${{ secrets.GHA_PAT }}
 
-      - id: Checkout_Actions
-        name: Checkout_Actions
-        uses: actions/checkout@v3
-        with:
-          repository: project-tsurugi/tsurugi-github-actions
-          path: .github/actions
-          ref: master
-          submodules: recursive
-          token: ${{ secrets.GHA_PAT }}
-
-      - id: Publish
-        name: Publish
+      - name: Publish
         if: contains(github.ref, '/heads/master')
         run: |
           ./gradlew -i iceaxe-core:showTsubakuroManifest clean publish
-
-      - id: Notify_Slack
-        name: Notify_Slack
-        uses: ./.github/actions/tsurugi-slack-action
-        if: always() && (contains(github.ref, '/tags/') ||  contains(github.ref, '/heads/master'))
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        with:
-          kind: 'job-result'
-          channel: 'tsurugi-build'
-          status: ${{ job.status }}
-          step_context: ${{ toJson(steps) }}
-          username: ${{ github.workflow }}

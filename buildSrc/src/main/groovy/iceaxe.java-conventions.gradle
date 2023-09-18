@@ -6,10 +6,10 @@ plugins {
 }
 
 group = 'com.tsurugidb.iceaxe'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0-SNAPSHOT'
 
 ext {
-    tsubakuroVersion = '0.0.1-SNAPSHOT'
+    tsubakuroVersion = '1.0.0-SNAPSHOT'
 }
 
 if (hasProperty('mavenLocal')) {
@@ -79,11 +79,6 @@ spotbugsTest.enabled = false
 
 tasks.withType(JavaCompile) { task ->
     task.options.encoding = 'UTF-8'
-}
-
-task testsJar(type: Jar) {
-    classifier 'tests'
-    from sourceSets.test.output
 }
 
 jar {
