@@ -99,8 +99,8 @@ class DbInsertCharTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                     tm.executeAndGetCount(ps, entity);
                 });
-                assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_TYPE_MISMATCH
-                assertContains("Unexpected error occurred", e.getMessage()); // TODO エラー詳細情報の確認
+                assertEqualsCode(SqlServiceCode.SQL_LIMIT_REACHED_EXCEPTION, e);
+                assertContains("Insufficient storage to store field data", e.getMessage()); // TODO エラー詳細情報（カラム名や桁数）
             }
         }
     }

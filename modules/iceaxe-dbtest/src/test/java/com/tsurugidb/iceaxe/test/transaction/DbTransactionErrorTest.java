@@ -69,8 +69,8 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var tm = session.createTransactionManager(TgTxOption.ofRTX());
         try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
-            assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_UNSUPPORTED
-            assertContains("Unexpected error occurred. status:err_unsupported", e.getMessage());
+            assertEqualsCode(SqlServiceCode.WRITE_OPERATION_BY_RTX_EXCEPTION, e);
+            assertContains("Write operation by rtx", e.getMessage());
         }
 
         // expected: auto rollback
@@ -87,8 +87,8 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var tm = session.createTransactionManager(TgTxOption.ofLTX()); // no WritePreserve
         try (var ps = session.createStatement(sql)) {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
-            assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_ILLEGAL_OPERATION
-            assertContains("Unexpected error occurred. status:err_illegal_operation", e.getMessage());
+            assertEqualsCode(SqlServiceCode.LTX_WRITE_OPERATION_WITHOUT_WRITE_PRESERVE_EXCEPTION, e);
+            assertContains("Ltx write operation outside write preserve", e.getMessage()); // TODO エラー詳細情報（テーブル名）
         }
 
         // expected: auto rollback

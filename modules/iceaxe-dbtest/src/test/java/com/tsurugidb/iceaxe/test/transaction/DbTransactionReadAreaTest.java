@@ -94,8 +94,8 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
         try (var select2Ps = session.createQuery(SELECT2_SQL, SELECT_MAPPING)) {
             try (var tx1 = session.createTransaction(LTX1)) {
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetList(select2Ps));
-                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e1); // TODO ERR_ILLEGAL_OPERATION
-                assertContains("creating transaction failed with error:err_illegal_operation", e1.getMessage()); // TODO エラーになったテーブルの確認
+                assertEqualsCode(SqlServiceCode.READ_OPERATION_ON_RESTRICTED_READ_AREA_EXCEPTION, e1);
+                assertContains("Read operation outside read area", e1.getMessage()); // TODO エラー詳細情報（テーブル名）
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetList(select2Ps));
                 assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e2);
             }
@@ -129,8 +129,13 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
         try (var update2Ps = session.createStatement(UPDATE2_SQL)) {
             try (var tx1 = session.createTransaction(txOption)) {
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetCount(update2Ps));
-                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e1);
-//              assertContains("TODO", e1.getMessage()); // TODO エラーになったテーブルの確認
+                if (pattern.equals("nothing")) {
+                    assertEqualsCode(SqlServiceCode.LTX_WRITE_OPERATION_WITHOUT_WRITE_PRESERVE_EXCEPTION, e1);
+                    assertContains("Ltx write operation outside write preserve", e1.getMessage()); // TODO エラー詳細情報（テーブル名）
+                } else {
+                    assertEqualsCode(SqlServiceCode.READ_OPERATION_ON_RESTRICTED_READ_AREA_EXCEPTION, e1);
+                    assertContains("Read operation outside read area", e1.getMessage()); // TODO エラー詳細情報（テーブル名）
+                }
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> tx1.executeAndGetCount(update2Ps));
                 assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e2);
             }

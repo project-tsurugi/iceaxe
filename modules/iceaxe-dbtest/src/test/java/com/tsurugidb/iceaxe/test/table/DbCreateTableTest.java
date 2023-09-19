@@ -122,8 +122,8 @@ class DbCreateTableTest extends DbTestTableTester {
         Consumer<TsurugiTmIOException> error = null;
         if (!hasPk) {
             error = e -> {
-                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e);
-                assertContains("writing sequence metadata to system storage failed", e.getMessage());
+                assertEqualsCode(SqlServiceCode.LTX_WRITE_OPERATION_WITHOUT_WRITE_PRESERVE_EXCEPTION, e);
+                assertContains("Ltx write operation outside write preserve", e.getMessage()); // TODO エラー詳細情報（テーブル名）
             };
         }
         repeat(TgTxOption.ofLTX().includeDdl(false), hasPk, error);
@@ -181,14 +181,14 @@ class DbCreateTableTest extends DbTestTableTester {
                 var e1 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeDdl(createDdl);
                 });
-                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e1);
-                assertContains("writing sequence metadata to system storage failed", e1.getMessage());
+                assertEqualsCode(SqlServiceCode.LTX_WRITE_OPERATION_WITHOUT_WRITE_PRESERVE_EXCEPTION, e1);
+                assertContains("Ltx write operation outside write preserve", e1.getMessage()); // TODO エラー詳細情報（テーブル名）
 
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeDdl(createDdl);
                 });
-                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e2); // TODO INACTIVE_TRANSACTION_EXCEPTION
-                assertContains("creating sequence failed with status:err_inactive_transaction error:scan failed", e2.getMessage());
+                assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e2);
+                assertContains("Current transaction is inactive (maybe aborted already.)", e2.getMessage());
             });
         });
         assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e);

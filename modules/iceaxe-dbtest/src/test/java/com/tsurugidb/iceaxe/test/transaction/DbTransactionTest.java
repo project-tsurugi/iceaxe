@@ -103,8 +103,8 @@ class DbTransactionTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeAndGetCount(ps, entity);
                 });
-                assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e); // TODO ERR_INACTIVE_TRANSACTION
-                assertContains("Unexpected error occurred. status:err_inactive_transaction", e.getMessage());
+                assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e);
+                assertContains("Current transaction is inactive (maybe aborted already.)", e.getMessage());
             }
             var status2 = transaction.getTransactionStatus();
             assertFalse(status2.isNormal());
@@ -176,8 +176,8 @@ class DbTransactionTest extends DbTestTableTester {
                 var e2 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
                     transaction.executeAndGetCount(ps, entity);
                 });
-                assertEqualsCode(SqlServiceCode.SQL_SERVICE_EXCEPTION, e2); // TODO ERR_INACTIVE_TRANSACTION
-                assertContains("Unexpected error occurred. status:err_inactive_transaction", e2.getMessage());
+                assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e2);
+                assertContains("Current transaction is inactive (maybe aborted already.)", e2.getMessage());
             }
             var status = transaction.getTransactionStatus();
             assertFalse(status.isNormal());
