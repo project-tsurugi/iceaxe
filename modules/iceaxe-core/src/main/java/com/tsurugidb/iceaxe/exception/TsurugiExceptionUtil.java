@@ -37,20 +37,6 @@ public class TsurugiExceptionUtil {
 
     //
 
-    /**
-     * whether OK
-     *
-     * @param e exception
-     * @return {@code true} if OK
-     */
-    public boolean isOk(TsurugiDiagnosticCodeProvider e) {
-        var lowException = e.findLowServerException().orElse(null);
-        if (lowException == null) {
-            return true;
-        }
-        return false;
-    }
-
     // SQL_EXECUTION_EXCEPTION (SQL-02000)
 
     /**

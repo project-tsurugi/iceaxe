@@ -49,9 +49,6 @@ public class TgTxStatus {
         if (this.exception == null) {
             return true;
         }
-        if (exceptionUtil.isOk(this.exception)) {
-            return true;
-        }
         return false;
     }
 
