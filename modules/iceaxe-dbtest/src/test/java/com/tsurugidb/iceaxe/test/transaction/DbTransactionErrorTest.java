@@ -104,12 +104,12 @@ class DbTransactionErrorTest extends DbTestTableTester {
                 try {
                     tx.getLowTransaction();
                 } catch (TsurugiIOException e) {
-                    assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e); // TODO ERR_RESOURCE_LIMIT_REACHED
-                    assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
+                    assertEqualsCode(SqlServiceCode.TRANSACTION_EXCEEDED_LIMIT_EXCEPTION, e);
+                    assertContains("The number of transactions exceeded the limit", e.getMessage());
                     return;
                 }
             }
-            fail("err_resource_limit_reached did not occur");
+            fail("TRANSACTION_EXCEEDED_LIMIT_EXCEPTION did not occur");
         }
     }
 

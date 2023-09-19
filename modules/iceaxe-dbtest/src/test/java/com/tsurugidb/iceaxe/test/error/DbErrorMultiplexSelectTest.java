@@ -85,23 +85,20 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
             selectMultiMain(size, type);
         } catch (TsurugiIOException e) {
             if (DbTestConnector.isTcp()) {
-                if (size <= 280) {
-                    throw e;
+                if (size > 280) {
+                    assertEqualsCode(SqlServiceCode.TRANSACTION_EXCEEDED_LIMIT_EXCEPTION, e);
+                    LOG.info("(TCP)TRANSACTION_EXCEEDED_LIMIT_EXCEPTION occur. size={}, type={}", size, type);
+                    return;
                 }
-                assertEqualsCode(SqlServiceCode.SQL_EXECUTION_EXCEPTION, e); // TODO ERR_RESOURCE_LIMIT_REACHED
-                assertContains("creating transaction failed with error:err_resource_limit_reached", e.getMessage());
-                LOG.info("(TCP)err_resource_limit_reached occur. size={}, type={}", size, type);
-                return;
             }
             throw e;
         } catch (IOException e) {
             if (DbTestConnector.isIpc()) {
-                if (size <= 240) {
-                    throw e;
+                if (size > 240) {
+                    assertEqualsCode(CoreServiceCode.RESOURCE_LIMIT_REACHED, e);
+                    LOG.info("(IPC)RESOURCE_LIMIT_REACHED occur. size={}, type={}", size, type);
+                    return;
                 }
-                assertEqualsCode(CoreServiceCode.RESOURCE_LIMIT_REACHED, e);
-                LOG.info("(IPC)resource_limit_reached occur. size={}, type={}", size, type);
-                return;
             }
             throw e;
         }
