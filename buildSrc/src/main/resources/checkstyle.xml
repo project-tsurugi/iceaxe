@@ -6,11 +6,11 @@
   <module name="TreeWalker">
     <module name="SuppressWarningsHolder"/>
     <property name="tabWidth" value="4"/>
-<!--
-    <module name="JavadocMethod">
+
+    <module name="MissingJavadocPackage"/>
+    <module name="MissingJavadocType"/>
+    <module name="MissingJavadocMethod">
       <property name="scope" value="protected"/>
-      <property name="validateThrows" value="false"/>
-      <property name="tokens" value="METHOD_DEF,CTOR_DEF"/>
     </module>
     <module name="JavadocType">
       <property name="scope" value="protected"/>
@@ -18,11 +18,15 @@
     <module name="JavadocVariable">
       <property name="scope" value="protected"/>
     </module>
+    <module name="JavadocMethod">
+      <property name="validateThrows" value="true"/>
+      <property name="tokens" value="METHOD_DEF,CTOR_DEF"/>
+    </module>
     <module name="JavadocStyle">
       <property name="checkEmptyJavadoc" value="true"/>
       <property name="endOfSentenceFormat" value="([.?!。][ \t\n\r\f&lt;])|([.?!。]$)"/>
     </module>
--->
+
     <module name="ConstantName"/>
     <module name="LocalFinalVariableName"/>
     <module name="LocalVariableName"/>
@@ -120,9 +124,9 @@
       <property name="checkFormat" value="$1"/>
     </module>
   </module>
-<!--
+
   <module name="JavadocPackage"/>
--->
+
   <module name="NewlineAtEndOfFile">
     <property name="severity" value="ignore"/>
     <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
