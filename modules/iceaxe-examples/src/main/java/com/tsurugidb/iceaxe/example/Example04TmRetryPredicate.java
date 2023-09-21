@@ -17,12 +17,12 @@ public class Example04TmRetryPredicate {
         var supplier = setting.getTransactionOptionSupplier();
         supplier.setRetryPredicate(new TsurugiDefaultRetryPredicate() {
             @Override
-            protected boolean isRetryable(TsurugiTransactionException e) {
+            protected boolean isRetryable(TsurugiTransactionException exception) {
                 var exceptionUtil = TsurugiExceptionUtil.getInstance();
-                if (exceptionUtil.isSerializationFailure(e)) {
+                if (exceptionUtil.isSerializationFailure(exception)) {
                     return true;
                 }
-                return super.isRetryable(e);
+                return super.isRetryable(exception);
             }
         });
     }

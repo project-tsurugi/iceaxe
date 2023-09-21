@@ -58,8 +58,8 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     }
 
     @Override
-    public final TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        var instruction = test(transaction, e);
+    public final TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
+        var instruction = test(transaction, exception);
         Objects.requireNonNull(instruction);
         return instruction;
     }
@@ -68,12 +68,12 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      * check retryable.
      *
      * @param transaction transaction
-     * @param e           transaction exception
+     * @param exception   transaction exception
      * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
-    protected TgTmRetryInstruction test(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
+    protected TgTmRetryInstruction test(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         TgTmRetryInstruction instruction;
 
         var txOption = transaction.getTransactionOption();
@@ -83,20 +83,20 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
         }
         switch (type) {
         case SHORT:
-            instruction = testOcc(transaction, e);
-            checkRetryInstruction(instruction, "OCC", e);
+            instruction = testOcc(transaction, exception);
+            checkRetryInstruction(instruction, "OCC", exception);
             break;
         case LONG:
-            instruction = testLtx(transaction, e);
-            checkRetryInstruction(instruction, "LTX", e);
+            instruction = testLtx(transaction, exception);
+            checkRetryInstruction(instruction, "LTX", exception);
             break;
         case READ_ONLY:
-            instruction = testRtx(transaction, e);
-            checkRetryInstruction(instruction, "RTX", e);
+            instruction = testRtx(transaction, exception);
+            checkRetryInstruction(instruction, "RTX", exception);
             break;
         default:
-            instruction = testOther(transaction, e);
-            checkRetryInstruction(instruction, "OTHER", e);
+            instruction = testOther(transaction, exception);
+            checkRetryInstruction(instruction, "OTHER", exception);
             break;
         }
 
@@ -108,11 +108,11 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      *
      * @param instruction retry instruction
      * @param position    check position
-     * @param e           transaction exception
+     * @param exception   transaction exception
      */
-    protected static final void checkRetryInstruction(TgTmRetryInstruction instruction, String position, TsurugiTransactionException e) {
+    protected static final void checkRetryInstruction(TgTmRetryInstruction instruction, String position, TsurugiTransactionException exception) {
         if (instruction == null) {
-            throw new IllegalStateException(position + " retryInstruction is null", e);
+            throw new IllegalStateException(position + " retryInstruction is null", exception);
         }
     }
 
@@ -120,64 +120,64 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      * check retryable for OCC.
      *
      * @param transaction transaction
-     * @param e           transaction exception
+     * @param exception   transaction exception
      * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
-    protected TgTmRetryInstruction testOcc(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        if (isConflictOnWritePreserve(e)) {
-            return TgTmRetryInstruction.ofRetryableLtx("OCC ltx retry. " + e.getMessage());
+    protected TgTmRetryInstruction testOcc(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
+        if (isConflictOnWritePreserve(exception)) {
+            return TgTmRetryInstruction.ofRetryableLtx("OCC ltx retry. " + exception.getMessage());
         }
 
-        return testCommon("OCC", transaction, e);
+        return testCommon("OCC", transaction, exception);
     }
 
     /**
      * check retryable for LTX.
      *
      * @param transaction transaction
-     * @param e           transaction exception
+     * @param exception   transaction exception
      * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
-    protected TgTmRetryInstruction testLtx(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        if (isConflictOnWritePreserve(e)) {
-            throw new IllegalStateException("illegal code. " + e.getMessage());
+    protected TgTmRetryInstruction testLtx(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
+        if (isConflictOnWritePreserve(exception)) {
+            throw new IllegalStateException("illegal code. " + exception.getMessage());
         }
 
-        return testCommon("LTX", transaction, e);
+        return testCommon("LTX", transaction, exception);
     }
 
     /**
      * check retryable for RTX.
      *
      * @param transaction transaction
-     * @param e           transaction exception
+     * @param exception   transaction exception
      * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
-    protected TgTmRetryInstruction testRtx(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        if (isConflictOnWritePreserve(e)) {
-            throw new IllegalStateException("illegal code. " + e.getMessage());
+    protected TgTmRetryInstruction testRtx(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
+        if (isConflictOnWritePreserve(exception)) {
+            throw new IllegalStateException("illegal code. " + exception.getMessage());
         }
 
-        return testCommon("RTX", transaction, e);
+        return testCommon("RTX", transaction, exception);
     }
 
     /**
      * check retryable for other.
      *
      * @param transaction transaction
-     * @param e           transaction exception
+     * @param exception   transaction exception
      * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
-    protected TgTmRetryInstruction testOther(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        return testCommon("OTHER", transaction, e);
+    protected TgTmRetryInstruction testOther(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
+        return testCommon("OTHER", transaction, exception);
     }
 
     /**
@@ -185,27 +185,27 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      *
      * @param position    check position
      * @param transaction transaction
-     * @param e           transaction exception
+     * @param exception   transaction exception
      * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
-    protected TgTmRetryInstruction testCommon(String position, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        if (isRetryable(e)) {
-            return TgTmRetryInstruction.ofRetryable(position + " retry. " + e.getMessage());
+    protected TgTmRetryInstruction testCommon(String position, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
+        if (isRetryable(exception)) {
+            return TgTmRetryInstruction.ofRetryable(position + " retry. " + exception.getMessage());
         }
-        if (isInactiveTransaction(e)) {
+        if (isInactiveTransaction(exception)) {
             var status = transaction.getTransactionStatus();
             var statusException = status.getTransactionException();
             if (statusException != null) {
                 if (isRetryable(statusException)) {
-                    return TgTmRetryInstruction.ofRetryable(position + " retry. " + statusException.getMessage() + " with " + e.getMessage());
+                    return TgTmRetryInstruction.ofRetryable(position + " retry. " + statusException.getMessage() + " with " + exception.getMessage());
                 }
-                return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + statusException.getMessage() + " with " + e.getMessage());
+                return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + statusException.getMessage() + " with " + exception.getMessage());
             }
         }
 
-        return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + e.getMessage());
+        return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + exception.getMessage());
     }
 
     //
@@ -213,11 +213,11 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     /**
      * Whether to retry.
      *
-     * @param e transaction exception
+     * @param exception transaction exception
      * @return {@code true} if retryable
      */
-    protected boolean isRetryable(TsurugiTransactionException e) {
-        if (exceptionUtil.isSerializationFailure(e)) {
+    protected boolean isRetryable(TsurugiTransactionException exception) {
+        if (exceptionUtil.isSerializationFailure(exception)) {
             return true;
         }
         return false;
@@ -226,16 +226,16 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     /**
      * Whether to conflict on write preserve.
      *
-     * @param e transaction exception
+     * @param exception transaction exception
      * @return {@code true} if conflict on write preserve
      */
-    protected boolean isConflictOnWritePreserve(TsurugiTransactionException e) {
-        if (exceptionUtil.isConflictOnWritePreserve(e)) {
+    protected boolean isConflictOnWritePreserve(TsurugiTransactionException exception) {
+        if (exceptionUtil.isConflictOnWritePreserve(exception)) {
             return true;
         }
-        if (exceptionUtil.isSerializationFailure(e)) {
+        if (exceptionUtil.isSerializationFailure(exception)) {
             // FIXME sub error code
-            String message = e.getMessage();
+            String message = exception.getMessage();
             if (message.contains("shirakami response Status=ERR_CC")) {
                 if (message.contains("reason_code:CC_OCC_WP_VERIFY")) {
                     return true;
@@ -248,11 +248,11 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
     /**
      * Whether to inactive transaction.
      *
-     * @param e transaction exception
+     * @param exception transaction exception
      * @return {@code true} if inactive transaction
      */
-    protected boolean isInactiveTransaction(TsurugiTransactionException e) {
-        if (exceptionUtil.isInactiveTransaction(e)) {
+    protected boolean isInactiveTransaction(TsurugiTransactionException exception) {
+        if (exceptionUtil.isInactiveTransaction(exception)) {
             return true;
         }
         return false;

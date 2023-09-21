@@ -77,7 +77,7 @@ public class TgTmTxOptionMultipleList extends TgTmTxOptionSupplier {
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException exception, TgTmRetryInstruction retryInstruction) {
         var txOption = findTxOption(attempt);
         if (txOption == null) {
             return TgTmTxOption.retryOver(retryInstruction);

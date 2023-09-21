@@ -49,13 +49,13 @@ public abstract class TsurugiSqlResult implements AutoCloseable {
     /**
      * fill information in exception.
      *
-     * @param e exception
+     * @param exception exception
      * @return exception
      */
     @IceaxeInternal
-    public TsurugiTransactionException fillToTsurugiException(TsurugiTransactionException e) {
-        e.setSql(ownerTransaction, sqlStatement, sqlParameter, this);
-        return e;
+    public TsurugiTransactionException fillToTsurugiException(TsurugiTransactionException exception) {
+        exception.setSql(ownerTransaction, sqlStatement, sqlParameter, this);
+        return exception;
     }
 
     @Override

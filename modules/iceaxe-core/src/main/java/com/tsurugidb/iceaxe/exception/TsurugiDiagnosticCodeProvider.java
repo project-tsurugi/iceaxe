@@ -53,15 +53,15 @@ public interface TsurugiDiagnosticCodeProvider {
     /**
      * create message.
      *
-     * @param e ServerException
+     * @param exception ServerException
      * @return message
      */
-    public static @Nullable String createMessage(ServerException e) {
-        var code = e.getDiagnosticCode();
+    public static @Nullable String createMessage(ServerException exception) {
+        var code = exception.getDiagnosticCode();
         if (code != null) {
-            return code.name() + ": " + e.getMessage();
+            return code.name() + ": " + exception.getMessage();
         } else {
-            return e.getMessage();
+            return exception.getMessage();
         }
     }
 

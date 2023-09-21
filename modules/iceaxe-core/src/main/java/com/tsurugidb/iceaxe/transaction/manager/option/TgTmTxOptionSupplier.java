@@ -105,11 +105,11 @@ public abstract class TgTmTxOptionSupplier {
         /**
          * accept.
          *
-         * @param attempt  attempt number
-         * @param e        transaction exception (null if attempt==0)
-         * @param tmOption tm option
+         * @param attempt   attempt number
+         * @param exception transaction exception (null if attempt==0)
+         * @param tmOption  tm option
          */
-        public void accept(int attempt, TsurugiTransactionException e, TgTmTxOption tmOption);
+        public void accept(int attempt, TsurugiTransactionException exception, TgTmTxOption tmOption);
     }
 
     private TsurugiTmRetryPredicate retryPredicate;
@@ -178,15 +178,15 @@ public abstract class TgTmTxOptionSupplier {
      * @param executeInfo {@link #createExecuteInfo(int)}
      * @param attempt     attempt number
      * @param transaction transaction (null if attempt==0)
-     * @param e           transaction exception (null if attempt==0)
+     * @param exception   transaction exception (null if attempt==0)
      * @return transaction option
      * @throws IOException
      * @throws InterruptedException
      */
-    public final @Nonnull TgTmTxOption get(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        var tmOption = computeTmOption(executeInfo, attempt, transaction, e);
+    public final @Nonnull TgTmTxOption get(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
+        var tmOption = computeTmOption(executeInfo, attempt, transaction, exception);
         if (this.tmOptionListener != null) {
-            tmOptionListener.accept(attempt, e, tmOption);
+            tmOptionListener.accept(attempt, exception, tmOption);
         }
         return tmOption;
     }
@@ -197,19 +197,19 @@ public abstract class TgTmTxOptionSupplier {
      * @param executeInfo {@link #createExecuteInfo(int)}
      * @param attempt     attempt number
      * @param transaction transaction (null if attempt==0)
-     * @param e           transaction exception (null if attempt==0)
+     * @param exception   transaction exception (null if attempt==0)
      * @return transaction option
      * @throws IOException
      * @throws InterruptedException
      */
-    protected TgTmTxOption computeTmOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
+    protected TgTmTxOption computeTmOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (attempt == 0) {
             return computeFirstTmOption(executeInfo);
         }
 
-        var retryInstruction = isRetryable(transaction, e);
+        var retryInstruction = isRetryable(transaction, exception);
         if (retryInstruction.isRetryable()) {
-            return computeRetryTmOption(executeInfo, attempt, e, retryInstruction);
+            return computeRetryTmOption(executeInfo, attempt, exception, retryInstruction);
         }
 
         return TgTmTxOption.notRetryable(retryInstruction);
@@ -228,23 +228,23 @@ public abstract class TgTmTxOptionSupplier {
      *
      * @param executeInfo      {@link #createExecuteInfo(int)}
      * @param attempt          attempt number
-     * @param e                transaction exception
+     * @param exception        transaction exception
      * @param retryInstruction retry instruction
      * @return transaction option
      */
-    protected abstract TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction);
+    protected abstract TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException exception, TgTmRetryInstruction retryInstruction);
 
     /**
      * whether to retry.
      *
      * @param transaction transaction
-     * @param e           Transaction Exception
+     * @param exception   Transaction Exception
      * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
-    protected TgTmRetryInstruction isRetryable(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
-        return getRetryPredicate().apply(transaction, e);
+    protected TgTmRetryInstruction isRetryable(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
+        return getRetryPredicate().apply(transaction, exception);
     }
 
     /**

@@ -205,17 +205,17 @@ public class TgTmSetting {
      * @param executeInfo {@link TgTmTxOptionSupplier#createExecuteInfo(int)}
      * @param attempt     attempt number
      * @param transaction transaction
-     * @param e           transaction exception
+     * @param exception   transaction exception
      * @return tm option
      * @throws IOException
      * @throws InterruptedException
      * @see TgTmTxOptionSupplier
      */
-    public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
+    public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (this.txOptionSupplier == null) {
             throw new IllegalStateException("txOptionSupplier is not specifed");
         }
-        var tmOption = txOptionSupplier.get(executeInfo, attempt, transaction, e);
+        var tmOption = txOptionSupplier.get(executeInfo, attempt, transaction, exception);
         if (tmOption.isExecute()) {
             var txOption = tmOption.getTransactionOption();
             if (txOption.label() == null && this.transactionLabel != null) {

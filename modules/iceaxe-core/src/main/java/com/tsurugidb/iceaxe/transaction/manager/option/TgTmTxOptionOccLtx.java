@@ -79,7 +79,7 @@ public class TgTmTxOptionOccLtx extends TgTmTxOptionSupplier {
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException exception, TgTmRetryInstruction retryInstruction) {
         var info = info(executeInfo);
 
         var reason = retryInstruction.retryCode();

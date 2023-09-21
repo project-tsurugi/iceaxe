@@ -261,8 +261,8 @@ public class TsurugiTransactionManager {
         }
     }
 
-    private TsurugiTransactionException findTransactionException(Exception e) {
-        for (Throwable t = e; t != null; t = t.getCause()) {
+    private TsurugiTransactionException findTransactionException(Exception exception) {
+        for (Throwable t = exception; t != null; t = t.getCause()) {
             if (t instanceof TsurugiTransactionException) {
                 return (TsurugiTransactionException) t;
             }
@@ -270,7 +270,7 @@ public class TsurugiTransactionManager {
         return null;
     }
 
-    private TgTxOption processTransactionException(TgTmSetting setting, Object executeInfo, TsurugiTransaction transaction, Exception cause, TgTxOption txOption, TsurugiTransactionException e)
+    private TgTxOption processTransactionException(TgTmSetting setting, Object executeInfo, TsurugiTransaction transaction, Exception cause, TgTxOption txOption, TsurugiTransactionException exception)
             throws IOException, InterruptedException {
         boolean calledRollback = false;
         try {
@@ -278,7 +278,7 @@ public class TsurugiTransactionManager {
 
             TgTmTxOption nextTmOption;
             try {
-                nextTmOption = setting.getTransactionOption(executeInfo, attempt + 1, transaction, e);
+                nextTmOption = setting.getTransactionOption(executeInfo, attempt + 1, transaction, exception);
             } catch (Throwable t) {
                 t.addSuppressed(cause);
                 throw t;
@@ -294,13 +294,13 @@ public class TsurugiTransactionManager {
 
                 var nextOption = nextTmOption.getTransactionOption();
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("tm.execute retry{}. e={}, nextTx={}", attempt + 1, e.getMessage(), nextTmOption);
+                    LOG.trace("tm.execute retry{}. e={}, nextTx={}", attempt + 1, exception.getMessage(), nextTmOption);
                 }
                 event(setting, cause, listener -> listener.transactionRetry(transaction, cause, nextTmOption));
                 return nextOption;
             }
 
-            LOG.trace("tm.execute error", e);
+            LOG.trace("tm.execute error", exception);
             if (nextTmOption.isRetryOver()) {
                 event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause, nextTmOption));
                 throw new TsurugiTmRetryOverIOException(transaction, cause, nextTmOption);

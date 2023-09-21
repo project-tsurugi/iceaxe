@@ -57,7 +57,7 @@ public class TgTmTxOptionList extends TgTmTxOptionSupplier {
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException exception, TgTmRetryInstruction retryInstruction) {
         if (attempt < txOptionList.size()) {
             return TgTmTxOption.execute(txOptionList.get(attempt), retryInstruction);
         }
