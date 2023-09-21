@@ -4,7 +4,7 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.CommitStatus;
 
 /**
- * Tsurugi Commit Type
+ * Tsurugi Commit Type.
  * <p>
  * This commitType determines when the {@link TsurugiTransaction#commit(TgCommitType)} returns.
  * </p>
@@ -46,7 +46,7 @@ public enum TgCommitType {
     }
 
     /**
-     * get {@link CommitStatus}
+     * get {@link CommitStatus}.
      *
      * @return commit status
      */

@@ -5,12 +5,14 @@ import javax.annotation.Nullable;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 
 /**
- * {@link TsurugiQueryResult} event listener
+ * {@link TsurugiQueryResult} event listener.
+ *
+ * @param <R> record type
  */
 public interface TsurugiQueryResultEventListener<R> {
 
     /**
-     * called when read a record
+     * called when read a record.
      *
      * @param result SQL result
      * @param record record
@@ -20,7 +22,7 @@ public interface TsurugiQueryResultEventListener<R> {
     }
 
     /**
-     * called when occurs exception
+     * called when occurs exception.
      *
      * @param result   SQL result
      * @param occurred exception
@@ -30,7 +32,7 @@ public interface TsurugiQueryResultEventListener<R> {
     }
 
     /**
-     * called when execute end
+     * called when execute end.
      *
      * @param result SQL result
      */
@@ -39,7 +41,7 @@ public interface TsurugiQueryResultEventListener<R> {
     }
 
     /**
-     * called when close result
+     * called when close result.
      *
      * @param result   SQL result
      * @param occurred exception

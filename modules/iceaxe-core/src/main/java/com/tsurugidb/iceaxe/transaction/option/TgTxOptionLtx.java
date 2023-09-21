@@ -15,7 +15,7 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 import com.tsurugidb.sql.proto.SqlRequest.WritePreserve;
 
 /**
- * Tsurugi Transaction Option (LTX)
+ * Tsurugi Transaction Option (LTX).
  */
 @ThreadSafe
 public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
@@ -36,9 +36,9 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * set include ddl
+     * set include DDL.
      *
-     * @param includeDDl {@code true} if include ddl
+     * @param includeDDl {@code true} if include DDL
      * @return this
      */
     public TgTxOptionLtx includeDdl(boolean includeDDl) {
@@ -48,16 +48,16 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * get include ddl
+     * get include DDL.
      *
-     * @return {@code true} if include ddl
+     * @return {@code true} if include DDL
      */
     public boolean includeDdl() {
         return this.includeDdl;
     }
 
     /**
-     * add write preserve
+     * add write preserve.
      *
      * @param tableName table name
      * @return this
@@ -69,7 +69,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add write preserve
+     * add write preserve.
      *
      * @param tableNames table name
      * @return this
@@ -83,7 +83,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add write preserve
+     * add write preserve.
      *
      * @param tableNames table name
      * @return this
@@ -97,7 +97,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add write preserve
+     * add write preserve.
      *
      * @param tableNames table name
      * @return this
@@ -109,7 +109,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove write preserve
+     * remove write preserve.
      *
      * @param tableNames table name
      * @return this
@@ -123,7 +123,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove write preserve
+     * remove write preserve.
      *
      * @param tableNames table name
      * @return this
@@ -137,7 +137,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove write preserve
+     * remove write preserve.
      *
      * @param tableNames table name
      * @return this
@@ -149,7 +149,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * get write preserve
+     * get write preserve.
      *
      * @return list of table name
      */
@@ -158,7 +158,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add inclusive read area
+     * add inclusive read area.
      *
      * @param tableName table name
      * @return this
@@ -170,7 +170,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add inclusive read area
+     * add inclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -184,7 +184,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add inclusive read area
+     * add inclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -198,7 +198,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add inclusive read area
+     * add inclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -210,7 +210,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove inclusive read area
+     * remove inclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -224,7 +224,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove inclusive read area
+     * remove inclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -238,7 +238,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove inclusive read area
+     * remove inclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -250,7 +250,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * get inclusive read area
+     * get inclusive read area.
      *
      * @return inclusive read area
      */
@@ -259,7 +259,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add exclusive read area
+     * add exclusive read area.
      *
      * @param tableName table name
      * @return this
@@ -271,7 +271,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add exclusive read area
+     * add exclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -285,7 +285,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add exclusive read area
+     * add exclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -299,7 +299,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * add exclusive read area
+     * add exclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -311,7 +311,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove exclusive read area
+     * remove exclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -325,7 +325,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove exclusive read area
+     * remove exclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -339,7 +339,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * remove exclusive read area
+     * remove exclusive read area.
      *
      * @param tableNames table name
      * @return this
@@ -351,7 +351,7 @@ public class TgTxOptionLtx extends AbstractTgTxOptionLong<TgTxOptionLtx> {
     }
 
     /**
-     * get exclusive read area
+     * get exclusive read area.
      *
      * @return exclusive read area
      */

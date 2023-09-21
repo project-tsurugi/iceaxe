@@ -18,7 +18,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionFunction;
 
 /**
- * Tsurugi Result Mapping for single column
+ * Tsurugi Result Mapping for single column.
  *
  * @param <R> result type
  */
@@ -27,7 +27,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<Boolean> booleanMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -41,7 +41,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<Integer> intMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -55,7 +55,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<Long> longMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -69,7 +69,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<Float> floatMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -83,7 +83,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<Double> doubleMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -97,7 +97,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<BigDecimal> decimalMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -111,7 +111,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<String> stringMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -125,7 +125,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<byte[]> bytesMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -139,7 +139,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<boolean[]> bitsMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -153,7 +153,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<LocalDate> dateMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -167,7 +167,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<LocalTime> timeMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -181,7 +181,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<LocalDateTime> dateTimeMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -195,7 +195,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<OffsetTime> offsetTimeMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -209,7 +209,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<OffsetDateTime> offsetDateTimeMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @return result mapping
      */
@@ -223,7 +223,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<ZonedDateTime> zonedDateTimeMapping;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @param zone time-zone
      * @return result mapping
@@ -238,8 +238,9 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private final TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter;
 
     /**
-     * create result mapping
+     * create result mapping.
      *
+     * @param <R>   result type
      * @param clazz result type
      * @return result mapping
      */
@@ -254,8 +255,9 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * create result mapping
+     * create result mapping.
      *
+     * @param <R>  result type
      * @param type result type
      * @return result mapping
      */
@@ -302,7 +304,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * Tsurugi Result Mapping for single column
+     * Tsurugi Result Mapping for single column.
      *
      * @param resultConverter converter from TsurugiResultRecord to R
      */

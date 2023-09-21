@@ -10,7 +10,7 @@ import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 
 /**
- * Tsurugi IOException
+ * Tsurugi IOException.
  */
 @SuppressWarnings("serial")
 public class TsurugiIOException extends IOException implements TsurugiDiagnosticCodeProvider {

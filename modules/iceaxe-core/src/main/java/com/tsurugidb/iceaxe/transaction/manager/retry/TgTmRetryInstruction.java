@@ -16,6 +16,7 @@ public /* record */ final class TgTmRetryInstruction {
      *
      * @param retryCode retry code
      * @param code      diagnostic code
+     * @return retry instruction
      */
     public static TgTmRetryInstruction of(@Nonnull TgTmRetryCode retryCode, @Nonnull DiagnosticCode code) {
         String reasonMessage = getReasonMessage(code);
@@ -27,6 +28,7 @@ public /* record */ final class TgTmRetryInstruction {
      *
      * @param retryCode     retry code
      * @param reasonMessage reason message
+     * @return retry instruction
      */
     public static TgTmRetryInstruction of(@Nonnull TgTmRetryCode retryCode, @Nonnull String reasonMessage) {
         return new TgTmRetryInstruction(retryCode, reasonMessage);
@@ -36,6 +38,7 @@ public /* record */ final class TgTmRetryInstruction {
      * Creates a new instance.
      *
      * @param code diagnostic code
+     * @return retry instruction
      */
     public static TgTmRetryInstruction ofRetryable(@Nonnull DiagnosticCode code) {
         String reasonMessage = getReasonMessage(code);
@@ -46,6 +49,7 @@ public /* record */ final class TgTmRetryInstruction {
      * Creates a new instance.
      *
      * @param reasonMessage reason message
+     * @return retry instruction
      */
     public static TgTmRetryInstruction ofRetryable(@Nonnull String reasonMessage) {
         return new TgTmRetryInstruction(TgTmRetryStandardCode.RETRYABLE, reasonMessage);
@@ -55,6 +59,7 @@ public /* record */ final class TgTmRetryInstruction {
      * Creates a new instance.
      *
      * @param reasonMessage reason message
+     * @return retry instruction
      */
     public static TgTmRetryInstruction ofRetryableLtx(@Nonnull String reasonMessage) {
         return new TgTmRetryInstruction(TgTmRetryStandardCode.RETRYABLE_LTX, reasonMessage);
@@ -64,6 +69,7 @@ public /* record */ final class TgTmRetryInstruction {
      * Creates a new instance.
      *
      * @param code diagnostic code
+     * @return retry instruction
      */
     public static TgTmRetryInstruction ofNotRetryable(@Nonnull DiagnosticCode code) {
         String reasonMessage = getReasonMessage(code);
@@ -74,6 +80,7 @@ public /* record */ final class TgTmRetryInstruction {
      * Creates a new instance.
      *
      * @param reasonMessage reason message
+     * @return retry instruction
      */
     public static TgTmRetryInstruction ofNotRetryable(@Nonnull String reasonMessage) {
         return new TgTmRetryInstruction(TgTmRetryStandardCode.NOT_RETRYABLE, reasonMessage);
@@ -98,7 +105,7 @@ public /* record */ final class TgTmRetryInstruction {
     }
 
     /**
-     * get retry code
+     * get retry code.
      *
      * @return retry code
      */
@@ -107,7 +114,7 @@ public /* record */ final class TgTmRetryInstruction {
     }
 
     /**
-     * get reason message
+     * get reason message.
      *
      * @return reason message
      */
@@ -116,7 +123,7 @@ public /* record */ final class TgTmRetryInstruction {
     }
 
     /**
-     * whether to retry
+     * whether to retry.
      *
      * @return {@code true}: retryable
      */

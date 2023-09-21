@@ -32,7 +32,7 @@ import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.ResultSet;
 
 /**
- * Tsurugi Result Record for {@link TsurugiQueryResult}
+ * Tsurugi Result Record for {@link TsurugiQueryResult}.
  *
  * <p>
  * The methods of this class are classified into the following three groups. If you use a certain group of methods, you basically cannot use the other group's methods.
@@ -92,19 +92,38 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
 public class TsurugiResultRecord {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiResultRecord.class);
 
+    /**
+     * column value.
+     */
     protected /* record */ static class TsurugiResultColumnValue {
         private final int index;
         private final Object value;
 
+        /**
+         * Creates a new instance.
+         *
+         * @param index column index
+         * @param value column value
+         */
         public TsurugiResultColumnValue(int index, Object value) {
             this.index = index;
             this.value = value;
         }
 
+        /**
+         * get column index.
+         *
+         * @return column index
+         */
         public int index() {
             return index;
         }
 
+        /**
+         * get column value.
+         *
+         * @return column value
+         */
         public Object value() {
             return value;
         }
@@ -116,6 +135,13 @@ public class TsurugiResultRecord {
     private int currentColumnIndex;
     private Map<String, TsurugiResultColumnValue> columnMap;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param result       query result
+     * @param lowResultSet low ResultSet
+     * @param convertUtil  convert type utility
+     */
     protected TsurugiResultRecord(TsurugiQueryResult<?> result, ResultSet lowResultSet, IceaxeConvertUtil convertUtil) {
         this.ownerResult = result;
         this.lowResultSet = lowResultSet;
@@ -131,7 +157,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get convert type utility
+     * get convert type utility.
      *
      * @return convert type utility
      */
@@ -144,7 +170,7 @@ public class TsurugiResultRecord {
      */
 
     /**
-     * move the current column to the next
+     * move the current column to the next.
      *
      * @return true if the next column exists
      * @throws IOException
@@ -170,13 +196,22 @@ public class TsurugiResultRecord {
         }
     }
 
+    /**
+     * get low column.
+     *
+     * @param index column index
+     * @return low column
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected @Nonnull Column getLowColumn(int index) throws IOException, InterruptedException, TsurugiTransactionException {
         var lowColumnList = TsurugiQueryResult.getLowColumnList(ownerResult, lowResultSet);
         return lowColumnList.get(index);
     }
 
     /**
-     * get current column name
+     * get current column name.
      *
      * @return column name
      * @throws IOException
@@ -190,7 +225,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column data type
+     * get current column data type.
      *
      * @return data type
      * @throws IOException
@@ -203,13 +238,21 @@ public class TsurugiResultRecord {
         return TgDataType.of(lowType);
     }
 
+    /**
+     * get current column low type.
+     *
+     * @return low data type
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected @Nonnull AtomType getCurrentColumnLowType() throws IOException, InterruptedException, TsurugiTransactionException {
         var lowColumn = getLowColumn(currentColumnIndex);
         return lowColumn.getAtomType();
     }
 
     /**
-     * get current column value (take once)
+     * get current column value (take once).
      *
      * @return value
      * @throws IOException
@@ -267,7 +310,7 @@ public class TsurugiResultRecord {
      */
 
     /**
-     * get name list
+     * get name list.
      *
      * @return list of column name
      * @throws IOException
@@ -278,6 +321,14 @@ public class TsurugiResultRecord {
         return TsurugiQueryResult.getNameList(ownerResult, lowResultSet);
     }
 
+    /**
+     * get column value map.
+     *
+     * @return column value map
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected @Nonnull Map<String, TsurugiResultColumnValue> getColumnMap() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.columnMap == null) {
             this.columnMap = new LinkedHashMap<>();
@@ -293,6 +344,15 @@ public class TsurugiResultRecord {
         return this.columnMap;
     }
 
+    /**
+     * get column value.
+     *
+     * @param name column name
+     * @return column value
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected @Nonnull TsurugiResultColumnValue getColumn(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var map = getColumnMap();
         var column = map.get(name);
@@ -303,7 +363,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get value
+     * get value.
      *
      * @param name column name
      * @return value
@@ -317,7 +377,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get data type
+     * get data type.
      *
      * @param name column name
      * @return data type
@@ -339,7 +399,7 @@ public class TsurugiResultRecord {
     // boolean
 
     /**
-     * get column value as boolean
+     * get column value as boolean.
      *
      * @param name column name
      * @return column value
@@ -355,7 +415,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as boolean
+     * get column value as boolean.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -373,7 +433,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as boolean
+     * get column value as boolean.
      *
      * @param name column name
      * @return column value
@@ -387,7 +447,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as boolean
+     * get column value as boolean.
      *
      * @param name column name
      * @return column value
@@ -403,7 +463,7 @@ public class TsurugiResultRecord {
     // int
 
     /**
-     * get column value as int
+     * get column value as int.
      *
      * @param name column name
      * @return column value
@@ -419,7 +479,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as int
+     * get column value as int.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -437,7 +497,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as int
+     * get column value as int.
      *
      * @param name column name
      * @return column value
@@ -451,7 +511,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as int
+     * get column value as int.
      *
      * @param name column name
      * @return column value
@@ -467,7 +527,7 @@ public class TsurugiResultRecord {
     // long
 
     /**
-     * get column value as long
+     * get column value as long.
      *
      * @param name column name
      * @return column value
@@ -483,7 +543,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as long
+     * get column value as long.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -501,7 +561,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as long
+     * get column value as long.
      *
      * @param name column name
      * @return column value
@@ -515,7 +575,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as long
+     * get column value as long.
      *
      * @param name column name
      * @return column value
@@ -531,7 +591,7 @@ public class TsurugiResultRecord {
     // float
 
     /**
-     * get column value as float
+     * get column value as float.
      *
      * @param name column name
      * @return column value
@@ -547,7 +607,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as float
+     * get column value as float.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -565,7 +625,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as float
+     * get column value as float.
      *
      * @param name column name
      * @return column value
@@ -579,7 +639,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as float
+     * get column value as float.
      *
      * @param name column name
      * @return column value
@@ -595,7 +655,7 @@ public class TsurugiResultRecord {
     // double
 
     /**
-     * get column value as double
+     * get column value as double.
      *
      * @param name column name
      * @return column value
@@ -611,7 +671,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as double
+     * get column value as double.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -629,7 +689,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as double
+     * get column value as double.
      *
      * @param name column name
      * @return column value
@@ -643,7 +703,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as double
+     * get column value as double.
      *
      * @param name column name
      * @return column value
@@ -659,7 +719,7 @@ public class TsurugiResultRecord {
     // decimal
 
     /**
-     * get column value as decimal
+     * get column value as decimal.
      *
      * @param name column name
      * @return column value
@@ -675,7 +735,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as decimal
+     * get column value as decimal.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -693,7 +753,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as decimal
+     * get column value as decimal.
      *
      * @param name column name
      * @return column value
@@ -707,7 +767,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as decimal
+     * get column value as decimal.
      *
      * @param name column name
      * @return column value
@@ -723,7 +783,7 @@ public class TsurugiResultRecord {
     // string
 
     /**
-     * get column value as String
+     * get column value as String.
      *
      * @param name column name
      * @return column value
@@ -739,7 +799,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as String
+     * get column value as String.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -757,7 +817,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as String
+     * get column value as String.
      *
      * @param name column name
      * @return column value
@@ -771,7 +831,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as String
+     * get column value as String.
      *
      * @param name column name
      * @return column value
@@ -787,7 +847,7 @@ public class TsurugiResultRecord {
     // byte[]
 
     /**
-     * get column value as byte[]
+     * get column value as byte[].
      *
      * @param name column name
      * @return column value
@@ -803,7 +863,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as byte[]
+     * get column value as byte[].
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -821,7 +881,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as byte[]
+     * get column value as byte[].
      *
      * @param name column name
      * @return column value
@@ -835,7 +895,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as byte[]
+     * get column value as byte[].
      *
      * @param name column name
      * @return column value
@@ -851,7 +911,7 @@ public class TsurugiResultRecord {
     // boolean[]
 
     /**
-     * get column value as boolean[]
+     * get column value as boolean[].
      *
      * @param name column name
      * @return column value
@@ -867,7 +927,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as boolean[]
+     * get column value as boolean[].
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -885,7 +945,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as boolean[]
+     * get column value as boolean[].
      *
      * @param name column name
      * @return column value
@@ -899,7 +959,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as boolean[]
+     * get column value as boolean[].
      *
      * @param name column name
      * @return column value
@@ -915,7 +975,7 @@ public class TsurugiResultRecord {
     // date
 
     /**
-     * get column value as date
+     * get column value as date.
      *
      * @param name column name
      * @return column value
@@ -931,7 +991,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as date
+     * get column value as date.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -949,7 +1009,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as date
+     * get column value as date.
      *
      * @param name column name
      * @return column value
@@ -963,7 +1023,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as date
+     * get column value as date.
      *
      * @param name column name
      * @return column value
@@ -979,7 +1039,7 @@ public class TsurugiResultRecord {
     // time
 
     /**
-     * get column value as time
+     * get column value as time.
      *
      * @param name column name
      * @return column value
@@ -995,7 +1055,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as time
+     * get column value as time.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -1013,7 +1073,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as time
+     * get column value as time.
      *
      * @param name column name
      * @return column value
@@ -1027,7 +1087,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as time
+     * get column value as time.
      *
      * @param name column name
      * @return column value
@@ -1043,7 +1103,7 @@ public class TsurugiResultRecord {
     // date time
 
     /**
-     * get column value as dateTime
+     * get column value as dateTime.
      *
      * @param name column name
      * @return column value
@@ -1059,7 +1119,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as dateTime
+     * get column value as dateTime.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -1077,7 +1137,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as dateTime
+     * get column value as dateTime.
      *
      * @param name column name
      * @return column value
@@ -1091,7 +1151,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as dateTime
+     * get column value as dateTime.
      *
      * @param name column name
      * @return column value
@@ -1107,7 +1167,7 @@ public class TsurugiResultRecord {
     // offset time
 
     /**
-     * get column value as offset time
+     * get column value as offset time.
      *
      * @param name column name
      * @return column value
@@ -1123,7 +1183,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as offset time
+     * get column value as offset time.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -1141,7 +1201,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as offset time
+     * get column value as offset time.
      *
      * @param name column name
      * @return column value
@@ -1155,7 +1215,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as offset time
+     * get column value as offset time.
      *
      * @param name column name
      * @return column value
@@ -1171,7 +1231,7 @@ public class TsurugiResultRecord {
     // offset dateTime
 
     /**
-     * get column value as offset dateTime
+     * get column value as offset dateTime.
      *
      * @param name column name
      * @return column value
@@ -1187,7 +1247,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as offset dateTime
+     * get column value as offset dateTime.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -1205,7 +1265,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as offset dateTime
+     * get column value as offset dateTime.
      *
      * @param name column name
      * @return column value
@@ -1219,7 +1279,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as offset dateTime
+     * get column value as offset dateTime.
      *
      * @param name column name
      * @return column value
@@ -1235,7 +1295,7 @@ public class TsurugiResultRecord {
     // zoned dateTime
 
     /**
-     * get column value as ZonedDateTime
+     * get column value as ZonedDateTime.
      *
      * @param name column name
      * @param zone time-zone
@@ -1252,7 +1312,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as ZonedDateTime
+     * get column value as ZonedDateTime.
      *
      * @param name         column name
      * @param zone         time-zone
@@ -1271,7 +1331,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as ZonedDateTime
+     * get column value as ZonedDateTime.
      *
      * @param name column name
      * @param zone time-zone
@@ -1286,7 +1346,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get column value as ZonedDateTime
+     * get column value as ZonedDateTime.
      *
      * @param name column name
      * @param zone time-zone
@@ -1305,7 +1365,7 @@ public class TsurugiResultRecord {
      */
 
     /**
-     * move next column
+     * move next column.
      *
      * @throws IOException
      * @throws InterruptedException
@@ -1319,6 +1379,14 @@ public class TsurugiResultRecord {
         }
     }
 
+    /**
+     * get current column value and move next column.
+     *
+     * @return column value
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected @Nullable Object nextLowValue() throws IOException, InterruptedException, TsurugiTransactionException {
         nextColumn();
         return fetchCurrentColumnValue();
@@ -1331,7 +1399,7 @@ public class TsurugiResultRecord {
     // boolean
 
     /**
-     * get current column value as boolean and move next column
+     * get current column value as boolean and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1346,7 +1414,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as boolean and move next column
+     * get current column value as boolean and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1363,7 +1431,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as boolean and move next column
+     * get current column value as boolean and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1376,7 +1444,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as boolean and move next column
+     * get current column value as boolean and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1391,7 +1459,7 @@ public class TsurugiResultRecord {
     // int
 
     /**
-     * get current column value as int and move next column
+     * get current column value as int and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1406,7 +1474,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as int and move next column
+     * get current column value as int and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1423,7 +1491,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as int and move next column
+     * get current column value as int and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1436,7 +1504,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as int and move next column
+     * get current column value as int and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1451,7 +1519,7 @@ public class TsurugiResultRecord {
     // long
 
     /**
-     * get current column value as long and move next column
+     * get current column value as long and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1466,7 +1534,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as long and move next column
+     * get current column value as long and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1483,7 +1551,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as long and move next column
+     * get current column value as long and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1496,7 +1564,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as long and move next column
+     * get current column value as long and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1511,7 +1579,7 @@ public class TsurugiResultRecord {
     // float
 
     /**
-     * get current column value as float and move next column
+     * get current column value as float and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1526,7 +1594,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as float and move next column
+     * get current column value as float and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1543,7 +1611,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as float and move next column
+     * get current column value as float and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1556,7 +1624,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as float and move next column
+     * get current column value as float and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1571,7 +1639,7 @@ public class TsurugiResultRecord {
     // double
 
     /**
-     * get current column value as double and move next column
+     * get current column value as double and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1586,7 +1654,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as double and move next column
+     * get current column value as double and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1603,7 +1671,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as double and move next column
+     * get current column value as double and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1616,7 +1684,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as double and move next column
+     * get current column value as double and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1631,7 +1699,7 @@ public class TsurugiResultRecord {
     // decimal
 
     /**
-     * get current column value as decimal and move next column
+     * get current column value as decimal and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1646,7 +1714,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as decimal and move next column
+     * get current column value as decimal and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1663,7 +1731,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as decimal and move next column
+     * get current column value as decimal and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1676,7 +1744,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as decimal and move next column
+     * get current column value as decimal and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1691,7 +1759,7 @@ public class TsurugiResultRecord {
     // string
 
     /**
-     * get current column value as String and move next column
+     * get current column value as String and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1706,7 +1774,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as String and move next column
+     * get current column value as String and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1723,7 +1791,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as String and move next column
+     * get current column value as String and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1736,7 +1804,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as String and move next column
+     * get current column value as String and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1751,7 +1819,7 @@ public class TsurugiResultRecord {
     // byte[]
 
     /**
-     * get current column value as byte[] and move next column
+     * get current column value as byte[] and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1766,7 +1834,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as byte[] and move next column
+     * get current column value as byte[] and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1783,7 +1851,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as byte[] and move next column
+     * get current column value as byte[] and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1796,7 +1864,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as byte[] and move next column
+     * get current column value as byte[] and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1811,7 +1879,7 @@ public class TsurugiResultRecord {
     // boolean[]
 
     /**
-     * get current column value as boolean[] and move next column
+     * get current column value as boolean[] and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1826,7 +1894,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as boolean[] and move next column
+     * get current column value as boolean[] and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1843,7 +1911,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as boolean[] and move next column
+     * get current column value as boolean[] and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1856,7 +1924,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as boolean[] and move next column
+     * get current column value as boolean[] and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1871,7 +1939,7 @@ public class TsurugiResultRecord {
     // date
 
     /**
-     * get current column value as date and move next column
+     * get current column value as date and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1886,7 +1954,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as date and move next column
+     * get current column value as date and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1903,7 +1971,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as date and move next column
+     * get current column value as date and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1916,7 +1984,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as date and move next column
+     * get current column value as date and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1931,7 +1999,7 @@ public class TsurugiResultRecord {
     // time
 
     /**
-     * get current column value as time and move next column
+     * get current column value as time and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1946,7 +2014,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as time and move next column
+     * get current column value as time and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -1963,7 +2031,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as time and move next column
+     * get current column value as time and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1976,7 +2044,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as time and move next column
+     * get current column value as time and move next column.
      *
      * @return column value
      * @throws IOException
@@ -1991,7 +2059,7 @@ public class TsurugiResultRecord {
     // dateTime
 
     /**
-     * get current column value as dateTime and move next column
+     * get current column value as dateTime and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2006,7 +2074,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as dateTime and move next column
+     * get current column value as dateTime and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -2023,7 +2091,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as dateTime and move next column
+     * get current column value as dateTime and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2036,7 +2104,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as dateTime and move next column
+     * get current column value as dateTime and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2051,7 +2119,7 @@ public class TsurugiResultRecord {
     // offset time
 
     /**
-     * get current column value as offset time and move next column
+     * get current column value as offset time and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2066,7 +2134,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as offset time and move next column
+     * get current column value as offset time and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -2083,7 +2151,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as offset time and move next column
+     * get current column value as offset time and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2096,7 +2164,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as offset time and move next column
+     * get current column value as offset time and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2111,7 +2179,7 @@ public class TsurugiResultRecord {
     // offset dateTime
 
     /**
-     * get current column value as offset dateTime and move next column
+     * get current column value as offset dateTime and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2126,7 +2194,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as offset dateTime and move next column
+     * get current column value as offset dateTime and move next column.
      *
      * @param defaultValue value to return if column value is null
      * @return column value
@@ -2143,7 +2211,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as offset dateTime and move next column
+     * get current column value as offset dateTime and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2156,7 +2224,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as offset dateTime and move next column
+     * get current column value as offset dateTime and move next column.
      *
      * @return column value
      * @throws IOException
@@ -2171,7 +2239,7 @@ public class TsurugiResultRecord {
     // zoned dateTime
 
     /**
-     * get current column value as ZonedDateTime and move next column
+     * get current column value as ZonedDateTime and move next column.
      *
      * @param zone time-zone
      * @return column value
@@ -2187,7 +2255,7 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as ZonedDateTime and move next column
+     * get current column value as ZonedDateTime and move next column.
      *
      * @param zone         time-zone
      * @param defaultValue value to return if column value is null
@@ -2205,11 +2273,12 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as ZonedDateTime and move next column
+     * get current column value as ZonedDateTime and move next column.
      *
      * @param zone time-zone
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     public @Nonnull Optional<ZonedDateTime> nextZonedDateTimeOpt(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
@@ -2218,11 +2287,12 @@ public class TsurugiResultRecord {
     }
 
     /**
-     * get current column value as ZonedDateTime and move next column
+     * get current column value as ZonedDateTime and move next column.
      *
      * @param zone time-zone
      * @return column value
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     public @Nullable ZonedDateTime nextZonedDateTimeOrNull(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {

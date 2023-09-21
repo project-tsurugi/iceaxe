@@ -3,7 +3,7 @@ package com.tsurugidb.iceaxe.session.event.logging;
 import java.time.ZonedDateTime;
 
 /**
- * Tsurugi transaction manager execute log
+ * Tsurugi transaction manager execute log.
  */
 public class TgSessionTmLog {
 
@@ -14,7 +14,7 @@ public class TgSessionTmLog {
     private ZonedDateTime endTime;
 
     /**
-     * set iceaxe tm executeId
+     * set iceaxe tm executeId.
      *
      * @param iceaxeTmExecuteId iceaxe tm executeId
      */
@@ -23,7 +23,7 @@ public class TgSessionTmLog {
     }
 
     /**
-     * get iceaxe tm executeId
+     * get iceaxe tm executeId.
      *
      * @return iceaxe tm executeId
      */
@@ -32,7 +32,7 @@ public class TgSessionTmLog {
     }
 
     /**
-     * set current transaction log
+     * set current transaction log.
      *
      * @param txLog transaction log
      */
@@ -41,7 +41,7 @@ public class TgSessionTmLog {
     }
 
     /**
-     * get current transaction log
+     * get current transaction log.
      *
      * @return transaction log
      */
@@ -50,7 +50,7 @@ public class TgSessionTmLog {
     }
 
     /**
-     * set start time
+     * set start time.
      *
      * @param time start time
      */
@@ -59,7 +59,7 @@ public class TgSessionTmLog {
     }
 
     /**
-     * get start time
+     * get start time.
      *
      * @return start time
      */
@@ -68,7 +68,7 @@ public class TgSessionTmLog {
     }
 
     /**
-     * set end time
+     * set end time.
      *
      * @param time end time
      */
@@ -77,7 +77,7 @@ public class TgSessionTmLog {
     }
 
     /**
-     * get end time
+     * get end time.
      *
      * @return end time
      */

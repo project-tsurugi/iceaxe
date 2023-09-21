@@ -24,7 +24,7 @@ import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi SQL prepared statement
+ * Tsurugi SQL definition (prepared).
  *
  * @param <P> parameter type
  */
@@ -38,6 +38,15 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param session                    session
+     * @param sql                        SQL
+     * @param lowPreparedStatementFuture future of prepared statement
+     * @param parameterMapping           parameter mapping
+     * @throws IOException
+     */
     protected TsurugiSqlPrepared(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) throws IOException {
         super(session, sql);
         this.lowPreparedStatementFuture = lowPreparedStatementFuture;
@@ -60,7 +69,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     }
 
     /**
-     * set connect-timeout
+     * set connect-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -70,7 +79,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     }
 
     /**
-     * set connect-timeout
+     * set connect-timeout.
      *
      * @param timeout time
      */
@@ -79,7 +88,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     }
 
     /**
-     * set close-timeout
+     * set close-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -89,7 +98,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     }
 
     /**
-     * set close-timeout
+     * set close-timeout.
      *
      * @param timeout time
      */
@@ -100,7 +109,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     }
 
     /**
-     * get low PreparedStatement
+     * get low PreparedStatement.
      *
      * @return PreparedStatement
      * @throws IOException
@@ -129,6 +138,12 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         return this.lowPreparedStatement;
     }
 
+    /**
+     * get low parameter list.
+     *
+     * @param parameter SQL parameter
+     * @return list of parameter
+     */
     protected final List<Parameter> getLowParameterList(P parameter) {
         var convertUtil = getConvertUtil(parameterMapping.getConvertUtil());
         return parameterMapping.toLowParameterList(parameter, convertUtil);

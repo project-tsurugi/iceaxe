@@ -16,7 +16,7 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 
 /**
- * Tsurugi Data Type
+ * Tsurugi Data Type.
  */
 public enum TgDataType {
     // FIXME byte.class等もINTに含めるか？
@@ -92,7 +92,7 @@ public enum TgDataType {
     }
 
     /**
-     * get {@link AtomType}
+     * get {@link AtomType}.
      *
      * @return atom type
      */
@@ -101,7 +101,7 @@ public enum TgDataType {
         return this.lowType;
     }
 
-    protected static final Map<Class<?>, TgDataType> TYPE_MAP;
+    private static final Map<Class<?>, TgDataType> TYPE_MAP;
     static {
         Map<Class<?>, TgDataType> map = new IdentityHashMap<>();
         for (TgDataType type : TgDataType.values()) {
@@ -113,7 +113,7 @@ public enum TgDataType {
     }
 
     /**
-     * get data type
+     * get data type.
      *
      * @param clazz class
      * @return data type
@@ -137,7 +137,7 @@ public enum TgDataType {
     }
 
     /**
-     * get data type
+     * get data type.
      *
      * @param lowType atom type
      * @return data type

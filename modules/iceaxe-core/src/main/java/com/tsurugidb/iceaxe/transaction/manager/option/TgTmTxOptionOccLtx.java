@@ -8,13 +8,13 @@ import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryStandardCode;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * {@link TgTxOption} OCC to LTX
+ * {@link TgTxOption} OCC to LTX.
  */
 @ThreadSafe
 public class TgTmTxOptionOccLtx extends TgTmTxOptionSupplier {
 
     /**
-     * create TgTmTxOptionOccLtx
+     * create TgTmTxOptionOccLtx.
      *
      * @param occOption transaction option for OCC
      * @param occSize   occ size
@@ -79,7 +79,7 @@ public class TgTmTxOptionOccLtx extends TgTmTxOptionSupplier {
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException exception, TgTmRetryInstruction retryInstruction) {
         var info = info(executeInfo);
 
         var reason = retryInstruction.retryCode();

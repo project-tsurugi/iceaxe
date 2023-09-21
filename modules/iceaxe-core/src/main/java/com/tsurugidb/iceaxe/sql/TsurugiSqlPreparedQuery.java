@@ -20,7 +20,7 @@ import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi SQL prepared query (select)
+ * Tsurugi SQL prepared query (select).
  *
  * @param <P> parameter type
  * @param <R> result type
@@ -49,7 +49,7 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -78,7 +78,7 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
     }
 
     /**
-     * execute query
+     * execute query.
      *
      * @param transaction Transaction
      * @param parameter   SQL parameter

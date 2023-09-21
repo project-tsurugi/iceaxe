@@ -6,7 +6,7 @@ package com.tsurugidb.iceaxe.transaction.manager.retry;
 public interface TgTmRetryCode {
 
     /**
-     * whether to retry
+     * whether to retry.
      *
      * @return {@code true}: retryable
      */

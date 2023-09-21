@@ -21,24 +21,24 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
- * Tsurugi TransactionManager Settings
+ * Tsurugi TransactionManager Settings.
  *
  * @see TsurugiTransactionManager
  */
 public class TgTmSetting {
 
     /**
-     * create TransactionManager Settings
+     * create TransactionManager Settings.
      *
      * @param txOptionSupplier transaction option supplier
-     * @returnTransactionManager Settings
+     * @return TransactionManager Settings
      */
     public static TgTmSetting of(TgTmTxOptionSupplier txOptionSupplier) {
         return new TgTmSetting().txOptionSupplier(txOptionSupplier);
     }
 
     /**
-     * create TransactionManager Settings
+     * create TransactionManager Settings.
      *
      * @param txOptions transaction options
      * @return TransactionManager Settings
@@ -49,7 +49,7 @@ public class TgTmSetting {
     }
 
     /**
-     * create TransactionManager Settings
+     * create TransactionManager Settings.
      *
      * @param txOption transaction option
      * @return TransactionManager Settings
@@ -60,7 +60,7 @@ public class TgTmSetting {
     }
 
     /**
-     * create TransactionManager Settings
+     * create TransactionManager Settings.
      *
      * @param txOption        transaction option
      * @param attemptMaxCount attempt max count
@@ -72,7 +72,7 @@ public class TgTmSetting {
     }
 
     /**
-     * create TransactionManager Settings
+     * create TransactionManager Settings.
      *
      * @param txOption transaction option
      * @param size     size
@@ -84,7 +84,7 @@ public class TgTmSetting {
     }
 
     /**
-     * create TransactionManager Settings
+     * create TransactionManager Settings.
      *
      * @param txOption1 transaction option
      * @param size1     size
@@ -98,7 +98,7 @@ public class TgTmSetting {
     }
 
     /**
-     * create TransactionManager Settings
+     * create TransactionManager Settings.
      *
      * @param occSize   occ size
      * @param ltxOption transaction option for LTX or RTX
@@ -111,7 +111,7 @@ public class TgTmSetting {
     }
 
     /**
-     * create TransactionManager Settings
+     * create TransactionManager Settings.
      *
      * @param occOption transaction option for OCC
      * @param occSize   occ size
@@ -133,14 +133,14 @@ public class TgTmSetting {
     private List<TsurugiTmEventListener> eventListenerList = null;
 
     /**
-     * Tsurugi TransactionManager Settings
+     * Creates a new instance.
      */
     public TgTmSetting() {
         // do nothing
     }
 
     /**
-     * set transaction option supplier
+     * set transaction option supplier.
      *
      * @param txOptionSupplier transaction option supplier
      * @return this
@@ -151,7 +151,7 @@ public class TgTmSetting {
     }
 
     /**
-     * get transaction option supplier
+     * get transaction option supplier.
      *
      * @return transaction option supplier
      */
@@ -160,7 +160,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction label
+     * set transaction label.
      *
      * @param label label
      * @return this
@@ -171,7 +171,7 @@ public class TgTmSetting {
     }
 
     /**
-     * get transaction label
+     * get transaction label.
      *
      * @return label
      */
@@ -180,7 +180,7 @@ public class TgTmSetting {
     }
 
     /**
-     * get first transaction option
+     * get first transaction option.
      *
      * @param executeInfo {@link TgTmTxOptionSupplier#createExecuteInfo(int)}
      * @return transaction option
@@ -200,22 +200,22 @@ public class TgTmSetting {
     }
 
     /**
-     * get transaction option
+     * get transaction option.
      *
      * @param executeInfo {@link TgTmTxOptionSupplier#createExecuteInfo(int)}
      * @param attempt     attempt number
      * @param transaction transaction
-     * @param e           transaction exception
+     * @param exception   transaction exception
      * @return tm option
      * @throws IOException
      * @throws InterruptedException
      * @see TgTmTxOptionSupplier
      */
-    public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
+    public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (this.txOptionSupplier == null) {
             throw new IllegalStateException("txOptionSupplier is not specifed");
         }
-        var tmOption = txOptionSupplier.get(executeInfo, attempt, transaction, e);
+        var tmOption = txOptionSupplier.get(executeInfo, attempt, transaction, exception);
         if (tmOption.isExecute()) {
             var txOption = tmOption.getTransactionOption();
             if (txOption.label() == null && this.transactionLabel != null) {
@@ -226,7 +226,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set commit type
+     * set commit type.
      *
      * @param commitType commit type
      */
@@ -235,7 +235,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set commit type
+     * set commit type.
      *
      * @param commitType commit type
      * @return this
@@ -246,7 +246,7 @@ public class TgTmSetting {
     }
 
     /**
-     * get commit type
+     * get commit type.
      *
      * @param sessionOption session option
      * @return commit type
@@ -259,7 +259,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-begin-timeout
+     * set transaction-begin-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -269,7 +269,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-begin-timeout
+     * set transaction-begin-timeout.
      *
      * @param timeout time
      */
@@ -278,7 +278,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-begin-timeout
+     * set transaction-begin-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -290,7 +290,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-begin-timeout
+     * set transaction-begin-timeout.
      *
      * @param timeout time
      * @return this
@@ -301,7 +301,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-commit-timeout
+     * set transaction-commit-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -311,7 +311,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-commit-timeout
+     * set transaction-commit-timeout.
      *
      * @param timeout time
      */
@@ -320,7 +320,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-commit-timeout
+     * set transaction-commit-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -332,7 +332,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-commit-timeout
+     * set transaction-commit-timeout.
      *
      * @param timeout time
      * @return this
@@ -343,7 +343,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-rollback-timeout
+     * set transaction-rollback-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -353,7 +353,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-rollback-timeout
+     * set transaction-rollback-timeout.
      *
      * @param timeout time
      */
@@ -362,7 +362,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-rollback-timeout
+     * set transaction-rollback-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -374,7 +374,7 @@ public class TgTmSetting {
     }
 
     /**
-     * set transaction-rollback-timeout
+     * set transaction-rollback-timeout.
      *
      * @param timeout time
      * @return this
@@ -385,7 +385,7 @@ public class TgTmSetting {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -399,7 +399,7 @@ public class TgTmSetting {
     }
 
     /**
-     * get event listener
+     * get event listener.
      *
      * @return event listener
      */
@@ -408,7 +408,7 @@ public class TgTmSetting {
     }
 
     /**
-     * initialize transaction
+     * initialize transaction.
      *
      * @param transaction transaction
      */

@@ -16,7 +16,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeExcep
 import com.tsurugidb.tsubakuro.exception.ServerException;
 
 /**
- * Iceaxe Closeable set
+ * Iceaxe Closeable set.
  */
 @ThreadSafe
 public class IceaxeCloseableSet {
@@ -25,8 +25,8 @@ public class IceaxeCloseableSet {
     private final Set<AutoCloseable> closeableSet = new LinkedHashSet<>();
 
     /**
-     * add Closeable
-     * 
+     * add Closeable.
+     *
      * @param closeable Closeable
      */
     public synchronized void add(AutoCloseable closeable) {
@@ -34,8 +34,8 @@ public class IceaxeCloseableSet {
     }
 
     /**
-     * remove Closeable
-     * 
+     * remove Closeable.
+     *
      * @param closeable Closeable
      */
     public synchronized void remove(AutoCloseable closeable) {
@@ -43,8 +43,8 @@ public class IceaxeCloseableSet {
     }
 
     /**
-     * close all Closeable
-     * 
+     * close all Closeable.
+     *
      * @return Exception list if close error occurs
      */
     public synchronized List<Throwable> close() {
@@ -67,8 +67,8 @@ public class IceaxeCloseableSet {
     }
 
     /**
-     * close all Closeable
-     * 
+     * close all Closeable.
+     *
      * @throws IOException
      * @throws TsurugiTransactionException
      */

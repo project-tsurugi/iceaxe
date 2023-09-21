@@ -13,12 +13,15 @@ import com.tsurugidb.tsubakuro.explain.json.JsonPlanGraphLoader;
 import com.tsurugidb.tsubakuro.sql.StatementMetadata;
 
 /**
- * Tsurugi statement metadata
+ * Tsurugi statement metadata.
  */
 public class TgStatementMetadata {
 
+    /** SQL */
     protected final String source;
+    /** SQL arguments */
     protected final Object arguments;
+    /** low statement metadata */
     protected final StatementMetadata lowStatementMetadata;
 
     /**
@@ -26,7 +29,7 @@ public class TgStatementMetadata {
      *
      * @param source               SQL
      * @param arguments            SQL arguments
-     * @param lowStatementMetadata low StatementMetadata
+     * @param lowStatementMetadata low statement metadata
      */
     @IceaxeInternal
     public TgStatementMetadata(String source, @Nullable Object arguments, StatementMetadata lowStatementMetadata) {
@@ -47,6 +50,7 @@ public class TgStatementMetadata {
     /**
      * get arguments.
      *
+     * @param <P> parameter type
      * @return SQL arguments
      */
     public <P> @Nullable P getArguments() {
@@ -69,6 +73,11 @@ public class TgStatementMetadata {
         return loader.load(formatId, formatVersion, contents);
     }
 
+    /**
+     * Creates a new PlanGraphLoader instance.
+     *
+     * @return PlanGraphLoader
+     */
     protected PlanGraphLoader createPlanGraphLoader() {
         return JsonPlanGraphLoader.newBuilder().build();
     }

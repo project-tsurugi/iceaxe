@@ -10,14 +10,15 @@ import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * Tsurugi transaction option for {@link TsurugiTransactionManager}
+ * Tsurugi transaction option for {@link TsurugiTransactionManager}.
  */
 public final class TgTmTxOption {
 
     /**
      * Creates a new instance.
      *
-     * @param txOption transaction option, {@code null} if first transaction
+     * @param txOption         transaction option, {@code null} if first transaction
+     * @param retryInstruction retry instruction
      * @return tm option
      */
     public static TgTmTxOption execute(@Nonnull TgTxOption txOption, @Nullable TgTmRetryInstruction retryInstruction) {
@@ -25,8 +26,9 @@ public final class TgTmTxOption {
     }
 
     /**
-     * returns tm option for retry over
+     * returns tm option for retry over.
      *
+     * @param retryInstruction retry instruction
      * @return tm option
      */
     public static TgTmTxOption retryOver(@Nonnull TgTmRetryInstruction retryInstruction) {
@@ -34,8 +36,9 @@ public final class TgTmTxOption {
     }
 
     /**
-     * returns tm option for not retryable
+     * returns tm option for not retryable.
      *
+     * @param retryInstruction retry instruction
      * @return tm option
      */
     public static TgTmTxOption notRetryable(@Nonnull TgTmRetryInstruction retryInstruction) {
@@ -53,7 +56,7 @@ public final class TgTmTxOption {
     }
 
     /**
-     * get executable
+     * get executable.
      *
      * @return true: executable
      */
@@ -62,7 +65,7 @@ public final class TgTmTxOption {
     }
 
     /**
-     * get retry over
+     * get retry over.
      *
      * @return true: retry over
      */
@@ -71,7 +74,7 @@ public final class TgTmTxOption {
     }
 
     /**
-     * get transaction option
+     * get transaction option.
      *
      * @return transaction option
      */
@@ -80,7 +83,7 @@ public final class TgTmTxOption {
     }
 
     /**
-     * get retry instruction
+     * get retry instruction.
      *
      * @return retry instruction
      */

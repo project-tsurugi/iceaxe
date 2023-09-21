@@ -15,10 +15,10 @@ public interface TsurugiTmRetryPredicate {
      * Applies this function to the given arguments.
      *
      * @param transaction transaction
-     * @param e           exception
+     * @param exception   exception
      * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
-    TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException;
+    TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException;
 }

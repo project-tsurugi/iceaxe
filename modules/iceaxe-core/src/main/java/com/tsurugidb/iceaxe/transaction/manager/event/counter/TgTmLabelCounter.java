@@ -16,7 +16,7 @@ import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * {@link TsurugiTransactionManager} label counter
+ * {@link TsurugiTransactionManager} label counter.
  */
 @ThreadSafe
 public class TgTmLabelCounter implements TsurugiTmEventListener {
@@ -101,25 +101,49 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
         getOrCreate(label).incrementFailCount();
     }
 
+    /**
+     * get transaction label.
+     *
+     * @param transaction transaction
+     * @return transaction label
+     */
     protected String label(TsurugiTransaction transaction) {
         return label(transaction.getTransactionOption());
     }
 
+    /**
+     * get transaction label.
+     *
+     * @param txOption transaction option
+     * @return transaction label
+     */
     protected String label(TgTxOption txOption) {
         String label = txOption.label();
         return (label != null) ? label : "";
     }
 
+    /**
+     * get or create count.
+     *
+     * @param label transaction label
+     * @return count
+     */
     protected TgTmCountAtomic getOrCreate(String label) {
         return counterMap.computeIfAbsent(label, this::newTmCountAtomic);
     }
 
+    /**
+     * Creates a new count instance.
+     *
+     * @param label transaction label
+     * @return count
+     */
     protected TgTmCountAtomic newTmCountAtomic(String label) {
         return new TgTmCountAtomic();
     }
 
     /**
-     * get count map
+     * get count map.
      *
      * @return count map
      */
@@ -128,7 +152,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     }
 
     /**
-     * get count
+     * get count.
      *
      * @param label label
      * @return count
@@ -139,7 +163,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     }
 
     /**
-     * get count
+     * get count.
      *
      * @param labelPrefix label prefix
      * @return count
@@ -152,7 +176,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     }
 
     /**
-     * get count
+     * get count.
      *
      * @return count
      */
@@ -162,7 +186,7 @@ public class TgTmLabelCounter implements TsurugiTmEventListener {
     }
 
     /**
-     * reset count
+     * reset count.
      */
     @OverridingMethodsMustInvokeSuper
     public void reset() {

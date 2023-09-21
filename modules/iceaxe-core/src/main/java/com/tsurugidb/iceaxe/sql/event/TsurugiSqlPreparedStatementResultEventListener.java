@@ -11,7 +11,7 @@ import com.tsurugidb.iceaxe.sql.result.event.TsurugiStatementResultEventListener
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
- * {@link TsurugiSqlPreparedStatement} with {@link TsurugiStatementResult} event listener
+ * {@link TsurugiSqlPreparedStatement} with {@link TsurugiStatementResult} event listener.
  *
  * @param <P> parameter type
  */
@@ -54,7 +54,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
     }
 
     /**
-     * called when execute statement started
+     * called when execute statement started.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -66,7 +66,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
     }
 
     /**
-     * called when execute statement end
+     * called when execute statement end.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -79,7 +79,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
     }
 
     /**
-     * called when close result
+     * called when close result.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -92,7 +92,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
     }
 
     /**
-     * called when execute statement started
+     * called when execute statement started.
      *
      * @param transaction   transaction
      * @param ps            SQL definition
@@ -104,7 +104,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
     }
 
     /**
-     * called when execute statement end
+     * called when execute statement end.
      *
      * @param transaction   transaction
      * @param ps            SQL definition
@@ -117,7 +117,7 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
     }
 
     /**
-     * called when close result
+     * called when close result.
      *
      * @param transaction   transaction
      * @param ps            SQL definition

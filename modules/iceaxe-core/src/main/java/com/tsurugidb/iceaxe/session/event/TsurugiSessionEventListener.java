@@ -3,20 +3,20 @@ package com.tsurugidb.iceaxe.session.event;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 
 /**
- * {@link TsurugiSession} event listener
+ * {@link TsurugiSession} event listener.
  */
 public interface TsurugiSessionEventListener {
 
     /**
-     * called when create query
+     * called when create query.
      *
      * @param <R> result type
      * @param ps  query
@@ -26,7 +26,7 @@ public interface TsurugiSessionEventListener {
     }
 
     /**
-     * called when create prepared query
+     * called when create prepared query.
      *
      * @param <P> parameter type
      * @param <R> result type
@@ -37,7 +37,7 @@ public interface TsurugiSessionEventListener {
     }
 
     /**
-     * called when create statement
+     * called when create statement.
      *
      * @param ps statement
      */
@@ -46,7 +46,7 @@ public interface TsurugiSessionEventListener {
     }
 
     /**
-     * called when create prepared statement
+     * called when create prepared statement.
      *
      * @param <P> parameter type
      * @param ps  statement
@@ -56,7 +56,7 @@ public interface TsurugiSessionEventListener {
     }
 
     /**
-     * called when create transaction manager
+     * called when create transaction manager.
      *
      * @param tm transaction manager
      */
@@ -65,7 +65,7 @@ public interface TsurugiSessionEventListener {
     }
 
     /**
-     * called when create transaction
+     * called when create transaction.
      *
      * @param transaction transaction
      */
@@ -74,7 +74,7 @@ public interface TsurugiSessionEventListener {
     }
 
     /**
-     * called when close session
+     * called when close session.
      *
      * @param session  session
      * @param occurred exception

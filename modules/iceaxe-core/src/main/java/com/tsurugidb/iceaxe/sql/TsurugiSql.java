@@ -19,36 +19,44 @@ import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
- * Tsurugi SQL definition
+ * Tsurugi SQL definition.
  */
 public abstract class TsurugiSql implements AutoCloseable {
 
-    private static final AtomicInteger SQL_STATEMENT_COUNT = new AtomicInteger(0);
+    private static final AtomicInteger SQL_DEFINITION_COUNT = new AtomicInteger(0);
     private static final AtomicInteger SQL_EXECUTE_COUNT = new AtomicInteger(0);
 
     private final int iceaxeSqlId;
     private final TsurugiSession ownerSession;
+    /** SQL */
     protected final String sql;
     private IceaxeTimeout explainConnectTimeout;
     private IceaxeTimeout explainCloseTimeout;
     private boolean closed = false;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param session session
+     * @param sql     SQL
+     * @throws IOException
+     */
     protected TsurugiSql(@Nonnull TsurugiSession session, @Nonnull String sql) throws IOException {
-        this.iceaxeSqlId = SQL_STATEMENT_COUNT.incrementAndGet();
+        this.iceaxeSqlId = SQL_DEFINITION_COUNT.incrementAndGet();
         this.ownerSession = Objects.requireNonNull(session);
         this.sql = Objects.requireNonNull(sql);
         session.addChild(this);
     }
 
     /**
-     * is prepared
+     * is prepared.
      *
      * @return true: prepared
      */
     public abstract boolean isPrepared();
 
     /**
-     * get iceaxe sqlId
+     * get iceaxe sqlId.
      *
      * @return iceaxe sqlId
      */
@@ -56,10 +64,20 @@ public abstract class TsurugiSql implements AutoCloseable {
         return this.iceaxeSqlId;
     }
 
+    /**
+     * get session.
+     *
+     * @return session
+     */
     protected final TsurugiSession getSession() {
         return this.ownerSession;
     }
 
+    /**
+     * get session option.
+     *
+     * @return session option
+     */
     protected final TgSessionOption getSessionOption() {
         return ownerSession.getSessionOption();
     }
@@ -75,7 +93,7 @@ public abstract class TsurugiSql implements AutoCloseable {
     }
 
     /**
-     * set explain-connect-timeout
+     * set explain-connect-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -85,7 +103,7 @@ public abstract class TsurugiSql implements AutoCloseable {
     }
 
     /**
-     * set explain-connect-timeout
+     * set explain-connect-timeout.
      *
      * @param timeout time
      */
@@ -93,6 +111,11 @@ public abstract class TsurugiSql implements AutoCloseable {
         getExplainConnectTimeout().set(timeout);
     }
 
+    /**
+     * get explain-connect-timeout.
+     *
+     * @return timeout
+     */
     protected synchronized IceaxeTimeout getExplainConnectTimeout() {
         if (this.explainConnectTimeout == null) {
             var sessionOption = ownerSession.getSessionOption();
@@ -102,7 +125,7 @@ public abstract class TsurugiSql implements AutoCloseable {
     }
 
     /**
-     * set explain-close-timeout
+     * set explain-close-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -112,7 +135,7 @@ public abstract class TsurugiSql implements AutoCloseable {
     }
 
     /**
-     * set explain-close-timeout
+     * set explain-close-timeout.
      *
      * @param timeout time
      */
@@ -120,6 +143,11 @@ public abstract class TsurugiSql implements AutoCloseable {
         getExplainCloseTimeout().set(timeout);
     }
 
+    /**
+     * get explain-close-timeout.
+     *
+     * @return timeout
+     */
     protected synchronized IceaxeTimeout getExplainCloseTimeout() {
         if (this.explainCloseTimeout == null) {
             var sessionOption = ownerSession.getSessionOption();
@@ -128,10 +156,21 @@ public abstract class TsurugiSql implements AutoCloseable {
         return this.explainCloseTimeout;
     }
 
+    /**
+     * get new iceaxe SQL executeId.
+     *
+     * @return iceaxe SQL executeId
+     */
     protected final int getNewIceaxeSqlExecuteId() {
         return SQL_EXECUTE_COUNT.incrementAndGet();
     }
 
+    /**
+     * get convert type utility.
+     *
+     * @param primaryConvertUtil primary convert type utility
+     * @return convert type utility
+     */
     protected final IceaxeConvertUtil getConvertUtil(@Nullable IceaxeConvertUtil primaryConvertUtil) {
         var convertUtil = primaryConvertUtil;
         if (convertUtil == null) {
@@ -160,6 +199,11 @@ public abstract class TsurugiSql implements AutoCloseable {
         return this.closed;
     }
 
+    /**
+     * check close.
+     *
+     * @throws IOException
+     */
     protected void checkClose() throws IOException {
         if (isClosed()) {
             throw new TsurugiIOException(IceaxeErrorCode.PS_ALREADY_CLOSED);

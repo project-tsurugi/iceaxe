@@ -117,7 +117,7 @@ public class Example04TmSetting {
             }
 
             @Override
-            protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
+            protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException exception, TgTmRetryInstruction retryInstruction) {
                 // 2回目以降でリトライ可能な場合はlaterOptionでトランザクション実行
                 return TgTmTxOption.execute(laterTxOption, retryInstruction);
             }
@@ -128,7 +128,7 @@ public class Example04TmSetting {
 
     void supplierLog(TgTxOption txOption) {
         var supplier = TgTmTxOptionSupplier.ofAlways(txOption, Integer.MAX_VALUE);
-        supplier.setTmOptionListener((attempt, e, tmOption) -> {
+        supplier.setTmOptionListener((attempt, exception, tmOption) -> {
             if (attempt > 0 && tmOption.isExecute()) {
                 System.out.println("retry " + attempt);
             }
@@ -138,7 +138,7 @@ public class Example04TmSetting {
 
     void supplierLogFromSetting(TgTxOption txOption) {
         var setting = TgTmSetting.ofAlways(txOption);
-        setting.getTransactionOptionSupplier().setTmOptionListener((attempt, e, tmOption) -> {
+        setting.getTransactionOptionSupplier().setTmOptionListener((attempt, exception, tmOption) -> {
             if (attempt > 0 && tmOption.isExecute()) {
                 System.out.println("retry " + attempt);
             }

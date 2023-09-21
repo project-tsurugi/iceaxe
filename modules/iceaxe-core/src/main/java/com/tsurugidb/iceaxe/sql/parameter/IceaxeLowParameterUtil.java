@@ -25,10 +25,24 @@ public final class IceaxeLowParameterUtil {
         // do nothing
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, boolean value) {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable Boolean value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -36,10 +50,24 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, int value) {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable Integer value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -47,10 +75,24 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, long value) {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable Long value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -58,10 +100,24 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, float value) {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable Float value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -69,10 +125,24 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, double value) {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable Double value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -80,6 +150,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable BigDecimal value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -87,6 +164,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable String value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -94,6 +178,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable byte[] value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -101,6 +192,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable boolean[] value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -108,6 +206,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable LocalDate value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -115,6 +220,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable LocalTime value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -122,6 +234,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable LocalDateTime value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -129,6 +248,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable OffsetTime value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -136,6 +262,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable OffsetDateTime value) {
         if (value == null) {
             return Parameters.ofNull(name);
@@ -143,6 +276,13 @@ public final class IceaxeLowParameterUtil {
         return Parameters.of(name, value);
     }
 
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     */
     public static Parameter create(@Nonnull String name, @Nullable ZonedDateTime value) {
         if (value == null) {
             return Parameters.ofNull(name);

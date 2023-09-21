@@ -6,10 +6,17 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 
 /**
- * Tsurugi SQL (not prepared) statement
+ * Tsurugi SQL definition (not prepared).
  */
 public abstract class TsurugiSqlDirect extends TsurugiSql {
 
+    /**
+     * Creates a new instance.
+     *
+     * @param session session
+     * @param sql     SQL
+     * @throws IOException
+     */
     protected TsurugiSqlDirect(TsurugiSession session, String sql) throws IOException {
         super(session, sql);
     }

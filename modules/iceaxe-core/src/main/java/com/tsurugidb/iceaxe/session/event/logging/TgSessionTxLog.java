@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
- * Tsurugi transaction log
+ * Tsurugi transaction log.
  */
 public class TgSessionTxLog {
     private static final Logger LOG = LoggerFactory.getLogger(TgSessionTxLog.class);
@@ -31,7 +31,7 @@ public class TgSessionTxLog {
     private ZonedDateTime closeTime;
 
     /**
-     * set transaction
+     * set transaction.
      *
      * @param transaction transaction
      */
@@ -40,7 +40,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get transaction
+     * get transaction.
      *
      * @return transaction
      */
@@ -49,7 +49,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set transactionId
+     * set transactionId.
      *
      * @param transactionId transactionId
      */
@@ -58,7 +58,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set transactionId
+     * set transactionId.
      *
      * @return transactionId
      */
@@ -67,7 +67,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set transaction manager log
+     * set transaction manager log.
      *
      * @param tmLog transaction manager log
      */
@@ -76,7 +76,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get transaction manager log
+     * get transaction manager log.
      *
      * @return transaction manager log
      */
@@ -85,7 +85,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get new SQL execute log
+     * get new SQL execute log.
      *
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      * @return SQL execute log
@@ -102,7 +102,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * Creates a new SQL execute log instance
+     * Creates a new SQL execute log instance.
      *
      * @return SQL execute log
      */
@@ -111,7 +111,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get SQL execute log
+     * get SQL execute log.
      *
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      * @return SQL execute log
@@ -125,7 +125,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get and remove SQL execute log
+     * get and remove SQL execute log.
      *
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      * @return SQL execute log
@@ -135,7 +135,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set start time
+     * set start time.
      *
      * @param time start time
      */
@@ -144,7 +144,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get start time
+     * get start time.
      *
      * @return start time
      */
@@ -153,7 +153,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set low transaction get start time
+     * set low transaction get start time.
      *
      * @param time low transaction get start time
      */
@@ -162,7 +162,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get low transaction get start time
+     * get low transaction get start time.
      *
      * @return low transaction get start time
      */
@@ -171,7 +171,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set low transaction get end time
+     * set low transaction get end time.
      *
      * @param time low transaction get end time
      */
@@ -180,7 +180,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get low transaction get end time
+     * get low transaction get end time.
      *
      * @return low transaction get end time
      */
@@ -189,7 +189,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * Tsurugi transaction SQL execute log
+     * Tsurugi transaction SQL execute log.
      */
     public static class TgSessionTxExecuteLog {
         private int iceaxeTxExecuteId;
@@ -197,7 +197,7 @@ public class TgSessionTxLog {
         private ZonedDateTime endTime;
 
         /**
-         * set iceaxe tx executeId
+         * set iceaxe tx executeId.
          *
          * @param iceaxeTxExecuteId iceaxe tx executeId
          */
@@ -206,7 +206,7 @@ public class TgSessionTxLog {
         }
 
         /**
-         * get iceaxe tx executeId
+         * get iceaxe tx executeId.
          *
          * @return iceaxe tx executeId
          */
@@ -215,7 +215,7 @@ public class TgSessionTxLog {
         }
 
         /**
-         * set start time
+         * set start time.
          *
          * @param time start time
          */
@@ -224,7 +224,7 @@ public class TgSessionTxLog {
         }
 
         /**
-         * get start time
+         * get start time.
          *
          * @return start time
          */
@@ -233,7 +233,7 @@ public class TgSessionTxLog {
         }
 
         /**
-         * set end time
+         * set end time.
          *
          * @param time end time
          */
@@ -242,7 +242,7 @@ public class TgSessionTxLog {
         }
 
         /**
-         * get end time
+         * get end time.
          *
          * @return end time
          */
@@ -252,7 +252,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get new transaction SQL execute log
+     * get new transaction SQL execute log.
      *
      * @param iceaxeTxExecuteId iceaxe tx executeId
      * @return transaction SQL execute log
@@ -265,12 +265,17 @@ public class TgSessionTxLog {
         return exLog;
     }
 
+    /**
+     * Creates a new transaction SQL execute log instance.
+     *
+     * @return transaction SQL execute log
+     */
     protected TgSessionTxExecuteLog createTxExecutLog() {
         return new TgSessionTxExecuteLog();
     }
 
     /**
-     * get and remove transaction SQL execute log
+     * get and remove transaction SQL execute log.
      *
      * @param iceaxeTxExecuteId iceaxe tx executeId
      * @return transaction SQL execute log
@@ -280,7 +285,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set commit start time
+     * set commit start time.
      *
      * @param time commit start time
      */
@@ -289,7 +294,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set commit start time
+     * set commit start time.
      *
      * @return commit start time
      */
@@ -298,7 +303,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set commit end time
+     * set commit end time.
      *
      * @param time commit end time
      */
@@ -307,7 +312,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get commit end time
+     * get commit end time.
      *
      * @return commit end time
      */
@@ -316,7 +321,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set rollback start time
+     * set rollback start time.
      *
      * @param time rollback start time
      */
@@ -325,7 +330,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get rollback start time
+     * get rollback start time.
      *
      * @return rollback start time
      */
@@ -334,7 +339,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set rollback end time
+     * set rollback end time.
      *
      * @param time rollback end time
      */
@@ -343,7 +348,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get rollback end time
+     * get rollback end time.
      *
      * @return rollback end time
      */
@@ -352,7 +357,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * set close time
+     * set close time.
      *
      * @param time close time
      */
@@ -361,7 +366,7 @@ public class TgSessionTxLog {
     }
 
     /**
-     * get close time
+     * get close time.
      *
      * @return close time
      */

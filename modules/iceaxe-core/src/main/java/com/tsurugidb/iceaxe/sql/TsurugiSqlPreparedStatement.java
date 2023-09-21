@@ -21,7 +21,7 @@ import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi SQL prepared statement (insert/update/delete)
+ * Tsurugi SQL prepared statement (insert/update/delete).
  *
  * @param <P> parameter type
  */
@@ -45,7 +45,7 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -74,7 +74,7 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
     }
 
     /**
-     * execute statement
+     * execute statement.
      *
      * @param transaction Transaction
      * @param parameter   SQL parameter
@@ -109,7 +109,7 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
     }
 
     /**
-     * execute batch
+     * execute batch.
      *
      * @param transaction   Transaction
      * @param parameterList SQL parameter

@@ -13,12 +13,12 @@ import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 
 /**
- * diagnostic code provider
+ * diagnostic code provider.
  */
 public interface TsurugiDiagnosticCodeProvider {
 
     /**
-     * get diagnostic code
+     * get diagnostic code.
      *
      * @return diagnostic code (null if not found)
      */
@@ -27,7 +27,7 @@ public interface TsurugiDiagnosticCodeProvider {
     // utility
 
     /**
-     * get diagnostic code provider
+     * get diagnostic code provider.
      *
      * @param e Throwable
      * @return diagnostic code provider
@@ -51,22 +51,22 @@ public interface TsurugiDiagnosticCodeProvider {
     }
 
     /**
-     * create message
+     * create message.
      *
-     * @param e ServerException
+     * @param exception ServerException
      * @return message
      */
-    public static @Nullable String createMessage(ServerException e) {
-        var code = e.getDiagnosticCode();
+    public static @Nullable String createMessage(ServerException exception) {
+        var code = exception.getDiagnosticCode();
         if (code != null) {
-            return code.name() + ": " + e.getMessage();
+            return code.name() + ": " + exception.getMessage();
         } else {
-            return e.getMessage();
+            return exception.getMessage();
         }
     }
 
     /**
-     * create message
+     * create message.
      *
      * @param code diagnostic code
      * @return message
@@ -81,7 +81,7 @@ public interface TsurugiDiagnosticCodeProvider {
     // transaction information
 
     /**
-     * get iceaxe transactionId
+     * get iceaxe transactionId.
      *
      * @return iceaxe transactionId
      */
@@ -90,7 +90,7 @@ public interface TsurugiDiagnosticCodeProvider {
     }
 
     /**
-     * get iceaxe tm executeId
+     * get iceaxe tm executeId.
      *
      * @return iceaxe tm executeId
      */
@@ -99,7 +99,7 @@ public interface TsurugiDiagnosticCodeProvider {
     }
 
     /**
-     * get attempt number
+     * get attempt number.
      *
      * @return attempt number
      * @see TgTmTxOptionSupplier#get(int, TsurugiTransactionException)
@@ -109,7 +109,7 @@ public interface TsurugiDiagnosticCodeProvider {
     }
 
     /**
-     * get transaction option
+     * get transaction option.
      *
      * @return transaction option
      */
@@ -118,7 +118,7 @@ public interface TsurugiDiagnosticCodeProvider {
     }
 
     /**
-     * get transaction id
+     * get transaction id.
      *
      * @return transaction id
      */

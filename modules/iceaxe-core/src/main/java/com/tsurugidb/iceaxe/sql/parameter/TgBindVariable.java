@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,7 +16,7 @@ import javax.annotation.Nullable;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 
 /**
- * Tsurugi Bind Variable
+ * Tsurugi Bind Variable.
  *
  * @param <T> data type
  * @see TgBindVariables#of(TgBindVariable...)
@@ -23,7 +24,7 @@ import com.tsurugidb.iceaxe.sql.TgDataType;
 public abstract class TgBindVariable<T> {
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -33,16 +34,21 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;Boolean&gt;
+     * Tsurugi Bind Variable&lt;Boolean&gt;.
      */
     public static class TgBindVariableBoolean extends TgBindVariable<Boolean> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableBoolean(@Nonnull String name) {
             super(name, TgDataType.BOOLEAN);
         }
 
         /**
-         * bind value
+         * bind value.
          *
          * @param value value
          * @return bind parameter
@@ -63,7 +69,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -73,16 +79,21 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;Integer&gt;
+     * Tsurugi Bind Variable&lt;Integer&gt;.
      */
     public static class TgBindVariableInteger extends TgBindVariable<Integer> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableInteger(@Nonnull String name) {
             super(name, TgDataType.INT);
         }
 
         /**
-         * bind value
+         * bind value.
          *
          * @param value value
          * @return bind parameter
@@ -103,7 +114,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -113,16 +124,21 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;Long&gt;
+     * Tsurugi Bind Variable&lt;Long&gt;.
      */
     public static class TgBindVariableLong extends TgBindVariable<Long> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableLong(@Nonnull String name) {
             super(name, TgDataType.LONG);
         }
 
         /**
-         * bind value
+         * bind value.
          *
          * @param value value
          * @return bind parameter
@@ -143,7 +159,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -153,16 +169,21 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;Float&gt;
+     * Tsurugi Bind Variable&lt;Float&gt;.
      */
     public static class TgBindVariableFloat extends TgBindVariable<Float> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableFloat(@Nonnull String name) {
             super(name, TgDataType.FLOAT);
         }
 
         /**
-         * bind value
+         * bind value.
          *
          * @param value value
          * @return bind parameter
@@ -183,7 +204,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -193,16 +214,21 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;Double&gt;
+     * Tsurugi Bind Variable&lt;Double&gt;.
      */
     public static class TgBindVariableDouble extends TgBindVariable<Double> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableDouble(@Nonnull String name) {
             super(name, TgDataType.DOUBLE);
         }
 
         /**
-         * bind value
+         * bind value.
          *
          * @param value value
          * @return bind parameter
@@ -223,7 +249,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable (don't round)
@@ -233,7 +259,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name  name
      * @param scale rounding scale. see {@link TgBindVariableBigDecimal#DEFAULT_ROUNDING_MODE}
@@ -244,7 +270,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name  name
      * @param scale rounding scale
@@ -256,7 +282,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;BigDecimal&gt;
+     * Tsurugi Bind Variable&lt;BigDecimal&gt;.
      */
     public static class TgBindVariableBigDecimal extends TgBindVariable<BigDecimal> {
 
@@ -270,10 +296,22 @@ public abstract class TgBindVariable<T> {
         private final int scale;
         private RoundingMode roundingMode;
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableBigDecimal(@Nonnull String name) {
             this(name, Integer.MAX_VALUE, null);
         }
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name  name
+         * @param scale scale
+         * @param mode  rounding mode
+         */
         protected TgBindVariableBigDecimal(@Nonnull String name, int scale, @Nullable RoundingMode mode) {
             super(name, TgDataType.DECIMAL);
             this.scale = scale;
@@ -300,7 +338,7 @@ public abstract class TgBindVariable<T> {
         }
 
         /**
-         * bind value
+         * bind value.
          *
          * @param value value
          * @return bind parameter
@@ -310,7 +348,7 @@ public abstract class TgBindVariable<T> {
         }
 
         /**
-         * bind value
+         * bind value.
          *
          * @param value value
          * @return bind parameter
@@ -325,7 +363,7 @@ public abstract class TgBindVariable<T> {
         }
 
         /**
-         * round value
+         * round value.
          *
          * @param value        value
          * @param scale        scale
@@ -356,7 +394,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -366,10 +404,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;String&gt;
+     * Tsurugi Bind Variable&lt;String&gt;.
      */
     public static class TgBindVariableString extends TgBindVariable<String> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableString(@Nonnull String name) {
             super(name, TgDataType.STRING);
         }
@@ -386,7 +429,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -396,10 +439,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;byte[]&gt;
+     * Tsurugi Bind Variable&lt;byte[]&gt;.
      */
     public static class TgBindVariableBytes extends TgBindVariable<byte[]> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableBytes(@Nonnull String name) {
             super(name, TgDataType.BYTES);
         }
@@ -416,7 +464,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -426,10 +474,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;boolean[]&gt;
+     * Tsurugi Bind Variable&lt;boolean[]&gt;.
      */
     public static class TgBindVariableBits extends TgBindVariable<boolean[]> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableBits(@Nonnull String name) {
             super(name, TgDataType.BITS);
         }
@@ -446,7 +499,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -456,10 +509,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;LocalDate&gt;
+     * Tsurugi Bind Variable&lt;LocalDate&gt;.
      */
     public static class TgBindVariableLocalDate extends TgBindVariable<LocalDate> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableLocalDate(@Nonnull String name) {
             super(name, TgDataType.DATE);
         }
@@ -476,7 +534,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -486,10 +544,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;LocalTime&gt;
+     * Tsurugi Bind Variable&lt;LocalTime&gt;.
      */
     public static class TgBindVariableLocalTime extends TgBindVariable<LocalTime> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableLocalTime(@Nonnull String name) {
             super(name, TgDataType.TIME);
         }
@@ -506,7 +569,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -516,10 +579,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;LocalDateTime&gt;
+     * Tsurugi Bind Variable&lt;LocalDateTime&gt;.
      */
     public static class TgBindVariableLocalDateTime extends TgBindVariable<LocalDateTime> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableLocalDateTime(@Nonnull String name) {
             super(name, TgDataType.DATE_TIME);
         }
@@ -536,7 +604,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -546,10 +614,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;OffsetTime&gt;
+     * Tsurugi Bind Variable&lt;OffsetTime&gt;.
      */
     public static class TgBindVariableOffsetTime extends TgBindVariable<OffsetTime> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableOffsetTime(@Nonnull String name) {
             super(name, TgDataType.OFFSET_TIME);
         }
@@ -566,7 +639,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -576,10 +649,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;OffsetDateTime&gt;
+     * Tsurugi Bind Variable&lt;OffsetDateTime&gt;.
      */
     public static class TgBindVariableOffsetDateTime extends TgBindVariable<OffsetDateTime> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableOffsetDateTime(@Nonnull String name) {
             super(name, TgDataType.OFFSET_DATE_TIME);
         }
@@ -596,7 +674,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * create bind variable
+     * create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -606,10 +684,15 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * Tsurugi Bind Variable&lt;ZonedDateTime&gt;
+     * Tsurugi Bind Variable&lt;ZonedDateTime&gt;.
      */
     public static class TgBindVariableZonedDateTime extends TgBindVariable<ZonedDateTime> {
 
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
         protected TgBindVariableZonedDateTime(@Nonnull String name) {
             super(name, TgDataType.ZONED_DATE_TIME);
         }
@@ -628,13 +711,19 @@ public abstract class TgBindVariable<T> {
     private final String name;
     private final TgDataType type;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param name name
+     * @param type type
+     */
     protected TgBindVariable(@Nonnull String name, @Nonnull TgDataType type) {
-        this.name = name;
-        this.type = type;
+        this.name = Objects.requireNonNull(name);
+        this.type = Objects.requireNonNull(type);
     }
 
     /**
-     * get name
+     * get name.
      *
      * @return name
      */
@@ -643,16 +732,16 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * get name
+     * get SQL name.
      *
-     * @return name
+     * @return SQL name
      */
     public @Nonnull String sqlName() {
         return ":" + this.name;
     }
 
     /**
-     * get type
+     * get type.
      *
      * @return type
      */
@@ -661,7 +750,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * bind value
+     * bind value.
      *
      * @param value value
      * @return bind parameter
@@ -669,7 +758,7 @@ public abstract class TgBindVariable<T> {
     public abstract @Nonnull TgBindParameter bind(@Nullable T value);
 
     /**
-     * copy with the same type
+     * copy with the same type.
      *
      * @param name name
      * @return bind variable
@@ -681,6 +770,11 @@ public abstract class TgBindVariable<T> {
         return sqlName() + "/*" + typeComment() + "*/";
     }
 
+    /**
+     * get type comment.
+     *
+     * @return comment
+     */
     protected String typeComment() {
         return String.valueOf(type);
     }

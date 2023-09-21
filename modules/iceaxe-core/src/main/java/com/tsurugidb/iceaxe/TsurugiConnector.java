@@ -24,13 +24,13 @@ import com.tsurugidb.tsubakuro.common.SessionBuilder;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi Connector
+ * Tsurugi Connector.
  */
 public class TsurugiConnector {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiConnector.class);
 
     /**
-     * create connector
+     * create connector.
      *
      * @param endpoint the end-point URI
      * @return connector
@@ -41,7 +41,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * create connector
+     * create connector.
      *
      * @param endpoint the end-point URI
      * @return connector
@@ -51,7 +51,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * create connector
+     * create connector.
      *
      * @param endpoint   the end-point URI
      * @param credential credential. if null, use NullCredential
@@ -63,7 +63,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * create connector
+     * create connector.
      *
      * @param endpoint   the end-point URI
      * @param credential credential. if null, use NullCredential
@@ -74,7 +74,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * create connector
+     * create connector.
      *
      * @param endpoint      the end-point URI
      * @param credential    credential. if null, use NullCredential
@@ -87,7 +87,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * create connector
+     * create connector.
      *
      * @param endpoint      the end-point URI
      * @param credential    credential. if null, use NullCredential
@@ -106,6 +106,7 @@ public class TsurugiConnector {
         return connector;
     }
 
+    /** low connector */
     protected final Connector lowConnector;
     private final URI endpoint;
     private final Credential defaultCredential;
@@ -113,6 +114,14 @@ public class TsurugiConnector {
     private List<Consumer<TsurugiSession>> eventListenerList = null;
     private TsurugiSessionTxFileLogConfig txFileLogConfig = TsurugiSessionTxFileLogConfig.DEFAULT;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param lowConnector         low connector
+     * @param endpoint             end-point
+     * @param defaultCredential    default credential
+     * @param defaultSessionOption default session option
+     */
     protected TsurugiConnector(Connector lowConnector, URI endpoint, Credential defaultCredential, TgSessionOption defaultSessionOption) {
         this.lowConnector = lowConnector;
         this.endpoint = endpoint;
@@ -121,7 +130,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * get end-point
+     * get end-point.
      *
      * @return end-point URI
      */
@@ -130,7 +139,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * get session option
+     * get session option.
      *
      * @return session option
      */
@@ -139,7 +148,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -161,7 +170,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * set {@link TsurugiSessionTxFileLogger} config
+     * set {@link TsurugiSessionTxFileLogger} config.
      *
      * @param config config
      */
@@ -170,7 +179,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * create session
+     * create session.
      *
      * @return session
      * @throws IOException
@@ -180,7 +189,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * create session
+     * create session.
      *
      * @param credential credential
      * @return session
@@ -191,7 +200,7 @@ public class TsurugiConnector {
     }
 
     /**
-     * create session
+     * create session.
      *
      * @param sessionOption session option
      * @return session
@@ -202,8 +211,9 @@ public class TsurugiConnector {
     }
 
     /**
-     * create session
+     * create session.
      *
+     * @param credential    credential
      * @param sessionOption session option
      * @return session
      * @throws IOException
@@ -222,6 +232,14 @@ public class TsurugiConnector {
         return session;
     }
 
+    /**
+     * create low session.
+     *
+     * @param credential    credential
+     * @param sessionOption session option
+     * @return future of session
+     * @throws IOException
+     */
     protected FutureResponse<? extends Session> createLowSession(@Nullable Credential credential, TgSessionOption sessionOption) throws IOException {
         var lowBuilder = SessionBuilder.connect(lowConnector);
 

@@ -21,7 +21,7 @@ import com.tsurugidb.tsubakuro.sql.TableMetadata;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi table metadata helper
+ * Tsurugi table metadata helper.
  */
 public class TsurugiTableMetadataHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTableMetadataHelper.class);
@@ -29,7 +29,7 @@ public class TsurugiTableMetadataHelper {
     private TsurugiExceptionUtil exceptionUtil = TsurugiExceptionUtil.getInstance();
 
     /**
-     * set exception utility
+     * set exception utility.
      *
      * @param execptionUtil exception utility
      */
@@ -37,6 +37,11 @@ public class TsurugiTableMetadataHelper {
         this.exceptionUtil = Objects.requireNonNull(execptionUtil);
     }
 
+    /**
+     * get exception utility.
+     *
+     * @return exception utility
+     */
     protected TsurugiExceptionUtil getExceptionUtil() {
         return this.exceptionUtil;
     }
@@ -58,10 +63,28 @@ public class TsurugiTableMetadataHelper {
         return findTableMetadata(session, tableName, lowTableMetadataFuture);
     }
 
+    /**
+     * get low table metadata.
+     *
+     * @param lowSqlClient low SQL client
+     * @param tableName    table name
+     * @return future of table metadata
+     * @throws IOException
+     */
     protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
         return lowSqlClient.getTableMetadata(tableName);
     }
 
+    /**
+     * get table metadata.
+     *
+     * @param session                tsurugi session
+     * @param tableName              table name
+     * @param lowTableMetadataFuture future of table metadata
+     * @return table metadata
+     * @throws IOException
+     * @throws InterruptedException
+     */
     protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException, InterruptedException {
         try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {
 
@@ -83,14 +106,32 @@ public class TsurugiTableMetadataHelper {
         }
     }
 
+    /**
+     * get connect timeout.
+     *
+     * @param sessionOption session option
+     * @return timeout
+     */
     protected IceaxeTimeout getConnectTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CONNECT);
     }
 
+    /**
+     * get close timeout.
+     *
+     * @param sessionOption session option
+     * @return timeout
+     */
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CLOSE);
     }
 
+    /**
+     * Creates a new table metadata instance.
+     *
+     * @param lowTableMetadata low table metadata
+     * @return table metadata
+     */
     protected TgTableMetadata newTableMetadata(TableMetadata lowTableMetadata) {
         return new TgTableMetadata(lowTableMetadata);
     }

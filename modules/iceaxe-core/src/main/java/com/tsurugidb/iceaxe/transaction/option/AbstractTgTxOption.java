@@ -9,7 +9,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 
 /**
- * Tsurugi Transaction Option (common)
+ * Tsurugi Transaction Option (common).
  *
  * @param <T> concrete class
  */
@@ -20,6 +20,11 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
 
     private TransactionOption lowTransactionOption;
 
+    /**
+     * returns this.
+     *
+     * @return this
+     */
     protected final T self() {
         @SuppressWarnings("unchecked")
         var r = (T) this;
@@ -38,6 +43,9 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
         return this.label;
     }
 
+    /**
+     * clear low transaction option.
+     */
     protected final void resetTransactionOption() {
         this.lowTransactionOption = null;
     }
@@ -52,6 +60,11 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
         return this.lowTransactionOption;
     }
 
+    /**
+     * initialize low transaction option.
+     *
+     * @param lowBuilder low transaction option builder
+     */
     @OverridingMethodsMustInvokeSuper
     protected void initializeLowTransactionOption(TransactionOption.Builder lowBuilder) {
         var lowType = type();
@@ -84,6 +97,12 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
         return txOption;
     }
 
+    /**
+     * fill from other transaction option.
+     *
+     * @param txOption source transaction option
+     * @return this
+     */
     @OverridingMethodsMustInvokeSuper
     protected T fillFrom(@Nonnull TgTxOption txOption) {
         label(txOption.label());
@@ -118,11 +137,23 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
         return sb.toString();
     }
 
+    /**
+     * append string.
+     *
+     * @param sb target string builder
+     */
     @OverridingMethodsMustInvokeSuper
     protected void toString(StringBuilder sb) {
         appendString(sb, "label", label);
     }
 
+    /**
+     * append string.
+     *
+     * @param sb    target string builder
+     * @param name  option name
+     * @param value option value
+     */
     protected final void appendString(StringBuilder sb, String name, Object value) {
         if (value != null) {
             if (sb.charAt(sb.length() - 1) != '{') {

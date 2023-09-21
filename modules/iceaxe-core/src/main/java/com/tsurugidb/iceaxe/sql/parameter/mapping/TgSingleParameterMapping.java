@@ -23,14 +23,14 @@ import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 import com.tsurugidb.tsubakuro.sql.Placeholders;;
 
 /**
- * Tsurugi Parameter Mapping for single variable
+ * Tsurugi Parameter Mapping for single variable.
  *
  * @param <P> parameter type (e.g. Integer, String)
  */
 public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -40,7 +40,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -50,7 +50,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -60,7 +60,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -70,7 +70,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -80,7 +80,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -90,9 +90,10 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
-     * @param name bind variable name
+     * @param name  bind variable name
+     * @param scale scale
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<BigDecimal> ofDecimal(String name, int scale) {
@@ -100,9 +101,11 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
-     * @param name bind variable name
+     * @param name  bind variable name
+     * @param scale scale
+     * @param mode  rounding mode
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<BigDecimal> ofDecimal(String name, int scale, RoundingMode mode) {
@@ -110,7 +113,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -120,7 +123,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -130,7 +133,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -140,7 +143,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -150,7 +153,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -160,7 +163,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -170,7 +173,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -180,7 +183,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -190,7 +193,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param name bind variable name
      * @return parameter mapping
@@ -200,7 +203,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param <P>   parameter type
      * @param name  bind variable name
@@ -218,7 +221,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param <P>  parameter type
      * @param name bind variable name
@@ -269,7 +272,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create parameter mapping
+     * create parameter mapping.
      *
      * @param <P>      parameter type
      * @param variable bind variable
@@ -284,7 +287,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     private final BiFunction<String, P, Parameter> lowParameterGenerator;
 
     /**
-     * Tsurugi Parameter Mapping for single variable
+     * Creates a new instance.
      *
      * @param name      bind variable name
      * @param type      parameter type

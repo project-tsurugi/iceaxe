@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.concurrent.ThreadSafe;
 
 /**
- * {@link TgTmCount} implemented by AtomicInteger
+ * {@link TgTmCount} implemented by AtomicInteger.
  */
 @ThreadSafe
 public class TgTmCountAtomic implements TgTmCount {
@@ -23,77 +23,77 @@ public class TgTmCountAtomic implements TgTmCount {
     private final AtomicInteger failCount = new AtomicInteger(0);
 
     /**
-     * increment execute count
+     * increment execute count.
      */
     public void incrementExecuteCount() {
         executeCount.incrementAndGet();
     }
 
     /**
-     * increment transaction count
+     * increment transaction count.
      */
     public void incrementTransactionCount() {
         transactionCount.incrementAndGet();
     }
 
     /**
-     * increment exception count
+     * increment exception count.
      */
     public void incrementExceptionCount() {
         exceptionCount.incrementAndGet();
     }
 
     /**
-     * increment retry count
+     * increment retry count.
      */
     public void incrementRetryCount() {
         retryCount.incrementAndGet();
     }
 
     /**
-     * increment retry-over count
+     * increment retry-over count.
      */
     public void incrementRetryOverCount() {
         retryOverCount.incrementAndGet();
     }
 
     /**
-     * increment before-commit count
+     * increment before-commit count.
      */
     public void incrementBeforeCommitCount() {
         beforeCommitCount.incrementAndGet();
     }
 
     /**
-     * increment commit count
+     * increment commit count.
      */
     public void incrementCommitCount() {
         commitCount.incrementAndGet();
     }
 
     /**
-     * increment rollback count
+     * increment rollback count.
      */
     public void incrementRollbackCount() {
         rollbackCount.incrementAndGet();
     }
 
     /**
-     * increment success(commit) count
+     * increment success(commit) count.
      */
     public void incrementSuccessCommitCount() {
         successCommitCount.incrementAndGet();
     }
 
     /**
-     * increment success(rollback) count
+     * increment success(rollback) count.
      */
     public void incrementSuccessRollbackCount() {
         successRollbackCount.incrementAndGet();
     }
 
     /**
-     * increment fail count
+     * increment fail count.
      */
     public void incrementFailCount() {
         failCount.incrementAndGet();
@@ -155,7 +155,7 @@ public class TgTmCountAtomic implements TgTmCount {
     }
 
     /**
-     * clear count
+     * clear count.
      */
     public void clear() {
         executeCount.set(0);

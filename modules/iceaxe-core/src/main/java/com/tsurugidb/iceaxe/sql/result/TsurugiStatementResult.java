@@ -25,7 +25,7 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi SQL Result for insert/update/delete
+ * Tsurugi SQL Result for insert/update/delete.
  *
  * @see TsurugiSqlStatement#execute(TsurugiTransaction)
  * @see TsurugiSqlPreparedStatement#execute(TsurugiTransaction, Object)
@@ -66,16 +66,17 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     }
 
     /**
-     * set check-timeout
+     * set check-timeout.
      *
-     * @param timeout time
+     * @param time timeout time
+     * @param unit timeout unit
      */
     public void setCheckTimeout(long time, TimeUnit unit) {
         setCheckTimeout(TgTimeValue.of(time, unit));
     }
 
     /**
-     * set check-timeout
+     * set check-timeout.
      *
      * @param timeout time
      */
@@ -84,7 +85,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     }
 
     /**
-     * set close-timeout
+     * set close-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -94,7 +95,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     }
 
     /**
-     * set close-timeout
+     * set close-timeout.
      *
      * @param timeout time
      */
@@ -105,7 +106,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -133,6 +134,13 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         }
     }
 
+    /**
+     * check low result.
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected final synchronized void checkLowResult() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.lowResultFuture != null) {
             LOG.trace("lowResult get start");
@@ -158,7 +166,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     }
 
     /**
-     * get count
+     * get count.
      *
      * @return the row count for SQL Data Manipulation Language (DML) statements
      * @throws IOException

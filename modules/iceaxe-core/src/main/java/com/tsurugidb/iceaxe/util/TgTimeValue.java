@@ -5,14 +5,14 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * time
+ * Iceaxe time.
  */
 @Immutable
-public class TgTimeValue { // record
+public /* record */ class TgTimeValue {
 
     /**
-     * create time
-     * 
+     * create time.
+     *
      * @param value time value
      * @param unit  time unit
      * @return time
@@ -25,8 +25,8 @@ public class TgTimeValue { // record
     private final TimeUnit unit;
 
     /**
-     * time
-     * 
+     * Creates a new instance.
+     *
      * @param value time value
      * @param unit  time unit
      */
@@ -36,8 +36,8 @@ public class TgTimeValue { // record
     }
 
     /**
-     * get time value
-     * 
+     * get time value.
+     *
      * @return time value
      */
     public long value() {
@@ -45,8 +45,8 @@ public class TgTimeValue { // record
     }
 
     /**
-     * get time unit
-     * 
+     * get time unit.
+     *
      * @return time unit
      */
     public TimeUnit unit() {

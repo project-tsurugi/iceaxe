@@ -20,7 +20,7 @@ import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
- * Tsurugi Session Option
+ * Tsurugi Session Option.
  *
  * @see TsurugiConnector#createSession(TgSessionOption)
  */
@@ -28,7 +28,7 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
 public class TgSessionOption {
 
     /**
-     * create session option
+     * create session option.
      *
      * @return session option
      */
@@ -37,7 +37,7 @@ public class TgSessionOption {
     }
 
     /**
-     * timeout key
+     * timeout key.
      */
     public enum TgTimeoutKey {
         /** default */
@@ -95,14 +95,14 @@ public class TgSessionOption {
     private TgCommitType commitType = TgCommitType.DEFAULT;
 
     /**
-     * Tsurugi Session Option
+     * Tsurugi Session Option.
      */
     public TgSessionOption() {
         timeoutMap.put(TgTimeoutKey.DEFAULT, TgTimeValue.of(Long.MAX_VALUE, TimeUnit.NANOSECONDS));
     }
 
     /**
-     * set session label
+     * set session label.
      *
      * @param label session label
      * @return this
@@ -113,7 +113,7 @@ public class TgSessionOption {
     }
 
     /**
-     * get session label
+     * get session label.
      *
      * @return session label
      */
@@ -122,7 +122,7 @@ public class TgSessionOption {
     }
 
     /**
-     * set timeout
+     * set timeout.
      *
      * @param key  timeout key
      * @param time timeout time
@@ -136,7 +136,7 @@ public class TgSessionOption {
     }
 
     /**
-     * get timeout time
+     * get timeout time.
      *
      * @param key timeout key
      * @return time
@@ -150,7 +150,7 @@ public class TgSessionOption {
     }
 
     /**
-     * set commit type
+     * set commit type.
      *
      * @param commitType commit type
      * @return this
@@ -161,7 +161,7 @@ public class TgSessionOption {
     }
 
     /**
-     * get commit type
+     * get commit type.
      *
      * @return commit type
      */

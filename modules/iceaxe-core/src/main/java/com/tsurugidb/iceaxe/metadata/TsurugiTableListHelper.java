@@ -15,16 +15,16 @@ import com.tsurugidb.tsubakuro.sql.TableList;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi table list helper
+ * Tsurugi table list helper.
  */
 public class TsurugiTableListHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTableListHelper.class);
 
     /**
-     * get table metadata.
+     * get table list.
      *
      * @param session tsurugi session
-     * @return table metadata
+     * @return table list
      * @throws IOException
      * @throws InterruptedException
      */
@@ -36,10 +36,26 @@ public class TsurugiTableListHelper {
         return getTableList(session, lowTableListFuture);
     }
 
+    /**
+     * get low table list.
+     *
+     * @param lowSqlClient low SQL client
+     * @return future of table list
+     * @throws IOException
+     */
     protected FutureResponse<TableList> getLowTableList(SqlClient lowSqlClient) throws IOException {
         return lowSqlClient.listTables();
     }
 
+    /**
+     * get table list.
+     *
+     * @param session            tsurugi session
+     * @param lowTableListFuture future of low table list
+     * @return table list
+     * @throws IOException
+     * @throws InterruptedException
+     */
     protected TgTableList getTableList(TsurugiSession session, FutureResponse<TableList> lowTableListFuture) throws IOException, InterruptedException {
         try (var closeable = IceaxeIoUtil.closeable(lowTableListFuture)) {
 
@@ -55,14 +71,32 @@ public class TsurugiTableListHelper {
         }
     }
 
+    /**
+     * get connect timeout.
+     *
+     * @param sessionOption session option
+     * @return timeout
+     */
     protected IceaxeTimeout getConnectTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_LIST_CONNECT);
     }
 
+    /**
+     * get close timeout.
+     *
+     * @param sessionOption session option
+     * @return timeout
+     */
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_LIST_CLOSE);
     }
 
+    /**
+     * Creates a new table list instance.
+     *
+     * @param lowTableList low table list
+     * @return table list
+     */
     protected TgTableList newTableList(TableList lowTableList) {
         return new TgTableList(lowTableList);
     }

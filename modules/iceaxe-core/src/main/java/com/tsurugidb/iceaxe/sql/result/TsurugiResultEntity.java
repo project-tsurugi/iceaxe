@@ -23,13 +23,13 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 
 /**
- * Tsurugi Result Record
+ * Tsurugi Result Record.
  */
 @ThreadSafe
 public class TsurugiResultEntity {
 
     /**
-     * create entity
+     * create entity.
      *
      * @param record Tsurugi Result Record
      * @return entity
@@ -54,7 +54,7 @@ public class TsurugiResultEntity {
     private List<String> nameList;
 
     /**
-     * set convert type utility
+     * set convert type utility.
      *
      * @param convertUtil convert type utility
      */
@@ -62,12 +62,18 @@ public class TsurugiResultEntity {
         this.convertUtil = convertUtil;
     }
 
+    /**
+     * add value.
+     *
+     * @param name  column name
+     * @param value column value
+     */
     protected void add(String name, Object value) {
         valueMap.put(name, value);
     }
 
     /**
-     * get column name list
+     * get column name list.
      *
      * @return list of column name
      */
@@ -80,7 +86,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column name
+     * get column name.
      *
      * @param index column index
      * @return column name
@@ -90,6 +96,12 @@ public class TsurugiResultEntity {
         return getNameList().get(index);
     }
 
+    /**
+     * get column value.
+     *
+     * @param name column name
+     * @return column value
+     */
     protected @Nullable Object getValue(String name) {
         var value = valueMap.get(name);
         if (value == null) {
@@ -103,7 +115,7 @@ public class TsurugiResultEntity {
     // boolean
 
     /**
-     * get column value as boolean
+     * get column value as boolean.
      *
      * @param name column name
      * @return column value
@@ -116,7 +128,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as boolean
+     * get column value as boolean.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -131,7 +143,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as boolean
+     * get column value as boolean.
      *
      * @param name column name
      * @return column value
@@ -142,7 +154,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as boolean
+     * get column value as boolean.
      *
      * @param name column name
      * @return column value
@@ -155,7 +167,7 @@ public class TsurugiResultEntity {
     // int
 
     /**
-     * get column value as int
+     * get column value as int.
      *
      * @param name column name
      * @return column value
@@ -168,7 +180,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as int
+     * get column value as int.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -183,7 +195,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as int
+     * get column value as int.
      *
      * @param name column name
      * @return column value
@@ -194,7 +206,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as int
+     * get column value as int.
      *
      * @param name column name
      * @return column value
@@ -207,7 +219,7 @@ public class TsurugiResultEntity {
     // long
 
     /**
-     * get column value as long
+     * get column value as long.
      *
      * @param name column name
      * @return column value
@@ -220,7 +232,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as long
+     * get column value as long.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -235,7 +247,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as long
+     * get column value as long.
      *
      * @param name column name
      * @return column value
@@ -246,7 +258,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as long
+     * get column value as long.
      *
      * @param name column name
      * @return column value
@@ -259,7 +271,7 @@ public class TsurugiResultEntity {
     // float
 
     /**
-     * get column value as float
+     * get column value as float.
      *
      * @param name column name
      * @return column value
@@ -272,7 +284,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as float
+     * get column value as float.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -287,7 +299,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as float
+     * get column value as float.
      *
      * @param name column name
      * @return column value
@@ -298,7 +310,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as float
+     * get column value as float.
      *
      * @param name column name
      * @return column value
@@ -311,7 +323,7 @@ public class TsurugiResultEntity {
     // double
 
     /**
-     * get column value as double
+     * get column value as double.
      *
      * @param name column name
      * @return column value
@@ -324,7 +336,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as double
+     * get column value as double.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -339,7 +351,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as double
+     * get column value as double.
      *
      * @param name column name
      * @return column value
@@ -350,7 +362,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as double
+     * get column value as double.
      *
      * @param name column name
      * @return column value
@@ -363,7 +375,7 @@ public class TsurugiResultEntity {
     // decimal
 
     /**
-     * get column value as decimal
+     * get column value as decimal.
      *
      * @param name column name
      * @return column value
@@ -376,7 +388,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as decimal
+     * get column value as decimal.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -391,7 +403,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as decimal
+     * get column value as decimal.
      *
      * @param name column name
      * @return column value
@@ -402,7 +414,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as decimal
+     * get column value as decimal.
      *
      * @param name column name
      * @return column value
@@ -415,7 +427,7 @@ public class TsurugiResultEntity {
     // string
 
     /**
-     * get column value as String
+     * get column value as String.
      *
      * @param name column name
      * @return column value
@@ -428,7 +440,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as String
+     * get column value as String.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -443,7 +455,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as String
+     * get column value as String.
      *
      * @param name column name
      * @return column value
@@ -454,7 +466,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as String
+     * get column value as String.
      *
      * @param name column name
      * @return column value
@@ -467,7 +479,7 @@ public class TsurugiResultEntity {
     // byte[]
 
     /**
-     * get column value as byte[]
+     * get column value as byte[].
      *
      * @param name column name
      * @return column value
@@ -480,7 +492,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as byte[]
+     * get column value as byte[].
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -495,7 +507,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as byte[]
+     * get column value as byte[].
      *
      * @param name column name
      * @return column value
@@ -506,7 +518,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as byte[]
+     * get column value as byte[].
      *
      * @param name column name
      * @return column value
@@ -519,7 +531,7 @@ public class TsurugiResultEntity {
     // boolean[]
 
     /**
-     * get column value as boolean[]
+     * get column value as boolean[].
      *
      * @param name column name
      * @return column value
@@ -532,7 +544,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as boolean[]
+     * get column value as boolean[].
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -547,7 +559,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as boolean[]
+     * get column value as boolean[].
      *
      * @param name column name
      * @return column value
@@ -558,7 +570,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as boolean[]
+     * get column value as boolean[].
      *
      * @param name column name
      * @return column value
@@ -571,7 +583,7 @@ public class TsurugiResultEntity {
     // date
 
     /**
-     * get column value as date
+     * get column value as date.
      *
      * @param name column name
      * @return column value
@@ -584,7 +596,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as date
+     * get column value as date.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -599,7 +611,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as date
+     * get column value as date.
      *
      * @param name column name
      * @return column value
@@ -610,7 +622,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as date
+     * get column value as date.
      *
      * @param name column name
      * @return column value
@@ -623,7 +635,7 @@ public class TsurugiResultEntity {
     // time
 
     /**
-     * get column value as time
+     * get column value as time.
      *
      * @param name column name
      * @return column value
@@ -636,7 +648,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as time
+     * get column value as time.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -651,7 +663,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as time
+     * get column value as time.
      *
      * @param name column name
      * @return column value
@@ -662,7 +674,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as time
+     * get column value as time.
      *
      * @param name column name
      * @return column value
@@ -675,7 +687,7 @@ public class TsurugiResultEntity {
     // dateTime
 
     /**
-     * get column value as dateTime
+     * get column value as dateTime.
      *
      * @param name column name
      * @return column value
@@ -688,7 +700,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as dateTime
+     * get column value as dateTime.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -703,7 +715,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as dateTime
+     * get column value as dateTime.
      *
      * @param name column name
      * @return column value
@@ -714,7 +726,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as dateTime
+     * get column value as dateTime.
      *
      * @param name column name
      * @return column value
@@ -727,7 +739,7 @@ public class TsurugiResultEntity {
     // offset time
 
     /**
-     * get column value as offset time
+     * get column value as offset time.
      *
      * @param name column name
      * @return column value
@@ -740,7 +752,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as offset time
+     * get column value as offset time.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -755,7 +767,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as offset time
+     * get column value as offset time.
      *
      * @param name column name
      * @return column value
@@ -766,7 +778,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as offset time
+     * get column value as offset time.
      *
      * @param name column name
      * @return column value
@@ -779,7 +791,7 @@ public class TsurugiResultEntity {
     // offset dateTime
 
     /**
-     * get column value as offset dateTime
+     * get column value as offset dateTime.
      *
      * @param name column name
      * @return column value
@@ -792,7 +804,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as offset dateTime
+     * get column value as offset dateTime.
      *
      * @param name         column name
      * @param defaultValue value to return if column value is null
@@ -807,7 +819,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as offset dateTime
+     * get column value as offset dateTime.
      *
      * @param name column name
      * @return column value
@@ -818,7 +830,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as offset dateTime
+     * get column value as offset dateTime.
      *
      * @param name column name
      * @return column value
@@ -831,7 +843,7 @@ public class TsurugiResultEntity {
     // zoned dateTime
 
     /**
-     * get column value as ZonedDateTime
+     * get column value as ZonedDateTime.
      *
      * @param name column name
      * @param zone time-zone
@@ -845,7 +857,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as ZonedDateTime
+     * get column value as ZonedDateTime.
      *
      * @param name         column name
      * @param zone         time-zone
@@ -861,7 +873,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as ZonedDateTime
+     * get column value as ZonedDateTime.
      *
      * @param name column name
      * @param zone time-zone
@@ -873,7 +885,7 @@ public class TsurugiResultEntity {
     }
 
     /**
-     * get column value as ZonedDateTime
+     * get column value as ZonedDateTime.
      *
      * @param name column name
      * @param zone time-zone

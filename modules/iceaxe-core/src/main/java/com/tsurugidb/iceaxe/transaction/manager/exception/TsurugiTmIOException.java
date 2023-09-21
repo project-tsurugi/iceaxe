@@ -9,7 +9,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
- * Tsurugi TransactionManager IOException
+ * Tsurugi TransactionManager IOException.
  */
 @SuppressWarnings("serial")
 public class TsurugiTmIOException extends TsurugiIOException {
@@ -66,9 +66,9 @@ public class TsurugiTmIOException extends TsurugiIOException {
     }
 
     /**
-     * get next transaction option
+     * get next transaction option.
      *
-     * @return next transaction option
+     * @return transaction option
      */
     public TgTmTxOption getNextTmOption() {
         return this.nextTmOption;

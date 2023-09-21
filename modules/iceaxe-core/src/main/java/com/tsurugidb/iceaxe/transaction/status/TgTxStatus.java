@@ -11,7 +11,7 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 
 /**
- * Tsurugi transaction status
+ * Tsurugi transaction status.
  */
 public class TgTxStatus {
 
@@ -19,7 +19,7 @@ public class TgTxStatus {
     private TsurugiExceptionUtil exceptionUtil = TsurugiExceptionUtil.getInstance();
 
     /**
-     * set exception utility
+     * set exception utility.
      *
      * @param execptionUtil exception utility
      */
@@ -27,6 +27,11 @@ public class TgTxStatus {
         this.exceptionUtil = Objects.requireNonNull(execptionUtil);
     }
 
+    /**
+     * get exception utility.
+     *
+     * @return exception utility
+     */
     protected TsurugiExceptionUtil getExceptionUtil() {
         return this.exceptionUtil;
     }

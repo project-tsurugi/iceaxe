@@ -5,7 +5,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 
 /**
- * Tsurugi Transaction Option (OCC)
+ * Tsurugi Transaction Option (OCC).
  */
 @ThreadSafe
 public class TgTxOptionOcc extends AbstractTgTxOption<TgTxOptionOcc> {

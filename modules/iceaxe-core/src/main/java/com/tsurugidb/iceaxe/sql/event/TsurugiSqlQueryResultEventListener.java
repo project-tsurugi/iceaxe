@@ -9,7 +9,7 @@ import com.tsurugidb.iceaxe.sql.result.event.TsurugiQueryResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
- * {@link TsurugiSqlQuery} with {@link TsurugiQueryResult} event listener
+ * {@link TsurugiSqlQuery} with {@link TsurugiQueryResult} event listener.
  *
  * @param <R> result type
  */
@@ -44,7 +44,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
     }
 
     /**
-     * called when execute query started
+     * called when execute query started.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -55,7 +55,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
     }
 
     /**
-     * called when execute query read record
+     * called when execute query read record.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -67,7 +67,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
     }
 
     /**
-     * called when execute query read error
+     * called when execute query read error.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -79,7 +79,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
     }
 
     /**
-     * called when execute query end
+     * called when execute query end.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -90,7 +90,7 @@ public interface TsurugiSqlQueryResultEventListener<R> extends TsurugiSqlQueryEv
     }
 
     /**
-     * called when close result
+     * called when close result.
      *
      * @param transaction transaction
      * @param ps          SQL definition

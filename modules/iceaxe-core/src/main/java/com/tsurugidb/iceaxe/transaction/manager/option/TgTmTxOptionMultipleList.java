@@ -10,13 +10,13 @@ import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * {@link TgTxOption} multiple list
+ * {@link TgTxOption} multiple list.
  */
 @ThreadSafe
 public class TgTmTxOptionMultipleList extends TgTmTxOptionSupplier {
 
     /**
-     * create TgTmTxOptionMultipleList
+     * create TgTmTxOptionMultipleList.
      *
      * @return TgTmTxOptionMultipleList
      */
@@ -28,7 +28,7 @@ public class TgTmTxOptionMultipleList extends TgTmTxOptionSupplier {
     private int totalSize = 0;
 
     /**
-     * add transaction option
+     * add transaction option.
      *
      * @param txOption transaction option
      * @param size     size
@@ -57,7 +57,7 @@ public class TgTmTxOptionMultipleList extends TgTmTxOptionSupplier {
     }
 
     /**
-     * get transaction option
+     * get transaction option.
      *
      * @param attempt attempt number
      * @return transaction option
@@ -77,7 +77,7 @@ public class TgTmTxOptionMultipleList extends TgTmTxOptionSupplier {
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException exception, TgTmRetryInstruction retryInstruction) {
         var txOption = findTxOption(attempt);
         if (txOption == null) {
             return TgTmTxOption.retryOver(retryInstruction);

@@ -15,14 +15,14 @@ import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 
 /**
- * Tsurugi Parameter Mapping
+ * Tsurugi Parameter Mapping.
  *
  * @param <P> parameter type
  */
 public abstract class TgParameterMapping<P> {
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
      * @param <P>   parameter type
      * @param clazz parameter class
@@ -33,7 +33,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
      * @param variables bind variables
      * @return parameter mapping
@@ -46,7 +46,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
      * @param variables bind variables
      * @return parameter mapping
@@ -56,7 +56,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
      * @param variables bind variables
      * @return parameter mapping
@@ -66,7 +66,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
      * @param <P>                parameter type
      * @param variables          bind variables
@@ -78,7 +78,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * create Parameter Mapping (single variable)
+     * create Parameter Mapping (single variable).
      *
      * @param <P>   parameter type
      * @param name  bind variable name
@@ -91,7 +91,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * create Parameter Mapping (single variable)
+     * create Parameter Mapping (single variable).
      *
      * @param <P>  parameter type
      * @param name bind variable name
@@ -104,7 +104,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * create Parameter Mapping (single variable)
+     * create Parameter Mapping (single variable).
      *
      * @param <P>      parameter type
      * @param variable bind variable
@@ -118,9 +118,10 @@ public abstract class TgParameterMapping<P> {
     private IceaxeConvertUtil convertUtil = null;
 
     /**
-     * set convert type utility
+     * set convert type utility.
      *
      * @param convertUtil convert type utility
+     * @return this
      */
     public TgParameterMapping<P> setConvertUtil(IceaxeConvertUtil convertUtil) {
         this.convertUtil = convertUtil;
@@ -128,7 +129,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * get convert type utility
+     * get convert type utility.
      *
      * @return convert type utility
      */
@@ -137,7 +138,7 @@ public abstract class TgParameterMapping<P> {
     }
 
     /**
-     * convert to {@link Placeholder} list
+     * convert to {@link Placeholder} list.
      *
      * @return placeholder list
      */
@@ -145,7 +146,7 @@ public abstract class TgParameterMapping<P> {
     public abstract List<Placeholder> toLowPlaceholderList();
 
     /**
-     * convert to {@link Parameter} list
+     * convert to {@link Parameter} list.
      *
      * @param parameter   parameter
      * @param convertUtil convert type utility

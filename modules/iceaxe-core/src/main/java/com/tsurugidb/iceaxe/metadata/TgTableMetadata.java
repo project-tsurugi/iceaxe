@@ -9,10 +9,11 @@ import com.tsurugidb.sql.proto.SqlCommon.Column;
 import com.tsurugidb.tsubakuro.sql.TableMetadata;
 
 /**
- * Tsurugi table metadata
+ * Tsurugi table metadata.
  */
 public class TgTableMetadata {
 
+    /** low table metadata */
     protected final TableMetadata lowTableMetadata;
 
     /**
@@ -25,7 +26,7 @@ public class TgTableMetadata {
     }
 
     /**
-     * get database name
+     * get database name.
      *
      * @return database name
      */
@@ -35,7 +36,7 @@ public class TgTableMetadata {
     }
 
     /**
-     * get schema name
+     * get schema name.
      *
      * @return schema name
      */
@@ -45,7 +46,7 @@ public class TgTableMetadata {
     }
 
     /**
-     * get table name
+     * get table name.
      *
      * @return table name
      */
@@ -55,7 +56,7 @@ public class TgTableMetadata {
     }
 
     /**
-     * get column list
+     * get column list.
      *
      * @return column list
      */

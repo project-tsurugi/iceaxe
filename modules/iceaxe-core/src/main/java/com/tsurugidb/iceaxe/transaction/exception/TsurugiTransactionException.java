@@ -16,7 +16,7 @@ import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 
 /**
- * Tsurugi Transaction Exception
+ * Tsurugi Transaction Exception.
  */
 @SuppressWarnings("serial")
 public class TsurugiTransactionException extends Exception implements TsurugiDiagnosticCodeProvider {

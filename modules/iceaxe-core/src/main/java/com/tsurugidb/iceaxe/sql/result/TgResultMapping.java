@@ -14,7 +14,7 @@ import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionFunction;
 
 /**
- * Tsurugi Result Mapping
+ * Tsurugi Result Mapping.
  *
  * @param <R> result type
  */
@@ -33,7 +33,7 @@ public abstract class TgResultMapping<R> {
     };
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @param <R>             result type
      * @param resultConverter converter from TsurugiResultRecord to R
@@ -44,7 +44,7 @@ public abstract class TgResultMapping<R> {
     }
 
     /**
-     * create result mapping
+     * create result mapping.
      *
      * @param <R>            result type
      * @param entitySupplier supplier of R
@@ -55,7 +55,7 @@ public abstract class TgResultMapping<R> {
     }
 
     /**
-     * create result mapping (single column)
+     * create result mapping (single column).
      *
      * @param <R>   result type
      * @param clazz result type
@@ -66,7 +66,7 @@ public abstract class TgResultMapping<R> {
     }
 
     /**
-     * create result mapping (single column)
+     * create result mapping (single column).
      *
      * @param <R>  result type
      * @param type result type
@@ -79,7 +79,7 @@ public abstract class TgResultMapping<R> {
     private IceaxeConvertUtil convertUtil = null;
 
     /**
-     * set convert type utility
+     * set convert type utility.
      *
      * @param convertUtil convert type utility
      * @return this
@@ -90,7 +90,7 @@ public abstract class TgResultMapping<R> {
     }
 
     /**
-     * get convert type utility
+     * get convert type utility.
      *
      * @return convert type utility
      */
@@ -98,5 +98,14 @@ public abstract class TgResultMapping<R> {
         return this.convertUtil;
     }
 
+    /**
+     * convert record to R.
+     *
+     * @param record record
+     * @return record(R type)
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected abstract R convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException;
 }

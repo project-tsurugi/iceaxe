@@ -12,10 +12,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link TsurugiSessionTxFileLogger} writer
+ * {@link TsurugiSessionTxFileLogger} writer.
  */
 public class TsurugiSessionTxFileLogWriter implements Closeable {
 
+    /** transaction file log config */
     protected final TsurugiSessionTxFileLogConfig config;
     private final Path outputDir;
     private final PrintWriter writer;
@@ -24,10 +25,11 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
     /**
      * Creates a new instance.
      *
-     * @param config config
+     * @param config transaction file log config
      * @param file   file path
+     * @throws UncheckedIOException
      */
-    public TsurugiSessionTxFileLogWriter(TsurugiSessionTxFileLogConfig config, Path file) {
+    public TsurugiSessionTxFileLogWriter(TsurugiSessionTxFileLogConfig config, Path file) throws UncheckedIOException {
         this.config = config;
         this.outputDir = file.getParent();
         try {
@@ -40,6 +42,14 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
         }
     }
 
+    /**
+     * create print writer.
+     *
+     * @param config transaction file log config
+     * @param file   file path
+     * @return print writer
+     * @throws IOException
+     */
     protected PrintWriter createPrintWriter(TsurugiSessionTxFileLogConfig config, Path file) throws IOException {
         return new PrintWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8), config.autoFlush());
     }

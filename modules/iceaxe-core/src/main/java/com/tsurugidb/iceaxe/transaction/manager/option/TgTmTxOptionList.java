@@ -9,13 +9,13 @@ import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * {@link TgTxOption} list
+ * {@link TgTxOption} list.
  */
 @ThreadSafe
 public class TgTmTxOptionList extends TgTmTxOptionSupplier {
 
     /**
-     * create TgTmTxOptionList
+     * create TgTmTxOptionList.
      *
      * @param txOptions transaction options
      * @return TgTmTxOptionList
@@ -28,7 +28,7 @@ public class TgTmTxOptionList extends TgTmTxOptionSupplier {
     }
 
     /**
-     * create TgTmTxOptionList
+     * create TgTmTxOptionList.
      *
      * @param txOptions transaction options
      * @return TgTmTxOptionList
@@ -43,7 +43,7 @@ public class TgTmTxOptionList extends TgTmTxOptionSupplier {
     private final List<TgTxOption> txOptionList;
 
     /**
-     * TgTxOption list
+     * Creates a new instance.
      *
      * @param txOptionList transaction options
      */
@@ -57,7 +57,7 @@ public class TgTmTxOptionList extends TgTmTxOptionSupplier {
     }
 
     @Override
-    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction) {
+    protected TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException exception, TgTmRetryInstruction retryInstruction) {
         if (attempt < txOptionList.size()) {
             return TgTmTxOption.execute(txOptionList.get(attempt), retryInstruction);
         }
