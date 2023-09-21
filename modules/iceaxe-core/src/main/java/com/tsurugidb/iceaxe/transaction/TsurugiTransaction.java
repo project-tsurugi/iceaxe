@@ -42,7 +42,7 @@ import com.tsurugidb.tsubakuro.sql.Transaction;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi Transaction
+ * Tsurugi Transaction.
  */
 public class TsurugiTransaction implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransaction.class);
@@ -115,8 +115,7 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @return session
      */
-    @Nonnull
-    public TsurugiSession getSession() {
+    public @Nonnull TsurugiSession getSession() {
         return this.ownerSession;
     }
 
@@ -125,8 +124,7 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @return transaction option
      */
-    @Nonnull
-    public TgTxOption getTransactionOption() {
+    public @Nonnull TgTxOption getTransactionOption() {
         return this.txOption;
     }
 
@@ -148,8 +146,7 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @return transaction manager, null if this transaction is not created by transaction manager
      */
-    @Nullable
-    public TsurugiTransactionManager getTransactionManager() {
+    public @Nullable TsurugiTransactionManager getTransactionManager() {
         return this.ownerTm;
     }
 
@@ -172,7 +169,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * set transaction-begin-timeout
+     * set transaction-begin-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -182,7 +179,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * set transaction-begin-timeout
+     * set transaction-begin-timeout.
      *
      * @param timeout time
      */
@@ -191,7 +188,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * set transaction-commit-timeout
+     * set transaction-commit-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -201,7 +198,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * set transaction-commit-timeout
+     * set transaction-commit-timeout.
      *
      * @param timeout time
      */
@@ -210,7 +207,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * set transaction-rollback-timeout
+     * set transaction-rollback-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -220,7 +217,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * set transaction-rollback-timeout
+     * set transaction-rollback-timeout.
      *
      * @param timeout time
      */
@@ -229,7 +226,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * set transaction-close-timeout
+     * set transaction-close-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -239,7 +236,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * set transaction-close-timeout
+     * set transaction-close-timeout.
      *
      * @param timeout time
      */
@@ -250,7 +247,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -279,7 +276,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * get session option
+     * get session option.
      *
      * @return session option
      */
@@ -288,7 +285,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * convert to {@link Transaction}
+     * convert to {@link Transaction}.
      *
      * @return transaction
      * @throws IOException
@@ -324,7 +321,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * Provides transaction id that is unique to for the duration of the database server's lifetime
+     * Provides transaction id that is unique to for the duration of the database server's lifetime.
      *
      * @return the id String for this transaction
      * @throws IOException
@@ -343,10 +340,10 @@ public class TsurugiTransaction implements AutoCloseable {
     // execute statement
 
     /**
-     * Tsurugi transaction execute method
+     * Tsurugi transaction execute method.
      */
     public enum TgTxMethod {
-        /** execute ddl */
+        /** execute DDL */
         EXECUTE_DDL("executeDdl"),
         /** execute query */
         EXECUTE_QUERY("executeQuery"),
@@ -390,7 +387,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * execute ddl.
+     * execute DDL.
      *
      * @param sql DDL
      * @throws IOException
@@ -608,10 +605,9 @@ public class TsurugiTransaction implements AutoCloseable {
     /**
      * execute query.
      *
-     * @param <R>       result type
-     * @param ps        SQL definition
-     * @param parameter SQL parameter
-     * @param action    The action to be performed for each record
+     * @param <R>    result type
+     * @param ps     SQL definition
+     * @param action The action to be performed for each record
      * @throws IOException
      * @throws InterruptedException
      * @throws TsurugiTransactionException
@@ -920,7 +916,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * transaction task
+     * transaction task.
      *
      * @param <R> type of return value
      */
@@ -928,7 +924,7 @@ public class TsurugiTransaction implements AutoCloseable {
     @FunctionalInterface
     public interface LowTransactionTask<R> {
         /**
-         * execute transaction task
+         * execute transaction task.
          *
          * @param lowTransaction transaction
          * @return return value
@@ -938,7 +934,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * execute transaction task
+     * execute transaction task.
      *
      * @param <R>  type of return value
      * @param task transaction task
@@ -955,7 +951,7 @@ public class TsurugiTransaction implements AutoCloseable {
     // commit, rollback
 
     /**
-     * Whether transaction is available
+     * Whether transaction is available.
      *
      * @return true: available
      * @throws IOException
@@ -973,7 +969,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * get transaction status
+     * get transaction status.
      *
      * @return transaction status
      * @throws IOException
@@ -987,7 +983,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * do commit
+     * do commit.
      *
      * @param commitType commit type
      * @throws IOException
@@ -1028,7 +1024,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * do rollback
+     * do rollback.
      *
      * @throws IOException
      * @throws InterruptedException
@@ -1063,6 +1059,15 @@ public class TsurugiTransaction implements AutoCloseable {
         LOG.trace("transaction rollback end");
     }
 
+    /**
+     * commit/rollback.
+     *
+     * @param finisher commit/rollback function
+     * @param timeout  timeout
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, InterruptedException, TsurugiTransactionException {
         var transaction = getLowTransaction();
         var lowResultFuture = finisher.apply(transaction);
@@ -1071,25 +1076,25 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * get committed
+     * get committed.
      *
-     * @return true: committed
+     * @return {@code true} if committed
      */
     public synchronized boolean isCommitted() {
         return this.committed;
     }
 
     /**
-     * get rollbacked
+     * get rollbacked.
      *
-     * @return true: rollbacked
+     * @return {@code true} if rollbacked
      */
     public synchronized boolean isRollbacked() {
         return this.rollbacked;
     }
 
     /**
-     * add child object
+     * add child object.
      *
      * @param closeable child object
      * @throws IOException
@@ -1101,7 +1106,7 @@ public class TsurugiTransaction implements AutoCloseable {
     }
 
     /**
-     * remove child object
+     * remove child object.
      *
      * @param closeable child object
      */
@@ -1148,6 +1153,11 @@ public class TsurugiTransaction implements AutoCloseable {
         return this.closed;
     }
 
+    /**
+     * check close.
+     *
+     * @throws IOException
+     */
     protected void checkClose() throws IOException {
         if (isClosed()) {
             throw new TsurugiIOException(IceaxeErrorCode.TX_ALREADY_CLOSED);

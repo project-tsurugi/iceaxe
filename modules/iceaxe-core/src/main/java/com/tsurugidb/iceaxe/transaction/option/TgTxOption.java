@@ -11,12 +11,12 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 
 /**
- * Tsurugi Transaction Option
+ * Tsurugi Transaction Option.
  */
 public interface TgTxOption extends Cloneable {
 
     /**
-     * create transaction option for short transaction
+     * create transaction option for short transaction.
      *
      * @return transaction option
      */
@@ -25,7 +25,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for short transaction
+     * create transaction option for short transaction.
      *
      * @param txOption source transaction option
      * @return transaction option
@@ -36,7 +36,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for long transaction
+     * create transaction option for long transaction.
      *
      * @param writePreserveTableNames table name to Write Preserve
      * @return transaction option
@@ -46,7 +46,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for long transaction
+     * create transaction option for long transaction.
      *
      * @param writePreserveTableNames table name to Write Preserve
      * @return transaction option
@@ -56,7 +56,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for long transaction
+     * create transaction option for long transaction.
      *
      * @param writePreserveTableNames table name to Write Preserve
      * @return transaction option
@@ -66,7 +66,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for long transaction
+     * create transaction option for long transaction.
      *
      * @param txOption source transaction option
      * @return transaction option
@@ -77,7 +77,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for read only transaction
+     * create transaction option for read only transaction.
      *
      * @return transaction option
      */
@@ -86,7 +86,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for read only transaction
+     * create transaction option for read only transaction.
      *
      * @param txOption source transaction option
      * @return transaction option
@@ -97,7 +97,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for DDL(LTX)
+     * create transaction option for DDL(LTX).
      *
      * @return transaction option
      */
@@ -106,7 +106,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * create transaction option for DDL(LTX)
+     * create transaction option for DDL(LTX).
      *
      * @param txOption source transaction option
      * @return transaction option
@@ -117,21 +117,21 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * get transaction type name
+     * get transaction type name.
      *
      * @return transaction type
      */
     public String typeName();
 
     /**
-     * get transaction type
+     * get transaction type.
      *
      * @return transaction type
      */
     public TransactionType type();
 
     /**
-     * check transaction type is OCC
+     * check transaction type is OCC.
      *
      * @return {@code true} if OCC
      */
@@ -140,7 +140,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * check transaction type is LTX
+     * check transaction type is LTX.
      *
      * @return {@code true} if LTX
      */
@@ -149,7 +149,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * check transaction type is RTX
+     * check transaction type is RTX.
      *
      * @return {@code true} if RTX
      */
@@ -158,7 +158,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * set label
+     * set label.
      *
      * @param label label
      * @return this
@@ -166,21 +166,21 @@ public interface TgTxOption extends Cloneable {
     public TgTxOption label(String label);
 
     /**
-     * get label
+     * get label.
      *
      * @return label
      */
     public String label();
 
     /**
-     * clone transaction option
+     * clone transaction option.
      *
      * @return new transaction option
      */
     public TgTxOption clone();
 
     /**
-     * clone transaction option
+     * clone transaction option.
      *
      * @param label label
      * @return new transaction option
@@ -233,7 +233,7 @@ public interface TgTxOption extends Cloneable {
     }
 
     /**
-     * convert to {@link TransactionOption}
+     * convert to {@link TransactionOption}.
      *
      * @return transaction option
      */

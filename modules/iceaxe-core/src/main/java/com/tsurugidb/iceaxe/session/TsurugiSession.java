@@ -45,7 +45,7 @@ import com.tsurugidb.tsubakuro.sql.SqlClient;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi Session
+ * Tsurugi Session.
  */
 public class TsurugiSession implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSession.class);
@@ -89,7 +89,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * set convert type utility
+     * set convert type utility.
      *
      * @param convertUtil convert type utility
      */
@@ -98,7 +98,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * get convert type utility
+     * get convert type utility.
      *
      * @return convert type utility
      */
@@ -107,7 +107,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * set connect-timeout
+     * set connect-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -117,7 +117,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * set connect-timeout
+     * set connect-timeout.
      *
      * @param timeout time
      */
@@ -126,7 +126,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * set close-timeout
+     * set close-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -136,7 +136,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * set close-timeout
+     * set close-timeout.
      *
      * @param timeout time
      */
@@ -147,7 +147,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * get session option
+     * get session option.
      *
      * @return session option
      */
@@ -156,7 +156,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -185,9 +185,9 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * get SQL service client
+     * get low SQL client.
      *
-     * @return SQL service client
+     * @return low SQL client
      * @throws IOException
      * @throws InterruptedException
      */
@@ -205,7 +205,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * get session
+     * get session.
      *
      * @return session
      * @throws IOException
@@ -305,7 +305,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * get table metadata
+     * get table metadata.
      *
      * @param tableName table name
      * @return table metadata (empty if table not found)
@@ -361,7 +361,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create SQL query
+     * create SQL query.
      *
      * @param sql SQL
      * @return SQL query
@@ -373,7 +373,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create SQL query
+     * create SQL query.
      *
      * @param <R>           result type
      * @param sql           SQL
@@ -391,7 +391,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create SQL prepared query
+     * create SQL prepared query.
      *
      * @param <P>              parameter type
      * @param sql              SQL
@@ -406,7 +406,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create SQL prepared query
+     * create SQL prepared query.
      *
      * @param <P>              parameter type
      * @param <R>              result type
@@ -430,10 +430,10 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create SQL definition
+     * create SQL statement.
      *
      * @param sql SQL
-     * @return SQL definition
+     * @return SQL statement
      * @throws IOException
      */
 //  @ThreadSafe
@@ -446,7 +446,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create SQL prepared statement
+     * create SQL prepared statement.
      *
      * @param <P>              parameter type
      * @param sql              SQL
@@ -468,7 +468,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create transaction manager
+     * create transaction manager.
      *
      * @return Transaction Manager
      */
@@ -478,7 +478,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create transaction manager
+     * create transaction manager.
      *
      * @param setting transaction manager settings
      * @return Transaction Manager
@@ -491,7 +491,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create transaction manager
+     * create transaction manager.
      *
      * @param txOption transaction option
      * @return Transaction Manager
@@ -503,10 +503,10 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create Transaction
+     * create transaction.
      *
      * @param txOption transaction option
-     * @return Transaction
+     * @return transaction
      * @throws IOException
      * @throws InterruptedException
      */
@@ -516,11 +516,11 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * create Transaction
+     * create transaction.
      *
      * @param txOption    transaction option
      * @param initializer transaction initializer
-     * @return Transaction
+     * @return transaction
      * @throws IOException
      * @throws InterruptedException
      */
@@ -541,7 +541,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * add child object
+     * add child object.
      *
      * @param closeable child object
      * @throws IOException
@@ -553,7 +553,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
-     * remove child object
+     * remove child object.
      *
      * @param closeable child object
      */
@@ -592,6 +592,11 @@ public class TsurugiSession implements AutoCloseable {
         return this.closed;
     }
 
+    /**
+     * check close.
+     *
+     * @throws IOException
+     */
     protected void checkClose() throws IOException {
         if (isClosed()) {
             throw new TsurugiIOException(IceaxeErrorCode.SESSION_ALREADY_CLOSED);

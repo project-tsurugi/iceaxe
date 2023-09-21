@@ -1,7 +1,7 @@
 package com.tsurugidb.iceaxe.util;
 
 /**
- * Tsurugi RuntimeException for InterruptedException
+ * Tsurugi RuntimeException for InterruptedException.
  */
 @SuppressWarnings("serial")
 public class InterruptedRuntimeException extends RuntimeException {

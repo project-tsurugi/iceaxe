@@ -17,7 +17,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
- * Tsurugi SQL definition (select)
+ * Tsurugi SQL query (select).
  *
  * @param <R> result type
  */
@@ -42,7 +42,7 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -71,7 +71,7 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
     }
 
     /**
-     * execute query
+     * execute query.
      *
      * @param transaction Transaction
      * @return SQL result

@@ -8,12 +8,12 @@ import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * {@link TsurugiTransactionManager} event listener
+ * {@link TsurugiTransactionManager} event listener.
  */
 public interface TsurugiTmEventListener {
 
     /**
-     * called when execute start
+     * called when execute start.
      *
      * @param tm                transaction manager
      * @param iceaxeTmExecuteId iceaxe tm executeId
@@ -24,7 +24,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when before start transaction
+     * called when before transaction start.
      *
      * @param tm                transaction manager
      * @param iceaxeTmExecuteId iceaxe tm executeId
@@ -36,7 +36,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when started transaction
+     * called when transaction started.
      *
      * @param transaction transaction
      */
@@ -45,7 +45,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when exception occurs in transaction
+     * called when exception occurs in transaction.
      *
      * @param transaction transaction
      * @param e           exception
@@ -55,7 +55,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when rollbacked transaction
+     * called when transaction rollbacked.
      *
      * @param transaction transaction
      * @param e           exception
@@ -65,7 +65,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when transaction retrying
+     * called when transaction retry.
      *
      * @param transaction  transaction
      * @param cause        exception
@@ -76,7 +76,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when transaction retry over
+     * called when transaction retry over.
      *
      * @param transaction  transaction
      * @param cause        exception
@@ -87,7 +87,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when transaction exception is not retryable
+     * called when transaction exception is not retryable.
      *
      * @param transaction  transaction
      * @param cause        exception
@@ -98,7 +98,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when execute success end
+     * called when execute success end.
      *
      * @param transaction transaction
      * @param committed   {@code true} committed, {@code false} rollbacked
@@ -109,7 +109,7 @@ public interface TsurugiTmEventListener {
     }
 
     /**
-     * called when execute fail end
+     * called when execute fail end.
      *
      * @param tm                transaction manager
      * @param iceaxeTmExecuteId iceaxe tm executeId

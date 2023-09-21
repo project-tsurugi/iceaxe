@@ -8,7 +8,7 @@ import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;;
 
 /**
- * Tsurugi Parameter Mapping for Empty
+ * Tsurugi Parameter Mapping for Empty.
  *
  * @param <P> parameter type
  */
@@ -17,7 +17,7 @@ public class TgEmptyParameterMapping<P> extends TgParameterMapping<P> {
     private static final TgEmptyParameterMapping<?> INSTANCE = new TgEmptyParameterMapping<>();
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
      * @param <P> parameter type
      * @return Tsurugi Parameter Mapping

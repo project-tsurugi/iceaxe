@@ -6,7 +6,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 
 /**
- * Tsurugi SQL execute log
+ * Tsurugi SQL execute log.
  */
 public class TgSessionSqlLog {
 
@@ -20,7 +20,7 @@ public class TgSessionSqlLog {
     private ZonedDateTime closeTime;
 
     /**
-     * set iceaxe SQL executeId
+     * set iceaxe SQL executeId.
      *
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      */
@@ -29,7 +29,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get SQL executeId
+     * get SQL executeId.
      *
      * @return SQL executeId
      */
@@ -38,7 +38,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * set SQL definition
+     * set SQL definition.
      *
      * @param ps        SQL definition
      * @param parameter SQL parameter
@@ -49,7 +49,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get SQL definition
+     * get SQL definition.
      *
      * @return SQL definition
      */
@@ -58,7 +58,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get SQL parameter
+     * get SQL parameter.
      *
      * @return SQL parameter
      */
@@ -67,16 +67,16 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get SQL statementId
+     * get iceaxe sqlId.
      *
-     * @return SQL statementId
+     * @return iceaxe sqlId
      */
-    public int getIceaxeSqlStatementId() {
+    public int getIceaxeSqlDefinitionId() {
         return this.sqlDefinition.getIceaxeSqlId();
     }
 
     /**
-     * set result
+     * set SQL result.
      *
      * @param result SQL result
      */
@@ -85,7 +85,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get SQL result
+     * get SQL result.
      *
      * @return SQL result
      */
@@ -94,7 +94,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * set start time
+     * set start time.
      *
      * @param time start time
      */
@@ -103,7 +103,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get start time
+     * get start time.
      *
      * @return start time
      */
@@ -112,7 +112,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * set end time
+     * set end time.
      *
      * @param time end time
      */
@@ -121,7 +121,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get end time
+     * get end time.
      *
      * @return end time
      */
@@ -130,7 +130,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * set close time
+     * set close time.
      *
      * @param time close time
      */
@@ -139,7 +139,7 @@ public class TgSessionSqlLog {
     }
 
     /**
-     * get close time
+     * get close time.
      *
      * @return close time
      */

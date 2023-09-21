@@ -6,13 +6,13 @@ import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 
 /**
- * Tsurugi Transaction RuntimeException
+ * Tsurugi Transaction RuntimeException.
  */
 @SuppressWarnings("serial")
 public class TsurugiTransactionRuntimeException extends RuntimeException implements TsurugiDiagnosticCodeProvider {
 
     /**
-     * Tsurugi Transaction RuntimeException
+     * Creates a new instance.
      *
      * @param cause TsurugiTransactionException
      */

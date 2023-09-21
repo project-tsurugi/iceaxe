@@ -17,7 +17,7 @@ import com.tsurugidb.tsubakuro.sql.Transaction;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi transaction status helper
+ * Tsurugi transaction status helper.
  */
 public class TsurugiTransactionStatusHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransactionStatusHelper.class);
@@ -38,10 +38,26 @@ public class TsurugiTransactionStatusHelper {
         return getTransactionStatus(transaction, lowFuture);
     }
 
+    /**
+     * get low SQL service exception.
+     *
+     * @param lowTx low transaction
+     * @return future of SQL service exception
+     * @throws IOException
+     */
     protected FutureResponse<SqlServiceException> getLowSqlServiceException(Transaction lowTx) throws IOException {
         return lowTx.getSqlServiceException();
     }
 
+    /**
+     * get transaction status.
+     *
+     * @param transaction transaction
+     * @param lowFuture   future of SQL service exception
+     * @return transaction status
+     * @throws IOException
+     * @throws InterruptedException
+     */
     protected TgTxStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowFuture) throws IOException, InterruptedException {
         try (var closeable = IceaxeIoUtil.closeable(lowFuture)) {
 
@@ -62,14 +78,32 @@ public class TsurugiTransactionStatusHelper {
         }
     }
 
+    /**
+     * get connect timeout.
+     *
+     * @param sessionOption session option
+     * @return timeout
+     */
     protected IceaxeTimeout getConnectTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CONNECT);
     }
 
+    /**
+     * get close timeout.
+     *
+     * @param sessionOption session option
+     * @return timeout
+     */
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CLOSE);
     }
 
+    /**
+     * Creates a new transaction exception instance.
+     *
+     * @param lowException low exception
+     * @return transaction exception
+     */
     protected TsurugiTransactionException newTransactionException(SqlServiceException lowException) {
         if (lowException == null) {
             return null;
@@ -77,6 +111,12 @@ public class TsurugiTransactionStatusHelper {
         return new TsurugiTransactionException(lowException);
     }
 
+    /**
+     * Creates a new transaction status instance.
+     *
+     * @param exception transaction exception
+     * @return transaction status
+     */
     protected TgTxStatus newTgTransactionStatus(TsurugiTransactionException exception) {
         return new TgTxStatus(exception);
     }

@@ -11,7 +11,7 @@ import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * {@link TsurugiTransactionManager} simple counter
+ * {@link TsurugiTransactionManager} simple counter.
  */
 @ThreadSafe
 public class TgTmSimpleCounter implements TsurugiTmEventListener {
@@ -82,7 +82,7 @@ public class TgTmSimpleCounter implements TsurugiTmEventListener {
     }
 
     /**
-     * get count
+     * get count.
      *
      * @return count
      */
@@ -91,7 +91,7 @@ public class TgTmSimpleCounter implements TsurugiTmEventListener {
     }
 
     /**
-     * reset count
+     * reset count.
      */
     public void reset() {
         counter.clear();

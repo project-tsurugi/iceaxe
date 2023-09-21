@@ -5,10 +5,11 @@ import java.util.List;
 import com.tsurugidb.tsubakuro.sql.TableList;
 
 /**
- * Tsurugi table list
+ * Tsurugi table list.
  */
 public class TgTableList {
 
+    /** low table list */
     protected final TableList lowTableList;
 
     /**

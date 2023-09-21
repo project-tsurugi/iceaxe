@@ -102,7 +102,14 @@ public class TsurugiSessionTxFileLogConfig {
      * sub directory type.
      */
     public enum TgTxFileLogSubDirType {
-        NOTHING, TM, TX, TM_TX;
+        /** nothing */
+        NOTHING,
+        /** transaction manager */
+        TM,
+        /** transaction */
+        TX,
+        /** transaction manager and transaction */
+        TM_TX;
     }
 
     private final Path outputDir;
@@ -126,7 +133,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get output directory
+     * get output directory.
      *
      * @return output directory
      */
@@ -135,7 +142,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set sub directory type
+     * set sub directory type.
      *
      * @param subDirType sub directory type
      * @return this
@@ -146,7 +153,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get sub directory type
+     * get sub directory type.
      *
      * @return sub directory type
      */
@@ -155,7 +162,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set write SQL file
+     * set write SQL file.
      *
      * @param write write SQL file
      * @return this
@@ -166,7 +173,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get write SQL file
+     * get write SQL file.
      *
      * @return write SQL file
      */
@@ -175,7 +182,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set header formatter
+     * set header formatter.
      *
      * @param formatter header formatter
      * @return this
@@ -186,7 +193,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get header formatter
+     * get header formatter.
      *
      * @return header formatter
      */
@@ -195,7 +202,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set SQL max length
+     * set SQL max length.
      *
      * @param maxLength SQL max length
      * @return this
@@ -206,7 +213,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get SQL max length
+     * get SQL max length.
      *
      * @return SQL max length
      */
@@ -215,7 +222,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set SQL argument max length
+     * set SQL argument max length.
      *
      * @param maxLength SQL argument max length
      * @return this
@@ -226,7 +233,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get SQL argument max length
+     * get SQL argument max length.
      *
      * @return SQL argument max length
      */
@@ -235,7 +242,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set write explain
+     * set write explain.
      *
      * @param writeExplain write explain
      * @return this
@@ -247,7 +254,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get write explain
+     * get write explain.
      *
      * @return write explain
      * @see #EXPLAIN_FILE
@@ -257,7 +264,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set write read record
+     * set write read record.
      *
      * @param writeReadRecord write read record
      * @return this
@@ -268,7 +275,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get write read record
+     * get write read record.
      *
      * @return write read record
      */
@@ -277,7 +284,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set read progress
+     * set read progress.
      *
      * @param count read progress
      * @return this
@@ -288,7 +295,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get read progress
+     * get read progress.
      *
      * @return read progress
      */
@@ -297,7 +304,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * set auto flush
+     * set auto flush.
      *
      * @param autoFlush auto flush
      * @return this
@@ -308,7 +315,7 @@ public class TsurugiSessionTxFileLogConfig {
     }
 
     /**
-     * get auto flush
+     * get auto flush.
      *
      * @return auto flush
      */

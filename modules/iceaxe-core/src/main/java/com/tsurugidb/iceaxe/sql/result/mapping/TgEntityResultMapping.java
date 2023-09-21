@@ -27,14 +27,14 @@ import com.tsurugidb.iceaxe.util.function.TsurugiTransactionBiConsumer;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionFunction;
 
 /**
- * Tsurugi Result Mapping for Entity
+ * Tsurugi Result Mapping for Entity.
  *
  * @param <R> result type (e.g. Entity)
  */
 public class TgEntityResultMapping<R> extends TgResultMapping<R> {
 
     /**
-     * create Result Mapping
+     * create Result Mapping.
      *
      * @param <R>            result type
      * @param entitySupplier supplier of R
@@ -49,14 +49,14 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     private Map<String, TsurugiTransactionBiConsumer<R, TsurugiResultRecord>> columnConverterMap;
 
     /**
-     * Tsurugi Result Mapping
+     * Tsurugi Result Mapping.
      */
     public TgEntityResultMapping() {
         // do nothing
     }
 
     /**
-     * set supplier
+     * set supplier.
      *
      * @param entitySupplier supplier of R
      * @return this
@@ -74,7 +74,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // boolean
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -85,7 +85,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -98,7 +98,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -110,7 +110,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -126,7 +126,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -138,7 +138,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -156,7 +156,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // int
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -167,7 +167,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -180,7 +180,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -192,7 +192,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -208,7 +208,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -220,7 +220,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -238,7 +238,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // long
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -249,7 +249,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -262,7 +262,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -274,7 +274,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -290,7 +290,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -302,7 +302,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -320,7 +320,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // float
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -331,7 +331,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -344,7 +344,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -356,7 +356,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -372,7 +372,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -384,7 +384,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -402,7 +402,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // double
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -413,7 +413,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -426,7 +426,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -438,7 +438,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -454,7 +454,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -466,7 +466,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -484,7 +484,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // decimal
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -495,7 +495,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -508,7 +508,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -520,7 +520,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -536,7 +536,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -548,7 +548,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -566,7 +566,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // string
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -577,7 +577,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -590,7 +590,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -602,7 +602,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -618,7 +618,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -630,7 +630,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -648,7 +648,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // byte[]
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -659,7 +659,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -672,7 +672,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -684,7 +684,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -700,7 +700,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -712,7 +712,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -730,7 +730,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // boolean[]
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -741,7 +741,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -754,7 +754,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -766,7 +766,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -782,7 +782,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -794,7 +794,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -812,7 +812,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // date
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -823,7 +823,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -836,7 +836,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -848,7 +848,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -864,7 +864,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -876,7 +876,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -894,7 +894,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // time
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -905,7 +905,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -918,7 +918,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -930,7 +930,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -946,7 +946,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -958,7 +958,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -976,7 +976,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // dateTime
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -987,7 +987,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -1000,7 +1000,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -1012,7 +1012,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -1028,7 +1028,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -1040,7 +1040,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -1058,7 +1058,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // offset time
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -1069,7 +1069,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -1082,7 +1082,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -1094,7 +1094,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -1110,7 +1110,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -1122,7 +1122,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -1140,7 +1140,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // offset dateTime
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @return this
@@ -1151,7 +1151,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -1164,7 +1164,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -1176,7 +1176,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -1192,7 +1192,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -1204,7 +1204,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -1222,7 +1222,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // zoned dateTime
 
     /**
-     * add setter
+     * add setter.
      *
      * @param setter setter to R
      * @param zone   time-zone
@@ -1234,7 +1234,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -1248,7 +1248,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -1261,7 +1261,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -1278,7 +1278,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -1291,7 +1291,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -1331,7 +1331,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add setter
+     * add setter.
      *
      * @param type   data type
      * @param setter setter to R
@@ -1348,7 +1348,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * add converter
+     * add converter.
      *
      * @param converter converter to R
      * @return this
@@ -1359,6 +1359,14 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         return this;
     }
 
+    /**
+     * set getter and setter.
+     *
+     * @param <V>          data type
+     * @param index        column index
+     * @param recordGetter getter from record
+     * @param setter       setter
+     */
     protected <V> void set(int index, TsurugiTransactionFunction<TsurugiResultRecord, V> recordGetter, BiConsumer<R, V> setter) {
         set(index, (entity, record) -> {
             V value = recordGetter.apply(record);
@@ -1366,6 +1374,12 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         });
     }
 
+    /**
+     * set converter.
+     *
+     * @param index     column index
+     * @param converter converter to R
+     */
     protected void set(int index, TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter) {
         while (index >= columnConverterList.size()) {
             columnConverterList.add(null);
@@ -1373,6 +1387,14 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         columnConverterList.set(index, converter);
     }
 
+    /**
+     * set getter and setter.
+     *
+     * @param <V>          data type
+     * @param name         column name
+     * @param recordGetter getter from record
+     * @param setter       setter
+     */
     protected <V> void set(String name, TsurugiTransactionFunction<TsurugiResultRecord, V> recordGetter, BiConsumer<R, V> setter) {
         set(name, (entity, record) -> {
             V value = recordGetter.apply(record);
@@ -1380,6 +1402,12 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         });
     }
 
+    /**
+     * set converter.
+     *
+     * @param name      column name
+     * @param converter converter to R
+     */
     protected void set(String name, TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter) {
         if (this.columnConverterMap == null) {
             this.columnConverterMap = new HashMap<>();
@@ -1403,6 +1431,14 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
         return entity;
     }
 
+    /**
+     * merge record to columnConverterMap.
+     *
+     * @param record record
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected synchronized void mergeColumnConverterMap(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.columnConverterMap != null) {
             var nameList = record.getNameList();

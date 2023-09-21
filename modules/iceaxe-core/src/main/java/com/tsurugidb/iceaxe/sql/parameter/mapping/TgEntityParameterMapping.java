@@ -22,17 +22,16 @@ import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 import com.tsurugidb.tsubakuro.sql.Placeholders;;
 
 /**
- * Tsurugi Parameter Mapping for Entity
+ * Tsurugi Parameter Mapping for Entity.
  *
  * @param <P> parameter type (e.g. Entity)
  */
 public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
-     * @param <P>   parameter type
-     * @param clazz parameter class
+     * @param <P> parameter type
      * @return Tsurugi Parameter Mapping
      */
     public static <P> TgEntityParameterMapping<P> of() {
@@ -40,7 +39,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
      * @param <P>   parameter type
      * @param clazz parameter class
@@ -54,7 +53,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     private final List<BiFunction<P, IceaxeConvertUtil, Parameter>> parameterConverterList = new ArrayList<>();
 
     /**
-     * Tsurugi Parameter Mapping
+     * Creates a new instance.
      */
     public TgEntityParameterMapping() {
         // do nothing
@@ -66,7 +65,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -82,12 +81,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addBoolean(String name, Function<P, V> getter, Function<V, Boolean> converter) {
@@ -98,7 +97,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -114,12 +113,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addInt(String name, Function<P, V> getter, Function<V, Integer> converter) {
@@ -130,7 +129,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -146,12 +145,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addLong(String name, Function<P, V> getter, Function<V, Long> converter) {
@@ -162,7 +161,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -178,12 +177,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addFloat(String name, Function<P, V> getter, Function<V, Float> converter) {
@@ -194,7 +193,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -210,12 +209,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addDouble(String name, Function<P, V> getter, Function<V, Double> converter) {
@@ -226,7 +225,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -242,12 +241,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addDecimal(String name, Function<P, V> getter, Function<V, BigDecimal> converter) {
@@ -258,7 +257,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -274,12 +273,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addString(String name, Function<P, V> getter, Function<V, String> converter) {
@@ -290,7 +289,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -306,12 +305,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addBytes(String name, Function<P, V> getter, Function<V, byte[]> converter) {
@@ -322,7 +321,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -338,12 +337,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addBits(String name, Function<P, V> getter, Function<V, boolean[]> converter) {
@@ -354,7 +353,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -370,12 +369,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addDate(String name, Function<P, V> getter, Function<V, LocalDate> converter) {
@@ -386,7 +385,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -402,12 +401,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addTime(String name, Function<P, V> getter, Function<V, LocalTime> converter) {
@@ -418,7 +417,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -434,12 +433,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addOffsetTime(String name, Function<P, V> getter, Function<V, OffsetTime> converter) {
@@ -450,7 +449,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -466,12 +465,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addDateTime(String name, Function<P, V> getter, Function<V, LocalDateTime> converter) {
@@ -482,7 +481,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -498,12 +497,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addOffsetDateTime(String name, Function<P, V> getter, Function<V, OffsetDateTime> converter) {
@@ -514,11 +513,10 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param getter getter from parameter
-     * @param offset time-offset
      * @return this
      */
     public TgEntityParameterMapping<P> addZonedDateTime(String name, Function<P, ZonedDateTime> getter) {
@@ -531,12 +529,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>      value type
-     * @param name     name
-     * @param getter   getter from parameter
-     * @param conveter converter to database data type
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
      * @return this
      */
     public <V> TgEntityParameterMapping<P> addZonedDateTime(String name, Function<P, V> getter, Function<V, ZonedDateTime> converter) {
@@ -547,7 +545,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param name   name
      * @param type   type
@@ -648,8 +646,9 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
+     * @param <V>       value type
      * @param name      name
      * @param type      type
      * @param getter    getter from parameter
@@ -664,9 +663,8 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
-     * @param <V>    value type
      * @param name   name
      * @param type   type
      * @param getter getter from parameter
@@ -678,8 +676,9 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
+     * @param <V>       value type
      * @param name      name
      * @param type      type
      * @param getter    getter from parameter
@@ -694,7 +693,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param <V>      value type
      * @param variable variable
@@ -711,6 +710,12 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         return this;
     }
 
+    /**
+     * add variable.
+     *
+     * @param name name
+     * @param type type
+     */
     protected void addVariable(String name, TgDataType type) {
         var lowPlaceholder = Placeholders.of(name, type.getLowDataType());
         lowPlaceholderList.add(lowPlaceholder);

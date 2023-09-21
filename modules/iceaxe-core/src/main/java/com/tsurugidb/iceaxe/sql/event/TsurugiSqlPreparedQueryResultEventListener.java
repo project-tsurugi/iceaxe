@@ -9,7 +9,7 @@ import com.tsurugidb.iceaxe.sql.result.event.TsurugiQueryResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
- * {@link TsurugiSqlPreparedQuery} with {@link TsurugiQueryResult} event listener
+ * {@link TsurugiSqlPreparedQuery} with {@link TsurugiQueryResult} event listener.
  *
  * @param <P> parameter type
  * @param <R> result type
@@ -45,7 +45,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
     }
 
     /**
-     * called when execute query started
+     * called when execute query started.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -57,7 +57,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
     }
 
     /**
-     * called when execute query read record
+     * called when execute query read record.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -70,7 +70,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
     }
 
     /**
-     * called when execute query read error
+     * called when execute query read error.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -83,7 +83,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
     }
 
     /**
-     * called when execute query end
+     * called when execute query end.
      *
      * @param transaction transaction
      * @param ps          SQL definition
@@ -95,7 +95,7 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
     }
 
     /**
-     * called when close result
+     * called when close result.
      *
      * @param transaction transaction
      * @param ps          SQL definition

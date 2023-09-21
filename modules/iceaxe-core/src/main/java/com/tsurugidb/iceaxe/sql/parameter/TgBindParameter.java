@@ -17,14 +17,14 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
 /**
- * Tsurugi Bind Parameter
+ * Tsurugi Bind Parameter.
  *
  * @see TgBindParameters#of(TgBindParameter...)
  */
 public class TgBindParameter {
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -35,7 +35,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -46,7 +46,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -57,7 +57,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -68,7 +68,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -79,7 +79,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -90,7 +90,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -101,7 +101,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -112,7 +112,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -123,7 +123,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -134,7 +134,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -145,7 +145,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -156,7 +156,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -188,7 +188,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -199,7 +199,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -210,7 +210,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -221,7 +221,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -232,7 +232,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -243,7 +243,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -254,7 +254,7 @@ public class TgBindParameter {
     }
 
     /**
-     * create bind parameter
+     * create bind parameter.
      *
      * @param name  name
      * @param value value
@@ -267,13 +267,19 @@ public class TgBindParameter {
     private final Parameter lowParameter;
     private final Supplier<String> stringSupplier;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param lowParameter   low parameter
+     * @param stringSupplier string supplier
+     */
     protected TgBindParameter(Parameter lowParameter, Supplier<String> stringSupplier) {
         this.lowParameter = lowParameter;
         this.stringSupplier = stringSupplier;
     }
 
     /**
-     * convert to {@link Parameter}
+     * convert to {@link Parameter}.
      *
      * @return parameter
      */
@@ -287,6 +293,14 @@ public class TgBindParameter {
         return stringSupplier.get();
     }
 
+    /**
+     * to string.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @param type  data type
+     * @return string
+     */
     protected static String toString(String name, Object value, Class<?> type) {
         return name + "=" + value + "(" + type.getSimpleName() + ")";
     }

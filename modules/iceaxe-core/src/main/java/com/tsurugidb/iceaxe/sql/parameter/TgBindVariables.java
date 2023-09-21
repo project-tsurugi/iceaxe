@@ -16,14 +16,14 @@ import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 import com.tsurugidb.tsubakuro.sql.Placeholders;
 
 /**
- * Tsurugi Bind Variables for {@link TsurugiSqlPrepared}
+ * Tsurugi Bind Variables for {@link TsurugiSqlPrepared}.
  *
  * @see TgParameterMapping#of(TgBindVariables)
  */
 public class TgBindVariables {
 
     /**
-     * create bind variables
+     * create bind variables.
      *
      * @return bind variables
      */
@@ -32,7 +32,7 @@ public class TgBindVariables {
     }
 
     /**
-     * create bind variables
+     * create bind variables.
      *
      * @param variables bind variable
      * @return bind variables
@@ -46,7 +46,7 @@ public class TgBindVariables {
     }
 
     /**
-     * create bind variables
+     * create bind variables.
      *
      * @param variables bind variable
      * @return bind variables
@@ -60,7 +60,7 @@ public class TgBindVariables {
     }
 
     /**
-     * convert to sql names
+     * convert to SQL names.
      *
      * @param variables bind variable
      * @return sql names
@@ -70,7 +70,7 @@ public class TgBindVariables {
     }
 
     /**
-     * convert to sql names
+     * convert to SQL names.
      *
      * @param delimiter the delimiter to be used between each element
      * @param variables bind variable
@@ -89,7 +89,7 @@ public class TgBindVariables {
     }
 
     /**
-     * convert to sql names
+     * convert to SQL names.
      *
      * @param variables bind variable
      * @return sql names
@@ -99,7 +99,7 @@ public class TgBindVariables {
     }
 
     /**
-     * convert to sql names
+     * convert to SQL names.
      *
      * @param delimiter the delimiter to be used between each element
      * @param variables bind variable
@@ -122,7 +122,7 @@ public class TgBindVariables {
     private Map<String, TgDataType> typeMap;
 
     /**
-     * add type(boolean)
+     * add type(boolean).
      *
      * @param name name
      * @return this
@@ -133,7 +133,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(int)
+     * add type(int).
      *
      * @param name name
      * @return this
@@ -144,7 +144,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(long)
+     * add type(long).
      *
      * @param name name
      * @return this
@@ -155,7 +155,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(float)
+     * add type(float).
      *
      * @param name name
      * @return this
@@ -166,7 +166,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(double)
+     * add type(double).
      *
      * @param name name
      * @return this
@@ -177,7 +177,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(decimal)
+     * add type(decimal).
      *
      * @param name name
      * @return this
@@ -188,7 +188,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(String)
+     * add type(String).
      *
      * @param name name
      * @return this
@@ -199,7 +199,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(byte[])
+     * add type(byte[]).
      *
      * @param name name
      * @return this
@@ -210,7 +210,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(boolean[])
+     * add type(boolean[]).
      *
      * @param name name
      * @return this
@@ -221,7 +221,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(date)
+     * add type(date).
      *
      * @param name name
      * @return this
@@ -232,7 +232,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(time)
+     * add type(time).
      *
      * @param name name
      * @return this
@@ -243,7 +243,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(dateTime)
+     * add type(dateTime).
      *
      * @param name name
      * @return this
@@ -254,7 +254,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(offset time)
+     * add type(offset time).
      *
      * @param name name
      * @return this
@@ -265,7 +265,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(offset dateTime)
+     * add type(offset dateTime).
      *
      * @param name name
      * @return this
@@ -276,7 +276,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type(zoned dateTime)
+     * add type(zoned dateTime).
      *
      * @param name name
      * @return this
@@ -287,7 +287,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type
+     * add type.
      *
      * @param name name
      * @param type data type
@@ -299,7 +299,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add type
+     * add type.
      *
      * @param name name
      * @param type data type
@@ -311,16 +311,18 @@ public class TgBindVariables {
         return this;
     }
 
+    /**
+     * get type.
+     *
+     * @param type data type
+     * @return data type
+     */
     protected TgDataType getDataType(Class<?> type) {
-        var tgType = TgDataType.of(type);
-        if (tgType == null) {
-            throw new IllegalArgumentException("unsupported data type. type=" + type);
-        }
-        return tgType;
+        return TgDataType.of(type);
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param variable variable
      * @return this
@@ -332,6 +334,12 @@ public class TgBindVariables {
         return this;
     }
 
+    /**
+     * add low.
+     *
+     * @param name name
+     * @param type data type
+     */
     protected final void addInternal(@Nonnull String name, @Nonnull TgDataType type) {
         var lowPlaceholder = Placeholders.of(name, type.getLowDataType());
         lowPlaceholderList.add(lowPlaceholder);
@@ -339,7 +347,7 @@ public class TgBindVariables {
     }
 
     /**
-     * add variable
+     * add variable.
      *
      * @param otherList variable list
      * @return this
@@ -353,26 +361,26 @@ public class TgBindVariables {
     }
 
     /**
-     * get sql names
+     * get SQL names.
      *
-     * @return sql names
+     * @return SQL names
      */
     public String getSqlNames() {
         return getSqlNames(",");
     }
 
     /**
-     * get sql names
+     * get SQL names.
      *
      * @param delimiter the delimiter to be used between each element
-     * @return sql names
+     * @return SQL names
      */
     public String getSqlNames(String delimiter) {
         return lowPlaceholderList.stream().map(ph -> ":" + ph.getName()).collect(Collectors.joining(delimiter));
     }
 
     /**
-     * convert to {@link Placeholder} list
+     * convert to {@link Placeholder} list.
      *
      * @return placeholder list
      */
@@ -382,7 +390,7 @@ public class TgBindVariables {
     }
 
     /**
-     * get data type
+     * get data type.
      *
      * @param name name
      * @return data type

@@ -9,7 +9,7 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionPriority;
 
 /**
- * Tsurugi Transaction Option (long transaction)
+ * Tsurugi Transaction Option (long transaction).
  *
  * @param <T> concrete class
  */
@@ -19,7 +19,7 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
     private TransactionPriority lowPriority = null;
 
     /**
-     * set priority
+     * set priority.
      *
      * @param priority priority
      * @return this
@@ -31,7 +31,7 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
     }
 
     /**
-     * get priority
+     * get priority.
      *
      * @return priority
      */

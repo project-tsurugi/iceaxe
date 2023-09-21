@@ -16,7 +16,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
- * Tsurugi SQL definition (insert/update/delete, DDL)
+ * Tsurugi SQL statement (insert/update/delete, DDL).
  */
 public class TsurugiSqlStatement extends TsurugiSqlDirect {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSqlStatement.class);
@@ -36,7 +36,7 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -65,7 +65,7 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
     }
 
     /**
-     * execute statement
+     * execute statement.
      *
      * @param transaction Transaction
      * @return SQL result

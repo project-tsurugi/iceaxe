@@ -37,7 +37,7 @@ import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
 
 /**
- * Tsurugi Transaction Manager
+ * Tsurugi Transaction Manager.
  * <p>
  * Thread Safe (excluding setTimeout)
  * </p>
@@ -53,7 +53,7 @@ public class TsurugiTransactionManager {
     private List<TsurugiTmEventListener> eventListenerList = null;
 
     /**
-     * Creates a new instance
+     * Creates a new instance.
      *
      * @param session        session
      * @param defaultSetting default setting
@@ -65,15 +65,19 @@ public class TsurugiTransactionManager {
     }
 
     /**
-     * get session
+     * get session.
      *
      * @return session
      */
-    @Nonnull
-    public TsurugiSession getSession() {
+    public @Nonnull TsurugiSession getSession() {
         return this.ownerSession;
     }
 
+    /**
+     * get default setting.
+     *
+     * @return setting
+     */
     protected final TgTmSetting defaultSetting() {
         if (this.defaultSetting == null) {
             throw new IllegalStateException("defaultSetting is not specified");
@@ -82,7 +86,7 @@ public class TsurugiTransactionManager {
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -117,7 +121,7 @@ public class TsurugiTransactionManager {
     }
 
     /**
-     * execute transaction
+     * execute transaction.
      *
      * @param action action
      * @throws IOException
@@ -129,7 +133,7 @@ public class TsurugiTransactionManager {
     }
 
     /**
-     * execute transaction
+     * execute transaction.
      *
      * @param setting transaction manager settings
      * @param action  action
@@ -148,7 +152,7 @@ public class TsurugiTransactionManager {
     }
 
     /**
-     * execute transaction
+     * execute transaction.
      *
      * @param <R>    return type
      * @param action action
@@ -162,7 +166,7 @@ public class TsurugiTransactionManager {
     }
 
     /**
-     * execute transaction
+     * execute transaction.
      *
      * @param <R>     return type
      * @param setting transaction manager settings
@@ -336,22 +340,21 @@ public class TsurugiTransactionManager {
     // execute statement
 
     /**
-     * execute ddl.
+     * execute DDL.
      *
      * @param sql DDL
      * @throws IOException
      * @throws InterruptedException
      */
     public void executeDdl(String sql) throws IOException, InterruptedException {
-        var setting = (this.defaultSetting != null) ? this.defaultSetting
-            : TgTmSetting.of(TgTxOption.ofDDL().label("iceaxe ddl"));
+        var setting = (this.defaultSetting != null) ? this.defaultSetting : TgTmSetting.of(TgTxOption.ofDDL().label("iceaxe ddl"));
         execute(setting, transaction -> {
             transaction.executeDdl(sql);
         });
     }
 
     /**
-     * execute ddl.
+     * execute DDL.
      *
      * @param setting transaction manager settings
      * @param sql     DDL
@@ -498,7 +501,7 @@ public class TsurugiTransactionManager {
      * execute query.
      *
      * @param <R>    result type
-     * @param ps     PreparedStatement
+     * @param ps     SQL definition
      * @param action The action to be performed for each record
      * @throws IOException
      * @throws InterruptedException
@@ -512,7 +515,7 @@ public class TsurugiTransactionManager {
      *
      * @param <R>     result type
      * @param setting transaction manager settings
-     * @param ps      PreparedStatement
+     * @param ps      SQL definition
      * @param action  The action to be performed for each record
      * @throws IOException
      * @throws InterruptedException
@@ -528,7 +531,7 @@ public class TsurugiTransactionManager {
      *
      * @param <P>       parameter type
      * @param <R>       result type
-     * @param ps        PreparedStatement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @param action    The action to be performed for each record
      * @throws IOException
@@ -544,7 +547,7 @@ public class TsurugiTransactionManager {
      * @param <P>       parameter type
      * @param <R>       result type
      * @param setting   transaction manager settings
-     * @param ps        PreparedStatement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @param action    The action to be performed for each record
      * @throws IOException
@@ -687,7 +690,7 @@ public class TsurugiTransactionManager {
      * execute query.
      *
      * @param <R> result type
-     * @param ps  PreparedStatement
+     * @param ps  SQL definition
      * @return list of record
      * @throws IOException
      * @throws InterruptedException
@@ -701,7 +704,7 @@ public class TsurugiTransactionManager {
      *
      * @param <R>     result type
      * @param setting transaction manager settings
-     * @param ps      PreparedStatement
+     * @param ps      SQL definition
      * @return list of record
      * @throws IOException
      * @throws InterruptedException
@@ -717,7 +720,7 @@ public class TsurugiTransactionManager {
      *
      * @param <P>       parameter type
      * @param <R>       result type
-     * @param ps        PreparedStatement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return list of record
      * @throws IOException
@@ -733,7 +736,7 @@ public class TsurugiTransactionManager {
      * @param <P>       parameter type
      * @param <R>       result type
      * @param setting   transaction manager settings
-     * @param ps        PreparedStatement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return list of record
      * @throws IOException
@@ -876,7 +879,7 @@ public class TsurugiTransactionManager {
      * execute query.
      *
      * @param <R> result type
-     * @param ps  PreparedStatement
+     * @param ps  SQL definition
      * @return record
      * @throws IOException
      * @throws InterruptedException
@@ -890,7 +893,7 @@ public class TsurugiTransactionManager {
      *
      * @param <R>     result type
      * @param setting transaction manager settings
-     * @param ps      PreparedStatement
+     * @param ps      SQL definition
      * @return record
      * @throws IOException
      * @throws InterruptedException
@@ -906,8 +909,7 @@ public class TsurugiTransactionManager {
      *
      * @param <P>       parameter type
      * @param <R>       result type
-     * @param setting   transaction manager settings
-     * @param ps        PreparedStatement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return record
      * @throws IOException
@@ -923,7 +925,7 @@ public class TsurugiTransactionManager {
      * @param <P>       parameter type
      * @param <R>       result type
      * @param setting   transaction manager settings
-     * @param ps        PreparedStatement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return record
      * @throws IOException
@@ -966,6 +968,7 @@ public class TsurugiTransactionManager {
     /**
      * execute statement.
      *
+     * @param <P>              parameter type
      * @param sql              SQL
      * @param parameterMapping parameter mapping
      * @param parameter        SQL parameter
@@ -980,6 +983,7 @@ public class TsurugiTransactionManager {
     /**
      * execute statement.
      *
+     * @param <P>              parameter type
      * @param setting          transaction manager settings
      * @param sql              SQL
      * @param parameterMapping parameter mapping
@@ -998,7 +1002,7 @@ public class TsurugiTransactionManager {
     /**
      * execute statement.
      *
-     * @param ps PreparedStatement
+     * @param ps SQL definition
      * @return row count
      * @throws IOException
      * @throws InterruptedException
@@ -1011,7 +1015,7 @@ public class TsurugiTransactionManager {
      * execute statement.
      *
      * @param setting transaction manager settings
-     * @param ps      PreparedStatement
+     * @param ps      SQL definition
      * @return row count
      * @throws IOException
      * @throws InterruptedException
@@ -1026,7 +1030,7 @@ public class TsurugiTransactionManager {
      * execute statement.
      *
      * @param <P>       parameter type
-     * @param ps        PreparedStatement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return row count
      * @throws IOException
@@ -1041,7 +1045,7 @@ public class TsurugiTransactionManager {
      *
      * @param <P>       parameter type
      * @param setting   transaction manager settings
-     * @param ps        PreparedStatement
+     * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return row count
      * @throws IOException

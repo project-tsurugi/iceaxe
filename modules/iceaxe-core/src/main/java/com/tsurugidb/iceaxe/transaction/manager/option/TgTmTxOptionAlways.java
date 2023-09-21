@@ -7,15 +7,15 @@ import com.tsurugidb.iceaxe.transaction.manager.retry.TgTmRetryInstruction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * Always the same {@link TgTxOption}
+ * Always the same {@link TgTxOption}.
  */
 @ThreadSafe
 public class TgTmTxOptionAlways extends TgTmTxOptionSupplier {
 
     /**
-     * create TgTmTxOptionAlways
+     * create TgTmTxOptionAlways.
      *
-     * @param txOption       transaction option
+     * @param txOption        transaction option
      * @param attemptMaxCount attempt max count
      * @return TgTmTxOptionAlways
      */
@@ -26,13 +26,15 @@ public class TgTmTxOptionAlways extends TgTmTxOptionSupplier {
         return new TgTmTxOptionAlways(txOption, attemptMaxCount);
     }
 
+    /** transaction option */
     protected final TgTxOption txOption;
+    /** attempt max count */
     protected final int attemptMaxCount;
 
     /**
-     * TgTxOption list
+     * Creates a new instance.
      *
-     * @param txOption       transaction option
+     * @param txOption        transaction option
      * @param attemptMaxCount attempt max count
      */
     public TgTmTxOptionAlways(TgTxOption txOption, int attemptMaxCount) {

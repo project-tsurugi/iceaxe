@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 /**
- * sum of {@link TgTmCount}
+ * sum of {@link TgTmCount}.
  */
 public class TgTmCountSum implements TgTmCount {
 
@@ -40,7 +40,7 @@ public class TgTmCountSum implements TgTmCount {
     private int failCount = 0;
 
     /**
-     * add count
+     * add count.
      *
      * @param count count
      */

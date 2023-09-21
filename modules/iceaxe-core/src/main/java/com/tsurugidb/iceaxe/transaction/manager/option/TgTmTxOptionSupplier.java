@@ -13,12 +13,12 @@ import com.tsurugidb.iceaxe.transaction.manager.retry.TsurugiTmRetryPredicate;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * {@link TgTxOption} supplier
+ * {@link TgTxOption} supplier.
  */
 public abstract class TgTmTxOptionSupplier {
 
     /**
-     * create TgTmTxOptionSupplier
+     * create TgTmTxOptionSupplier.
      *
      * @param txOptions transaction options
      * @return supplier
@@ -28,7 +28,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * create TgTmTxOptionSupplier
+     * create TgTmTxOptionSupplier.
      *
      * @param txOption transaction option
      * @return supplier
@@ -38,7 +38,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * create TgTmTxOptionSupplier
+     * create TgTmTxOptionSupplier.
      *
      * @param txOption        transaction option
      * @param attemptMaxCount attempt max count
@@ -49,7 +49,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * create TgTmTxOptionSupplier
+     * create TgTmTxOptionSupplier.
      *
      * @param txOption transaction option
      * @param size     size
@@ -60,7 +60,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * create TgTmTxOptionSupplier
+     * create TgTmTxOptionSupplier.
      *
      * @param txOption1 transaction option
      * @param size1     size
@@ -73,7 +73,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * create TgTmTxOptionSupplier
+     * create TgTmTxOptionSupplier.
      *
      * @param occSize   occ size
      * @param ltxOption transaction option for LTX or RTX
@@ -85,7 +85,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * create TgTmTxOptionSupplier
+     * create TgTmTxOptionSupplier.
      *
      * @param occOption transaction option for OCC
      * @param occSize   occ size
@@ -98,7 +98,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * {@link TgTmTxOption} listener
+     * {@link TgTmTxOption} listener.
      */
     @FunctionalInterface
     public interface TgTmOptionListener {
@@ -133,7 +133,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * set retry predicate
+     * set retry predicate.
      *
      * @param predicate retry predicate
      */
@@ -145,7 +145,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * get retry predicate
+     * get retry predicate.
      *
      * @return retry predicate
      */
@@ -154,7 +154,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * set tm option listener
+     * set tm option listener.
      *
      * @param listener tm option listener
      */
@@ -163,7 +163,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * create execute information
+     * create execute information.
      *
      * @param iceaxeTmExecuteId iceaxe tm executeId
      * @return execute information
@@ -173,18 +173,17 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * get tm option
+     * get transaction option.
      *
      * @param executeInfo {@link #createExecuteInfo(int)}
      * @param attempt     attempt number
      * @param transaction transaction (null if attempt==0)
      * @param e           transaction exception (null if attempt==0)
-     * @return Transaction Option
+     * @return transaction option
      * @throws IOException
      * @throws InterruptedException
      */
-    @Nonnull
-    public final TgTmTxOption get(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
+    public final @Nonnull TgTmTxOption get(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         var tmOption = computeTmOption(executeInfo, attempt, transaction, e);
         if (this.tmOptionListener != null) {
             tmOptionListener.accept(attempt, e, tmOption);
@@ -192,6 +191,17 @@ public abstract class TgTmTxOptionSupplier {
         return tmOption;
     }
 
+    /**
+     * get transaction option.
+     *
+     * @param executeInfo {@link #createExecuteInfo(int)}
+     * @param attempt     attempt number
+     * @param transaction transaction (null if attempt==0)
+     * @param e           transaction exception (null if attempt==0)
+     * @return transaction option
+     * @throws IOException
+     * @throws InterruptedException
+     */
     protected TgTmTxOption computeTmOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException e) throws IOException, InterruptedException {
         if (attempt == 0) {
             return computeFirstTmOption(executeInfo);
@@ -205,16 +215,31 @@ public abstract class TgTmTxOptionSupplier {
         return TgTmTxOption.notRetryable(retryInstruction);
     }
 
+    /**
+     * get first transaction option.
+     *
+     * @param executeInfo {@link #createExecuteInfo(int)}
+     * @return transaction option
+     */
     protected abstract TgTmTxOption computeFirstTmOption(Object executeInfo);
 
+    /**
+     * get retry transaction option.
+     *
+     * @param executeInfo      {@link #createExecuteInfo(int)}
+     * @param attempt          attempt number
+     * @param e                transaction exception
+     * @param retryInstruction retry instruction
+     * @return transaction option
+     */
     protected abstract TgTmTxOption computeRetryTmOption(Object executeInfo, int attempt, TsurugiTransactionException e, TgTmRetryInstruction retryInstruction);
 
     /**
-     * whether to retry
+     * whether to retry.
      *
      * @param transaction transaction
      * @param e           Transaction Exception
-     * @return true: retryable
+     * @return retry instruction
      * @throws IOException
      * @throws InterruptedException
      */
@@ -223,7 +248,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * set description
+     * set description.
      *
      * @param description description
      */
@@ -232,7 +257,7 @@ public abstract class TgTmTxOptionSupplier {
     }
 
     /**
-     * get description
+     * get description.
      *
      * @return description
      */
@@ -243,6 +268,11 @@ public abstract class TgTmTxOptionSupplier {
         return getDefaultDescription();
     }
 
+    /**
+     * get default description.
+     *
+     * @return description
+     */
     protected String getDefaultDescription() {
         // do override
         return getClass().getSimpleName();

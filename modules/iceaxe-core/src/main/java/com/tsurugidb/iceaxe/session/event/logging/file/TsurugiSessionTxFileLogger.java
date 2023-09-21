@@ -42,15 +42,14 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     /** iceaxeTmExecuteId */
     private static final String TM_HEADER = "[TM-%d]";
 
+    /** transaction file log config */
     protected final TsurugiSessionTxFileLogConfig config;
     private final Map<Integer, TsurugiSessionTxFileLogWriter> writerMap = new ConcurrentHashMap<>();
 
     /**
      * Creates a new instance.
      *
-     * @param outputDir       output directory
-     * @param writeExplain    write explain flag
-     * @param writeReadRecord write read record
+     * @param config transaction file log config
      */
     public TsurugiSessionTxFileLogger(TsurugiSessionTxFileLogConfig config) {
         this.config = config;
@@ -85,11 +84,23 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         writer.println(TX_HEADER + " transaction start %s %s\n%s", txId, startTime, threadName, transaction);
     }
 
+    /**
+     * create writer.
+     *
+     * @param txLog transaction log
+     * @return writer
+     */
     protected TsurugiSessionTxFileLogWriter createWriter(TgSessionTxLog txLog) {
         var file = config.outputDir().resolve(getLogFileName(txLog));
         return new TsurugiSessionTxFileLogWriter(config, file);
     }
 
+    /**
+     * get log file name.
+     *
+     * @param txLog transaction log
+     * @return file name
+     */
     protected String getLogFileName(TgSessionTxLog txLog) {
         String txName = getLogDirNameTx(txLog);
         switch (config.subDirType()) {
@@ -105,6 +116,12 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         }
     }
 
+    /**
+     * get log directory name for transaction manager.
+     *
+     * @param txLog transaction log
+     * @return directory name
+     */
     protected String getLogDirNameTm(TgSessionTxLog txLog) {
         int tmExecuteId = 0;
         ZonedDateTime startTime = null;
@@ -122,6 +139,12 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         return "tm" + startTime.format(FILENAME_FORMATTER) + "." + tmExecuteId + "." + threadName;
     }
 
+    /**
+     * get log directory name for transaction.
+     *
+     * @param txLog transaction log
+     * @return directory name
+     */
     protected String getLogDirNameTx(TgSessionTxLog txLog) {
         var startTime = txLog.getStartTime();
         var transaction = txLog.getTransaction();
@@ -136,6 +159,12 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         return "tx" + startTime.format(FILENAME_FORMATTER) + "." + txId + "." + label;
     }
 
+    /**
+     * get writer.
+     *
+     * @param txLog transaction log
+     * @return writer
+     */
     protected TsurugiSessionTxFileLogWriter getWriter(TgSessionTxLog txLog) {
         return writerMap.get(txLog.getTransaction().getIceaxeTxId());
     }
@@ -205,7 +234,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
-        int ssId = sqlLog.getIceaxeSqlStatementId();
+        int ssId = sqlLog.getIceaxeSqlDefinitionId();
         var ps = sqlLog.getSqlDefinition();
         {
             int maxLength = config.sqlMaxLength();
@@ -248,6 +277,14 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         return s.substring(0, maxLength) + "...";
     }
 
+    /**
+     * output SQL explain.
+     *
+     * @param sqlId           iceaxe SQL executeId
+     * @param ssId            iceaxe sqlId
+     * @param writer          writer
+     * @param explainSupplier supplier of explain
+     */
     protected void logSqlExplain(int sqlId, int ssId, TsurugiSessionTxFileLogWriter writer, IoSupplier<TgStatementMetadata> explainSupplier) {
         int writeExplain = config.writeExplain();
         if (writeExplain == TsurugiSessionTxFileLogConfig.EXPLAIN_NOTHING) {
@@ -276,7 +313,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
-        int ssId = sqlLog.getIceaxeSqlStatementId();
+        int ssId = sqlLog.getIceaxeSqlDefinitionId();
         writer.println(SQL_HEADER + " sql start error", sqlId, ssId);
         writer.println(occurred);
     }
@@ -289,7 +326,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
-        int ssId = sqlLog.getIceaxeSqlStatementId();
+        int ssId = sqlLog.getIceaxeSqlDefinitionId();
         if (config.writeReadRecord()) {
             int index = result.getReadCount() - 1;
             writer.println(SQL_HEADER + " read[%d]=%s", sqlId, ssId, index, record);
@@ -309,7 +346,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
-        int ssId = sqlLog.getIceaxeSqlStatementId();
+        int ssId = sqlLog.getIceaxeSqlDefinitionId();
         writer.println(SQL_HEADER + " read error", sqlId, ssId);
         writer.println(occurred);
     }
@@ -319,7 +356,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
-        int ssId = sqlLog.getIceaxeSqlStatementId();
+        int ssId = sqlLog.getIceaxeSqlDefinitionId();
         var time = elapsed(sqlLog.getStartTime(), sqlLog.getEndTime());
         var result = sqlLog.getSqlResult();
         if (result instanceof TsurugiQueryResult) {
@@ -343,7 +380,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var writer = getWriter(txLog);
 
         int sqlId = sqlLog.getIceaxeSqlExecuteId();
-        int ssId = sqlLog.getIceaxeSqlStatementId();
+        int ssId = sqlLog.getIceaxeSqlDefinitionId();
         var time = elapsed(sqlLog.getEndTime(), sqlLog.getCloseTime());
         writer.println(SQL_HEADER + " sql close. close.elapsed=%d[ms]", sqlId, ssId, time);
         writer.println(occurred);
@@ -427,6 +464,13 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         writerMap.remove(txLog.getTransaction().getIceaxeTxId());
     }
 
+    /**
+     * get elapsed.
+     *
+     * @param start start time
+     * @param end   end time
+     * @return elapsed[ms]
+     */
     protected long elapsed(ZonedDateTime start, ZonedDateTime end) {
         if (start != null && end != null) {
             return start.until(end, ChronoUnit.MILLIS);

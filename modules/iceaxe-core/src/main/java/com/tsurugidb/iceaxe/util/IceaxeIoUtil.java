@@ -13,7 +13,7 @@ import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Iceaxe I/O utility
+ * Iceaxe I/O utility.
  */
 public final class IceaxeIoUtil {
 
@@ -22,7 +22,7 @@ public final class IceaxeIoUtil {
     }
 
     /**
-     * get value from future
+     * get value from future.
      *
      * @param <V>     the result value type
      * @param future  future
@@ -36,7 +36,7 @@ public final class IceaxeIoUtil {
     }
 
     /**
-     * get value from future in transaction
+     * get value from future in transaction.
      *
      * @param <V>     the result value type
      * @param future  future
@@ -90,7 +90,7 @@ public final class IceaxeIoUtil {
     }
 
     /**
-     * Closeable for FutureResponse
+     * Closeable for FutureResponse.
      */
     public interface IceaxeFutureResponseCloseable extends AutoCloseable {
         @Override
@@ -98,7 +98,7 @@ public final class IceaxeIoUtil {
     }
 
     /**
-     * wrap with Closeable
+     * wrap with Closeable.
      *
      * @param future future
      * @return Closeable
@@ -111,7 +111,7 @@ public final class IceaxeIoUtil {
     }
 
     /**
-     * close resources
+     * close resources.
      *
      * @param closeableSet Closeable set
      * @param runnable     close action
@@ -150,20 +150,22 @@ public final class IceaxeIoUtil {
     }
 
     /**
-     * close resources
+     * close resources.
      *
      * @param closeables AutoCloseable
      * @throws IOException
+     * @throws InterruptedException
      */
     public static void close(AutoCloseable... closeables) throws IOException, InterruptedException {
         close(closeables, TsurugiIOException.class, TsurugiIOException::new);
     }
 
     /**
-     * close resources in transaction
+     * close resources in transaction.
      *
      * @param closeables AutoCloseable
      * @throws IOException
+     * @throws InterruptedException
      * @throws TsurugiTransactionException
      */
     public static void closeInTransaction(AutoCloseable... closeables) throws IOException, InterruptedException, TsurugiTransactionException {

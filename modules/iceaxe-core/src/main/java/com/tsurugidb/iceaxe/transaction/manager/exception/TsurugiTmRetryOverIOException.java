@@ -5,7 +5,7 @@ import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
- * Tsurugi TransactionManager Retry Over Exception
+ * Tsurugi TransactionManager Retry Over Exception.
  */
 @SuppressWarnings("serial")
 public class TsurugiTmRetryOverIOException extends TsurugiTmIOException {

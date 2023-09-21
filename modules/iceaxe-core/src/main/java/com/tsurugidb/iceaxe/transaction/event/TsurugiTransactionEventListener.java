@@ -9,12 +9,12 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
 
 /**
- * {@link TsurugiTransaction} event listener
+ * {@link TsurugiTransaction} event listener.
  */
 public interface TsurugiTransactionEventListener {
 
     /**
-     * called when low transaction get start
+     * called when low transaction get start.
      *
      * @param transaction transaction
      */
@@ -23,7 +23,7 @@ public interface TsurugiTransactionEventListener {
     }
 
     /**
-     * called when low transaction get end
+     * called when low transaction get end.
      *
      * @param transaction   transaction
      * @param transactionId transactionId
@@ -34,7 +34,7 @@ public interface TsurugiTransactionEventListener {
     }
 
     /**
-     * called when execute start
+     * called when execute start.
      *
      * @param transaction       transaction
      * @param method            execute method
@@ -47,7 +47,7 @@ public interface TsurugiTransactionEventListener {
     }
 
     /**
-     * called when execute end
+     * called when execute end.
      *
      * @param transaction       transaction
      * @param method            execute method
@@ -63,7 +63,7 @@ public interface TsurugiTransactionEventListener {
     }
 
     /**
-     * called when commit start
+     * called when commit start.
      *
      * @param transaction transaction
      * @param commitType  commit type
@@ -73,7 +73,7 @@ public interface TsurugiTransactionEventListener {
     }
 
     /**
-     * called when commit end
+     * called when commit end.
      *
      * @param transaction transaction
      * @param commitType  commit type
@@ -84,7 +84,7 @@ public interface TsurugiTransactionEventListener {
     }
 
     /**
-     * called when rollback start
+     * called when rollback start.
      *
      * @param transaction transaction
      */
@@ -93,7 +93,7 @@ public interface TsurugiTransactionEventListener {
     }
 
     /**
-     * called when rollback end
+     * called when rollback end.
      *
      * @param transaction transaction
      * @param occurred    exception
@@ -103,7 +103,7 @@ public interface TsurugiTransactionEventListener {
     }
 
     /**
-     * called when close transaction
+     * called when close transaction.
      *
      * @param transaction transaction
      * @param occurred    exception

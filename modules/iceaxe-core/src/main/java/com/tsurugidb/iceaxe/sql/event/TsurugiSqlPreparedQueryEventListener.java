@@ -5,7 +5,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 
 /**
- * {@link TsurugiSqlPreparedQuery} event listener
+ * {@link TsurugiSqlPreparedQuery} event listener.
  *
  * @param <P> parameter type
  * @param <R> result type
@@ -13,7 +13,7 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 public interface TsurugiSqlPreparedQueryEventListener<P, R> {
 
     /**
-     * called when execute query start
+     * called when execute query start.
      *
      * @param transaction        transaction
      * @param ps                 SQL definition
@@ -25,7 +25,7 @@ public interface TsurugiSqlPreparedQueryEventListener<P, R> {
     }
 
     /**
-     * called when execute query start error
+     * called when execute query start error.
      *
      * @param transaction        transaction
      * @param ps                 SQL definition
@@ -38,7 +38,7 @@ public interface TsurugiSqlPreparedQueryEventListener<P, R> {
     }
 
     /**
-     * called when execute query started
+     * called when execute query started.
      *
      * @param transaction transaction
      * @param ps          SQL definition

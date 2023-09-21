@@ -11,14 +11,14 @@ import com.tsurugidb.tsubakuro.sql.exception.TargetNotFoundException;
 import com.tsurugidb.tsubakuro.sql.exception.UniqueConstraintViolationException;
 
 /**
- * Tsurugi Exception utility
+ * Tsurugi Exception utility.
  */
 public class TsurugiExceptionUtil {
 
     private static TsurugiExceptionUtil instance = new TsurugiExceptionUtil();
 
     /**
-     * get default Exception utility
+     * get default Exception utility.
      *
      * @return Exception utility
      */
@@ -27,7 +27,7 @@ public class TsurugiExceptionUtil {
     }
 
     /**
-     * set default Exception utility
+     * set default Exception utility.
      *
      * @param defaultExceptionUtil Exception utility
      */
@@ -40,10 +40,10 @@ public class TsurugiExceptionUtil {
     // SQL_EXECUTION_EXCEPTION (SQL-02000)
 
     /**
-     * whether OK
+     * whether unique constraint violation.
      *
      * @param e exception
-     * @return {@code true} if OK
+     * @return {@code true} if unique constraint violation
      */
     public boolean isUniqueConstraintViolation(TsurugiDiagnosticCodeProvider e) {
         var lowException = e.findLowServerException().orElse(null);
@@ -56,7 +56,7 @@ public class TsurugiExceptionUtil {
     }
 
     /**
-     * whether target not found
+     * whether target not found.
      *
      * @param e exception
      * @return {@code true} if target not found
@@ -72,7 +72,7 @@ public class TsurugiExceptionUtil {
     }
 
     /**
-     * whether inactive transaction
+     * whether inactive transaction.
      *
      * @param e exception
      * @return {@code true} if inactive transaction
@@ -90,7 +90,7 @@ public class TsurugiExceptionUtil {
     // CC_EXCEPTION (SQL-04000)
 
     /**
-     * whether serialization error
+     * whether serialization error.
      *
      * @param e exception
      * @return {@code true} if serialization error
@@ -106,7 +106,7 @@ public class TsurugiExceptionUtil {
     }
 
     /**
-     * whether conflict on write preserve
+     * whether conflict on write preserve.
      *
      * @param e exception
      * @return {@code true} if conflict on write preserve

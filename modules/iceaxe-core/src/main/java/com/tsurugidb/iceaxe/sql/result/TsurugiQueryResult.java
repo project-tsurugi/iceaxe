@@ -36,7 +36,7 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
- * Tsurugi SQL Result for query
+ * Tsurugi SQL Result for query.
  *
  * @param <R> result type
  * @see TsurugiSqlQuery#execute(TsurugiTransaction)
@@ -92,16 +92,17 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * set ResetSet-timeout
+     * set ResetSet-timeout.
      *
-     * @param timeout time
+     * @param time time value
+     * @param unit time unit
      */
     public void setRsConnectTimeout(long time, TimeUnit unit) {
         setRsConnectTimeout(TgTimeValue.of(time, unit));
     }
 
     /**
-     * set ResetSet-timeout
+     * set ResetSet-timeout.
      *
      * @param timeout time
      */
@@ -110,7 +111,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * set ResetSet-close-timeout
+     * set ResetSet-close-timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -120,7 +121,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * set ResetSet-close-timeout
+     * set ResetSet-close-timeout.
      *
      * @param timeout time
      */
@@ -131,7 +132,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * add event listener
+     * add event listener.
      *
      * @param listener event listener
      * @return this
@@ -160,7 +161,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * get {@link ResultSet}
+     * get {@link ResultSet}.
      *
      * @return SQL result set
      * @throws IOException
@@ -186,6 +187,14 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return this.lowResultSet;
     }
 
+    /**
+     * Advances to the next record.
+     *
+     * @return {@code false} if there are no more rows
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected boolean nextLowRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         boolean exists;
         try {
@@ -222,7 +231,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * get hasNextRow
+     * get hasNextRow.
      *
      * @return hasNextRow
      */
@@ -230,6 +239,14 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return this.hasNextRow;
     }
 
+    /**
+     * get record.
+     *
+     * @return record
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected TsurugiResultRecord getRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.record == null) {
             try {
@@ -243,6 +260,15 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return this.record;
     }
 
+    /**
+     * convert record to R.
+     *
+     * @param record record
+     * @return record(R type)
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws TsurugiTransactionException
+     */
     protected R convertRecord(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         R result;
         try {
@@ -260,7 +286,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * get number of read
+     * get number of read.
      *
      * @return number of read
      */
@@ -271,7 +297,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     // column name
 
     /**
-     * get name list
+     * get name list.
      *
      * @return list of column name
      * @throws IOException
@@ -337,7 +363,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * get record list
+     * get record list.
      *
      * @return list of record
      * @throws IOException
@@ -357,7 +383,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
-     * get one record
+     * get one record.
      *
      * @return record
      * @throws IOException
@@ -377,7 +403,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @throws UncheckedIOException
+     * @throws InterruptedRuntimeException
      * @throws TsurugiTransactionRuntimeException
      */
     @Override
@@ -394,15 +423,30 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         }
     }
 
+    /**
+     * Iterator for {@link TsurugiQueryResult}.
+     */
     protected class TsurugiQueryResultIterator implements Iterator<R> {
         private final TsurugiResultRecord record;
         private boolean moveNext = true;
         private boolean hasNext;
 
+        /**
+         * Creates a new instance.
+         *
+         * @param record record
+         */
         public TsurugiQueryResultIterator(TsurugiResultRecord record) {
             this.record = record;
         }
 
+        /**
+         * move next record.
+         *
+         * @throws UncheckedIOException
+         * @throws InterruptedRuntimeException
+         * @throws TsurugiTransactionRuntimeException
+         */
         protected void moveNext() {
             if (this.moveNext) {
                 try {
@@ -420,12 +464,27 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             }
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @throws UncheckedIOException
+         * @throws InterruptedRuntimeException
+         * @throws TsurugiTransactionRuntimeException
+         */
         @Override
         public boolean hasNext() {
             moveNext();
             return this.hasNext;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @throws NoSuchElementException
+         * @throws UncheckedIOException
+         * @throws InterruptedRuntimeException
+         * @throws TsurugiTransactionRuntimeException
+         */
         @Override
         public R next() {
             moveNext();
@@ -450,7 +509,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     }
 
     /**
+     * {@inheritDoc}
+     *
      * @throws UncheckedIOException
+     * @throws InterruptedRuntimeException
      * @throws TsurugiTransactionRuntimeException
      * @see #whileEach(TsurugiTransactionConsumer)
      */

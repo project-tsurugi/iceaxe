@@ -11,14 +11,14 @@ import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;;
 
 /**
- * Tsurugi Parameter Mapping for Entity
+ * Tsurugi Parameter Mapping for Entity.
  *
  * @param <P> parameter type (e.g. Entity)
  */
 public class TgConverterParameterMapping<P> extends TgParameterMapping<P> {
 
     /**
-     * create Parameter Mapping
+     * create Parameter Mapping.
      *
      * @param <P>                parameter type
      * @param variables          bind variables
@@ -33,7 +33,7 @@ public class TgConverterParameterMapping<P> extends TgParameterMapping<P> {
     private final Function<P, TgBindParameters> parameterConverter;
 
     /**
-     * Tsurugi Parameter Mapping
+     * Creates a new instance.
      *
      * @param variables          bind variables
      * @param parameterConverter converter from P to Parameter

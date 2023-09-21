@@ -16,20 +16,20 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * convert type utility
+ * convert type utility.
  */
 public class IceaxeConvertUtil {
 
+    /** convert type utility singleton instance */
     public static final IceaxeConvertUtil INSTANCE = new IceaxeConvertUtil();
 
     /**
-     * convert to Boolean
+     * convert to Boolean.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public Boolean toBoolean(@Nullable Object obj) {
+    public @Nullable Boolean toBoolean(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -44,8 +44,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected Boolean convertBoolean(@Nonnull Object obj) {
+    /**
+     * convert to Boolean.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable Boolean convertBoolean(@Nonnull Object obj) {
         if (obj instanceof Boolean) {
             return (Boolean) obj;
         }
@@ -68,13 +73,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to Integer
+     * convert to Integer.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public Integer toInt(@Nullable Object obj) {
+    public @Nullable Integer toInt(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -89,8 +93,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected Integer convertInteger(@Nonnull Object obj) {
+    /**
+     * convert to Integer.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable Integer convertInteger(@Nonnull Object obj) {
         if (obj instanceof Number) {
             return ((Number) obj).intValue();
         }
@@ -101,13 +110,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to Long
+     * convert to Long.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public Long toLong(@Nullable Object obj) {
+    public @Nullable Long toLong(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -122,8 +130,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected Long convertLong(@Nonnull Object obj) {
+    /**
+     * convert to Long.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable Long convertLong(@Nonnull Object obj) {
         if (obj instanceof Number) {
             return ((Number) obj).longValue();
         }
@@ -134,13 +147,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to Float
+     * convert to Float.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public Float toFloat(@Nullable Object obj) {
+    public @Nullable Float toFloat(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -155,8 +167,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected Float convertFloat(@Nonnull Object obj) {
+    /**
+     * convert to Float.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable Float convertFloat(@Nonnull Object obj) {
         if (obj instanceof Number) {
             return ((Number) obj).floatValue();
         }
@@ -167,13 +184,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to Double
+     * convert to Double.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public Double toDouble(@Nullable Object obj) {
+    public @Nullable Double toDouble(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -188,8 +204,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected Double convertDouble(@Nonnull Object obj) {
+    /**
+     * convert to Double.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable Double convertDouble(@Nonnull Object obj) {
         if (obj instanceof Number) {
             return ((Number) obj).doubleValue();
         }
@@ -200,13 +221,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to BigDecimal
+     * convert to BigDecimal.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public BigDecimal toDecimal(@Nullable Object obj) {
+    public @Nullable BigDecimal toDecimal(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -221,8 +241,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected BigDecimal convertBigDecimal(@Nonnull Object obj) {
+    /**
+     * convert to BigDecimal.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable BigDecimal convertBigDecimal(@Nonnull Object obj) {
         if (obj instanceof BigDecimal) {
             return (BigDecimal) obj;
         }
@@ -245,13 +270,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to String
+     * convert to String.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public String toString(@Nullable Object obj) {
+    public @Nullable String toString(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -266,8 +290,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected String convertString(@Nonnull Object obj) {
+    /**
+     * convert to String.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable String convertString(@Nonnull Object obj) {
         if (obj instanceof String) {
             return (String) obj;
         }
@@ -278,13 +307,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to byte[]
+     * convert to byte[].
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public byte[] toBytes(@Nullable Object obj) {
+    public @Nullable byte[] toBytes(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -299,8 +327,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected byte[] convertBytes(@Nonnull Object obj) {
+    /**
+     * convert to byte[].
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable byte[] convertBytes(@Nonnull Object obj) {
         if (obj instanceof byte[]) {
             return (byte[]) obj;
         }
@@ -308,13 +341,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to boolean[]
+     * convert to boolean[].
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public boolean[] toBits(@Nullable Object obj) {
+    public @Nullable boolean[] toBits(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -329,8 +361,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected boolean[] convertBits(@Nonnull Object obj) {
+    /**
+     * convert to boolean[].
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable boolean[] convertBits(@Nonnull Object obj) {
         if (obj instanceof boolean[]) {
             return (boolean[]) obj;
         }
@@ -338,13 +375,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to date
+     * convert to date.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public LocalDate toDate(@Nullable Object obj) {
+    public @Nullable LocalDate toDate(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -359,8 +395,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected LocalDate convertLocalDate(@Nonnull Object obj) {
+    /**
+     * convert to date.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable LocalDate convertLocalDate(@Nonnull Object obj) {
         if (obj instanceof LocalDate) {
             return (LocalDate) obj;
         }
@@ -387,13 +428,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to time
+     * convert to time.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public LocalTime toTime(@Nullable Object obj) {
+    public @Nullable LocalTime toTime(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -408,8 +448,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected LocalTime convertLocalTime(@Nonnull Object obj) {
+    /**
+     * convert to time.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable LocalTime convertLocalTime(@Nonnull Object obj) {
         if (obj instanceof LocalTime) {
             return (LocalTime) obj;
         }
@@ -436,13 +481,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to dateTime
+     * convert to dateTime.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public LocalDateTime toDateTime(@Nullable Object obj) {
+    public @Nullable LocalDateTime toDateTime(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -457,8 +501,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected LocalDateTime convertDateTime(@Nonnull Object obj) {
+    /**
+     * convert to dateTime.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable LocalDateTime convertDateTime(@Nonnull Object obj) {
         if (obj instanceof LocalDateTime) {
             return ((LocalDateTime) obj);
         }
@@ -479,13 +528,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to offset time
+     * convert to offset time.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public OffsetTime toOffsetTime(@Nullable Object obj) {
+    public @Nullable OffsetTime toOffsetTime(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -500,8 +548,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected OffsetTime convertOffsetTime(@Nonnull Object obj) {
+    /**
+     * convert to offset time.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable OffsetTime convertOffsetTime(@Nonnull Object obj) {
         if (obj instanceof OffsetTime) {
             return ((OffsetTime) obj);
         }
@@ -518,13 +571,12 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to offset dateTime
+     * convert to offset dateTime.
      *
      * @param obj value
      * @return value
      */
-    @Nullable
-    public OffsetDateTime toOffsetDateTime(@Nullable Object obj) {
+    public @Nullable OffsetDateTime toOffsetDateTime(@Nullable Object obj) {
         if (obj == null) {
             return null;
         }
@@ -539,8 +591,13 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected OffsetDateTime convertOffsetDateTime(@Nonnull Object obj) {
+    /**
+     * convert to offset dateTime.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable OffsetDateTime convertOffsetDateTime(@Nonnull Object obj) {
         if (obj instanceof OffsetDateTime) {
             return ((OffsetDateTime) obj);
         }
@@ -554,14 +611,13 @@ public class IceaxeConvertUtil {
     }
 
     /**
-     * convert to ZonedDateTime
+     * convert to ZonedDateTime.
      *
      * @param obj  value
      * @param zone time-zone
      * @return value
      */
-    @Nullable
-    public ZonedDateTime toZonedDateTime(@Nullable Object obj, @Nonnull ZoneId zone) {
+    public @Nullable ZonedDateTime toZonedDateTime(@Nullable Object obj, @Nonnull ZoneId zone) {
         if (obj == null) {
             return null;
         }
@@ -576,8 +632,14 @@ public class IceaxeConvertUtil {
         throw createException(obj, null);
     }
 
-    @Nullable
-    protected ZonedDateTime convertZonedDateTime(@Nonnull Object obj, @Nonnull ZoneId zone) {
+    /**
+     * convert to ZonedDateTime.
+     *
+     * @param obj  value
+     * @param zone time-zone
+     * @return value
+     */
+    protected @Nullable ZonedDateTime convertZonedDateTime(@Nonnull Object obj, @Nonnull ZoneId zone) {
         if (obj instanceof ZonedDateTime) {
             return ((ZonedDateTime) obj).withZoneSameInstant(zone);
         }
@@ -594,8 +656,13 @@ public class IceaxeConvertUtil {
         return null;
     }
 
-    @Nullable
-    protected Instant convertInstant(@Nonnull Object obj) {
+    /**
+     * convert to Instance.
+     *
+     * @param obj value
+     * @return value
+     */
+    protected @Nullable Instant convertInstant(@Nonnull Object obj) {
         if (obj instanceof Instant) {
             return (Instant) obj;
         }
@@ -605,7 +672,14 @@ public class IceaxeConvertUtil {
         return null;
     }
 
-    protected RuntimeException createException(Object obj, Throwable cause) {
+    /**
+     * Creates a new exception instance.
+     *
+     * @param obj   value
+     * @param cause cause exception
+     * @return exception
+     */
+    protected RuntimeException createException(@Nonnull Object obj, @Nullable Throwable cause) {
         return new UnsupportedOperationException(MessageFormat.format("unsupported type error. value={0}({1})", obj, obj.getClass()), cause);
     }
 }

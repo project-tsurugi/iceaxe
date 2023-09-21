@@ -24,7 +24,7 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
 /**
- * Tsurugi Bind Parameters for {@link TsurugiSqlPrepared}
+ * Tsurugi Bind Parameters for {@link TsurugiSqlPrepared}.
  *
  * @see TsurugiSqlPreparedQuery#execute(com.tsurugidb.iceaxe.transaction.TsurugiTransaction, Object)
  * @see TsurugiSqlPreparedStatement#execute(com.tsurugidb.iceaxe.transaction.TsurugiTransaction, Object)
@@ -32,7 +32,7 @@ import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 public class TgBindParameters {
 
     /**
-     * create bind parameters
+     * create bind parameters.
      *
      * @return bind parameters
      */
@@ -41,7 +41,7 @@ public class TgBindParameters {
     }
 
     /**
-     * create bind parameters
+     * create bind parameters.
      *
      * @param parameters bind parameter
      * @return bind parameters
@@ -55,7 +55,7 @@ public class TgBindParameters {
     }
 
     /**
-     * create bind parameters
+     * create bind parameters.
      *
      * @param parameters bind parameter
      * @return bind parameters
@@ -76,14 +76,14 @@ public class TgBindParameters {
     private final List<TgBindParameter> parameterList = new ArrayList<>();
 
     /**
-     * Tsurugi Parameter for PreparedStatement
+     * Creates a new instance.
      */
     public TgBindParameters() {
         // do nothing
     }
 
     /**
-     * add value(boolean)
+     * add value(boolean).
      *
      * @param name  name
      * @param value value
@@ -95,7 +95,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(boolean)
+     * add value(boolean).
      *
      * @param name  name
      * @param value value
@@ -107,7 +107,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(int)
+     * add value(int).
      *
      * @param name  name
      * @param value value
@@ -119,7 +119,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(int)
+     * add value(int).
      *
      * @param name  name
      * @param value value
@@ -131,7 +131,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(long)
+     * add value(long).
      *
      * @param name  name
      * @param value value
@@ -143,7 +143,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(long)
+     * add value(long).
      *
      * @param name  name
      * @param value value
@@ -155,7 +155,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(float)
+     * add value(float).
      *
      * @param name  name
      * @param value value
@@ -167,7 +167,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(float)
+     * add value(float).
      *
      * @param name  name
      * @param value value
@@ -179,7 +179,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(double)
+     * add value(double).
      *
      * @param name  name
      * @param value value
@@ -191,7 +191,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(double)
+     * add value(double).
      *
      * @param name  name
      * @param value value
@@ -203,7 +203,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(decimal)
+     * add value(decimal).
      *
      * @param name  name
      * @param value value
@@ -215,7 +215,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(decimal)
+     * add value(decimal).
      *
      * @param name  name
      * @param value value
@@ -227,7 +227,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(decimal)
+     * add value(decimal).
      *
      * @param name  name
      * @param value value
@@ -241,7 +241,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(String)
+     * add value(String).
      *
      * @param name  name
      * @param value value
@@ -253,7 +253,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(byte[])
+     * add value(byte[]).
      *
      * @param name  name
      * @param value value
@@ -265,7 +265,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(boolean[])
+     * add value(boolean[]).
      *
      * @param name  name
      * @param value value
@@ -277,7 +277,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(date)
+     * add value(date).
      *
      * @param name  name
      * @param value value
@@ -289,7 +289,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(time)
+     * add value(time).
      *
      * @param name  name
      * @param value value
@@ -301,7 +301,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(dateTime)
+     * add value(dateTime).
      *
      * @param name  name
      * @param value value
@@ -313,7 +313,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(offset time)
+     * add value(offset time).
      *
      * @param name  name
      * @param value value
@@ -325,7 +325,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(offset dateTime)
+     * add value(offset dateTime).
      *
      * @param name  name
      * @param value value
@@ -337,7 +337,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(zoned dateTime)
+     * add value(zoned dateTime).
      *
      * @param name  name
      * @param value value
@@ -349,7 +349,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(boolean)
+     * add value(boolean).
      *
      * @param name  name
      * @param value value
@@ -360,7 +360,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(boolean)
+     * add value(boolean).
      *
      * @param name  name
      * @param value value
@@ -371,7 +371,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(int)
+     * add value(int).
      *
      * @param name  name
      * @param value value
@@ -382,7 +382,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(int)
+     * add value(int).
      *
      * @param name  name
      * @param value value
@@ -393,7 +393,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(long)
+     * add value(long).
      *
      * @param name  name
      * @param value value
@@ -404,7 +404,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(long)
+     * add value(long).
      *
      * @param name  name
      * @param value value
@@ -415,7 +415,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(float)
+     * add value(float).
      *
      * @param name  name
      * @param value value
@@ -426,7 +426,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(float)
+     * add value(float).
      *
      * @param name  name
      * @param value value
@@ -437,7 +437,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(double)
+     * add value(double).
      *
      * @param name  name
      * @param value value
@@ -448,7 +448,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(double)
+     * add value(double).
      *
      * @param name  name
      * @param value value
@@ -459,7 +459,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(decimal)
+     * add value(decimal).
      *
      * @param name  name
      * @param value value
@@ -470,7 +470,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(decimal)
+     * add value(decimal).
      *
      * @param name  name
      * @param value value
@@ -482,7 +482,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(decimal)
+     * add value(decimal).
      *
      * @param name  name
      * @param value value
@@ -495,7 +495,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(String)
+     * add value(String).
      *
      * @param name  name
      * @param value value
@@ -506,7 +506,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(byte[])
+     * add value(byte[]).
      *
      * @param name  name
      * @param value value
@@ -517,7 +517,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(boolean[])
+     * add value(boolean[]).
      *
      * @param name  name
      * @param value value
@@ -528,7 +528,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(date)
+     * add value(date).
      *
      * @param name  name
      * @param value value
@@ -539,7 +539,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(time)
+     * add value(time).
      *
      * @param name  name
      * @param value value
@@ -550,7 +550,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(dateTime)
+     * add value(dateTime).
      *
      * @param name  name
      * @param value value
@@ -561,7 +561,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(offset time)
+     * add value(offset time).
      *
      * @param name  name
      * @param value value
@@ -572,7 +572,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(offset dateTime)
+     * add value(offset dateTime).
      *
      * @param name  name
      * @param value value
@@ -583,7 +583,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add value(zoned dateTime)
+     * add value(zoned dateTime).
      *
      * @param name  name
      * @param value value
@@ -594,7 +594,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add parameter
+     * add parameter.
      *
      * @param parameter parameter
      * @return this
@@ -605,7 +605,7 @@ public class TgBindParameters {
     }
 
     /**
-     * add parameter
+     * add parameter.
      *
      * @param other parameters
      * @return this
@@ -616,7 +616,7 @@ public class TgBindParameters {
     }
 
     /**
-     * convert to {@link Parameter} list
+     * convert to {@link Parameter} list.
      *
      * @return parameter list
      */
