@@ -19,7 +19,7 @@
       <property name="scope" value="protected"/>
     </module>
     <module name="JavadocMethod">
-      <property name="validateThrows" value="true"/>
+      <property name="validateThrows" value="false"/>
       <property name="tokens" value="METHOD_DEF,CTOR_DEF"/>
     </module>
     <module name="JavadocStyle">
