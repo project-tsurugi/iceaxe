@@ -20,8 +20,6 @@ jobs:
         shell: bash
     env:
       JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
-      GPR_USER: ${{ github.repository_owner }}
-      GPR_KEY: ${{ secrets.GHCR_PAT }}
 
     steps:
       - name: Setup_Java
@@ -53,8 +51,6 @@ jobs:
 
   Publish:
     uses: ./.github/workflows/ci-publish.yml
-    if: (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
+    if: github.repository_owner == 'project-tsurugi' && (contains(github.ref, '/tags/') || contains(github.ref, '/heads/master'))
     needs: Build
     secrets: inherit
-    permissions:
-      packages: write
