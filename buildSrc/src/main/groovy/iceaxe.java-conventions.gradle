@@ -70,6 +70,8 @@ checkstyleTest.enabled = false
 spotbugsMain.enabled = false
 spotbugsTest.enabled = false
 
+javadoc.failOnError = false
+
 tasks.withType(JavaCompile) { task ->
     task.options.encoding = 'UTF-8'
 }
