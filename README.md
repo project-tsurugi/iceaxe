@@ -1,5 +1,7 @@
 # Iceaxe - Java High-level-API
 
+[![javadoc](https://javadoc.io/badge2/com.tsurugidb.iceaxe/iceaxe-core/javadoc.svg)](https://javadoc.io/doc/com.tsurugidb.iceaxe/iceaxe-core)
+
 ## Requirements
 
 * Java `>= 11`
