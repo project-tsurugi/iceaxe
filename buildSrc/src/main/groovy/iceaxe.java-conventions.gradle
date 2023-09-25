@@ -10,6 +10,7 @@ version = '1.0.0-SNAPSHOT'
 
 ext {
     tsubakuroVersion = '1.0.0-SNAPSHOT'
+    isReleaseVersion = !version.endsWith("SNAPSHOT")
 }
 
 if (hasProperty('mavenLocal')) {
