@@ -19,24 +19,16 @@ if (hasProperty('mavenLocal')) {
 } else {
     repositories {
         maven {
-            url 'https://maven.pkg.github.com/project-tsurugi/*'
+            url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
             content {
                 includeGroupByRegex 'com\\.tsurugidb.*'
-            }
-            credentials {
-                username findProperty('gpr.user') ?: System.getenv('GPR_USER')
-                password findProperty('gpr.key') ?: System.getenv('GPR_KEY')
             }
         }
     }
 }
 
 repositories {
-    mavenCentral {
-        content {
-            excludeGroupByRegex 'com\\.tsurugidb.*'
-        }
-    }
+    mavenCentral()
 }
 
 configurations.all {
@@ -48,6 +40,7 @@ java {
         languageVersion = JavaLanguageVersion.of(11)
     }
     withSourcesJar()
+    withJavadocJar()
 }
 
 dependencies {
@@ -76,6 +69,8 @@ checkstyleMain.enabled = false
 checkstyleTest.enabled = false
 spotbugsMain.enabled = false
 spotbugsTest.enabled = false
+
+javadoc.failOnError = false
 
 tasks.withType(JavaCompile) { task ->
     task.options.encoding = 'UTF-8'

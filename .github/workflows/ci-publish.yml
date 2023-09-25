@@ -1,27 +1,17 @@
 name: Iceaxe-CI-Publish
 
 on: [workflow_dispatch, workflow_call]
+concurrency: ${{ github.workflow }}
 
 jobs:
   Publish:
-    runs-on: [self-hosted, docker]
-    permissions:
-      packages: write
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-    container:
-      image: ghcr.io/project-tsurugi/oltp-sandbox:ubuntu-22.04
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GHCR_PAT }}
-      volumes:
-        - ${{ vars.gradle_cache_dir }}:/root/.gradle
     defaults:
       run:
         shell: bash
     env:
       JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
-      GPR_USER: ${{ github.repository_owner }}
-      GPR_KEY: ${{ secrets.GHCR_PAT }}
 
     steps:
       - name: Setup_Java
@@ -36,6 +26,11 @@ jobs:
           token: ${{ secrets.GHA_PAT }}
 
       - name: Publish
-        if: contains(github.ref, '/heads/master')
         run: |
           ./gradlew -i iceaxe-core:showTsubakuroManifest clean publish
+        env:
+          ST_OSSRH_USER: ${{ secrets.ST_OSSRH_USER }}
+          ST_OSSRH_PASSWORD: ${{ secrets.ST_OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
