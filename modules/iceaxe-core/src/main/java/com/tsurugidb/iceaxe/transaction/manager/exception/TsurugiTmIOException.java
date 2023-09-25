@@ -6,6 +6,7 @@ import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.status.TgTxStatus;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
@@ -15,6 +16,7 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 public class TsurugiTmIOException extends TsurugiIOException {
 
     private final TsurugiTransaction transaction;
+    private final TgTxStatus status;
     private final TgTmTxOption nextTmOption;
 
     /**
@@ -23,12 +25,14 @@ public class TsurugiTmIOException extends TsurugiIOException {
      * @param message      the detail message
      * @param transaction  transaction
      * @param cause        the cause
+     * @param status       transaction status
      * @param nextTmOption next transaction option
      */
     @IceaxeInternal
-    public TsurugiTmIOException(String message, TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
+    public TsurugiTmIOException(String message, TsurugiTransaction transaction, Exception cause, TgTxStatus status, TgTmTxOption nextTmOption) {
         super(createMessage(message, transaction, nextTmOption), cause);
         this.transaction = transaction;
+        this.status = status;
         this.nextTmOption = nextTmOption;
     }
 
@@ -63,6 +67,15 @@ public class TsurugiTmIOException extends TsurugiIOException {
         } catch (IOException | InterruptedException e) {
             return null;
         }
+    }
+
+    /**
+     * get transaction status.
+     *
+     * @return transaction status
+     */
+    public TgTxStatus getTransactionStatus() {
+        return this.status;
     }
 
     /**

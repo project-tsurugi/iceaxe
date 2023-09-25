@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.transaction.manager.exception;
 
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
+import com.tsurugidb.iceaxe.transaction.status.TgTxStatus;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
@@ -15,10 +16,11 @@ public class TsurugiTmRetryOverIOException extends TsurugiTmIOException {
      *
      * @param transaction  transaction
      * @param cause        the cause
+     * @param status       transaction status
      * @param nextTmOption next transaction option
      */
     @IceaxeInternal
-    public TsurugiTmRetryOverIOException(TsurugiTransaction transaction, Exception cause, TgTmTxOption nextTmOption) {
-        super("transaction retry over", transaction, cause, nextTmOption);
+    public TsurugiTmRetryOverIOException(TsurugiTransaction transaction, Exception cause, TgTxStatus status, TgTmTxOption nextTmOption) {
+        super("transaction retry over", transaction, cause, status, nextTmOption);
     }
 }

@@ -32,6 +32,7 @@ import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.iceaxe.transaction.status.TgTxStatus;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
@@ -301,12 +302,19 @@ public class TsurugiTransactionManager {
             }
 
             LOG.trace("tm.execute error", exception);
+            TgTxStatus status;
+            try {
+                status = transaction.getTransactionStatus();
+            } catch (Throwable t) {
+                t.addSuppressed(cause);
+                throw t;
+            }
             if (nextTmOption.isRetryOver()) {
                 event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause, nextTmOption));
-                throw new TsurugiTmRetryOverIOException(transaction, cause, nextTmOption);
+                throw new TsurugiTmRetryOverIOException(transaction, cause, status, nextTmOption);
             } else {
                 event(setting, cause, listener -> listener.transactionNotRetryable(transaction, cause, nextTmOption));
-                throw new TsurugiTmIOException(cause.getMessage(), transaction, cause, nextTmOption);
+                throw new TsurugiTmIOException(cause.getMessage(), transaction, cause, status, nextTmOption);
             }
         } catch (Throwable t) {
             if (!calledRollback) {
