@@ -1,6 +1,7 @@
-package com.tsurugidb.iceaxe.test.select;
+package com.tsurugidb.iceaxe.test.sql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Iterator;
@@ -12,9 +13,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.test.util.FutureResponseCloseWrapper;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
  * {@link TsurugiQueryResult} test
@@ -142,6 +147,21 @@ class DbQueryResultTest extends DbTestTableTester {
                     assertEquals(SIZE, result.getReadCount());
                 }
             });
+        }
+    }
+
+    @Test
+    void constructorError() throws Exception {
+        var session = getSession();
+        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
+            try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+                var future = FutureResponseCloseWrapper.of(transaction.getLowTransaction().executeQuery(ps.getSql()));
+
+                transaction.close();
+                var e = assertThrows(TsurugiIOException.class, () -> new TsurugiQueryResult<>(0, transaction, ps, null, future, SELECT_MAPPING, null));
+                assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
+                assertTrue(future.isClosed());
+            }
         }
     }
 }

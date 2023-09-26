@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -16,11 +17,15 @@ import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.test.util.FutureResponseCloseWrapper;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.sql.SqlClient;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
+import com.tsurugidb.tsubakuro.sql.Transaction;
 
 /**
  * Transaction error test
@@ -219,5 +224,20 @@ class DbTransactionErrorTest extends DbTestTableTester {
             });
         });
         assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
+    }
+
+    @Test
+    void constructorError() throws Exception {
+        var session = DbTestConnector.createSession();
+
+        FutureResponseCloseWrapper<Transaction> future;
+        try (var client = SqlClient.attach(session.getLowSession())) {
+            future = FutureResponseCloseWrapper.of(client.createTransaction());
+        }
+
+        session.close();
+        var e = assertThrows(TsurugiIOException.class, () -> new TsurugiTransaction(session, future, TgTxOption.ofOCC()));
+        assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
+        assertTrue(future.isClosed());
     }
 }
