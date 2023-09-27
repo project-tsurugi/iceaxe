@@ -11,6 +11,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableListHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
+import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
@@ -62,9 +63,9 @@ public class TgSessionOption {
         /** {@link TsurugiExplainHelper} close */
         EXPLAIN_CLOSE,
 
-        /** {@link TsurugiPreparedStatementWithLowPs} connect */
+        /** {@link TsurugiSqlPrepared} connect */
         PS_CONNECT,
-        /** {@link TsurugiPreparedStatementWithLowPs} close */
+        /** {@link TsurugiSqlPrepared} close */
         PS_CLOSE,
 
         /** {@link TsurugiTransaction} begin */

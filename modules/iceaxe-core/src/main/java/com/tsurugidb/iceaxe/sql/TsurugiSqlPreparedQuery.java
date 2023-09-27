@@ -86,7 +86,7 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @throws IOException                 if an I/O error occurs while execute query
      * @throws InterruptedException        if interrupted while execute query
      * @throws TsurugiTransactionException if server error occurs while execute query
-     * @see TsurugiTransaction#executeQuery(TsurugiSqlPreparedQuery, P)
+     * @see TsurugiTransaction#executeQuery(TsurugiSqlPreparedQuery, Object)
      */
     public TsurugiQueryResult<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();

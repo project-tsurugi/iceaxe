@@ -468,9 +468,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @throws IOException                 if an I/O error occurs while execute query
      * @throws InterruptedException        if interrupted while execute query
      * @throws TsurugiTransactionException if server error occurs while execute query
-     * @see #executeAndForEach(TsurugiSqlPreparedQuery, P, TsurugiTransactionConsumer)
-     * @see #executeAndFindRecord(TsurugiSqlPreparedQuery, P)
-     * @see #executeAndGetList(TsurugiSqlPreparedQuery, P)
+     * @see #executeAndForEach(TsurugiSqlPreparedQuery, Object, TsurugiTransactionConsumer)
+     * @see #executeAndFindRecord(TsurugiSqlPreparedQuery, Object)
+     * @see #executeAndGetList(TsurugiSqlPreparedQuery, Object)
      */
     public <P, R> TsurugiQueryResult<R> executeQuery(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_QUERY;
@@ -540,7 +540,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @throws IOException                 if an I/O error occurs while execute statement
      * @throws InterruptedException        if interrupted while execute statement
      * @throws TsurugiTransactionException if server error occurs while execute statement
-     * @see #executeAndGetCount(TsurugiSqlPreparedStatement, P)
+     * @see #executeAndGetCount(TsurugiSqlPreparedStatement, Object)
      */
     public <P> TsurugiStatementResult executeStatement(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_SATTEMENT;

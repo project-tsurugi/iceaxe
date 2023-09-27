@@ -95,7 +95,7 @@ public class TsurugiSessionTxFileLogConfig {
     public static final int EXPLAIN_LOG = 1;
     /** output explain to file */
     public static final int EXPLAIN_FILE = 2;
-    /** output explain to log & file */
+    /** output explain to log &amp; file */
     public static final int EXPLAIN_BOTH = EXPLAIN_LOG | EXPLAIN_FILE;
 
     /**

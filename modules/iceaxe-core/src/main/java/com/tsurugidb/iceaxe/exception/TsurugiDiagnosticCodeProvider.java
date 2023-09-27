@@ -102,7 +102,7 @@ public interface TsurugiDiagnosticCodeProvider {
      * get attempt number.
      *
      * @return attempt number
-     * @see TgTmTxOptionSupplier#get(int, TsurugiTransactionException)
+     * @see TgTmTxOptionSupplier#get(Object, int, com.tsurugidb.iceaxe.transaction.TsurugiTransaction, TsurugiTransactionException)
      */
     public default int getAttempt() {
         return findTransactionException().map(e -> e.getAttempt()).orElse(0);

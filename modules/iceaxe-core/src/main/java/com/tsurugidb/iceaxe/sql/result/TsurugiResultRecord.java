@@ -37,12 +37,11 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * <p>
  * The methods of this class are classified into the following three groups. If you use a certain group of methods, you basically cannot use the other group's methods.
  * </p>
- * <ul>
- * <li><code>current column</code> group
- * <ul>
- * <li>Get the value while moving the current column by {@link #moveCurrentColumnNext()}.<br>
- * Each column value can be retrieved only once.</li>
- * <li>
+ * <h2><code>current column</code> group</h2>
+ * <p>
+ * Get the value while moving the current column by {@link #moveCurrentColumnNext()}.<br>
+ * Each column value can be retrieved only once.
+ * </p>
  *
  * <pre>
  * while (record.moveCurrentColumnNext()) {
@@ -51,12 +50,10 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * }
  * </pre>
  *
- * </li>
- * </ul>
- * <li><code>name</code> group
- * <ul>
- * <li>Get the value by specifying the column name.</li>
- * <li>
+ * <h2><code>name</code> group</h2>
+ * <p>
+ * Get the value by specifying the column name.
+ * </p>
  *
  * <pre>
  * entity.setFoo(record.getInt("foo"));
@@ -64,14 +61,12 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * entity.setZzz(record.getString("zzz"));
  * </pre>
  *
- * </li>
- * </ul>
- * <li><code>next</code> group</li>
- * <ul>
- * <li>Move to the next column and get the value of the current column.<br>
+ * <h2><code>next</code> group</h2>
+ * <p>
+ * Move to the next column and get the value of the current column.<br>
  * Each column value can be retrieved only once.<br>
- * {@link #getCurrentColumnName()} and {@link #getCurrentColumnType()} can be used immediately after calling the next group method.</li>
- * <li>
+ * {@link #getCurrentColumnName()} and {@link #getCurrentColumnType()} can be used immediately after calling the next group method.
+ * </p>
  *
  * <pre>
  * entity.setFoo(record.nextInt());
@@ -79,9 +74,6 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * entity.setZzz(record.nextString());
  * </pre>
  *
- * </li>
- * </ul>
- * </ul>
  * <p>
  * This class is linked with {@link TsurugiQueryResult} and the instance is shared among multiple records.<br>
  * Therefore, this instance must not be held by the user program for the purpose of holding the value of the record.<br>
