@@ -44,6 +44,10 @@ java {
     withJavadocJar()
 }
 
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}
+
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
 }
