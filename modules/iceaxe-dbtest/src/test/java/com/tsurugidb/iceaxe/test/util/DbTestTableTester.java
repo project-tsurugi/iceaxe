@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -39,6 +41,9 @@ import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
+import com.tsurugidb.tsubakuro.sql.SqlServiceException;
+import com.tsurugidb.tsubakuro.sql.exception.SqlExecutionException;
 
 public class DbTestTableTester {
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -333,6 +338,12 @@ public class DbTestTableTester {
     protected void assertEqualsCode(DiagnosticCode expected, Throwable actual) {
         var code = findDiagnosticCode(actual);
         assertEquals(expected, code);
+
+        var expectedClass = findLowServerExceptionClass(expected);
+        if (expectedClass != null) {
+            var actualServerException = findLowServerException(actual);
+            assertEquals(expectedClass, actualServerException.getClass());
+        }
     }
 
     protected static DiagnosticCode findDiagnosticCode(Throwable t) {
@@ -367,6 +378,30 @@ public class DbTestTableTester {
             }
         }
         return null;
+    }
+
+    protected static Class<?> findLowServerExceptionClass(DiagnosticCode code) {
+        if (code instanceof IceaxeErrorCode) {
+            return null;
+        }
+        if (code instanceof SqlServiceCode) {
+            if (code == SqlServiceCode.SQL_SERVICE_EXCEPTION) {
+                return SqlServiceException.class;
+            }
+
+            var name = toCamelCase(code.name());
+            var className = SqlExecutionException.class.getPackage().getName() + "." + name;
+            try {
+                return Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                throw new AssertionError(e);
+            }
+        }
+        throw new AssertionError(code);
+    }
+
+    private static String toCamelCase(String snakeCase) {
+        return Arrays.stream(snakeCase.split("_")).map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1).toLowerCase()).collect(Collectors.joining());
     }
 
     protected static void assertEqualsTestTable(TestEntity... expected) throws IOException, InterruptedException {
