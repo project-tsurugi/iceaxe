@@ -39,6 +39,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
@@ -382,6 +383,9 @@ public class DbTestTableTester {
 
     protected static Class<?> findLowServerExceptionClass(DiagnosticCode code) {
         if (code instanceof IceaxeErrorCode) {
+            return null;
+        }
+        if (code instanceof CoreServiceCode) {
             return null;
         }
         if (code instanceof SqlServiceCode) {
