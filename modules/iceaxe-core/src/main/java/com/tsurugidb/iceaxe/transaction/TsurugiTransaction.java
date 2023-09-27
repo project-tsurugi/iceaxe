@@ -77,7 +77,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param session              session
      * @param lowTransactionFuture future of Transaction
      * @param txOption             transaction option
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
     public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption txOption) throws IOException {
@@ -288,8 +288,8 @@ public class TsurugiTransaction implements AutoCloseable {
      * convert to {@link Transaction}.
      *
      * @return transaction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction
+     * @throws InterruptedException if interrupted while retrieving transaction
      */
     @IceaxeInternal
 //  @ThreadSafe
@@ -324,8 +324,8 @@ public class TsurugiTransaction implements AutoCloseable {
      * Provides transaction id that is unique to for the duration of the database server's lifetime.
      *
      * @return the id String for this transaction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction
+     * @throws InterruptedException if interrupted while retrieving transaction
      */
     public String getTransactionId() throws IOException, InterruptedException {
         if (this.transactionId == null) {
@@ -390,9 +390,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * execute DDL.
      *
      * @param sql DDL
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute DDL
+     * @throws InterruptedException        if interrupted while execute DDL
+     * @throws TsurugiTransactionException if server error occurs while execute DDL
      */
     public void executeDdl(String sql) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_DDL;
@@ -426,9 +426,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param <R> result type
      * @param ps  SQL definition
      * @return SQL result ({@link java.io.Closeable})
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      * @see #executeAndForEach(TsurugiSqlQuery, TsurugiTransactionConsumer)
      * @see #executeAndFindRecord(TsurugiSqlQuery)
      * @see #executeAndGetList(TsurugiSqlQuery)
@@ -465,9 +465,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return SQL result ({@link java.io.Closeable})
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      * @see #executeAndForEach(TsurugiSqlPreparedQuery, P, TsurugiTransactionConsumer)
      * @see #executeAndFindRecord(TsurugiSqlPreparedQuery, P)
      * @see #executeAndGetList(TsurugiSqlPreparedQuery, P)
@@ -501,9 +501,9 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @param ps SQL definition
      * @return SQL result ({@link java.io.Closeable})
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute statement
+     * @throws InterruptedException        if interrupted while execute statement
+     * @throws TsurugiTransactionException if server error occurs while execute statement
      * @see #executeAndGetCount(TsurugiSqlStatement)
      */
     public TsurugiStatementResult executeStatement(TsurugiSqlStatement ps) throws IOException, InterruptedException, TsurugiTransactionException {
@@ -537,9 +537,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return SQL result ({@link java.io.Closeable})
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute statement
+     * @throws InterruptedException        if interrupted while execute statement
+     * @throws TsurugiTransactionException if server error occurs while execute statement
      * @see #executeAndGetCount(TsurugiSqlPreparedStatement, P)
      */
     public <P> TsurugiStatementResult executeStatement(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
@@ -573,9 +573,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @return SQL result ({@link java.io.Closeable})
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute batch
+     * @throws InterruptedException        if interrupted while execute batch
+     * @throws TsurugiTransactionException if server error occurs while execute batch
      * @see #executeAndGetCount(TsurugiSqlPreparedStatement, Collection)
      */
     public <P> TsurugiStatementResult executeBatch(TsurugiSqlPreparedStatement<P> ps, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {
@@ -608,9 +608,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param <R>    result type
      * @param ps     SQL definition
      * @param action The action to be performed for each record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      */
     public <R> void executeAndForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumer<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FOR_EACH;
@@ -644,9 +644,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param ps        SQL definition
      * @param parameter SQL parameter
      * @param action    The action to be performed for each record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      */
     public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FOR_EACH;
@@ -678,9 +678,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param <R> result type
      * @param ps  SQL definition
      * @return list of record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      */
     public <R> List<R> executeAndGetList(TsurugiSqlQuery<R> ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_LIST;
@@ -714,9 +714,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return list of record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      */
     public <P, R> List<R> executeAndGetList(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_LIST;
@@ -748,9 +748,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param <R> result type
      * @param ps  SQL definition
      * @return record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      */
     public <R> Optional<R> executeAndFindRecord(TsurugiSqlQuery<R> ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FIND_RECORD;
@@ -784,9 +784,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      */
     public <P, R> Optional<R> executeAndFindRecord(TsurugiSqlPreparedQuery<P, R> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FIND_RECORD;
@@ -817,9 +817,9 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @param ps SQL definition
      * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute statement
+     * @throws InterruptedException        if interrupted while execute statement
+     * @throws TsurugiTransactionException if server error occurs while execute statement
      */
     public int executeAndGetCount(TsurugiSqlStatement ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_COUNT;
@@ -852,9 +852,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param ps        SQL definition
      * @param parameter SQL parameter
      * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute statement
+     * @throws InterruptedException        if interrupted while execute statement
+     * @throws TsurugiTransactionException if server error occurs while execute statement
      */
     public <P> int executeAndGetCount(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_COUNT;
@@ -887,9 +887,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @return row count
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute batch
+     * @throws InterruptedException        if interrupted while execute batch
+     * @throws TsurugiTransactionException if server error occurs while execute batch
      */
     public <P> int executeAndGetCount(TsurugiSqlPreparedStatement<P> ps, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_COUNT;
@@ -928,9 +928,10 @@ public class TsurugiTransaction implements AutoCloseable {
          *
          * @param lowTransaction transaction
          * @return return value
-         * @throws IOException
+         * @throws IOException          if an I/O error occurs while execute
+         * @throws InterruptedException if interrupted while execute
          */
-        R run(Transaction lowTransaction) throws IOException;
+        R run(Transaction lowTransaction) throws IOException, InterruptedException;
     }
 
     /**
@@ -939,8 +940,8 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param <R>  type of return value
      * @param task transaction task
      * @return return value
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while execute
+     * @throws InterruptedException if interrupted while execute
      */
     @IceaxeInternal
     public <R> R executeLow(LowTransactionTask<R> task) throws IOException, InterruptedException {
@@ -953,9 +954,9 @@ public class TsurugiTransaction implements AutoCloseable {
     /**
      * Whether transaction is available.
      *
-     * @return true: available
-     * @throws IOException
-     * @throws InterruptedException
+     * @return {@code true} if available
+     * @throws IOException          if an I/O error occurs while retrieving transaction
+     * @throws InterruptedException if interrupted while retrieving transaction
      */
 //  @ThreadSafe
     public final synchronized boolean available() throws IOException, InterruptedException {
@@ -972,8 +973,8 @@ public class TsurugiTransaction implements AutoCloseable {
      * get transaction status.
      *
      * @return transaction status
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
 //  @ThreadSafe
     public TgTxStatus getTransactionStatus() throws IOException, InterruptedException {
@@ -986,9 +987,9 @@ public class TsurugiTransaction implements AutoCloseable {
      * do commit.
      *
      * @param commitType commit type
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while commit
+     * @throws InterruptedException        if interrupted while commit
+     * @throws TsurugiTransactionException if server error occurs while commit
      */
     public synchronized void commit(TgCommitType commitType) throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();
@@ -1026,9 +1027,9 @@ public class TsurugiTransaction implements AutoCloseable {
     /**
      * do rollback.
      *
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while rollback
+     * @throws InterruptedException        if interrupted while rollback
+     * @throws TsurugiTransactionException if server error occurs while rollback
      */
     public synchronized void rollback() throws IOException, InterruptedException, TsurugiTransactionException {
         checkClose();
@@ -1064,9 +1065,9 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @param finisher commit/rollback function
      * @param timeout  timeout
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute
+     * @throws InterruptedException        if interrupted while execute
+     * @throws TsurugiTransactionException if server error occurs while execute
      */
     protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, InterruptedException, TsurugiTransactionException {
         var transaction = getLowTransaction();
@@ -1097,7 +1098,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * add child object.
      *
      * @param closeable child object
-     * @throws IOException
+     * @throws IOException if already closed
      */
     @IceaxeInternal
     public void addChild(AutoCloseable closeable) throws IOException {
@@ -1156,7 +1157,7 @@ public class TsurugiTransaction implements AutoCloseable {
     /**
      * check close.
      *
-     * @throws IOException
+     * @throws IOException if already closed
      */
     protected void checkClose() throws IOException {
         if (isClosed()) {

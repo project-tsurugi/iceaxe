@@ -18,9 +18,9 @@ public interface TsurugiTransactionFunction<T, R> {
      *
      * @param t the function argument
      * @return the function result
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute
+     * @throws InterruptedException        if interrupted while execute
+     * @throws TsurugiTransactionException if server error occurs while execute
      */
     R apply(T t) throws IOException, InterruptedException, TsurugiTransactionException;
 }

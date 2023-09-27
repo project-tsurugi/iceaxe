@@ -18,9 +18,9 @@ public interface TsurugiTransactionBiConsumer<T, U> {
      *
      * @param t the first input argument
      * @param u the second input argument
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute
+     * @throws InterruptedException        if interrupted while execute
+     * @throws TsurugiTransactionException if server error occurs while execute
      */
     void accept(T t, U u) throws IOException, InterruptedException, TsurugiTransactionException;
 }

@@ -25,8 +25,8 @@ public class TsurugiTableListHelper {
      *
      * @param session tsurugi session
      * @return table list
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving table list
+     * @throws InterruptedException if interrupted while retrieving table list
      */
     public TgTableList getTableList(TsurugiSession session) throws IOException, InterruptedException {
         var lowSqlClient = session.getLowSqlClient();
@@ -41,7 +41,7 @@ public class TsurugiTableListHelper {
      *
      * @param lowSqlClient low SQL client
      * @return future of table list
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while retrieving table list
      */
     protected FutureResponse<TableList> getLowTableList(SqlClient lowSqlClient) throws IOException {
         return lowSqlClient.listTables();
@@ -53,8 +53,8 @@ public class TsurugiTableListHelper {
      * @param session            tsurugi session
      * @param lowTableListFuture future of low table list
      * @return table list
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving table list
+     * @throws InterruptedException if interrupted while retrieving table list
      */
     protected TgTableList getTableList(TsurugiSession session, FutureResponse<TableList> lowTableListFuture) throws IOException, InterruptedException {
         try (var closeable = IceaxeIoUtil.closeable(lowTableListFuture)) {

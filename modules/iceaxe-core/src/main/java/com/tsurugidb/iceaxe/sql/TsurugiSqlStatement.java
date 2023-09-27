@@ -28,7 +28,7 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
      *
      * @param session session
      * @param sql     SQL
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
     public TsurugiSqlStatement(TsurugiSession session, String sql) throws IOException {
@@ -69,9 +69,9 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
      *
      * @param transaction Transaction
      * @return SQL result
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute statement
+     * @throws InterruptedException        if interrupted while execute statement
+     * @throws TsurugiTransactionException if server error occurs while execute statement
      * @see TsurugiTransaction#executeStatement(TsurugiSqlStatement)
      */
     public TsurugiStatementResult execute(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {

@@ -27,8 +27,8 @@ public class TsurugiTransactionStatusHelper {
      *
      * @param transaction transaction
      * @return transaction status
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     public TgTxStatus getTransactionStatus(TsurugiTransaction transaction) throws IOException, InterruptedException {
         var lowTx = transaction.getLowTransaction();
@@ -43,7 +43,7 @@ public class TsurugiTransactionStatusHelper {
      *
      * @param lowTx low transaction
      * @return future of SQL service exception
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while retrieving transaction status
      */
     protected FutureResponse<SqlServiceException> getLowSqlServiceException(Transaction lowTx) throws IOException {
         return lowTx.getSqlServiceException();
@@ -55,8 +55,8 @@ public class TsurugiTransactionStatusHelper {
      * @param transaction transaction
      * @param lowFuture   future of SQL service exception
      * @return transaction status
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTxStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowFuture) throws IOException, InterruptedException {
         try (var closeable = IceaxeIoUtil.closeable(lowFuture)) {

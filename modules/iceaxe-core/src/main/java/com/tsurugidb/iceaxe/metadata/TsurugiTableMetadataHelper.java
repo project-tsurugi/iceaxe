@@ -52,8 +52,8 @@ public class TsurugiTableMetadataHelper {
      * @param session   tsurugi session
      * @param tableName table name
      * @return table metadata
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving table metadata
+     * @throws InterruptedException if interrupted while retrieving table metadata
      */
     public Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName) throws IOException, InterruptedException {
         var lowSqlClient = session.getLowSqlClient();
@@ -69,7 +69,7 @@ public class TsurugiTableMetadataHelper {
      * @param lowSqlClient low SQL client
      * @param tableName    table name
      * @return future of table metadata
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while retrieving table metadata
      */
     protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
         return lowSqlClient.getTableMetadata(tableName);
@@ -82,8 +82,8 @@ public class TsurugiTableMetadataHelper {
      * @param tableName              table name
      * @param lowTableMetadataFuture future of table metadata
      * @return table metadata
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving table metadata
+     * @throws InterruptedException if interrupted while retrieving table metadata
      */
     protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException, InterruptedException {
         try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {

@@ -27,7 +27,7 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
      *
      * @param config transaction file log config
      * @param file   file path
-     * @throws UncheckedIOException
+     * @throws UncheckedIOException if an I/O error occurs
      */
     public TsurugiSessionTxFileLogWriter(TsurugiSessionTxFileLogConfig config, Path file) throws UncheckedIOException {
         this.config = config;
@@ -48,7 +48,7 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
      * @param config transaction file log config
      * @param file   file path
      * @return print writer
-     * @throws IOException
+     * @throws IOException if an I/O error occurs opening or creating the file
      */
     protected PrintWriter createPrintWriter(TsurugiSessionTxFileLogConfig config, Path file) throws IOException {
         return new PrintWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8), config.autoFlush());
@@ -97,7 +97,7 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
      *
      * @param sqlId    sqlId
      * @param contents explain contents
-     * @throws IOException
+     * @throws IOException if an I/O error occurs writing to or creating the file
      */
     public void writeExplain(int sqlId, String contents) throws IOException {
         String fileName = String.format("sql-%d.explain.json", sqlId);

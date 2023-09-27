@@ -184,8 +184,8 @@ public class TgTmSetting {
      *
      * @param executeInfo {@link TgTmTxOptionSupplier#createExecuteInfo(int)}
      * @return transaction option
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     public TgTxOption getFirstTransactionOption(Object executeInfo) throws IOException, InterruptedException {
         var tmOption = getTransactionOption(executeInfo, 0, null, null);
@@ -207,8 +207,8 @@ public class TgTmSetting {
      * @param transaction transaction
      * @param exception   transaction exception
      * @return tm option
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      * @see TgTmTxOptionSupplier
      */
     public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {

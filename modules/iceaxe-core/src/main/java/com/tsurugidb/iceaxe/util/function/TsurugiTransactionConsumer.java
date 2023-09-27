@@ -16,9 +16,9 @@ public interface TsurugiTransactionConsumer<T> {
      * Performs this operation on the given argument.
      *
      * @param t the input argument
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute
+     * @throws InterruptedException        if interrupted while execute
+     * @throws TsurugiTransactionException if server error occurs while execute
      */
     void accept(T t) throws IOException, InterruptedException, TsurugiTransactionException;
 }

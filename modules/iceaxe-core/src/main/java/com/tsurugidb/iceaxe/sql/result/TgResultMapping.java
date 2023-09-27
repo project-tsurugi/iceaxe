@@ -103,9 +103,9 @@ public abstract class TgResultMapping<R> {
      *
      * @param record record
      * @return record(R type)
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving the column data
+     * @throws InterruptedException        if interrupted while retrieving the column data
+     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      */
     protected abstract R convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException;
 }

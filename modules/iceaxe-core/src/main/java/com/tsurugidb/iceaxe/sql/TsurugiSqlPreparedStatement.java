@@ -37,7 +37,7 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      * @param sql                        SQL
      * @param lowPreparedStatementFuture future of PreparedStatement
      * @param parameterMapping           parameter mapping
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
     public TsurugiSqlPreparedStatement(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) throws IOException {
@@ -79,9 +79,9 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return SQL result
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute statement
+     * @throws InterruptedException        if interrupted while execute statement
+     * @throws TsurugiTransactionException if server error occurs while execute statement
      * @see TsurugiTransaction#executeStatement(TsurugiSqlPreparedStatement, P)
      */
     public TsurugiStatementResult execute(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
@@ -114,9 +114,9 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      * @param transaction   Transaction
      * @param parameterList SQL parameter
      * @return SQL result
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute batch
+     * @throws InterruptedException        if interrupted while execute batch
+     * @throws TsurugiTransactionException if server error occurs while execute batch
      * @see TsurugiTransaction#executeBatch(TsurugiSqlPreparedStatement, Collection)
      */
     public TsurugiStatementResult executeBatch(TsurugiTransaction transaction, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {

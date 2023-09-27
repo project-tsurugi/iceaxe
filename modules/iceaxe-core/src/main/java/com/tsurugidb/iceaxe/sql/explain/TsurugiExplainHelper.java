@@ -29,8 +29,8 @@ public class TsurugiExplainHelper {
      * @param session tsurugi session
      * @param source  SQL
      * @return statement metadata
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving statement metadata
+     * @throws InterruptedException if interrupted while retrieving statement metadata
      */
     public TgStatementMetadata explain(TsurugiSession session, String source) throws IOException, InterruptedException {
         var sessionOption = session.getSessionOption();
@@ -67,8 +67,8 @@ public class TsurugiExplainHelper {
      * @param connectTimeout connect timeout
      * @param closeTimeout   close timeout
      * @return statement metadata
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving statement metadata
+     * @throws InterruptedException if interrupted while retrieving statement metadata
      */
     public TgStatementMetadata explain(TsurugiSession session, String source, IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout) throws IOException, InterruptedException {
         var lowSqlClient = session.getLowSqlClient();
@@ -84,7 +84,7 @@ public class TsurugiExplainHelper {
      * @param lowSqlClient low SQL client
      * @param source       SQL
      * @return future of statement metadata
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while retrieving statement metadata
      */
     protected FutureResponse<StatementMetadata> explainLow(SqlClient lowSqlClient, String source) throws IOException {
         return lowSqlClient.explain(source);
@@ -101,8 +101,8 @@ public class TsurugiExplainHelper {
      * @param connectTimeout connect timeout
      * @param closeTimeout   close timeout
      * @return statement metadata
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving statement metadata
+     * @throws InterruptedException if interrupted while retrieving statement metadata
      */
     public TgStatementMetadata explain(TsurugiSession session, String source, Object arguments, PreparedStatement lowPs, List<Parameter> lowParameter, IceaxeTimeout connectTimeout,
             IceaxeTimeout closeTimeout) throws IOException, InterruptedException {
@@ -120,7 +120,7 @@ public class TsurugiExplainHelper {
      * @param lowPs        prepared statement
      * @param lowParameter list of parameter
      * @return future of statement metadata
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while retrieving statement metadata
      */
     protected FutureResponse<StatementMetadata> explainLow(SqlClient lowSqlClient, PreparedStatement lowPs, List<Parameter> lowParameter) throws IOException {
         return lowSqlClient.explain(lowPs, lowParameter);
@@ -136,8 +136,8 @@ public class TsurugiExplainHelper {
      * @param connectTimeout             connect timeout
      * @param closeTimeout               close timeout
      * @return statement metadata
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving statement metadata
+     * @throws InterruptedException if interrupted while retrieving statement metadata
      */
     protected TgStatementMetadata getStatementMetadata(TsurugiSession session, String source, Object arguments, FutureResponse<StatementMetadata> lowStatementMetadataFuture,
             IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout) throws IOException, InterruptedException {

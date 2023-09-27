@@ -70,8 +70,8 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      * @param transaction transaction
      * @param exception   transaction exception
      * @return retry instruction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTmRetryInstruction test(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         TgTmRetryInstruction instruction;
@@ -122,8 +122,8 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      * @param transaction transaction
      * @param exception   transaction exception
      * @return retry instruction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTmRetryInstruction testOcc(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (isConflictOnWritePreserve(exception)) {
@@ -139,8 +139,8 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      * @param transaction transaction
      * @param exception   transaction exception
      * @return retry instruction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTmRetryInstruction testLtx(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (isConflictOnWritePreserve(exception)) {
@@ -156,8 +156,8 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      * @param transaction transaction
      * @param exception   transaction exception
      * @return retry instruction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTmRetryInstruction testRtx(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (isConflictOnWritePreserve(exception)) {
@@ -173,8 +173,8 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      * @param transaction transaction
      * @param exception   transaction exception
      * @return retry instruction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTmRetryInstruction testOther(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         return testCommon("OTHER", transaction, exception);
@@ -187,8 +187,8 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
      * @param transaction transaction
      * @param exception   transaction exception
      * @return retry instruction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTmRetryInstruction testCommon(String position, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (isRetryable(exception)) {

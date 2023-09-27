@@ -69,10 +69,11 @@ public class IceaxeCloseableSet {
     /**
      * close all Closeable.
      *
-     * @throws IOException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while disposing the resources
+     * @throws InterruptedException        if interrupted while requesting cancel
+     * @throws TsurugiTransactionException if server error occurs while disposing the resources
      */
-    public synchronized void closeInTransaction() throws IOException, TsurugiTransactionException {
+    public synchronized void closeInTransaction() throws IOException, InterruptedException, TsurugiTransactionException {
         if (closeableSet.isEmpty()) {
             return;
         }
@@ -93,6 +94,8 @@ public class IceaxeCloseableSet {
                     e = save.getCause();
                 } else if (save instanceof RuntimeException) {
                     e = save;
+                } else if (save instanceof InterruptedException) {
+                    e = save;
                 } else {
                     e = new IOException(save.getMessage(), save);
                 }
@@ -108,6 +111,8 @@ public class IceaxeCloseableSet {
                 throw (TsurugiTransactionException) e;
             } else if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
+            } else if (e instanceof InterruptedException) {
+                throw (InterruptedException) e;
             } else {
                 throw new AssertionError(e);
             }

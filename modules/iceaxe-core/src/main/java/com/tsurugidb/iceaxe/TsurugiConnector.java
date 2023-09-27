@@ -182,7 +182,7 @@ public class TsurugiConnector {
      * create session.
      *
      * @return session
-     * @throws IOException
+     * @throws IOException if an I/O error occurs during connection
      */
     public TsurugiSession createSession() throws IOException {
         return createSession(defaultCredential, defaultSessionOption);
@@ -193,7 +193,7 @@ public class TsurugiConnector {
      *
      * @param credential credential
      * @return session
-     * @throws IOException
+     * @throws IOException if an I/O error occurs during connection
      */
     public TsurugiSession createSession(Credential credential) throws IOException {
         return createSession(credential, defaultSessionOption);
@@ -204,7 +204,7 @@ public class TsurugiConnector {
      *
      * @param sessionOption session option
      * @return session
-     * @throws IOException
+     * @throws IOException if an I/O error occurs during connection
      */
     public TsurugiSession createSession(TgSessionOption sessionOption) throws IOException {
         return createSession(defaultCredential, sessionOption);
@@ -216,7 +216,7 @@ public class TsurugiConnector {
      * @param credential    credential
      * @param sessionOption session option
      * @return session
-     * @throws IOException
+     * @throws IOException if an I/O error occurs during connection
      */
     public TsurugiSession createSession(Credential credential, TgSessionOption sessionOption) throws IOException {
         LOG.trace("create session. credential={}, option={}", credential, sessionOption);
@@ -238,7 +238,7 @@ public class TsurugiConnector {
      * @param credential    credential
      * @param sessionOption session option
      * @return future of session
-     * @throws IOException
+     * @throws IOException if an I/O error occurs during connection
      */
     protected FutureResponse<? extends Session> createLowSession(@Nullable Credential credential, TgSessionOption sessionOption) throws IOException {
         var lowBuilder = SessionBuilder.connect(lowConnector);

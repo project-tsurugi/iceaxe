@@ -39,7 +39,7 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param lowPreparedStatementFuture future of PreparedStatement
      * @param parameterMapping           parameter mapping
      * @param resultMapping              result mapping
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
     public TsurugiSqlPreparedQuery(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping,
@@ -83,9 +83,9 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
      * @param transaction Transaction
      * @param parameter   SQL parameter
      * @return SQL result
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      * @see TsurugiTransaction#executeQuery(TsurugiSqlPreparedQuery, P)
      */
     public TsurugiQueryResult<R> execute(TsurugiTransaction transaction, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {

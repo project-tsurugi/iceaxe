@@ -180,8 +180,8 @@ public abstract class TgTmTxOptionSupplier {
      * @param transaction transaction (null if attempt==0)
      * @param exception   transaction exception (null if attempt==0)
      * @return transaction option
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     public final @Nonnull TgTmTxOption get(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         var tmOption = computeTmOption(executeInfo, attempt, transaction, exception);
@@ -199,8 +199,8 @@ public abstract class TgTmTxOptionSupplier {
      * @param transaction transaction (null if attempt==0)
      * @param exception   transaction exception (null if attempt==0)
      * @return transaction option
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTmTxOption computeTmOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (attempt == 0) {
@@ -240,8 +240,8 @@ public abstract class TgTmTxOptionSupplier {
      * @param transaction transaction
      * @param exception   Transaction Exception
      * @return retry instruction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTmRetryInstruction isRetryable(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         return getRetryPredicate().apply(transaction, exception);

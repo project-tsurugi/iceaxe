@@ -10,8 +10,8 @@ public interface IoRunnable {
     /**
      * execute.
      *
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while execute
+     * @throws InterruptedException if interrupted while execute
      */
     void run() throws IOException, InterruptedException;
 }

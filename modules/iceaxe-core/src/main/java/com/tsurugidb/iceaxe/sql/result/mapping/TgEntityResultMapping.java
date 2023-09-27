@@ -1435,9 +1435,9 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * merge record to columnConverterMap.
      *
      * @param record record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving metadata
+     * @throws InterruptedException        if interrupted while retrieving metadata
+     * @throws TsurugiTransactionException if server error occurs while retrieving metadata
      */
     protected synchronized void mergeColumnConverterMap(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.columnConverterMap != null) {

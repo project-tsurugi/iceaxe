@@ -33,9 +33,9 @@ public class TsurugiResultEntity {
      *
      * @param record Tsurugi Result Record
      * @return entity
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving the column data
+     * @throws InterruptedException        if interrupted while retrieving the column data
+     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      */
     public static TsurugiResultEntity of(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         var entity = new TsurugiResultEntity();
@@ -90,7 +90,7 @@ public class TsurugiResultEntity {
      *
      * @param index column index
      * @return column name
-     * @throws IndexOutOfBoundsException
+     * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
     public String getName(int index) {
         return getNameList().get(index);

@@ -33,7 +33,7 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      * @param session       session
      * @param sql           SQL
      * @param resultMapping result mapping
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
     public TsurugiSqlQuery(TsurugiSession session, String sql, TgResultMapping<R> resultMapping) throws IOException {
@@ -75,9 +75,9 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      *
      * @param transaction Transaction
      * @return SQL result
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
      * @see TsurugiTransaction#executeQuery(TsurugiSqlQuery)
      */
     public TsurugiQueryResult<R> execute(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException {

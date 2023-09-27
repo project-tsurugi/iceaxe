@@ -28,8 +28,8 @@ public final class IceaxeIoUtil {
      * @param future  future
      * @param timeout the maximum time to wait
      * @return result value
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while processing the request
+     * @throws InterruptedException if interrupted while processing the request
      */
     public static <V> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, InterruptedException {
         return getAndCloseFuture(future, timeout, TsurugiIOException::new);
@@ -42,9 +42,9 @@ public final class IceaxeIoUtil {
      * @param future  future
      * @param timeout the maximum time to wait
      * @return result value
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while processing the request
+     * @throws InterruptedException        if interrupted while processing the request
+     * @throws TsurugiTransactionException if server error occurs while processing the request
      */
     public static <V> V getAndCloseFutureInTransaction(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, InterruptedException, TsurugiTransactionException {
         return getAndCloseFuture(future, timeout, TsurugiTransactionException::new);
@@ -115,8 +115,8 @@ public final class IceaxeIoUtil {
      *
      * @param closeableSet Closeable set
      * @param runnable     close action
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while disposing the resources
+     * @throws InterruptedException if interrupted while disposing the resources
      */
     public static void close(IceaxeCloseableSet closeableSet, IoRunnable runnable) throws IOException, InterruptedException {
         List<Throwable> saveList = closeableSet.close();
@@ -153,8 +153,8 @@ public final class IceaxeIoUtil {
      * close resources.
      *
      * @param closeables AutoCloseable
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while disposing the resources
+     * @throws InterruptedException if interrupted while disposing the resources
      */
     public static void close(AutoCloseable... closeables) throws IOException, InterruptedException {
         close(closeables, TsurugiIOException.class, TsurugiIOException::new);
@@ -164,9 +164,9 @@ public final class IceaxeIoUtil {
      * close resources in transaction.
      *
      * @param closeables AutoCloseable
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while disposing the resources
+     * @throws InterruptedException        if interrupted while disposing the resources
+     * @throws TsurugiTransactionException if server error occurs while disposing the resources
      */
     public static void closeInTransaction(AutoCloseable... closeables) throws IOException, InterruptedException, TsurugiTransactionException {
         close(closeables, TsurugiTransactionException.class, TsurugiTransactionException::new);

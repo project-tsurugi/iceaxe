@@ -17,8 +17,8 @@ public interface TsurugiTmRetryPredicate {
      * @param transaction transaction
      * @param exception   exception
      * @return retry instruction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
      */
     TgTmRetryInstruction apply(TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException;
 }

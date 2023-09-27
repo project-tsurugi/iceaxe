@@ -27,6 +27,7 @@
       <property name="endOfSentenceFormat" value="([.?!。][ \t\n\r\f&lt;])|([.?!。]$)"/>
       <property name="tokens" value="ANNOTATION_DEF ,ANNOTATION_FIELD_DEF, CLASS_DEF, CTOR_DEF, ENUM_DEF, INTERFACE_DEF, METHOD_DEF, PACKAGE_DEF,RECORD_DEF, COMPACT_CTOR_DEF"/>
     </module>
+    <module name="NonEmptyAtclauseDescription"/>
 
     <module name="ConstantName"/>
     <module name="LocalFinalVariableName"/>

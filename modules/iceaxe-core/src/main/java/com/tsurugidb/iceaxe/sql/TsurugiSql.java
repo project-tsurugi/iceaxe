@@ -39,7 +39,7 @@ public abstract class TsurugiSql implements AutoCloseable {
      *
      * @param session session
      * @param sql     SQL
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     protected TsurugiSql(@Nonnull TsurugiSession session, @Nonnull String sql) throws IOException {
         this.iceaxeSqlId = SQL_DEFINITION_COUNT.incrementAndGet();
@@ -202,7 +202,7 @@ public abstract class TsurugiSql implements AutoCloseable {
     /**
      * check close.
      *
-     * @throws IOException
+     * @throws IOException if already closed
      */
     protected void checkClose() throws IOException {
         if (isClosed()) {

@@ -26,7 +26,7 @@ public abstract class TsurugiSqlResult implements AutoCloseable {
      * @param transaction  transaction
      * @param ps           SQL definition
      * @param parameter    SQL parameter
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
     public TsurugiSqlResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter) throws IOException {

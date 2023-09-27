@@ -15,7 +15,7 @@ public abstract class TsurugiSqlDirect extends TsurugiSql {
      *
      * @param session session
      * @param sql     SQL
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     protected TsurugiSqlDirect(TsurugiSession session, String sql) throws IOException {
         super(session, sql);
@@ -30,8 +30,8 @@ public abstract class TsurugiSqlDirect extends TsurugiSql {
      * Retrieves execution plan of the statement.
      *
      * @return statement metadata
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving statement metadata
+     * @throws InterruptedException if interrupted while retrieving statement metadata
      */
     public TgStatementMetadata explain() throws IOException, InterruptedException {
         var session = getSession();

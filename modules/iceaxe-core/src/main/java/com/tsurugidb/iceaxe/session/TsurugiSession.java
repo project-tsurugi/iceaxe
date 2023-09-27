@@ -188,8 +188,8 @@ public class TsurugiSession implements AutoCloseable {
      * get low SQL client.
      *
      * @return low SQL client
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while communicating to the server
+     * @throws InterruptedException if interrupted while communicating to the server
      */
     @IceaxeInternal
 //  @ThreadSafe
@@ -208,8 +208,8 @@ public class TsurugiSession implements AutoCloseable {
      * get session.
      *
      * @return session
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while communicating to the server
+     * @throws InterruptedException if interrupted while communicating to the server
      */
     @IceaxeInternal
 //  @ThreadSafe
@@ -273,8 +273,8 @@ public class TsurugiSession implements AutoCloseable {
      * get table names.
      *
      * @return table names
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving table list
+     * @throws InterruptedException if interrupted while retrieving table list
      */
 //  @ThreadSafe
     public List<String> getTableNameList() throws IOException, InterruptedException {
@@ -309,8 +309,8 @@ public class TsurugiSession implements AutoCloseable {
      *
      * @param tableName table name
      * @return table metadata (empty if table not found)
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving table metadata
+     * @throws InterruptedException if interrupted while retrieving table metadata
      */
 //  @ThreadSafe
     public Optional<TgTableMetadata> findTableMetadata(String tableName) throws IOException, InterruptedException {
@@ -365,7 +365,7 @@ public class TsurugiSession implements AutoCloseable {
      *
      * @param sql SQL
      * @return SQL query
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while create query
      */
 //  @ThreadSafe
     public TsurugiSqlQuery<TsurugiResultEntity> createQuery(String sql) throws IOException {
@@ -379,7 +379,7 @@ public class TsurugiSession implements AutoCloseable {
      * @param sql           SQL
      * @param resultMapping result mapping
      * @return SQL query
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while create query
      */
 //  @ThreadSafe
     public <R> TsurugiSqlQuery<R> createQuery(String sql, TgResultMapping<R> resultMapping) throws IOException {
@@ -397,8 +397,8 @@ public class TsurugiSession implements AutoCloseable {
      * @param sql              SQL
      * @param parameterMapping parameter mapping
      * @return SQL prepared query
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while create prepared query
+     * @throws InterruptedException if interrupted while create prepared query
      */
 //  @ThreadSafe
     public <P> TsurugiSqlPreparedQuery<P, TsurugiResultEntity> createQuery(String sql, TgParameterMapping<P> parameterMapping) throws IOException, InterruptedException {
@@ -414,8 +414,8 @@ public class TsurugiSession implements AutoCloseable {
      * @param parameterMapping parameter mapping
      * @param resultMapping    result mapping
      * @return SQL prepared query
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while create prepared query
+     * @throws InterruptedException if interrupted while create prepared query
      */
 //  @ThreadSafe
     public <P, R> TsurugiSqlPreparedQuery<P, R> createQuery(String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) throws IOException, InterruptedException {
@@ -434,7 +434,7 @@ public class TsurugiSession implements AutoCloseable {
      *
      * @param sql SQL
      * @return SQL statement
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while create statement
      */
 //  @ThreadSafe
     public TsurugiSqlStatement createStatement(String sql) throws IOException {
@@ -452,8 +452,8 @@ public class TsurugiSession implements AutoCloseable {
      * @param sql              SQL
      * @param parameterMapping parameter mapping
      * @return SQL prepared statement
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while create prepared statement
+     * @throws InterruptedException if interrupted while create prepared statement
      */
 //  @ThreadSafe
     public <P> TsurugiSqlPreparedStatement<P> createStatement(String sql, TgParameterMapping<P> parameterMapping) throws IOException, InterruptedException {
@@ -507,8 +507,8 @@ public class TsurugiSession implements AutoCloseable {
      *
      * @param txOption transaction option
      * @return transaction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while create transaction
+     * @throws InterruptedException if interrupted while create transaction
      */
 //  @ThreadSafe
     public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption) throws IOException, InterruptedException {
@@ -521,8 +521,8 @@ public class TsurugiSession implements AutoCloseable {
      * @param txOption    transaction option
      * @param initializer transaction initializer
      * @return transaction
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while create transaction
+     * @throws InterruptedException if interrupted while create transaction
      */
 //  @ThreadSafe
     public TsurugiTransaction createTransaction(@Nonnull TgTxOption txOption, @Nullable Consumer<TsurugiTransaction> initializer) throws IOException, InterruptedException {
@@ -544,7 +544,7 @@ public class TsurugiSession implements AutoCloseable {
      * add child object.
      *
      * @param closeable child object
-     * @throws IOException
+     * @throws IOException if already closed
      */
     @IceaxeInternal
     public void addChild(AutoCloseable closeable) throws IOException {
@@ -595,7 +595,7 @@ public class TsurugiSession implements AutoCloseable {
     /**
      * check close.
      *
-     * @throws IOException
+     * @throws IOException if already closed
      */
     protected void checkClose() throws IOException {
         if (isClosed()) {

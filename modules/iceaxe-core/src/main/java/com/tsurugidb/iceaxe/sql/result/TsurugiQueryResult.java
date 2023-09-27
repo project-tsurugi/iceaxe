@@ -69,7 +69,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @param lowResultSetFuture future of ResultSet
      * @param resultMapping      result mapping
      * @param convertUtil        convert type utility
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
     public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping,
@@ -164,9 +164,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * get {@link ResultSet}.
      *
      * @return SQL result set
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving result set
+     * @throws InterruptedException        if interrupted while retrieving result set
+     * @throws TsurugiTransactionException if server error occurs while retrieving result set
      */
     @IceaxeInternal
     public final synchronized ResultSet getLowResultSet() throws IOException, InterruptedException, TsurugiTransactionException {
@@ -191,9 +191,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * Advances to the next record.
      *
      * @return {@code false} if there are no more rows
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving result set
+     * @throws InterruptedException        if interrupted while retrieving result set
+     * @throws TsurugiTransactionException if server error occurs while retrieving result set
      */
     protected boolean nextLowRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         boolean exists;
@@ -243,9 +243,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * get record.
      *
      * @return record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving result set
+     * @throws InterruptedException        if interrupted while retrieving result set
+     * @throws TsurugiTransactionException if server error occurs while retrieving result set
      */
     protected TsurugiResultRecord getRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.record == null) {
@@ -265,9 +265,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @param record record
      * @return record(R type)
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving the column data
+     * @throws InterruptedException        if interrupted while retrieving the column data
+     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      */
     protected R convertRecord(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
         R result;
@@ -300,9 +300,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * get name list.
      *
      * @return list of column name
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving metadata
+     * @throws InterruptedException        if interrupted while retrieving metadata
+     * @throws TsurugiTransactionException if server error occurs while retrieving metadata
      */
     public List<String> getNameList() throws IOException, InterruptedException, TsurugiTransactionException {
         try {
@@ -348,9 +348,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * Performs the given action for each record.
      *
      * @param action The action to be performed for each record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving record
+     * @throws InterruptedException        if interrupted while retrieving record
+     * @throws TsurugiTransactionException if server error occurs while retrieving record
      */
     public void whileEach(TsurugiTransactionConsumer<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var record = getRecord();
@@ -366,9 +366,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * get record list.
      *
      * @return list of record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving record
+     * @throws InterruptedException        if interrupted while retrieving record
+     * @throws TsurugiTransactionException if server error occurs while retrieving record
      */
     public List<R> getRecordList() throws IOException, InterruptedException, TsurugiTransactionException {
         var list = new ArrayList<R>();
@@ -386,9 +386,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * get one record.
      *
      * @return record
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving record
+     * @throws InterruptedException        if interrupted while retrieving record
+     * @throws TsurugiTransactionException if server error occurs while retrieving record
      */
     public Optional<R> findRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         if (nextLowRecord()) {
@@ -405,9 +405,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     /**
      * {@inheritDoc}
      *
-     * @throws UncheckedIOException
-     * @throws InterruptedRuntimeException
-     * @throws TsurugiTransactionRuntimeException
+     * @throws UncheckedIOException               if an I/O error occurs while retrieving record
+     * @throws InterruptedRuntimeException        if interrupted while retrieving record
+     * @throws TsurugiTransactionRuntimeException if server error occurs while retrieving record
      */
     @Override
     public Iterator<R> iterator() {
@@ -443,9 +443,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         /**
          * move next record.
          *
-         * @throws UncheckedIOException
-         * @throws InterruptedRuntimeException
-         * @throws TsurugiTransactionRuntimeException
+         * @throws UncheckedIOException               if an I/O error occurs while retrieving record
+         * @throws InterruptedRuntimeException        if interrupted while retrieving record
+         * @throws TsurugiTransactionRuntimeException if server error occurs while retrieving record
          */
         protected void moveNext() {
             if (this.moveNext) {
@@ -467,9 +467,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         /**
          * {@inheritDoc}
          *
-         * @throws UncheckedIOException
-         * @throws InterruptedRuntimeException
-         * @throws TsurugiTransactionRuntimeException
+         * @throws UncheckedIOException               if an I/O error occurs while retrieving record
+         * @throws InterruptedRuntimeException        if interrupted while retrieving record
+         * @throws TsurugiTransactionRuntimeException if server error occurs while retrieving record
          */
         @Override
         public boolean hasNext() {
@@ -480,10 +480,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         /**
          * {@inheritDoc}
          *
-         * @throws NoSuchElementException
-         * @throws UncheckedIOException
-         * @throws InterruptedRuntimeException
-         * @throws TsurugiTransactionRuntimeException
+         * @throws NoSuchElementException             if the iteration has no more elements
+         * @throws UncheckedIOException               if an I/O error occurs while retrieving record
+         * @throws InterruptedRuntimeException        if interrupted while retrieving record
+         * @throws TsurugiTransactionRuntimeException if server error occurs while retrieving record
          */
         @Override
         public R next() {
@@ -511,9 +511,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     /**
      * {@inheritDoc}
      *
-     * @throws UncheckedIOException
-     * @throws InterruptedRuntimeException
-     * @throws TsurugiTransactionRuntimeException
+     * @throws UncheckedIOException               if an I/O error occurs while retrieving record
+     * @throws InterruptedRuntimeException        if interrupted while retrieving record
+     * @throws TsurugiTransactionRuntimeException if server error occurs while retrieving record
      * @see #whileEach(TsurugiTransactionConsumer)
      */
     @Override

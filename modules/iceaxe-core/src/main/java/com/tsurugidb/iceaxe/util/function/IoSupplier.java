@@ -14,8 +14,8 @@ public interface IoSupplier<T> {
      * Gets a result.
      *
      * @return a result
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while execute
+     * @throws InterruptedException if interrupted while execute
      */
     T get() throws IOException, InterruptedException;
 }

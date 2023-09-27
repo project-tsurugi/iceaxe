@@ -401,8 +401,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     /**
      * do transactionManager execute error.
      *
-     * @param transaction
-     * @param occurred
+     * @param transaction transaction
+     * @param occurred    exception
      */
     protected void doLogTmExecuteException(TsurugiTransaction transaction, Throwable occurred) {
         var txLog = getTxLog(transaction);

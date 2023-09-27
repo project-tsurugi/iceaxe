@@ -16,8 +16,8 @@ public interface IoFunction<T, R> {
      *
      * @param t the function argument
      * @return the function result
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while execute
+     * @throws InterruptedException if interrupted while execute
      */
     R apply(T t) throws IOException, InterruptedException;
 }

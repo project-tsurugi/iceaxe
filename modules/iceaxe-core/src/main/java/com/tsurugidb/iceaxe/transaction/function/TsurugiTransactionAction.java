@@ -14,9 +14,9 @@ public interface TsurugiTransactionAction {
      * execute transaction.
      *
      * @param transaction transaction
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while execute
+     * @throws InterruptedException        if interrupted while execute
+     * @throws TsurugiTransactionException if server error occurs while execute
      */
     public void run(TsurugiTransaction transaction) throws IOException, InterruptedException, TsurugiTransactionException;
 }

@@ -190,7 +190,7 @@ class IceaxeCloseableSetTest {
     }
 
     @Test
-    void testCloseInTransaction0() throws IOException, TsurugiTransactionException {
+    void testCloseInTransaction0() throws IOException, InterruptedException, TsurugiTransactionException {
         var target = new IceaxeCloseableSet();
         assertEquals(0, target.size());
         target.closeInTransaction();
@@ -245,7 +245,7 @@ class IceaxeCloseableSetTest {
     }
 
     @Test
-    void testCloseInTransaction() throws IOException, TsurugiTransactionException {
+    void testCloseInTransaction() throws IOException, InterruptedException, TsurugiTransactionException {
         var target = new IceaxeCloseableSet();
         assertEquals(0, target.size());
         target.closeInTransaction();
@@ -301,6 +301,40 @@ class IceaxeCloseableSetTest {
         assertEquals(2, target.size());
 
         var e = assertThrowsExactly(IOException.class, () -> {
+            target.closeInTransaction();
+        });
+        assertEquals("abc", e.getMessage());
+        assertEquals(1, e.getSuppressed().length);
+        var s0 = e.getSuppressed()[0];
+        assertInstanceOf(RuntimeException.class, s0);
+        assertEquals("def", s0.getMessage());
+        assertEquals(0, target.size());
+    }
+
+    // 最初の例外がInterruptedException
+    @Test
+    void testCloseInTransactionInterruptedEx() {
+        var target = new IceaxeCloseableSet();
+
+        var closeable1 = new AutoCloseable() {
+            @Override
+            public void close() throws InterruptedException {
+                throw new InterruptedException("abc");
+            }
+        };
+        target.add(closeable1);
+        assertEquals(1, target.size());
+
+        var closeable2 = new Closeable() {
+            @Override
+            public void close() {
+                throw new RuntimeException("def");
+            }
+        };
+        target.add(closeable2);
+        assertEquals(2, target.size());
+
+        var e = assertThrowsExactly(InterruptedException.class, () -> {
             target.closeInTransaction();
         });
         assertEquals("abc", e.getMessage());

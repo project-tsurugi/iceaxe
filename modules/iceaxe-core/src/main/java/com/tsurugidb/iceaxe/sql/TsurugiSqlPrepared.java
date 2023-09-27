@@ -45,7 +45,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
      * @param sql                        SQL
      * @param lowPreparedStatementFuture future of prepared statement
      * @param parameterMapping           parameter mapping
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     protected TsurugiSqlPrepared(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) throws IOException {
         super(session, sql);
@@ -109,11 +109,11 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     }
 
     /**
-     * get low PreparedStatement.
+     * get low prepared statement.
      *
-     * @return PreparedStatement
-     * @throws IOException
-     * @throws InterruptedException
+     * @return prepared statement
+     * @throws IOException          if an I/O error occurs while retrieving prepared statement
+     * @throws InterruptedException if interrupted while retrieving prepared statement
      */
     @IceaxeInternal
 //  @ThreadSafe
@@ -154,8 +154,8 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
      *
      * @param parameter SQL parameter
      * @return statement metadata
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          if an I/O error occurs while retrieving statement metadata
+     * @throws InterruptedException if interrupted while retrieving statement metadata
      */
     public TgStatementMetadata explain(P parameter) throws IOException, InterruptedException {
         var session = getSession();

@@ -47,7 +47,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * @param ps              SQL definition
      * @param parameter       SQL parameter
      * @param lowResultFuture future of Void
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
     public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<Void> lowResultFuture) throws IOException {
@@ -137,9 +137,9 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     /**
      * check low result.
      *
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving result
+     * @throws InterruptedException        if interrupted while retrieving result
+     * @throws TsurugiTransactionException if server error occurs while retrieving result
      */
     protected final synchronized void checkLowResult() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.lowResultFuture != null) {
@@ -169,9 +169,9 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * get count.
      *
      * @return the row count for SQL Data Manipulation Language (DML) statements
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws TsurugiTransactionException
+     * @throws IOException                 if an I/O error occurs while retrieving result
+     * @throws InterruptedException        if interrupted while retrieving result
+     * @throws TsurugiTransactionException if server error occurs while retrieving result
      */
     public int getUpdateCount() throws IOException, InterruptedException, TsurugiTransactionException {
         checkLowResult();
