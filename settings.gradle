@@ -2,7 +2,6 @@ rootProject.name = 'iceaxe'
 
 include 'iceaxe-core'
 include 'iceaxe-examples'
-include 'iceaxe-dbtest'
 
 rootProject.children.each { project ->
     project.projectDir = new File(settingsDir, "modules/${project.name}")

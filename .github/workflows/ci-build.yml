@@ -32,7 +32,7 @@ jobs:
 
       - name: Check
         run: |
-          ./gradlew -i check -x :iceaxe-dbtest:check --continue
+          ./gradlew -i check --continue
 
       - name: Verify
         uses: project-tsurugi/tsurugi-annotations-action@v1
