@@ -1,5 +1,7 @@
 # Iceaxe - Java High-level-API
 
+Iceaxe is a Java library that executes SQL on Tsurugi database.
+
 [![javadoc](https://javadoc.io/badge2/com.tsurugidb.iceaxe/iceaxe-core/javadoc.svg)](https://javadoc.io/doc/com.tsurugidb.iceaxe/iceaxe-core)
 
 ## Requirements
@@ -7,7 +9,7 @@
 * Java `>= 11`
 
 * access to installed dependent modules:
-  * tsubakuro
+  * Tsubakuro
 
 ## How to build
 
