@@ -11,14 +11,6 @@
 
 ## How to build
 
-### Build with Tsubakuro that deployed GitHub Packages
-
-First, set up the following credentials for the GitHub Packages, and build nomally.
-* Gradle property `gpr.user` or environment variable `GPR_USER` with your GitHub username
-* Gradle Property `gpr.key` or environment variable `GPR_KEY` with your personal access token
-
-Ref: [iceaxe.libs-conventions.gradle](buildSrc/src/main/groovy/iceaxe.libs-conventions.gradle)
-
 ```
 cd iceaxe
 ./gradlew build
@@ -42,7 +34,7 @@ To use on Gradle, add Iceaxe library to dependencies.
 
 ```
 dependencies {
-    api 'com.tsurugidb.iceaxe:iceaxe-core:1.0.0-SNAPSHOT'
+    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.0.0-SNAPSHOT'
 }
 ```
 
