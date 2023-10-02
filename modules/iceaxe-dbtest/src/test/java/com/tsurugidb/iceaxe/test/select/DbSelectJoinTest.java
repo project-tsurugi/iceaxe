@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -82,6 +83,15 @@ class DbSelectJoinTest extends DbTestTableTester {
             new DetailEntity(21, 2, "b1"), //
             new DetailEntity(40, 4, "master nothing"), //
             new DetailEntity(90, null, "master null"));
+    private static final Map<Integer, List<DetailEntity>> DETAIL_MAP;
+    static {
+        var map = new HashMap<Integer, List<DetailEntity>>();
+        for (var detail : DETAIL_LIST) {
+            var masterId = detail.getMasterId();
+            map.computeIfAbsent(masterId, k -> new ArrayList<>()).add(detail);
+        }
+        DETAIL_MAP = map;
+    }
 
     private static void insertMasterDetail() throws IOException, InterruptedException {
         var session = getSession();
@@ -217,8 +227,59 @@ class DbSelectJoinTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
             List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
-            assertEquals(4, list.size()); // TODO left join実装待ち
-//          assertEqualsMasterDetail(expectedList, list);
+            assertEqualsMasterDetail(expectedList, list);
+        }
+    }
+
+    @Test
+    void rightJoin() throws Exception {
+        var sql = "select * from " + DETAIL + " d\n" //
+                + "right join " + MASTER + " m on m.m_id = d.d_master_id\n" //
+                + "order by d_id";
+
+        var expectedList = new ArrayList<MasterDetailPair>();
+        for (var master : MASTER_LIST) {
+            var detailList = DETAIL_MAP.get(master.getId());
+            if (detailList != null) {
+                for (var detail : detailList) {
+                    expectedList.add(new MasterDetailPair(master, detail));
+                }
+            } else {
+                expectedList.add(new MasterDetailPair(master, null));
+            }
+        }
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql)) {
+            List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
+            assertEqualsMasterDetail(expectedList, list);
+        }
+    }
+
+    @Test
+    void fullJoin() throws Exception {
+        var sql = "select * from " + DETAIL + " d\n" //
+                + "full join " + MASTER + " m on m.m_id = d.d_master_id\n" //
+                + "order by d_id";
+
+        var expectedList = new ArrayList<MasterDetailPair>();
+        for (var detail : DETAIL_LIST) {
+            var master = MASTER_MAP.get(detail.getMasterId());
+            expectedList.add(new MasterDetailPair(master, detail));
+        }
+        for (var master : MASTER_LIST) {
+            var detailList = DETAIL_MAP.get(master.getId());
+            if (detailList == null) {
+                expectedList.add(new MasterDetailPair(master, null));
+            }
+        }
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql)) {
+            List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
+            assertEqualsMasterDetail(expectedList, list);
         }
     }
 
@@ -234,13 +295,13 @@ class DbSelectJoinTest extends DbTestTableTester {
         @Override
         public int compareTo(MasterDetailPair that) {
             if (this.detail == null && that.detail == null) {
-                return Long.compare(this.master.getId(), that.master.getId());
+                return Integer.compare(this.master.getId(), that.master.getId());
             }
             if (this.detail == null) {
-                return 1;
+                return -1;
             }
             if (that.detail == null) {
-                return -1;
+                return 1;
             }
 
             return Long.compare(this.detail.getId(), that.detail.getId());
@@ -254,16 +315,22 @@ class DbSelectJoinTest extends DbTestTableTester {
         for (var pair : expectedList) {
             var actual = actualList.get(i++);
             var detail = pair.detail;
-            assertEquals(detail.getId(), actual.getLong("d_id"));
-            assertEquals(detail.getMasterId(), actual.getIntOrNull("d_master_id"));
-            assertEquals(detail.getMemo(), actual.getString("d_memo"));
+            if (detail != null) {
+                assertEquals(detail.getId(), actual.getLong("d_id"));
+                assertEquals(detail.getMasterId(), actual.getIntOrNull("d_master_id"));
+                assertEquals(detail.getMemo(), actual.getString("d_memo"));
+            } else {
+                assertNull(actual.getLongOrNull("d_id"));
+                assertNull(actual.getIntOrNull("d_master_id"));
+                assertNull(actual.getStringOrNull("d_memo"));
+            }
             var master = pair.master;
             if (master != null) {
                 assertEquals(master.getId(), actual.getInt("m_id"));
                 assertEquals(master.getName(), actual.getString("m_name"));
             } else {
                 assertNull(actual.getIntOrNull("m_id"));
-                assertNull(actual.getIntOrNull("m_name"));
+                assertNull(actual.getStringOrNull("m_name"));
             }
         }
     }
