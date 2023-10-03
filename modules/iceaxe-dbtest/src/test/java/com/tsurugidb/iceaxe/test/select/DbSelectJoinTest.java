@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
@@ -211,10 +213,11 @@ class DbSelectJoinTest extends DbTestTableTester {
         }
     }
 
-    @Test
-    void leftJoin() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { "left join", "left outer join" })
+    void leftJoin(String join) throws Exception {
         var sql = "select * from " + DETAIL + " d\n" //
-                + "left join " + MASTER + " m on m.m_id = d.d_master_id\n" //
+                + join + " " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";
 
         var expectedList = new ArrayList<MasterDetailPair>();
@@ -231,10 +234,11 @@ class DbSelectJoinTest extends DbTestTableTester {
         }
     }
 
-    @Test
-    void rightJoin() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { "right join", "right outer join" })
+    void rightJoin(String join) throws Exception {
         var sql = "select * from " + DETAIL + " d\n" //
-                + "right join " + MASTER + " m on m.m_id = d.d_master_id\n" //
+                + join + " " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";
 
         var expectedList = new ArrayList<MasterDetailPair>();
@@ -257,10 +261,11 @@ class DbSelectJoinTest extends DbTestTableTester {
         }
     }
 
-    @Test
-    void fullJoin() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { "full join", "full outer join" })
+    void fullJoin(String join) throws Exception {
         var sql = "select * from " + DETAIL + " d\n" //
-                + "full join " + MASTER + " m on m.m_id = d.d_master_id\n" //
+                + join + " " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";
 
         var expectedList = new ArrayList<MasterDetailPair>();
