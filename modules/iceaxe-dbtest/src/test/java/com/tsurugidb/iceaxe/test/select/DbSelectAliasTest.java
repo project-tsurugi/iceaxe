@@ -1,7 +1,6 @@
 package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.util.List;
 
@@ -15,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * select alias test
@@ -64,10 +61,7 @@ class DbSelectAliasTest extends DbTestTableTester {
     @Test
     void selectName() throws Exception {
         var sql = "select count(*) cnt from " + TEST;
-        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-            selectCount(sql, "cnt");
-        });
-        assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO as無し別名実装待ち
+        selectCount(sql, "cnt");
     }
 
     @Test

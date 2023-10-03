@@ -75,7 +75,7 @@ class DbSelectLiteralTest extends DbTestTableTester {
             });
         });
         assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e);
-        assertContains("parsing statement failed: missing K_FROM at 'e2' (<input>:1:8)", e.getMessage());
+        assertContains("parsing statement failed: mismatched input 'as' expecting K_FROM (<input>:1:11)", e.getMessage());
     }
 
     @Test
