@@ -74,13 +74,10 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-                var list = tm.executeAndGetList(ps);
-                assertEquals(1, list.size());
-                var entity = list.get(0);
-                assertEquals(NULL_ENTITY, entity);
-            });
-            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO is null実装待ち
+            var list = tm.executeAndGetList(ps);
+            assertEquals(1, list.size());
+            var entity = list.get(0);
+            assertEquals(NULL_ENTITY, entity);
         }
     }
 
@@ -91,14 +88,11 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-                var list = tm.executeAndGetList(ps);
-                assertEquals(SIZE, list.size());
-                for (int i = 0; i < SIZE; i++) {
-                    assertEquals(i, list.get(i).getFoo());
-                }
-            });
-            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO is not null実装待ち
+            var list = tm.executeAndGetList(ps);
+            assertEquals(SIZE, list.size());
+            for (int i = 0; i < SIZE; i++) {
+                assertEquals(i, list.get(i).getFoo());
+            }
         }
     }
 
