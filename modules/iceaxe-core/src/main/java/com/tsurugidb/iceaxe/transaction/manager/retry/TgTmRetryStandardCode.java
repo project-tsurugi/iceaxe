@@ -8,9 +8,9 @@ public enum TgTmRetryStandardCode implements TgTmRetryCode {
     /** not retryable */
     NOT_RETRYABLE(false),
 
-    /** retryable. by ERR_ABORTED_RETRYABLE */
+    /** retryable. by serialization failure */
     RETRYABLE(true),
-    /** retryable to LTX. by ERR_CONFLICT_ON_WRITE_PRESERVE, CC_OCC_WP_VERIFY */
+    /** retryable to LTX. by conflict on write preserve */
     RETRYABLE_LTX(true),
 
     ;
