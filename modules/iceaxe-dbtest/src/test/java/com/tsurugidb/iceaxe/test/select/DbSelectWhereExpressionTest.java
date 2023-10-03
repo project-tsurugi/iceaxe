@@ -23,7 +23,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbSelectWhereExpressionTest extends DbTestTableTester {
 
-    private static final int SIZE = 10;
+    private static final int SIZE = 20;
     private static TestEntity NULL_ENTITY = new TestEntity(123, null, null);
 
     @BeforeAll
@@ -97,6 +97,32 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     }
 
     @Test
+    void isTrue() throws Exception {
+        var sql = SELECT_SQL + " where (1=1) is true";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            assertEquals(0, list.size()); // TODO isTrue実装待ち
+//          assertEquals(SIZE, list.size());
+        }
+    }
+
+    @Test
+    void isFalse() throws Exception {
+        var sql = SELECT_SQL + " where (1=0) is false";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            assertEquals(0, list.size()); // TODO isFalse実装待ち
+//          assertEquals(SIZE, list.size());
+        }
+    }
+
+    @Test
     void in() throws Exception {
         var expectedList = List.of(2, 4, 5, 7);
         var sql = SELECT_SQL + " where foo in (" + expectedList.stream().map(n -> Integer.toString(n)).collect(Collectors.joining(",")) + ") order by foo";
@@ -134,6 +160,30 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 }
             });
             assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e0); // TODO between実装待ち
+        }
+    }
+
+    @Test
+    void like() throws Exception {
+        var sql = SELECT_SQL + " where zzz like'1%'";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            assertEquals(0, list.size()); // TODO like実装待ち
+        }
+    }
+
+    @Test
+    void notLike() throws Exception {
+        var sql = SELECT_SQL + " where zzz not like'1%'";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            assertEquals(0, list.size()); // TODO like実装待ち
         }
     }
 }
