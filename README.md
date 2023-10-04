@@ -36,7 +36,7 @@ To use on Gradle, add Iceaxe library to dependencies.
 
 ```
 dependencies {
-    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.0.0-SNAPSHOT'
+    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.0.1'
 }
 ```
 
