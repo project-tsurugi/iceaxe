@@ -1,0 +1,36 @@
+name: Iceaxe-CI-Javadoc
+
+on: [workflow_dispatch, workflow_call]
+concurrency: ${{ github.workflow }}
+
+jobs:
+  GHPages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
+
+    steps:
+      - name: Setup_Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build_Javadoc
+        run: |
+         ./gradlew -i clean iceaxe-core:javadoc
+
+      - name: Publish_Javadoc
+        uses: peaceiris/actions-gh-pages@v3.9.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: modules/iceaxe-core/build/docs/javadoc
