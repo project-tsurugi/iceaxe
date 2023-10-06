@@ -213,7 +213,7 @@ public class TgTmSetting {
      */
     public TgTmTxOption getTransactionOption(Object executeInfo, int attempt, TsurugiTransaction transaction, TsurugiTransactionException exception) throws IOException, InterruptedException {
         if (this.txOptionSupplier == null) {
-            throw new IllegalStateException("txOptionSupplier is not specifed");
+            throw new IllegalStateException("txOptionSupplier is not specified");
         }
         var tmOption = txOptionSupplier.get(executeInfo, attempt, transaction, exception);
         if (tmOption.isExecute()) {
