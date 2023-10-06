@@ -372,7 +372,7 @@ public class TsurugiTransaction implements AutoCloseable {
         /** execute query */
         EXECUTE_QUERY("executeQuery"),
         /** execute statement */
-        EXECUTE_SATTEMENT("executeStatement"),
+        EXECUTE_STATEMENT("executeStatement"),
         /** execute batch */
         EXECUTE_BATCH("executeBatch"),
         /** execute and for each */
@@ -531,7 +531,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @see #executeAndGetCount(TsurugiSqlStatement)
      */
     public TsurugiStatementResult executeStatement(TsurugiSqlStatement ps) throws IOException, InterruptedException, TsurugiTransactionException {
-        var method = TgTxMethod.EXECUTE_SATTEMENT;
+        var method = TgTxMethod.EXECUTE_STATEMENT;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
 
@@ -567,7 +567,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @see #executeAndGetCount(TsurugiSqlPreparedStatement, Object)
      */
     public <P> TsurugiStatementResult executeStatement(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
-        var method = TgTxMethod.EXECUTE_SATTEMENT;
+        var method = TgTxMethod.EXECUTE_STATEMENT;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
 
