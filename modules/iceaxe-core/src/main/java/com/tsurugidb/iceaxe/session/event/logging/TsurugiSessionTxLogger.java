@@ -784,7 +784,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     protected void doLogTransactionClose(TsurugiTransaction transaction, @Nullable Throwable occurred) {
         var txLog = txLogMap.remove(transaction.getIceaxeTxId());
         if (txLog == null) {
-            LOG.debug("tranaction already closed {}", transaction);
+            LOG.debug("transaction already closed {}", transaction);
             return;
         }
 
