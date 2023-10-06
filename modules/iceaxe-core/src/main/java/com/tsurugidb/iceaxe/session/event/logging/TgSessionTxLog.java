@@ -258,7 +258,7 @@ public class TgSessionTxLog {
      * @return transaction SQL execute log
      */
     public TgSessionTxExecuteLog getNewTxExecuteLog(int iceaxeTxExecuteId) {
-        var exLog = createTxExecutLog();
+        var exLog = createTxExecuteLog();
         exLog.setIceaxeTxExecuteId(iceaxeTxExecuteId);
 
         timeMap.put(iceaxeTxExecuteId, exLog);
@@ -270,7 +270,7 @@ public class TgSessionTxLog {
      *
      * @return transaction SQL execute log
      */
-    protected TgSessionTxExecuteLog createTxExecutLog() {
+    protected TgSessionTxExecuteLog createTxExecuteLog() {
         return new TgSessionTxExecuteLog();
     }
 
