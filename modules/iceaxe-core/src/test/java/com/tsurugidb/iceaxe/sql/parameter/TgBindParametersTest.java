@@ -292,7 +292,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringLongWrapoper() {
+    void testAddStringLongWrapper() {
         var parameter = TgBindParameters.of();
         parameter.add("foo", Long.valueOf(123));
         parameter.add("bar", (Long) null);
