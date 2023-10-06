@@ -95,7 +95,7 @@ public class TgSessionTxLog {
 
         var log = createSqlLog();
         log.setStartTime(startTime);
-        log.setIceaxeSqExecutelId(iceaxeSqlExecuteId);
+        log.setIceaxeSqlExecuteId(iceaxeSqlExecuteId);
 
         sqlLogMap.put(iceaxeSqlExecuteId, log);
         return log;
