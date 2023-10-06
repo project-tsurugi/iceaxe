@@ -183,7 +183,7 @@ class TgBindVariablesTest {
     }
 
     @Test
-    void addTgVariabls() {
+    void addTgVariables() {
         var variable1 = new TgBindVariables() //
                 .addInt("foo") //
                 .addLong("bar");
