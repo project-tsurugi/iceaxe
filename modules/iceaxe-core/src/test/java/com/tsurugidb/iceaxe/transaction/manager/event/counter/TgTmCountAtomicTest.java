@@ -25,7 +25,7 @@ class TgTmCountAtomicTest {
 
         assertEquals(1, count.executeCount());
         assertEquals(2, count.transactionCount());
-        assertEquals(3, count.execptionCount());
+        assertEquals(3, count.exceptionCount());
         assertEquals(4, count.retryCount());
         assertEquals(5, count.retryOverCount());
         assertEquals(6, count.beforeCommitCount());
@@ -43,7 +43,7 @@ class TgTmCountAtomicTest {
         count.clear();
         assertEquals(0, count.executeCount());
         assertEquals(0, count.transactionCount());
-        assertEquals(0, count.execptionCount());
+        assertEquals(0, count.exceptionCount());
         assertEquals(0, count.retryCount());
         assertEquals(0, count.retryOverCount());
         assertEquals(0, count.beforeCommitCount());

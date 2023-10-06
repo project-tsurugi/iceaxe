@@ -31,10 +31,10 @@ public class TsurugiTableMetadataHelper {
     /**
      * set exception utility.
      *
-     * @param execptionUtil exception utility
+     * @param exceptionUtil exception utility
      */
-    public void setExceptionUtil(@Nonnull TsurugiExceptionUtil execptionUtil) {
-        this.exceptionUtil = Objects.requireNonNull(execptionUtil);
+    public void setExceptionUtil(@Nonnull TsurugiExceptionUtil exceptionUtil) {
+        this.exceptionUtil = Objects.requireNonNull(exceptionUtil);
     }
 
     /**

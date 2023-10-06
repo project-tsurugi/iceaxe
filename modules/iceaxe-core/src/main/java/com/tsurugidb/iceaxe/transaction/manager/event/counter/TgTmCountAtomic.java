@@ -110,7 +110,7 @@ public class TgTmCountAtomic implements TgTmCount {
     }
 
     @Override
-    public int execptionCount() {
+    public int exceptionCount() {
         return exceptionCount.get();
     }
 

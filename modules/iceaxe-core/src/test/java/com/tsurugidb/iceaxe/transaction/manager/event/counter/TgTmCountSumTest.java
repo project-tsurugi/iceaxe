@@ -39,7 +39,7 @@ class TgTmCountSumTest {
 
         assertEquals(1 + 11, count.executeCount());
         assertEquals(2 + 12, count.transactionCount());
-        assertEquals(3 + 13, count.execptionCount());
+        assertEquals(3 + 13, count.exceptionCount());
         assertEquals(4 + 14, count.retryCount());
         assertEquals(5 + 15, count.retryOverCount());
         assertEquals(6 + 16, count.beforeCommitCount());
