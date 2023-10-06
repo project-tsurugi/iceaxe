@@ -360,11 +360,11 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param iceaxeTmExecuteId iceaxe tm executeId
      */
     protected void doLogTmExecuteStart(int iceaxeTmExecuteId) {
-        var satrtTime = ZonedDateTime.now();
+        var startTime = ZonedDateTime.now();
 
         var tmLog = createTmLog();
         tmLog.setIceaxeTmExecuteId(iceaxeTmExecuteId);
-        tmLog.setStartTime(satrtTime);
+        tmLog.setStartTime(startTime);
         tmLogMap.put(iceaxeTmExecuteId, tmLog);
 
         logTmExecuteStart(tmLog);
