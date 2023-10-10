@@ -26,7 +26,7 @@ public interface TgTmCount {
      *
      * @return exception count
      */
-    int execptionCount();
+    int exceptionCount();
 
     /**
      * get retry count.

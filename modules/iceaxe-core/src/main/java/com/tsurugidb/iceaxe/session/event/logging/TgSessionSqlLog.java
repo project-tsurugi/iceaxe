@@ -24,7 +24,7 @@ public class TgSessionSqlLog {
      *
      * @param iceaxeSqlExecuteId iceaxe SQL executeId
      */
-    public void setIceaxeSqExecutelId(int iceaxeSqlExecuteId) {
+    public void setIceaxeSqlExecuteId(int iceaxeSqlExecuteId) {
         this.iceaxeSqlExecuteId = iceaxeSqlExecuteId;
     }
 

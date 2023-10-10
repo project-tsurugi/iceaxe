@@ -47,7 +47,7 @@ public class TgTmCountSum implements TgTmCount {
     public void add(TgTmCount count) {
         executeCount += count.executeCount();
         transactionCount += count.transactionCount();
-        exceptionCount += count.execptionCount();
+        exceptionCount += count.exceptionCount();
         retryCount += count.retryCount();
         retryOverCount += count.retryOverCount();
         beforeCommitCount += count.beforeCommitCount();
@@ -69,7 +69,7 @@ public class TgTmCountSum implements TgTmCount {
     }
 
     @Override
-    public int execptionCount() {
+    public int exceptionCount() {
         return this.exceptionCount;
     }
 

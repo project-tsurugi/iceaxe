@@ -360,11 +360,11 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param iceaxeTmExecuteId iceaxe tm executeId
      */
     protected void doLogTmExecuteStart(int iceaxeTmExecuteId) {
-        var satrtTime = ZonedDateTime.now();
+        var startTime = ZonedDateTime.now();
 
         var tmLog = createTmLog();
         tmLog.setIceaxeTmExecuteId(iceaxeTmExecuteId);
-        tmLog.setStartTime(satrtTime);
+        tmLog.setStartTime(startTime);
         tmLogMap.put(iceaxeTmExecuteId, tmLog);
 
         logTmExecuteStart(tmLog);
@@ -784,7 +784,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     protected void doLogTransactionClose(TsurugiTransaction transaction, @Nullable Throwable occurred) {
         var txLog = txLogMap.remove(transaction.getIceaxeTxId());
         if (txLog == null) {
-            LOG.debug("tranaction already closed {}", transaction);
+            LOG.debug("transaction already closed {}", transaction);
             return;
         }
 
