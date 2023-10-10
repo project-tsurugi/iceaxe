@@ -42,8 +42,7 @@ public class Example00 {
      * @see Example11Ddl
      */
     private static void executeCreateTable(TsurugiSession session) throws IOException, InterruptedException {
-        // DDLの場合は、LTXであってもwritePreserveを指定する必要は無い。
-        var setting = TgTmSetting.of(TgTxOption.ofLTX());
+        var setting = TgTmSetting.of(TgTxOption.ofDDL());
         var tm = session.createTransactionManager(setting);
 
         Optional<TgTableMetadata> metadata = session.findTableMetadata(TABLE_NAME);
