@@ -60,7 +60,7 @@ class DbManagerCounterTest extends DbTestTableTester {
     private void assertTotalCount(TgTmCount count) {
         assertEquals(count.successCount() + count.failCount(), count.executeCount());
         assertEquals(count.commitCount() + count.rollbackCount(), count.transactionCount());
-        assertEquals(6, count.execptionCount());
+        assertEquals(6, count.exceptionCount());
         assertEquals(4, count.retryCount());
         assertEquals(1, count.retryOverCount());
         assertEquals(2, count.beforeCommitCount());
@@ -92,7 +92,7 @@ class DbManagerCounterTest extends DbTestTableTester {
             var tx1 = counter.findCount("tx1").get();
             assertEquals(tx1.successCount() + tx1.failCount(), tx1.executeCount());
             assertEquals(tx1.commitCount() + tx1.rollbackCount(), tx1.transactionCount());
-            assertEquals(0, tx1.execptionCount());
+            assertEquals(0, tx1.exceptionCount());
             assertEquals(0, tx1.retryCount());
             assertEquals(0, tx1.retryOverCount());
             assertEquals(1, tx1.beforeCommitCount());
@@ -105,7 +105,7 @@ class DbManagerCounterTest extends DbTestTableTester {
             var tx2 = counter.findCount("tx2").get();
             assertEquals(tx2.successCount() + tx2.failCount(), tx2.executeCount());
             assertEquals(tx2.commitCount() + tx2.rollbackCount(), tx2.transactionCount());
-            assertEquals(3, tx2.execptionCount());
+            assertEquals(3, tx2.exceptionCount());
             assertEquals(2, tx2.retryCount());
             assertEquals(1, tx2.retryOverCount());
             assertEquals(0, tx2.beforeCommitCount());
@@ -118,7 +118,7 @@ class DbManagerCounterTest extends DbTestTableTester {
             var tran1 = counter.findCount("tran1").get();
             assertEquals(tran1.successCount() + tran1.failCount(), tran1.executeCount());
             assertEquals(tran1.commitCount() + tran1.rollbackCount(), tran1.transactionCount());
-            assertEquals(0, tran1.execptionCount());
+            assertEquals(0, tran1.exceptionCount());
             assertEquals(0, tran1.retryCount());
             assertEquals(0, tran1.retryOverCount());
             assertEquals(0, tran1.beforeCommitCount());
@@ -131,7 +131,7 @@ class DbManagerCounterTest extends DbTestTableTester {
             var tran2 = counter.findCount("tran2").get();
             assertEquals(tran2.successCount() + tran2.failCount(), tran2.executeCount());
             assertEquals(tran2.commitCount() + tran2.rollbackCount(), tran2.transactionCount());
-            assertEquals(2, tran2.execptionCount());
+            assertEquals(2, tran2.exceptionCount());
             assertEquals(2, tran2.retryCount());
             assertEquals(0, tran2.retryOverCount());
             assertEquals(1, tran2.beforeCommitCount());
@@ -144,7 +144,7 @@ class DbManagerCounterTest extends DbTestTableTester {
             var empty = counter.findCount("").get();
             assertEquals(empty.successCount() + empty.failCount(), empty.executeCount());
             assertEquals(empty.commitCount() + empty.rollbackCount(), empty.transactionCount());
-            assertEquals(1, empty.execptionCount());
+            assertEquals(1, empty.exceptionCount());
             assertEquals(0, empty.retryCount());
             assertEquals(0, empty.retryOverCount());
             assertEquals(0, empty.beforeCommitCount());
@@ -161,7 +161,7 @@ class DbManagerCounterTest extends DbTestTableTester {
             var tx1 = counter.findCount("tx1").get();
             var tx2 = counter.findCount("tx2").get();
             assertEquals(tx1.executeCount() + tx2.executeCount(), tx.executeCount());
-            assertEquals(tx1.execptionCount() + tx2.execptionCount(), tx.execptionCount());
+            assertEquals(tx1.exceptionCount() + tx2.exceptionCount(), tx.exceptionCount());
             assertEquals(tx1.retryCount() + tx2.retryCount(), tx.retryCount());
             assertEquals(tx1.retryOverCount() + tx2.retryOverCount(), tx.retryOverCount());
             assertEquals(tx1.beforeCommitCount() + tx2.beforeCommitCount(), tx.beforeCommitCount());
