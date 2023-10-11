@@ -288,6 +288,28 @@ class DbSelectJoinTest extends DbTestTableTester {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "cross join", "," })
+    void crossJoin(String join) throws Exception {
+        var sql = "select * from " + DETAIL + " d\n" //
+                + join + " " + MASTER + "\n" //
+                + "order by d_id, m_id";
+
+        var expectedList = new ArrayList<MasterDetailPair>();
+        for (var master : MASTER_LIST) {
+            for (var detail : DETAIL_LIST) {
+                expectedList.add(new MasterDetailPair(master, detail));
+            }
+        }
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql)) {
+            List<TsurugiResultEntity> list = tm.executeAndGetList(ps);
+            assertEqualsMasterDetail(expectedList, list);
+        }
+    }
+
     private static class MasterDetailPair implements Comparable<MasterDetailPair> {
         private MasterEntity master;
         private DetailEntity detail;
