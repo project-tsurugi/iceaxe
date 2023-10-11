@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -73,11 +72,10 @@ class DbTransactionParallelTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled
     void testLtxLtxReadArea() throws Exception {
-        // TODO read areaを指定するとtx2は早く終わるはず
-        var txOption1 = TgTxOption.ofLTX(TEST);
-        var txOption2 = TgTxOption.ofLTX(TEST2);
+        // LTX同士でも、read areaを指定するとtx2はtx1を待たない
+        var txOption1 = TgTxOption.ofLTX(TEST).addInclusiveReadArea(TEST);
+        var txOption2 = TgTxOption.ofLTX(TEST2).addInclusiveReadArea(TEST2);
         test(txOption1, txOption2, false);
     }
 
