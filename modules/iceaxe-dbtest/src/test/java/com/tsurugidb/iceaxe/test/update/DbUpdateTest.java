@@ -4,13 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,7 +22,6 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
-import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmRetryOverIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -197,51 +196,23 @@ class DbUpdateTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(ints = { -1, 0, 1, SIZE - 1, SIZE, SIZE + 1, -(SIZE - 1), -SIZE, -(SIZE + 1) })
     void updatePK_occ(int add) throws Exception {
-        String addText = (add >= 0) ? " + " + add : "" + add;
-        var sql = "update " + TEST //
-                + " set" //
-                + "  foo = foo" + addText; // primary key
-
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createStatement(sql)) {
-            if (1 <= add && add <= SIZE - 1) {
-                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
-                assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e);
-                assertEqualsTestTable(SIZE);
-                return;
-            } else {
-                int count = tm.executeAndGetCount(ps);
-                assertUpdateCount(SIZE, count);
-            }
-        } catch (TsurugiTmRetryOverIOException e) {
-            if (add == -1) { // TODO updatePK(-1)
-                return;
-            }
-            if (add >= SIZE) { // TODO updatePK(SIZE)
-                return;
-            }
-            if (add <= -(SIZE - 1)) { // TODO updatePK(-SIZE)
-                return;
-            }
-            throw e;
-        }
-
-        var expectedList = IntStream.range(0, SIZE).mapToObj(i -> createTestEntity(i)).peek(e -> e.setFoo(e.getFoo() + add)).collect(Collectors.toList());
-        Collections.sort(expectedList, Comparator.comparing(TestEntity::getFoo));
-        assertEqualsTestTable(expectedList);
+        updatePK(add, TgTxOption.ofOCC());
     }
 
     @ParameterizedTest
     @ValueSource(ints = { -1, 0, 1, SIZE - 1, SIZE, SIZE + 1, -(SIZE - 1), -SIZE, -(SIZE + 1) })
     void updatePK_ltx(int add) throws Exception {
+        updatePK(add, TgTxOption.ofLTX(TEST));
+    }
+
+    private void updatePK(int add, TgTxOption txOption) throws IOException, InterruptedException {
         String addText = (add >= 0) ? " + " + add : "" + add;
         var sql = "update " + TEST //
                 + " set" //
                 + "  foo = foo" + addText; // primary key
 
         var session = getSession();
-        var tm = session.createTransactionManager(TgTxOption.ofLTX(TEST));
+        var tm = session.createTransactionManager(txOption);
         try (var ps = session.createStatement(sql)) {
             if (1 <= add && add <= SIZE - 1) {
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps));
@@ -273,25 +244,6 @@ class DbUpdateTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable(SIZE);
-    }
-
-    @Test
-    @Disabled // TODO remove Disabled. implements mod()
-    void updatePKSwap() throws Exception {
-        var sql = "update " + TEST //
-                + " set" //
-                + "  foo = foo - mod(foo, 2)*2 + 1"; // primary key
-
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createStatement(sql)) {
-            int count = tm.executeAndGetCount(ps);
-            assertUpdateCount(SIZE, count);
-        }
-
-        var expectedList = IntStream.range(0, SIZE).mapToObj(i -> createTestEntity(i)).peek(e -> e.setFoo(-(e.getFoo() % 2) + 1)).collect(Collectors.toList());
-        Collections.sort(expectedList, Comparator.comparing(TestEntity::getFoo));
-        assertEqualsTestTable(expectedList);
     }
 
     @Test
