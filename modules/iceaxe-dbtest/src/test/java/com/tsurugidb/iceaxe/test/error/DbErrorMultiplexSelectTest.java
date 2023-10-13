@@ -15,7 +15,6 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
-import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -95,8 +94,9 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
         } catch (IOException e) {
             if (DbTestConnector.isIpc()) {
                 if (size > 240) {
-                    assertEqualsCode(CoreServiceCode.RESOURCE_LIMIT_REACHED, e);
-                    LOG.info("(IPC)RESOURCE_LIMIT_REACHED occur. size={}, type={}", size, type);
+                    assertEqualsCode(SqlServiceCode.SQL_LIMIT_REACHED_EXCEPTION, e);
+                    assertContains("creating output channel failed (maybe too many requests)", e.getMessage());
+                    LOG.info("(IPC)SQL_LIMIT_REACHED_EXCEPTION occur. size={}, type={}", size, type);
                     return;
                 }
             }
