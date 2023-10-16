@@ -10,6 +10,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
@@ -121,7 +122,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
             });
             tm.execute(transaction -> {
                 var parameter = TgBindParameters.of(foo.bind(1));
-                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                var e = assertThrowsExactly(IceaxeIOException.class, () -> {
                     transaction.executeAndGetList(ps, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);
@@ -169,7 +170,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 assertContains(expected, e.getMessage());
             });
             tm.execute(transaction -> {
-                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                var e = assertThrowsExactly(IceaxeIOException.class, () -> {
                     transaction.executeAndGetCount(ps, parameter);
                 });
                 assertEqualsCode(IceaxeErrorCode.PS_LOW_ERROR, e);

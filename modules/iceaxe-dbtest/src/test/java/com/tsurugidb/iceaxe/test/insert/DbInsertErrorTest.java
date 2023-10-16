@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -105,7 +105,7 @@ class DbInsertErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         var ps = session.createStatement(sql);
         ps.close();
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             tm.executeAndGetCount(ps);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
@@ -120,7 +120,7 @@ class DbInsertErrorTest extends DbTestTableTester {
         var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING);
         ps.close();
         var entity = createTestEntity(1);
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             tm.executeAndGetCount(ps, entity);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
@@ -150,7 +150,7 @@ class DbInsertErrorTest extends DbTestTableTester {
                 transaction.getLowTransaction();
             }
             transaction.close();
-            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+            var e = assertThrowsExactly(IceaxeIOException.class, () -> {
                 transaction.executeAndGetCount(ps);
             });
             assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);

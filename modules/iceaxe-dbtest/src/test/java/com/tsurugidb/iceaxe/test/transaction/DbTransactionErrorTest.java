@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -167,7 +168,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> transaction.commit(TgCommitType.DEFAULT));
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> transaction.commit(TgCommitType.DEFAULT));
         assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
     }
 
@@ -176,7 +177,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> transaction.rollback());
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> transaction.rollback());
         assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
     }
 
@@ -185,7 +186,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             transaction.addChild(() -> {
                 // dummy
             });
@@ -218,7 +219,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var session = getSession();
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             transaction.executeLow(lowTx -> {
                 return null; // dummy
             });
@@ -236,7 +237,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         }
 
         session.close();
-        var e = assertThrows(TsurugiIOException.class, () -> new TsurugiTransaction(session, future, TgTxOption.ofOCC()));
+        var e = assertThrows(IceaxeIOException.class, () -> new TsurugiTransaction(session, future, TgTxOption.ofOCC()));
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
         assertTrue(future.isClosed());
     }

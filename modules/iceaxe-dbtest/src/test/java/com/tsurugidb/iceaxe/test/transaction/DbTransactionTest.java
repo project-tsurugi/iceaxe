@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -214,7 +215,7 @@ class DbTransactionTest extends DbTestTableTester {
         var session = getSession();
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             transaction.close();
-            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+            var e = assertThrowsExactly(IceaxeIOException.class, () -> {
                 transaction.getTransactionStatus();
             });
             assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);

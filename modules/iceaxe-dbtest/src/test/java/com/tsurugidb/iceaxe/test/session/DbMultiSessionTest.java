@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -83,7 +83,7 @@ class DbMultiSessionTest extends DbTestTableTester {
             if (session.isAlive()) {
                 count++;
             } else {
-                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                var e = assertThrowsExactly(IceaxeIOException.class, () -> {
                     session.getLowSqlClient();
                 });
                 assertEqualsCode(IceaxeErrorCode.SESSION_LOW_ERROR, e);

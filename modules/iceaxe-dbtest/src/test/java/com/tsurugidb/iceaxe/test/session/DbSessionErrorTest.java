@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
@@ -23,7 +23,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     void createQueryAfterClose() throws Exception {
         var session = createClosedSession();
 
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             session.createQuery(SELECT_SQL);
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
@@ -33,7 +33,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     void createPreparedQueryAfterClose() throws Exception {
         var session = createClosedSession();
 
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             session.createQuery(SELECT_SQL, TgParameterMapping.of());
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
@@ -43,7 +43,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     void createStatementAfterClose() throws Exception {
         var session = createClosedSession();
 
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             session.createStatement(INSERT_SQL);
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
@@ -53,7 +53,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     void createPreparedStatementAfterClose() throws Exception {
         var session = createClosedSession();
 
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             session.createStatement(INSERT_SQL, INSERT_MAPPING);
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
@@ -63,7 +63,7 @@ class DbSessionErrorTest extends DbTestTableTester {
     void createTransactionAfterClose() throws Exception {
         var session = createClosedSession();
 
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             session.createTransaction(TgTxOption.ofOCC());
         });
         assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);

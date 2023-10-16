@@ -16,7 +16,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
@@ -86,7 +86,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         var ps = session.createQuery(sql);
         ps.close();
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             tm.executeAndGetList(ps);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
@@ -103,7 +103,7 @@ class DbSelectErrorTest extends DbTestTableTester {
         var ps = session.createQuery(sql, parameterMapping);
         ps.close();
         var parameter = TgBindParameters.of(foo.bind(1));
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
             tm.executeAndGetList(ps, parameter);
         });
         assertEqualsCode(IceaxeErrorCode.PS_ALREADY_CLOSED, e);
@@ -129,7 +129,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                 transaction.getLowTransaction();
             }
             transaction.close();
-            var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+            var e = assertThrowsExactly(IceaxeIOException.class, () -> {
                 transaction.executeAndGetList(ps);
             });
             assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
