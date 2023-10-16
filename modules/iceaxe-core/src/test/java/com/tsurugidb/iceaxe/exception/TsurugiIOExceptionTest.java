@@ -25,7 +25,7 @@ class TsurugiIOExceptionTest {
 
     @Test
     void constructCode() {
-        var target = new TsurugiIOException(IceaxeErrorCode.TX_LOW_ERROR);
+        var target = new IceaxeIOException(IceaxeErrorCode.TX_LOW_ERROR);
         assertEquals(IceaxeErrorCode.TX_LOW_ERROR.getMessage(), target.getMessage());
         assertEquals(IceaxeErrorCode.TX_LOW_ERROR, target.getDiagnosticCode());
     }
@@ -33,7 +33,7 @@ class TsurugiIOExceptionTest {
     @Test
     void constructCodeIOException() {
         var se = new IceaxeServerExceptionTestMock("test", IceaxeErrorCode.TX_ALREADY_CLOSED);
-        var target = new TsurugiIOException(IceaxeErrorCode.TX_LOW_ERROR, new IOException(se.getMessage(), se));
+        var target = new IceaxeIOException(IceaxeErrorCode.TX_LOW_ERROR, new IOException(se.getMessage(), se));
         assertEquals(IceaxeErrorCode.TX_LOW_ERROR.getMessage() + ": " + se.getMessage(), target.getMessage());
         assertEquals(IceaxeErrorCode.TX_LOW_ERROR, target.getDiagnosticCode());
     }

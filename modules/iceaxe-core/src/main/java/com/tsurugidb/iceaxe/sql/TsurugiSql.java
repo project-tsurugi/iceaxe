@@ -12,7 +12,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -235,7 +235,7 @@ public abstract class TsurugiSql implements AutoCloseable {
      */
     protected void checkClose() throws IOException {
         if (isClosed()) {
-            throw new TsurugiIOException(IceaxeErrorCode.PS_ALREADY_CLOSED);
+            throw new IceaxeIOException(IceaxeErrorCode.PS_ALREADY_CLOSED);
         }
     }
 

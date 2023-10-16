@@ -41,33 +41,14 @@ public class TsurugiIOException extends IOException implements TsurugiDiagnostic
     /**
      * Creates a new instance.
      *
-     * @param code the diagnostic code
+     * @param code    diagnostic code
+     * @param message the detail message
+     * @param cause   the cause
      */
     @IceaxeInternal
-    public TsurugiIOException(IceaxeErrorCode code) {
-        this(code, null);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param code  the diagnostic code
-     * @param cause the cause
-     */
-    @IceaxeInternal
-    public TsurugiIOException(IceaxeErrorCode code, Throwable cause) {
-        super(createMessage(code, cause), cause);
+    protected TsurugiIOException(DiagnosticCode code, String message, Throwable cause) {
+        super(message, cause);
         this.diagnosticCode = Optional.of(code);
-    }
-
-    private static String createMessage(IceaxeErrorCode code, Throwable cause) {
-        if (cause != null) {
-            String causeMessage = cause.getMessage();
-            if (causeMessage != null && !causeMessage.isEmpty()) {
-                return code.getMessage() + ": " + causeMessage;
-            }
-        }
-        return code.getMessage();
     }
 
     @Override

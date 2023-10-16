@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -49,7 +49,7 @@ class TsurugiTransactionTest {
         try (var target = new TsurugiTransaction(session, future, TgTxOption.ofOCC())) {
             var e1 = assertThrowsExactly(IOException.class, () -> target.getLowTransaction());
             assertEquals("test", e1.getMessage());
-            var e2 = assertThrowsExactly(TsurugiIOException.class, () -> target.getLowTransaction());
+            var e2 = assertThrowsExactly(IceaxeIOException.class, () -> target.getLowTransaction());
             assertEquals(IceaxeErrorCode.TX_LOW_ERROR, e2.getDiagnosticCode());
             assertSame(e1, e2.getCause());
         }

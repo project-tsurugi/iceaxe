@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
@@ -121,7 +121,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     public final synchronized PreparedStatement getLowPreparedStatement() throws IOException, InterruptedException {
         if (this.lowPreparedStatement == null) {
             if (lowFutureException != null) {
-                throw new TsurugiIOException(IceaxeErrorCode.PS_LOW_ERROR, lowFutureException);
+                throw new IceaxeIOException(IceaxeErrorCode.PS_LOW_ERROR, lowFutureException);
             }
 
             log.trace("lowPs get start");

@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableListHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
@@ -216,7 +216,7 @@ public class TsurugiSession implements AutoCloseable {
     public final synchronized Session getLowSession() throws IOException, InterruptedException {
         if (this.lowSession == null) {
             if (this.lowFutureException != null) {
-                throw new TsurugiIOException(IceaxeErrorCode.SESSION_LOW_ERROR, lowFutureException);
+                throw new IceaxeIOException(IceaxeErrorCode.SESSION_LOW_ERROR, lowFutureException);
             }
 
             LOG.trace("lowSession get start");
@@ -599,7 +599,7 @@ public class TsurugiSession implements AutoCloseable {
      */
     protected void checkClose() throws IOException {
         if (isClosed()) {
-            throw new TsurugiIOException(IceaxeErrorCode.SESSION_ALREADY_CLOSED);
+            throw new IceaxeIOException(IceaxeErrorCode.SESSION_ALREADY_CLOSED);
         }
     }
 

@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.TsurugiIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -321,7 +321,7 @@ public class TsurugiTransaction implements AutoCloseable {
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
             if (this.lowFutureException != null) {
-                throw new TsurugiIOException(IceaxeErrorCode.TX_LOW_ERROR, lowFutureException);
+                throw new IceaxeIOException(IceaxeErrorCode.TX_LOW_ERROR, lowFutureException);
             }
 
             LOG.trace("lowTransaction get start");
@@ -1185,7 +1185,7 @@ public class TsurugiTransaction implements AutoCloseable {
      */
     protected void checkClose() throws IOException {
         if (isClosed()) {
-            throw new TsurugiIOException(IceaxeErrorCode.TX_ALREADY_CLOSED);
+            throw new IceaxeIOException(IceaxeErrorCode.TX_ALREADY_CLOSED);
         }
     }
 
