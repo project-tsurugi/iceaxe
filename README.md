@@ -1,21 +1,66 @@
-# Iceaxe - Java High-level-API
+# Iceaxe - java library for Tsurugi
 
 Iceaxe is a Java library that executes SQL on Tsurugi database.
+
+Iceaxe is not JDBC, but the program layer is similar to JDBC.
+
+[The book about Tsurugi](https://info.nikkeibp.co.jp/media/LIN/atcl/books/091300039/) explains Iceaxe.
 
 ## Requirements
 
 * Java `>= 11`
 
-* access to installed dependent modules:
-  * Tsubakuro
+* dependent modules:
+  * [Tsubakuro](https://github.com/project-tsurugi/tsubakuro)
+  * SLF4J
 
 ## Javadoc
 
 * https://project-tsurugi.github.io/iceaxe/
+* https://javadoc.io/doc/com.tsurugidb.iceaxe/iceaxe-core/latest/index.html - All versions of javadoc can be referenced.
+
+## How to use
+
+Iceaxe is hosted on Maven Central Repository.
+
+* https://central.sonatype.com/artifact/com.tsurugidb.iceaxe/iceaxe-core/overview
+
+To use on Gradle, add Iceaxe library to dependencies.
+
+```
+dependencies {
+    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.0.1'
+
+    implementation 'org.slf4j:slf4j-simple:1.7.32'
+}
+```
+
+## Example
+
+```java
+import java.net.URI;
+import com.tsurugidb.iceaxe.TsurugiConnector;
+import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+
+var endpoint = URI.create("tcp://localhost:12345");
+var connector = TsurugiConnector.of(endpoint);
+try (var session = connector.createSession()) {
+    try (var ps = session.createStatement("update customer set c_age = c_age + 1")) {
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
+        var tm = session.createTransactionManager(setting);
+        tm.execute(transaction -> {
+            transaction.executeAndGetCount(ps);
+        });
+    }
+}
+```
+
+See also [iceaxe-examples](modules/iceaxe-examples/src/main/java/com/tsurugidb/iceaxe/example).
 
 ## How to build
 
-```
+```bash
 cd iceaxe
 ./gradlew build
 ```
@@ -30,16 +75,6 @@ cd tsubakuro
 
 cd iceaxe
 ./gradlew build -PmavenLocal
-```
-
-## How to use
-
-To use on Gradle, add Iceaxe library to dependencies.
-
-```
-dependencies {
-    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.0.1'
-}
 ```
 
 ## License
