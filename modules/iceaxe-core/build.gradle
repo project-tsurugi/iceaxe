@@ -15,3 +15,8 @@ dependencies {
 spotbugs {
     excludeFilter = file("$projectDir/config/spotbugs/spotbugsExclude.xml")
 }
+
+javadoc {
+    title "Tsurugi Iceaxe ${project.version} API"
+    options.overview = 'src/main/javadoc/overview.html'
+}
