@@ -16,8 +16,12 @@ Iceaxe is not JDBC, but the program layer is similar to JDBC.
 
 ## Javadoc
 
-* https://project-tsurugi.github.io/iceaxe/
-* https://javadoc.io/doc/com.tsurugidb.iceaxe/iceaxe-core/latest/index.html [![javadoc](https://javadoc.io/badge2/com.tsurugidb.iceaxe/iceaxe-core/javadoc.svg)](https://javadoc.io/doc/com.tsurugidb.iceaxe/iceaxe-core) - All versions of javadoc can be referenced.
+[![javadoc](https://javadoc.io/badge2/com.tsurugidb.iceaxe/iceaxe-core/javadoc.svg)](https://javadoc.io/doc/com.tsurugidb.iceaxe/iceaxe-core)
+
+* GitHub Pages (Latest version)
+  * https://project-tsurugi.github.io/iceaxe/
+* javadoc.io (All versions of javadoc can be referenced)
+  * https://javadoc.io/doc/com.tsurugidb.iceaxe/iceaxe-core/latest/index.html
 
 ## How to use
 
