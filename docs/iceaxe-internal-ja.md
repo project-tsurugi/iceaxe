@@ -2,8 +2,6 @@
 
 Iceaxeの内部構造やその意図について説明する。
 
-- 当ドキュメントで[iceaxe-usage.md](iceaxe-usage.md)の補足も行う。
-
 
 
 ## クラス名の命名ルール
