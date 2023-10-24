@@ -491,6 +491,6 @@ public class DbTestTableTester {
     }
 
     protected static void assertUpdateCount(int expected, int actual) {
-        assertEquals(-1, actual); // TODO use expected (for updateCount)
+        assertEquals(expected, actual);
     }
 }
