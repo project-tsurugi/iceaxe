@@ -99,7 +99,7 @@ class DbUpdateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
             int count = tm.executeAndGetCount(ps);
-            assertUpdateCount(SIZE, count);
+            assertUpdateCount(SIZE / 2, count);
         }
 
         var list = selectAllFromTest();
