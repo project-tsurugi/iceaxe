@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.sql.result;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -22,6 +23,7 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
+import com.tsurugidb.tsubakuro.sql.ExecuteResult;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
@@ -34,10 +36,34 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class TsurugiStatementResult extends TsurugiSqlResult {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiStatementResult.class);
 
-    private FutureResponse<Void> lowResultFuture;
+    private FutureResponse<ExecuteResult> lowResultFuture;
+    private TgResultCount resultCount = null;
     private final IceaxeTimeout checkTimeout;
     private final IceaxeTimeout closeTimeout;
     private List<TsurugiStatementResultEventListener> eventListenerList = null;
+
+    /**
+     * Creates a new instance.
+     *
+     * @param sqlExecuteId    iceaxe SQL executeId
+     * @param transaction     transaction
+     * @param ps              SQL definition
+     * @param parameter       SQL parameter
+     * @param lowResultFuture future of ExecuteResult
+     * @throws IOException if an I/O error occurs while disposing the resources
+     */
+    @IceaxeInternal
+    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<ExecuteResult> lowResultFuture) throws IOException {
+        super(sqlExecuteId, transaction, ps, parameter);
+        this.lowResultFuture = lowResultFuture;
+
+        var sessionOption = transaction.getSessionOption();
+        this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CHECK);
+        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
+
+        applyCloseTimeout();
+        initialize(lowResultFuture);
+    }
 
     /**
      * Creates a new instance.
@@ -50,16 +76,17 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
-    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<Void> lowResultFuture) throws IOException {
+    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Collection<?> parameter, FutureResponse<Void> lowResultFuture) throws IOException {
         super(sqlExecuteId, transaction, ps, parameter);
-        this.lowResultFuture = lowResultFuture;
-
-        var sessionOption = transaction.getSessionOption();
-        this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CHECK);
-        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
-
-        applyCloseTimeout();
-        initialize(lowResultFuture);
+        throw new UnsupportedOperationException("not yet implements"); // TODO executeBatch
+//        this.lowResultFuture = lowResultFuture;
+//
+//        var sessionOption = transaction.getSessionOption();
+//        this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CHECK);
+//        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
+//
+//        applyCloseTimeout();
+//        initialize(lowResultFuture);
     }
 
     private void applyCloseTimeout() {
@@ -142,12 +169,14 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * @throws InterruptedException        if interrupted while retrieving result
      * @throws TsurugiTransactionException if server error occurs while retrieving result
      */
-    protected final synchronized void checkLowResult() throws IOException, InterruptedException, TsurugiTransactionException {
+    @IceaxeInternal
+    public final synchronized void checkLowResult() throws IOException, InterruptedException, TsurugiTransactionException {
         if (this.lowResultFuture != null) {
             LOG.trace("lowResult get start");
             Throwable occurred = null;
             try {
-                IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout);
+                var lowExecuteResult = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout);
+                this.resultCount = new TgResultCount(lowExecuteResult);
             } catch (TsurugiTransactionException e) {
                 occurred = e;
                 fillToTsurugiException(e);
@@ -173,14 +202,27 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * @throws IOException                 if an I/O error occurs while retrieving result
      * @throws InterruptedException        if interrupted while retrieving result
      * @throws TsurugiTransactionException if server error occurs while retrieving result
+     * @see #getCountDetail()
      */
     public int getUpdateCount() throws IOException, InterruptedException, TsurugiTransactionException {
+        return (int) getCountDetail().getTotalCount();
+    }
+
+    /**
+     * get count detail.
+     *
+     * @return the row count for SQL Data Manipulation Language (DML) statements
+     * @throws IOException                 if an I/O error occurs while retrieving result
+     * @throws InterruptedException        if interrupted while retrieving result
+     * @throws TsurugiTransactionException if server error occurs while retrieving result
+     * @since X.X.X
+     */
+    public TgResultCount getCountDetail() throws IOException, InterruptedException, TsurugiTransactionException {
         checkLowResult();
-        // FIXME 更新件数取得
-        // 件数を保持し、何度呼ばれても返せるようにする
-//      throw new InternalError("not yet implements");
-//      System.err.println("not yet implements TsurugiStatementResult.getUpdateCount(), now always returns -1");
-        return -1;
+        if (this.resultCount == null) {
+            throw new IllegalStateException("resultCount==null");
+        }
+        return this.resultCount;
     }
 
     @Override
