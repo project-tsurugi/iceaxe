@@ -24,6 +24,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
+import com.tsurugidb.iceaxe.sql.result.TgResultCount;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
@@ -383,6 +384,8 @@ public class TsurugiTransaction implements AutoCloseable {
         EXECUTE_FIND_RECORD("executeAndFindRecord"),
         /** execute and get count */
         EXECUTE_GET_COUNT("executeAndGetCount"),
+        /** execute and get count detail */
+        EXECUTE_GET_COUNT_DETAIL("executeAndGetCountDetail"),
         /** commit */
         COMMIT("commit"),
         /** rollback */
@@ -428,7 +431,7 @@ public class TsurugiTransaction implements AutoCloseable {
             Throwable occurred = null;
             try (var rs = ps.execute(this)) {
                 result = rs;
-                rs.getUpdateCount();
+                rs.checkLowResult();
             } catch (TsurugiTransactionException e) {
                 occurred = e;
                 e.setTxMethod(method, txExecuteId);
@@ -925,6 +928,112 @@ public class TsurugiTransaction implements AutoCloseable {
         try (var rs = ps.executeBatch(this, parameterList)) {
             result = rs;
             return rs.getUpdateCount();
+        } catch (TsurugiTransactionException e) {
+            occurred = e;
+            e.setTxMethod(method, txExecuteId);
+            throw e;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalResult = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameterList, finalResult, finalOccurred));
+        }
+    }
+
+    /**
+     * execute statement.
+     *
+     * @param ps SQL definition
+     * @return row count
+     * @throws IOException                 if an I/O error occurs while execute statement
+     * @throws InterruptedException        if interrupted while execute statement
+     * @throws TsurugiTransactionException if server error occurs while execute statement
+     * @since X.X.X
+     */
+    public TgResultCount executeAndGetCountDetail(TsurugiSqlStatement ps) throws IOException, InterruptedException, TsurugiTransactionException {
+        var method = TgTxMethod.EXECUTE_GET_COUNT_DETAIL;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
+
+        TsurugiStatementResult result = null;
+        Throwable occurred = null;
+        try (var rs = ps.execute(this)) {
+            result = rs;
+            return rs.getCountDetail();
+        } catch (TsurugiTransactionException e) {
+            occurred = e;
+            e.setTxMethod(method, txExecuteId);
+            throw e;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalResult = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
+        }
+    }
+
+    /**
+     * execute statement.
+     *
+     * @param <P>       parameter type
+     * @param ps        SQL definition
+     * @param parameter SQL parameter
+     * @return row count
+     * @throws IOException                 if an I/O error occurs while execute statement
+     * @throws InterruptedException        if interrupted while execute statement
+     * @throws TsurugiTransactionException if server error occurs while execute statement
+     * @since X.X.X
+     */
+    public <P> TgResultCount executeAndGetCountDetail(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
+        var method = TgTxMethod.EXECUTE_GET_COUNT_DETAIL;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
+
+        TsurugiStatementResult result = null;
+        Throwable occurred = null;
+        try (var rs = ps.execute(this, parameter)) {
+            result = rs;
+            return rs.getCountDetail();
+        } catch (TsurugiTransactionException e) {
+            occurred = e;
+            e.setTxMethod(method, txExecuteId);
+            throw e;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalResult = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
+        }
+    }
+
+    /**
+     * execute batch.
+     *
+     * @param <P>           parameter type
+     * @param ps            SQL definition
+     * @param parameterList SQL parameter
+     * @return row count
+     * @throws IOException                 if an I/O error occurs while execute batch
+     * @throws InterruptedException        if interrupted while execute batch
+     * @throws TsurugiTransactionException if server error occurs while execute batch
+     * @since X.X.X
+     */
+    public <P> TgResultCount executeAndGetCountDetail(TsurugiSqlPreparedStatement<P> ps, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {
+        var method = TgTxMethod.EXECUTE_GET_COUNT_DETAIL;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameterList));
+
+        TsurugiStatementResult result = null;
+        Throwable occurred = null;
+        try (var rs = ps.executeBatch(this, parameterList)) {
+            result = rs;
+            return rs.getCountDetail();
         } catch (TsurugiTransactionException e) {
             occurred = e;
             e.setTxMethod(method, txExecuteId);
