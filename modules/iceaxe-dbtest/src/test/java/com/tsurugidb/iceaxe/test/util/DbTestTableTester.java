@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -336,7 +337,7 @@ public class DbTestTableTester {
 
     // assertion
 
-    protected void assertEqualsCode(DiagnosticCode expected, Throwable actual) {
+    protected static void assertEqualsCode(DiagnosticCode expected, Throwable actual) {
         var code = findDiagnosticCode(actual);
         assertEquals(expected, code);
 
@@ -419,14 +420,25 @@ public class DbTestTableTester {
     }
 
     protected static void assertEqualsTestTable(int expectedSize) throws IOException, InterruptedException {
+        assertEqualsTestTable(expectedSize, entity -> {
+        });
+    }
+
+    protected static void assertEqualsTestTable(int expectedSize, Consumer<TestEntity> modifier) throws IOException, InterruptedException {
         var actualList = selectAllFromTest();
-        assertEqualsTestTable(expectedSize, actualList);
+        assertEqualsTestTable(expectedSize, actualList, modifier);
     }
 
     protected static void assertEqualsTestTable(int expectedSize, List<TestEntity> actualList) {
+        assertEqualsTestTable(expectedSize, actualList, entity -> {
+        });
+    }
+
+    protected static void assertEqualsTestTable(int expectedSize, List<TestEntity> actualList, Consumer<TestEntity> modifier) {
         assertEquals(expectedSize, actualList.size());
         for (int i = 0; i < expectedSize; i++) {
             var expected = createTestEntity(i);
+            modifier.accept(expected);
             var actual = actualList.get(i);
             assertEquals(expected, actual);
         }
