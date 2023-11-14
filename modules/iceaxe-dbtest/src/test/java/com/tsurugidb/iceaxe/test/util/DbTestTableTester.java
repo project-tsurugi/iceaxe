@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -40,6 +41,7 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.event.TsurugiTmEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.debug.DebugClient;
 import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -57,6 +59,7 @@ public class DbTestTableTester {
 
     private static TsurugiSession staticSession;
     private static ExecutorService staticService;
+    private static DebugClient staticDebugClient;
 
     protected static TsurugiSession getSession() throws IOException {
         synchronized (DbTestTableTester.class) {
@@ -67,16 +70,28 @@ public class DbTestTableTester {
         return staticSession;
     }
 
-    protected static synchronized void closeStaticSession() throws IOException, InterruptedException {
-        if (staticSession != null) {
-            staticSession.close();
+    private static DebugClient getDebugClient() throws IOException, InterruptedException {
+        synchronized (DbTestTableTester.class) {
+            if (staticDebugClient == null) {
+                var session = getSession();
+                staticDebugClient = DebugClient.attach(session.getLowSession());
+            }
+        }
+        return staticDebugClient;
+    }
+
+    protected static synchronized void closeStaticSession() throws IOException, InterruptedException, ServerException {
+        try (var c1 = staticSession; var c2 = staticDebugClient) {
+            // close only
+        } finally {
             staticSession = null;
+            staticDebugClient = null;
         }
     }
 
     @AfterAll
-    static void testerAfterAll() throws IOException, InterruptedException {
-        try (var c1 = staticSession; var c2 = (Closeable) () -> {
+    static void testerAfterAll() throws IOException, InterruptedException, ServerException {
+        try (var c1 = staticSession; var c2 = staticDebugClient; var c3 = (Closeable) () -> {
             if (staticService != null) {
                 staticService.shutdownNow();
             }
@@ -84,6 +99,7 @@ public class DbTestTableTester {
             // close only
         } finally {
             staticSession = null;
+            staticDebugClient = null;
             staticService = null;
         }
 
@@ -98,6 +114,7 @@ public class DbTestTableTester {
         } else {
             log.debug("init all start");
         }
+        serverLog(log, null, "init all start");
     }
 
     protected static void logInitEnd(Logger log, TestInfo info) {
@@ -106,40 +123,49 @@ public class DbTestTableTester {
         } else {
             log.debug("init all end");
         }
+        serverLog(log, null, "init all end");
     }
 
     protected void logInitStart(TestInfo info) {
+        String displayName = getDisplayName(info);
         if (START_END_LOG_INFO) {
-            LOG.info("{} init start", getDisplayName(info));
+            LOG.info("{} init start", displayName);
         } else {
-            LOG.debug("{} init start", getDisplayName(info));
+            LOG.debug("{} init start", displayName);
         }
+        serverLog(LOG, displayName, "init start");
     }
 
     protected void logInitEnd(TestInfo info) {
+        String displayName = getDisplayName(info);
         if (START_END_LOG_INFO) {
-            LOG.info("{} init end", getDisplayName(info));
+            LOG.info("{} init end", displayName);
         } else {
-            LOG.debug("{} init end", getDisplayName(info));
+            LOG.debug("{} init end", displayName);
         }
+        serverLog(LOG, displayName, "init end");
     }
 
     @BeforeEach
     void tetsterBeforeEach(TestInfo info) {
+        String displayName = getDisplayName(info);
         if (START_END_LOG_INFO) {
-            LOG.info("{} start", getDisplayName(info));
+            LOG.info("{} start", displayName);
         } else {
-            LOG.debug("{} start", getDisplayName(info));
+            LOG.debug("{} start", displayName);
         }
+        serverLog(LOG, displayName, "start");
     }
 
     @AfterEach
     void testerAfterEach(TestInfo info) {
+        String displayName = getDisplayName(info);
         if (START_END_LOG_INFO) {
-            LOG.info("{} end", getDisplayName(info));
+            LOG.info("{} end", displayName);
         } else {
-            LOG.debug("{} end", getDisplayName(info));
+            LOG.debug("{} end", displayName);
         }
+        serverLog(LOG, displayName, "end");
     }
 
     private static String getDisplayName(TestInfo info) {
@@ -149,6 +175,29 @@ public class DbTestTableTester {
             return m + "() " + d;
         }
         return d;
+    }
+
+    protected static void serverLog(Logger log, String displayName, String message) {
+        try {
+            var client = getDebugClient();
+            var m = "iceaxe-dbtest: " + getServerLogName(log, displayName) + " " + message;
+            client.logging(m).await(3, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("serverLog error. message={}", message, e);
+        }
+    }
+
+    private static String getServerLogName(Logger log, String displayName) {
+        String name = log.getName();
+        int n = name.lastIndexOf('.');
+        if (n >= 0) {
+            name = name.substring(n + 1);
+        }
+
+        if (displayName == null) {
+            return name;
+        }
+        return name + "." + displayName;
     }
 
     // property
