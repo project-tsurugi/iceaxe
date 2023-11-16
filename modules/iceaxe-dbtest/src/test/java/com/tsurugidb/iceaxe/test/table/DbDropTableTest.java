@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.table;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -69,5 +70,20 @@ class DbDropTableTest extends DbTestTableTester {
         }
 
         assertTrue(session.findTableMetadata(TEST).isEmpty());
+    }
+
+    @Test
+    void dropIfExists() throws Exception {
+        createTestTable();
+        var sql = SQL.replace("drop table", "drop table if exists");
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+
+        assertTrue(existsTable(TEST));
+        tm.executeDdl(sql);
+        assertFalse(existsTable(TEST));
+        tm.executeDdl(sql);
+        assertFalse(existsTable(TEST));
     }
 }

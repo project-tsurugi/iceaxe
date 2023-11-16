@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.table;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -192,5 +193,19 @@ class DbCreateTableTest extends DbTestTableTester {
             });
         });
         assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e);
+    }
+
+    @Test
+    void createIfNotExists() throws Exception {
+        var sql = SQL.replace("create table", "create table if not exists");
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+
+        assertFalse(existsTable(TEST));
+        tm.executeDdl(sql);
+        assertTrue(existsTable(TEST));
+        tm.executeDdl(sql);
+        assertTrue(existsTable(TEST));
     }
 }
