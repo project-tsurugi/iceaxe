@@ -2,8 +2,12 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -103,9 +107,11 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(0, list.size()); // TODO isTrue実装待ち
-//          assertEquals(SIZE, list.size());
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // TODO isTrue実装待ち
+                var list = tm.executeAndGetList(ps);
+                assertEquals(SIZE, list.size());
+            });
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
         }
     }
 
@@ -116,27 +122,26 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(0, list.size()); // TODO isFalse実装待ち
-//          assertEquals(SIZE, list.size());
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // TODO isFalse実装待ち
+                var list = tm.executeAndGetList(ps);
+                assertEquals(SIZE, list.size());
+            });
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
         }
     }
 
     @Test
     void in() throws Exception {
         var expectedList = List.of(2, 4, 5, 7);
-        var sql = SELECT_SQL + " where foo in (" + expectedList.stream().map(n -> Integer.toString(n)).collect(Collectors.joining(",")) + ") order by foo";
-//      var sql = SELECT_SQL + " where " + expectedList.stream().map(n -> "foo=" + n).collect(Collectors.joining(" or ")) + " order by foo";
+        var sql = SELECT_SQL + " where foo in (" + expectedList.stream().map(n -> Integer.toString(n)).collect(Collectors.joining(",")) + ")";
+//      var sql = SELECT_SQL + " where " + expectedList.stream().map(n -> "foo=" + n).collect(Collectors.joining(" or ")) ;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 var list = tm.executeAndGetList(ps);
-                assertEquals(expectedList.size(), list.size());
-                for (int i = 0; i < list.size(); i++) {
-                    assertEquals(expectedList.get(i), list.get(i).getFoo());
-                }
+                assertWhere(entity -> expectedList.contains(entity.getFoo()), list);
             });
             assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO in実装待ち
         }
@@ -144,22 +149,19 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
 
     @Test
     void between() throws Exception {
-        int s = 4;
-        int e = 6;
-        var sql = SELECT_SQL + " where foo between " + s + " and " + e + " order by foo";
-//      var sql = SELECT_SQL + " where " + s + " <= foo and foo <= " + e + " order by foo";
+        int start = 4;
+        int end = 6;
+        var sql = SELECT_SQL + " where foo between " + start + " and " + end;
+//      var sql = SELECT_SQL + " where " + start + " <= foo and foo <= " + end;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e0 = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 var list = tm.executeAndGetList(ps);
-                assertEquals(e - s + 1, list.size());
-                for (int i = 0; i < list.size(); i++) {
-                    assertEquals(s + i, list.get(i).getFoo());
-                }
+                assertWhere(entity -> start <= entity.getFoo() && entity.getFoo() <= end, list);
             });
-            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e0); // TODO between実装待ち
+            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO between実装待ち
         }
     }
 
@@ -170,8 +172,11 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(0, list.size()); // TODO like実装待ち
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // // TODO like実装待ち
+                var list = tm.executeAndGetList(ps);
+                assertWhere(entity -> entity.getZzz().startsWith("1"), list);
+            });
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
         }
     }
 
@@ -182,8 +187,30 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(0, list.size()); // TODO like実装待ち
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // // TODO like実装待ち
+                var list = tm.executeAndGetList(ps);
+                assertWhere(entity -> !entity.getZzz().startsWith("1"), list);
+            });
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
         }
+    }
+
+    private static void assertWhere(Predicate<TestEntity> where, List<TestEntity> actualList) {
+        var expectedMap = expectedMap(where);
+        assertEquals(expectedMap.size(), actualList.size());
+        for (var actual : actualList) {
+            assertTrue(expectedMap.containsKey(actual.getFoo()));
+        }
+    }
+
+    private static Map<Integer, TestEntity> expectedMap(Predicate<TestEntity> where) {
+        var map = new HashMap<Integer, TestEntity>();
+        for (int i = 0; i < SIZE; i++) {
+            var entity = createTestEntity(i);
+            if (where.test(entity)) {
+                map.put(entity.getFoo(), entity);
+            }
+        }
+        return map;
     }
 }
