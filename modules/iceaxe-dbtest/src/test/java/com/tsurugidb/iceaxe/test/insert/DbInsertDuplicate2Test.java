@@ -81,7 +81,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
 
     @Test
     void mix() throws Exception {
-        var setting = TgTmSetting.of(TgTxOption.ofOCC(), 3, TgTxOption.ofLTX(TEST, TEST2), 10);
+        var setting = TgTmSetting.of(TgTxOption.ofOCC(), 3, TgTxOption.ofLTX(TEST, TEST2), 17);
         test(setting, 10, 500);
     }
 
