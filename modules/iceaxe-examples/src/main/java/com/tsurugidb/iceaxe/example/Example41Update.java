@@ -6,6 +6,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultCount;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -24,6 +25,7 @@ public class Example41Update {
             update_tm_sql(tm);
             updateBindParameter(session, tm);
             updateEntity(session, tm);
+            update_countDetail(session, tm);
         }
     }
 
@@ -70,6 +72,17 @@ public class Example41Update {
                 var entity = new TestEntity(123, 456L, "abc");
                 int count = transaction.executeAndGetCount(ps, entity);
                 System.out.println(count);
+            });
+        }
+    }
+
+    void update_countDetail(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        var sql = "update TEST set BAR = BAR + 1";
+        try (var ps = session.createStatement(sql)) {
+            tm.execute(transaction -> {
+                TgResultCount count = transaction.executeAndGetCountDetail(ps);
+                long updatedCount = count.getUpdatedCount();
+                System.out.println(updatedCount);
             });
         }
     }
