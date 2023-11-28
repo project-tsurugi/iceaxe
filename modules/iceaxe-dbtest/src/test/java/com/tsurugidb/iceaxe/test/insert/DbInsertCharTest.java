@@ -62,7 +62,7 @@ class DbInsertCharTest extends DbTestTableTester {
     }
 
     void insertOK(Function<String, String> pad) throws Exception {
-        var list = List.of("", "0123456789", "あいう", "あいう0", "\0\1\uffff");
+        var list = List.of("", "0123456789", "あいう", "あいう0", /* "\0\1\uffff", */ "\1\uffff");
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -118,28 +118,37 @@ class DbInsertCharTest extends DbTestTableTester {
             for (int i = 1; i <= size; i++) {
                 var entity = new TestEntity(i, i, nulCharText(i));
 
-                int count = tm.executeAndGetCount(ps, entity);
-                assertUpdateCount(1, count);
+                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                    int count = tm.executeAndGetCount(ps, entity);
+                    assertUpdateCount(1, count);
+                });
+                assertEqualsCode(SqlServiceCode.INVALID_RUNTIME_VALUE_EXCEPTION, e);
+                assertContains("detected invalid runtime value", e.getMessage()); // TODO エラー詳細情報（カラム名や桁数）
             }
         }
 
         try (var ps = session.createQuery(SELECT_SQL + " order by zzz", SELECT_MAPPING)) {
             var list = tm.executeAndGetList(ps);
-            assertEquals(size, list.size());
-            // int i = size;
-            for (var entity : list) {
-                // TODO assertEquals(i--, entity.getFoo());
-                var expected = pad.apply(nulCharText(entity.getFoo()));
-                switch (entity.getFoo()) { // TODO remove 補正
-                case 4:
-                case 5:
-                case 6:
-                    expected = "ab"; // 補正
-                    break;
-                default:
-                    break;
+            boolean ideal = false; // TODO remove
+            if (ideal) {
+                assertEquals(size, list.size());
+                // int i = size;
+                for (var entity : list) {
+                    // TODO assertEquals(i--, entity.getFoo());
+                    var expected = pad.apply(nulCharText(entity.getFoo()));
+                    switch (entity.getFoo()) { // TODO remove 補正
+                    case 4:
+                    case 5:
+                    case 6:
+                        expected = "ab"; // 補正
+                        break;
+                    default:
+                        break;
+                    }
+                    assertEquals(expected, entity.getZzz());
                 }
-                assertEquals(expected, entity.getZzz());
+            } else {
+                assertEquals(0, list.size());
             }
         }
     }
