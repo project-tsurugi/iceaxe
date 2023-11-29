@@ -135,7 +135,7 @@ public class DbInsertConstraintTest extends DbTestTableTester {
             });
         });
         assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e0);
-//      assertContains("TODO", e0.getMessage()); // TODO エラー詳細情報の確認
+        assertContains("Unique constraint violation occurred. Table:test", e0.getMessage());
 
         assertEqualsTestTable(0);
     }
