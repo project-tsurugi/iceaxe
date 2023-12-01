@@ -67,8 +67,7 @@ class DbTransactionParallelTest extends DbTestTableTester {
 
     @Test
     void testLtxLtx() throws Exception {
-        // LTX同士の場合、tx2はtx1のコミットが終わるのを待つ
-        test(TgTxOption.ofLTX(TEST), TgTxOption.ofLTX(TEST2), true);
+        test(TgTxOption.ofLTX(TEST), TgTxOption.ofLTX(TEST2), false);
     }
 
     @Test
