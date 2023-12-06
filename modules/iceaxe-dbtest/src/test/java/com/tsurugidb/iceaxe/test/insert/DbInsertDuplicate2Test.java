@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,12 +75,14 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
     }
 
     @Test
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-ltx.*")
     void ltx() throws Exception {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX(TEST, TEST2));
         test(setting, 30, 500);
     }
 
     @Test
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-mix.*")
     void mix() throws Exception {
         var setting = TgTmSetting.of(TgTxOption.ofOCC(), 3, TgTxOption.ofLTX(TEST, TEST2), 17);
         test(setting, 10, 500);
