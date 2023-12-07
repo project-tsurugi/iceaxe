@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
@@ -237,10 +238,17 @@ class DbTransactionReadAreaTest extends DbTestTableTester {
                 try (var tx2 = session.createTransaction(tx2Option)) {
                     tx2.executeAndGetList(select1Ps);
                     tx2.executeAndGetCount(update2Ps);
-                    tx2.commit(TgCommitType.DEFAULT);
-                }
+                    var future2 = executeFuture(() -> {
+                        tx2.commit(TgCommitType.DEFAULT);
+                        return null;
+                    });
 
-                tx1.commit(TgCommitType.DEFAULT);
+                    Thread.sleep(100);
+                    assertFalse(future2.isDone());
+                    tx1.commit(TgCommitType.DEFAULT);
+
+                    future2.get();
+                }
             }
         }
 
