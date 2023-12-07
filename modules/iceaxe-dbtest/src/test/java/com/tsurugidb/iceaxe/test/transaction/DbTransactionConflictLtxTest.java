@@ -310,15 +310,11 @@ class DbTransactionConflictLtxTest extends DbTestTableTester {
                     assertFalse(future2.isDone());
                     tx1.commit(TgCommitType.DEFAULT);
 
-                    var e = assertThrowsExactly(ExecutionException.class, () -> {
-                        future2.get();
-                    });
-                    assertInstanceOf(TsurugiTransactionException.class, e.getCause());
-                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
+                    future2.get();
                 }
             }
         }
 
-        assertEqualsTestTable(SIZE);
+        assertEqualsTestTable(SIZE + add);
     }
 }
