@@ -215,7 +215,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * @throws IOException                 if an I/O error occurs while retrieving result
      * @throws InterruptedException        if interrupted while retrieving result
      * @throws TsurugiTransactionException if server error occurs while retrieving result
-     * @since X.X.X
+     * @since 1.1.0
      */
     public TgResultCount getCountDetail() throws IOException, InterruptedException, TsurugiTransactionException {
         checkLowResult();

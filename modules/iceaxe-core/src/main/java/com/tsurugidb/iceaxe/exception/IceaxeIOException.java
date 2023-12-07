@@ -5,7 +5,7 @@ import com.tsurugidb.iceaxe.util.IceaxeInternal;
 /**
  * Iceaxe IOException.
  *
- * @since X.X.X
+ * @since 1.1.0
  */
 @SuppressWarnings("serial")
 public class IceaxeIOException extends TsurugiIOException {

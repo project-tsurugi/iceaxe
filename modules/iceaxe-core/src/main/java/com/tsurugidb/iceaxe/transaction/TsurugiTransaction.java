@@ -950,7 +950,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @throws IOException                 if an I/O error occurs while execute statement
      * @throws InterruptedException        if interrupted while execute statement
      * @throws TsurugiTransactionException if server error occurs while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public TgResultCount executeAndGetCountDetail(TsurugiSqlStatement ps) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_COUNT_DETAIL;
@@ -986,7 +986,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @throws IOException                 if an I/O error occurs while execute statement
      * @throws InterruptedException        if interrupted while execute statement
      * @throws TsurugiTransactionException if server error occurs while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public <P> TgResultCount executeAndGetCountDetail(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_COUNT_DETAIL;
@@ -1022,7 +1022,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @throws IOException                 if an I/O error occurs while execute batch
      * @throws InterruptedException        if interrupted while execute batch
      * @throws TsurugiTransactionException if server error occurs while execute batch
-     * @since X.X.X
+     * @since 1.1.0
      */
     public <P> TgResultCount executeAndGetCountDetail(TsurugiSqlPreparedStatement<P> ps, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_GET_COUNT_DETAIL;

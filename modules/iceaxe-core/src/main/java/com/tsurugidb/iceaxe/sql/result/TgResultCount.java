@@ -14,7 +14,7 @@ import com.tsurugidb.tsubakuro.sql.ExecuteResult;
  * Tsurugi SQL Result count.
  *
  * @see TsurugiStatementResult
- * @since X.X.X
+ * @since 1.1.0
  */
 @ThreadSafe
 public class TgResultCount {

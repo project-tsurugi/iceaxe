@@ -1081,7 +1081,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException          if an I/O error occurs while execute statement
      * @throws InterruptedException if interrupted while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public TgResultCount executeAndGetCountDetail(String sql) throws IOException, InterruptedException {
         return executeAndGetCountDetail(defaultSetting(), sql);
@@ -1095,7 +1095,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException          if an I/O error occurs while execute statement
      * @throws InterruptedException if interrupted while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public TgResultCount executeAndGetCountDetail(TgTmSetting setting, String sql) throws IOException, InterruptedException {
         var session = getSession();
@@ -1114,7 +1114,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException          if an I/O error occurs while execute statement
      * @throws InterruptedException if interrupted while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public <P> TgResultCount executeAndGetCountDetail(String sql, TgParameterMapping<P> parameterMapping, P parameter) throws IOException, InterruptedException {
         return executeAndGetCountDetail(defaultSetting(), sql, parameterMapping, parameter);
@@ -1131,7 +1131,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException          if an I/O error occurs while execute statement
      * @throws InterruptedException if interrupted while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public <P> TgResultCount executeAndGetCountDetail(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter) throws IOException, InterruptedException {
         var session = getSession();
@@ -1147,7 +1147,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException          if an I/O error occurs while execute statement
      * @throws InterruptedException if interrupted while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public TgResultCount executeAndGetCountDetail(TsurugiSqlStatement ps) throws IOException, InterruptedException {
         return executeAndGetCountDetail(defaultSetting(), ps);
@@ -1161,7 +1161,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException          if an I/O error occurs while execute statement
      * @throws InterruptedException if interrupted while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public TgResultCount executeAndGetCountDetail(TgTmSetting setting, TsurugiSqlStatement ps) throws IOException, InterruptedException {
         return execute(setting, transaction -> {
@@ -1178,7 +1178,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException          if an I/O error occurs while execute statement
      * @throws InterruptedException if interrupted while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public <P> TgResultCount executeAndGetCountDetail(TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException {
         return executeAndGetCountDetail(defaultSetting(), ps, parameter);
@@ -1194,7 +1194,7 @@ public class TsurugiTransactionManager {
      * @return row count
      * @throws IOException          if an I/O error occurs while execute statement
      * @throws InterruptedException if interrupted while execute statement
-     * @since X.X.X
+     * @since 1.1.0
      */
     public <P> TgResultCount executeAndGetCountDetail(TgTmSetting setting, TsurugiSqlPreparedStatement<P> ps, P parameter) throws IOException, InterruptedException {
         return execute(setting, transaction -> {
