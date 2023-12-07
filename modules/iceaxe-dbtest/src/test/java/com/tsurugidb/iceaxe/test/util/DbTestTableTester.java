@@ -387,13 +387,18 @@ public class DbTestTableTester {
     // assertion
 
     protected static void assertEqualsCode(DiagnosticCode expected, Throwable actual) {
-        var code = findDiagnosticCode(actual);
-        assertEquals(expected, code);
+        try {
+            var code = findDiagnosticCode(actual);
+            assertEquals(expected, code);
 
-        var expectedClass = findLowServerExceptionClass(expected);
-        if (expectedClass != null) {
-            var actualServerException = findLowServerException(actual);
-            assertEquals(expectedClass, actualServerException.getClass());
+            var expectedClass = findLowServerExceptionClass(expected);
+            if (expectedClass != null) {
+                var actualServerException = findLowServerException(actual);
+                assertEquals(expectedClass, actualServerException.getClass());
+            }
+        } catch (Throwable e) {
+            e.addSuppressed(actual);
+            throw e;
         }
     }
 
