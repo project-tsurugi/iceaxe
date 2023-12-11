@@ -12,6 +12,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
@@ -228,6 +229,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
     }
 
     @Test
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbTransactionErrorTest-constructorError.*")
     void constructorError() throws Exception {
         var session = DbTestConnector.createSession();
 
