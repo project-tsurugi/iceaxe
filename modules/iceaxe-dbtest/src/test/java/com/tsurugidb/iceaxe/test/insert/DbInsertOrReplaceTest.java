@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -44,7 +45,7 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
         test(TgTxOption.ofOCC());
     }
 
-    @Test
+    @RepeatedTest(100)
     void ltx() throws Exception {
         test(TgTxOption.ofLTX(TEST));
     }
@@ -86,21 +87,35 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
         }
 
         var actualList = selectAllFromTest();
-        assertEquals(SIZE + INSERT_SIZE, actualList.size());
-        TestEntity first = null;
-        int i = 0;
-        for (TestEntity actual : actualList) {
-            if (i < SIZE) {
-                var expected = createTestEntity(i);
-                assertEquals(expected, actual);
-            } else {
-                if (first == null) {
-                    first = actual;
+        try {
+            assertEquals(SIZE + INSERT_SIZE, actualList.size());
+            TestEntity first = null;
+            int i = 0;
+            for (TestEntity actual : actualList) {
+                if (i < SIZE) {
+                    var expected = createTestEntity(i);
+                    assertEquals(expected, actual);
+                } else {
+                    if (first == null) {
+                        first = actual;
+                    }
+                    try {
+                        assertEquals(first.getBar(), actual.getBar());
+                        assertEquals(createZzz(first.getBar(), actual.getFoo() - SIZE), actual.getZzz());
+                    } catch (AssertionError e) {
+                        LOG.error("i={}, first={}, actual={}", i, first, actual, e);
+                        throw e;
+                    }
                 }
-                assertEquals(first.getBar(), actual.getBar());
-                assertEquals(createZzz(first.getBar(), actual.getFoo() - SIZE), actual.getZzz());
+                i++;
             }
-            i++;
+        } catch (AssertionError e) {
+            int i = 0;
+            for (var actual : actualList) {
+                LOG.error("actual[{}]={}", i, actual);
+                i++;
+            }
+            throw e;
         }
     }
 
