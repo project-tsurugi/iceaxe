@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.test.insert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -17,6 +18,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -28,6 +30,7 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
 
     private static final int SIZE = 10;
     private static final int INSERT_SIZE = 20;
+    private static final String UPSERT_SQL = INSERT_SQL.replace("insert", "insert or replace");
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
@@ -132,9 +135,7 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
 
         @Override
         public Void call() throws Exception {
-            var insertSql = INSERT_SQL.replace("insert", "insert or replace");
-
-            try (var insertPs = session.createStatement(insertSql, INSERT_MAPPING)) {
+            try (var insertPs = session.createStatement(UPSERT_SQL, INSERT_MAPPING)) {
                 var setting = TgTmSetting.of(txOption);
                 var tm = session.createTransactionManager(setting);
 
@@ -152,5 +153,66 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
 
     private static String createZzz(long number, int i) {
         return String.format("%d-%02d", number, i);
+    }
+
+    @Test
+    void occ2() throws Exception {
+        test2(TgTxOption.ofOCC(), 2);
+    }
+
+    @Test
+    void ltx2() throws Exception {
+        test2(TgTxOption.ofLTX(TEST), 1);
+    }
+
+    private void test2(TgTxOption txOption, long expectedBar) throws Exception {
+        var session = getSession();
+        try (var insertPs = session.createStatement(UPSERT_SQL, INSERT_MAPPING); //
+                var tx1 = session.createTransaction(txOption); //
+                var tx2 = session.createTransaction(txOption)) {
+            int N1 = 1;
+            int N2 = 2;
+
+            int i = 0;
+            var entity11 = new TestEntity(SIZE + i, N1, createZzz(N1, i));
+            tx1.executeAndGetCount(insertPs, entity11);
+            var entity21 = new TestEntity(SIZE + i, N2, createZzz(N2, i));
+            tx2.executeAndGetCount(insertPs, entity21);
+
+            i++;
+            var entity22 = new TestEntity(SIZE + i, N2, createZzz(N2, i));
+            tx2.executeAndGetCount(insertPs, entity22);
+            var entity12 = new TestEntity(SIZE + i, N1, createZzz(N1, i));
+            tx1.executeAndGetCount(insertPs, entity12);
+
+            tx1.commit(TgCommitType.DEFAULT);
+//          assert2(1); // TODO tx1コミット後にselectして状態を確認したい
+            tx2.commit(TgCommitType.DEFAULT);
+        }
+
+        assert2(expectedBar);
+    }
+
+    private void assert2(long expectedBar) throws IOException, InterruptedException {
+        var actualList = selectAllFromTest();
+        try {
+            int i = 0;
+            for (TestEntity actual : actualList) {
+                if (i < SIZE) {
+                    var expected = createTestEntity(i);
+                    assertEquals(expected, actual);
+                } else {
+                    assertEquals(expectedBar, actual.getBar());
+                }
+                i++;
+            }
+        } catch (AssertionError e) {
+            int i = 0;
+            for (var actual : actualList) {
+                LOG.error("actual[{}]={}", i, actual);
+                i++;
+            }
+            throw e;
+        }
     }
 }
