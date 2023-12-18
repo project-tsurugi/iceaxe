@@ -13,6 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
@@ -43,23 +46,29 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
         logInitEnd(info);
     }
 
-    @Test
-    void occ() throws Exception {
-        test(TgTxOption.ofOCC());
+    @ParameterizedTest
+    @ValueSource(ints = { 2, 10 })
+    void occ(int threadSize) throws Exception {
+        test(TgTxOption.ofOCC(), threadSize);
     }
 
     @RepeatedTest(100)
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertOrReplaceTest-ltx.*")
     void ltx() throws Exception {
-        test(TgTxOption.ofLTX(TEST));
+        test(TgTxOption.ofLTX(TEST), 10);
     }
 
-    private void test(TgTxOption txOption) throws Exception {
-        test(txOption, new DbTestSessions());
+    @RepeatedTest(10)
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertOrReplaceTest-ltx.*")
+    void ltx_2() throws Exception {
+        test(TgTxOption.ofLTX(TEST), 2);
     }
 
-    private void test(TgTxOption txOption, DbTestSessions sessions) throws Exception {
-        int threadSize = 10;
+    private void test(TgTxOption txOption, int threadSize) throws Exception {
+        test(txOption, new DbTestSessions(), threadSize);
+    }
 
+    private void test(TgTxOption txOption, DbTestSessions sessions, int threadSize) throws Exception {
         try (sessions) {
             var onlineList = new ArrayList<OnlineTask>(threadSize);
             for (int i = 0; i < threadSize; i++) {
