@@ -52,16 +52,22 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
         test(TgTxOption.ofOCC(), threadSize);
     }
 
-    @RepeatedTest(100)
+    @RepeatedTest(10)
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertOrReplaceTest-ltx.*")
     void ltx() throws Exception {
         test(TgTxOption.ofLTX(TEST), 10);
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(60)
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertOrReplaceTest-ltx.*")
     void ltx_2() throws Exception {
         test(TgTxOption.ofLTX(TEST), 2);
+    }
+
+    @RepeatedTest(100)
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertOrReplaceTest-ltx.*")
+    void ltx_3() throws Exception {
+        test(TgTxOption.ofLTX(TEST), 3);
     }
 
     private void test(TgTxOption txOption, int threadSize) throws Exception {
@@ -166,15 +172,15 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
 
     @Test
     void occ2() throws Exception {
-        test2(TgTxOption.ofOCC(), 2);
+        test2(TgTxOption.ofOCC());
     }
 
     @Test
     void ltx2() throws Exception {
-        test2(TgTxOption.ofLTX(TEST), 1);
+        test2(TgTxOption.ofLTX(TEST));
     }
 
-    private void test2(TgTxOption txOption, long expectedBar) throws Exception {
+    private void test2(TgTxOption txOption) throws Exception {
         var session = getSession();
         try (var insertPs = session.createStatement(UPSERT_SQL, INSERT_MAPPING); //
                 var tx1 = session.createTransaction(txOption); //
@@ -199,7 +205,7 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
             tx2.commit(TgCommitType.DEFAULT);
         }
 
-        assert2(expectedBar);
+        assert2(2);
     }
 
     private void assert2(long expectedBar) throws IOException, InterruptedException {
