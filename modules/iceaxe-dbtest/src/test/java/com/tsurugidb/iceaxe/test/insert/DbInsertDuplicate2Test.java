@@ -179,6 +179,9 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                         }
                         LOG.error("online task error: {}", e.getMessage());
                         throw e;
+                    } catch (Throwable e) {
+                        LOG.error("online task error", e);
+                        throw e;
                     }
                     counter.incrementAndGet();
                 }
