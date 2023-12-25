@@ -1,7 +1,5 @@
 package com.tsurugidb.iceaxe.test.transaction;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInfo;
@@ -38,9 +36,9 @@ class DbTransactionRtxTest extends DbTestTableTester {
 //              Thread.sleep(100);
 
                 try (var tx2 = session.createTransaction(TgTxOption.ofRTX())) {
-                    try (var selectPs = session.createQuery("select * from " + TEST)) {
+                    try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
                         var list = tx2.executeAndGetList(selectPs);
-                        assertEquals(SIZE, list.size());
+                        assertEqualsTestTable(SIZE, list);
                     }
                     tx2.commit(TgCommitType.DEFAULT);
                 }
@@ -60,9 +58,9 @@ class DbTransactionRtxTest extends DbTestTableTester {
 //              Thread.sleep(100);
 
                 try (var tx2 = session.createTransaction(TgTxOption.ofRTX())) {
-                    try (var selectPs = session.createQuery("select * from " + TEST)) {
+                    try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
                         var list = tx2.executeAndGetList(selectPs);
-                        assertEquals(SIZE, list.size());
+                        assertEqualsTestTable(SIZE, list);
                     }
                     tx2.commit(TgCommitType.DEFAULT);
                 }
