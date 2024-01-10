@@ -505,10 +505,14 @@ public class DbTestTableTester {
     }
 
     protected static List<TestEntity> selectAllFromTest() throws IOException, InterruptedException {
+        return selectAllFromTest(TgTmSetting.ofAlways(TgTxOption.ofOCC().label("selectAllFromTest"), 3));
+    }
+
+    protected static List<TestEntity> selectAllFromTest(TgTmSetting setting) throws IOException, InterruptedException {
         var sql = SELECT_SQL + "\norder by " + TEST_COLUMNS;
 
         var session = getSession();
-        var tm = createTransactionManagerOcc(session, "selectAllFromTest", 3);
+        var tm = session.createTransactionManager(setting);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
             return tm.executeAndGetList(ps);
         }

@@ -201,7 +201,7 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
             tx1.executeAndGetCount(insertPs, entity12);
 
             tx1.commit(TgCommitType.DEFAULT);
-//          assert2(1); // TODO tx1コミット後にselectして状態を確認したい
+            assert2(1);
             tx2.commit(TgCommitType.DEFAULT);
         }
 
@@ -209,7 +209,7 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
     }
 
     private void assert2(long expectedBar) throws IOException, InterruptedException {
-        var actualList = selectAllFromTest();
+        var actualList = selectAllFromTest(TgTmSetting.of(TgTxOption.ofRTX()));
         try {
             int i = 0;
             for (TestEntity actual : actualList) {
