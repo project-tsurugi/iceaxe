@@ -1,10 +1,13 @@
 package com.tsurugidb.iceaxe.test.insert;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +43,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbInsertDuplicateTest extends DbTestTableTester {
 
     private static final String TEST2 = "test2";
+    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(3);
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
@@ -145,7 +149,22 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                 var setting = TgTmSetting.ofAlways(txOption);
                 var tm = session.createTransactionManager(setting);
 
-                for (int i = 0; i < 40; i++) {
+                long start = System.currentTimeMillis();
+                int prev = 0;
+                final int ATTEMPT_SIZE = 40;
+                for (int i = 0, j = 1; i < ATTEMPT_SIZE; i++, j++) {
+                    if (System.currentTimeMillis() - start > TIMEOUT) {
+                        LOG.error("timeout. loop {} (i={}/{})", j, i, ATTEMPT_SIZE);
+                        throw new TimeoutException(MessageFormat.format("[{0}] timeout. loop {1} (i={2})", Thread.currentThread().getName(), j, i));
+                    }
+                    if (j % 200 == 0) {
+                        if (prev == 0) {
+                            LOG.info("loop {} (i={}/{})", j, i, ATTEMPT_SIZE);
+                        } else {
+                            LOG.info("loop {} (i={}/{} (+{}))", j, i, ATTEMPT_SIZE, i - prev);
+                        }
+                        prev = i;
+                    }
                     try {
                         tm.execute(transaction -> {
                             execute(transaction, maxPs, insertPs, insert2Ps);

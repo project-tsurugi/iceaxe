@@ -1,11 +1,13 @@
 package com.tsurugidb.iceaxe.test.insert;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbInsertDuplicate2Test extends DbTestTableTester {
 
     private static final String TEST2 = "test2";
+    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(3);
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
@@ -158,9 +161,14 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                     var insert2Ps = session.createStatement(insert2Sql, insert2Mapping)) {
                 var tm = session.createTransactionManager(setting);
 
-                for (;;) {
-                    if (counter.get() >= attemptSize) {
-                        break;
+                long start = System.currentTimeMillis();
+                for (int i = 1; counter.get() < attemptSize; i++) {
+                    if (System.currentTimeMillis() - start > TIMEOUT) {
+                        LOG.error("timeout. loop {} (counter={})", i, counter.get());
+                        throw new TimeoutException(MessageFormat.format("[{0}] timeout. loop {1} (counter={2})", Thread.currentThread().getName(), i, counter.get()));
+                    }
+                    if (i % 200 == 0) {
+                        LOG.info("loop {} (counter={})", i, counter.get());
                     }
                     try {
                         tm.execute(transaction -> {
