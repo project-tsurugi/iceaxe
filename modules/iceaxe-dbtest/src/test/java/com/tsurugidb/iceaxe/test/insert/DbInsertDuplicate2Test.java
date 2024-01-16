@@ -172,7 +172,14 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                     }
                     try {
                         tm.execute(transaction -> {
+                            try {
                             execute(transaction, maxPs, insertPs, insert2Ps);
+                            }catch(TsurugiTransactionException e) {
+                                if(e.getMessage().contains("USER_ABORT")) {
+                                    LOG.info("USER_ABORT: {}",transaction.getTransactionStatus());
+                                }
+                                throw e;
+                            }
                         });
                     } catch (TsurugiTmIOException e) {
                         var exceptionUtil = TsurugiExceptionUtil.getInstance();
