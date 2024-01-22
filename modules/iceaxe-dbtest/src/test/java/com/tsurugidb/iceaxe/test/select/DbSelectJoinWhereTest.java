@@ -13,7 +13,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -293,10 +292,21 @@ class DbSelectJoinWhereTest extends DbTestTableTester {
         leftJoin("where d_id2 = 1", pair -> pair.eqDetailId2(1));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "d_id1", "d_id2", "d_memo" })
+    void leftJoinWhereDetailIsNull(String column) throws Exception {
+        leftJoin("where " + column + " is null", pair -> pair.isDetailNull());
+    }
+
     @Test
-    @Disabled // TODO remove Disabled. left join whereの結果がおかしい
     void leftJoinWhereMaster() throws Exception {
         leftJoin("where m_id2 = 1", pair -> pair.eqMasterId2(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "m_id1", "m_id2", "m_name" })
+    void leftJoinWhereMasterIsNull(String column) throws Exception {
+        leftJoin("where " + column + " is null", pair -> pair.isMasterNull());
     }
 
     private void leftJoin(String where, Predicate<MasterDetailPair> filter) throws Exception {
@@ -332,14 +342,25 @@ class DbSelectJoinWhereTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled. right join whereの結果がおかしい
     void rightJoinWhereDetail() throws Exception {
         rightJoin("where d_id2 = 1", pair -> pair.eqDetailId2(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "d_id1", "d_id2", "d_memo" })
+    void rightJoinWhereDetailIsNull(String column) throws Exception {
+        rightJoin("where " + column + " is null", pair -> pair.isDetailNull());
     }
 
     @Test
     void rightJoinWhereMaster() throws Exception {
         rightJoin("where m_id2 = 1", pair -> pair.eqMasterId2(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "m_id1", "m_id2", "m_name" })
+    void rightJoinWhereMasterIsNull(String column) throws Exception {
+        rightJoin("where " + column + " is null", pair -> pair.isMasterNull());
     }
 
     private void rightJoin(String where, Predicate<MasterDetailPair> filter) throws Exception {
@@ -375,15 +396,25 @@ class DbSelectJoinWhereTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled. full join whereがクラッシュする
     void fullJoinWhereDetail() throws Exception {
         fullJoin("where d_id2 = 1", pair -> pair.eqDetailId2(1));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "d_id1", "d_id2", "d_memo" })
+    void fullJoinWhereDetailIsNull(String column) throws Exception {
+        fullJoin("where " + column + " is null", pair -> pair.isDetailNull());
+    }
+
     @Test
-    @Disabled // TODO remove Disabled. full join whereがクラッシュする
     void fullJoinWhereMaster() throws Exception {
         fullJoin("where m_id2 = 1", pair -> pair.eqMasterId2(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "m_id1", "m_id2", "m_name" })
+    void fullJoinWhereMasterIsNull(String column) throws Exception {
+        fullJoin("where " + column + " is null", pair -> pair.isMasterNull());
     }
 
     private void fullJoin(String where, Predicate<MasterDetailPair> filter) throws Exception {
@@ -475,11 +506,19 @@ class DbSelectJoinWhereTest extends DbTestTableTester {
             return master.id2 == id2;
         }
 
+        public boolean isMasterNull() {
+            return master == null;
+        }
+
         public boolean eqDetailId2(int id2) {
             if (detail == null) {
                 return false;
             }
             return detail.id2 == id2;
+        }
+
+        public boolean isDetailNull() {
+            return detail == null;
         }
 
         @Override
