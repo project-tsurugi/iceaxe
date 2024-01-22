@@ -6,7 +6,6 @@ import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -32,7 +31,6 @@ class DbSelectAllTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled. countがinsert/commit件数と一致しないことがある
     void selectWhileInsertOcc() throws Exception {
         selectWhileInsert(TgTxOption.ofOCC());
     }
