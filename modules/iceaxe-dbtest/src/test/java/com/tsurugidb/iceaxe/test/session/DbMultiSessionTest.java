@@ -90,7 +90,12 @@ class DbMultiSessionTest extends DbTestTableTester {
                 });
                 assertEqualsCode(IceaxeErrorCode.SESSION_LOW_ERROR, e);
                 var c = e.getCause();
-                assertEquals("the server has declined the connection request", c.getMessage());
+                try {
+                    assertEquals("the server has declined the connection request", c.getMessage());
+                } catch (Throwable t) {
+                    t.addSuppressed(e);
+                    throw t;
+                }
             }
         }
         if (count < EXPECTED_SESSION_SIZE) {
