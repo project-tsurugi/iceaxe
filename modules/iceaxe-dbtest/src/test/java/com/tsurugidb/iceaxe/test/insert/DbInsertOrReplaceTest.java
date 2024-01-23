@@ -201,15 +201,15 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
             tx1.executeAndGetCount(insertPs, entity12);
 
             tx1.commit(TgCommitType.DEFAULT);
-            assert2(1);
+            assert2(1, true);
             tx2.commit(TgCommitType.DEFAULT);
         }
 
-        assert2(2);
+        assert2(2, false);
     }
 
-    private void assert2(long expectedBar) throws IOException, InterruptedException {
-        var actualList = selectAllFromTest(TgTmSetting.of(TgTxOption.ofRTX()));
+    private void assert2(long expectedBar, boolean rtx) throws IOException, InterruptedException {
+        var actualList = selectAllFromTest(TgTmSetting.of(rtx ? TgTxOption.ofRTX() : TgTxOption.ofLTX()));
         try {
             int i = 0;
             for (TestEntity actual : actualList) {
