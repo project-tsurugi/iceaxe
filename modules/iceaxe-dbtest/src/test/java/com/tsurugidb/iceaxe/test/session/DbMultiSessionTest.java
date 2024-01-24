@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 
@@ -31,7 +32,7 @@ class DbMultiSessionTest extends DbTestTableTester {
     // TODO 最大接続数は、実行環境（tsurugidbの構成定義ファイルの内容）によって変わるので、本当はDBサーバーから取得したい
     private static final int EXPECTED_SESSION_SIZE = getSystemProperty("tsurugi.dbtest.expected.session.size", 104);
 
-    @Test
+    @RepeatedTest(10)
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbMultiSessionTest-limit.*")
     void limit() throws Exception {
         closeStaticSession();
