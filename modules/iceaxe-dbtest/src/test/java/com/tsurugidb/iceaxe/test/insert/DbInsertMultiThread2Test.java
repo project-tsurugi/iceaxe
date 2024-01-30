@@ -112,7 +112,7 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     }
 
     private void insertMultiTxOcc(int threadSize, boolean prepare) throws IOException, InterruptedException {
-        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 80); // TODO リトライ無しにしたい
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 200); // TODO リトライ無しにしたい
         setting.getTransactionOptionSupplier().setTmOptionListener((attempt, exception, tmOption) -> {
             if (attempt > 0) {
                 LOG.info("insertMultiTxOcc({}, {}) OCC retry {}", threadSize, prepare, attempt);
