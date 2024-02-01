@@ -25,7 +25,7 @@ jobs:
 
       - name: Build_Javadoc
         run: |
-         ./gradlew -i clean iceaxe-core:javadoc
+         ./gradlew -i clean iceaxe-core:javadoc --warning-mode all
 
       - name: Publish_Javadoc
         uses: actions/upload-pages-artifact@v3

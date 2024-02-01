@@ -25,7 +25,7 @@ jobs:
 
       - name: Publish
         run: |
-          ./gradlew -i iceaxe-core:showTsubakuroManifest clean publish
+          ./gradlew -i iceaxe-core:showTsubakuroManifest clean publish --warning-mode all
         env:
           ST_OSSRH_USER: ${{ secrets.ST_OSSRH_USER }}
           ST_OSSRH_PASSWORD: ${{ secrets.ST_OSSRH_PASSWORD }}

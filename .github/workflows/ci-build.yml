@@ -24,11 +24,11 @@ jobs:
 
       - name: Assemble
         run: |
-          ./gradlew -i iceaxe-core:showTsubakuroManifest clean assemble
+          ./gradlew -i iceaxe-core:showTsubakuroManifest clean assemble --warning-mode all
 
       - name: Check
         run: |
-          ./gradlew -i check --continue
+          ./gradlew -i check --continue --warning-mode all
 
       - name: Verify
         uses: project-tsurugi/tsurugi-annotations-action@v1
