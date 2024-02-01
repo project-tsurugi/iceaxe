@@ -15,20 +15,20 @@ jobs:
 
     steps:
       - name: Setup_Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build_Javadoc
         run: |
-         ./gradlew -i clean iceaxe-core:javadoc
+         ./gradlew -i clean iceaxe-core:javadoc --warning-mode all
 
       - name: Publish_Javadoc
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: modules/iceaxe-core/build/docs/javadoc
 

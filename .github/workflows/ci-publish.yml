@@ -15,17 +15,17 @@ jobs:
 
     steps:
       - name: Setup_Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11'
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Publish
         run: |
-          ./gradlew -i iceaxe-core:showTsubakuroManifest clean publish
+          ./gradlew -i iceaxe-core:showTsubakuroManifest clean publish --warning-mode all
         env:
           ST_OSSRH_USER: ${{ secrets.ST_OSSRH_USER }}
           ST_OSSRH_PASSWORD: ${{ secrets.ST_OSSRH_PASSWORD }}
