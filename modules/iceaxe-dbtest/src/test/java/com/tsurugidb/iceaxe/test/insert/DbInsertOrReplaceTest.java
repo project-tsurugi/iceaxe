@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -60,13 +61,13 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
 
     @RepeatedTest(60)
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertOrReplaceTest-ltx.*")
-    void ltx_2() throws Exception {
+    void ltx_2thread() throws Exception {
         test(TgTxOption.ofLTX(TEST), 2);
     }
 
     @RepeatedTest(100)
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertOrReplaceTest-ltx.*")
-    void ltx_3() throws Exception {
+    void ltx_3thread() throws Exception {
         test(TgTxOption.ofLTX(TEST), 3);
     }
 
@@ -172,44 +173,75 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
 
     @Test
     void occ2() throws Exception {
-        test2(TgTxOption.ofOCC());
+        test2(TgTxOption.ofOCC(), true, 2);
+    }
+
+    @Test
+    void occ2_commitReverse() throws Exception {
+        test2(TgTxOption.ofOCC(), false, 1);
     }
 
     @Test
     void ltx2() throws Exception {
-        test2(TgTxOption.ofLTX(TEST));
+        test2(TgTxOption.ofLTX(TEST), true, 2);
     }
 
-    private void test2(TgTxOption txOption) throws Exception {
+    @Test
+    void ltx2_commitReverse() throws Exception {
+        test2(TgTxOption.ofLTX(TEST), false, 2);
+    }
+
+    private void test2(TgTxOption txOption, boolean commitAsc, long expectedLastBar) throws Exception {
         var session = getSession();
         try (var insertPs = session.createStatement(UPSERT_SQL, INSERT_MAPPING); //
-                var tx1 = session.createTransaction(txOption); //
-                var tx2 = session.createTransaction(txOption)) {
-            int N1 = 1;
-            int N2 = 2;
+                var tx1 = session.createTransaction(txOption)) {
+            tx1.getLowTransaction();
+            try (var tx2 = session.createTransaction(txOption)) {
+                tx2.getLowTransaction();
 
-            int i = 0;
-            var entity11 = new TestEntity(SIZE + i, N1, createZzz(N1, i));
-            tx1.executeAndGetCount(insertPs, entity11);
-            var entity21 = new TestEntity(SIZE + i, N2, createZzz(N2, i));
-            tx2.executeAndGetCount(insertPs, entity21);
+                int N1 = 1;
+                int N2 = 2;
 
-            i++;
-            var entity22 = new TestEntity(SIZE + i, N2, createZzz(N2, i));
-            tx2.executeAndGetCount(insertPs, entity22);
-            var entity12 = new TestEntity(SIZE + i, N1, createZzz(N1, i));
-            tx1.executeAndGetCount(insertPs, entity12);
+                int i = 0;
+                var entity11 = new TestEntity(SIZE + i, N1, createZzz(N1, i));
+                tx1.executeAndGetCount(insertPs, entity11);
+                var entity21 = new TestEntity(SIZE + i, N2, createZzz(N2, i));
+                tx2.executeAndGetCount(insertPs, entity21);
 
-            tx1.commit(TgCommitType.DEFAULT);
-            assert2(1, true);
-            tx2.commit(TgCommitType.DEFAULT);
+                i++;
+                var entity22 = new TestEntity(SIZE + i, N2, createZzz(N2, i));
+                tx2.executeAndGetCount(insertPs, entity22);
+                var entity12 = new TestEntity(SIZE + i, N1, createZzz(N1, i));
+                tx1.executeAndGetCount(insertPs, entity12);
+
+                if (commitAsc) {
+                    tx1.commit(TgCommitType.DEFAULT);
+                    TimeUnit.MILLISECONDS.sleep(40);
+                    assert2(1, true, SIZE);
+                    tx2.commit(TgCommitType.DEFAULT);
+                } else {
+                    tx2.commit(TgCommitType.DEFAULT);
+                    TimeUnit.MILLISECONDS.sleep(40);
+                    assert2(2, true, SIZE);
+                    tx1.commit(TgCommitType.DEFAULT);
+                }
+            }
         }
 
-        assert2(2, false);
+        assert2(expectedLastBar, false, SIZE + 2);
     }
 
-    private void assert2(long expectedBar, boolean rtx) throws IOException, InterruptedException {
+    private void assert2(long expectedBar, boolean rtx, int maybeSize) throws IOException, InterruptedException {
         var actualList = selectAllFromTest(TgTmSetting.of(rtx ? TgTxOption.ofRTX() : TgTxOption.ofLTX()));
+        try {
+            assertEquals(SIZE + 2, actualList.size());
+        } catch (AssertionError e) {
+            if (rtx && actualList.size() == maybeSize) {
+                // success
+            } else {
+                throw e;
+            }
+        }
         try {
             int i = 0;
             for (TestEntity actual : actualList) {
