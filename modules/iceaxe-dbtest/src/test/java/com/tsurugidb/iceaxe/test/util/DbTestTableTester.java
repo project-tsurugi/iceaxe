@@ -266,7 +266,13 @@ public class DbTestTableTester {
         }
 
         var tm = createTransactionManagerOcc(session, "executeDdl", 1);
-        tm.executeDdl(sql);
+        try {
+            tm.executeDdl(sql);
+        } catch (TsurugiTmIOException e) {
+            var log = LoggerFactory.getLogger(DbTestTableTester.class);
+            log.error("executeDdl error. {}, sql={}, status={}", e.getMessage(), sql, e.getTransactionStatus());
+            throw e;
+        }
     }
 
     @Deprecated(forRemoval = true)
