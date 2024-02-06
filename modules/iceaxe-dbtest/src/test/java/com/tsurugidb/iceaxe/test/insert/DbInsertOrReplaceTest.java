@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.insert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,9 +24,11 @@ import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * insert or replace test
@@ -35,6 +38,7 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
     private static final int SIZE = 10;
     private static final int INSERT_SIZE = 20;
     private static final String UPSERT_SQL = INSERT_SQL.replace("insert", "insert or replace");
+    private static final String UPDATE_SQL = "update " + TEST + " set bar = :bar, zzz = :zzz where foo = :foo";
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
@@ -249,7 +253,124 @@ class DbInsertOrReplaceTest extends DbTestTableTester {
                     var expected = createTestEntity(i);
                     assertEquals(expected, actual);
                 } else {
-                    assertEquals(expectedBar, actual.getBar());
+                    assertEquals(expectedBar, actual.getBar(), "bar[" + i + "]");
+                }
+                i++;
+            }
+        } catch (AssertionError e) {
+            int i = 0;
+            for (var actual : actualList) {
+                LOG.error("actual[{}]={}", i, actual);
+                i++;
+            }
+            throw e;
+        }
+    }
+
+    @Test
+    void updateOcc() throws Exception {
+        updateOcc(true);
+    }
+
+    @Test
+    void updateOcc_commitReverse() throws Exception {
+        updateOcc(false);
+    }
+
+    private void updateOcc(boolean commitAsc) throws Exception {
+        var session = getSession();
+
+        try (var insertPs = session.createStatement(UPSERT_SQL, INSERT_MAPPING); //
+                var updatePs = session.createStatement(UPDATE_SQL, INSERT_MAPPING); //
+                var tx1 = session.createTransaction(TgTxOption.ofOCC())) {
+            tx1.getLowTransaction();
+            try (var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
+                tx2.getLowTransaction();
+
+                int N1 = 1;
+                int N2 = 2;
+
+                var entity1 = new TestEntity(SIZE - 1, N1, createZzz(N1, 0));
+                tx1.executeAndGetCount(updatePs, entity1);
+                var entity2 = new TestEntity(SIZE - 1, N2, createZzz(N2, 0));
+                tx2.executeAndGetCount(insertPs, entity2);
+
+                if (commitAsc) {
+                    tx1.commit(TgCommitType.DEFAULT);
+                    TimeUnit.MILLISECONDS.sleep(40);
+                    assertUpdate(1, true);
+                    tx2.commit(TgCommitType.DEFAULT);
+                } else {
+                    tx2.commit(TgCommitType.DEFAULT);
+                    TimeUnit.MILLISECONDS.sleep(40);
+                    assertUpdate(2, true);
+                    var e = assertThrows(TsurugiTransactionException.class, () -> {
+                        tx1.commit(TgCommitType.DEFAULT);
+                    });
+                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
+                }
+            }
+        }
+
+        assertUpdate(2, false);
+    }
+
+    @Test
+    void updateLtx() throws Exception {
+        updateLtx(true);
+    }
+
+    @Test
+    void updateLtx_commitReverse() throws Exception {
+        updateLtx(false);
+    }
+
+    private void updateLtx(boolean commitAsc) throws Exception {
+        var session = getSession();
+
+        try (var insertPs = session.createStatement(UPSERT_SQL, INSERT_MAPPING); //
+                var updatePs = session.createStatement(UPDATE_SQL, INSERT_MAPPING); //
+                var tx1 = session.createTransaction(TgTxOption.ofLTX(TEST))) {
+            tx1.getLowTransaction();
+            try (var tx2 = session.createTransaction(TgTxOption.ofLTX(TEST))) {
+                tx2.getLowTransaction();
+
+                int N1 = 1;
+                int N2 = 2;
+
+                var entity1 = new TestEntity(SIZE - 1, N1, createZzz(N1, 0));
+                tx1.executeAndGetCount(updatePs, entity1);
+                var entity2 = new TestEntity(SIZE - 1, N2, createZzz(N2, 0));
+                tx2.executeAndGetCount(insertPs, entity2);
+
+                if (commitAsc) {
+                    tx1.commit(TgCommitType.DEFAULT);
+                    TimeUnit.MILLISECONDS.sleep(40);
+                    assertUpdate(1, true);
+                    tx2.commit(TgCommitType.DEFAULT);
+                } else {
+                    tx2.commit(TgCommitType.DEFAULT);
+//                  TimeUnit.MILLISECONDS.sleep(40);
+//                  assertUpdate(2, true);
+                    tx1.commit(TgCommitType.DEFAULT);
+                }
+            }
+        }
+
+        assertUpdate(2, false);
+    }
+
+    private void assertUpdate(long expectedBar, boolean rtx) throws IOException, InterruptedException {
+        var actualList = selectAllFromTest(TgTmSetting.of(rtx ? TgTxOption.ofRTX() : TgTxOption.ofLTX()));
+        assertEquals(SIZE, actualList.size());
+        try {
+            int i = 0;
+            for (TestEntity actual : actualList) {
+                if (i < SIZE - 1) {
+                    var expected = createTestEntity(i);
+                    assertEquals(expected, actual);
+                } else {
+                    assertEquals(expectedBar, actual.getBar(), "bar[" + i + "]");
                 }
                 i++;
             }
