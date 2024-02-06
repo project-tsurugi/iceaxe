@@ -203,7 +203,7 @@ public class TsurugiDefaultRetryPredicate implements TsurugiTmRetryPredicate {
                 }
                 return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + statusException.getMessage() + " with " + exception.getMessage());
             }
-            return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + exception.getMessage() + ", status=" + statusException);
+            return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + exception.getMessage() + ", status=null" /* + statusException */);
         }
 
         return TgTmRetryInstruction.ofNotRetryable(position + " not retry. " + exception.getMessage());
