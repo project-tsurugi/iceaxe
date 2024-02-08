@@ -16,7 +16,6 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
-import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
@@ -98,7 +97,8 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
             var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeStatement(lowPs, lowParameterList));
             LOG.trace("execute started");
 
-            result = new TsurugiStatementResult(sqlExecuteId, transaction, this, parameter, lowResultFuture);
+            result = new TsurugiStatementResult(sqlExecuteId, transaction, this, parameter);
+            result.initialize(lowResultFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeStatementStartException(transaction, this, parameter, sqlExecuteId, e));
             throw e;
@@ -120,6 +120,8 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      * @see TsurugiTransaction#executeBatch(TsurugiSqlPreparedStatement, Collection)
      */
     public TsurugiStatementResult executeBatch(TsurugiTransaction transaction, Collection<P> parameterList) throws IOException, InterruptedException, TsurugiTransactionException {
+        throw new UnsupportedOperationException("not yet implements"); // TODO executeBatch
+/*
         checkClose();
 
         LOG.trace("executeBatch start");
@@ -136,7 +138,8 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
             var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.batch(lowPs, lowParameterList));
             LOG.trace("executeBatch started");
 
-            result = new TsurugiStatementResult(sqlExecuteId, transaction, this, parameterList, lowResultFuture);
+            result = new TsurugiStatementResult(sqlExecuteId, transaction, this, parameterList);
+            result.initialize(lowResultFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeBatchStartException(transaction, this, parameterList, sqlExecuteId, e));
             throw e;
@@ -144,5 +147,6 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
 
         event(null, listener -> listener.executeBatchStarted(transaction, this, parameterList, result));
         return result;
+*/
     }
 }

@@ -2,8 +2,8 @@ package com.tsurugidb.iceaxe.sql.result;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -41,52 +41,61 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
     private final IceaxeTimeout checkTimeout;
     private final IceaxeTimeout closeTimeout;
     private List<TsurugiStatementResultEventListener> eventListenerList = null;
+    private boolean checkResultOnClose = true;
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize(FutureResponse)} after construct.
+     * </p>
      *
-     * @param sqlExecuteId    iceaxe SQL executeId
-     * @param transaction     transaction
-     * @param ps              SQL definition
-     * @param parameter       SQL parameter
-     * @param lowResultFuture future of ExecuteResult
-     * @throws IOException if an I/O error occurs while disposing the resources
+     * @param sqlExecuteId iceaxe SQL executeId
+     * @param transaction  transaction
+     * @param ps           SQL definition
+     * @param parameter    SQL parameter
      */
     @IceaxeInternal
-    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<ExecuteResult> lowResultFuture) throws IOException {
+    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter) {
         super(sqlExecuteId, transaction, ps, parameter);
-        this.lowResultFuture = lowResultFuture;
 
         var sessionOption = transaction.getSessionOption();
         this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CHECK);
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
-
-        applyCloseTimeout();
-        initialize(lowResultFuture);
     }
 
     /**
-     * Creates a new instance.
+     * initialize.
+     * <p>
+     * Call this method only once after construct.
+     * </p>
      *
-     * @param sqlExecuteId    iceaxe SQL executeId
-     * @param transaction     transaction
-     * @param ps              SQL definition
-     * @param parameter       SQL parameter
-     * @param lowResultFuture future of Void
-     * @throws IOException if an I/O error occurs while disposing the resources
+     * @param lowResultFuture future of ExecuteResult
+     * @throws IOException if transaction already closed
+     * @since X.X.X
      */
     @IceaxeInternal
-    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Collection<?> parameter, FutureResponse<Void> lowResultFuture) throws IOException {
-        super(sqlExecuteId, transaction, ps, parameter);
-        throw new UnsupportedOperationException("not yet implements"); // TODO executeBatch
-//        this.lowResultFuture = lowResultFuture;
-//
-//        var sessionOption = transaction.getSessionOption();
-//        this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CHECK);
-//        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
-//
-//        applyCloseTimeout();
-//        initialize(lowResultFuture);
+    public void initialize(FutureResponse<ExecuteResult> lowResultFuture) throws IOException {
+        if (this.lowResultFuture != null || this.resultCount != null) {
+            throw new IllegalStateException("initialize() is already called");
+        }
+
+        this.lowResultFuture = Objects.requireNonNull(lowResultFuture);
+        applyCloseTimeout();
+
+        try {
+            super.initialize();
+        } catch (Throwable e) {
+            var log = LoggerFactory.getLogger(getClass());
+            log.trace("TsurugiStatementResult.initialize close start", e);
+            try {
+                IceaxeIoUtil.closeInTransaction(lowResultFuture);
+            } catch (Throwable c) {
+                e.addSuppressed(c);
+            }
+            this.checkResultOnClose = false;
+            log.trace("TsurugiStatementResult.initialize close end");
+            throw e;
+        }
     }
 
     private void applyCloseTimeout() {
@@ -171,27 +180,30 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      */
     @IceaxeInternal
     public final synchronized void checkLowResult() throws IOException, InterruptedException, TsurugiTransactionException {
-        if (this.lowResultFuture != null) {
+        this.checkResultOnClose = false;
+        if (this.resultCount == null) {
+            if (this.lowResultFuture == null) {
+                throw new IllegalStateException("initialize() is not called");
+            }
+
             LOG.trace("lowResult get start");
-            Throwable occurred = null;
             try {
                 var lowExecuteResult = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout);
                 this.resultCount = new TgResultCount(lowExecuteResult);
             } catch (TsurugiTransactionException e) {
-                occurred = e;
                 fillToTsurugiException(e);
+                event(e, listener -> listener.endResult(this, e));
                 throw e;
             } catch (Throwable e) {
-                occurred = e;
+                event(e, listener -> listener.endResult(this, e));
                 throw e;
-            } finally {
-                this.lowResultFuture = null;
-                applyCloseTimeout();
-
-                var finalOccurred = occurred;
-                event(occurred, listener -> listener.endResult(this, finalOccurred));
             }
             LOG.trace("lowResult get end");
+
+            this.lowResultFuture = null;
+            applyCloseTimeout();
+
+            event(null, listener -> listener.endResult(this, null));
         }
     }
 
@@ -231,7 +243,9 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
 
         Throwable occurred = null;
         try {
-            checkLowResult();
+            if (this.checkResultOnClose) {
+                checkLowResult();
+            }
         } catch (Throwable e) {
             occurred = e;
             throw e;

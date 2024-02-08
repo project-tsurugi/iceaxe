@@ -4,14 +4,10 @@ import java.io.IOException;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
-import org.slf4j.LoggerFactory;
-
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
-import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
-import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi SQL Result.
@@ -25,6 +21,9 @@ public abstract class TsurugiSqlResult implements AutoCloseable {
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize()} after construct.
+     * </p>
      *
      * @param sqlExecuteId iceaxe SQL executeId
      * @param transaction  transaction
@@ -42,26 +41,14 @@ public abstract class TsurugiSqlResult implements AutoCloseable {
     /**
      * initialize.
      * <p>
-     * call from constructor after applyCloseTimeout()
+     * Call this method only once after construct.
      * </p>
      *
-     * @param future future to close when an error occurs
      * @throws IOException if transaction already closed
      */
-    protected void initialize(FutureResponse<?> future) throws IOException {
-        try {
-            ownerTransaction.addChild(this);
-        } catch (Throwable e) {
-            var log = LoggerFactory.getLogger(getClass());
-            log.trace("sqlResult.initialize close start", e);
-            try {
-                IceaxeIoUtil.closeInTransaction(future);
-            } catch (Throwable c) {
-                e.addSuppressed(c);
-            }
-            log.trace("sqlResult.initialize close on error end");
-            throw e;
-        }
+    @IceaxeInternal
+    protected void initialize() throws IOException {
+        ownerTransaction.addChild(this);
     }
 
     /**

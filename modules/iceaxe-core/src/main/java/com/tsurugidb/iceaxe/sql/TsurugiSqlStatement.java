@@ -88,7 +88,8 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
             var lowResultFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeStatement(sql));
             LOG.trace("execute started");
 
-            result = new TsurugiStatementResult(sqlExecuteId, transaction, this, null, lowResultFuture);
+            result = new TsurugiStatementResult(sqlExecuteId, transaction, this, null);
+            result.initialize(lowResultFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeStatementStartException(transaction, this, sqlExecuteId, e));
             throw e;

@@ -102,7 +102,8 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
             LOG.trace("execute started");
 
             var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
-            result = new TsurugiQueryResult<>(sqlExecuteId, transaction, this, parameter, lowResultSetFuture, resultMapping, convertUtil);
+            result = new TsurugiQueryResult<>(sqlExecuteId, transaction, this, parameter, resultMapping, convertUtil);
+            result.initialize(lowResultSetFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeQueryStartException(transaction, this, parameter, sqlExecuteId, e));
             throw e;

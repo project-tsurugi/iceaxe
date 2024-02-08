@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -46,45 +47,76 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<R> {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiQueryResult.class);
 
-    private FutureResponse<ResultSet> lowResultSetFuture;
-    private ResultSet lowResultSet;
-    private boolean calledGetLowResultSet = false;
     private final TgResultMapping<R> resultMapping;
     private final IceaxeConvertUtil convertUtil;
+    private FutureResponse<ResultSet> lowResultSetFuture;
+    private ResultSet lowResultSet;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
     private List<TsurugiQueryResultEventListener<R>> eventListenerList = null;
     private int readCount = 0;
     private TsurugiResultRecord record;
     private Optional<Boolean> hasNextRow = Optional.empty();
+    private boolean checkResultOnClose = true;
     private boolean calledEndEvent = false;
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize(FutureResponse)} after construct.
+     * </p>
      *
-     * @param sqlExecuteId       iceaxe SQL executeId
-     * @param transaction        transaction
-     * @param ps                 SQL definition
-     * @param parameter          SQL parameter
-     * @param lowResultSetFuture future of ResultSet
-     * @param resultMapping      result mapping
-     * @param convertUtil        convert type utility
-     * @throws IOException if an I/O error occurs while disposing the resources
+     * @param sqlExecuteId  iceaxe SQL executeId
+     * @param transaction   transaction
+     * @param ps            SQL definition
+     * @param parameter     SQL parameter
+     * @param resultMapping result mapping
+     * @param convertUtil   convert type utility
      */
     @IceaxeInternal
-    public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, FutureResponse<ResultSet> lowResultSetFuture, TgResultMapping<R> resultMapping,
-            IceaxeConvertUtil convertUtil) throws IOException {
+    public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil) {
         super(sqlExecuteId, transaction, ps, parameter);
-        this.lowResultSetFuture = lowResultSetFuture;
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
 
         var sessionOption = transaction.getSessionOption();
         this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RS_CONNECT);
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RS_CLOSE);
+    }
 
+    /**
+     * initialize.
+     * <p>
+     * Call this method only once after construct.
+     * </p>
+     *
+     * @param lowResultSetFuture future of ResultSet
+     * @throws IOException if transaction already closed
+     * @since X.X.X
+     */
+    @IceaxeInternal
+    public void initialize(FutureResponse<ResultSet> lowResultSetFuture) throws IOException {
+        if (this.lowResultSetFuture != null || this.lowResultSet != null) {
+            throw new IllegalStateException("initialize() is already called");
+        }
+
+        this.lowResultSetFuture = Objects.requireNonNull(lowResultSetFuture);
         applyCloseTimeout();
-        initialize(lowResultSetFuture);
+
+        try {
+            super.initialize();
+        } catch (Throwable e) {
+            var log = LoggerFactory.getLogger(getClass());
+            log.trace("TsurugiQueryResult.initialize close start", e);
+            try {
+                IceaxeIoUtil.closeInTransaction(lowResultSetFuture);
+            } catch (Throwable c) {
+                e.addSuppressed(c);
+            }
+            this.checkResultOnClose = false;
+            log.trace("TsurugiQueryResult.initialize close end");
+            throw e;
+        }
     }
 
     private void applyCloseTimeout() {
@@ -171,8 +203,12 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      */
     @IceaxeInternal
     public final synchronized ResultSet getLowResultSet() throws IOException, InterruptedException, TsurugiTransactionException {
-        this.calledGetLowResultSet = true;
+        this.checkResultOnClose = false;
         if (this.lowResultSet == null) {
+            if (this.lowResultSetFuture == null) {
+                throw new IllegalStateException("initialize() is not called");
+            }
+
             LOG.trace("lowResultSet get start");
             try {
                 this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout);
@@ -544,7 +580,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
 
         Throwable occurred = null;
         try {
-            if (!this.calledGetLowResultSet) {
+            if (this.checkResultOnClose) {
                 getLowResultSet();
             }
             callEndEvent();

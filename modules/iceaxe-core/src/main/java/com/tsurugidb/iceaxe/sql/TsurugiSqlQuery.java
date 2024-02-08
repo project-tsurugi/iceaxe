@@ -95,7 +95,8 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
             LOG.trace("execute started");
 
             var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
-            result = new TsurugiQueryResult<>(sqlExecuteId, transaction, this, null, lowResultSetFuture, resultMapping, convertUtil);
+            result = new TsurugiQueryResult<>(sqlExecuteId, transaction, this, null, resultMapping, convertUtil);
+            result.initialize(lowResultSetFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeQueryStartException(transaction, this, sqlExecuteId, e));
             throw e;
