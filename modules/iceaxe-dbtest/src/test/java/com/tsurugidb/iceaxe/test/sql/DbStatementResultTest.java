@@ -40,9 +40,13 @@ class DbStatementResultTest extends DbTestTableTester {
                 var future = FutureResponseCloseWrapper.of(transaction.getLowTransaction().executeStatement(ps.getSql()));
 
                 transaction.close();
-                var e = assertThrows(TsurugiIOException.class, () -> new TsurugiStatementResult(0, transaction, ps, null, future));
-                assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
-                assertTrue(future.isClosed());
+                try (var target = new TsurugiStatementResult(0, transaction, ps, null)) {
+                    var e = assertThrows(TsurugiIOException.class, () -> {
+                        target.initialize(future);
+                    });
+                    assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
+                    assertTrue(future.isClosed());
+                }
             }
         }
     }
