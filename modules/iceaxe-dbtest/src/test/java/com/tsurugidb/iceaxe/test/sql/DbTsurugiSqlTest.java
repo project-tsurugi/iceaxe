@@ -43,8 +43,12 @@ class DbTsurugiSqlTest extends DbTestTableTester {
         var session = DbTestConnector.createSession();
 
         session.close();
-        var e = assertThrows(TsurugiIOException.class, () -> new TsurugiSqlQuery<>(session, SELECT_SQL, SELECT_MAPPING));
-        assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
+        try (var target = new TsurugiSqlQuery<>(session, SELECT_SQL, SELECT_MAPPING)) {
+            var e = assertThrows(TsurugiIOException.class, () -> {
+                target.initialize();
+            });
+            assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
+        }
     }
 
     @Test
@@ -52,8 +56,12 @@ class DbTsurugiSqlTest extends DbTestTableTester {
         var session = DbTestConnector.createSession();
 
         session.close();
-        var e = assertThrows(TsurugiIOException.class, () -> new TsurugiSqlStatement(session, INSERT_SQL));
-        assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
+        try (var target = new TsurugiSqlStatement(session, INSERT_SQL)) {
+            var e = assertThrows(TsurugiIOException.class, () -> {
+                target.initialize();
+            });
+            assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
+        }
     }
 
     @Test
@@ -65,9 +73,13 @@ class DbTsurugiSqlTest extends DbTestTableTester {
         }
 
         session.close();
-        var e = assertThrows(TsurugiIOException.class, () -> new TsurugiSqlPreparedQuery<>(session, SELECT_SQL, future, null, SELECT_MAPPING));
-        assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
-        assertTrue(future.isClosed());
+        try (var target = new TsurugiSqlPreparedQuery<>(session, SELECT_SQL, null, SELECT_MAPPING)) {
+            var e = assertThrows(TsurugiIOException.class, () -> {
+                target.initialize(future);
+            });
+            assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
+            assertTrue(future.isClosed());
+        }
     }
 
     @Test
@@ -79,8 +91,12 @@ class DbTsurugiSqlTest extends DbTestTableTester {
         }
 
         session.close();
-        var e = assertThrows(TsurugiIOException.class, () -> new TsurugiSqlPreparedStatement<>(session, INSERT_SQL, future, INSERT_MAPPING));
-        assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
-        assertTrue(future.isClosed());
+        try (var target = new TsurugiSqlPreparedStatement<>(session, INSERT_SQL, INSERT_MAPPING)) {
+            var e = assertThrows(TsurugiIOException.class, () -> {
+                target.initialize(future);
+            });
+            assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
+            assertTrue(future.isClosed());
+        }
     }
 }
