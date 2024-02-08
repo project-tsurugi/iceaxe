@@ -23,7 +23,32 @@ public class TgTmTxOptionOccLtx extends TgTmTxOptionSupplier {
      * @return TgTmTxOptionOccLtx
      */
     public static TgTmTxOptionOccLtx of(TgTxOption occOption, int occSize, TgTxOption ltxOption, int ltxSize) {
+        checkArguments(occOption, occSize, ltxOption, ltxSize);
         return new TgTmTxOptionOccLtx(occOption, occSize, ltxOption, ltxSize);
+    }
+
+    /**
+     * check arguments.
+     *
+     * @param occOption transaction option for OCC
+     * @param occSize   occ size
+     * @param ltxOption transaction option for LTX or RTX
+     * @param ltxSize   ltx size
+     * @throws IllegalArgumentException if argument is invalid
+     */
+    protected static void checkArguments(TgTxOption occOption, int occSize, TgTxOption ltxOption, int ltxSize) throws IllegalArgumentException {
+        if (!occOption.isOCC()) {
+            throw new IllegalArgumentException("occOption is not OCC");
+        }
+        if (occSize < 1) {
+            throw new IllegalArgumentException("occSize < 1 (size=" + occSize + ")");
+        }
+        if (!(ltxOption.isLTX() || ltxOption.isRTX())) {
+            throw new IllegalArgumentException("ltxOption is not LTX,RTX");
+        }
+        if (ltxSize < 1) {
+            throw new IllegalArgumentException("ltxSize < 1 (size=" + ltxSize + ")");
+        }
     }
 
     private final TgTxOption occOption;
@@ -40,18 +65,7 @@ public class TgTmTxOptionOccLtx extends TgTmTxOptionSupplier {
      * @param ltxSize   ltx size
      */
     public TgTmTxOptionOccLtx(TgTxOption occOption, int occSize, TgTxOption ltxOption, int ltxSize) {
-        if (!occOption.isOCC()) {
-            throw new IllegalArgumentException("occOption is not OCC");
-        }
-        if (occSize < 1) {
-            throw new IllegalArgumentException("occSize < 1 (size=" + occSize + ")");
-        }
-        if (!(ltxOption.isLTX() || ltxOption.isRTX())) {
-            throw new IllegalArgumentException("ltxOption is not LTX,RTX");
-        }
-        if (ltxSize < 1) {
-            throw new IllegalArgumentException("ltxSize < 1 (size=" + ltxSize + ")");
-        }
+        checkArguments(occOption, occSize, ltxOption, ltxSize);
         this.occOption = occOption;
         this.occSize = occSize;
         this.ltxOption = ltxOption;
