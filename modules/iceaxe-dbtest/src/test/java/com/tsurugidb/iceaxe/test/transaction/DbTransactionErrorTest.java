@@ -239,8 +239,13 @@ class DbTransactionErrorTest extends DbTestTableTester {
         }
 
         session.close();
-        var e = assertThrows(IceaxeIOException.class, () -> new TsurugiTransaction(session, future, TgTxOption.ofOCC()));
-        assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
-        assertTrue(future.isClosed());
+        try (var target = new TsurugiTransaction(session, TgTxOption.ofOCC())) {
+            var e = assertThrows(IceaxeIOException.class, () -> {
+                target.initialize(future);
+            });
+
+            assertEqualsCode(IceaxeErrorCode.SESSION_ALREADY_CLOSED, e);
+            assertTrue(future.isClosed());
+        }
     }
 }
