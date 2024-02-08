@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,8 +54,8 @@ public class TsurugiTransaction implements AutoCloseable {
 
     private final int iceaxeTxId;
     private final TsurugiSession ownerSession;
-    private FutureResponse<Transaction> lowTransactionFuture;
     private final TgTxOption txOption;
+    private FutureResponse<Transaction> lowTransactionFuture;
     private Throwable lowFutureException = null;
     private Transaction lowTransaction;
     private boolean calledGetLowTransaction = false;
@@ -74,17 +75,17 @@ public class TsurugiTransaction implements AutoCloseable {
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize(FutureResponse)} after construct.
+     * </p>
      *
-     * @param session              session
-     * @param lowTransactionFuture future of Transaction
-     * @param txOption             transaction option
-     * @throws IOException if an I/O error occurs while disposing the resources
+     * @param session  session
+     * @param txOption transaction option
      */
     @IceaxeInternal
-    public TsurugiTransaction(TsurugiSession session, FutureResponse<Transaction> lowTransactionFuture, TgTxOption txOption) throws IOException {
+    public TsurugiTransaction(TsurugiSession session, TgTxOption txOption) {
         this.iceaxeTxId = TRANSACTION_COUNT.incrementAndGet();
         this.ownerSession = session;
-        this.lowTransactionFuture = lowTransactionFuture;
         this.txOption = txOption;
 
         var sessionOption = session.getSessionOption();
@@ -92,38 +93,43 @@ public class TsurugiTransaction implements AutoCloseable {
         this.commitTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TRANSACTION_COMMIT);
         this.rollbackTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TRANSACTION_ROLLBACK);
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TRANSACTION_CLOSE);
-
-        applyCloseTimeout();
-        initialize(lowTransactionFuture);
-    }
-
-    private void applyCloseTimeout() {
-        closeTimeout.apply(lowTransaction);
-        closeTimeout.apply(lowTransactionFuture);
     }
 
     /**
      * initialize.
      * <p>
-     * call from constructor after applyCloseTimeout()
+     * Call this method only once after construct.
      * </p>
      *
-     * @param future future to close when an error occurs
+     * @param lowTransactionFuture future of Transaction
      * @throws IOException if session already closed
      */
-    protected void initialize(FutureResponse<Transaction> future) throws IOException {
+    @IceaxeInternal
+    public void initialize(FutureResponse<Transaction> lowTransactionFuture) throws IOException {
+        if (this.lowTransactionFuture != null || this.lowTransaction != null) {
+            throw new IllegalStateException("initialize() is already called");
+        }
+
+        this.lowTransactionFuture = Objects.requireNonNull(lowTransactionFuture);
+        applyCloseTimeout();
+
         try {
             ownerSession.addChild(this);
         } catch (Throwable e) {
             LOG.trace("transaction.initialize close start", e);
             try {
-                IceaxeIoUtil.close(future);
+                IceaxeIoUtil.close(lowTransactionFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
             LOG.trace("transaction.initialize close end");
             throw e;
         }
+    }
+
+    private void applyCloseTimeout() {
+        closeTimeout.apply(lowTransaction);
+        closeTimeout.apply(lowTransactionFuture);
     }
 
     /**
@@ -323,6 +329,9 @@ public class TsurugiTransaction implements AutoCloseable {
         if (this.lowTransaction == null) {
             if (this.lowFutureException != null) {
                 throw new IceaxeIOException(IceaxeErrorCode.TX_LOW_ERROR, lowFutureException);
+            }
+            if (this.lowTransactionFuture == null) {
+                throw new IllegalStateException("initialize() is not called");
             }
 
             LOG.trace("lowTransaction get start");

@@ -10,9 +10,10 @@ import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 import com.tsurugidb.tsubakuro.util.Timeout;
 
-class IceaxeFutureResponseTestMock<V> implements FutureResponse<V> {
+public class IceaxeFutureResponseTestMock<V> implements FutureResponse<V> {
 
     protected Timeout closeTimeout;
+    public boolean isClosed = false;
 
     @Override
     public void setCloseTimeout(Timeout timeout) {
@@ -39,6 +40,6 @@ class IceaxeFutureResponseTestMock<V> implements FutureResponse<V> {
 
     @Override
     public void close() throws IOException, ServerException, InterruptedException {
-        fail("do override");
+        this.isClosed = true;
     }
 }

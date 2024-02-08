@@ -532,7 +532,8 @@ public class TsurugiSession implements AutoCloseable {
         LOG.trace("lowTransaction create start. lowOption={}", lowOption);
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
         LOG.trace("lowTransaction create started");
-        var transaction = new TsurugiTransaction(this, lowTransactionFuture, txOption);
+        var transaction = new TsurugiTransaction(this, txOption);
+        transaction.initialize(lowTransactionFuture);
         if (initializer != null) {
             initializer.accept(transaction);
         }
