@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.sql;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -31,32 +32,63 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    private final TgParameterMapping<P> parameterMapping;
     private FutureResponse<PreparedStatement> lowPreparedStatementFuture;
     private Throwable lowFutureException = null;
     private PreparedStatement lowPreparedStatement;
-    private final TgParameterMapping<P> parameterMapping;
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize(FutureResponse)} after construct.
+     * </p>
      *
-     * @param session                    session
-     * @param sql                        SQL
-     * @param lowPreparedStatementFuture future of prepared statement
-     * @param parameterMapping           parameter mapping
-     * @throws IOException if an I/O error occurs while disposing the resources
+     * @param session          session
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
      */
-    protected TsurugiSqlPrepared(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping) throws IOException {
+    @IceaxeInternal
+    protected TsurugiSqlPrepared(TsurugiSession session, String sql, TgParameterMapping<P> parameterMapping) {
         super(session, sql);
-        this.lowPreparedStatementFuture = lowPreparedStatementFuture;
         this.parameterMapping = parameterMapping;
         var sessionOption = session.getSessionOption();
         this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.PS_CONNECT);
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.PS_CLOSE);
+    }
 
+    /**
+     * initialize.
+     * <p>
+     * Call this method only once after construct.
+     * </p>
+     *
+     * @param lowPreparedStatementFuture future of prepared statement
+     * @throws IOException if session already closed
+     * @since X.X.X
+     */
+    @IceaxeInternal
+    public void initialize(FutureResponse<PreparedStatement> lowPreparedStatementFuture) throws IOException {
+        if (this.lowPreparedStatementFuture != null || this.lowPreparedStatement != null) {
+            throw new IllegalStateException("initialize() is already called");
+        }
+
+        this.lowPreparedStatementFuture = Objects.requireNonNull(lowPreparedStatementFuture);
         applyCloseTimeout();
-        initialize(lowPreparedStatementFuture);
+
+        try {
+            super.initialize();
+        } catch (Throwable e) {
+            log.trace("TsurugiSqlPrepared.initialize close start", e);
+            try {
+                IceaxeIoUtil.close(lowPreparedStatementFuture);
+            } catch (Throwable c) {
+                e.addSuppressed(c);
+            }
+            log.trace("TsurugiSqlPrepared.initialize close end");
+            throw e;
+        }
     }
 
     @Override
@@ -122,6 +154,9 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         if (this.lowPreparedStatement == null) {
             if (lowFutureException != null) {
                 throw new IceaxeIOException(IceaxeErrorCode.PS_LOW_ERROR, lowFutureException);
+            }
+            if (this.lowPreparedStatementFuture == null) {
+                throw new IllegalStateException("initialize() is not called");
             }
 
             log.trace("lowPs get start");

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 
 /**
  * Tsurugi SQL definition (not prepared).
@@ -12,14 +13,31 @@ public abstract class TsurugiSqlDirect extends TsurugiSql {
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize()} after construct.
+     * </p>
      *
      * @param session session
      * @param sql     SQL
-     * @throws IOException if an I/O error occurs while disposing the resources
      */
-    protected TsurugiSqlDirect(TsurugiSession session, String sql) throws IOException {
+    @IceaxeInternal
+    protected TsurugiSqlDirect(TsurugiSession session, String sql) {
         super(session, sql);
-        initialize(null);
+    }
+
+    /**
+     * initialize.
+     * <p>
+     * Call this method only once after construct.
+     * </p>
+     *
+     * @throws IOException if session already closed
+     * @since X.X.X
+     */
+    @IceaxeInternal
+    @Override
+    public void initialize() throws IOException {
+        super.initialize();
     }
 
     @Override

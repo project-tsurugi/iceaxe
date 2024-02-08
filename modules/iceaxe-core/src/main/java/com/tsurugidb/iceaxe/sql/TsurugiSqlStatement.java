@@ -25,13 +25,15 @@ public class TsurugiSqlStatement extends TsurugiSqlDirect {
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize()} after construct.
+     * </p>
      *
      * @param session session
      * @param sql     SQL
-     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
-    public TsurugiSqlStatement(TsurugiSession session, String sql) throws IOException {
+    public TsurugiSqlStatement(TsurugiSession session, String sql) {
         super(session, sql);
     }
 

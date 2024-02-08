@@ -29,14 +29,16 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize()} after construct.
+     * </p>
      *
      * @param session       session
      * @param sql           SQL
      * @param resultMapping result mapping
-     * @throws IOException if an I/O error occurs while disposing the resources
      */
     @IceaxeInternal
-    public TsurugiSqlQuery(TsurugiSession session, String sql, TgResultMapping<R> resultMapping) throws IOException {
+    public TsurugiSqlQuery(TsurugiSession session, String sql, TgResultMapping<R> resultMapping) {
         super(session, sql);
         this.resultMapping = resultMapping;
     }

@@ -386,6 +386,7 @@ public class TsurugiSession implements AutoCloseable {
         checkClose();
         LOG.trace("createQuery. sql={}", sql);
         var ps = new TsurugiSqlQuery<>(this, sql, resultMapping);
+        ps.initialize();
         event(null, listener -> listener.createQuery(ps));
         return ps;
     }
@@ -424,7 +425,8 @@ public class TsurugiSession implements AutoCloseable {
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
         LOG.trace("createQuery started");
-        var ps = new TsurugiSqlPreparedQuery<>(this, sql, lowPreparedStatementFuture, parameterMapping, resultMapping);
+        var ps = new TsurugiSqlPreparedQuery<>(this, sql, parameterMapping, resultMapping);
+        ps.initialize(lowPreparedStatementFuture);
         event(null, listener -> listener.createQuery(ps));
         return ps;
     }
@@ -441,6 +443,7 @@ public class TsurugiSession implements AutoCloseable {
         checkClose();
         LOG.trace("createStatement. sql={}", sql);
         var ps = new TsurugiSqlStatement(this, sql);
+        ps.initialize();
         event(null, listener -> listener.createStatement(ps));
         return ps;
     }
@@ -462,7 +465,8 @@ public class TsurugiSession implements AutoCloseable {
         var lowPlaceholderList = parameterMapping.toLowPlaceholderList();
         var lowPreparedStatementFuture = getLowSqlClient().prepare(sql, lowPlaceholderList);
         LOG.trace("createStatement started");
-        var ps = new TsurugiSqlPreparedStatement<>(this, sql, lowPreparedStatementFuture, parameterMapping);
+        var ps = new TsurugiSqlPreparedStatement<>(this, sql, parameterMapping);
+        ps.initialize(lowPreparedStatementFuture);
         event(null, listener -> listener.createStatement(ps));
         return ps;
     }

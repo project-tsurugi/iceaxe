@@ -16,7 +16,6 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
-import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
@@ -33,18 +32,18 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize(FutureResponse)} after construct.
+     * </p>
      *
-     * @param session                    session
-     * @param sql                        SQL
-     * @param lowPreparedStatementFuture future of PreparedStatement
-     * @param parameterMapping           parameter mapping
-     * @param resultMapping              result mapping
-     * @throws IOException if an I/O error occurs while disposing the resources
+     * @param session          session
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param resultMapping    result mapping
      */
     @IceaxeInternal
-    public TsurugiSqlPreparedQuery(TsurugiSession session, String sql, FutureResponse<PreparedStatement> lowPreparedStatementFuture, TgParameterMapping<P> parameterMapping,
-            TgResultMapping<R> resultMapping) throws IOException {
-        super(session, sql, lowPreparedStatementFuture, parameterMapping);
+    public TsurugiSqlPreparedQuery(TsurugiSession session, String sql, TgParameterMapping<P> parameterMapping, TgResultMapping<R> resultMapping) {
+        super(session, sql, parameterMapping);
         this.resultMapping = resultMapping;
     }
 

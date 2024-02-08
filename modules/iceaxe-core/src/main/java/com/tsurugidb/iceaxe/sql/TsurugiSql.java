@@ -9,19 +9,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
-import org.slf4j.LoggerFactory;
-
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
-import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
-import com.tsurugidb.tsubakuro.sql.PreparedStatement;
-import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
  * Tsurugi SQL definition.
@@ -41,12 +37,15 @@ public abstract class TsurugiSql implements AutoCloseable {
 
     /**
      * Creates a new instance.
+     * <p>
+     * Call {@link #initialize()} after construct.
+     * </p>
      *
      * @param session session
      * @param sql     SQL
-     * @throws IOException if an I/O error occurs while disposing the resources
      */
-    protected TsurugiSql(@Nonnull TsurugiSession session, @Nonnull String sql) throws IOException {
+    @IceaxeInternal
+    protected TsurugiSql(@Nonnull TsurugiSession session, @Nonnull String sql) {
         this.iceaxeSqlId = SQL_DEFINITION_COUNT.incrementAndGet();
         this.ownerSession = Objects.requireNonNull(session);
         this.sql = Objects.requireNonNull(sql);
@@ -55,26 +54,14 @@ public abstract class TsurugiSql implements AutoCloseable {
     /**
      * initialize.
      * <p>
-     * call from constructor after applyCloseTimeout()
+     * Call this method only once after construct.
      * </p>
      *
-     * @param future future to close when an error occurs
      * @throws IOException if session already closed
      */
-    protected void initialize(FutureResponse<PreparedStatement> future) throws IOException {
-        try {
-            ownerSession.addChild(this);
-        } catch (Throwable e) {
-            var log = LoggerFactory.getLogger(getClass());
-            log.trace("tsurugiSql.initialize close start", e);
-            try {
-                IceaxeIoUtil.close(future);
-            } catch (Throwable c) {
-                e.addSuppressed(c);
-            }
-            log.trace("tsurugiSql.initialize close end");
-            throw e;
-        }
+    @IceaxeInternal
+    protected void initialize() throws IOException {
+        ownerSession.addChild(this);
     }
 
     /**
