@@ -1,9 +1,11 @@
 package com.tsurugidb.iceaxe.session.event.logging.file;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -89,10 +91,17 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
      *
      * @param txLog transaction log
      * @return writer
+     * @throws UncheckedIOException if an I/O error occurs opening or creating the file
      */
-    protected TsurugiSessionTxFileLogWriter createWriter(TgSessionTxLog txLog) {
+    protected TsurugiSessionTxFileLogWriter createWriter(TgSessionTxLog txLog) throws UncheckedIOException {
         var file = config.outputDir().resolve(getLogFileName(txLog));
-        return new TsurugiSessionTxFileLogWriter(config, file);
+        try {
+            var outputDir = createOutputDir(file);
+            var pw = createPrintWriter(config, file);
+            return new TsurugiSessionTxFileLogWriter(config, outputDir, pw);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -157,6 +166,37 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var label = Thread.currentThread().getName();
 
         return "tx" + startTime.format(FILENAME_FORMATTER) + "." + txId + "." + label;
+    }
+
+    /**
+     * create output directory.
+     *
+     * @param file file path
+     * @return output directory path
+     * @throws IOException if an I/O error occurs
+     * @since X.X.X
+     */
+    protected Path createOutputDir(Path file) throws IOException {
+        var outputDir = file.getParent();
+        if (outputDir != null) {
+            Files.createDirectories(outputDir);
+        } else {
+            outputDir = Path.of(".");
+        }
+        return outputDir;
+    }
+
+    /**
+     * create print writer.
+     *
+     * @param config transaction file log config
+     * @param file   file path
+     * @return print writer
+     * @throws IOException if an I/O error occurs opening or creating the file
+     * @since X.X.X
+     */
+    protected PrintWriter createPrintWriter(TsurugiSessionTxFileLogConfig config, Path file) throws IOException {
+        return new PrintWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8), config.autoFlush());
     }
 
     /**

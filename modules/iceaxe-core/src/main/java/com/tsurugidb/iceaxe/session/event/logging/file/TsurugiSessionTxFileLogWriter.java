@@ -3,7 +3,6 @@ package com.tsurugidb.iceaxe.session.event.logging.file;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,40 +24,21 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
     /**
      * Creates a new instance.
      *
-     * @param config transaction file log config
-     * @param file   file path
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param config    transaction file log config
+     * @param outputDir output directory path
+     * @param writer    print writer
      */
-    public TsurugiSessionTxFileLogWriter(TsurugiSessionTxFileLogConfig config, Path file) throws UncheckedIOException {
+    public TsurugiSessionTxFileLogWriter(TsurugiSessionTxFileLogConfig config, Path outputDir, PrintWriter writer) {
         this.config = config;
-        this.outputDir = file.getParent();
-        try {
-            if (this.outputDir != null) {
-                Files.createDirectories(outputDir);
-            }
-            this.writer = createPrintWriter(config, file);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * create print writer.
-     *
-     * @param config transaction file log config
-     * @param file   file path
-     * @return print writer
-     * @throws IOException if an I/O error occurs opening or creating the file
-     */
-    protected PrintWriter createPrintWriter(TsurugiSessionTxFileLogConfig config, Path file) throws IOException {
-        return new PrintWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8), config.autoFlush());
+        this.outputDir = outputDir;
+        this.writer = writer;
     }
 
     /**
      * Prints a String.
      *
      * @param format A format string
-     * @param args   Arguments referenced by the format specifiers in the formatstring
+     * @param args   Arguments referenced by the format specifiers in the format string
      */
     public void println(String format, Object... args) {
         String text = String.format(format, args);
