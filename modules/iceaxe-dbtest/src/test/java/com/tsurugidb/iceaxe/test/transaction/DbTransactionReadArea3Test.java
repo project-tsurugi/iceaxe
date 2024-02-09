@@ -71,11 +71,11 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                 var selectAps = session.createQuery(SELECT_A_SQL, SELECT_MAPPING); //
                 var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING)) {
             try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).label("t1"))) {
-                tx1.getTransactionId();
+                tx1.getLowTransaction();
                 try (var tx2 = session.createTransaction(TgTxOption.ofLTX().addExclusiveReadArea(TABLE_B).label("t2"))) {
-                    tx2.getTransactionId();
+                    tx2.getLowTransaction();
                     try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
-                        tx3.getTransactionId();
+                        tx3.getLowTransaction();
 
                         tx1.executeAndGetCount(insertAps, ENTITY0);
 
@@ -104,11 +104,11 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                 var selectAps = session.createQuery(SELECT_A_SQL, SELECT_MAPPING); //
                 var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING)) {
             try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).label("t1"))) {
-                tx1.getTransactionId();
+                tx1.getLowTransaction();
                 try (var tx2 = session.createTransaction(TgTxOption.ofLTX().addExclusiveReadArea(TABLE_B).label("t2"))) {
-                    tx2.getTransactionId();
+                    tx2.getLowTransaction();
                     try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
-                        tx3.getTransactionId();
+                        tx3.getLowTransaction();
 
                         tx3.executeAndGetList(selectAps); // yellow conflict
                         tx3.executeAndGetCount(insertBps, ENTITY0);
@@ -136,11 +136,11 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                 var selectAps = session.createQuery(SELECT_A_SQL, SELECT_MAPPING); //
                 var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING)) {
             try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).addExclusiveReadArea(TABLE_B).label("t1"))) {
-                tx1.getTransactionId();
+                tx1.getLowTransaction();
                 try (var tx2 = session.createTransaction(TgTxOption.ofLTX().addExclusiveReadArea(TABLE_B).label("t2"))) {
-                    tx2.getTransactionId();
+                    tx2.getLowTransaction();
                     try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
-                        tx3.getTransactionId();
+                        tx3.getLowTransaction();
 
                         tx1.executeAndGetCount(insertAps, ENTITY0);
 
@@ -171,11 +171,11 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                 var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING); //
                 var selectBps = session.createQuery(SELECT_B_SQL, SELECT_MAPPING)) {
             try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).label("t1"))) {
-                tx1.getTransactionId();
+                tx1.getLowTransaction();
                 try (var tx2 = session.createTransaction(TgTxOption.ofLTX().label("t2"))) {
-                    tx2.getTransactionId();
+                    tx2.getLowTransaction();
                     try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
-                        tx3.getTransactionId();
+                        tx3.getLowTransaction();
 
                         tx1.executeAndGetCount(insertAps, ENTITY0);
 
@@ -207,11 +207,11 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                 var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING); //
                 var selectBps = session.createQuery(SELECT_B_SQL, SELECT_MAPPING)) {
             try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).label("t1"))) {
-                tx1.getTransactionId();
+                tx1.getLowTransaction();
                 try (var tx2 = session.createTransaction(TgTxOption.ofLTX().label("t2"))) {
-                    tx2.getTransactionId();
+                    tx2.getLowTransaction();
                     try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
-                        tx3.getTransactionId();
+                        tx3.getLowTransaction();
 
                         tx3.executeAndGetList(selectAps); // yellow conflict
                         tx3.executeAndGetCount(insertBps, ENTITY0);
@@ -244,11 +244,11 @@ class DbTransactionReadArea3Test extends DbTestTableTester {
                 var insertBps = session.createStatement(INSERT_B_SQL, INSERT_MAPPING); //
                 var selectBps = session.createQuery(SELECT_B_SQL, SELECT_MAPPING)) {
             try (var tx1 = session.createTransaction(TgTxOption.ofLTX(TABLE_A).addExclusiveReadArea(TABLE_B).label("t1"))) {
-                tx1.getTransactionId();
+                tx1.getLowTransaction();
                 try (var tx2 = session.createTransaction(TgTxOption.ofLTX().label("t2"))) {
-                    tx2.getTransactionId();
+                    tx2.getLowTransaction();
                     try (var tx3 = session.createTransaction(TgTxOption.ofLTX(TABLE_B).label("t3"))) {
-                        tx3.getTransactionId();
+                        tx3.getLowTransaction();
 
                         tx1.executeAndGetCount(insertAps, ENTITY0);
 

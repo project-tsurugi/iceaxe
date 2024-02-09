@@ -147,27 +147,29 @@ public class DbInsertConstraintTest extends DbTestTableTester {
         var session = getSession();
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             var e0 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
-                        var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
-                    int count1 = tx1.executeAndGetCount(ps, entity);
-                    assertUpdateCount(1, count1);
-                    int count2 = tx2.executeAndGetCount(ps, entity);
-                    assertUpdateCount(1, count2);
+                try (var tx1 = session.createTransaction(TgTxOption.ofOCC())) {
+                    tx1.getLowTransaction();
+                    try (var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
+                        int count1 = tx1.executeAndGetCount(ps, entity);
+                        assertUpdateCount(1, count1);
+                        int count2 = tx2.executeAndGetCount(ps, entity);
+                        assertUpdateCount(1, count2);
 
-                    tx1.commit(TgCommitType.DEFAULT);
-                    var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                        tx2.commit(TgCommitType.DEFAULT);
-                    });
-                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
-
-                    try (var tx3 = session.createTransaction(TgTxOption.ofOCC())) {
-                        int count3 = tx3.executeAndGetCount(ps, entity);
-                        assertUpdateCount(1, count3);
-                        var e3 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                            tx3.commit(TgCommitType.DEFAULT);
+                        tx1.commit(TgCommitType.DEFAULT);
+                        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                            tx2.commit(TgCommitType.DEFAULT);
                         });
-                        assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e3);
-                        throw e3;
+                        assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
+
+                        try (var tx3 = session.createTransaction(TgTxOption.ofOCC())) {
+                            int count3 = tx3.executeAndGetCount(ps, entity);
+                            assertUpdateCount(1, count3);
+                            var e3 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                                tx3.commit(TgCommitType.DEFAULT);
+                            });
+                            assertEqualsCode(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, e3);
+                            throw e3;
+                        }
                     }
                 }
             });
@@ -184,15 +186,17 @@ public class DbInsertConstraintTest extends DbTestTableTester {
 
         var session = getSession();
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-            try (var tx1 = session.createTransaction(TgTxOption.ofOCC()); //
-                    var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
-                int count1 = tx1.executeAndGetCount(ps, entity);
-                assertUpdateCount(1, count1);
-                int count2 = tx2.executeAndGetCount(ps, entity);
-                assertUpdateCount(1, count2);
+            try (var tx1 = session.createTransaction(TgTxOption.ofOCC())) {
+                tx1.getLowTransaction();
+                try (var tx2 = session.createTransaction(TgTxOption.ofOCC())) {
+                    int count1 = tx1.executeAndGetCount(ps, entity);
+                    assertUpdateCount(1, count1);
+                    int count2 = tx2.executeAndGetCount(ps, entity);
+                    assertUpdateCount(1, count2);
 
-                tx1.rollback();
-                tx2.commit(TgCommitType.DEFAULT);
+                    tx1.rollback();
+                    tx2.commit(TgCommitType.DEFAULT);
+                }
             }
         }
 
