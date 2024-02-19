@@ -8,7 +8,7 @@ import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -68,17 +68,17 @@ class DbSelectCountTest extends DbTestTableTester {
         }
     }
 
-    @Test
+    @RepeatedTest(30)
     void countWhileInsertOcc() throws Exception {
         countWhileInsert(TgTxOption.ofOCC());
     }
 
-    @Test
+    @RepeatedTest(30)
     void countWhileInserLtx() throws Exception {
         countWhileInsert(TgTxOption.ofLTX());
     }
 
-    @Test
+    @RepeatedTest(30)
     void countWhileInserRtx() throws Exception {
         countWhileInsert(TgTxOption.ofRTX());
     }
