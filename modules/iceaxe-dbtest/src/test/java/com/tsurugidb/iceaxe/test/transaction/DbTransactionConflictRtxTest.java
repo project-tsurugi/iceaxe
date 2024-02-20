@@ -96,47 +96,43 @@ class DbTransactionConflictRtxTest extends DbTestTableTester {
         }
     }
 
-    @Test
-    void rtx_ltx() throws Exception {
-        var session = getSession();
-        try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
-                var updatePs2 = session.createStatement(UPDATE_SQL2)) {
-            try (var tx1 = session.createTransaction(RTX)) {
-                var entity11 = tx1.executeAndFindRecord(selectPs).get();
-                assertEquals(BAR_BEFORE, entity11.getBar());
-
-                try (var tx2 = session.createTransaction(LTX)) {
-                    tx2.executeAndGetCount(updatePs2);
-
-                    tx2.commit(TgCommitType.DEFAULT);
-
-                    var entity12 = tx1.executeAndFindRecord(selectPs).get();
-                    assertEquals(BAR_BEFORE, entity12.getBar());
-
-                    tx1.commit(TgCommitType.DEFAULT);
-                }
-            }
-        }
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void rtx_ltx(boolean commitAsc) throws Exception {
+        rtx_ltx(RTX, commitAsc);
     }
 
-    @Test
-    void rtx_ltx2() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void rtx_ltx_testByLTX(boolean commitAsc) throws Exception {
+        rtx_ltx(TgTxOption.ofLTX(), commitAsc);
+    }
+
+    private void rtx_ltx(TgTxOption tx1Option, boolean commitAsc) throws Exception {
         var session = getSession();
         try (var selectPs = session.createQuery(SELECT_SQL1, SELECT_MAPPING); //
                 var updatePs2 = session.createStatement(UPDATE_SQL2)) {
-            try (var tx1 = session.createTransaction(LTX)) {
+            try (var tx1 = session.createTransaction(tx1Option)) {
                 var entity11 = tx1.executeAndFindRecord(selectPs).get();
                 assertEquals(BAR_BEFORE, entity11.getBar());
 
                 try (var tx2 = session.createTransaction(LTX)) {
                     tx2.executeAndGetCount(updatePs2);
 
-                    var entity12 = tx1.executeAndFindRecord(selectPs).get();
-                    assertEquals(BAR_BEFORE, entity12.getBar());
+                    if (commitAsc) {
+                        var entity12 = tx1.executeAndFindRecord(selectPs).get();
+                        assertEquals(BAR_BEFORE, entity12.getBar());
 
-                    tx1.commit(TgCommitType.DEFAULT);
+                        tx1.commit(TgCommitType.DEFAULT);
+                        tx2.commit(TgCommitType.DEFAULT);
+                    } else {
+                        tx2.commit(TgCommitType.DEFAULT);
 
-                    tx2.commit(TgCommitType.DEFAULT);
+                        var entity12 = tx1.executeAndFindRecord(selectPs).get();
+                        assertEquals(BAR_BEFORE, entity12.getBar());
+
+                        tx1.commit(TgCommitType.DEFAULT);
+                    }
                 }
             }
         }
