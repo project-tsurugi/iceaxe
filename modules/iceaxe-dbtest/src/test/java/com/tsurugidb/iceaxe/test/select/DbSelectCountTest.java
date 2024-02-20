@@ -1,7 +1,7 @@
 package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -13,14 +13,17 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.TgCommitType;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
-import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * select count test
@@ -89,7 +92,6 @@ class DbSelectCountTest extends DbTestTableTester {
         var sql = "select count(*) from " + TEST;
 
         var session = getSession();
-        var tm = session.createTransactionManager(TgTmSetting.ofAlways(txOption));
         try (var ps = session.createQuery(sql, TgParameterMapping.of(), TgResultMapping.ofSingle(int.class))) {
             var insertThread = new InsertThread();
             insertThread.start();
@@ -97,12 +99,37 @@ class DbSelectCountTest extends DbTestTableTester {
             Throwable occurred = null;
             try {
                 while (!insertThread.end) {
-                    tm.execute(transaction -> {
+                    try (var transaction = session.createTransaction(txOption)) {
                         int count = transaction.executeAndFindRecord(ps, null).orElse(0);
+
+                        String message = null;
                         if (count % COMMIT_SIZE != 0) {
-                            fail(MessageFormat.format("count={0} (COMMIT_SIZE={1})", count, COMMIT_SIZE));
+                            message = MessageFormat.format("count={0} (COMMIT_SIZE={1})", count, COMMIT_SIZE);
+//                          fail(message);
+                            LOG.info(message);
                         }
-                    });
+
+                        if (message == null) {
+                            transaction.commit(TgCommitType.DEFAULT);
+                        } else {
+                            try {
+                                var e = assertThrows(TsurugiTransactionException.class, () -> {
+                                    transaction.commit(TgCommitType.DEFAULT);
+                                });
+                                assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e);
+                                continue;
+                            } catch (Throwable t) {
+                                t.addSuppressed(new AssertionError(message));
+                                throw t;
+                            }
+                        }
+                    } catch (TsurugiTransactionException e) {
+                        var exceptionUtil = TsurugiExceptionUtil.getInstance();
+                        if (exceptionUtil.isSerializationFailure(e)) {
+                            continue;
+                        }
+                        throw e;
+                    }
                 }
             } catch (Throwable e) {
                 occurred = e;
