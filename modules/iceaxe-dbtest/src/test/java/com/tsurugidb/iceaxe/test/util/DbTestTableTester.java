@@ -238,9 +238,20 @@ public class DbTestTableTester {
             + "  zzz varchar(" + ZZZ_SIZE + ")," //
             + "  primary key(foo)" //
             + ")";
+    protected static final String CREATE_TEST_NO_PK_SQL = "create table " + TEST //
+            + "(" //
+            + "  foo int," //
+            + "  bar bigint," //
+            + "  zzz varchar(" + ZZZ_SIZE + ")" //
+            + ")";
 
     protected static void createTestTable() throws IOException, InterruptedException {
-        executeDdl(getSession(), CREATE_TEST_SQL, TEST);
+        createTestTable(true);
+    }
+
+    protected static void createTestTable(boolean hasPk) throws IOException, InterruptedException {
+        var sql = hasPk ? CREATE_TEST_SQL : CREATE_TEST_NO_PK_SQL;
+        executeDdl(getSession(), sql, TEST);
     }
 
     protected static void executeDdl(TsurugiSession session, String sql) throws IOException, InterruptedException {
