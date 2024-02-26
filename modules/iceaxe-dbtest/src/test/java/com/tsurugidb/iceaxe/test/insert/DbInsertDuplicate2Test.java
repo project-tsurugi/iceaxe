@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
@@ -73,7 +72,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
     }
 
     @Test
-    @Disabled
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-occ.*")
     void occ() throws Exception {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
         test(setting, 30, 500);

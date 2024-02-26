@@ -71,6 +71,7 @@ class DbInsertDuplicateTest extends DbTestTableTester {
     }
 
     @Test
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-occ.*")
     void occ() throws Exception {
         test(TgTxOption.ofOCC());
     }
