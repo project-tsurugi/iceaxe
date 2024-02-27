@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,34 +72,46 @@ class DbInsertDuplicateTest extends DbTestTableTester {
         executeDdl(getSession(), sql);
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = { 1, 2, 3, 5 })
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-occ1.*")
+    void occ1(int threadSize) throws Exception {
+        test(TgTxOption.ofOCC(), threadSize);
+    }
+
     @Test
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-occ.*")
     void occ() throws Exception {
-        test(TgTxOption.ofOCC());
+        test(TgTxOption.ofOCC(), 40);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 1, 2, 3, 5 })
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-ltx1.*")
+    void ltx1(int threadSize) throws Exception {
+        test(TgTxOption.ofLTX(TEST, TEST2), threadSize);
     }
 
     @Test
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-ltx.*")
     void ltx() throws Exception {
-        test(TgTxOption.ofLTX(TEST, TEST2));
+        test(TgTxOption.ofLTX(TEST, TEST2), 40);
     }
 
-    private void test(TgTxOption txOption) throws Exception {
-        test(txOption, new DbTestSessions());
+    private void test(TgTxOption txOption, int threadSize) throws Exception {
+        test(txOption, new DbTestSessions(), threadSize);
     }
 
-    private void test(TgTxOption txOption, DbTestSessions sessions) throws Exception {
-        int onlineSize = 40;
-
+    private void test(TgTxOption txOption, DbTestSessions sessions, int threadSize) throws Exception {
         try (sessions) {
-            var onlineList = new ArrayList<OnlineTask>(onlineSize);
-            for (int i = 0; i < onlineSize; i++) {
+            var onlineList = new ArrayList<OnlineTask>(threadSize);
+            for (int i = 0; i < threadSize; i++) {
                 var task = new OnlineTask(sessions.createSession(), txOption);
                 onlineList.add(task);
             }
 
             var service = Executors.newCachedThreadPool();
-            var futureList = new ArrayList<Future<?>>(onlineSize);
+            var futureList = new ArrayList<Future<?>>(threadSize);
             onlineList.forEach(task -> futureList.add(service.submit(task)));
 
             var exceptionList = new ArrayList<Exception>();
