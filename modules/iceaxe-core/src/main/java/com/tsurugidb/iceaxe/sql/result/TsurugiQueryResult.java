@@ -110,7 +110,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             var log = LoggerFactory.getLogger(getClass());
             log.trace("TsurugiQueryResult.initialize close start", e);
             try {
-                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RS_CLOSE_TIMEOUT, lowResultSetFuture);
+                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RS_CLOSE_TIMEOUT, IceaxeErrorCode.RS_CLOSE_ERROR, lowResultSetFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -591,7 +591,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         } finally {
             try {
                 // not try-finally
-                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RS_CLOSE_TIMEOUT, lowResultSet, lowResultSetFuture);
+                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RS_CLOSE_TIMEOUT, IceaxeErrorCode.RS_CLOSE_ERROR, lowResultSet, lowResultSetFuture);
                 super.close();
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);

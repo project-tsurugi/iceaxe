@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.IceaxeServerExceptionTestMock;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
@@ -189,11 +191,13 @@ class IceaxeCloseableSetTest {
         assertEquals("def", e1.getMessage());
     }
 
+    private static final IceaxeErrorCode CLOSE_IN_TX_ERROR = IceaxeErrorCode.TX_COMMIT_CHILD_CLOSE_ERROR;
+
     @Test
     void testCloseInTransaction0() throws IOException, InterruptedException, TsurugiTransactionException {
         var target = new IceaxeCloseableSet();
         assertEquals(0, target.size());
-        target.closeInTransaction();
+        target.closeInTransaction(CLOSE_IN_TX_ERROR);
         assertEquals(0, target.size());
 
         var count = new AtomicInteger(0);
@@ -239,7 +243,7 @@ class IceaxeCloseableSetTest {
         assertEquals(3, count.get());
         assertEquals(0, target.size());
 
-        target.closeInTransaction();
+        target.closeInTransaction(CLOSE_IN_TX_ERROR);
         assertEquals(3, count.get());
         assertEquals(0, target.size());
     }
@@ -248,7 +252,7 @@ class IceaxeCloseableSetTest {
     void testCloseInTransaction() throws IOException, InterruptedException, TsurugiTransactionException {
         var target = new IceaxeCloseableSet();
         assertEquals(0, target.size());
-        target.closeInTransaction();
+        target.closeInTransaction(CLOSE_IN_TX_ERROR);
         assertEquals(0, target.size());
 
         var count = new AtomicInteger(0);
@@ -272,7 +276,7 @@ class IceaxeCloseableSetTest {
         target.add(closeable2);
         assertEquals(2, target.size());
 
-        target.closeInTransaction();
+        target.closeInTransaction(CLOSE_IN_TX_ERROR);
         assertEquals(2, count.get());
         assertEquals(0, target.size());
     }
@@ -301,7 +305,7 @@ class IceaxeCloseableSetTest {
         assertEquals(2, target.size());
 
         var e = assertThrowsExactly(IOException.class, () -> {
-            target.closeInTransaction();
+            target.closeInTransaction(CLOSE_IN_TX_ERROR);
         });
         assertEquals("abc", e.getMessage());
         assertEquals(1, e.getSuppressed().length);
@@ -335,7 +339,7 @@ class IceaxeCloseableSetTest {
         assertEquals(2, target.size());
 
         var e = assertThrowsExactly(InterruptedException.class, () -> {
-            target.closeInTransaction();
+            target.closeInTransaction(CLOSE_IN_TX_ERROR);
         });
         assertEquals("abc", e.getMessage());
         assertEquals(1, e.getSuppressed().length);
@@ -381,7 +385,7 @@ class IceaxeCloseableSetTest {
         assertEquals(3, target.size());
 
         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-            target.closeInTransaction();
+            target.closeInTransaction(CLOSE_IN_TX_ERROR);
         });
         assertEquals("MOCK_123: abc", e.getMessage());
         assertEquals(2, e.getSuppressed().length);
@@ -410,7 +414,7 @@ class IceaxeCloseableSetTest {
         assertEquals(1, target.size());
 
         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-            target.closeInTransaction();
+            target.closeInTransaction(CLOSE_IN_TX_ERROR);
         });
         assertSame(t, e);
         assertEquals(0, target.size());
@@ -432,7 +436,7 @@ class IceaxeCloseableSetTest {
         assertEquals(1, target.size());
 
         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-            target.closeInTransaction();
+            target.closeInTransaction(CLOSE_IN_TX_ERROR);
         });
         assertSame(t, e.getCause());
         assertEquals(0, target.size());
@@ -453,7 +457,7 @@ class IceaxeCloseableSetTest {
         assertEquals(1, target.size());
 
         var e = assertThrowsExactly(RuntimeException.class, () -> {
-            target.closeInTransaction();
+            target.closeInTransaction(CLOSE_IN_TX_ERROR);
         });
         assertEquals("abc", e.getMessage());
         assertEquals(0, target.size());
@@ -474,10 +478,11 @@ class IceaxeCloseableSetTest {
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var e = assertThrowsExactly(IOException.class, () -> {
-            target.closeInTransaction();
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
+            target.closeInTransaction(CLOSE_IN_TX_ERROR);
         });
-        assertEquals("abc", e.getMessage());
+        assertEquals(CLOSE_IN_TX_ERROR, e.getDiagnosticCode());
+        assertEquals(CLOSE_IN_TX_ERROR.getMessage() + ": abc", e.getMessage());
         assertSame(t, e.getCause());
         assertEquals(0, target.size());
     }

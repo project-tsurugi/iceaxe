@@ -13,6 +13,8 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
@@ -341,7 +343,7 @@ public class TsurugiTransactionManager {
             if (save != null) {
                 save.addSuppressed(e);
             } else {
-                throw new IOException(e.getMessage(), e);
+                throw new IceaxeIOException(IceaxeErrorCode.TM_ROLLBACK_ERROR, e);
             }
         }
     }

@@ -58,7 +58,7 @@ public class TsurugiTableListHelper {
      * @throws InterruptedException if interrupted while retrieving table list
      */
     protected TgTableList getTableList(TsurugiSession session, FutureResponse<TableList> lowTableListFuture) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowTableListFuture, IceaxeErrorCode.TABLE_LIST_CLOSE_TIMEOUT)) {
+        try (var closeable = IceaxeIoUtil.closeable(lowTableListFuture, IceaxeErrorCode.TABLE_LIST_CLOSE_TIMEOUT, IceaxeErrorCode.TABLE_LIST_CLOSE_ERROR)) {
 
             var sessionOption = session.getSessionOption();
             var connectTimeout = getConnectTimeout(sessionOption);

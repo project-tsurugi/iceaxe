@@ -574,8 +574,8 @@ public class TsurugiSession implements AutoCloseable {
         LOG.trace("session close start");
         Throwable occurred = null;
         try {
-            IceaxeIoUtil.close(closeableSet, () -> {
-                IceaxeIoUtil.close(IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, lowSqlClient, lowSession, lowSessionFuture);
+            IceaxeIoUtil.close(closeableSet, IceaxeErrorCode.SESSION_CHILD_CLOSE_ERROR, () -> {
+                IceaxeIoUtil.close(IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_ERROR, lowSqlClient, lowSession, lowSessionFuture);
             });
         } catch (Throwable e) {
             occurred = e;

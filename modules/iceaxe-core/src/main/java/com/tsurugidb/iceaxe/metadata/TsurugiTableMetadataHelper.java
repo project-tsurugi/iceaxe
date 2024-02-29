@@ -87,7 +87,7 @@ public class TsurugiTableMetadataHelper {
      * @throws InterruptedException if interrupted while retrieving table metadata
      */
     protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture, IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT)) {
+        try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture, IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT, IceaxeErrorCode.TABLE_METADATA_CLOSE_ERROR)) {
 
             var sessionOption = session.getSessionOption();
             var connectTimeout = getConnectTimeout(sessionOption);

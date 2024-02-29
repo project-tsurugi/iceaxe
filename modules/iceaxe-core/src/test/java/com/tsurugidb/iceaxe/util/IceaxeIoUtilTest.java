@@ -395,6 +395,7 @@ class IceaxeIoUtilTest {
     }
 
     private static final IceaxeErrorCode CLOSE_TIMEOUT = IceaxeErrorCode.SESSION_CLOSE_TIMEOUT;
+    private static final IceaxeErrorCode CLOSE_ERROR = IceaxeErrorCode.SESSION_CHILD_CLOSE_ERROR;
 
     @Test
     void testCloseable() throws Exception {
@@ -405,7 +406,7 @@ class IceaxeIoUtilTest {
                 count.addAndGet(1);
             }
         };
-        try (var closeable = IceaxeIoUtil.closeable(future, CLOSE_TIMEOUT)) {
+        try (var closeable = IceaxeIoUtil.closeable(future, CLOSE_TIMEOUT, CLOSE_ERROR)) {
         }
         assertEquals(1, count.get());
     }
@@ -419,7 +420,7 @@ class IceaxeIoUtilTest {
             }
         };
         var e = assertThrowsExactly(InterruptedException.class, () -> {
-            try (var closeable = IceaxeIoUtil.closeable(future, CLOSE_TIMEOUT)) {
+            try (var closeable = IceaxeIoUtil.closeable(future, CLOSE_TIMEOUT, CLOSE_ERROR)) {
             }
         });
         assertEquals("abc", e.getMessage());
@@ -434,7 +435,7 @@ class IceaxeIoUtilTest {
             }
         };
         var e = assertThrowsExactly(IOException.class, () -> {
-            try (var closeable = IceaxeIoUtil.closeable(future, CLOSE_TIMEOUT)) {
+            try (var closeable = IceaxeIoUtil.closeable(future, CLOSE_TIMEOUT, CLOSE_ERROR)) {
                 throw new IOException("abc");
             }
         });
@@ -453,7 +454,7 @@ class IceaxeIoUtilTest {
             }
         };
         var e = assertThrowsExactly(Exception.class, () -> {
-            try (var closeable = IceaxeIoUtil.closeable(future, CLOSE_TIMEOUT)) {
+            try (var closeable = IceaxeIoUtil.closeable(future, CLOSE_TIMEOUT, CLOSE_ERROR)) {
                 throw new Exception("abc");
             }
         });
@@ -468,7 +469,7 @@ class IceaxeIoUtilTest {
         {
             var count = new AtomicInteger(0);
             var closeableSet = new IceaxeCloseableSet();
-            IceaxeIoUtil.close(closeableSet, () -> {
+            IceaxeIoUtil.close(closeableSet, CLOSE_ERROR, () -> {
                 count.addAndGet(1);
             });
             assertEquals(1, count.get());
@@ -477,7 +478,7 @@ class IceaxeIoUtilTest {
             var count = new AtomicInteger(0);
             var closeableSet = new IceaxeCloseableSet();
             closeableSet.add(() -> count.addAndGet(1));
-            IceaxeIoUtil.close(closeableSet, () -> {
+            IceaxeIoUtil.close(closeableSet, CLOSE_ERROR, () -> {
                 count.addAndGet(1);
             });
             assertEquals(2, count.get());
@@ -496,7 +497,7 @@ class IceaxeIoUtilTest {
             });
 
             var count = new AtomicInteger(0);
-            var e = assertThrowsExactly(TsurugiIOException.class, () -> IceaxeIoUtil.close(closeableSet, () -> {
+            var e = assertThrowsExactly(TsurugiIOException.class, () -> IceaxeIoUtil.close(closeableSet, CLOSE_ERROR, () -> {
                 count.addAndGet(1);
             }));
             assertEquals(1, count.get());
@@ -520,7 +521,7 @@ class IceaxeIoUtilTest {
             });
 
             var count = new AtomicInteger(0);
-            var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(closeableSet, () -> {
+            var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(closeableSet, CLOSE_ERROR, () -> {
                 count.addAndGet(1);
             }));
             assertEquals(1, count.get());
@@ -544,12 +545,12 @@ class IceaxeIoUtilTest {
             });
 
             var count = new AtomicInteger(0);
-            var e = assertThrowsExactly(IceaxeIOException.class, () -> IceaxeIoUtil.close(closeableSet, () -> {
+            var e = assertThrowsExactly(IceaxeIOException.class, () -> IceaxeIoUtil.close(closeableSet, CLOSE_ERROR, () -> {
                 count.addAndGet(1);
             }));
             assertEquals(1, count.get());
 
-            assertEquals(IceaxeErrorCode.CLOSE_ERROR, e.getDiagnosticCode());
+            assertEquals(CLOSE_ERROR, e.getDiagnosticCode());
             var cause = e.getCause();
             assertInstanceOf(InterruptedException.class, cause);
             assertEquals("abc", cause.getMessage());
@@ -567,7 +568,7 @@ class IceaxeIoUtilTest {
                 throw new IceaxeServerExceptionTestMock("def", 456);
             });
 
-            var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(closeableSet, () -> {
+            var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(closeableSet, CLOSE_ERROR, () -> {
                 throw new IOException("abc");
             }));
 
@@ -586,7 +587,7 @@ class IceaxeIoUtilTest {
                 throw new IOException("def");
             });
 
-            var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(closeableSet, () -> {
+            var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(closeableSet, CLOSE_ERROR, () -> {
                 throw new IOException("abc");
             }));
 
@@ -604,17 +605,17 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> count.addAndGet(2);
         {
             count.set(0);
-            IceaxeIoUtil.close(CLOSE_TIMEOUT, close1);
+            IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1);
             assertEquals(1, count.get());
         }
         {
             count.set(0);
-            IceaxeIoUtil.close(CLOSE_TIMEOUT, close1, close2);
+            IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2);
             assertEquals(3, count.get());
         }
         {
             count.set(0);
-            IceaxeIoUtil.close(CLOSE_TIMEOUT, close1, null, close2);
+            IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1, null, close2);
             assertEquals(3, count.get());
         }
     }
@@ -627,7 +628,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new IceaxeServerExceptionTestMock("def", 456);
         };
-        var e = assertThrowsExactly(TsurugiIOException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, close1, close2));
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2));
         assertEquals("MOCK_123: abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(TsurugiIOException.class, s0);
@@ -642,7 +643,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new IOException("def");
         };
-        var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, close1, close2));
+        var e = assertThrowsExactly(IOException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2));
         assertEquals("abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(IOException.class, s0);
@@ -657,7 +658,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new InterruptedException("def");
         };
-        var e = assertThrowsExactly(InterruptedException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, close1, close2));
+        var e = assertThrowsExactly(InterruptedException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2));
         assertEquals("abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(InterruptedException.class, s0);
@@ -672,7 +673,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new RuntimeException("def");
         };
-        var e = assertThrowsExactly(RuntimeException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, close1, close2));
+        var e = assertThrowsExactly(RuntimeException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2));
         assertEquals("abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(RuntimeException.class, s0);
@@ -687,7 +688,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new Error("def");
         };
-        var e = assertThrowsExactly(Error.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, close1, close2));
+        var e = assertThrowsExactly(Error.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2));
         assertEquals("abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(Error.class, s0);
@@ -702,7 +703,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new ResponseTimeoutException("def");
         };
-        var e = assertThrowsExactly(IceaxeIOException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, close1, close2));
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> IceaxeIoUtil.close(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2));
         assertEquals(CLOSE_TIMEOUT.getMessage() + ": abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(IceaxeIOException.class, s0);
@@ -716,17 +717,17 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> count.addAndGet(2);
         {
             count.set(0);
-            IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, close1);
+            IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, CLOSE_ERROR, close1);
             assertEquals(1, count.get());
         }
         {
             count.set(0);
-            IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, close1, close2);
+            IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2);
             assertEquals(3, count.get());
         }
         {
             count.set(0);
-            IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, close1, null, close2);
+            IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, CLOSE_ERROR, close1, null, close2);
             assertEquals(3, count.get());
         }
     }
@@ -739,7 +740,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new IceaxeServerExceptionTestMock("def", 456);
         };
-        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, close1, close2));
+        var e = assertThrowsExactly(TsurugiTransactionException.class, () -> IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2));
         assertEquals("MOCK_123: abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(TsurugiTransactionException.class, s0);
@@ -754,7 +755,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new ResponseTimeoutException("def");
         };
-        var e = assertThrowsExactly(IceaxeIOException.class, () -> IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, close1, close2));
+        var e = assertThrowsExactly(IceaxeIOException.class, () -> IceaxeIoUtil.closeInTransaction(CLOSE_TIMEOUT, CLOSE_ERROR, close1, close2));
         assertEquals(CLOSE_TIMEOUT.getMessage() + ": abc", e.getMessage());
         var s0 = e.getSuppressed()[0];
         assertInstanceOf(IceaxeIOException.class, s0);

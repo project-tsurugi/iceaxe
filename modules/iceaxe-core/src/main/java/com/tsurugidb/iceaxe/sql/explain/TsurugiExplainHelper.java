@@ -142,7 +142,7 @@ public class TsurugiExplainHelper {
      */
     protected TgStatementMetadata getStatementMetadata(TsurugiSession session, String source, Object arguments, FutureResponse<StatementMetadata> lowStatementMetadataFuture,
             IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowStatementMetadataFuture, IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT)) {
+        try (var closeable = IceaxeIoUtil.closeable(lowStatementMetadataFuture, IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT, IceaxeErrorCode.EXPLAIN_CLOSE_ERROR)) {
             closeTimeout.apply(lowStatementMetadataFuture);
 
             var lowStatementMetadata = IceaxeIoUtil.getAndCloseFuture(lowStatementMetadataFuture, connectTimeout, IceaxeErrorCode.EXPLAIN_CONNECT_TIMEOUT, IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT);

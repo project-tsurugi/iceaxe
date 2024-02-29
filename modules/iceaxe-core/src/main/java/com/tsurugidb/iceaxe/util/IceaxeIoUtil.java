@@ -118,24 +118,26 @@ public final class IceaxeIoUtil {
      *
      * @param future                future
      * @param closeTimeoutErrorCode error code for close timeout
+     * @param closeErrorCode        error code for close
      * @return Closeable
      */
-    public static IceaxeFutureResponseCloseable closeable(FutureResponse<?> future, IceaxeErrorCode closeTimeoutErrorCode) {
+    public static IceaxeFutureResponseCloseable closeable(FutureResponse<?> future, IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode) {
         return () -> {
             // ServerException -> TsurugiIOException
-            IceaxeIoUtil.close(closeTimeoutErrorCode, future);
+            IceaxeIoUtil.close(closeTimeoutErrorCode, closeErrorCode, future);
         };
     }
 
     /**
      * close resources.
      *
-     * @param closeableSet Closeable set
-     * @param runnable     close action
+     * @param closeableSet   Closeable set
+     * @param closeErrorCode error code for close
+     * @param runnable       close action
      * @throws IOException          if an I/O error occurs while disposing the resources
      * @throws InterruptedException if interrupted while disposing the resources
      */
-    public static void close(IceaxeCloseableSet closeableSet, IoRunnable runnable) throws IOException, InterruptedException {
+    public static void close(IceaxeCloseableSet closeableSet, IceaxeErrorCode closeErrorCode, IoRunnable runnable) throws IOException, InterruptedException {
         List<Throwable> saveList = closeableSet.close();
 
         try {
@@ -155,7 +157,7 @@ public final class IceaxeIoUtil {
                 if (s instanceof IOException) {
                     e = (IOException) s;
                 } else {
-                    e = new IceaxeIOException(IceaxeErrorCode.CLOSE_ERROR, s);
+                    e = new IceaxeIOException(closeErrorCode, s);
                 }
             } else {
                 e.addSuppressed(s);
@@ -170,29 +172,32 @@ public final class IceaxeIoUtil {
      * close resources.
      *
      * @param closeTimeoutErrorCode error code for close timeout
+     * @param closeErrorCode        error code for close
      * @param closeables            AutoCloseable
      * @throws IOException          if an I/O error occurs while disposing the resources
      * @throws InterruptedException if interrupted while disposing the resources
      */
-    public static void close(IceaxeErrorCode closeTimeoutErrorCode, AutoCloseable... closeables) throws IOException, InterruptedException {
-        close(closeables, closeTimeoutErrorCode, TsurugiIOException.class, TsurugiIOException::new);
+    public static void close(IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, AutoCloseable... closeables) throws IOException, InterruptedException {
+        close(closeables, closeTimeoutErrorCode, closeErrorCode, TsurugiIOException.class, TsurugiIOException::new);
     }
 
     /**
      * close resources in transaction.
      *
      * @param closeTimeoutErrorCode error code for close timeout
+     * @param closeErrorCode        error code for close
      * @param closeables            AutoCloseable
      * @throws IOException                 if an I/O error occurs while disposing the resources
      * @throws InterruptedException        if interrupted while disposing the resources
      * @throws TsurugiTransactionException if server error occurs while disposing the resources
      */
-    public static void closeInTransaction(IceaxeErrorCode closeTimeoutErrorCode, AutoCloseable... closeables) throws IOException, InterruptedException, TsurugiTransactionException {
-        close(closeables, closeTimeoutErrorCode, TsurugiTransactionException.class, TsurugiTransactionException::new);
+    public static void closeInTransaction(IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, AutoCloseable... closeables)
+            throws IOException, InterruptedException, TsurugiTransactionException {
+        close(closeables, closeTimeoutErrorCode, closeErrorCode, TsurugiTransactionException.class, TsurugiTransactionException::new);
     }
 
-    private static <E extends Exception> void close(AutoCloseable[] closeables, IceaxeErrorCode closeTimeoutErrorCode, Class<E> classE, Function<ServerException, E> serverExceptionWrapper)
-            throws IOException, InterruptedException, E {
+    private static <E extends Exception> void close(AutoCloseable[] closeables, IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, Class<E> classE,
+            Function<ServerException, E> serverExceptionWrapper) throws IOException, InterruptedException, E {
         Throwable occurred = null;
 
         for (var closeable : closeables) {
@@ -224,7 +229,7 @@ public final class IceaxeIoUtil {
                 }
             } catch (Throwable e) {
                 if (occurred == null) {
-                    occurred = new IceaxeIOException(IceaxeErrorCode.CLOSE_ERROR, e);
+                    occurred = new IceaxeIOException(closeErrorCode, e);
                 } else {
                     occurred.addSuppressed(e);
                 }

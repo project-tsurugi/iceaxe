@@ -118,7 +118,7 @@ public class TsurugiTransaction implements AutoCloseable {
         } catch (Throwable e) {
             LOG.trace("transaction.initialize close start", e);
             try {
-                IceaxeIoUtil.close(IceaxeErrorCode.TX_CLOSE_TIMEOUT, lowTransactionFuture);
+                IceaxeIoUtil.close(IceaxeErrorCode.TX_CLOSE_TIMEOUT, IceaxeErrorCode.TX_CLOSE_ERROR, lowTransactionFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -1147,7 +1147,7 @@ public class TsurugiTransaction implements AutoCloseable {
 
         Throwable occurred = null;
         try {
-            closeableSet.closeInTransaction();
+            closeableSet.closeInTransaction(IceaxeErrorCode.TX_COMMIT_CHILD_CLOSE_ERROR);
             var lowCommitStatus = commitType.getLowCommitStatus();
             finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout, IceaxeErrorCode.TX_COMMIT_TIMEOUT, IceaxeErrorCode.TX_COMMIT_CLOSE_TIMEOUT);
             this.committed = true;
@@ -1184,7 +1184,7 @@ public class TsurugiTransaction implements AutoCloseable {
 
         Throwable occurred = null;
         try {
-            closeableSet.closeInTransaction();
+            closeableSet.closeInTransaction(IceaxeErrorCode.TX_ROLLBACK_CHILD_CLOSE_ERROR);
             finish(Transaction::rollback, rollbackTimeout, IceaxeErrorCode.TX_ROLLBACK_TIMEOUT, IceaxeErrorCode.TX_ROLLBACK_CLOSE_TIMEOUT);
             this.rollbacked = true;
         } catch (TsurugiTransactionException e) {
@@ -1274,9 +1274,9 @@ public class TsurugiTransaction implements AutoCloseable {
         }
         Throwable occurred = null;
         try {
-            IceaxeIoUtil.close(closeableSet, () -> {
+            IceaxeIoUtil.close(closeableSet, IceaxeErrorCode.TX_CHILD_CLOSE_ERROR, () -> {
                 // not try-finally
-                IceaxeIoUtil.close(IceaxeErrorCode.TX_CLOSE_TIMEOUT, lowTransaction, lowTransactionFuture);
+                IceaxeIoUtil.close(IceaxeErrorCode.TX_CLOSE_TIMEOUT, IceaxeErrorCode.TX_CLOSE_ERROR, lowTransaction, lowTransactionFuture);
                 ownerSession.removeChild(this);
             });
         } catch (Throwable e) {

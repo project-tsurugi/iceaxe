@@ -11,6 +11,8 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -69,11 +71,12 @@ public class IceaxeCloseableSet {
     /**
      * close all Closeable.
      *
+     * @param closeErrorCode error code for close
      * @throws IOException                 if an I/O error occurs while disposing the resources
      * @throws InterruptedException        if interrupted while requesting cancel
      * @throws TsurugiTransactionException if server error occurs while disposing the resources
      */
-    public synchronized void closeInTransaction() throws IOException, InterruptedException, TsurugiTransactionException {
+    public synchronized void closeInTransaction(IceaxeErrorCode closeErrorCode) throws IOException, InterruptedException, TsurugiTransactionException {
         if (closeableSet.isEmpty()) {
             return;
         }
@@ -97,7 +100,7 @@ public class IceaxeCloseableSet {
                 } else if (save instanceof InterruptedException) {
                     e = save;
                 } else {
-                    e = new IOException(save.getMessage(), save);
+                    e = new IceaxeIOException(closeErrorCode, save);
                 }
             } else {
                 e.addSuppressed(save);

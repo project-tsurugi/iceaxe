@@ -82,7 +82,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         } catch (Throwable e) {
             log.trace("TsurugiSqlPrepared.initialize close start", e);
             try {
-                IceaxeIoUtil.close(IceaxeErrorCode.PS_CLOSE_TIMEOUT, lowPreparedStatementFuture);
+                IceaxeIoUtil.close(IceaxeErrorCode.PS_CLOSE_TIMEOUT, IceaxeErrorCode.PS_CLOSE_ERROR, lowPreparedStatementFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -207,7 +207,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     public void close() throws IOException, InterruptedException {
         log.trace("lowPs close start");
         // not try-finally
-        IceaxeIoUtil.close(IceaxeErrorCode.PS_CLOSE_TIMEOUT, lowPreparedStatement, lowPreparedStatementFuture);
+        IceaxeIoUtil.close(IceaxeErrorCode.PS_CLOSE_TIMEOUT, IceaxeErrorCode.PS_CLOSE_ERROR, lowPreparedStatement, lowPreparedStatementFuture);
         super.close();
         log.trace("lowPs close end");
     }

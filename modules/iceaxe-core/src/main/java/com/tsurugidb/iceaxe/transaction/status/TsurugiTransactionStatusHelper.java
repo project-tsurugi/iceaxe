@@ -60,7 +60,7 @@ public class TsurugiTransactionStatusHelper {
      * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTxStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowFuture) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowFuture, IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT)) {
+        try (var closeable = IceaxeIoUtil.closeable(lowFuture, IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT, IceaxeErrorCode.TX_STATUS_CLOSE_ERROR)) {
 
             var sessionOption = transaction.getSession().getSessionOption();
             var connectTimeout = getConnectTimeout(sessionOption);
