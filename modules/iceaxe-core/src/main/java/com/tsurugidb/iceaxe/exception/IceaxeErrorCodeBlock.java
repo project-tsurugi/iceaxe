@@ -7,6 +7,7 @@ package com.tsurugidb.iceaxe.exception;
  */
 public final class IceaxeErrorCodeBlock {
 
+    static final int COMMON = 0;
     static final int CONNECTOR = 1000;
     static final int SESSION = 2000;
     static final int TRANSACTION = 3000;

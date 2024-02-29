@@ -12,6 +12,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
@@ -59,7 +60,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         super(sqlExecuteId, transaction, ps, parameter);
 
         var sessionOption = transaction.getSessionOption();
-        this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CHECK);
+        this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CONNECT);
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
     }
 
@@ -88,7 +89,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
             var log = LoggerFactory.getLogger(getClass());
             log.trace("TsurugiStatementResult.initialize close start", e);
             try {
-                IceaxeIoUtil.closeInTransaction(lowResultFuture);
+                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RESULT_CLOSE_TIMEOUT, lowResultFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -188,7 +189,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
 
             LOG.trace("lowResult get start");
             try {
-                var lowExecuteResult = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout);
+                var lowExecuteResult = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout, IceaxeErrorCode.RESULT_CONNECT_TIMEOUT, IceaxeErrorCode.RESULT_CLOSE_TIMEOUT);
                 this.resultCount = new TgResultCount(lowExecuteResult);
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);
@@ -252,7 +253,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         } finally {
             try {
                 // not try-finally
-                IceaxeIoUtil.closeInTransaction(lowResultFuture);
+                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RESULT_CLOSE_TIMEOUT, lowResultFuture);
                 super.close();
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);

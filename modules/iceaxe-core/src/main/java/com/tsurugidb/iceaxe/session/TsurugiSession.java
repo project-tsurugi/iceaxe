@@ -221,7 +221,7 @@ public class TsurugiSession implements AutoCloseable {
 
             LOG.trace("lowSession get start");
             try {
-                this.lowSession = IceaxeIoUtil.getAndCloseFuture(lowSessionFuture, connectTimeout);
+                this.lowSession = IceaxeIoUtil.getAndCloseFuture(lowSessionFuture, connectTimeout, IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_TIMEOUT);
             } catch (Throwable e) {
                 this.lowFutureException = e;
                 throw e;
@@ -575,7 +575,7 @@ public class TsurugiSession implements AutoCloseable {
         Throwable occurred = null;
         try {
             IceaxeIoUtil.close(closeableSet, () -> {
-                IceaxeIoUtil.close(lowSqlClient, lowSession, lowSessionFuture);
+                IceaxeIoUtil.close(IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, lowSqlClient, lowSession, lowSessionFuture);
             });
         } catch (Throwable e) {
             occurred = e;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -59,14 +60,14 @@ public class TsurugiTransactionStatusHelper {
      * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTxStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowFuture) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowFuture)) {
+        try (var closeable = IceaxeIoUtil.closeable(lowFuture, IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT)) {
 
             var sessionOption = transaction.getSession().getSessionOption();
             var connectTimeout = getConnectTimeout(sessionOption);
             var closeTimeout = getCloseTimeout(sessionOption);
             closeTimeout.apply(lowFuture);
 
-            var lowStatus = IceaxeIoUtil.getAndCloseFuture(lowFuture, connectTimeout);
+            var lowStatus = IceaxeIoUtil.getAndCloseFuture(lowFuture, connectTimeout, IceaxeErrorCode.TX_STATUS_CONNECT_TIMEOUT, IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT);
             LOG.trace("getTransactionStatus end");
 
             var exception = newTransactionException(lowStatus);

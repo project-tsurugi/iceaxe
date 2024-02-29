@@ -16,6 +16,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
@@ -109,7 +110,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             var log = LoggerFactory.getLogger(getClass());
             log.trace("TsurugiQueryResult.initialize close start", e);
             try {
-                IceaxeIoUtil.closeInTransaction(lowResultSetFuture);
+                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RS_CLOSE_TIMEOUT, lowResultSetFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -211,7 +212,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
 
             LOG.trace("lowResultSet get start");
             try {
-                this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout);
+                this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout, IceaxeErrorCode.RS_CONNECT_TIMEOUT, IceaxeErrorCode.RS_CLOSE_TIMEOUT);
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);
                 throw e;
@@ -590,7 +591,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         } finally {
             try {
                 // not try-finally
-                IceaxeIoUtil.closeInTransaction(lowResultSet, lowResultSetFuture);
+                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RS_CLOSE_TIMEOUT, lowResultSet, lowResultSetFuture);
                 super.close();
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);

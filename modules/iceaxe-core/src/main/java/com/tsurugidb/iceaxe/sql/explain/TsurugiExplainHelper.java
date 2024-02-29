@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -141,10 +142,10 @@ public class TsurugiExplainHelper {
      */
     protected TgStatementMetadata getStatementMetadata(TsurugiSession session, String source, Object arguments, FutureResponse<StatementMetadata> lowStatementMetadataFuture,
             IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowStatementMetadataFuture)) {
+        try (var closeable = IceaxeIoUtil.closeable(lowStatementMetadataFuture, IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT)) {
             closeTimeout.apply(lowStatementMetadataFuture);
 
-            var lowStatementMetadata = IceaxeIoUtil.getAndCloseFuture(lowStatementMetadataFuture, connectTimeout);
+            var lowStatementMetadata = IceaxeIoUtil.getAndCloseFuture(lowStatementMetadataFuture, connectTimeout, IceaxeErrorCode.EXPLAIN_CONNECT_TIMEOUT, IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT);
             LOG.trace("explain end");
 
             return newStatementMetadata(source, arguments, lowStatementMetadata);

@@ -118,7 +118,7 @@ public class TsurugiTransaction implements AutoCloseable {
         } catch (Throwable e) {
             LOG.trace("transaction.initialize close start", e);
             try {
-                IceaxeIoUtil.close(lowTransactionFuture);
+                IceaxeIoUtil.close(IceaxeErrorCode.TX_CLOSE_TIMEOUT, lowTransactionFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -337,7 +337,7 @@ public class TsurugiTransaction implements AutoCloseable {
             LOG.trace("lowTransaction get start");
             event(null, listener -> listener.lowTransactionGetStart(this));
             try {
-                this.lowTransaction = IceaxeIoUtil.getAndCloseFuture(lowTransactionFuture, beginTimeout);
+                this.lowTransaction = IceaxeIoUtil.getAndCloseFuture(lowTransactionFuture, beginTimeout, IceaxeErrorCode.TX_BEGIN_TIMEOUT, IceaxeErrorCode.TX_CLOSE_TIMEOUT);
             } catch (Throwable e) {
                 this.lowFutureException = e;
                 event(e, listener -> listener.lowTransactionGetEnd(this, null, e));
@@ -1149,7 +1149,7 @@ public class TsurugiTransaction implements AutoCloseable {
         try {
             closeableSet.closeInTransaction();
             var lowCommitStatus = commitType.getLowCommitStatus();
-            finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout);
+            finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout, IceaxeErrorCode.TX_COMMIT_TIMEOUT, IceaxeErrorCode.TX_COMMIT_CLOSE_TIMEOUT);
             this.committed = true;
         } catch (TsurugiTransactionException e) {
             occurred = e;
@@ -1185,7 +1185,7 @@ public class TsurugiTransaction implements AutoCloseable {
         Throwable occurred = null;
         try {
             closeableSet.closeInTransaction();
-            finish(Transaction::rollback, rollbackTimeout);
+            finish(Transaction::rollback, rollbackTimeout, IceaxeErrorCode.TX_ROLLBACK_TIMEOUT, IceaxeErrorCode.TX_ROLLBACK_CLOSE_TIMEOUT);
             this.rollbacked = true;
         } catch (TsurugiTransactionException e) {
             occurred = e;
@@ -1205,17 +1205,20 @@ public class TsurugiTransaction implements AutoCloseable {
     /**
      * commit/rollback.
      *
-     * @param finisher commit/rollback function
-     * @param timeout  timeout
+     * @param finisher              commit/rollback function
+     * @param timeout               timeout
+     * @param timeoutErrorCode      error code for timeout
+     * @param closeTimeoutErrorCode error code for close timeout
      * @throws IOException                 if an I/O error occurs while execute
      * @throws InterruptedException        if interrupted while execute
      * @throws TsurugiTransactionException if server error occurs while execute
      */
-    protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout) throws IOException, InterruptedException, TsurugiTransactionException {
+    protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout, IceaxeErrorCode timeoutErrorCode, IceaxeErrorCode closeTimeoutErrorCode)
+            throws IOException, InterruptedException, TsurugiTransactionException {
         var transaction = getLowTransaction();
         var lowResultFuture = finisher.apply(transaction);
         closeTimeout.apply(lowResultFuture);
-        IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, timeout);
+        IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, timeout, timeoutErrorCode, closeTimeoutErrorCode);
     }
 
     /**
@@ -1273,7 +1276,7 @@ public class TsurugiTransaction implements AutoCloseable {
         try {
             IceaxeIoUtil.close(closeableSet, () -> {
                 // not try-finally
-                IceaxeIoUtil.close(lowTransaction, lowTransactionFuture);
+                IceaxeIoUtil.close(IceaxeErrorCode.TX_CLOSE_TIMEOUT, lowTransaction, lowTransactionFuture);
                 ownerSession.removeChild(this);
             });
         } catch (Throwable e) {

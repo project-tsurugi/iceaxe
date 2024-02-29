@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -57,14 +58,14 @@ public class TsurugiTableListHelper {
      * @throws InterruptedException if interrupted while retrieving table list
      */
     protected TgTableList getTableList(TsurugiSession session, FutureResponse<TableList> lowTableListFuture) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowTableListFuture)) {
+        try (var closeable = IceaxeIoUtil.closeable(lowTableListFuture, IceaxeErrorCode.TABLE_LIST_CLOSE_TIMEOUT)) {
 
             var sessionOption = session.getSessionOption();
             var connectTimeout = getConnectTimeout(sessionOption);
             var closeTimeout = getCloseTimeout(sessionOption);
             closeTimeout.apply(lowTableListFuture);
 
-            var lowTableList = IceaxeIoUtil.getAndCloseFuture(lowTableListFuture, connectTimeout);
+            var lowTableList = IceaxeIoUtil.getAndCloseFuture(lowTableListFuture, connectTimeout, IceaxeErrorCode.TABLE_LIST_CONNECT_TIMEOUT, IceaxeErrorCode.TABLE_LIST_CLOSE_TIMEOUT);
             LOG.trace("getTableList end");
 
             return newTableList(lowTableList);

@@ -6,9 +6,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.function.IoRunnable;
+import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -24,34 +27,40 @@ public final class IceaxeIoUtil {
     /**
      * get value from future.
      *
-     * @param <V>     the result value type
-     * @param future  future
-     * @param timeout the maximum time to wait
+     * @param <V>                   the result value type
+     * @param future                future
+     * @param timeout               the maximum time to wait
+     * @param timeoutErrorCode      error code for timeout
+     * @param closeTimeoutErrorCode error code for close timeout
      * @return result value
      * @throws IOException          if an I/O error occurs while processing the request
      * @throws InterruptedException if interrupted while processing the request
      */
-    public static <V> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, InterruptedException {
-        return getAndCloseFuture(future, timeout, TsurugiIOException::new);
+    public static <V> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout, IceaxeErrorCode timeoutErrorCode, IceaxeErrorCode closeTimeoutErrorCode)
+            throws IOException, InterruptedException {
+        return getAndCloseFuture(future, timeout, timeoutErrorCode, closeTimeoutErrorCode, TsurugiIOException::new);
     }
 
     /**
      * get value from future in transaction.
      *
-     * @param <V>     the result value type
-     * @param future  future
-     * @param timeout the maximum time to wait
+     * @param <V>                   the result value type
+     * @param future                future
+     * @param timeout               the maximum time to wait
+     * @param timeoutErrorCode      error code for timeout
+     * @param closeTimeoutErrorCode error code for close timeout
      * @return result value
      * @throws IOException                 if an I/O error occurs while processing the request
      * @throws InterruptedException        if interrupted while processing the request
      * @throws TsurugiTransactionException if server error occurs while processing the request
      */
-    public static <V> V getAndCloseFutureInTransaction(FutureResponse<V> future, IceaxeTimeout timeout) throws IOException, InterruptedException, TsurugiTransactionException {
-        return getAndCloseFuture(future, timeout, TsurugiTransactionException::new);
+    public static <V> V getAndCloseFutureInTransaction(FutureResponse<V> future, IceaxeTimeout timeout, IceaxeErrorCode timeoutErrorCode, IceaxeErrorCode closeTimeoutErrorCode)
+            throws IOException, InterruptedException, TsurugiTransactionException {
+        return getAndCloseFuture(future, timeout, timeoutErrorCode, closeTimeoutErrorCode, TsurugiTransactionException::new);
     }
 
-    private static <V, E extends Exception> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout, Function<ServerException, E> serverExceptionWrapper)
-            throws IOException, InterruptedException, E {
+    private static <V, E extends Exception> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout, IceaxeErrorCode timeoutErrorCode, IceaxeErrorCode closeTimeoutErrorCode,
+            Function<ServerException, E> serverExceptionWrapper) throws IOException, InterruptedException, E {
         Throwable occurred = null;
         try {
             var time = timeout.get();
@@ -62,8 +71,8 @@ public final class IceaxeIoUtil {
             E wrapper = serverExceptionWrapper.apply(e);
             occurred = wrapper;
             throw wrapper;
-        } catch (TimeoutException e) {
-            var ioe = new IOException(e.getMessage(), e);
+        } catch (TimeoutException | ResponseTimeoutException e) {
+            var ioe = new IceaxeIOException(timeoutErrorCode, e);
             occurred = ioe;
             throw ioe;
         } catch (Throwable e) {
@@ -78,6 +87,13 @@ public final class IceaxeIoUtil {
                     occurred.addSuppressed(wrapper);
                 } else {
                     throw wrapper;
+                }
+            } catch (ResponseTimeoutException e) {
+                var ie = new IceaxeIOException(closeTimeoutErrorCode, e);
+                if (occurred != null) {
+                    occurred.addSuppressed(ie);
+                } else {
+                    throw ie;
                 }
             } catch (Throwable e) {
                 if (occurred != null) {
@@ -100,13 +116,14 @@ public final class IceaxeIoUtil {
     /**
      * wrap with Closeable.
      *
-     * @param future future
+     * @param future                future
+     * @param closeTimeoutErrorCode error code for close timeout
      * @return Closeable
      */
-    public static IceaxeFutureResponseCloseable closeable(FutureResponse<?> future) {
+    public static IceaxeFutureResponseCloseable closeable(FutureResponse<?> future, IceaxeErrorCode closeTimeoutErrorCode) {
         return () -> {
             // ServerException -> TsurugiIOException
-            IceaxeIoUtil.close(future);
+            IceaxeIoUtil.close(closeTimeoutErrorCode, future);
         };
     }
 
@@ -138,7 +155,7 @@ public final class IceaxeIoUtil {
                 if (s instanceof IOException) {
                     e = (IOException) s;
                 } else {
-                    e = new IOException(s.getMessage(), s);
+                    e = new IceaxeIOException(IceaxeErrorCode.CLOSE_ERROR, s);
                 }
             } else {
                 e.addSuppressed(s);
@@ -152,27 +169,30 @@ public final class IceaxeIoUtil {
     /**
      * close resources.
      *
-     * @param closeables AutoCloseable
+     * @param closeTimeoutErrorCode error code for close timeout
+     * @param closeables            AutoCloseable
      * @throws IOException          if an I/O error occurs while disposing the resources
      * @throws InterruptedException if interrupted while disposing the resources
      */
-    public static void close(AutoCloseable... closeables) throws IOException, InterruptedException {
-        close(closeables, TsurugiIOException.class, TsurugiIOException::new);
+    public static void close(IceaxeErrorCode closeTimeoutErrorCode, AutoCloseable... closeables) throws IOException, InterruptedException {
+        close(closeables, closeTimeoutErrorCode, TsurugiIOException.class, TsurugiIOException::new);
     }
 
     /**
      * close resources in transaction.
      *
-     * @param closeables AutoCloseable
+     * @param closeTimeoutErrorCode error code for close timeout
+     * @param closeables            AutoCloseable
      * @throws IOException                 if an I/O error occurs while disposing the resources
      * @throws InterruptedException        if interrupted while disposing the resources
      * @throws TsurugiTransactionException if server error occurs while disposing the resources
      */
-    public static void closeInTransaction(AutoCloseable... closeables) throws IOException, InterruptedException, TsurugiTransactionException {
-        close(closeables, TsurugiTransactionException.class, TsurugiTransactionException::new);
+    public static void closeInTransaction(IceaxeErrorCode closeTimeoutErrorCode, AutoCloseable... closeables) throws IOException, InterruptedException, TsurugiTransactionException {
+        close(closeables, closeTimeoutErrorCode, TsurugiTransactionException.class, TsurugiTransactionException::new);
     }
 
-    private static <E extends Exception> void close(AutoCloseable[] closeables, Class<E> classE, Function<ServerException, E> serverExceptionWrapper) throws IOException, InterruptedException, E {
+    private static <E extends Exception> void close(AutoCloseable[] closeables, IceaxeErrorCode closeTimeoutErrorCode, Class<E> classE, Function<ServerException, E> serverExceptionWrapper)
+            throws IOException, InterruptedException, E {
         Throwable occurred = null;
 
         for (var closeable : closeables) {
@@ -189,6 +209,13 @@ public final class IceaxeIoUtil {
                 } else {
                     occurred.addSuppressed(wrapper);
                 }
+            } catch (ResponseTimeoutException e) {
+                var ie = new IceaxeIOException(closeTimeoutErrorCode, e);
+                if (occurred == null) {
+                    occurred = ie;
+                } else {
+                    occurred.addSuppressed(ie);
+                }
             } catch (IOException | InterruptedException | RuntimeException | Error e) {
                 if (occurred == null) {
                     occurred = e;
@@ -197,7 +224,7 @@ public final class IceaxeIoUtil {
                 }
             } catch (Throwable e) {
                 if (occurred == null) {
-                    occurred = new IOException(e.getMessage(), e);
+                    occurred = new IceaxeIOException(IceaxeErrorCode.CLOSE_ERROR, e);
                 } else {
                     occurred.addSuppressed(e);
                 }

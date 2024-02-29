@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
@@ -86,14 +87,14 @@ public class TsurugiTableMetadataHelper {
      * @throws InterruptedException if interrupted while retrieving table metadata
      */
     protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture)) {
+        try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture, IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT)) {
 
             var sessionOption = session.getSessionOption();
             var connectTimeout = getConnectTimeout(sessionOption);
             var closeTimeout = getCloseTimeout(sessionOption);
             closeTimeout.apply(lowTableMetadataFuture);
 
-            var lowTableMetadata = IceaxeIoUtil.getAndCloseFuture(lowTableMetadataFuture, connectTimeout);
+            var lowTableMetadata = IceaxeIoUtil.getAndCloseFuture(lowTableMetadataFuture, connectTimeout, IceaxeErrorCode.TABLE_METADATA_CONNECT_TIMEOUT, IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT);
             LOG.trace("getTableMetadata end");
 
             return Optional.of(newTableMetadata(lowTableMetadata));
@@ -113,7 +114,7 @@ public class TsurugiTableMetadataHelper {
      * @return timeout
      */
     protected IceaxeTimeout getConnectTimeout(TgSessionOption sessionOption) {
-        return new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CONNECT);
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_METADATA_CONNECT);
     }
 
     /**
@@ -123,7 +124,7 @@ public class TsurugiTableMetadataHelper {
      * @return timeout
      */
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
-        return new IceaxeTimeout(sessionOption, TgTimeoutKey.METADATA_CLOSE);
+        return new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_METADATA_CLOSE);
     }
 
     /**

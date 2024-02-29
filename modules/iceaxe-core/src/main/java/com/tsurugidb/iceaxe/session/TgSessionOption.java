@@ -49,25 +49,6 @@ public class TgSessionOption {
         /** {@link TsurugiSession} close */
         SESSION_CLOSE,
 
-        /** {@link TsurugiTableListHelper} connect */
-        TABLE_LIST_CONNECT,
-        /** {@link TsurugiTableListHelper} close */
-        TABLE_LIST_CLOSE,
-        /** {@link TsurugiTableMetadataHelper} connect */
-        METADATA_CONNECT,
-        /** {@link TsurugiTableMetadataHelper} close */
-        METADATA_CLOSE,
-
-        /** {@link TsurugiExplainHelper} connect */
-        EXPLAIN_CONNECT,
-        /** {@link TsurugiExplainHelper} close */
-        EXPLAIN_CLOSE,
-
-        /** {@link TsurugiSqlPrepared} connect */
-        PS_CONNECT,
-        /** {@link TsurugiSqlPrepared} close */
-        PS_CLOSE,
-
         /** {@link TsurugiTransaction} begin */
         TRANSACTION_BEGIN,
         /** {@link TsurugiTransaction} commit */
@@ -81,14 +62,57 @@ public class TgSessionOption {
         /** {@link TsurugiTransactionStatusHelper} close */
         TX_STATUS_CLOSE,
 
+        /** {@link TsurugiSqlPrepared} connect */
+        PS_CONNECT,
+        /** {@link TsurugiSqlPrepared} close */
+        PS_CLOSE,
+
         /** {@link TsurugiQueryResult} connect */
         RS_CONNECT,
         /** {@link TsurugiQueryResult} close */
         RS_CLOSE,
-        /** {@link TsurugiStatementResult} check */
-        RESULT_CHECK,
+        /** {@link TsurugiStatementResult} connect */
+        RESULT_CONNECT,
         /** {@link TsurugiStatementResult} close */
         RESULT_CLOSE,
+
+        /** {@link TsurugiExplainHelper} connect */
+        EXPLAIN_CONNECT,
+        /** {@link TsurugiExplainHelper} close */
+        EXPLAIN_CLOSE,
+
+        /** {@link TsurugiTableListHelper} connect */
+        TABLE_LIST_CONNECT,
+        /** {@link TsurugiTableListHelper} close */
+        TABLE_LIST_CLOSE,
+        /** {@link TsurugiTableMetadataHelper} connect */
+        TABLE_METADATA_CONNECT,
+        /** {@link TsurugiTableMetadataHelper} close */
+        TABLE_METADATA_CLOSE,
+
+        ;
+
+        /**
+         * {@link TsurugiStatementResult} connect.
+         *
+         * @see #RESULT_CONNECT
+         */
+        @Deprecated(forRemoval = true, since = "X.X.X")
+        public static final TgTimeoutKey RESULT_CHECK = RESULT_CONNECT;
+        /**
+         * {@link TsurugiTableMetadataHelper} connect.
+         *
+         * @see #TABLE_METADATA_CONNECT
+         */
+        @Deprecated(forRemoval = true, since = "X.X.X")
+        public static final TgTimeoutKey METADATA_CONNECT = TABLE_METADATA_CONNECT;
+        /**
+         * {@link TsurugiTableMetadataHelper} close.
+         *
+         * @see #TABLE_METADATA_CLOSE
+         */
+        @Deprecated(forRemoval = true, since = "X.X.X")
+        public static final TgTimeoutKey METADATA_CLOSE = TABLE_METADATA_CLOSE;
     }
 
     private String sessionLabel;
