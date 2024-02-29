@@ -6,6 +6,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableListHelper;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
@@ -78,13 +80,11 @@ public class DbTimeoutTableListCloseTest extends DbTimetoutTest {
 
         try {
             session.getTableNameList();
-        } catch (IOException e) {
-            // TABLE_LIST_CLOSEはタイムアウトするような通信処理が無い
-//          assertInstanceOf(TimeoutException.class, e.getCause());
-//          LOG.trace("timeout success");
-//          return;
-            throw e;
+        } catch (IceaxeIOException e) {
+            assertEqualsCode(IceaxeErrorCode.TABLE_LIST_CLOSE_TIMEOUT, e);
+            return;
         }
+        // TABLE_LIST_CLOSEはタイムアウトするような通信処理が無い
 //      fail("didn't time out");
     }
 }

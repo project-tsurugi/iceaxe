@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -114,14 +116,12 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
             var parameter = TgBindParameters.of();
             try {
                 ps.explain(parameter);
-            } catch (IOException e) {
-                // EXPLAIN_CLOSEはタイムアウトするような通信処理が無い
-//              assertInstanceOf(TimeoutException.class, e.getCause());
-//              LOG.trace("timeout success");
-//              return;
-                throw e;
+            } catch (IceaxeIOException e) {
+                assertEqualsCode(IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT, e);
+                return;
             }
         }
+        // EXPLAIN_CLOSEはタイムアウトするような通信処理が無い
 //      fail("didn't time out");
     }
 }

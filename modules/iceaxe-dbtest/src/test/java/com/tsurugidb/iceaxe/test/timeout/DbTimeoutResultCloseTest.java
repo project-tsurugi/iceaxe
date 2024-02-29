@@ -1,12 +1,13 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -71,15 +72,13 @@ public class DbTimeoutResultCloseTest extends DbTimetoutTest {
                 pipeServer.setPipeWrite(false);
                 try {
                     result.close();
-                } catch (IOException e) {
-                    // RESULT_CLOSEはタイムアウトするような通信処理が無い
-//                  assertInstanceOf(TimeoutException.class, e.getCause());
-//                  LOG.trace("timeout success");
-//                  return;
-                    throw e;
+                } catch (IceaxeIOException e) {
+                    assertEqualsCode(IceaxeErrorCode.RESULT_CLOSE_TIMEOUT, e);
+                    return;
                 } finally {
                     pipeServer.setPipeWrite(true);
                 }
+                // RESULT_CLOSEはタイムアウトするような通信処理が無い
 //              fail("didn't time out");
             }
         }

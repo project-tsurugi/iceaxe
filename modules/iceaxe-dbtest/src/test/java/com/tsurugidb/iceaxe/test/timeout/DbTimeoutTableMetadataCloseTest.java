@@ -6,6 +6,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
@@ -35,7 +37,7 @@ public class DbTimeoutTableMetadataCloseTest extends DbTimetoutTest {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
-                sessionOption.setTimeout(TgTimeoutKey.METADATA_CLOSE, 1, TimeUnit.SECONDS);
+                sessionOption.setTimeout(TgTimeoutKey.TABLE_METADATA_CLOSE, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -78,13 +80,11 @@ public class DbTimeoutTableMetadataCloseTest extends DbTimetoutTest {
 
         try {
             session.findTableMetadata(TEST);
-        } catch (IOException e) {
-            // METADATA_CLOSEはタイムアウトするような通信処理が無い
-//          assertInstanceOf(TimeoutException.class, e.getCause());
-//          LOG.trace("timeout success");
-//          return;
-            throw e;
+        } catch (IceaxeIOException e) {
+            assertEqualsCode(IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT, e);
+            return;
         }
+        // TABLE_METADATA_CLOSEはタイムアウトするような通信処理が無い
 //      fail("didn't time out");
     }
 }

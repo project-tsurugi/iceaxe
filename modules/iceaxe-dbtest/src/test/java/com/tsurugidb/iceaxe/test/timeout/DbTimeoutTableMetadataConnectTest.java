@@ -1,14 +1,14 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
@@ -37,7 +37,7 @@ public class DbTimeoutTableMetadataConnectTest extends DbTimetoutTest {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
-                sessionOption.setTimeout(TgTimeoutKey.METADATA_CONNECT, 1, TimeUnit.SECONDS);
+                sessionOption.setTimeout(TgTimeoutKey.TABLE_METADATA_CONNECT, 1, TimeUnit.SECONDS);
             }
         });
     }
@@ -55,9 +55,8 @@ public class DbTimeoutTableMetadataConnectTest extends DbTimetoutTest {
 
         try {
             session.findTableMetadata(TEST);
-        } catch (IOException e) {
-            assertInstanceOf(TimeoutException.class, e.getCause());
-            LOG.trace("timeout success");
+        } catch (IceaxeIOException e) {
+            assertEqualsCode(IceaxeErrorCode.TABLE_METADATA_CONNECT_TIMEOUT, e);
             return;
         } finally {
             pipeServer.setPipeWrite(true);

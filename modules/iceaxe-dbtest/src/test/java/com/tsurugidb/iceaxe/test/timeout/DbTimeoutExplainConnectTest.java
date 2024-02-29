@@ -1,18 +1,18 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -91,9 +91,8 @@ public class DbTimeoutExplainConnectTest extends DbTimetoutTest {
             var parameter = TgBindParameters.of();
             try {
                 ps.explain(parameter);
-            } catch (IOException e) {
-                assertInstanceOf(TimeoutException.class, e.getCause());
-                LOG.trace("timeout success");
+            } catch (IceaxeIOException e) {
+                assertEqualsCode(IceaxeErrorCode.EXPLAIN_CONNECT_TIMEOUT, e);
                 return;
             } finally {
                 pipeServer.setPipeWrite(true);

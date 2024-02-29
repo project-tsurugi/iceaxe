@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlQuery;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
@@ -17,7 +19,6 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
-import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 
 /**
  * slot limit test
@@ -63,8 +64,8 @@ public class DbSlotLimitTest extends DbTimetoutTest {
                     LOG.trace("close i={}", i);
                     try {
                         result.close();
-                    } catch (ResponseTimeoutException e) {
-                        // success
+                    } catch (IceaxeIOException e) {
+                        assertEqualsCode(IceaxeErrorCode.RS_CONNECT_TIMEOUT, e); // close内で接続しているため、コネクトタイムアウト
                     }
                     i++;
                 }
@@ -72,9 +73,10 @@ public class DbSlotLimitTest extends DbTimetoutTest {
         } finally {
             try {
                 transaction.close();
-            } catch (ResponseTimeoutException e) {
+            } catch (IceaxeIOException e) {
+                assertEqualsCode(IceaxeErrorCode.TX_CLOSE_TIMEOUT, e);
                 // TODO 本来はタイムアウトせず正常にクローズできて欲しい
-                LOG.warn("transaction.close() {}", e.getClass().getName());
+                LOG.warn("transaction.close() {}", e.getMessage());
             }
         }
     }
