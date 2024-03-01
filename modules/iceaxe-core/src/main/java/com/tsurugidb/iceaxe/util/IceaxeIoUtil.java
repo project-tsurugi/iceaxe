@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
+import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.function.IoRunnable;
@@ -150,22 +151,33 @@ public final class IceaxeIoUtil {
             throw e;
         }
 
-        IOException e = null;
+        IOException ioe = null;
         for (var save : saveList) {
             var s = (save instanceof ServerException) ? new TsurugiIOException((ServerException) save) : save;
-            if (e == null) {
+            if (ioe == null) {
                 if (s instanceof IOException) {
-                    e = (IOException) s;
+                    ioe = (IOException) s;
                 } else {
-                    e = new IceaxeIOException(closeErrorCode, s);
+                    if (hasDiagnosticCode(s)) {
+                        ioe = new TsurugiIOException(s.getMessage(), s);
+                    } else {
+                        ioe = new IceaxeIOException(closeErrorCode, s);
+                    }
                 }
             } else {
-                e.addSuppressed(s);
+                ioe.addSuppressed(s);
             }
         }
-        if (e != null) {
-            throw e;
+        if (ioe != null) {
+            throw ioe;
         }
+    }
+
+    private static boolean hasDiagnosticCode(Throwable t) {
+        if (t instanceof TsurugiDiagnosticCodeProvider) {
+            return ((TsurugiDiagnosticCodeProvider) t).getDiagnosticCode() != null;
+        }
+        return false;
     }
 
     /**
@@ -229,7 +241,11 @@ public final class IceaxeIoUtil {
                 }
             } catch (Throwable e) {
                 if (occurred == null) {
-                    occurred = new IceaxeIOException(closeErrorCode, e);
+                    if (hasDiagnosticCode(e)) {
+                        occurred = new TsurugiIOException(e.getMessage(), e);
+                    } else {
+                        occurred = new IceaxeIOException(closeErrorCode, e);
+                    }
                 } else {
                     occurred.addSuppressed(e);
                 }
