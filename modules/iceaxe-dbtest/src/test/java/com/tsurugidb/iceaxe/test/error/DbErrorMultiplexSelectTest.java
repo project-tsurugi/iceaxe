@@ -83,13 +83,13 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
         try {
             selectMultiMain(size, type);
         } catch (TsurugiIOException e) {
-            if (size > 280) {
-                assertEqualsCode(SqlServiceCode.TRANSACTION_EXCEEDED_LIMIT_EXCEPTION, e);
-                LOG.info("(TCP)TRANSACTION_EXCEEDED_LIMIT_EXCEPTION occur. size={}, type={}", size, type);
-                return;
+            if (DbTestConnector.isTcp()) {
+                if (size > 280) {
+                    assertEqualsCode(SqlServiceCode.TRANSACTION_EXCEEDED_LIMIT_EXCEPTION, e);
+                    LOG.info("(TCP)TRANSACTION_EXCEEDED_LIMIT_EXCEPTION occur. size={}, type={}", size, type);
+                    return;
+                }
             }
-            throw e;
-        } catch (IOException e) {
             if (DbTestConnector.isIpc()) {
                 if (size > 240) {
                     assertEqualsCode(SqlServiceCode.SQL_LIMIT_REACHED_EXCEPTION, e);
