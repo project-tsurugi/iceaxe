@@ -414,6 +414,9 @@ public class DbTestTableTester {
                 assertEquals(expectedClass, actualServerException.getClass());
             }
         } catch (Throwable e) {
+            var log = LoggerFactory.getLogger(DbTestTableTester.class);
+            log.error("assertEqualsCode fail. {}", e.getMessage(), actual);
+
             e.addSuppressed(actual);
             throw e;
         }
