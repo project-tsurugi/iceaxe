@@ -1,13 +1,17 @@
 package com.tsurugidb.iceaxe.test.insert;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +40,7 @@ import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
@@ -76,37 +81,44 @@ class DbInsertDuplicateTest extends DbTestTableTester {
     @ValueSource(ints = { 1, 2, 3, 5 })
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-occ1.*")
     void occ1(int threadSize) throws Exception {
-        test(TgTxOption.ofOCC(), threadSize);
+        test(TgTxOption.ofOCC(), threadSize, false);
     }
 
     @Test
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-occ.*")
     void occ() throws Exception {
-        test(TgTxOption.ofOCC(), 40);
+        test(TgTxOption.ofOCC(), 40, false);
+    }
+
+    @Test
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-occ.*")
+    void occDebug() throws Exception {
+        test(TgTxOption.ofOCC(), 20, true);
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 1, 2, 3, 5 })
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-ltx1.*")
     void ltx1(int threadSize) throws Exception {
-        test(TgTxOption.ofLTX(TEST, TEST2), threadSize);
+        test(TgTxOption.ofLTX(TEST, TEST2), threadSize, false);
     }
 
     @Test
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicateTest-ltx.*")
     void ltx() throws Exception {
-        test(TgTxOption.ofLTX(TEST, TEST2), 40);
+        test(TgTxOption.ofLTX(TEST, TEST2), 40, false);
     }
 
-    private void test(TgTxOption txOption, int threadSize) throws Exception {
-        test(txOption, new DbTestSessions(), threadSize);
+    private void test(TgTxOption txOption, int threadSize, boolean debugFlag) throws Exception {
+        test(txOption, new DbTestSessions(), threadSize, debugFlag);
     }
 
-    private void test(TgTxOption txOption, DbTestSessions sessions, int threadSize) throws Exception {
+    private void test(TgTxOption txOption, DbTestSessions sessions, int threadSize, boolean debugFlag) throws Exception {
         try (sessions) {
             var onlineList = new ArrayList<OnlineTask>(threadSize);
+            var stopFlag = new AtomicBoolean(false);
             for (int i = 0; i < threadSize; i++) {
-                var task = new OnlineTask(sessions.createSession(), txOption);
+                var task = new OnlineTask(i, sessions.createSession(), txOption, debugFlag, stopFlag);
                 onlineList.add(task);
             }
 
@@ -130,6 +142,9 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                 exceptionList.stream().forEach(e::addSuppressed);
                 throw e;
             }
+            if (stopFlag.get()) {
+                fail("inconsistent commit data");
+            }
         }
     }
 
@@ -140,12 +155,18 @@ class DbInsertDuplicateTest extends DbTestTableTester {
         private static final TgBindVariableInteger vKey2 = TgBindVariable.ofInt("key2");
         private static final TgBindVariableString vZzz2 = TgBindVariable.ofString("zzz2");
 
+        private final int threadNumber;
         private final TsurugiSession session;
         private final TgTxOption txOption;
+        private final boolean debugFlag;
+        private final AtomicBoolean stopFlag;
 
-        public OnlineTask(TsurugiSession session, TgTxOption txOption) {
+        public OnlineTask(int threadNumber, TsurugiSession session, TgTxOption txOption, boolean debugFlag, AtomicBoolean stopFlag) {
+            this.threadNumber = threadNumber;
             this.session = session;
-            this.txOption = txOption;
+            this.txOption = txOption.clone("thread" + threadNumber);
+            this.debugFlag = debugFlag;
+            this.stopFlag = stopFlag;
         }
 
         @Override
@@ -158,16 +179,27 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                     + "values(" + insert2List.getSqlNames() + ")";
             var insert2Mapping = TgParameterMapping.of(insert2List);
 
+            var debugSelect1Sql = SELECT_SQL + " where foo >= 10 order by foo";
+            var debugSelect2Sql = "select * from " + TEST2 + " order by key1, key2";
+
             try (var maxPs = session.createQuery(maxSql); //
                     var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
-                    var insert2Ps = session.createStatement(insert2Sql, insert2Mapping)) {
+                    var insert2Ps = session.createStatement(insert2Sql, insert2Mapping); //
+                    var debugSelect1Ps = session.createQuery(debugSelect1Sql, SELECT_MAPPING); //
+                    var debugSelect2Ps = session.createQuery(debugSelect2Sql)) {
                 var setting = TgTmSetting.ofAlways(txOption);
                 var tm = session.createTransactionManager(setting);
+                var debugTm = session.createTransactionManager(TgTmSetting.ofOccLtx( //
+                        TgTxOption.ofOCC().label("debugSelect" + threadNumber), 3, //
+                        TgTxOption.ofRTX().label("debugSelect" + threadNumber), 1));
 
                 long start = System.currentTimeMillis();
                 int prev = 0;
                 final int ATTEMPT_SIZE = 40;
                 for (int i = 0, j = 1; i < ATTEMPT_SIZE; i++, j++) {
+                    if (stopFlag.get()) {
+                        break;
+                    }
                     if (System.currentTimeMillis() - start > TIMEOUT) {
                         LOG.error("timeout. loop {} (i={}/{})", j, i, ATTEMPT_SIZE);
                         throw new TimeoutException(MessageFormat.format("[{0}] timeout. loop {1} (i={2})", Thread.currentThread().getName(), j, i));
@@ -181,9 +213,26 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                         prev = i;
                     }
                     try {
+                        if (stopFlag.get()) {
+                            break;
+                        }
                         tm.execute(transaction -> {
+                            if (stopFlag.get()) {
+                                transaction.rollback();
+                                return;
+                            }
                             execute(transaction, maxPs, insertPs, insert2Ps);
                         });
+
+                        if (debugFlag) {
+                            if (stopFlag.get()) {
+                                break;
+                            }
+                            if (!debugExecute(debugTm, debugSelect1Ps, debugSelect2Ps)) {
+                                stopFlag.set(true);
+                                break;
+                            }
+                        }
                     } catch (TsurugiTmIOException e) {
                         if (TsurugiExceptionUtil.getInstance().isUniqueConstraintViolation(e)) {
 //                          LOG.info("UNIQUE_CONSTRAINT_VIOLATION {}", i);
@@ -203,11 +252,62 @@ class DbInsertDuplicateTest extends DbTestTableTester {
             var max = transaction.executeAndFindRecord(maxPs).get();
             int foo = max.getInt("foo");
 
-            var entity = new TestEntity(foo, foo, Integer.toString(foo));
+            String zzz = "thead" + threadNumber;
+            var entity = new TestEntity(foo, foo, zzz);
             transaction.executeAndGetCount(insertPs, entity);
 
-            var parameter = TgBindParameters.of(vKey1.bind(foo), vKey2.bind(foo / 2), vZzz2.bind(Integer.toString(foo)));
+            var parameter = TgBindParameters.of(vKey1.bind(foo), vKey2.bind(foo / 2), vZzz2.bind(zzz));
             transaction.executeAndGetCount(insert2Ps, parameter);
+        }
+
+        private boolean debugExecute(TsurugiTransactionManager tm, TsurugiSqlQuery<TestEntity> select1Ps, TsurugiSqlQuery<TsurugiResultEntity> select2Ps) throws IOException, InterruptedException {
+            var list1 = new ArrayList<TestEntity>();
+            var list2 = new ArrayList<TsurugiResultEntity>();
+            tm.execute(transaction -> {
+                if (stopFlag.get()) {
+                    transaction.rollback();
+                    return;
+                }
+
+                list1.clear();
+                list2.clear();
+                list1.addAll(transaction.executeAndGetList(select1Ps));
+                list2.addAll(transaction.executeAndGetList(select2Ps));
+            });
+            for (int i = 0; i < Math.max(list1.size(), list2.size()); i++) {
+                if (i >= list1.size() || i >= list2.size()) {
+                    debugLog(list1, list2, i);
+                    return false;
+                }
+
+                var entity1 = list1.get(i);
+                var entity2 = list2.get(i);
+
+                var foo = (int) entity1.getFoo();
+                var key1 = entity2.getInt("key1");
+                if (foo != key1) {
+                    debugLog(list1, list2, i);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void debugLog(List<TestEntity> list1, ArrayList<TsurugiResultEntity> list2, int startIndex) {
+            if (startIndex >= 1) {
+                startIndex--;
+            }
+            synchronized (DbInsertDuplicateTest.class) {
+                for (int i = startIndex; i < list1.size(); i++) {
+                    var entity = list1.get(i);
+                    LOG.error("thread{} test[{}]:  {}", threadNumber, i, entity);
+                }
+                for (int i = startIndex; i < list2.size(); i++) {
+                    var entity = list2.get(i);
+                    LOG.error("thread{} test2[{}]: {}", threadNumber, i, entity);
+                }
+                LOG.error("thread{}: test.size={}, test2.size={}", threadNumber, list1.size(), list2.size());
+            }
         }
     }
 }
