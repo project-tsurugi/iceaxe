@@ -31,15 +31,15 @@ class DbTransaction3Test extends DbTestTableTester {
 
     @Test
     void updateOcc() throws Exception {
-        update(TgTxOption.ofOCC(), false);
+        update(TgTxOption.ofOCC());
     }
 
     @Test
     void updateLtx() throws Exception {
-        update(TgTxOption.ofLTX(TEST), true);
+        update(TgTxOption.ofLTX(TEST));
     }
 
-    private void update(TgTxOption txOption, boolean workaround) throws Exception {
+    private void update(TgTxOption txOption) throws Exception {
         var updateSql = "update " + TEST + " set bar=:bar where foo=0";
         var updateMapping = TgParameterMapping.ofSingle("bar", long.class);
 
@@ -60,18 +60,8 @@ class DbTransaction3Test extends DbTestTableTester {
                             t1.commit(TgCommitType.DEFAULT);
                             var e2 = assertThrows(TsurugiTransactionException.class, () -> t2.commit(TgCommitType.DEFAULT));
                             assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e2);
-                            if (workaround) {
-                                // TODO 常にCC_EXCEPTIONになるはず
-                                if (i == 0) {
-                                    var e3 = assertThrows(TsurugiTransactionException.class, () -> t3.commit(TgCommitType.DEFAULT));
-                                    assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e3);
-                                } else {
-                                    t3.commit(TgCommitType.DEFAULT);
-                                }
-                            } else {
-                                var e3 = assertThrows(TsurugiTransactionException.class, () -> t3.commit(TgCommitType.DEFAULT));
-                                assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e3);
-                            }
+                            var e3 = assertThrows(TsurugiTransactionException.class, () -> t3.commit(TgCommitType.DEFAULT));
+                            assertEqualsCode(SqlServiceCode.CC_EXCEPTION, e3);
                         }
                     }
                 }
