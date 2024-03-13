@@ -221,7 +221,7 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                         if (stopFlag.get()) {
                             break;
                         }
-                        String label = String.format("thread%d-%d", threadNumber, i);
+                        String label = String.format("th%d-%d", threadNumber, i);
                         var setting = TgTmSetting.ofAlways(txOption.clone(label));
                         tm.execute(setting, transaction -> {
                             if (stopFlag.get()) {
