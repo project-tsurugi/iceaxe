@@ -181,6 +181,10 @@ public class TsurugiTransactionManager {
      * @see TsurugiSql
      */
     public <R> R execute(TgTmSetting setting, TsurugiTransactionTask<R> action) throws IOException, InterruptedException {
+        return execute(setting, action, true);
+    }
+
+    private <R> R execute(TgTmSetting setting, TsurugiTransactionTask<R> action, boolean txClose) throws IOException, InterruptedException {
         LOG.trace("tm.execute start");
         if (setting == null) {
             throw new IllegalArgumentException("setting is not specified");
@@ -206,11 +210,34 @@ public class TsurugiTransactionManager {
             final var finalTxOption = txOption;
             event(setting, null, listener -> listener.transactionStart(this, tmExecuteId, finalAttempt, finalTxOption));
 
+            class TransactionCloseable implements AutoCloseable {
+                private TsurugiTransaction transaction = null;
+
+                public TsurugiTransaction createTransaction() throws IOException, InterruptedException {
+                    this.transaction = ownerSession.createTransaction(finalTxOption, tx -> {
+                        tx.setOwner(TsurugiTransactionManager.this, tmExecuteId, finalAttempt);
+                        setting.initializeTransaction(tx);
+                    });
+                    return this.transaction;
+                }
+
+                public void setReturn() {
+                    if (!txClose) {
+                        this.transaction = null;
+                    }
+                }
+
+                @Override
+                public void close() throws IOException, InterruptedException {
+                    if (this.transaction != null) {
+                        transaction.close();
+                    }
+                }
+            }
+
             TsurugiTransaction lastTransaction = null;
-            try (var transaction = ownerSession.createTransaction(txOption, tx -> {
-                tx.setOwner(this, tmExecuteId, finalAttempt);
-                setting.initializeTransaction(tx);
-            })) {
+            try (var txCloseable = new TransactionCloseable()) {
+                var transaction = txCloseable.createTransaction();
                 lastTransaction = transaction;
                 event(setting, null, listener -> listener.transactionStarted(transaction));
 
@@ -219,6 +246,7 @@ public class TsurugiTransactionManager {
                     if (transaction.isRollbacked()) {
                         LOG.trace("tm.execute end (rollbacked)");
                         event(setting, null, listener -> listener.executeEndSuccess(transaction, false, r));
+                        txCloseable.setReturn();
                         return r;
                     }
                     var sessionOption = ownerSession.getSessionOption();
@@ -226,6 +254,7 @@ public class TsurugiTransactionManager {
                     transaction.commit(commitType);
                     LOG.trace("tm.execute end (committed)");
                     event(setting, null, listener -> listener.executeEndSuccess(transaction, true, r));
+                    txCloseable.setReturn();
                     return r;
                 } catch (TsurugiTransactionException e) {
                     event(setting, e, listener -> listener.transactionException(transaction, e));
@@ -1202,5 +1231,35 @@ public class TsurugiTransactionManager {
         return execute(setting, transaction -> {
             return transaction.executeAndGetCountDetail(ps, parameter);
         });
+    }
+
+    /**
+     * execute and get transaction.
+     *
+     * @param action action
+     * @return transaction that have been committed or rollbacked but not closed. The caller must close.
+     * @throws IOException          if an I/O error occurs while execute
+     * @throws InterruptedException if interrupted while execute
+     * @since X.X.X
+     */
+    public TsurugiTransaction executeAndGetTransaction(TsurugiTransactionAction action) throws IOException, InterruptedException {
+        return executeAndGetTransaction(defaultSetting(), action);
+    }
+
+    /**
+     * execute and get transaction.
+     *
+     * @param setting transaction manager settings
+     * @param action  action
+     * @return transaction that have been committed or rollbacked but not closed. The caller must close.
+     * @throws IOException          if an I/O error occurs while execute
+     * @throws InterruptedException if interrupted while execute
+     * @since X.X.X
+     */
+    public TsurugiTransaction executeAndGetTransaction(TgTmSetting setting, TsurugiTransactionAction action) throws IOException, InterruptedException {
+        return execute(setting, transaction -> {
+            action.run(transaction);
+            return transaction;
+        }, false);
     }
 }
