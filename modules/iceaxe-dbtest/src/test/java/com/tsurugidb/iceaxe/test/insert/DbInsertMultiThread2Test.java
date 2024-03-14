@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -94,25 +93,22 @@ class DbInsertMultiThread2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
     void insertMultiTxOcc1(boolean prepare) throws Exception {
-//      insertMultiTx(100, 1, TgTmSetting.of(TgTxOption.ofOCC()), prepare);
-        insertMultiTxOcc(1, prepare);
+        insertMultiTx(100, 1, TgTmSetting.of(TgTxOption.ofOCC()), prepare);
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
-    @Disabled // TODO remove Disabled. CC_OCC_PHANTOM_AVOIDANCE retry-over
     void insertMultiTxOcc30(boolean prepare) throws Exception {
         insertMultiTxOcc(30, prepare);
     }
 
     @RepeatedTest(4)
-    @Disabled // TODO remove Disabled. CC_OCC_PHANTOM_AVOIDANCE retry-over
     void insertMultiTxOcc30False() throws Exception {
         insertMultiTxOcc(30, false);
     }
 
     private void insertMultiTxOcc(int threadSize, boolean prepare) throws IOException, InterruptedException {
-        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 200); // TODO リトライ無しにしたい
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC(), 10); // TODO リトライ無しにしたい
         setting.getTransactionOptionSupplier().setTmOptionListener((attempt, exception, tmOption) -> {
             if (attempt > 0) {
                 LOG.info("insertMultiTxOcc({}, {}) OCC retry {}", threadSize, prepare, attempt);
