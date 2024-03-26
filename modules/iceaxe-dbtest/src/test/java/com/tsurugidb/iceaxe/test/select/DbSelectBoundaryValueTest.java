@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -107,6 +108,11 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
             return int4 == other.int4 && int8 == other.int8 && Float.floatToIntBits(float4) == Float.floatToIntBits(other.float4)
                     && Double.doubleToLongBits(float8) == Double.doubleToLongBits(other.float8);
         }
+
+        @Override
+        public String toString() {
+            return "TestEntity{int4=" + int4 + ", int8=" + int8 + ", float4=" + float4 + ", float8=" + float8 + "}";
+        }
     }
 
     private static final List<TestEntity> TEST_ENTITY_LIST = List.of(//
@@ -115,7 +121,8 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
             new TestEntity(Integer.MIN_VALUE + 2, Long.MIN_VALUE + 2, Float.MIN_VALUE + Float.MIN_NORMAL * 2, Double.MIN_VALUE + Double.MIN_NORMAL * 2), //
             new TestEntity(Integer.MAX_VALUE - 2, Long.MAX_VALUE - 2, Float.MAX_VALUE - Float.MIN_NORMAL * 2, Double.MAX_VALUE - Double.MIN_NORMAL * 2), //
             new TestEntity(Integer.MAX_VALUE - 1, Long.MAX_VALUE - 1, Float.MAX_VALUE - Float.MIN_NORMAL, Double.MAX_VALUE - Double.MIN_NORMAL), //
-            new TestEntity(Integer.MAX_VALUE, Long.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE) //
+            new TestEntity(Integer.MAX_VALUE, Long.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE), //
+            new TestEntity(Integer.MAX_VALUE, Long.MAX_VALUE, Float.NaN, Double.NaN) //
     );
 
     private static void insertTable() throws IOException, InterruptedException {
@@ -164,34 +171,57 @@ class DbSelectBoundaryValueTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(floats = { Float.MIN_VALUE, Float.MIN_VALUE + Float.MIN_NORMAL, Float.MAX_VALUE - Float.MIN_NORMAL, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN })
+    @ValueSource(floats = { Float.MIN_VALUE, Float.MIN_VALUE + Float.MIN_NORMAL, Float.MAX_VALUE - Float.MIN_NORMAL, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY })
     void selectFloat4(float value) throws Exception {
         var variable = TgBindVariable.ofFloat("value");
         test("float4 =:value", entity -> entity.getFloat4() == value, value, variable);
         test("float4<>:value", entity -> entity.getFloat4() != value, value, variable);
-        test("float4>=:value", entity -> entity.getFloat4() >= value, value, variable);
-        test("float4> :value", entity -> entity.getFloat4() > value, value, variable);
+        test("float4>=:value", entity -> entity.getFloat4() >= value || Float.isNaN(entity.getFloat4()), value, variable);
+        test("float4> :value", entity -> entity.getFloat4() > value || Float.isNaN(entity.getFloat4()), value, variable);
         test("float4<=:value", entity -> entity.getFloat4() <= value, value, variable);
         test("float4< :value", entity -> entity.getFloat4() < value, value, variable);
     }
 
+    @Test
+    void selectFloat4NaN() throws Exception {
+        float value = Float.NaN;
+        var variable = TgBindVariable.ofFloat("value");
+        test("float4 =:value", entity -> entity.getFloat4() == value || Float.isNaN(entity.getFloat4()), value, variable);
+        test("float4<>:value", entity -> entity.getFloat4() != value && !Float.isNaN(entity.getFloat4()), value, variable);
+        test("float4>=:value", entity -> entity.getFloat4() >= value || Float.isNaN(entity.getFloat4()), value, variable);
+        test("float4> :value", entity -> entity.getFloat4() > value, value, variable);
+        test("float4<=:value", entity -> entity.getFloat4() <= Float.MAX_VALUE || Float.isNaN(entity.getFloat4()), value, variable);
+        test("float4< :value", entity -> entity.getFloat4() <= Float.MAX_VALUE, value, variable);
+    }
+
     @ParameterizedTest
-    @ValueSource(doubles = { Double.MIN_VALUE, Double.MIN_VALUE + Double.MIN_NORMAL, Double.MIN_VALUE - Double.MIN_NORMAL, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
-            Double.NaN })
+    @ValueSource(doubles = { Double.MIN_VALUE, Double.MIN_VALUE + Double.MIN_NORMAL, Double.MIN_VALUE - Double.MIN_NORMAL, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY })
     void selectFloat8(double value) throws Exception {
         var variable = TgBindVariable.ofDouble("value");
         test("float8 =:value", entity -> entity.getFloat8() == value, value, variable);
         test("float8<>:value", entity -> entity.getFloat8() != value, value, variable);
-        test("float8>=:value", entity -> entity.getFloat8() >= value, value, variable);
-        test("float8> :value", entity -> entity.getFloat8() > value, value, variable);
+        test("float8>=:value", entity -> entity.getFloat8() >= value || Double.isNaN(entity.getFloat8()), value, variable);
+        test("float8> :value", entity -> entity.getFloat8() > value || Double.isNaN(entity.getFloat8()), value, variable);
         test("float8<=:value", entity -> entity.getFloat8() <= value, value, variable);
         test("float8< :value", entity -> entity.getFloat8() < value, value, variable);
+    }
+
+    @Test
+    void selectFloat8NaN() throws Exception {
+        double value = Double.NaN;
+        var variable = TgBindVariable.ofDouble("value");
+        test("float8 =:value", entity -> entity.getFloat8() == value || Double.isNaN(entity.getFloat8()), value, variable);
+        test("float8<>:value", entity -> entity.getFloat8() != value && !Double.isNaN(entity.getFloat8()), value, variable);
+        test("float8>=:value", entity -> entity.getFloat8() >= value || Double.isNaN(entity.getFloat8()), value, variable);
+        test("float8> :value", entity -> entity.getFloat8() > value, value, variable);
+        test("float8<=:value", entity -> entity.getFloat8() <= Double.MAX_VALUE || Double.isNaN(entity.getFloat8()), value, variable);
+        test("float8< :value", entity -> entity.getFloat8() <= Double.MAX_VALUE, value, variable);
     }
 
     private static <T> void test(String where, Predicate<TestEntity> expectedPredicate, T value, TgBindVariable<T> variable) throws IOException, InterruptedException {
         var sql = "select int4, int8, float4, float8 from " + TEST //
                 + " where " + where //
-                + " order by int4";
+                + " order by int4, float4";
         var parameterMapping = TgParameterMapping.of(variable);
         var resultMapping = TgResultMapping.of(TestEntity::new) //
                 .addInt("int4", TestEntity::setInt4) //
