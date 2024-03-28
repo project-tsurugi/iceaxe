@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
 import org.slf4j.Logger;
@@ -43,7 +45,7 @@ import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
 /**
  * Tsurugi Transaction Manager.
  * <p>
- * Thread Safe (excluding setTimeout)
+ * Thread Safe for {@code execute}.
  * </p>
  */
 @ThreadSafe
@@ -55,6 +57,7 @@ public class TsurugiTransactionManager {
     private final TsurugiSession ownerSession;
     private final TgTmSetting defaultSetting;
     private List<TsurugiTmEventListener> eventListenerList = null;
+    private TsurugiTmTxOptionModifier txOptionModifier = null;
 
     /**
      * Creates a new instance.
@@ -122,6 +125,68 @@ public class TsurugiTransactionManager {
             }
             throw e;
         }
+    }
+
+    /**
+     * set transaction option modifier.
+     *
+     * @param modifier transaction option modifier
+     * @return this
+     * @since X.X.X
+     */
+    public TsurugiTransactionManager setTransactionOptionModifier(@Nullable Function<TgTxOption, TgTxOption> modifier) {
+        if (modifier == null) {
+            return setTransactionOptionModifier((TsurugiTmTxOptionModifier) null);
+        }
+        return setTransactionOptionModifier((o, a) -> modifier.apply(o));
+    }
+
+    /**
+     * Tsurugi Transaction Manager txOption modifier.
+     *
+     * @since X.X.X
+     */
+    @FunctionalInterface
+    public interface TsurugiTmTxOptionModifier {
+        /**
+         * modify transaction option.
+         *
+         * @param txOption transaction option
+         * @param attempt  attempt number
+         * @return new transaction option
+         */
+        public @Nonnull TgTxOption modify(@Nonnull TgTxOption txOption, int attempt);
+    }
+
+    /**
+     * set transaction option modifier.
+     *
+     * @param modifier transaction option modifier
+     * @return this
+     * @since X.X.X
+     */
+    public TsurugiTransactionManager setTransactionOptionModifier(@Nullable TsurugiTmTxOptionModifier modifier) {
+        this.txOptionModifier = modifier;
+        return this;
+    }
+
+    /**
+     * modify transaction option.
+     *
+     * @param txOption transaction option
+     * @param attempt  attempt number
+     * @return new transaction option
+     */
+    protected TgTxOption modifyTransactionOption(TgTxOption txOption, int attempt) {
+        var modifier = this.txOptionModifier;
+        if (modifier == null) {
+            return txOption;
+        }
+        var newTxOption = modifier.modify(txOption, attempt);
+        if (newTxOption == null) {
+            throw new IllegalStateException("newTxOption is null");
+        }
+        return newTxOption;
     }
 
     /**
@@ -197,6 +262,7 @@ public class TsurugiTransactionManager {
         final Object executeInfo = setting.getTransactionOptionSupplier().createExecuteInfo(tmExecuteId);
 
         var txOption = setting.getFirstTransactionOption(executeInfo);
+        txOption = modifyTransactionOption(txOption, 0);
         {
             var finalTxOption = txOption;
             event(setting, null, listener -> listener.executeStart(this, tmExecuteId, finalTxOption));
@@ -307,11 +373,11 @@ public class TsurugiTransactionManager {
             throws IOException, InterruptedException {
         boolean calledRollback = false;
         try {
-            int attempt = transaction.getAttempt();
+            int nextAttempt = transaction.getAttempt() + 1;
 
             TgTmTxOption nextTmOption;
             try {
-                nextTmOption = setting.getTransactionOption(executeInfo, attempt + 1, transaction, exception);
+                nextTmOption = setting.getTransactionOption(executeInfo, nextAttempt, transaction, exception);
             } catch (Throwable t) {
                 t.addSuppressed(cause);
                 throw t;
@@ -325,11 +391,16 @@ public class TsurugiTransactionManager {
                     calledRollback = true;
                 }
 
-                var nextOption = nextTmOption.getTransactionOption();
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("tm.execute retry{}. e={}, nextTx={}", attempt + 1, exception.getMessage(), nextTmOption);
+                var nextOption0 = nextTmOption.getTransactionOption();
+                var nextOption = modifyTransactionOption(nextOption0, nextAttempt);
+                if (nextOption != nextOption0) {
+                    nextTmOption = TgTmTxOption.execute(nextOption, nextTmOption.getRetryInstruction());
                 }
-                event(setting, cause, listener -> listener.transactionRetry(transaction, cause, nextTmOption));
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("tm.execute retry{}. e={}, nextTx={}", nextAttempt, exception.getMessage(), nextTmOption);
+                }
+                var finalNextTmOption = nextTmOption;
+                event(setting, cause, listener -> listener.transactionRetry(transaction, cause, finalNextTmOption));
                 return nextOption;
             }
 
@@ -341,11 +412,12 @@ public class TsurugiTransactionManager {
                 t.addSuppressed(cause);
                 throw t;
             }
+            var finalNextTmOption = nextTmOption;
             if (nextTmOption.isRetryOver()) {
-                event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause, nextTmOption));
+                event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause, finalNextTmOption));
                 throw new TsurugiTmRetryOverIOException(transaction, cause, status, nextTmOption);
             } else {
-                event(setting, cause, listener -> listener.transactionNotRetryable(transaction, cause, nextTmOption));
+                event(setting, cause, listener -> listener.transactionNotRetryable(transaction, cause, finalNextTmOption));
                 throw new TsurugiTmIOException(cause.getMessage(), transaction, cause, status, nextTmOption);
             }
         } catch (Throwable t) {
