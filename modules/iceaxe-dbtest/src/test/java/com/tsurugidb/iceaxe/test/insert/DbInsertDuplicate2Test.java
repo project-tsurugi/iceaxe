@@ -1,13 +1,19 @@
 package com.tsurugidb.iceaxe.test.insert;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -29,12 +35,14 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableString;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestSessions;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
+import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
@@ -75,30 +83,38 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-occ.*")
     void occ() throws Exception {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
-        test(setting, 30, 500);
+        test(setting, 30, 500, false);
     }
 
     @Test
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-ltx.*")
     void ltx() throws Exception {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX(TEST, TEST2));
-        test(setting, 30, 500);
+        test(setting, 30, 500, false);
+    }
+
+    @Test
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-ltxDebug.*")
+    void ltxDebug() throws Exception {
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofLTX(TEST, TEST2));
+        test(setting, 30, 500, true);
     }
 
     @Test
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-mix.*")
     void mix() throws Exception {
         var setting = TgTmSetting.of(TgTxOption.ofOCC(), 3, TgTxOption.ofLTX(TEST, TEST2), 40);
-        test(setting, 10, 500);
+        test(setting, 10, 500, false);
     }
 
-    private void test(TgTmSetting setting, int threadSize, int attemptSize) throws Exception {
+    private void test(TgTmSetting setting, int threadSize, int insertSize, boolean debugFlag) throws Exception {
         try (var sessions = new DbTestSessions(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
             var counter = new AtomicInteger(0);
 
             var onlineList = new ArrayList<OnlineTask>(threadSize);
+            var stopFlag = new AtomicBoolean(false);
             for (int i = 0; i < threadSize; i++) {
-                var task = new OnlineTask(sessions.createSession(), setting, attemptSize, counter);
+                var task = new OnlineTask(i, sessions.createSession(), setting, insertSize, counter, debugFlag, stopFlag);
                 onlineList.add(task);
             }
 
@@ -122,6 +138,9 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                 exceptionList.stream().forEach(e::addSuppressed);
                 throw e;
             }
+            if (stopFlag.get()) {
+                fail("inconsistent commit data");
+            }
         }
     }
 
@@ -132,16 +151,22 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
         private static final TgBindVariableInteger vKey2 = TgBindVariable.ofInt("key2");
         private static final TgBindVariableString vZzz2 = TgBindVariable.ofString("zzz2");
 
+        private final int threadNumber;
         private final TsurugiSession session;
         private final TgTmSetting setting;
-        private final int attemptSize;
+        private final int insertSize;
         private final AtomicInteger counter;
+        private final boolean debugFlag;
+        private final AtomicBoolean stopFlag;
 
-        public OnlineTask(TsurugiSession session, TgTmSetting setting, int attemptSize, AtomicInteger counter) {
+        public OnlineTask(int threadNumber, TsurugiSession session, TgTmSetting setting, int insertSize, AtomicInteger counter, boolean debugFlag, AtomicBoolean stopFlag) {
+            this.threadNumber = threadNumber;
             this.session = session;
             this.setting = setting;
-            this.attemptSize = attemptSize;
+            this.insertSize = insertSize;
             this.counter = counter;
+            this.debugFlag = debugFlag;
+            this.stopFlag = stopFlag;
         }
 
         @Override
@@ -155,31 +180,63 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                     + "values(" + insert2List.getSqlNames() + ")";
             var insert2Mapping = TgParameterMapping.of(insert2List);
 
+            var debugSelect1Sql = SELECT_SQL + " where foo >= 10 order by foo";
+            var debugSelect2Sql = "select * from " + TEST2 + " order by key1, key2";
+
             try (var maxPs = session.createQuery(maxSql, maxMapping); //
                     var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
-                    var insert2Ps = session.createStatement(insert2Sql, insert2Mapping)) {
+                    var insert2Ps = session.createStatement(insert2Sql, insert2Mapping); //
+                    var debugSelect1Ps = session.createQuery(debugSelect1Sql, SELECT_MAPPING); //
+                    var debugSelect2Ps = session.createQuery(debugSelect2Sql)) {
                 var tm = session.createTransactionManager(setting);
+                var debugTm = session.createTransactionManager(TgTmSetting.ofOccLtx( //
+                        TgTxOption.ofOCC().label("debugSelect" + threadNumber), 3, //
+                        TgTxOption.ofRTX().label("debugSelect" + threadNumber), 1));
 
                 long start = System.currentTimeMillis();
-                for (int i = 1; counter.get() < attemptSize; i++) {
+                for (int i = 1; counter.get() < insertSize; i++) {
+                    if (stopFlag.get()) {
+                        break;
+                    }
+                    String label = String.format("th%d-%d", threadNumber, i);
                     if (System.currentTimeMillis() - start > TIMEOUT) {
                         LOG.error("timeout. loop {} (counter={})", i, counter.get());
-                        throw new TimeoutException(MessageFormat.format("[{0}] timeout. loop {1} (counter={2})", Thread.currentThread().getName(), i, counter.get()));
+                        var timeoutException = new TimeoutException(MessageFormat.format("[{0}] timeout. loop {1} (counter={2})", Thread.currentThread().getName(), i, counter.get()));
+                        try {
+                            debugExecute("timeout " + label, debugTm, debugSelect1Ps, debugSelect2Ps);
+                        } catch (Throwable e) {
+                            e.addSuppressed(timeoutException);
+                            throw e;
+                        }
+                        throw timeoutException;
                     }
                     if (i % 200 == 0) {
                         LOG.info("loop {} (counter={})", i, counter.get());
                     }
                     try {
+                        if (stopFlag.get()) {
+                            break;
+                        }
+                        tm.setTransactionOptionModifier((opt, attempt) -> opt.clone(label + "-" + attempt));
                         tm.execute(transaction -> {
                             try {
-                            execute(transaction, maxPs, insertPs, insert2Ps);
-                            }catch(TsurugiTransactionException e) {
-                                if(e.getMessage().contains("USER_ABORT")) {
-                                    LOG.info("USER_ABORT: {}",transaction.getTransactionStatus());
+                                execute(transaction, maxPs, insertPs, insert2Ps, label);
+                            } catch (TsurugiTransactionException e) {
+                                if (e.getMessage().contains("USER_ABORT")) {
+                                    LOG.info("USER_ABORT: {}", transaction.getTransactionStatus());
                                 }
                                 throw e;
                             }
                         });
+                        if (debugFlag) {
+                            if (stopFlag.get()) {
+                                break;
+                            }
+                            if (!debugExecute(label, debugTm, debugSelect1Ps, debugSelect2Ps)) {
+                                stopFlag.set(true);
+                                break;
+                            }
+                        }
                     } catch (TsurugiTmIOException e) {
                         var exceptionUtil = TsurugiExceptionUtil.getInstance();
                         if (exceptionUtil.isUniqueConstraintViolation(e)) {
@@ -205,16 +262,126 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
             return null;
         }
 
-        private void execute(TsurugiTransaction transaction, TsurugiSqlQuery<Integer> maxPs, TsurugiSqlPreparedStatement<TestEntity> insertPs, TsurugiSqlPreparedStatement<TgBindParameters> insert2Ps)
-                throws IOException, InterruptedException, TsurugiTransactionException {
+        private void execute(TsurugiTransaction transaction, TsurugiSqlQuery<Integer> maxPs, TsurugiSqlPreparedStatement<TestEntity> insertPs, TsurugiSqlPreparedStatement<TgBindParameters> insert2Ps,
+                String label) throws IOException, InterruptedException, TsurugiTransactionException {
             int foo = transaction.executeAndFindRecord(maxPs).get();
 
-            var entity = new TestEntity(foo, foo, Integer.toString(foo));
+            var entity = new TestEntity(foo, foo, label);
             transaction.executeAndGetCount(insertPs, entity);
 
             for (int i = 0; i < 10; i++) {
-                var parameter = TgBindParameters.of(vKey1.bind(foo), vKey2.bind(i + 1), vZzz2.bind(Integer.toString(foo)));
+                var parameter = TgBindParameters.of(vKey1.bind(foo), vKey2.bind(i + 1), vZzz2.bind(label));
                 transaction.executeAndGetCount(insert2Ps, parameter);
+            }
+        }
+
+        private boolean debugExecute(String label, TsurugiTransactionManager tm, TsurugiSqlQuery<TestEntity> select1Ps, TsurugiSqlQuery<TsurugiResultEntity> select2Ps)
+                throws IOException, InterruptedException {
+            var list1 = new ArrayList<TestEntity>();
+            var list2 = new ArrayList<TsurugiResultEntity>();
+            TgTxOption[] debugTxOption = { null };
+            tm.execute(transaction -> {
+                if (stopFlag.get()) {
+                    transaction.rollback();
+                    return;
+                }
+
+                list1.clear();
+                list2.clear();
+                list1.addAll(transaction.executeAndGetList(select1Ps));
+                list2.addAll(transaction.executeAndGetList(select2Ps));
+                debugTxOption[0] = transaction.getTransactionOption();
+            });
+
+            var map = new TreeMap<Integer, Count>();
+            {
+                int i = 0;
+                for (var entity1 : list1) {
+                    var c = map.computeIfAbsent(entity1.getFoo(), Count::new);
+                    c.index1 = i++;
+                    c.count1++;
+                    c.zzz1 = entity1.getZzz();
+                }
+                i = 0;
+                for (var entity2 : list2) {
+                    var c = map.computeIfAbsent(entity2.getInt("key1"), Count::new);
+                    if (c.index2 < 0) {
+                        c.index2 = i;
+                    }
+                    i++;
+                    c.count2++;
+                    c.zzz2Set.add(entity2.getString("zzz2"));
+                }
+            }
+
+            var invalidList = map.values().stream().filter(c -> c.invalid()).collect(Collectors.toList());
+            if (!invalidList.isEmpty()) {
+                debugLog(label, list1, list2, invalidList, debugTxOption[0]);
+                return false;
+            }
+            return true;
+        }
+
+        private static class Count {
+            private final int key1;
+            int index1 = -1;
+            int count1 = 0;
+            int index2 = -1;
+            String zzz1;
+            int count2 = 0;
+            final TreeSet<String> zzz2Set = new TreeSet<>();
+
+            public Count(int key1) {
+                this.key1 = key1;
+            }
+
+            public boolean invalid() {
+                if (count1 != 1 || count2 != 10 || zzz2Set.size() != 1) {
+                    return true;
+                }
+                String zzz2 = zzz2Set.first();
+                if (!zzz1.equals(zzz2)) {
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public String toString() {
+                return "key1=" + key1 + ", count1=" + count1 + ", zzz1=" + zzz1 + ", count2=" + count2 + ", zzz2=" + zzz2Set;
+            }
+        }
+
+        private void debugLog(String label, List<TestEntity> list1, List<TsurugiResultEntity> list2, List<Count> invalidList, TgTxOption txOption) {
+            var first = invalidList.get(0);
+            int startIndex1 = first.index1;
+            if (startIndex1 >= 1) {
+                startIndex1--;
+            }
+            if (startIndex1 < 0) {
+                startIndex1 = 0;
+            }
+            int startIndex2 = first.index2;
+            if (startIndex2 >= 1) {
+                startIndex2--;
+            }
+            if (startIndex2 < 0) {
+                startIndex2 = 0;
+            }
+            synchronized (DbInsertDuplicateTest.class) {
+                for (int i = startIndex1; i < list1.size(); i++) {
+                    var entity = list1.get(i);
+                    LOG.error("{} test[{}]:  {}", label, i, entity);
+                }
+                for (int i = startIndex2; i < list2.size(); i++) {
+                    var entity = list2.get(i);
+                    LOG.error("{} test2[{}]: {}", label, i, entity);
+                }
+                LOG.error("{}: test.size={}, test2.size={}, readTxOption={}", label, list1.size(), list2.size(), txOption);
+
+                for (var c : invalidList) {
+                    LOG.error("{}: {}", label, c);
+                }
             }
         }
     }
