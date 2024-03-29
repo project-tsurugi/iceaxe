@@ -377,7 +377,15 @@ public class TsurugiTransactionManager {
 
             TgTmTxOption nextTmOption;
             try {
-                nextTmOption = setting.getTransactionOption(executeInfo, nextAttempt, transaction, exception);
+                var nextTmOption0 = setting.getTransactionOption(executeInfo, nextAttempt, transaction, exception);
+                if (nextTmOption0.isExecute()) {
+                    var nextOption0 = nextTmOption0.getTransactionOption();
+                    var nextOption = modifyTransactionOption(nextOption0, nextAttempt);
+                    if (nextOption != nextOption0) {
+                        nextTmOption0 = TgTmTxOption.execute(nextOption, nextTmOption0.getRetryInstruction());
+                    }
+                }
+                nextTmOption = nextTmOption0;
             } catch (Throwable t) {
                 t.addSuppressed(cause);
                 throw t;
@@ -391,16 +399,11 @@ public class TsurugiTransactionManager {
                     calledRollback = true;
                 }
 
-                var nextOption0 = nextTmOption.getTransactionOption();
-                var nextOption = modifyTransactionOption(nextOption0, nextAttempt);
-                if (nextOption != nextOption0) {
-                    nextTmOption = TgTmTxOption.execute(nextOption, nextTmOption.getRetryInstruction());
-                }
+                var nextOption = nextTmOption.getTransactionOption();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("tm.execute retry{}. e={}, nextTx={}", nextAttempt, exception.getMessage(), nextTmOption);
                 }
-                var finalNextTmOption = nextTmOption;
-                event(setting, cause, listener -> listener.transactionRetry(transaction, cause, finalNextTmOption));
+                event(setting, cause, listener -> listener.transactionRetry(transaction, cause, nextTmOption));
                 return nextOption;
             }
 
@@ -412,12 +415,11 @@ public class TsurugiTransactionManager {
                 t.addSuppressed(cause);
                 throw t;
             }
-            var finalNextTmOption = nextTmOption;
             if (nextTmOption.isRetryOver()) {
-                event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause, finalNextTmOption));
+                event(setting, cause, listener -> listener.transactionRetryOver(transaction, cause, nextTmOption));
                 throw new TsurugiTmRetryOverIOException(transaction, cause, status, nextTmOption);
             } else {
-                event(setting, cause, listener -> listener.transactionNotRetryable(transaction, cause, finalNextTmOption));
+                event(setting, cause, listener -> listener.transactionNotRetryable(transaction, cause, nextTmOption));
                 throw new TsurugiTmIOException(cause.getMessage(), transaction, cause, status, nextTmOption);
             }
         } catch (Throwable t) {
