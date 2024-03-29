@@ -205,8 +205,10 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                     if (stopFlag.get()) {
                         break;
                     }
+                    String label = String.format("th%d-%d", threadNumber, i);
                     if (System.currentTimeMillis() - start > TIMEOUT) {
                         LOG.error("timeout. loop {} (i={}/{})", j, i, ATTEMPT_SIZE);
+                        debugExecute(label, debugTm, debugSelect1Ps, debugSelect2Ps);
                         throw new TimeoutException(MessageFormat.format("[{0}] timeout. loop {1} (i={2})", Thread.currentThread().getName(), j, i));
                     }
                     if (j % 200 == 0) {
@@ -221,7 +223,6 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                         if (stopFlag.get()) {
                             break;
                         }
-                        String label = String.format("th%d-%d", threadNumber, i);
                         var setting = TgTmSetting.ofAlways(txOption.clone(label));
                         tm.execute(setting, transaction -> {
                             if (stopFlag.get()) {
@@ -290,9 +291,15 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                 var entity1 = list1.get(i);
                 var entity2 = list2.get(i);
 
-                var foo = (int) entity1.getFoo();
-                var key1 = entity2.getInt("key1");
+                int foo = entity1.getFoo();
+                int key1 = entity2.getInt("key1");
                 if (foo != key1) {
+                    debugLog(label, list1, list2, i);
+                    return false;
+                }
+                String zzz1 = entity1.getZzz();
+                String zzz2 = entity2.getString("zzz2");
+                if (!zzz1.equals(zzz2)) {
                     debugLog(label, list1, list2, i);
                     return false;
                 }
