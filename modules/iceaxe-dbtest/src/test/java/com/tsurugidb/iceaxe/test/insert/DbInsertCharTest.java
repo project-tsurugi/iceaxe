@@ -93,14 +93,15 @@ class DbInsertCharTest extends DbTestTableTester {
         try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
             int i = 0;
             for (var zzz : list) {
-                assert zzz.getBytes(StandardCharsets.UTF_8).length > ZZZ_SIZE;
+                int zzzLength = zzz.getBytes(StandardCharsets.UTF_8).length;
+                assert zzzLength > ZZZ_SIZE;
 
                 var entity = new TestEntity(++i, i, zzz);
                 var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                     tm.executeAndGetCount(ps, entity);
                 });
                 assertEqualsCode(SqlServiceCode.VALUE_TOO_LONG_EXCEPTION, e);
-                assertContains("Insufficient storage to store field data", e.getMessage()); // TODO エラー詳細情報（カラム名や桁数）
+                assertContains("lost_precision_value_too_long: value is too long to convert source length:" + zzzLength + " target length:10", e.getMessage()); // TODO エラー詳細情報（カラム名）
             }
         }
     }

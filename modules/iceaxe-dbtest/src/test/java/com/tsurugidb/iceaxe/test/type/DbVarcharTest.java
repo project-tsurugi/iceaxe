@@ -130,7 +130,7 @@ class DbVarcharTest extends DbTestTableTester {
                         tm.executeAndGetCount(insertPs, parameter);
                     });
                     assertEqualsCode(SqlServiceCode.VALUE_TOO_LONG_EXCEPTION, e);
-                    assertContains("Insufficient storage to store field data", e.getMessage()); // TODO エラー詳細情報（カラム名や桁数）
+                    assertContains("lost_precision_value_too_long: value is too long to convert source length:" + length + " target length:" + maxLength, e.getMessage()); // TODO エラー詳細情報（カラム名）
                 }
             }
             {
@@ -157,7 +157,7 @@ class DbVarcharTest extends DbTestTableTester {
                         tm.executeAndGetCount(updatePs, parameter);
                     });
                     assertEqualsCode(SqlServiceCode.VALUE_TOO_LONG_EXCEPTION, e);
-                    assertContains("Insufficient storage to store field data", e.getMessage()); // TODO エラー詳細情報（カラム名や桁数）
+                    assertContains("lost_precision_value_too_long: value is too long to convert source length:" + length + " target length:" + maxLength, e.getMessage()); // TODO エラー詳細情報（カラム名）
                 }
             }
             {

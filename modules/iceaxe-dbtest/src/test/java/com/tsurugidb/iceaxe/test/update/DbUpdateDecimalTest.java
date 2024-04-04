@@ -92,7 +92,7 @@ class DbUpdateDecimalTest extends DbTestTableTester {
                             transaction.executeAndGetCount(ps, parameter);
                         });
                         assertEqualsCode(SqlServiceCode.VALUE_EVALUATION_EXCEPTION, e);
-                        assertContains("An error occurred in evaluating values", e.getMessage()); // TODO エラー詳細情報
+                        assertContains("error in evaluating expression: lost_precision: value loses precision by conversion", e.getMessage()); // TODO エラー詳細情報
                     });
                 });
                 assertEqualsCode(SqlServiceCode.INACTIVE_TRANSACTION_EXCEPTION, e0);

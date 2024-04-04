@@ -77,7 +77,7 @@ class DbInsertDecimalTest extends DbTestTableTester {
             var parameter = TgBindParameters.of(variable.bind(value));
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetCount(ps, parameter));
             assertEqualsCode(SqlServiceCode.VALUE_EVALUATION_EXCEPTION, e);
-            assertContains("An error occurred in evaluating values. Encoding failed", e.getMessage()); // TODO エラー詳細情報の確認
+            assertContains("error in evaluating expression: lost_precision: value loses precision by conversion", e.getMessage()); // TODO エラー詳細情報の確認
         }
     }
 
