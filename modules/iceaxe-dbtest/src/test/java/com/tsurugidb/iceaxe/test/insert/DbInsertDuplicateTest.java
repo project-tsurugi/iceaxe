@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.insert;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -251,6 +252,15 @@ class DbInsertDuplicateTest extends DbTestTableTester {
                         throw e;
                     }
                 }
+
+                synchronized (OnlineTask.class) {
+                    if (!stopFlag.get()) {
+                        String label = String.format("th%d-endCheck", threadNumber);
+                        if (!debugExecute(label, debugTm, debugSelect1Ps, debugSelect2Ps)) {
+                            stopFlag.set(true);
+                        }
+                    }
+                }
             }
             return null;
         }
@@ -261,10 +271,12 @@ class DbInsertDuplicateTest extends DbTestTableTester {
             int foo = max.getInt("foo");
 
             var entity = new TestEntity(foo, foo, label);
-            transaction.executeAndGetCount(insertPs, entity);
+            int count1 = transaction.executeAndGetCount(insertPs, entity);
+            assertEquals(1, count1);
 
             var parameter = TgBindParameters.of(vKey1.bind(foo), vKey2.bind(foo / 2), vZzz2.bind(label));
-            transaction.executeAndGetCount(insert2Ps, parameter);
+            int count2 = transaction.executeAndGetCount(insert2Ps, parameter);
+            assertEquals(1, count2);
         }
 
         private boolean debugExecute(String label, TsurugiTransactionManager tm, TsurugiSqlQuery<TestEntity> select1Ps, TsurugiSqlQuery<TsurugiResultEntity> select2Ps)
@@ -272,16 +284,17 @@ class DbInsertDuplicateTest extends DbTestTableTester {
             var list1 = new ArrayList<TestEntity>();
             var list2 = new ArrayList<TsurugiResultEntity>();
             tm.execute(transaction -> {
+                list1.clear();
+                list2.clear();
                 if (stopFlag.get()) {
                     transaction.rollback();
                     return;
                 }
 
-                list1.clear();
-                list2.clear();
                 list1.addAll(transaction.executeAndGetList(select1Ps));
                 list2.addAll(transaction.executeAndGetList(select2Ps));
             });
+
             for (int i = 0; i < Math.max(list1.size(), list2.size()); i++) {
                 if (i >= list1.size() || i >= list2.size()) {
                     debugLog(label, list1, list2, i);

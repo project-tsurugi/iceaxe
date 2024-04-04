@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.insert;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -84,6 +85,13 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
     void occ() throws Exception {
         var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
         test(setting, 30, 500, false);
+    }
+
+    @Test
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-occDebug.*")
+    void occDebug() throws Exception {
+        var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
+        test(setting, 30, 500, true);
     }
 
     @Test
@@ -258,6 +266,15 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                     }
                     counter.incrementAndGet();
                 }
+
+                synchronized (OnlineTask.class) {
+                    if (!stopFlag.get()) {
+                        String label = String.format("th%d-endCheck", threadNumber);
+                        if (!debugExecute(label, debugTm, debugSelect1Ps, debugSelect2Ps)) {
+                            stopFlag.set(true);
+                        }
+                    }
+                }
             }
             return null;
         }
@@ -267,11 +284,13 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
             int foo = transaction.executeAndFindRecord(maxPs).get();
 
             var entity = new TestEntity(foo, foo, label);
-            transaction.executeAndGetCount(insertPs, entity);
+            int count1 = transaction.executeAndGetCount(insertPs, entity);
+            assertEquals(1, count1);
 
             for (int i = 0; i < 10; i++) {
                 var parameter = TgBindParameters.of(vKey1.bind(foo), vKey2.bind(i + 1), vZzz2.bind(label));
-                transaction.executeAndGetCount(insert2Ps, parameter);
+                int count2 = transaction.executeAndGetCount(insert2Ps, parameter);
+                assertEquals(1, count2);
             }
         }
 
@@ -281,13 +300,13 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
             var list2 = new ArrayList<TsurugiResultEntity>();
             TgTxOption[] debugTxOption = { null };
             tm.execute(transaction -> {
+                list1.clear();
+                list2.clear();
                 if (stopFlag.get()) {
                     transaction.rollback();
                     return;
                 }
 
-                list1.clear();
-                list2.clear();
                 list1.addAll(transaction.executeAndGetList(select1Ps));
                 list2.addAll(transaction.executeAndGetList(select2Ps));
                 debugTxOption[0] = transaction.getTransactionOption();
@@ -380,7 +399,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
                 LOG.error("{}: test.size={}, test2.size={}, readTxOption={}", label, list1.size(), list2.size(), txOption);
 
                 for (var c : invalidList) {
-                    LOG.error("{}: {}", label, c);
+                    LOG.error("{} error data: {}", label, c);
                 }
             }
         }
