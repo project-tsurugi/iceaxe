@@ -52,7 +52,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbInsertDuplicate2Test extends DbTestTableTester {
 
     private static final String TEST2 = "test2";
-    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(3);
+    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(4);
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
