@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +17,7 @@ import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeFutureResponseTestMock;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -97,6 +99,26 @@ class TsurugiTransactionTest {
             });
             assertEquals(IceaxeErrorCode.TX_LOW_ERROR, e2.getDiagnosticCode());
             assertSame(e1, e2.getCause());
+        }
+    }
+
+    @Test
+    void findEventListener() throws Exception {
+        class TestListener implements TsurugiTransactionEventListener {
+        }
+
+        var session = new TsurugiSession(null, TgSessionOption.of());
+        try (var target = new TsurugiTransaction(session, TgTxOption.ofOCC())) {
+            {
+                var opt = target.findEventListener(l -> l instanceof TestListener);
+                assertTrue(opt.isEmpty());
+            }
+            {
+                var listener = new TestListener();
+                target.addEventListener(listener);
+                var opt = target.findEventListener(l -> l instanceof TestListener);
+                assertSame(listener, opt.get());
+            }
         }
     }
 }

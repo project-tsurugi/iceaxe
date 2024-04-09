@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -161,9 +163,29 @@ public class TsurugiConnector {
         return this;
     }
 
+    /**
+     * find event listener.
+     *
+     * @param predicate predicate for event listener
+     * @return event listener
+     * @since X.X.X
+     */
+    public Optional<Consumer<TsurugiSession>> findEventListener(Predicate<Consumer<TsurugiSession>> predicate) {
+        var listenerList = this.eventListenerList;
+        if (listenerList != null) {
+            for (var listener : listenerList) {
+                if (predicate.test(listener)) {
+                    return Optional.of(listener);
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     private void event(Consumer<Consumer<TsurugiSession>> action) {
-        if (this.eventListenerList != null) {
-            for (var listener : eventListenerList) {
+        var listenerList = this.eventListenerList;
+        if (listenerList != null) {
+            for (var listener : listenerList) {
                 action.accept(listener);
             }
         }

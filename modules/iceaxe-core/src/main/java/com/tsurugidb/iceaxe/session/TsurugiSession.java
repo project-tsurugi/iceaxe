@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -169,10 +170,30 @@ public class TsurugiSession implements AutoCloseable {
         return this;
     }
 
+    /**
+     * find event listener.
+     *
+     * @param predicate predicate for event listener
+     * @return event listener
+     * @since X.X.X
+     */
+    public Optional<TsurugiSessionEventListener> findEventListener(Predicate<TsurugiSessionEventListener> predicate) {
+        var listenerList = this.eventListenerList;
+        if (listenerList != null) {
+            for (var listener : listenerList) {
+                if (predicate.test(listener)) {
+                    return Optional.of(listener);
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     private void event(Throwable occurred, Consumer<TsurugiSessionEventListener> action) {
-        if (this.eventListenerList != null) {
+        var listenerList = this.eventListenerList;
+        if (listenerList != null) {
             try {
-                for (var listener : eventListenerList) {
+                for (var listener : listenerList) {
                     action.accept(listener);
                 }
             } catch (Throwable e) {

@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,10 +59,30 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
         return this;
     }
 
+    /**
+     * find event listener.
+     *
+     * @param predicate predicate for event listener
+     * @return event listener
+     * @since X.X.X
+     */
+    public Optional<TsurugiSqlPreparedStatementEventListener<P>> findEventListener(Predicate<TsurugiSqlPreparedStatementEventListener<P>> predicate) {
+        var listenerList = this.eventListenerList;
+        if (listenerList != null) {
+            for (var listener : listenerList) {
+                if (predicate.test(listener)) {
+                    return Optional.of(listener);
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     private void event(Throwable occurred, Consumer<TsurugiSqlPreparedStatementEventListener<P>> action) {
-        if (this.eventListenerList != null) {
+        var listenerList = this.eventListenerList;
+        if (listenerList != null) {
             try {
-                for (var listener : eventListenerList) {
+                for (var listener : listenerList) {
                     action.accept(listener);
                 }
             } catch (Throwable e) {

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -106,10 +107,41 @@ public class TsurugiTransactionManager {
         return this;
     }
 
+    /**
+     * find event listener.
+     *
+     * @param predicate predicate for event listener
+     * @return event listener
+     * @since X.X.X
+     */
+    public Optional<TsurugiTmEventListener> findEventListener(Predicate<TsurugiTmEventListener> predicate) {
+        var listenerList = this.eventListenerList;
+        if (listenerList != null) {
+            for (var listener : listenerList) {
+                if (predicate.test(listener)) {
+                    return Optional.of(listener);
+                }
+            }
+        }
+        var setting = this.defaultSetting;
+        if (setting != null) {
+            var settingListener = setting.getEventListener();
+            if (settingListener != null) {
+                for (var listener : settingListener) {
+                    if (predicate.test(listener)) {
+                        return Optional.of(listener);
+                    }
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     private void event(TgTmSetting setting, Throwable occurred, Consumer<TsurugiTmEventListener> action) {
         try {
-            if (this.eventListenerList != null) {
-                for (var listener : eventListenerList) {
+            var listenerList = this.eventListenerList;
+            if (listenerList != null) {
+                for (var listener : listenerList) {
                     action.accept(listener);
                 }
             }
