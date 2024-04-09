@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -589,6 +590,7 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     @Override
+    @OverridingMethodsMustInvokeSuper
     public void close() throws IOException, InterruptedException {
         this.closed = true;
 

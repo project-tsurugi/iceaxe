@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -113,6 +114,7 @@ public class TsurugiConnector {
     private final URI endpoint;
     private final Credential defaultCredential;
     private final TgSessionOption defaultSessionOption;
+    private BiFunction<FutureResponse<? extends Session>, TgSessionOption, ? extends TsurugiSession> sessionGenerator = null;
     private List<Consumer<TsurugiSession>> eventListenerList = null;
     private TsurugiSessionTxFileLogConfig txFileLogConfig = TsurugiSessionTxFileLogConfig.DEFAULT;
 
@@ -147,6 +149,16 @@ public class TsurugiConnector {
      */
     public TgSessionOption getSessionOption() {
         return this.defaultSessionOption;
+    }
+
+    /**
+     * set session generator.
+     *
+     * @param generator session generator
+     * @since X.X.X
+     */
+    public void setSesionGenerator(BiFunction<FutureResponse<? extends Session>, TgSessionOption, ? extends TsurugiSession> generator) {
+        this.sessionGenerator = generator;
     }
 
     /**
@@ -244,7 +256,7 @@ public class TsurugiConnector {
         LOG.trace("create session. credential={}, option={}", credential, sessionOption);
         var option = (sessionOption != null) ? sessionOption : TgSessionOption.of();
         var lowSessionFuture = createLowSession(credential, option);
-        var session = new TsurugiSession(lowSessionFuture, option);
+        var session = newTsurugiSession(lowSessionFuture, option);
 
         if (this.txFileLogConfig != null) {
             session.addEventListener(new TsurugiSessionTxFileLogger(txFileLogConfig));
@@ -270,6 +282,23 @@ public class TsurugiConnector {
         }
 
         return lowBuilder.createAsync();
+    }
+
+    /**
+     * create session instance.
+     *
+     * @param lowSessionFuture future of low session
+     * @param sessionOption    session option
+     * @return session
+     * @since X.X.X
+     */
+    protected TsurugiSession newTsurugiSession(FutureResponse<? extends Session> lowSessionFuture, TgSessionOption sessionOption) {
+        var generator = this.sessionGenerator;
+        if (generator != null) {
+            return generator.apply(lowSessionFuture, sessionOption);
+        }
+
+        return new TsurugiSession(lowSessionFuture, sessionOption);
     }
 
     @Override
