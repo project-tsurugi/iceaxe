@@ -66,7 +66,7 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
      *
      * @param lowPreparedStatementFuture future of prepared statement
      * @throws IOException if session already closed
-     * @since X.X.X
+     * @since 1.3.0
      */
     @IceaxeInternal
     public void initialize(FutureResponse<PreparedStatement> lowPreparedStatementFuture) throws IOException {

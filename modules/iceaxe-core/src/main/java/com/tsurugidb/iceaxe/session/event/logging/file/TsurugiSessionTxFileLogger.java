@@ -174,7 +174,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
      * @param file file path
      * @return output directory path
      * @throws IOException if an I/O error occurs
-     * @since X.X.X
+     * @since 1.3.0
      */
     protected Path createOutputDir(Path file) throws IOException {
         var outputDir = file.getParent();
@@ -193,7 +193,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
      * @param file   file path
      * @return print writer
      * @throws IOException if an I/O error occurs opening or creating the file
-     * @since X.X.X
+     * @since 1.3.0
      */
     protected PrintWriter createPrintWriter(TsurugiSessionTxFileLogConfig config, Path file) throws IOException {
         return new PrintWriter(Files.newBufferedWriter(file, StandardCharsets.UTF_8), config.autoFlush());

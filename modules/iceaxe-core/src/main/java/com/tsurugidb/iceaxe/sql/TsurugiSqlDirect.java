@@ -32,7 +32,7 @@ public abstract class TsurugiSqlDirect extends TsurugiSql {
      * </p>
      *
      * @throws IOException if session already closed
-     * @since X.X.X
+     * @since 1.3.0
      */
     @IceaxeInternal
     @Override

@@ -155,7 +155,7 @@ public class TsurugiConnector {
      * set session generator.
      *
      * @param generator session generator
-     * @since X.X.X
+     * @since 1.3.0
      */
     public void setSesionGenerator(BiFunction<FutureResponse<? extends Session>, TgSessionOption, ? extends TsurugiSession> generator) {
         this.sessionGenerator = generator;
@@ -180,7 +180,7 @@ public class TsurugiConnector {
      *
      * @param predicate predicate for event listener
      * @return event listener
-     * @since X.X.X
+     * @since 1.3.0
      */
     public Optional<Consumer<TsurugiSession>> findEventListener(Predicate<Consumer<TsurugiSession>> predicate) {
         var listenerList = this.eventListenerList;
@@ -290,7 +290,7 @@ public class TsurugiConnector {
      * @param lowSessionFuture future of low session
      * @param sessionOption    session option
      * @return session
-     * @since X.X.X
+     * @since 1.3.0
      */
     protected TsurugiSession newTsurugiSession(FutureResponse<? extends Session> lowSessionFuture, TgSessionOption sessionOption) {
         var generator = this.sessionGenerator;

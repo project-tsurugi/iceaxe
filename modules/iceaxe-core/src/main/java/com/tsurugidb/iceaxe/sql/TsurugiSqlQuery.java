@@ -64,7 +64,7 @@ public class TsurugiSqlQuery<R> extends TsurugiSqlDirect {
      *
      * @param predicate predicate for event listener
      * @return event listener
-     * @since X.X.X
+     * @since 1.3.0
      */
     public Optional<TsurugiSqlQueryEventListener<R>> findEventListener(Predicate<TsurugiSqlQueryEventListener<R>> predicate) {
         var listenerList = this.eventListenerList;

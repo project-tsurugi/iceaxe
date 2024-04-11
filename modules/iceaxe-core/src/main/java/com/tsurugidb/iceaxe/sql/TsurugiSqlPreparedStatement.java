@@ -64,7 +64,7 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
      *
      * @param predicate predicate for event listener
      * @return event listener
-     * @since X.X.X
+     * @since 1.3.0
      */
     public Optional<TsurugiSqlPreparedStatementEventListener<P>> findEventListener(Predicate<TsurugiSqlPreparedStatementEventListener<P>> predicate) {
         var listenerList = this.eventListenerList;

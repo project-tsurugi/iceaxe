@@ -297,7 +297,7 @@ public class TsurugiTransaction implements AutoCloseable {
      *
      * @param predicate predicate for event listener
      * @return event listener
-     * @since X.X.X
+     * @since 1.3.0
      */
     public Optional<TsurugiTransactionEventListener> findEventListener(Predicate<TsurugiTransactionEventListener> predicate) {
         var listenerList = this.eventListenerList;

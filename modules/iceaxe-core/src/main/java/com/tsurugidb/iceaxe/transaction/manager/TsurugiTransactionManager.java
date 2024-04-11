@@ -112,7 +112,7 @@ public class TsurugiTransactionManager {
      *
      * @param predicate predicate for event listener
      * @return event listener
-     * @since X.X.X
+     * @since 1.3.0
      */
     public Optional<TsurugiTmEventListener> findEventListener(Predicate<TsurugiTmEventListener> predicate) {
         var listenerList = this.eventListenerList;
@@ -164,7 +164,7 @@ public class TsurugiTransactionManager {
      *
      * @param modifier transaction option modifier
      * @return this
-     * @since X.X.X
+     * @since 1.3.0
      */
     public TsurugiTransactionManager setTransactionOptionModifier(@Nullable Function<TgTxOption, TgTxOption> modifier) {
         if (modifier == null) {
@@ -176,7 +176,7 @@ public class TsurugiTransactionManager {
     /**
      * Tsurugi Transaction Manager txOption modifier.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     @FunctionalInterface
     public interface TsurugiTmTxOptionModifier {
@@ -195,7 +195,7 @@ public class TsurugiTransactionManager {
      *
      * @param modifier transaction option modifier
      * @return this
-     * @since X.X.X
+     * @since 1.3.0
      */
     public TsurugiTransactionManager setTransactionOptionModifier(@Nullable TsurugiTmTxOptionModifier modifier) {
         this.txOptionModifier = modifier;
@@ -1346,7 +1346,7 @@ public class TsurugiTransactionManager {
      * @return transaction that have been committed or rollbacked but not closed. The caller must close.
      * @throws IOException          if an I/O error occurs while execute
      * @throws InterruptedException if interrupted while execute
-     * @since X.X.X
+     * @since 1.3.0
      */
     public TsurugiTransaction executeAndGetTransaction(TsurugiTransactionAction action) throws IOException, InterruptedException {
         return executeAndGetTransaction(defaultSetting(), action);
@@ -1360,7 +1360,7 @@ public class TsurugiTransactionManager {
      * @return transaction that have been committed or rollbacked but not closed. The caller must close.
      * @throws IOException          if an I/O error occurs while execute
      * @throws InterruptedException if interrupted while execute
-     * @since X.X.X
+     * @since 1.3.0
      */
     public TsurugiTransaction executeAndGetTransaction(TgTmSetting setting, TsurugiTransactionAction action) throws IOException, InterruptedException {
         return execute(setting, transaction -> {

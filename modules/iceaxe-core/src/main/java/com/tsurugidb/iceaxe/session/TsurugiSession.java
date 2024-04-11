@@ -176,7 +176,7 @@ public class TsurugiSession implements AutoCloseable {
      *
      * @param predicate predicate for event listener
      * @return event listener
-     * @since X.X.X
+     * @since 1.3.0
      */
     public Optional<TsurugiSessionEventListener> findEventListener(Predicate<TsurugiSessionEventListener> predicate) {
         var listenerList = this.eventListenerList;

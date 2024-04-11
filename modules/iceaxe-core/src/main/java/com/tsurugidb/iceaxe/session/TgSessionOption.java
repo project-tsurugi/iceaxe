@@ -97,21 +97,21 @@ public class TgSessionOption {
          *
          * @see #RESULT_CONNECT
          */
-        @Deprecated(forRemoval = true, since = "X.X.X")
+        @Deprecated(forRemoval = true, since = "1.3.0")
         public static final TgTimeoutKey RESULT_CHECK = RESULT_CONNECT;
         /**
          * {@link TsurugiTableMetadataHelper} connect.
          *
          * @see #TABLE_METADATA_CONNECT
          */
-        @Deprecated(forRemoval = true, since = "X.X.X")
+        @Deprecated(forRemoval = true, since = "1.3.0")
         public static final TgTimeoutKey METADATA_CONNECT = TABLE_METADATA_CONNECT;
         /**
          * {@link TsurugiTableMetadataHelper} close.
          *
          * @see #TABLE_METADATA_CLOSE
          */
-        @Deprecated(forRemoval = true, since = "X.X.X")
+        @Deprecated(forRemoval = true, since = "1.3.0")
         public static final TgTimeoutKey METADATA_CLOSE = TABLE_METADATA_CLOSE;
     }
 

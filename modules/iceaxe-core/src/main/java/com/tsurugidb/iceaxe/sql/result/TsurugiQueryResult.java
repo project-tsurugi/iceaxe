@@ -94,7 +94,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @param lowResultSetFuture future of ResultSet
      * @throws IOException if transaction already closed
-     * @since X.X.X
+     * @since 1.3.0
      */
     @IceaxeInternal
     public void initialize(FutureResponse<ResultSet> lowResultSetFuture) throws IOException {
@@ -185,7 +185,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @param predicate predicate for event listener
      * @return event listener
-     * @since X.X.X
+     * @since 1.3.0
      */
     public Optional<TsurugiQueryResultEventListener<R>> findEventListener(Predicate<TsurugiQueryResultEventListener<R>> predicate) {
         var listenerList = this.eventListenerList;

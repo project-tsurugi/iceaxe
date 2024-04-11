@@ -21,7 +21,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiSession#getLowSession()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     SESSION_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 1, "session connect timeout"),
     /** low session error. */
@@ -29,19 +29,19 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * session child resource close error at {@link TsurugiSession#close()}.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     SESSION_CHILD_CLOSE_ERROR(IceaxeErrorCodeBlock.SESSION + 901, "session child resource close error"),
     /**
      * {@link TsurugiSession#close()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     SESSION_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 902, "session close timeout"),
     /**
      * {@link TsurugiSession#close()} error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     SESSION_CLOSE_ERROR(IceaxeErrorCodeBlock.SESSION + 903, "session close error"),
     /** session already closed. */
@@ -51,7 +51,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiTransactionManager} rollback error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TM_ROLLBACK_ERROR(IceaxeErrorCodeBlock.TRANSACTION_MANAGER + 801, "transactionManager rollback error"),
 
@@ -59,7 +59,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiTransaction#getLowTransaction()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_BEGIN_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 1, "transaction begin timeout"),
     /** low transaction error. */
@@ -67,73 +67,73 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiTransactionStatusHelper#getTransactionStatus(TsurugiTransaction)} connect timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_STATUS_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 101, "transaction getTransactionStatus connect timeout"),
     /**
      * {@link TsurugiTransactionStatusHelper#getTransactionStatus(TsurugiTransaction)} close timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_STATUS_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 191, "transaction getTransactionStatus close timeout"),
     /**
      * {@link TsurugiTransactionStatusHelper#getTransactionStatus(TsurugiTransaction)} close error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_STATUS_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 192, "transaction getTransactionStatus close error"),
     /**
      * transaction child resource close error at {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitType)}.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_COMMIT_CHILD_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 701, "transaction child resource close error before commit"),
     /**
      * {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitType)} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_COMMIT_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 711, "transaction commit timeout"),
     /**
      * {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitType)} close timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_COMMIT_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 791, "transaction commit close timeout"),
     /**
      * transaction child resource close error at {@link TsurugiTransaction#rollback()}.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_ROLLBACK_CHILD_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 801, "transaction child resource close error before rollback"),
     /**
      * {@link TsurugiTransaction#rollback()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_ROLLBACK_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 811, "transaction rollback timeout"),
     /**
      * {@link TsurugiTransaction#rollback()} close timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_ROLLBACK_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 891, "transaction rollback close timeout"),
     /**
      * session child resource close error at {@link TsurugiTransaction#close()}.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_CHILD_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 901, "transaction child resource close error"),
     /**
      * {@link TsurugiTransaction#close()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 902, "transaction close timeout"),
     /**
      * {@link TsurugiTransaction#close()} error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TX_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 903, "transaction close error"),
     /** transaction already closed. */
@@ -143,7 +143,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiSqlPrepared#getLowPreparedStatement()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     PS_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.STATEMENT + 1, "prepared statement connect timeout"),
     /** low prepared statement error. */
@@ -151,13 +151,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiSqlPrepared#close()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     PS_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.STATEMENT + 901, "prepared statement close timeout"),
     /**
      * {@link TsurugiSqlPrepared#close()} error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     PS_CLOSE_ERROR(IceaxeErrorCodeBlock.STATEMENT + 902, "prepared statement close error"),
     /** prepared statement already closed. */
@@ -167,37 +167,37 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiQueryResult#getLowResultSet()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     RS_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 101, "resultSet connect timeout"),
     /**
      * {@link TsurugiQueryResult#close()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     RS_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 191, "resultSet close timeout"),
     /**
      * {@link TsurugiQueryResult#close()} error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     RS_CLOSE_ERROR(IceaxeErrorCodeBlock.RESULT + 192, "resultSet close error"),
     /**
      * {@link TsurugiStatementResult#checkLowResult()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     RESULT_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 201, "executeResult connect timeout"),
     /**
      * {@link TsurugiStatementResult#close()} timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     RESULT_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 291, "executeResult close timeout"),
     /**
      * {@link TsurugiStatementResult#close()} error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     RESULT_CLOSE_ERROR(IceaxeErrorCodeBlock.RESULT + 292, "executeResult close error"),
 
@@ -205,19 +205,19 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiExplainHelper} connect timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     EXPLAIN_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.EXPLAIN + 1, "explain connect timeout"),
     /**
      * {@link TsurugiExplainHelper} close timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     EXPLAIN_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.EXPLAIN + 901, "explain close timeout"),
     /**
      * {@link TsurugiExplainHelper} close error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     EXPLAIN_CLOSE_ERROR(IceaxeErrorCodeBlock.EXPLAIN + 902, "explain close error"),
 
@@ -225,37 +225,37 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiTableListHelper} connect timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TABLE_LIST_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.METADATA + 101, "getTableList connect timeout"),
     /**
      * {@link TsurugiTableListHelper} close timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TABLE_LIST_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.METADATA + 191, "getTableList close timeout"),
     /**
      * {@link TsurugiTableListHelper} close error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TABLE_LIST_CLOSE_ERROR(IceaxeErrorCodeBlock.METADATA + 192, "getTableList close error"),
     /**
      * {@link TsurugiTableMetadataHelper} connect timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TABLE_METADATA_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.METADATA + 201, "getTableMetadata connect timeout"),
     /**
      * {@link TsurugiTableMetadataHelper} close timeout.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TABLE_METADATA_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.METADATA + 291, "getTableMetadata close timeout"),
     /**
      * {@link TsurugiTableMetadataHelper} close error.
      *
-     * @since X.X.X
+     * @since 1.3.0
      */
     TABLE_METADATA_CLOSE_ERROR(IceaxeErrorCodeBlock.METADATA + 292, "getTableMetadata close error"),
 

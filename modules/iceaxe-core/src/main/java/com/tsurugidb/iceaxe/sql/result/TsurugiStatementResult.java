@@ -74,7 +74,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      *
      * @param lowResultFuture future of ExecuteResult
      * @throws IOException if transaction already closed
-     * @since X.X.X
+     * @since 1.3.0
      */
     @IceaxeInternal
     public void initialize(FutureResponse<ExecuteResult> lowResultFuture) throws IOException {
@@ -164,7 +164,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      *
      * @param predicate predicate for event listener
      * @return event listener
-     * @since X.X.X
+     * @since 1.3.0
      */
     public Optional<TsurugiStatementResultEventListener> findEventListener(Predicate<TsurugiStatementResultEventListener> predicate) {
         var listenerList = this.eventListenerList;
