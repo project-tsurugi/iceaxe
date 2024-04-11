@@ -1,7 +1,6 @@
 name: Iceaxe-CI-Publish
 
 on: [workflow_dispatch, workflow_call]
-concurrency: ${{ github.workflow }}
 
 jobs:
   Publish:
