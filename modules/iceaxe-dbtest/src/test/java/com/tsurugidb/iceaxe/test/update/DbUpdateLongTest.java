@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -65,7 +64,6 @@ class DbUpdateLongTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO remove Disabled. intからbigintへセットするupdateがおかしい
     void updateLongFromInt() throws Exception {
         var sql = "update " + TEST + " set long_value = int_value";
 
