@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
@@ -116,6 +117,7 @@ public class TgSessionOption {
     }
 
     private String sessionLabel;
+    private String applicationName;
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
     private TgCommitType commitType = TgCommitType.DEFAULT;
 
@@ -132,7 +134,7 @@ public class TgSessionOption {
      * @param label session label
      * @return this
      */
-    public TgSessionOption setLabel(String label) {
+    public TgSessionOption setLabel(@Nullable String label) {
         this.sessionLabel = label;
         return this;
     }
@@ -142,8 +144,30 @@ public class TgSessionOption {
      *
      * @return session label
      */
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return this.sessionLabel;
+    }
+
+    /**
+     * set application name.
+     *
+     * @param name application name
+     * @return this
+     * @since X.X.X
+     */
+    public TgSessionOption setApplicationName(@Nullable String name) {
+        this.applicationName = name;
+        return this;
+    }
+
+    /**
+     * get application name.
+     *
+     * @return application name
+     * @since X.X.X
+     */
+    public @Nullable String getApplicationName() {
+        return this.applicationName;
     }
 
     /**
@@ -196,6 +220,6 @@ public class TgSessionOption {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{label=" + sessionLabel + ", timeout=" + timeoutMap + ", commitType=" + commitType + "}";
+        return getClass().getSimpleName() + "{label=" + sessionLabel + ", applicationName=" + applicationName + ", timeout=" + timeoutMap + ", commitType=" + commitType + "}";
     }
 }

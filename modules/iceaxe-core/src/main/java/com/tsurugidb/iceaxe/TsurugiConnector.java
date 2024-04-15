@@ -275,13 +275,36 @@ public class TsurugiConnector {
      * @throws IOException if an I/O error occurs during connection
      */
     protected FutureResponse<? extends Session> createLowSession(@Nullable Credential credential, TgSessionOption sessionOption) throws IOException {
+        var lowBuilder = createLowSessionBuilder(credential, sessionOption);
+        return lowBuilder.createAsync();
+    }
+
+    /**
+     * create low session builder.
+     *
+     * @param credential    credential
+     * @param sessionOption session option
+     * @return session builder
+     * @since X.X.X
+     */
+    protected SessionBuilder createLowSessionBuilder(@Nullable Credential credential, TgSessionOption sessionOption) {
         var lowBuilder = SessionBuilder.connect(lowConnector);
 
         if (credential != null) {
             lowBuilder.withCredential(credential);
         }
 
-        return lowBuilder.createAsync();
+        String label = sessionOption.getLabel();
+        if (label != null) {
+            lowBuilder.withLabel(label);
+        }
+
+        String applicationName = sessionOption.getApplicationName();
+        if (applicationName != null) {
+            lowBuilder.withApplicationName(applicationName);
+        }
+
+        return lowBuilder;
     }
 
     /**
