@@ -8,11 +8,12 @@ import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
+import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 
 /**
  * Tsurugi SQL Result.
  */
-public abstract class TsurugiSqlResult implements AutoCloseable {
+public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
 
     private final int iceaxeSqlExecuteId;
     private final TsurugiTransaction ownerTransaction;

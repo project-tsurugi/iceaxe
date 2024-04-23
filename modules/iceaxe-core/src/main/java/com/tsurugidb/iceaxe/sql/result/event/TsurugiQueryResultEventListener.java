@@ -43,10 +43,11 @@ public interface TsurugiQueryResultEventListener<R> {
     /**
      * called when close result.
      *
-     * @param result   SQL result
-     * @param occurred exception
+     * @param result       SQL result
+     * @param timeoutNanos close timeout
+     * @param occurred     exception
      */
-    default void closeResult(TsurugiQueryResult<R> result, @Nullable Throwable occurred) {
+    default void closeResult(TsurugiQueryResult<R> result, long timeoutNanos, @Nullable Throwable occurred) {
         // do override
     }
 }

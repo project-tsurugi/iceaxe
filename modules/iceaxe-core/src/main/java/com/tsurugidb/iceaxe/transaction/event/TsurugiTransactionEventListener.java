@@ -105,10 +105,11 @@ public interface TsurugiTransactionEventListener {
     /**
      * called when close transaction.
      *
-     * @param transaction transaction
-     * @param occurred    exception
+     * @param transaction  transaction
+     * @param timeoutNanos close timeout
+     * @param occurred     exception
      */
-    default void closeTransaction(TsurugiTransaction transaction, @Nullable Throwable occurred) {
+    default void closeTransaction(TsurugiTransaction transaction, long timeoutNanos, @Nullable Throwable occurred) {
         // do override
     }
 }

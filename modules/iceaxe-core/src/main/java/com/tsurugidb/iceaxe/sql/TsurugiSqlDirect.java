@@ -55,6 +55,16 @@ public abstract class TsurugiSqlDirect extends TsurugiSql {
     public TgStatementMetadata explain() throws IOException, InterruptedException {
         var session = getSession();
         var helper = session.getExplainHelper();
-        return helper.explain(session, sql, getExplainConnectTimeout(), getExplainCloseTimeout());
+        var connectTimeout = getExplainConnectTimeout();
+        @SuppressWarnings("deprecation")
+        var closeTimeout = getExplainCloseTimeout();
+        return helper.explain(session, sql, connectTimeout, closeTimeout);
+    }
+
+    // close
+
+    @Override
+    public void close(long timeoutNanos) throws IOException, InterruptedException {
+        close();
     }
 }

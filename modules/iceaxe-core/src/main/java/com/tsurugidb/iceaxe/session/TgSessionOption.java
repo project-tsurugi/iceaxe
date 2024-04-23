@@ -61,6 +61,7 @@ public class TgSessionOption {
         /** {@link TsurugiTransactionStatusHelper} connect */
         TX_STATUS_CONNECT,
         /** {@link TsurugiTransactionStatusHelper} close */
+        @Deprecated(since = "X.X.X")
         TX_STATUS_CLOSE,
 
         /** {@link TsurugiSqlPrepared} connect */
@@ -80,15 +81,18 @@ public class TgSessionOption {
         /** {@link TsurugiExplainHelper} connect */
         EXPLAIN_CONNECT,
         /** {@link TsurugiExplainHelper} close */
+        @Deprecated(since = "X.X.X")
         EXPLAIN_CLOSE,
 
         /** {@link TsurugiTableListHelper} connect */
         TABLE_LIST_CONNECT,
         /** {@link TsurugiTableListHelper} close */
+        @Deprecated(since = "X.X.X")
         TABLE_LIST_CLOSE,
         /** {@link TsurugiTableMetadataHelper} connect */
         TABLE_METADATA_CONNECT,
         /** {@link TsurugiTableMetadataHelper} close */
+        @Deprecated(since = "X.X.X")
         TABLE_METADATA_CLOSE,
 
         ;

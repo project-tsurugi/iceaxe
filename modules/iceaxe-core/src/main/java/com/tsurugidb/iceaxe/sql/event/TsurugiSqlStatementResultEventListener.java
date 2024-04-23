@@ -23,8 +23,8 @@ public interface TsurugiSqlStatementResultEventListener extends TsurugiSqlStatem
             }
 
             @Override
-            public void closeResult(TsurugiStatementResult result, @Nullable Throwable occurred) {
-                executeStatementClose(transaction, ps, result, occurred);
+            public void closeResult(TsurugiStatementResult result, long timeoutNanos, @Nullable Throwable occurred) {
+                executeStatementClose(transaction, ps, result, timeoutNanos, occurred);
             }
         });
 
@@ -57,12 +57,13 @@ public interface TsurugiSqlStatementResultEventListener extends TsurugiSqlStatem
     /**
      * called when close result.
      *
-     * @param transaction transaction
-     * @param ps          SQL definition
-     * @param result      SQL result
-     * @param occurred    exception
+     * @param transaction  transaction
+     * @param ps           SQL definition
+     * @param result       SQL result
+     * @param timeoutNanos close timeout
+     * @param occurred     exception
      */
-    default void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result, @Nullable Throwable occurred) {
+    default void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result, long timeoutNanos, @Nullable Throwable occurred) {
         // do override
     }
 }

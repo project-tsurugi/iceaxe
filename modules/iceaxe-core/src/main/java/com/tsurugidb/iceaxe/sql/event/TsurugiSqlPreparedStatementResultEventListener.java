@@ -27,8 +27,8 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
             }
 
             @Override
-            public void closeResult(TsurugiStatementResult result, @Nullable Throwable occurred) {
-                executeStatementClose(transaction, ps, parameter, result, occurred);
+            public void closeResult(TsurugiStatementResult result, long timeoutNanos, @Nullable Throwable occurred) {
+                executeStatementClose(transaction, ps, parameter, result, timeoutNanos, occurred);
             }
         });
 
@@ -45,8 +45,8 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
             }
 
             @Override
-            public void closeResult(TsurugiStatementResult result, @Nullable Throwable occurred) {
-                executeBatchClose(transaction, ps, parameter, result, occurred);
+            public void closeResult(TsurugiStatementResult result, long timeoutNanos, @Nullable Throwable occurred) {
+                executeBatchClose(transaction, ps, parameter, result, timeoutNanos, occurred);
             }
         });
 
@@ -81,13 +81,14 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
     /**
      * called when close result.
      *
-     * @param transaction transaction
-     * @param ps          SQL definition
-     * @param parameter   SQL parameter
-     * @param result      SQL result
-     * @param occurred    exception
+     * @param transaction  transaction
+     * @param ps           SQL definition
+     * @param parameter    SQL parameter
+     * @param result       SQL result
+     * @param timeoutNanos close timeout
+     * @param occurred     exception
      */
-    default void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<P> ps, P parameter, TsurugiStatementResult result, @Nullable Throwable occurred) {
+    default void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<P> ps, P parameter, TsurugiStatementResult result, long timeoutNanos, @Nullable Throwable occurred) {
         // do override
     }
 
@@ -123,9 +124,11 @@ public interface TsurugiSqlPreparedStatementResultEventListener<P> extends Tsuru
      * @param ps            SQL definition
      * @param parameterList SQL parameter
      * @param result        SQL result
+     * @param timeoutNanos  close timeout
      * @param occurred      exception
      */
-    default void executeBatchClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<P> ps, Collection<P> parameterList, TsurugiStatementResult result, @Nullable Throwable occurred) {
+    default void executeBatchClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<P> ps, Collection<P> parameterList, TsurugiStatementResult result, long timeoutNanos,
+            @Nullable Throwable occurred) {
         // do override
     }
 }

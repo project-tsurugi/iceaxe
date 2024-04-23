@@ -81,6 +81,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
+    @Deprecated(since = "X.X.X")
     TX_STATUS_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 192, "transaction getTransactionStatus close error"),
     /**
      * transaction child resource close error at {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitType)}.
@@ -219,6 +220,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
+    @Deprecated(since = "X.X.X")
     EXPLAIN_CLOSE_ERROR(IceaxeErrorCodeBlock.EXPLAIN + 902, "explain close error"),
 
     // metadata
@@ -239,6 +241,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
+    @Deprecated(since = "X.X.X")
     TABLE_LIST_CLOSE_ERROR(IceaxeErrorCodeBlock.METADATA + 192, "getTableList close error"),
     /**
      * {@link TsurugiTableMetadataHelper} connect timeout.
@@ -257,6 +260,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
+    @Deprecated(since = "X.X.X")
     TABLE_METADATA_CLOSE_ERROR(IceaxeErrorCodeBlock.METADATA + 292, "getTableMetadata close error"),
 
     //

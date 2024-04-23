@@ -17,9 +17,9 @@ import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.test.low.TestFutureResponse;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.iceaxe.util.IceaxeFutureResponseTestMock;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.Transaction;
 
@@ -29,7 +29,7 @@ class TsurugiTransactionTest {
     void initialize_notCall() throws Exception {
         var session = new TsurugiSession(null, TgSessionOption.of());
         try (var target = new TsurugiTransaction(session, TgTxOption.ofOCC())) {
-//not call  target.initialize(future);
+            // do not call target.initialize(future);
 
             assertThrows(IllegalStateException.class, () -> {
                 target.getLowTransaction();
@@ -40,7 +40,7 @@ class TsurugiTransactionTest {
     @Test
     void initialize_twice1() throws Exception {
         var session = new TsurugiSession(null, TgSessionOption.of());
-        var future = new IceaxeFutureResponseTestMock<Transaction>();
+        var future = new TestFutureResponse<Transaction>();
 
         try (var target = new TsurugiTransaction(session, TgTxOption.ofOCC())) {
             target.initialize(future);
@@ -54,7 +54,7 @@ class TsurugiTransactionTest {
     @Test
     void initialize_twice2() throws Exception {
         var session = new TsurugiSession(null, TgSessionOption.of());
-        var future = new IceaxeFutureResponseTestMock<Transaction>() {
+        var future = new TestFutureResponse<Transaction>() {
             @Override
             public Transaction get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException {
                 return new Transaction() {
@@ -79,7 +79,7 @@ class TsurugiTransactionTest {
     @Test
     void getLowTransactionError() throws Exception {
         var session = new TsurugiSession(null, TgSessionOption.of());
-        var future = new IceaxeFutureResponseTestMock<Transaction>() {
+        var future = new TestFutureResponse<Transaction>() {
             @Override
             public Transaction get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
                 throw new IOException("test-exception");

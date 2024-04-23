@@ -38,6 +38,7 @@ import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
+import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.IoFunction;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
@@ -47,7 +48,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 /**
  * Tsurugi Transaction.
  */
-public class TsurugiTransaction implements AutoCloseable {
+public class TsurugiTransaction implements IceaxeTimeoutCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiTransaction.class);
 
     private static final AtomicInteger TRANSACTION_COUNT = new AtomicInteger(0);
@@ -112,25 +113,20 @@ public class TsurugiTransaction implements AutoCloseable {
         }
 
         this.lowTransactionFuture = Objects.requireNonNull(lowTransactionFuture);
-        applyCloseTimeout();
 
         try {
             ownerSession.addChild(this);
         } catch (Throwable e) {
             LOG.trace("transaction.initialize close start", e);
             try {
-                IceaxeIoUtil.close(IceaxeErrorCode.TX_CLOSE_TIMEOUT, IceaxeErrorCode.TX_CLOSE_ERROR, lowTransactionFuture);
+                IceaxeIoUtil.close(closeTimeout.getNanos(), IceaxeErrorCode.TX_CLOSE_TIMEOUT, IceaxeErrorCode.TX_CLOSE_ERROR, //
+                        lowTransactionFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
             LOG.trace("transaction.initialize close end");
             throw e;
         }
-    }
-
-    private void applyCloseTimeout() {
-        closeTimeout.apply(lowTransaction);
-        closeTimeout.apply(lowTransactionFuture);
     }
 
     /**
@@ -274,8 +270,6 @@ public class TsurugiTransaction implements AutoCloseable {
      */
     public void setCloseTimeout(TgTimeValue timeout) {
         closeTimeout.set(timeout);
-
-        applyCloseTimeout();
     }
 
     /**
@@ -358,7 +352,9 @@ public class TsurugiTransaction implements AutoCloseable {
             LOG.trace("lowTransaction get start");
             event(null, listener -> listener.lowTransactionGetStart(this));
             try {
-                this.lowTransaction = IceaxeIoUtil.getAndCloseFuture(lowTransactionFuture, beginTimeout, IceaxeErrorCode.TX_BEGIN_TIMEOUT, IceaxeErrorCode.TX_CLOSE_TIMEOUT);
+                this.lowTransaction = IceaxeIoUtil.getAndCloseFuture(lowTransactionFuture, //
+                        beginTimeout, IceaxeErrorCode.TX_BEGIN_TIMEOUT, //
+                        IceaxeErrorCode.TX_CLOSE_TIMEOUT);
             } catch (Throwable e) {
                 this.lowFutureException = e;
                 event(e, listener -> listener.lowTransactionGetEnd(this, null, e));
@@ -367,7 +363,6 @@ public class TsurugiTransaction implements AutoCloseable {
             LOG.trace("lowTransaction get end");
 
             this.lowTransactionFuture = null;
-            applyCloseTimeout();
 
             this.transactionId = lowTransaction.getTransactionId();
             event(null, listener -> listener.lowTransactionGetEnd(this, transactionId, null));
@@ -1168,9 +1163,10 @@ public class TsurugiTransaction implements AutoCloseable {
 
         Throwable occurred = null;
         try {
-            closeableSet.closeInTransaction(IceaxeErrorCode.TX_COMMIT_CHILD_CLOSE_ERROR);
+            long start = System.nanoTime();
+            closeableSet.closeInTransaction(commitTimeout.getNanos(), IceaxeErrorCode.TX_COMMIT_CHILD_CLOSE_ERROR);
             var lowCommitStatus = commitType.getLowCommitStatus();
-            finish(lowTx -> lowTx.commit(lowCommitStatus), commitTimeout, IceaxeErrorCode.TX_COMMIT_TIMEOUT, IceaxeErrorCode.TX_COMMIT_CLOSE_TIMEOUT);
+            finish(start, lowTx -> lowTx.commit(lowCommitStatus), commitTimeout, IceaxeErrorCode.TX_COMMIT_TIMEOUT, IceaxeErrorCode.TX_COMMIT_CLOSE_TIMEOUT);
             this.committed = true;
         } catch (TsurugiTransactionException e) {
             occurred = e;
@@ -1205,8 +1201,9 @@ public class TsurugiTransaction implements AutoCloseable {
 
         Throwable occurred = null;
         try {
-            closeableSet.closeInTransaction(IceaxeErrorCode.TX_ROLLBACK_CHILD_CLOSE_ERROR);
-            finish(Transaction::rollback, rollbackTimeout, IceaxeErrorCode.TX_ROLLBACK_TIMEOUT, IceaxeErrorCode.TX_ROLLBACK_CLOSE_TIMEOUT);
+            long start = System.nanoTime();
+            closeableSet.closeInTransaction(rollbackTimeout.getNanos(), IceaxeErrorCode.TX_ROLLBACK_CHILD_CLOSE_ERROR);
+            finish(start, Transaction::rollback, rollbackTimeout, IceaxeErrorCode.TX_ROLLBACK_TIMEOUT, IceaxeErrorCode.TX_ROLLBACK_CLOSE_TIMEOUT);
             this.rollbacked = true;
         } catch (TsurugiTransactionException e) {
             occurred = e;
@@ -1226,6 +1223,7 @@ public class TsurugiTransaction implements AutoCloseable {
     /**
      * commit/rollback.
      *
+     * @param start                 start time
      * @param finisher              commit/rollback function
      * @param timeout               timeout
      * @param timeoutErrorCode      error code for timeout
@@ -1234,12 +1232,13 @@ public class TsurugiTransaction implements AutoCloseable {
      * @throws InterruptedException        if interrupted while execute
      * @throws TsurugiTransactionException if server error occurs while execute
      */
-    protected void finish(IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout, IceaxeErrorCode timeoutErrorCode, IceaxeErrorCode closeTimeoutErrorCode)
+    protected void finish(long start, IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout, IceaxeErrorCode timeoutErrorCode, IceaxeErrorCode closeTimeoutErrorCode)
             throws IOException, InterruptedException, TsurugiTransactionException {
         var transaction = getLowTransaction();
         var lowResultFuture = finisher.apply(transaction);
-        closeTimeout.apply(lowResultFuture);
-        IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, timeout, timeoutErrorCode, closeTimeoutErrorCode);
+        long timeoutNanos = IceaxeIoUtil.calculateTimeoutNanos(timeout.getNanos(), start);
+        var finishTimeout = new IceaxeTimeout(timeoutNanos, TimeUnit.NANOSECONDS);
+        IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, finishTimeout, timeoutErrorCode, closeTimeoutErrorCode);
     }
 
     /**
@@ -1260,6 +1259,8 @@ public class TsurugiTransaction implements AutoCloseable {
         return this.rollbacked;
     }
 
+    // child
+
     /**
      * add child object.
      *
@@ -1267,7 +1268,7 @@ public class TsurugiTransaction implements AutoCloseable {
      * @throws IOException if already closed
      */
     @IceaxeInternal
-    public void addChild(AutoCloseable closeable) throws IOException {
+    public void addChild(IceaxeTimeoutCloseable closeable) throws IOException {
         checkClose();
         closeableSet.add(closeable);
     }
@@ -1278,12 +1279,19 @@ public class TsurugiTransaction implements AutoCloseable {
      * @param closeable child object
      */
     @IceaxeInternal
-    public void removeChild(AutoCloseable closeable) {
+    public void removeChild(IceaxeTimeoutCloseable closeable) {
         closeableSet.remove(closeable);
     }
 
+    // close
+
     @Override
     public void close() throws IOException, InterruptedException {
+        close(closeTimeout.getNanos());
+    }
+
+    @Override
+    public void close(long timeoutNanos) throws IOException, InterruptedException {
         this.closed = true;
 
 //      if (!(this.committed || this.rollbacked)) {
@@ -1295,9 +1303,10 @@ public class TsurugiTransaction implements AutoCloseable {
         }
         Throwable occurred = null;
         try {
-            IceaxeIoUtil.close(closeableSet, IceaxeErrorCode.TX_CHILD_CLOSE_ERROR, () -> {
+            IceaxeIoUtil.close(timeoutNanos, closeableSet, IceaxeErrorCode.TX_CHILD_CLOSE_ERROR, t -> {
                 // not try-finally
-                IceaxeIoUtil.close(IceaxeErrorCode.TX_CLOSE_TIMEOUT, IceaxeErrorCode.TX_CLOSE_ERROR, lowTransaction, lowTransactionFuture);
+                IceaxeIoUtil.close(t, IceaxeErrorCode.TX_CLOSE_TIMEOUT, IceaxeErrorCode.TX_CLOSE_ERROR, //
+                        lowTransaction, lowTransactionFuture);
                 ownerSession.removeChild(this);
             });
         } catch (Throwable e) {
@@ -1305,7 +1314,7 @@ public class TsurugiTransaction implements AutoCloseable {
             throw e;
         } finally {
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.closeTransaction(this, finalOccurred));
+            event(occurred, listener -> listener.closeTransaction(this, timeoutNanos, finalOccurred));
         }
         LOG.trace("transaction close end");
     }

@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
@@ -17,12 +16,13 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
+import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
  * Tsurugi SQL definition.
  */
-public abstract class TsurugiSql implements AutoCloseable {
+public abstract class TsurugiSql implements IceaxeTimeoutCloseable {
 
     private static final AtomicInteger SQL_DEFINITION_COUNT = new AtomicInteger(0);
     private static final AtomicInteger SQL_EXECUTE_COUNT = new AtomicInteger(0);
@@ -146,6 +146,7 @@ public abstract class TsurugiSql implements AutoCloseable {
      * @param time timeout time
      * @param unit timeout unit
      */
+    @Deprecated(since = "X.X.X")
     public void setExplainCloseTimeout(long time, TimeUnit unit) {
         setExplainCloseTimeout(TgTimeValue.of(time, unit));
     }
@@ -155,6 +156,7 @@ public abstract class TsurugiSql implements AutoCloseable {
      *
      * @param timeout time
      */
+    @Deprecated(since = "X.X.X")
     public void setExplainCloseTimeout(TgTimeValue timeout) {
         getExplainCloseTimeout().set(timeout);
     }
@@ -164,6 +166,7 @@ public abstract class TsurugiSql implements AutoCloseable {
      *
      * @return timeout
      */
+    @Deprecated(since = "X.X.X")
     protected synchronized IceaxeTimeout getExplainCloseTimeout() {
         if (this.explainCloseTimeout == null) {
             var sessionOption = ownerSession.getSessionOption();
@@ -199,7 +202,7 @@ public abstract class TsurugiSql implements AutoCloseable {
     }
 
     @Override
-    @OverridingMethodsMustInvokeSuper
+//  @OverridingMethodsMustInvokeSuper
     public void close() throws IOException, InterruptedException {
         ownerSession.removeChild(this);
         this.closed = true;

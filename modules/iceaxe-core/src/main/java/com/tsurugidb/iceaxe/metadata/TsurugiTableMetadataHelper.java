@@ -57,54 +57,14 @@ public class TsurugiTableMetadataHelper {
      * @throws InterruptedException if interrupted while retrieving table metadata
      */
     public Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName) throws IOException, InterruptedException {
+        var sessionOption = session.getSessionOption();
+        var connectTimeout = getConnectTimeout(sessionOption);
+
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("getTableMetadata start. tableName={}", tableName);
         var lowTableMetadataFuture = getLowTableMetadata(lowSqlClient, tableName);
         LOG.trace("getTableMetadata started");
-        return findTableMetadata(session, tableName, lowTableMetadataFuture);
-    }
-
-    /**
-     * get low table metadata.
-     *
-     * @param lowSqlClient low SQL client
-     * @param tableName    table name
-     * @return future of table metadata
-     * @throws IOException if an I/O error occurs while retrieving table metadata
-     */
-    protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
-        return lowSqlClient.getTableMetadata(tableName);
-    }
-
-    /**
-     * get table metadata.
-     *
-     * @param session                tsurugi session
-     * @param tableName              table name
-     * @param lowTableMetadataFuture future of table metadata
-     * @return table metadata
-     * @throws IOException          if an I/O error occurs while retrieving table metadata
-     * @throws InterruptedException if interrupted while retrieving table metadata
-     */
-    protected Optional<TgTableMetadata> findTableMetadata(TsurugiSession session, String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowTableMetadataFuture, IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT, IceaxeErrorCode.TABLE_METADATA_CLOSE_ERROR)) {
-
-            var sessionOption = session.getSessionOption();
-            var connectTimeout = getConnectTimeout(sessionOption);
-            var closeTimeout = getCloseTimeout(sessionOption);
-            closeTimeout.apply(lowTableMetadataFuture);
-
-            var lowTableMetadata = IceaxeIoUtil.getAndCloseFuture(lowTableMetadataFuture, connectTimeout, IceaxeErrorCode.TABLE_METADATA_CONNECT_TIMEOUT, IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT);
-            LOG.trace("getTableMetadata end");
-
-            return Optional.of(newTableMetadata(lowTableMetadata));
-        } catch (TsurugiIOException e) {
-            if (exceptionUtil.isTargetNotFound(e)) {
-                LOG.trace("getTableMetadata end (tableName={} not found)", tableName);
-                return Optional.empty();
-            }
-            throw e;
-        }
+        return findTableMetadata(tableName, lowTableMetadataFuture, connectTimeout);
     }
 
     /**
@@ -123,8 +83,49 @@ public class TsurugiTableMetadataHelper {
      * @param sessionOption session option
      * @return timeout
      */
+    @Deprecated(since = "X.X.X")
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_METADATA_CLOSE);
+    }
+
+    /**
+     * get low table metadata.
+     *
+     * @param lowSqlClient low SQL client
+     * @param tableName    table name
+     * @return future of table metadata
+     * @throws IOException if an I/O error occurs while retrieving table metadata
+     */
+    protected FutureResponse<TableMetadata> getLowTableMetadata(SqlClient lowSqlClient, String tableName) throws IOException {
+        return lowSqlClient.getTableMetadata(tableName);
+    }
+
+    /**
+     * get table metadata.
+     *
+     * @param tableName              table name
+     * @param lowTableMetadataFuture future of table metadata
+     * @param connectTimeout         connect timeout
+     * @return table metadata
+     * @throws IOException          if an I/O error occurs while retrieving table metadata
+     * @throws InterruptedException if interrupted while retrieving table metadata
+     */
+    protected Optional<TgTableMetadata> findTableMetadata(String tableName, FutureResponse<TableMetadata> lowTableMetadataFuture, IceaxeTimeout connectTimeout)
+            throws IOException, InterruptedException {
+        try {
+            var lowTableMetadata = IceaxeIoUtil.getAndCloseFuture(lowTableMetadataFuture, //
+                    connectTimeout, IceaxeErrorCode.TABLE_METADATA_CONNECT_TIMEOUT, //
+                    IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT);
+            LOG.trace("getTableMetadata end");
+
+            return Optional.of(newTableMetadata(lowTableMetadata));
+        } catch (TsurugiIOException e) {
+            if (exceptionUtil.isTargetNotFound(e)) {
+                LOG.trace("getTableMetadata end (tableName={} not found)", tableName);
+                return Optional.empty();
+            }
+            throw e;
+        }
     }
 
     /**

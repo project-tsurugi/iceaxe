@@ -36,8 +36,8 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
             }
 
             @Override
-            public void closeResult(TsurugiQueryResult<R> result, @Nullable Throwable occurred) {
-                executeQueryClose(transaction, ps, parameter, result, occurred);
+            public void closeResult(TsurugiQueryResult<R> result, long timeoutNanos, @Nullable Throwable occurred) {
+                executeQueryClose(transaction, ps, parameter, result, timeoutNanos, occurred);
             }
         });
 
@@ -97,13 +97,14 @@ public interface TsurugiSqlPreparedQueryResultEventListener<P, R> extends Tsurug
     /**
      * called when close result.
      *
-     * @param transaction transaction
-     * @param ps          SQL definition
-     * @param parameter   SQL parameter
-     * @param result      SQL result
-     * @param occurred    exception
+     * @param transaction  transaction
+     * @param ps           SQL definition
+     * @param parameter    SQL parameter
+     * @param result       SQL result
+     * @param timeoutNanos close timeout
+     * @param occurred     exception
      */
-    default void executeQueryClose(TsurugiTransaction transaction, TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiQueryResult<R> result, @Nullable Throwable occurred) {
+    default void executeQueryClose(TsurugiTransaction transaction, TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiQueryResult<R> result, long timeoutNanos, @Nullable Throwable occurred) {
         // do override
     }
 }

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,7 +23,7 @@ class IceaxeCloseableSetTest {
     @Test
     void test0() {
         var target = new IceaxeCloseableSet();
-        List<Throwable> result = target.close();
+        List<Throwable> result = target.close(0);
 
         assertEquals(0, result.size());
     }
@@ -34,16 +33,16 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
         var count = new AtomicInteger(0);
 
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
         };
         target.add(closeable1);
 
-        List<Throwable> result = target.close();
+        List<Throwable> result = target.close(0);
         assertEquals(1, count.get());
 
         assertEquals(0, result.size());
@@ -54,16 +53,16 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
         var count = new AtomicInteger(0);
 
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 throw new IOException("abc");
             }
         };
         target.add(closeable1);
 
-        List<Throwable> result = target.close();
+        List<Throwable> result = target.close(0);
         assertEquals(1, count.get());
 
         assertEquals(1, result.size());
@@ -76,24 +75,24 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
         var count = new AtomicInteger(0);
 
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
         };
         target.add(closeable1);
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
         };
         target.add(closeable2);
 
-        List<Throwable> result = target.close();
+        List<Throwable> result = target.close(0);
         assertEquals(2, count.get());
 
         assertEquals(0, result.size());
@@ -104,24 +103,24 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
         var count = new AtomicInteger(0);
 
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 throw new IOException("abc");
             }
         };
         target.add(closeable1);
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
         };
         target.add(closeable2);
 
-        List<Throwable> result = target.close();
+        List<Throwable> result = target.close(0);
         assertEquals(2, count.get());
 
         assertEquals(1, result.size());
@@ -134,24 +133,24 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
         var count = new AtomicInteger(0);
 
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
         };
         target.add(closeable1);
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 throw new IOException("abc");
             }
         };
         target.add(closeable2);
 
-        List<Throwable> result = target.close();
+        List<Throwable> result = target.close(0);
         assertEquals(2, count.get());
 
         assertEquals(1, result.size());
@@ -164,24 +163,24 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
         var count = new AtomicInteger(0);
 
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 throw new IOException("abc");
             }
         };
         target.add(closeable1);
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 throw new IOException("def");
             }
         };
         target.add(closeable2);
 
-        List<Throwable> result = target.close();
+        List<Throwable> result = target.close(0);
         assertEquals(2, count.get());
 
         assertEquals(2, result.size());
@@ -197,13 +196,13 @@ class IceaxeCloseableSetTest {
     void testCloseInTransaction0() throws IOException, InterruptedException, TsurugiTransactionException {
         var target = new IceaxeCloseableSet();
         assertEquals(0, target.size());
-        target.closeInTransaction(CLOSE_IN_TX_ERROR);
+        target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         assertEquals(0, target.size());
 
         var count = new AtomicInteger(0);
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
@@ -211,9 +210,9 @@ class IceaxeCloseableSetTest {
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
@@ -221,9 +220,9 @@ class IceaxeCloseableSetTest {
         target.add(closeable2);
         assertEquals(2, target.size());
 
-        var closeable3 = new Closeable() {
+        var closeable3 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
@@ -231,19 +230,19 @@ class IceaxeCloseableSetTest {
         target.add(closeable3);
         assertEquals(3, target.size());
 
-        closeable2.close();
+        closeable2.close(0);
         assertEquals(1, count.get());
         assertEquals(2, target.size());
 
-        closeable1.close();
+        closeable1.close(0);
         assertEquals(2, count.get());
         assertEquals(1, target.size());
 
-        closeable3.close();
+        closeable3.close(0);
         assertEquals(3, count.get());
         assertEquals(0, target.size());
 
-        target.closeInTransaction(CLOSE_IN_TX_ERROR);
+        target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         assertEquals(3, count.get());
         assertEquals(0, target.size());
     }
@@ -252,13 +251,13 @@ class IceaxeCloseableSetTest {
     void testCloseInTransaction() throws IOException, InterruptedException, TsurugiTransactionException {
         var target = new IceaxeCloseableSet();
         assertEquals(0, target.size());
-        target.closeInTransaction(CLOSE_IN_TX_ERROR);
+        target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         assertEquals(0, target.size());
 
         var count = new AtomicInteger(0);
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
@@ -266,9 +265,9 @@ class IceaxeCloseableSetTest {
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 count.addAndGet(1);
                 target.remove(this);
             }
@@ -276,7 +275,7 @@ class IceaxeCloseableSetTest {
         target.add(closeable2);
         assertEquals(2, target.size());
 
-        target.closeInTransaction(CLOSE_IN_TX_ERROR);
+        target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         assertEquals(2, count.get());
         assertEquals(0, target.size());
     }
@@ -286,18 +285,18 @@ class IceaxeCloseableSetTest {
     void testCloseInTransactionIOEx() {
         var target = new IceaxeCloseableSet();
 
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws IOException {
+            public void close(long timeoutNanos) throws IOException {
                 throw new IOException("abc");
             }
         };
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() {
+            public void close(long timeoutNanos) {
                 throw new RuntimeException("def");
             }
         };
@@ -305,7 +304,7 @@ class IceaxeCloseableSetTest {
         assertEquals(2, target.size());
 
         var e = assertThrowsExactly(IOException.class, () -> {
-            target.closeInTransaction(CLOSE_IN_TX_ERROR);
+            target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         });
         assertEquals("abc", e.getMessage());
         assertEquals(1, e.getSuppressed().length);
@@ -320,18 +319,18 @@ class IceaxeCloseableSetTest {
     void testCloseInTransactionInterruptedEx() {
         var target = new IceaxeCloseableSet();
 
-        var closeable1 = new AutoCloseable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws InterruptedException {
+            public void close(long timeoutNanos) throws InterruptedException {
                 throw new InterruptedException("abc");
             }
         };
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() {
+            public void close(long timeoutNanos) {
                 throw new RuntimeException("def");
             }
         };
@@ -339,7 +338,7 @@ class IceaxeCloseableSetTest {
         assertEquals(2, target.size());
 
         var e = assertThrowsExactly(InterruptedException.class, () -> {
-            target.closeInTransaction(CLOSE_IN_TX_ERROR);
+            target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         });
         assertEquals("abc", e.getMessage());
         assertEquals(1, e.getSuppressed().length);
@@ -354,9 +353,9 @@ class IceaxeCloseableSetTest {
     void testCloseInTransactionEx1() {
         var target = new IceaxeCloseableSet();
 
-        var closeable1 = new AutoCloseable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws TsurugiTransactionException {
+            public void close(long timeoutNanos) throws TsurugiTransactionException {
                 var e = new IceaxeServerExceptionTestMock("abc", 123);
                 throw new TsurugiTransactionException(e);
             }
@@ -364,9 +363,9 @@ class IceaxeCloseableSetTest {
         target.add(closeable1);
         assertEquals(1, target.size());
 
-        var closeable2 = new Closeable() {
+        var closeable2 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() {
+            public void close(long timeoutNanos) {
                 var e = new IceaxeServerExceptionTestMock("def", 456);
                 var t = new TsurugiTransactionException(e);
                 throw new TsurugiTransactionRuntimeException(t);
@@ -375,9 +374,9 @@ class IceaxeCloseableSetTest {
         target.add(closeable2);
         assertEquals(2, target.size());
 
-        var closeable3 = new AutoCloseable() {
+        var closeable3 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws Exception {
+            public void close(long timeoutNanos) throws Exception {
                 throw new IceaxeServerExceptionTestMock("ghi", 789);
             }
         };
@@ -385,7 +384,7 @@ class IceaxeCloseableSetTest {
         assertEquals(3, target.size());
 
         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-            target.closeInTransaction(CLOSE_IN_TX_ERROR);
+            target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         });
         assertEquals("MOCK_123: abc", e.getMessage());
         assertEquals(2, e.getSuppressed().length);
@@ -404,9 +403,9 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
 
         var t = new TsurugiTransactionException(new IceaxeServerExceptionTestMock("abc", 123));
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() {
+            public void close(long timeoutNanos) {
                 throw new TsurugiTransactionRuntimeException(t);
             }
         };
@@ -414,7 +413,7 @@ class IceaxeCloseableSetTest {
         assertEquals(1, target.size());
 
         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-            target.closeInTransaction(CLOSE_IN_TX_ERROR);
+            target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         });
         assertSame(t, e);
         assertEquals(0, target.size());
@@ -426,9 +425,9 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
 
         var t = new IceaxeServerExceptionTestMock("abc", 123);
-        var closeable1 = new AutoCloseable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws ServerException {
+            public void close(long timeoutNanos) throws ServerException {
                 throw t;
             }
         };
@@ -436,7 +435,7 @@ class IceaxeCloseableSetTest {
         assertEquals(1, target.size());
 
         var e = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-            target.closeInTransaction(CLOSE_IN_TX_ERROR);
+            target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         });
         assertSame(t, e.getCause());
         assertEquals(0, target.size());
@@ -447,9 +446,9 @@ class IceaxeCloseableSetTest {
     void testCloseInTransactionEx4() {
         var target = new IceaxeCloseableSet();
 
-        var closeable1 = new Closeable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() {
+            public void close(long timeoutNanos) {
                 throw new RuntimeException("abc");
             }
         };
@@ -457,7 +456,7 @@ class IceaxeCloseableSetTest {
         assertEquals(1, target.size());
 
         var e = assertThrowsExactly(RuntimeException.class, () -> {
-            target.closeInTransaction(CLOSE_IN_TX_ERROR);
+            target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         });
         assertEquals("abc", e.getMessage());
         assertEquals(0, target.size());
@@ -469,9 +468,9 @@ class IceaxeCloseableSetTest {
         var target = new IceaxeCloseableSet();
 
         var t = new Exception("abc");
-        var closeable1 = new AutoCloseable() {
+        var closeable1 = new IceaxeTimeoutCloseable() {
             @Override
-            public void close() throws Exception {
+            public void close(long timeoutNanos) throws Exception {
                 throw t;
             }
         };
@@ -479,7 +478,7 @@ class IceaxeCloseableSetTest {
         assertEquals(1, target.size());
 
         var e = assertThrowsExactly(IceaxeIOException.class, () -> {
-            target.closeInTransaction(CLOSE_IN_TX_ERROR);
+            target.closeInTransaction(0, CLOSE_IN_TX_ERROR);
         });
         assertEquals(CLOSE_IN_TX_ERROR, e.getDiagnosticCode());
         assertEquals(CLOSE_IN_TX_ERROR.getMessage() + ": abc", e.getMessage());

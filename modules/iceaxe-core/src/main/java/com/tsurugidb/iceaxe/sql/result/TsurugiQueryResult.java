@@ -103,7 +103,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         }
 
         this.lowResultSetFuture = Objects.requireNonNull(lowResultSetFuture);
-        applyCloseTimeout();
 
         try {
             super.initialize();
@@ -111,7 +110,8 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             var log = LoggerFactory.getLogger(getClass());
             log.trace("TsurugiQueryResult.initialize close start", e);
             try {
-                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RS_CLOSE_TIMEOUT, IceaxeErrorCode.RS_CLOSE_ERROR, lowResultSetFuture);
+                IceaxeIoUtil.closeInTransaction(closeTimeout.getNanos(), IceaxeErrorCode.RS_CLOSE_TIMEOUT, IceaxeErrorCode.RS_CLOSE_ERROR, //
+                        lowResultSetFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -119,11 +119,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             log.trace("TsurugiQueryResult.initialize close end");
             throw e;
         }
-    }
-
-    private void applyCloseTimeout() {
-        closeTimeout.apply(lowResultSet);
-        closeTimeout.apply(lowResultSetFuture);
     }
 
     /**
@@ -162,8 +157,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      */
     public void setRsCloseTimeout(TgTimeValue timeout) {
         closeTimeout.set(timeout);
-
-        applyCloseTimeout();
     }
 
     /**
@@ -233,7 +226,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
 
             LOG.trace("lowResultSet get start");
             try {
-                this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, connectTimeout, IceaxeErrorCode.RS_CONNECT_TIMEOUT, IceaxeErrorCode.RS_CLOSE_TIMEOUT);
+                this.lowResultSet = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultSetFuture, //
+                        connectTimeout, IceaxeErrorCode.RS_CONNECT_TIMEOUT, //
+                        IceaxeErrorCode.RS_CLOSE_TIMEOUT);
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);
                 throw e;
@@ -241,7 +236,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             LOG.trace("lowResultSet get end");
 
             this.lowResultSetFuture = null;
-            applyCloseTimeout();
         }
         return this.lowResultSet;
     }
@@ -598,6 +592,11 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
 
     @Override
     public void close() throws IOException, InterruptedException, TsurugiTransactionException {
+        close(closeTimeout.getNanos());
+    }
+
+    @Override
+    public void close(long timeoutNanos) throws IOException, InterruptedException, TsurugiTransactionException {
         LOG.trace("queryResult close start");
 
         Throwable occurred = null;
@@ -612,7 +611,8 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         } finally {
             try {
                 // not try-finally
-                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RS_CLOSE_TIMEOUT, IceaxeErrorCode.RS_CLOSE_ERROR, lowResultSet, lowResultSetFuture);
+                IceaxeIoUtil.closeInTransaction(timeoutNanos, IceaxeErrorCode.RS_CLOSE_TIMEOUT, IceaxeErrorCode.RS_CLOSE_ERROR, //
+                        lowResultSet, lowResultSetFuture);
                 super.close();
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);
@@ -631,7 +631,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
                 }
             } finally {
                 var finalOccurred = occurred;
-                event(occurred, listener -> listener.closeResult(this, finalOccurred));
+                event(occurred, listener -> listener.closeResult(this, timeoutNanos, finalOccurred));
             }
         }
 

@@ -11,10 +11,12 @@ import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
-import com.tsurugidb.iceaxe.util.function.IoRunnable;
 import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
+import com.tsurugidb.tsubakuro.util.ServerResource;
+import com.tsurugidb.tsubakuro.util.Timeout;
+import com.tsurugidb.tsubakuro.util.Timeout.Policy;
 
 /**
  * Iceaxe I/O utility.
@@ -63,6 +65,8 @@ public final class IceaxeIoUtil {
     private static <V, E extends Exception> V getAndCloseFuture(FutureResponse<V> future, IceaxeTimeout timeout, IceaxeErrorCode timeoutErrorCode, IceaxeErrorCode closeTimeoutErrorCode,
             Function<ServerException, E> serverExceptionWrapper) throws IOException, InterruptedException, E {
         Throwable occurred = null;
+
+        long start = System.nanoTime();
         try {
             var time = timeout.get();
             long value = time.value();
@@ -81,6 +85,8 @@ public final class IceaxeIoUtil {
             throw e;
         } finally {
             try {
+                long closeTimeout = calculateTimeoutNanos(timeout.getNanos(), start);
+                future.setCloseTimeout(new Timeout(closeTimeout, TimeUnit.NANOSECONDS, Policy.ERROR));
                 future.close();
             } catch (ServerException e) {
                 E wrapper = serverExceptionWrapper.apply(e);
@@ -118,31 +124,57 @@ public final class IceaxeIoUtil {
      * wrap with Closeable.
      *
      * @param future                future
+     * @param closeTimeout          close timeout
      * @param closeTimeoutErrorCode error code for close timeout
-     * @param closeErrorCode        error code for close
      * @return Closeable
      */
-    public static IceaxeFutureResponseCloseable closeable(FutureResponse<?> future, IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode) {
+    public static IceaxeFutureResponseCloseable closeable(FutureResponse<?> future, IceaxeTimeout closeTimeout, IceaxeErrorCode closeTimeoutErrorCode) {
         return () -> {
-            // ServerException -> TsurugiIOException
-            IceaxeIoUtil.close(closeTimeoutErrorCode, closeErrorCode, future);
+            closeTimeout.apply(future);
+            try {
+                future.close();
+            } catch (ServerException e) {
+                throw new TsurugiIOException(e);
+            } catch (ResponseTimeoutException e) {
+                throw new IceaxeIOException(closeTimeoutErrorCode, e);
+            }
         };
+    }
+
+    /**
+     * close action.
+     *
+     * @since X.X.X
+     */
+    @FunctionalInterface
+    public interface IceaxeCloseAction {
+        /**
+         * close action.
+         *
+         * @param timeoutNanos close timeout
+         * @throws IOException          if an I/O error occurs while disposing the resources
+         * @throws InterruptedException if interrupted while disposing the resources
+         */
+        public void close(long timeoutNanos) throws IOException, InterruptedException;
     }
 
     /**
      * close resources.
      *
+     * @param timeoutNanos   close timeout
      * @param closeableSet   Closeable set
      * @param closeErrorCode error code for close
-     * @param runnable       close action
+     * @param closeAction    close action
      * @throws IOException          if an I/O error occurs while disposing the resources
      * @throws InterruptedException if interrupted while disposing the resources
      */
-    public static void close(IceaxeCloseableSet closeableSet, IceaxeErrorCode closeErrorCode, IoRunnable runnable) throws IOException, InterruptedException {
-        List<Throwable> saveList = closeableSet.close();
+    public static void close(long timeoutNanos, IceaxeCloseableSet closeableSet, IceaxeErrorCode closeErrorCode, IceaxeCloseAction closeAction) throws IOException, InterruptedException {
+        long start = System.nanoTime();
+        List<Throwable> saveList = closeableSet.close(timeoutNanos);
 
+        long timeout = calculateTimeoutNanos(timeoutNanos, start);
         try {
-            runnable.run();
+            closeAction.close(timeout);
         } catch (Exception e) {
             for (var save : saveList) {
                 var s = (save instanceof ServerException) ? new TsurugiIOException((ServerException) save) : save;
@@ -183,19 +215,21 @@ public final class IceaxeIoUtil {
     /**
      * close resources.
      *
+     * @param timeoutNanos          close timeout
      * @param closeTimeoutErrorCode error code for close timeout
      * @param closeErrorCode        error code for close
      * @param closeables            AutoCloseable
      * @throws IOException          if an I/O error occurs while disposing the resources
      * @throws InterruptedException if interrupted while disposing the resources
      */
-    public static void close(IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, AutoCloseable... closeables) throws IOException, InterruptedException {
-        close(closeables, closeTimeoutErrorCode, closeErrorCode, TsurugiIOException.class, TsurugiIOException::new);
+    public static void close(long timeoutNanos, IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, AutoCloseable... closeables) throws IOException, InterruptedException {
+        close(timeoutNanos, closeables, closeTimeoutErrorCode, closeErrorCode, TsurugiIOException.class, TsurugiIOException::new);
     }
 
     /**
      * close resources in transaction.
      *
+     * @param timeoutNanos          close timeout
      * @param closeTimeoutErrorCode error code for close timeout
      * @param closeErrorCode        error code for close
      * @param closeables            AutoCloseable
@@ -203,22 +237,24 @@ public final class IceaxeIoUtil {
      * @throws InterruptedException        if interrupted while disposing the resources
      * @throws TsurugiTransactionException if server error occurs while disposing the resources
      */
-    public static void closeInTransaction(IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, AutoCloseable... closeables)
+    public static void closeInTransaction(long timeoutNanos, IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, AutoCloseable... closeables)
             throws IOException, InterruptedException, TsurugiTransactionException {
-        close(closeables, closeTimeoutErrorCode, closeErrorCode, TsurugiTransactionException.class, TsurugiTransactionException::new);
+        close(timeoutNanos, closeables, closeTimeoutErrorCode, closeErrorCode, TsurugiTransactionException.class, TsurugiTransactionException::new);
     }
 
-    private static <E extends Exception> void close(AutoCloseable[] closeables, IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, Class<E> classE,
+    private static <E extends Exception> void close(long timeoutNanos, AutoCloseable[] closeables, IceaxeErrorCode closeTimeoutErrorCode, IceaxeErrorCode closeErrorCode, Class<E> classE,
             Function<ServerException, E> serverExceptionWrapper) throws IOException, InterruptedException, E {
         Throwable occurred = null;
 
+        long start = System.nanoTime();
         for (var closeable : closeables) {
             if (closeable == null) {
                 continue;
             }
 
+            long timeout = calculateTimeoutNanos(timeoutNanos, start);
             try {
-                closeable.close();
+                close(timeout, closeable);
             } catch (ServerException e) {
                 var wrapper = serverExceptionWrapper.apply(e);
                 if (occurred == null) {
@@ -267,5 +303,36 @@ public final class IceaxeIoUtil {
             }
             throw (IOException) occurred;
         }
+    }
+
+    private static void close(long timeoutNanos, AutoCloseable closeable) throws Throwable {
+        if (closeable instanceof IceaxeTimeoutCloseable) {
+            var timeoutCloseable = (IceaxeTimeoutCloseable) closeable;
+            timeoutCloseable.close(timeoutNanos);
+            return;
+        }
+
+        if (closeable instanceof ServerResource) {
+            var resource = (ServerResource) closeable;
+            var timeout = new Timeout(timeoutNanos, TimeUnit.NANOSECONDS, Policy.ERROR);
+            resource.setCloseTimeout(timeout);
+            resource.close();
+            return;
+        }
+
+        closeable.close();
+    }
+
+    /**
+     * calculate timeout time.
+     *
+     * @param totalTimeoutNanos total timeout
+     * @param start             start time
+     * @return timeout
+     * @since X.X.X
+     */
+    public static long calculateTimeoutNanos(long totalTimeoutNanos, long start) {
+        long now = System.nanoTime();
+        return Math.max(totalTimeoutNanos - (now - start), TimeUnit.MILLISECONDS.toNanos(1));
     }
 }

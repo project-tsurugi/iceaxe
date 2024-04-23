@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,14 +73,14 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         }
 
         this.lowPreparedStatementFuture = Objects.requireNonNull(lowPreparedStatementFuture);
-        applyCloseTimeout();
 
         try {
             super.initialize();
         } catch (Throwable e) {
             log.trace("TsurugiSqlPrepared.initialize close start", e);
             try {
-                IceaxeIoUtil.close(IceaxeErrorCode.PS_CLOSE_TIMEOUT, IceaxeErrorCode.PS_CLOSE_ERROR, lowPreparedStatementFuture);
+                IceaxeIoUtil.close(closeTimeout.getNanos(), IceaxeErrorCode.PS_CLOSE_TIMEOUT, IceaxeErrorCode.PS_CLOSE_ERROR, //
+                        lowPreparedStatementFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -94,11 +92,6 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     @Override
     public final boolean isPrepared() {
         return true;
-    }
-
-    private void applyCloseTimeout() {
-        closeTimeout.apply(lowPreparedStatement);
-        closeTimeout.apply(lowPreparedStatementFuture);
     }
 
     /**
@@ -137,8 +130,6 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
      */
     public void setCloseTimeout(TgTimeValue timeout) {
         closeTimeout.set(timeout);
-
-        applyCloseTimeout();
     }
 
     /**
@@ -161,7 +152,9 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
 
             log.trace("lowPs get start");
             try {
-                this.lowPreparedStatement = IceaxeIoUtil.getAndCloseFuture(lowPreparedStatementFuture, connectTimeout, IceaxeErrorCode.PS_CONNECT_TIMEOUT, IceaxeErrorCode.PS_CLOSE_TIMEOUT);
+                this.lowPreparedStatement = IceaxeIoUtil.getAndCloseFuture(lowPreparedStatementFuture, //
+                        connectTimeout, IceaxeErrorCode.PS_CONNECT_TIMEOUT, //
+                        IceaxeErrorCode.PS_CLOSE_TIMEOUT);
             } catch (Throwable e) {
                 this.lowFutureException = e;
                 throw e;
@@ -169,7 +162,6 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
             log.trace("lowPs get end");
 
             this.lowPreparedStatementFuture = null;
-            applyCloseTimeout();
         }
         return this.lowPreparedStatement;
     }
@@ -199,15 +191,26 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         var lowParameterList = getLowParameterList(parameter);
 
         var helper = session.getExplainHelper();
-        return helper.explain(session, sql, parameter, lowPs, lowParameterList, getExplainConnectTimeout(), getExplainCloseTimeout());
+        var connectTimeout = getExplainConnectTimeout();
+        @SuppressWarnings("deprecation")
+        var closeTimeout = getExplainCloseTimeout();
+        return helper.explain(session, sql, parameter, lowPs, lowParameterList, connectTimeout, closeTimeout);
+    }
+
+    // close
+
+    @Override
+//  @OverridingMethodsMustInvokeSuper
+    public void close() throws IOException, InterruptedException {
+        close(closeTimeout.getNanos());
     }
 
     @Override
-    @OverridingMethodsMustInvokeSuper
-    public void close() throws IOException, InterruptedException {
+    public void close(long timeoutNanos) throws IOException, InterruptedException {
         log.trace("lowPs close start");
         // not try-finally
-        IceaxeIoUtil.close(IceaxeErrorCode.PS_CLOSE_TIMEOUT, IceaxeErrorCode.PS_CLOSE_ERROR, lowPreparedStatement, lowPreparedStatementFuture);
+        IceaxeIoUtil.close(timeoutNanos, IceaxeErrorCode.PS_CLOSE_TIMEOUT, IceaxeErrorCode.PS_CLOSE_ERROR, //
+                lowPreparedStatement, lowPreparedStatementFuture);
         super.close();
         log.trace("lowPs close end");
     }

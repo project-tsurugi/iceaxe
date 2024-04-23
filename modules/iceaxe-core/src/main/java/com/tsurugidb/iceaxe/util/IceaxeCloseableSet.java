@@ -24,14 +24,14 @@ import com.tsurugidb.tsubakuro.exception.ServerException;
 public class IceaxeCloseableSet {
     private static final Logger LOG = LoggerFactory.getLogger(IceaxeCloseableSet.class);
 
-    private final Set<AutoCloseable> closeableSet = new LinkedHashSet<>();
+    private final Set<IceaxeTimeoutCloseable> closeableSet = new LinkedHashSet<>();
 
     /**
      * add Closeable.
      *
      * @param closeable Closeable
      */
-    public synchronized void add(AutoCloseable closeable) {
+    public synchronized void add(IceaxeTimeoutCloseable closeable) {
         closeableSet.add(closeable);
     }
 
@@ -40,23 +40,26 @@ public class IceaxeCloseableSet {
      *
      * @param closeable Closeable
      */
-    public synchronized void remove(AutoCloseable closeable) {
+    public synchronized void remove(IceaxeTimeoutCloseable closeable) {
         closeableSet.remove(closeable);
     }
 
     /**
      * close all Closeable.
      *
+     * @param timeoutNanos timeout
      * @return Exception list if close error occurs
      */
-    public synchronized List<Throwable> close() {
+    public synchronized List<Throwable> close(long timeoutNanos) {
         List<Throwable> result = null;
+        long start = System.nanoTime();
         for (var i = closeableSet.iterator(); i.hasNext();) {
             var closeable = i.next();
             i.remove();
 
+            long timeout = IceaxeIoUtil.calculateTimeoutNanos(timeoutNanos, start);
             try {
-                closeable.close();
+                closeable.close(timeout);
             } catch (Exception e) {
                 if (result == null) {
                     result = new ArrayList<>();
@@ -71,12 +74,13 @@ public class IceaxeCloseableSet {
     /**
      * close all Closeable.
      *
+     * @param timeoutNanos   timeout
      * @param closeErrorCode error code for close
      * @throws IOException                 if an I/O error occurs while disposing the resources
      * @throws InterruptedException        if interrupted while requesting cancel
      * @throws TsurugiTransactionException if server error occurs while disposing the resources
      */
-    public synchronized void closeInTransaction(IceaxeErrorCode closeErrorCode) throws IOException, InterruptedException, TsurugiTransactionException {
+    public synchronized void closeInTransaction(long timeoutNanos, IceaxeErrorCode closeErrorCode) throws IOException, InterruptedException, TsurugiTransactionException {
         if (closeableSet.isEmpty()) {
             return;
         }
@@ -84,7 +88,7 @@ public class IceaxeCloseableSet {
         LOG.trace("close start");
 
         Throwable e = null;
-        var saveList = close();
+        var saveList = close(timeoutNanos);
         for (var save : saveList) {
             if (e == null) {
                 if (save instanceof IOException) {
@@ -124,7 +128,17 @@ public class IceaxeCloseableSet {
         LOG.trace("close end");
     }
 
-    int size() {
+    /**
+     * get size.
+     *
+     * @return size
+     */
+    public int size() {
         return closeableSet.size();
+    }
+
+    @Override
+    public String toString() {
+        return "IceaxeCloseableSet(" + closeableSet.size() + ")";
     }
 }

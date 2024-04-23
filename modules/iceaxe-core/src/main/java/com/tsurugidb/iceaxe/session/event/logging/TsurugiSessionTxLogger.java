@@ -119,7 +119,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void closeTransaction(TsurugiTransaction transaction, @Nullable Throwable occurred) {
+        public void closeTransaction(TsurugiTransaction transaction, long timeoutNanos, @Nullable Throwable occurred) {
             doLogTransactionClose(transaction, occurred);
         }
     };
@@ -156,7 +156,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void executeQueryClose(TsurugiTransaction transaction, TsurugiSqlQuery<Object> ps, TsurugiQueryResult<Object> result, Throwable occurred) {
+        public void executeQueryClose(TsurugiTransaction transaction, TsurugiSqlQuery<Object> ps, TsurugiQueryResult<Object> result, long timeoutNanos, Throwable occurred) {
             doLogSqlClose(transaction, result, occurred);
         }
     };
@@ -193,7 +193,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void executeQueryClose(TsurugiTransaction transaction, TsurugiSqlPreparedQuery<Object, Object> ps, Object parameter, TsurugiQueryResult<Object> result, Throwable occurred) {
+        public void executeQueryClose(TsurugiTransaction transaction, TsurugiSqlPreparedQuery<Object, Object> ps, Object parameter, TsurugiQueryResult<Object> result, long timeoutNanos,
+                Throwable occurred) {
             doLogSqlClose(transaction, result, occurred);
         }
     };
@@ -220,7 +221,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result, Throwable occurred) {
+        public void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlStatement ps, TsurugiStatementResult result, long timeoutNanos, Throwable occurred) {
             doLogSqlClose(transaction, result, occurred);
         }
     };
@@ -247,7 +248,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Object parameter, TsurugiStatementResult result, Throwable occurred) {
+        public void executeStatementClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Object parameter, TsurugiStatementResult result, long timeoutNanos,
+                Throwable occurred) {
             doLogSqlClose(transaction, result, occurred);
         }
 
@@ -272,7 +274,8 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void executeBatchClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Collection<Object> parameterList, TsurugiStatementResult result, Throwable occurred) {
+        public void executeBatchClose(TsurugiTransaction transaction, TsurugiSqlPreparedStatement<Object> ps, Collection<Object> parameterList, TsurugiStatementResult result, long timeoutNanos,
+                Throwable occurred) {
             doLogSqlClose(transaction, result, occurred);
         }
     };
@@ -327,7 +330,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     }
 
     @Override
-    public final void closeSession(TsurugiSession session, @Nullable Throwable occurred) {
+    public final void closeSession(TsurugiSession session, long timeoutNanos, @Nullable Throwable occurred) {
         logSessionClose(session, occurred);
     }
 

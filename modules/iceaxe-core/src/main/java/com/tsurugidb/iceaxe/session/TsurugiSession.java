@@ -41,6 +41,7 @@ import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
+import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.tsubakuro.common.Session;
 import com.tsurugidb.tsubakuro.sql.SqlClient;
@@ -49,7 +50,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 /**
  * Tsurugi Session.
  */
-public class TsurugiSession implements AutoCloseable {
+public class TsurugiSession implements IceaxeTimeoutCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSession.class);
 
     private final TgSessionOption sessionOption;
@@ -80,14 +81,6 @@ public class TsurugiSession implements AutoCloseable {
         this.lowSessionFuture = lowSessionFuture;
         this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
         this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CLOSE);
-
-        applyCloseTimeout();
-    }
-
-    private void applyCloseTimeout() {
-        closeTimeout.apply(lowSessionFuture);
-        closeTimeout.apply(lowSession);
-        closeTimeout.apply(lowSqlClient);
     }
 
     /**
@@ -144,8 +137,6 @@ public class TsurugiSession implements AutoCloseable {
      */
     public void setCloseTimeout(TgTimeValue timeout) {
         closeTimeout.set(timeout);
-
-        applyCloseTimeout();
     }
 
     /**
@@ -219,11 +210,21 @@ public class TsurugiSession implements AutoCloseable {
         if (this.lowSqlClient == null) {
             var lowSession = getLowSession();
             LOG.trace("SqlClient.attach start");
-            this.lowSqlClient = SqlClient.attach(lowSession);
+            this.lowSqlClient = newSqlClient(lowSession);
             LOG.trace("SqlClient.attach end");
-            applyCloseTimeout();
         }
         return this.lowSqlClient;
+    }
+
+    /**
+     * create SqlClient instance.
+     *
+     * @param lowSession session
+     * @return SqlClient
+     * @since X.X.X
+     */
+    protected SqlClient newSqlClient(Session lowSession) {
+        return SqlClient.attach(lowSession);
     }
 
     /**
@@ -243,7 +244,9 @@ public class TsurugiSession implements AutoCloseable {
 
             LOG.trace("lowSession get start");
             try {
-                this.lowSession = IceaxeIoUtil.getAndCloseFuture(lowSessionFuture, connectTimeout, IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_TIMEOUT);
+                this.lowSession = IceaxeIoUtil.getAndCloseFuture(lowSessionFuture, //
+                        connectTimeout, IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, //
+                        IceaxeErrorCode.SESSION_CLOSE_TIMEOUT);
             } catch (Throwable e) {
                 this.lowFutureException = e;
                 throw e;
@@ -251,7 +254,6 @@ public class TsurugiSession implements AutoCloseable {
             LOG.trace("lowSession get end");
 
             this.lowSessionFuture = null;
-            applyCloseTimeout();
         }
         return this.lowSession;
     }
@@ -558,7 +560,7 @@ public class TsurugiSession implements AutoCloseable {
         LOG.trace("lowTransaction create start. lowOption={}", lowOption);
         var lowTransactionFuture = getLowSqlClient().createTransaction(lowOption);
         LOG.trace("lowTransaction create started");
-        var transaction = new TsurugiTransaction(this, txOption);
+        var transaction = newTsurugiTransaction(txOption);
         transaction.initialize(lowTransactionFuture);
         if (initializer != null) {
             initializer.accept(transaction);
@@ -568,13 +570,26 @@ public class TsurugiSession implements AutoCloseable {
     }
 
     /**
+     * create transaction instance.
+     *
+     * @param txOption transaction option
+     * @return transaction
+     * @since X.X.X
+     */
+    protected TsurugiTransaction newTsurugiTransaction(TgTxOption txOption) {
+        return new TsurugiTransaction(this, txOption);
+    }
+
+    // child
+
+    /**
      * add child object.
      *
      * @param closeable child object
      * @throws IOException if already closed
      */
     @IceaxeInternal
-    public void addChild(AutoCloseable closeable) throws IOException {
+    public void addChild(IceaxeTimeoutCloseable closeable) throws IOException {
         checkClose();
         closeableSet.add(closeable);
     }
@@ -585,27 +600,35 @@ public class TsurugiSession implements AutoCloseable {
      * @param closeable child object
      */
     @IceaxeInternal
-    public void removeChild(AutoCloseable closeable) {
+    public void removeChild(IceaxeTimeoutCloseable closeable) {
         closeableSet.remove(closeable);
     }
+
+    // close
 
     @Override
     @OverridingMethodsMustInvokeSuper
     public void close() throws IOException, InterruptedException {
+        close(closeTimeout.getNanos());
+    }
+
+    @Override
+    public void close(long timeoutNanos) throws IOException, InterruptedException {
         this.closed = true;
 
         LOG.trace("session close start");
         Throwable occurred = null;
         try {
-            IceaxeIoUtil.close(closeableSet, IceaxeErrorCode.SESSION_CHILD_CLOSE_ERROR, () -> {
-                IceaxeIoUtil.close(IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_ERROR, lowSqlClient, lowSession, lowSessionFuture);
+            IceaxeIoUtil.close(timeoutNanos, closeableSet, IceaxeErrorCode.SESSION_CHILD_CLOSE_ERROR, t -> {
+                IceaxeIoUtil.close(t, IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_ERROR, //
+                        lowSqlClient, lowSession, lowSessionFuture);
             });
         } catch (Throwable e) {
             occurred = e;
             throw e;
         } finally {
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.closeSession(this, finalOccurred));
+            event(occurred, listener -> listener.closeSession(this, timeoutNanos, finalOccurred));
         }
         LOG.trace("session close end");
     }

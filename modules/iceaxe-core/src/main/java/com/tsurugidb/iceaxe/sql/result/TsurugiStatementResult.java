@@ -83,7 +83,6 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         }
 
         this.lowResultFuture = Objects.requireNonNull(lowResultFuture);
-        applyCloseTimeout();
 
         try {
             super.initialize();
@@ -91,7 +90,8 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
             var log = LoggerFactory.getLogger(getClass());
             log.trace("TsurugiStatementResult.initialize close start", e);
             try {
-                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RESULT_CLOSE_TIMEOUT, IceaxeErrorCode.RESULT_CLOSE_ERROR, lowResultFuture);
+                IceaxeIoUtil.closeInTransaction(closeTimeout.getNanos(), IceaxeErrorCode.RESULT_CLOSE_TIMEOUT, IceaxeErrorCode.RESULT_CLOSE_ERROR, //
+                        lowResultFuture);
             } catch (Throwable c) {
                 e.addSuppressed(c);
             }
@@ -99,10 +99,6 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
             log.trace("TsurugiStatementResult.initialize close end");
             throw e;
         }
-    }
-
-    private void applyCloseTimeout() {
-        closeTimeout.apply(lowResultFuture);
     }
 
     /**
@@ -141,8 +137,6 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      */
     public void setCloseTimeout(TgTimeValue timeout) {
         closeTimeout.set(timeout);
-
-        applyCloseTimeout();
     }
 
     /**
@@ -211,7 +205,9 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
 
             LOG.trace("lowResult get start");
             try {
-                var lowExecuteResult = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, checkTimeout, IceaxeErrorCode.RESULT_CONNECT_TIMEOUT, IceaxeErrorCode.RESULT_CLOSE_TIMEOUT);
+                var lowExecuteResult = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, //
+                        checkTimeout, IceaxeErrorCode.RESULT_CONNECT_TIMEOUT, //
+                        IceaxeErrorCode.RESULT_CLOSE_TIMEOUT);
                 this.resultCount = new TgResultCount(lowExecuteResult);
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);
@@ -224,7 +220,6 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
             LOG.trace("lowResult get end");
 
             this.lowResultFuture = null;
-            applyCloseTimeout();
 
             event(null, listener -> listener.endResult(this, null));
         }
@@ -260,8 +255,15 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         return this.resultCount;
     }
 
+    // close
+
     @Override
     public void close() throws IOException, InterruptedException, TsurugiTransactionException {
+        close(closeTimeout.getNanos());
+    }
+
+    @Override
+    public void close(long timeoutNanos) throws IOException, InterruptedException, TsurugiTransactionException {
         LOG.trace("statementResult close start");
 
         Throwable occurred = null;
@@ -275,7 +277,8 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
         } finally {
             try {
                 // not try-finally
-                IceaxeIoUtil.closeInTransaction(IceaxeErrorCode.RESULT_CLOSE_TIMEOUT, IceaxeErrorCode.RESULT_CLOSE_ERROR, lowResultFuture);
+                IceaxeIoUtil.closeInTransaction(timeoutNanos, IceaxeErrorCode.RESULT_CLOSE_TIMEOUT, IceaxeErrorCode.RESULT_CLOSE_ERROR, //
+                        lowResultFuture);
                 super.close();
             } catch (TsurugiTransactionException e) {
                 fillToTsurugiException(e);
@@ -294,7 +297,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
                 }
             } finally {
                 var finalOccurred = occurred;
-                event(occurred, listener -> listener.closeResult(this, finalOccurred));
+                event(occurred, listener -> listener.closeResult(this, timeoutNanos, finalOccurred));
             }
         }
 

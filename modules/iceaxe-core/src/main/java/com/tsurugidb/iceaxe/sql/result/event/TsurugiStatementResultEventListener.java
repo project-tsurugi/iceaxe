@@ -22,10 +22,11 @@ public interface TsurugiStatementResultEventListener {
     /**
      * called when close result.
      *
-     * @param result   SQL result
-     * @param occurred exception
+     * @param result       SQL result
+     * @param timeoutNanos close timeout
+     * @param occurred     exception
      */
-    default void closeResult(TsurugiStatementResult result, @Nullable Throwable occurred) {
+    default void closeResult(TsurugiStatementResult result, long timeoutNanos, @Nullable Throwable occurred) {
         // do override
     }
 }

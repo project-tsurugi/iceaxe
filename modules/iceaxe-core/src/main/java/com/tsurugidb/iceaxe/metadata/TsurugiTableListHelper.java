@@ -30,46 +30,14 @@ public class TsurugiTableListHelper {
      * @throws InterruptedException if interrupted while retrieving table list
      */
     public TgTableList getTableList(TsurugiSession session) throws IOException, InterruptedException {
+        var sessionOption = session.getSessionOption();
+        var connectTimeout = getConnectTimeout(sessionOption);
+
         var lowSqlClient = session.getLowSqlClient();
         LOG.trace("getTableList start");
         var lowTableListFuture = getLowTableList(lowSqlClient);
         LOG.trace("getTableList started");
-        return getTableList(session, lowTableListFuture);
-    }
-
-    /**
-     * get low table list.
-     *
-     * @param lowSqlClient low SQL client
-     * @return future of table list
-     * @throws IOException if an I/O error occurs while retrieving table list
-     */
-    protected FutureResponse<TableList> getLowTableList(SqlClient lowSqlClient) throws IOException {
-        return lowSqlClient.listTables();
-    }
-
-    /**
-     * get table list.
-     *
-     * @param session            tsurugi session
-     * @param lowTableListFuture future of low table list
-     * @return table list
-     * @throws IOException          if an I/O error occurs while retrieving table list
-     * @throws InterruptedException if interrupted while retrieving table list
-     */
-    protected TgTableList getTableList(TsurugiSession session, FutureResponse<TableList> lowTableListFuture) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowTableListFuture, IceaxeErrorCode.TABLE_LIST_CLOSE_TIMEOUT, IceaxeErrorCode.TABLE_LIST_CLOSE_ERROR)) {
-
-            var sessionOption = session.getSessionOption();
-            var connectTimeout = getConnectTimeout(sessionOption);
-            var closeTimeout = getCloseTimeout(sessionOption);
-            closeTimeout.apply(lowTableListFuture);
-
-            var lowTableList = IceaxeIoUtil.getAndCloseFuture(lowTableListFuture, connectTimeout, IceaxeErrorCode.TABLE_LIST_CONNECT_TIMEOUT, IceaxeErrorCode.TABLE_LIST_CLOSE_TIMEOUT);
-            LOG.trace("getTableList end");
-
-            return newTableList(lowTableList);
-        }
+        return getTableList(lowTableListFuture, connectTimeout);
     }
 
     /**
@@ -88,8 +56,38 @@ public class TsurugiTableListHelper {
      * @param sessionOption session option
      * @return timeout
      */
+    @Deprecated(since = "X.X.X")
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TABLE_LIST_CLOSE);
+    }
+
+    /**
+     * get low table list.
+     *
+     * @param lowSqlClient low SQL client
+     * @return future of table list
+     * @throws IOException if an I/O error occurs while retrieving table list
+     */
+    protected FutureResponse<TableList> getLowTableList(SqlClient lowSqlClient) throws IOException {
+        return lowSqlClient.listTables();
+    }
+
+    /**
+     * get table list.
+     *
+     * @param lowTableListFuture future of low table list
+     * @param connectTimeout     connect timeout
+     * @return table list
+     * @throws IOException          if an I/O error occurs while retrieving table list
+     * @throws InterruptedException if interrupted while retrieving table list
+     */
+    protected TgTableList getTableList(FutureResponse<TableList> lowTableListFuture, IceaxeTimeout connectTimeout) throws IOException, InterruptedException {
+        var lowTableList = IceaxeIoUtil.getAndCloseFuture(lowTableListFuture, //
+                connectTimeout, IceaxeErrorCode.TABLE_LIST_CONNECT_TIMEOUT, //
+                IceaxeErrorCode.TABLE_LIST_CLOSE_TIMEOUT);
+        LOG.trace("getTableList end");
+
+        return newTableList(lowTableList);
     }
 
     /**

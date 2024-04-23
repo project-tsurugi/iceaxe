@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.test.low.TestFutureResponse;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.util.ServerResource;
 import com.tsurugidb.tsubakuro.util.Timeout;
@@ -22,7 +23,7 @@ class IceaxeTimeoutTest {
         @Override
         public void setCloseTimeout(Timeout timeout) {
             try {
-                timeout.waitFor(new IceaxeFutureResponseTestMock<>() {
+                timeout.waitFor(new TestFutureResponse<>() {
                     @Override
                     public Void get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException, TimeoutException {
                         assertCloseTimeout(timeout, unit);
@@ -35,12 +36,12 @@ class IceaxeTimeoutTest {
         }
 
         protected void assertCloseTimeout(long timeout, TimeUnit unit) {
-            fail();
+            fail("do override");
         }
 
         @Override
         public void close() throws ServerException, IOException, InterruptedException {
-            fail();
+            fail("do override");
         }
     }
 
@@ -75,6 +76,22 @@ class IceaxeTimeoutTest {
                 assertEquals(TimeUnit.MICROSECONDS, unit);
             }
         });
+    }
+
+    @Test
+    void getNanos() {
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
+        var target = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
+
+        assertEquals(TimeUnit.MILLISECONDS.toNanos(123), target.getNanos());
+    }
+
+    @Test
+    void constructLongUnit() {
+        var target = new IceaxeTimeout(123, TimeUnit.MILLISECONDS);
+
+        assertEquals(123L, target.get().value());
+        assertEquals(TimeUnit.MILLISECONDS, target.get().unit());
     }
 
     @Test

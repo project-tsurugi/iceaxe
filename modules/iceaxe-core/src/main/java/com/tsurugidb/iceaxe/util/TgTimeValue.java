@@ -53,6 +53,16 @@ public /* record */ class TgTimeValue {
         return this.unit;
     }
 
+    /**
+     * get time value[nanosecond].
+     *
+     * @return time value
+     * @since X.X.X
+     */
+    public long toNanos() {
+        return unit.toNanos(this.value);
+    }
+
     @Override
     public String toString() {
         return value + unit.toString().toLowerCase();

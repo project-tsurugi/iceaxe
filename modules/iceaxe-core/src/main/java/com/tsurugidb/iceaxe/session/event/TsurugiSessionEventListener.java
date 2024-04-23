@@ -76,10 +76,11 @@ public interface TsurugiSessionEventListener {
     /**
      * called when close session.
      *
-     * @param session  session
-     * @param occurred exception
+     * @param session      session
+     * @param timeoutNanos close timeout
+     * @param occurred     exception
      */
-    default void closeSession(TsurugiSession session, @Nullable Throwable occurred) {
+    default void closeSession(TsurugiSession session, long timeoutNanos, @Nullable Throwable occurred) {
         // do override
     }
 }

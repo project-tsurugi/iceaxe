@@ -56,6 +56,7 @@ public class TsurugiExplainHelper {
      * @param sessionOption session option
      * @return timeout
      */
+    @Deprecated(since = "X.X.X")
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.EXPLAIN_CLOSE);
     }
@@ -76,7 +77,7 @@ public class TsurugiExplainHelper {
         LOG.trace("explain start. source={}", source);
         var lowStatementMetadataFuture = explainLow(lowSqlClient, source);
         LOG.trace("explain started");
-        return getStatementMetadata(session, source, null, lowStatementMetadataFuture, connectTimeout, closeTimeout);
+        return getStatementMetadata(session, source, null, lowStatementMetadataFuture, connectTimeout);
     }
 
     /**
@@ -111,7 +112,7 @@ public class TsurugiExplainHelper {
         LOG.trace("explain start. source={}", source);
         var lowStatementMetadataFuture = explainLow(lowSqlClient, lowPs, lowParameter);
         LOG.trace("explain started");
-        return getStatementMetadata(session, source, arguments, lowStatementMetadataFuture, connectTimeout, closeTimeout);
+        return getStatementMetadata(session, source, arguments, lowStatementMetadataFuture, connectTimeout);
     }
 
     /**
@@ -135,21 +136,18 @@ public class TsurugiExplainHelper {
      * @param arguments                  SQL parameter
      * @param lowStatementMetadataFuture future of statement metadata
      * @param connectTimeout             connect timeout
-     * @param closeTimeout               close timeout
      * @return statement metadata
      * @throws IOException          if an I/O error occurs while retrieving statement metadata
      * @throws InterruptedException if interrupted while retrieving statement metadata
      */
     protected TgStatementMetadata getStatementMetadata(TsurugiSession session, String source, Object arguments, FutureResponse<StatementMetadata> lowStatementMetadataFuture,
-            IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout) throws IOException, InterruptedException {
-        try (var closeable = IceaxeIoUtil.closeable(lowStatementMetadataFuture, IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT, IceaxeErrorCode.EXPLAIN_CLOSE_ERROR)) {
-            closeTimeout.apply(lowStatementMetadataFuture);
+            IceaxeTimeout connectTimeout) throws IOException, InterruptedException {
+        var lowStatementMetadata = IceaxeIoUtil.getAndCloseFuture(lowStatementMetadataFuture, //
+                connectTimeout, IceaxeErrorCode.EXPLAIN_CONNECT_TIMEOUT, //
+                IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT);
+        LOG.trace("explain end");
 
-            var lowStatementMetadata = IceaxeIoUtil.getAndCloseFuture(lowStatementMetadataFuture, connectTimeout, IceaxeErrorCode.EXPLAIN_CONNECT_TIMEOUT, IceaxeErrorCode.EXPLAIN_CLOSE_TIMEOUT);
-            LOG.trace("explain end");
-
-            return newStatementMetadata(source, arguments, lowStatementMetadata);
-        }
+        return newStatementMetadata(source, arguments, lowStatementMetadata);
     }
 
     /**

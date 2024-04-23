@@ -30,6 +30,19 @@ public class IceaxeTimeout {
     }
 
     /**
+     * Creates a new instance.
+     *
+     * @param time time value
+     * @param unit time unit
+     * @since X.X.X
+     */
+    public IceaxeTimeout(long time, TimeUnit unit) {
+        this.sessionOption = null;
+        this.key = null;
+        this.value = new TgTimeValue(time, unit);
+    }
+
+    /**
      * set time.
      *
      * @param time time value
@@ -58,6 +71,16 @@ public class IceaxeTimeout {
             this.value = sessionOption.getTimeout(key);
         }
         return this.value;
+    }
+
+    /**
+     * get time.
+     *
+     * @return time [nanosecond]
+     * @since X.X.X
+     */
+    public long getNanos() {
+        return get().toNanos();
     }
 
     /**
