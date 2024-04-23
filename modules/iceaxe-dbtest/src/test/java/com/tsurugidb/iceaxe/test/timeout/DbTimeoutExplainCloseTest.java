@@ -55,6 +55,7 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
     @Test
     void timeoutSpecified() throws Exception {
         testTimeout(new TimeoutModifier() {
+            @SuppressWarnings("deprecation")
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
                 sessionOption.setTimeout(TgTimeoutKey.EXPLAIN_CLOSE, 1, TimeUnit.SECONDS);
@@ -65,6 +66,7 @@ public class DbTimeoutExplainCloseTest extends DbTimetoutTest {
     @Test
     void timeoutSet() throws Exception {
         testTimeout(new TimeoutModifier() {
+            @SuppressWarnings("deprecation")
             @Override
             public void modifyPs(TsurugiSqlPrepared<?> ps) {
                 ps.setExplainCloseTimeout(1, TimeUnit.SECONDS);

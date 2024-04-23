@@ -188,7 +188,7 @@ class DbTransactionErrorTest extends DbTestTableTester {
         var transaction = session.createTransaction(TgTxOption.ofOCC());
         transaction.close();
         var e = assertThrowsExactly(IceaxeIOException.class, () -> {
-            transaction.addChild(() -> {
+            transaction.addChild(t -> {
                 // dummy
             });
         });

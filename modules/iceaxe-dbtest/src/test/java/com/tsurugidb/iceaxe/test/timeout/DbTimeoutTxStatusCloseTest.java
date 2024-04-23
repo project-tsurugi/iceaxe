@@ -36,6 +36,7 @@ public class DbTimeoutTxStatusCloseTest extends DbTimetoutTest {
     @Test
     void timeoutSpecified() throws Exception {
         testTimeout(new TimeoutModifier() {
+            @SuppressWarnings("deprecation")
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
                 sessionOption.setTimeout(TgTimeoutKey.TX_STATUS_CLOSE, 1, TimeUnit.SECONDS);
@@ -86,7 +87,7 @@ public class DbTimeoutTxStatusCloseTest extends DbTimetoutTest {
                 assertEqualsCode(IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT, e);
                 return;
             }
-            // TABLE_LIST_CLOSEはタイムアウトするような通信処理が無い
+            // TX_STATUS_CLOSEはタイムアウトするような通信処理が無い
 //          fail("didn't time out");
         }
     }

@@ -103,7 +103,7 @@ public class DbTestConnector {
 
     private static final TsurugiSessionEventListener SESSION_CLOSE_LISTENER = new TsurugiSessionEventListener() {
         @Override
-        public void closeSession(TsurugiSession session, Throwable occurred) {
+        public void closeSession(TsurugiSession session, long timeoutNanos, Throwable occurred) {
             staticSessionList.remove(session);
         }
     };
