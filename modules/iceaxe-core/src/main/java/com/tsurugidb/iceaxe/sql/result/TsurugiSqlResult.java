@@ -2,8 +2,6 @@ package com.tsurugidb.iceaxe.sql.result;
 
 import java.io.IOException;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -74,7 +72,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
     }
 
     @Override
-    @OverridingMethodsMustInvokeSuper
+//  @OverridingMethodsMustInvokeSuper
     public void close() throws IOException, InterruptedException, TsurugiTransactionException {
         ownerTransaction.removeChild(this);
     }
