@@ -173,4 +173,44 @@ class DbDecimal0Test extends DbTestTableTester {
         BigDecimal result = tm.executeAndFindRecord(sql, resultMapping).get();
         assertEquals(BigDecimal.valueOf(IntStream.range(0, SIZE).sum() / SIZE), result);
     }
+
+    @Test
+    void minCastAny() throws Exception {
+        var session = getSession();
+        String sql = "select min(cast(value as decimal(*,*))) from " + TEST;
+        var resultMapping = TgResultMapping.ofSingle(BigDecimal.class);
+        var tm = createTransactionManagerOcc(session);
+        BigDecimal result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(BigDecimal.valueOf(0), result);
+    }
+
+    @Test
+    void maxCastAny() throws Exception {
+        var session = getSession();
+        String sql = "select max(cast(value as decimal(*,*))) from " + TEST;
+        var resultMapping = TgResultMapping.ofSingle(BigDecimal.class);
+        var tm = createTransactionManagerOcc(session);
+        BigDecimal result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(BigDecimal.valueOf(SIZE - 1), result);
+    }
+
+    @Test
+    void sumCastAny() throws Exception {
+        var session = getSession();
+        String sql = "select sum(cast(value as decimal(*,*))) from " + TEST;
+        var resultMapping = TgResultMapping.ofSingle(BigDecimal.class);
+        var tm = createTransactionManagerOcc(session);
+        BigDecimal result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(BigDecimal.valueOf(IntStream.range(0, SIZE).sum()), result);
+    }
+
+    @Test
+    void avgCastAny() throws Exception {
+        var session = getSession();
+        String sql = "select avg(cast(value as decimal(*,*))) from " + TEST;
+        var resultMapping = TgResultMapping.ofSingle(BigDecimal.class);
+        var tm = createTransactionManagerOcc(session);
+        BigDecimal result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(BigDecimal.valueOf(IntStream.range(0, SIZE).sum() / SIZE), result);
+    }
 }
