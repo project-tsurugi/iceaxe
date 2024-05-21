@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -257,41 +259,25 @@ class DbUpdateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         tm.execute(tranasction -> {
-            // insert
-            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-                int count = tranasction.executeAndGetCount(ps, insertEntity);
-                assertUpdateCount(1, count);
-            }
-
-            // update
-            try (var ps = session.createStatement(sql)) {
-                int count = tranasction.executeAndGetCount(ps);
-                assertUpdateCount(1, count);
+            try (var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
+                    var updatePs = session.createStatement(sql)) {
+                // insert
+                int insertCount = tranasction.executeAndGetCount(insertPs, insertEntity);
+                assertUpdateCount(1, insertCount);
+                // update
+                int updateCount = tranasction.executeAndGetCount(updatePs);
+                assertUpdateCount(1, updateCount);
             }
 
             // select
             try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
                 var list = tranasction.executeAndGetList(ps);
-                assertEquals(SIZE + 1, list.size());
-                for (var entity : list) {
-                    if (entity.getFoo().equals(insertEntity.getFoo())) {
-                        assertEquals(789L, entity.getBar());
-                    } else {
-                        assertEquals((long) entity.getFoo(), entity.getBar());
-                    }
-                }
+                assertInsertUpdate(insertEntity, 1, list);
             }
         });
 
         var list = selectAllFromTest();
-        assertEquals(SIZE + 1, list.size());
-        for (var entity : list) {
-            if (entity.getFoo().equals(insertEntity.getFoo())) {
-                assertEquals(789L, entity.getBar());
-            } else {
-                assertEquals((long) entity.getFoo(), entity.getBar());
-            }
-        }
+        assertInsertUpdate(insertEntity, 1, list);
     }
 
     @Test
@@ -302,39 +288,46 @@ class DbUpdateTest extends DbTestTableTester {
                 + "  bar = 789" //
                 + " where foo = " + insertEntity.getFoo();
 
+        var updateCount = new AtomicInteger();
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         tm.execute(tranasction -> {
-            // insert
-            try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-                ps.execute(tranasction, insertEntity); // not get-count
-            }
-            // executeの結果を確認せずに次のSQLを実行すると、同一トランザクション内でもSQLの実行順序が保証されないらしい
+            try (var insertPs = session.createStatement(INSERT_SQL, INSERT_MAPPING); //
+                    var updatePs = session.createStatement(sql)) {
+                // executeの結果を確認せずに次のSQLを実行すると、同一トランザクション内でもSQLの実行順序が保証されない
+                // insert
+                var insertResult = insertPs.execute(tranasction, insertEntity);
+                // update
+                var updateResult = updatePs.execute(tranasction);
 
-            // update
-            try (var ps = session.createStatement(sql)) {
-                ps.execute(tranasction); // not get-count
+                updateCount.set(updateResult.getUpdateCount());
+                if (updateCount.get() != 1) {
+                    LOG.info("insertUpdateNoCheck().updateCount={}", updateCount);
+                    assertEquals(0, updateCount.get());
+                }
+                assertEquals(1, insertResult.getUpdateCount());
             }
 
             // select
             try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
                 var list = tranasction.executeAndGetList(ps);
-                assertEquals(SIZE + 1, list.size());
-                for (var entity : list) {
-                    if (entity.getFoo().equals(insertEntity.getFoo())) {
-                        assertEquals(789L, entity.getBar());
-                    } else {
-                        assertEquals((long) entity.getFoo(), entity.getBar());
-                    }
-                }
+                assertInsertUpdate(insertEntity, updateCount.get(), list);
             }
         });
 
         var list = selectAllFromTest();
+        assertInsertUpdate(insertEntity, updateCount.get(), list);
+    }
+
+    private static void assertInsertUpdate(TestEntity insertEntity, int updateCount, List<TestEntity> list) {
         assertEquals(SIZE + 1, list.size());
         for (var entity : list) {
             if (entity.getFoo().equals(insertEntity.getFoo())) {
-                assertEquals(789L, entity.getBar());
+                if (updateCount == 1) {
+                    assertEquals(789L, entity.getBar());
+                } else {
+                    assertEquals(insertEntity.getBar(), entity.getBar());
+                }
             } else {
                 assertEquals((long) entity.getFoo(), entity.getBar());
             }
