@@ -84,7 +84,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         var list = metadata.getLowColumnList();
         assertEquals(2, list.size());
         assertColumn("pk", AtomType.INT4, list.get(0));
-        assertColumn("value", AtomType.TIME_POINT, list.get(1)); // TODO TIME_POINT_WITH_TIME_ZONE
+        assertColumn("value", AtomType.TIME_POINT_WITH_TIME_ZONE, list.get(1));
     }
 
     private static void assertColumn(String name, AtomType type, SqlCommon.Column actual) {

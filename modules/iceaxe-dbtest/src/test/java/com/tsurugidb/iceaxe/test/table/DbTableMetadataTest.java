@@ -72,10 +72,8 @@ class DbTableMetadataTest extends DbTestTableTester {
         assertColumn("date1", TgDataType.DATE, columnList.get(i++));
         assertColumn("time1", TgDataType.TIME, columnList.get(i++));
         assertColumn("date_time", TgDataType.DATE_TIME, columnList.get(i++));
-        assertColumn("offset_time", TgDataType.TIME, columnList.get(i++));
-//TODO  assertColumn("offset_time", TgDataType.OFFSET_TIME, columnList.get(i++));
-        assertColumn("offset_date_time", TgDataType.DATE_TIME, columnList.get(i++));
-//TODO  assertColumn("offset_date_time", TgDataType.OFFSET_DATE_TIME, columnList.get(i++));
+        assertColumn("offset_time", TgDataType.OFFSET_TIME, columnList.get(i++));
+        assertColumn("offset_date_time", TgDataType.OFFSET_DATE_TIME, columnList.get(i++));
     }
 
     private static void assertColumn(String name, TgDataType type, SqlCommon.Column column) {
