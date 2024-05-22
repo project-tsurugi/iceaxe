@@ -693,6 +693,6 @@ public class IceaxeConvertUtil {
      * @return exception
      */
     protected RuntimeException createException(Class<?> toClass, @Nonnull Object obj, @Nullable Throwable cause) {
-        return new UnsupportedOperationException(MessageFormat.format("unsupported type. toClass={0}, value={1}({2})", toClass, obj, obj.getClass()), cause);
+        return new UnsupportedOperationException(MessageFormat.format("unsupported type. toClass={0}, value={1}({2})", toClass.getName(), obj, obj.getClass()), cause);
     }
 }
