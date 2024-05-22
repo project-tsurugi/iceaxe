@@ -39,9 +39,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(boolean.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(boolean.class, obj, null);
     }
 
     /**
@@ -88,9 +88,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(int.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(int.class, obj, null);
     }
 
     /**
@@ -100,6 +100,9 @@ public class IceaxeConvertUtil {
      * @return value
      */
     protected @Nullable Integer convertInteger(@Nonnull Object obj) {
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        }
         if (obj instanceof Number) {
             return ((Number) obj).intValue();
         }
@@ -125,9 +128,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(long.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(long.class, obj, null);
     }
 
     /**
@@ -137,6 +140,9 @@ public class IceaxeConvertUtil {
      * @return value
      */
     protected @Nullable Long convertLong(@Nonnull Object obj) {
+        if (obj instanceof Long) {
+            return (Long) obj;
+        }
         if (obj instanceof Number) {
             return ((Number) obj).longValue();
         }
@@ -162,9 +168,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(float.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(float.class, obj, null);
     }
 
     /**
@@ -174,6 +180,9 @@ public class IceaxeConvertUtil {
      * @return value
      */
     protected @Nullable Float convertFloat(@Nonnull Object obj) {
+        if (obj instanceof Float) {
+            return (Float) obj;
+        }
         if (obj instanceof Number) {
             return ((Number) obj).floatValue();
         }
@@ -199,9 +208,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(double.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(double.class, obj, null);
     }
 
     /**
@@ -211,6 +220,9 @@ public class IceaxeConvertUtil {
      * @return value
      */
     protected @Nullable Double convertDouble(@Nonnull Object obj) {
+        if (obj instanceof Double) {
+            return (Double) obj;
+        }
         if (obj instanceof Number) {
             return ((Number) obj).doubleValue();
         }
@@ -236,9 +248,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(BigDecimal.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(BigDecimal.class, obj, null);
     }
 
     /**
@@ -285,9 +297,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(String.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(String.class, obj, null);
     }
 
     /**
@@ -322,9 +334,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(byte[].class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(byte[].class, obj, null);
     }
 
     /**
@@ -356,9 +368,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(boolean[].class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(boolean[].class, obj, null);
     }
 
     /**
@@ -390,9 +402,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(LocalDate.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(LocalDate.class, obj, null);
     }
 
     /**
@@ -443,9 +455,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(LocalTime.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(LocalTime.class, obj, null);
     }
 
     /**
@@ -496,9 +508,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(LocalDateTime.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(LocalDateTime.class, obj, null);
     }
 
     /**
@@ -543,9 +555,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(OffsetTime.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(OffsetTime.class, obj, null);
     }
 
     /**
@@ -586,9 +598,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(OffsetDateTime.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(OffsetDateTime.class, obj, null);
     }
 
     /**
@@ -627,9 +639,9 @@ public class IceaxeConvertUtil {
                 return value;
             }
         } catch (Throwable e) {
-            throw createException(obj, e);
+            throw createException(ZonedDateTime.class, obj, e);
         }
-        throw createException(obj, null);
+        throw createException(ZonedDateTime.class, obj, null);
     }
 
     /**
@@ -675,11 +687,12 @@ public class IceaxeConvertUtil {
     /**
      * Creates a new exception instance.
      *
-     * @param obj   value
-     * @param cause cause exception
+     * @param toClass to class
+     * @param obj     value
+     * @param cause   cause exception
      * @return exception
      */
-    protected RuntimeException createException(@Nonnull Object obj, @Nullable Throwable cause) {
-        return new UnsupportedOperationException(MessageFormat.format("unsupported type error. value={0}({1})", obj, obj.getClass()), cause);
+    protected RuntimeException createException(Class<?> toClass, @Nonnull Object obj, @Nullable Throwable cause) {
+        return new UnsupportedOperationException(MessageFormat.format("unsupported type. toClass={0}, value={1}({2})", toClass, obj, obj.getClass()), cause);
     }
 }
