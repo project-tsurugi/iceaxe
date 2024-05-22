@@ -18,6 +18,8 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.sql.proto.SqlCommon;
+import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 
 /**
  * decimal(5,0) test
@@ -60,6 +62,21 @@ class DbDecimal0Test extends DbTestTableTester {
                 return;
             });
         }
+    }
+
+    @Test
+    void tableMetadate() throws Exception {
+        var session = getSession();
+        var metadata = session.findTableMetadata(TEST).get();
+        var list = metadata.getLowColumnList();
+        assertEquals(2, list.size());
+        assertColumn("pk", AtomType.INT4, list.get(0));
+        assertColumn("value", AtomType.DECIMAL, list.get(1));
+    }
+
+    private static void assertColumn(String name, AtomType type, SqlCommon.Column actual) {
+        assertEquals(name, actual.getName());
+        assertEquals(type, actual.getAtomType());
     }
 
     @Test

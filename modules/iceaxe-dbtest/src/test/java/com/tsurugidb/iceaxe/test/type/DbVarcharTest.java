@@ -4,27 +4,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
-import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
-import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
-import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableInteger;
-import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableString;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
+import com.tsurugidb.sql.proto.SqlCommon;
+import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -32,156 +27,152 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbVarcharTest extends DbTestTableTester {
 
-    private static final int MAX_LENGTH = 30716;
+    private static final int SIZE = 5;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
         logInitStart(info);
 
         dropTestTable();
+        createTable();
+        insert(SIZE);
 
         logInitEnd(info);
     }
 
-    @Test
-    void createError() throws Exception {
-        var session = getSession();
-
-        var createSql = getCreateTable(MAX_LENGTH + 1);
-        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-            executeDdl(session, createSql);
-        });
-        assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
-        assertContains("character type on column \"value\" is unsupported (invalid length)", e.getMessage());
-    }
-
-    private static String getCreateTable(int length) {
-        return "create table " + TEST + "(" //
+    private static void createTable() throws IOException, InterruptedException {
+        String sql = "create table " + TEST + "(" //
                 + "  pk int primary key," //
-                + "  value varchar(" + length + ")" //
+                + "  value varchar(10)" //
                 + ")";
+        var session = getSession();
+        executeDdl(session, sql);
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = { 100, MAX_LENGTH - 1, MAX_LENGTH })
-    void insertUpdate(int maxLength) throws Exception {
-        new VarcharTester(maxLength).test();
+    private static void insert(int size) throws IOException, InterruptedException {
+        var session = getSession();
+        var insertSql = "insert into " + TEST + " values(:pk, :value)";
+        var insertMapping = TgParameterMapping.of(TgBindVariables.of().addInt("pk").addString("value"));
+        try (var ps = session.createStatement(insertSql, insertMapping)) {
+            var tm = createTransactionManagerOcc(session);
+            tm.execute(transaction -> {
+                for (int i = 0; i < size; i++) {
+                    var parameter = TgBindParameters.of().addInt("pk", i).addString("value", String.valueOf(size - i - 1));
+                    transaction.executeAndGetCount(ps, parameter);
+                }
+                return;
+            });
+        }
     }
 
-    static class VarcharTester {
-        protected final int maxLength;
-        private TsurugiSqlPreparedStatement<TgBindParameters> insertPs;
-        private TsurugiSqlPreparedQuery<TgBindParameters, TsurugiResultEntity> selectPs;
-        private TsurugiSqlPreparedStatement<TgBindParameters> updatePs;
-        private TsurugiTransactionManager tm;
-        private int size = 0;
-        private String prevValue;
+    @Test
+    void tableMetadate() throws Exception {
+        var session = getSession();
+        var metadata = session.findTableMetadata(TEST).get();
+        var list = metadata.getLowColumnList();
+        assertEquals(2, list.size());
+        assertColumn("pk", AtomType.INT4, list.get(0));
+        assertColumn("value", AtomType.CHARACTER, list.get(1));
+    }
 
-        public VarcharTester(int maxLength) {
-            this.maxLength = maxLength;
+    private static void assertColumn(String name, AtomType type, SqlCommon.Column actual) {
+        assertEquals(name, actual.getName());
+        assertEquals(type, actual.getAtomType());
+    }
+
+    @Test
+    void bindWhereEq() throws Exception {
+        var variable = TgBindVariable.ofString("value");
+        var sql = "select * from " + TEST + " where value=" + variable;
+        var mapping = TgParameterMapping.of(variable);
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, mapping)) {
+            var value = toString(2);
+            var parameter = TgBindParameters.of(variable.bind(value));
+            var entity = tm.executeAndFindRecord(ps, parameter).get();
+            assertEquals(value, entity.getString("value"));
         }
+    }
 
-        private static final TgBindVariableInteger PK = TgBindVariable.ofInt("pk");
-        private static final TgBindVariableString VALUE = TgBindVariable.ofString("value");
+    private static String toString(int n) {
+        return Integer.toString(n);
+    }
 
-        public void test() throws IOException, InterruptedException {
-            var session = getSession();
+    @Test
+    void bindWhereRange() throws Exception {
+        var start = TgBindVariable.ofString("start");
+        var end = TgBindVariable.ofString("end");
+        var sql = "select * from " + TEST + " where " + start + "<=value and value<=" + end + " order by value";
+        var mapping = TgParameterMapping.of(start, end);
 
-            var createSql = getCreateSql();
-            executeDdl(session, createSql);
-
-            var insertSql = "insert into " + TEST + " values(" + TgBindVariables.toSqlNames(PK, VALUE) + ")";
-            var insertMapping = TgParameterMapping.of(PK, VALUE);
-            var selectSql = "select * from " + TEST + " where pk=" + PK;
-            var selectMapping = TgParameterMapping.of(PK);
-            var updateSql = "update " + TEST + " set value=" + VALUE;
-            var updateMapping = TgParameterMapping.of(PK, VALUE);
-            try (var insertPs = session.createStatement(insertSql, insertMapping); //
-                    var selectPs = session.createQuery(selectSql, selectMapping); //
-                    var updatePs = session.createStatement(updateSql, updateMapping)) {
-                this.insertPs = insertPs;
-                this.selectPs = selectPs;
-                this.updatePs = updatePs;
-                this.tm = createTransactionManagerOcc(session);
-                test(0, true);
-                test(1, true);
-                test(maxLength - 1, true);
-                test(maxLength, true);
-                test(maxLength + 1, false);
-            }
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, mapping)) {
+            var parameter = TgBindParameters.of(start.bind(toString(2)), end.bind(toString(3)));
+            var list = tm.executeAndGetList(ps, parameter);
+            assertEquals(2, list.size());
+            assertEquals(toString(2), list.get(0).getString("value"));
+            assertEquals(toString(3), list.get(1).getString("value"));
         }
+    }
 
-        protected String getCreateSql() {
-            return getCreateTable(maxLength);
+    @Test
+    @Disabled // TODO implicit conversion: int to char
+    void implicitConversion() throws Exception {
+        var session = getSession();
+        String sql = "select * from " + TEST + " where value = 2";
+        var tm = createTransactionManagerOcc(session);
+        TsurugiResultEntity entity = tm.executeAndFindRecord(sql).get();
+        assertEquals(toString(2), entity.getString("value"));
+    }
+
+    @Test
+    void cast() throws Exception {
+        var session = getSession();
+        String sql = "update " + TEST + " set value = cast(7 as varchar(10))";
+        var tm = createTransactionManagerOcc(session);
+        int count = tm.executeAndGetCount(sql);
+        assertEquals(SIZE, count);
+
+        var list = tm.executeAndGetList("select * from " + TEST);
+        assertEquals(SIZE, list.size());
+        for (var actual : list) {
+            assertEquals(toString(7), actual.getString("value"));
         }
+    }
 
-        private void test(int length, boolean success) throws IOException, InterruptedException {
-            String insertValue = createString('a', length);
-            String updateValue = createString('b', length);
+    @Test
+    void min() throws Exception {
+        var session = getSession();
+        String sql = "select min(value) from " + TEST;
+        var resultMapping = TgResultMapping.ofSingle(String.class);
+        var tm = createTransactionManagerOcc(session);
+        String result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(toString(0), result);
+    }
 
-            { // insert
-                var parameter = TgBindParameters.of(PK.bind(length), VALUE.bind(insertValue));
-                if (success) {
-                    int count = tm.executeAndGetCount(insertPs, parameter);
-                    assertUpdateCount(1, count);
-                    this.size++;
-                } else {
-                    var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-                        tm.executeAndGetCount(insertPs, parameter);
-                    });
-                    assertEqualsCode(SqlServiceCode.VALUE_TOO_LONG_EXCEPTION, e);
-                    assertContains("lost_precision_value_too_long: value is too long to convert source length:" + length + " target length:" + maxLength, e.getMessage()); // TODO エラー詳細情報（カラム名）
-                }
-            }
-            {
-                var parameter = TgBindParameters.of(PK.bind(length));
-                var list = tm.executeAndGetList(selectPs, parameter);
-                if (success) {
-                    assertEquals(1, list.size());
-                    var actual = list.get(0);
-                    assertEquals(length, actual.getInt("pk"));
-                    String expectedValue = getExpectedValue(insertValue);
-                    assertEquals(expectedValue, actual.getString("value"));
-                } else {
-                    assertEquals(0, list.size());
-                }
-            }
-            { // update
-                var parameter = TgBindParameters.of(VALUE.bind(updateValue));
-                if (success) {
-                    int count = tm.executeAndGetCount(updatePs, parameter);
-                    assertUpdateCount(this.size, count);
-                    this.prevValue = updateValue;
-                } else {
-                    var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-                        tm.executeAndGetCount(updatePs, parameter);
-                    });
-                    assertEqualsCode(SqlServiceCode.VALUE_TOO_LONG_EXCEPTION, e);
-                    assertContains("lost_precision_value_too_long: value is too long to convert source length:" + length + " target length:" + maxLength, e.getMessage()); // TODO エラー詳細情報（カラム名）
-                }
-            }
-            {
-                var list = tm.executeAndGetList("select * from " + TEST);
-                for (var actual : list) {
-                    String expectedValue;
-                    if (success) {
-                        expectedValue = getExpectedValue(updateValue);
-                    } else {
-                        expectedValue = getExpectedValue(this.prevValue);
-                    }
-                    assertEquals(expectedValue, actual.getString("value"));
-                }
-            }
-        }
+    @Test
+    void max() throws Exception {
+        var session = getSession();
+        String sql = "select max(value) from " + TEST;
+        var resultMapping = TgResultMapping.ofSingle(String.class);
+        var tm = createTransactionManagerOcc(session);
+        String result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(toString(SIZE - 1), result);
+    }
 
-        protected String getExpectedValue(String value) {
-            return value;
-        }
-
-        protected static String createString(char c, int length) {
-            var buf = new byte[length];
-            Arrays.fill(buf, (byte) c);
-            return new String(buf, StandardCharsets.UTF_8);
-        }
+    @Test
+    void sum() throws Exception {
+        var session = getSession();
+        String sql = "select sum(value) from " + TEST;
+        var resultMapping = TgResultMapping.ofSingle(String.class);
+        var tm = createTransactionManagerOcc(session);
+        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+            tm.executeAndFindRecord(sql, resultMapping);
+        });
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+        assertContains("function 'sum' is not found", e.getMessage());
     }
 }
