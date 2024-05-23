@@ -66,7 +66,7 @@ class DbVarcharTest extends DbTestTableTester {
     }
 
     @Test
-    void tableMetadate() throws Exception {
+    void tableMetadata() throws Exception {
         var session = getSession();
         var metadata = session.findTableMetadata(TEST).get();
         var list = metadata.getLowColumnList();
