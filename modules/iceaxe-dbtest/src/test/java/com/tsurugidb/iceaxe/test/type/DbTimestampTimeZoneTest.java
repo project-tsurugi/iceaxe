@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
@@ -26,7 +27,6 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.sql.proto.SqlCommon;
-import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -83,13 +83,13 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         var metadata = session.findTableMetadata(TEST).get();
         var list = metadata.getLowColumnList();
         assertEquals(2, list.size());
-        assertColumn("pk", AtomType.INT4, list.get(0));
-        assertColumn("value", AtomType.TIME_POINT_WITH_TIME_ZONE, list.get(1));
+        assertColumn("pk", TgDataType.INT, list.get(0));
+        assertColumn("value", TgDataType.OFFSET_DATE_TIME, list.get(1));
     }
 
-    private static void assertColumn(String name, AtomType type, SqlCommon.Column actual) {
+    private static void assertColumn(String name, TgDataType type, SqlCommon.Column actual) {
         assertEquals(name, actual.getName());
-        assertEquals(type, actual.getAtomType());
+        assertEquals(type.getLowDataType(), actual.getAtomType());
     }
 
     @Test
