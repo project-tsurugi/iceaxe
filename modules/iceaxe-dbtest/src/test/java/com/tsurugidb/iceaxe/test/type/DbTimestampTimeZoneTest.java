@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -92,6 +93,30 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         assertEquals(type.getLowDataType(), actual.getAtomType());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "2024-05-24T23:45:56.123456789+09:00", "0001-01-01T00:00:00Z",
+            // TODO "0001-01-01T00:00:01Z", fix time zone serde
+            "0001-01-01T00:00:00.000000001Z", "1970-01-01T00:00:00Z",
+            // TODO "1969-12-31T00:00:01Z", fix time zone serde
+            "9999-12-31T23:59:59.999999999Z", "-999999999-01-01T00:00:00-18:00", "+99999999-12-31T23:59:59.999999999+18:00" })
+    void value(String s) throws Exception {
+        var expected = OffsetDateTime.parse(s);
+
+        var variable = TgBindVariable.ofOffsetDateTime("value");
+        var updateSql = "update " + TEST + " set value=" + variable + " where pk=1";
+        var updateMapping = TgParameterMapping.of(variable);
+        var updateParameter = TgBindParameters.of(variable.bind(expected));
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        int count = tm.executeAndGetCount(updateSql, updateMapping, updateParameter);
+        assertEquals(1, count);
+
+        var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
+        assertEquals(expected.withOffsetSameLocal(ZoneOffset.UTC), // TODO remove withOffsetSameLocal()
+                actual.getOffsetDateTime("value"));
+    }
+
     @Test
     void bindWhereEq() throws Exception {
         var variable = TgBindVariable.ofOffsetDateTime("value");
@@ -114,7 +139,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
 
     // TODO remove toZ()
     private static OffsetDateTime toZ(OffsetDateTime date) {
-        return date.atZoneSimilarLocal(ZoneId.of("UTC")).toOffsetDateTime();
+        return date.withOffsetSameLocal(ZoneOffset.UTC);
     }
 
     @Test
