@@ -94,10 +94,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "2024-05-24T23:45:56.123456789+09:00", "0001-01-01T00:00:00Z",
-            // TODO "0001-01-01T00:00:01Z", fix time zone serde
-            "0001-01-01T00:00:00.000000001Z", "1970-01-01T00:00:00Z",
-            // TODO "1969-12-31T00:00:01Z", fix time zone serde
+    @ValueSource(strings = { "2024-05-24T23:45:56.123456789+09:00", "0001-01-01T00:00:00Z", "0001-01-01T00:00:01Z", "0001-01-01T00:00:00.000000001Z", "1970-01-01T00:00:00Z", "1969-12-31T00:00:01Z",
             "9999-12-31T23:59:59.999999999Z", "-999999999-01-01T00:00:00-18:00", "+99999999-12-31T23:59:59.999999999+18:00" })
     void value(String s) throws Exception {
         var expected = OffsetDateTime.parse(s);

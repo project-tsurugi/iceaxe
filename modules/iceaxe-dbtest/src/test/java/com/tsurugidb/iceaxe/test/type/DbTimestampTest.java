@@ -84,10 +84,7 @@ class DbTimestampTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "2024-05-24T23:45:56.123456789", "0001-01-01T00:00:00",
-            // TODO "0001-01-01T00:00:01", fix time zone serde
-            "0001-01-01T00:00:00.000000001", "1970-01-01T00:00:00",
-            // TODO "1969-12-31T00:00:01", fix time zone serde
+    @ValueSource(strings = { "2024-05-24T23:45:56.123456789", "0001-01-01T00:00:00", "0001-01-01T00:00:01", "0001-01-01T00:00:00.000000001", "1970-01-01T00:00:00", "1969-12-31T00:00:01",
             "9999-12-31T23:59:59.999999999", "-999999999-01-01T00:00:00", "+99999999-12-31T23:59:59.999999999" })
     void value(String s) throws Exception {
         var expected = LocalDateTime.parse(s);
