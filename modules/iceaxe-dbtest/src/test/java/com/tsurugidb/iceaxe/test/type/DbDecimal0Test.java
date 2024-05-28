@@ -4,12 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -20,6 +23,8 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.sql.proto.SqlCommon;
+import com.tsurugidb.tsubakuro.kvs.KvsClient;
+import com.tsurugidb.tsubakuro.kvs.RecordBuffer;
 
 /**
  * decimal(5,0) test
@@ -56,12 +61,16 @@ class DbDecimal0Test extends DbTestTableTester {
             var tm = createTransactionManagerOcc(session);
             tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
-                    var parameter = TgBindParameters.of().addInt("pk", i).addDecimal("value", BigDecimal.valueOf(size - i - 1));
+                    var parameter = TgBindParameters.of().addInt("pk", i).addDecimal("value", value(size, i));
                     transaction.executeAndGetCount(ps, parameter);
                 }
                 return;
             });
         }
+    }
+
+    private static BigDecimal value(int size, int i) {
+        return BigDecimal.valueOf(size - i - 1);
     }
 
     @Test
@@ -229,5 +238,44 @@ class DbDecimal0Test extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         BigDecimal result = tm.executeAndFindRecord(sql, resultMapping).get();
         assertEquals(BigDecimal.valueOf(IntStream.range(0, SIZE).sum() / SIZE), result);
+    }
+
+    @Test
+    void kvsGet() throws Exception {
+        var session = getSession();
+        try (var client = KvsClient.attach(session.getLowSession()); // TODO Iceaxe KVS
+                var txHandle = client.beginTransaction().await(10, TimeUnit.SECONDS)) {
+            var key = new RecordBuffer().add("pk", 1);
+            var result = client.get(txHandle, TEST, key).await(10, TimeUnit.SECONDS);
+            assertEquals(1, result.size());
+
+            client.commit(txHandle).await(10, TimeUnit.SECONDS);
+
+            var record = result.asRecord();
+            assertEquals(1, record.getInt("pk"));
+            assertEquals(value(SIZE, 1), record.getDecimal("value"));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 123, 0, -1 })
+    void kvsPut(int n) throws Exception {
+        var expected = BigDecimal.valueOf(n);
+
+        var session = getSession();
+        try (var client = KvsClient.attach(session.getLowSession()); // TODO Iceaxe KVS
+                var txHandle = client.beginTransaction().await(10, TimeUnit.SECONDS)) {
+            var record = new RecordBuffer().add("pk", 1).add("value", expected);
+            var result = client.put(txHandle, TEST, record).await(10, TimeUnit.SECONDS);
+            assertEquals(1, result.size());
+
+            client.commit(txHandle).await(10, TimeUnit.SECONDS);
+        }
+
+        String sql = "select value from " + TEST + " where pk=1";
+        var resultMapping = TgResultMapping.ofSingle(BigDecimal.class);
+        var tm = createTransactionManagerOcc(session);
+        var result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(expected, result);
     }
 }

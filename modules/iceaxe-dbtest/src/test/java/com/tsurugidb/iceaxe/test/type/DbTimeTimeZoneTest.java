@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,6 +29,8 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.sql.proto.SqlCommon;
+import com.tsurugidb.tsubakuro.kvs.KvsClient;
+import com.tsurugidb.tsubakuro.kvs.RecordBuffer;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -70,12 +73,16 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
             var tm = createTransactionManagerOcc(session);
             tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
-                    var parameter = TgBindParameters.of().addInt("pk", i).addOffsetTime("value", LIST.get(i));
+                    var parameter = TgBindParameters.of().addInt("pk", i).addOffsetTime("value", value(size, i));
                     transaction.executeAndGetCount(ps, parameter);
                 }
                 return;
             });
         }
+    }
+
+    private static OffsetTime value(int size, int i) {
+        return LIST.get(i);
     }
 
     @Test
@@ -219,5 +226,44 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         });
         assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
         assertContains("function 'sum' is not found", e.getMessage());
+    }
+
+    @Test
+    void kvsGet() throws Exception {
+        var session = getSession();
+        try (var client = KvsClient.attach(session.getLowSession()); // TODO Iceaxe KVS
+                var txHandle = client.beginTransaction().await(10, TimeUnit.SECONDS)) {
+            var key = new RecordBuffer().add("pk", 1);
+            var result = client.get(txHandle, TEST, key).await(10, TimeUnit.SECONDS);
+            assertEquals(1, result.size());
+
+            client.commit(txHandle).await(10, TimeUnit.SECONDS);
+
+            var record = result.asRecord();
+            assertEquals(1, record.getInt("pk"));
+            assertEquals(value(SIZE, 1).toLocalTime(), record.getTimeOfDay("value"));// TODO assertEquals(value(SIZE, 1), record.getTimeOfDayWithTimeZone("value"));
+        }
+    }
+
+    @Test
+    @Disabled // TODO remove Disabled. KVS put for time with time zone
+    void kvsPut() throws Exception {
+        var expected = OffsetTime.of(12, 34, 56, 789_000_001, ZoneOffset.ofHours(9));
+
+        var session = getSession();
+        try (var client = KvsClient.attach(session.getLowSession()); // TODO Iceaxe KVS
+                var txHandle = client.beginTransaction().await(10, TimeUnit.SECONDS)) {
+            var record = new RecordBuffer().add("pk", 1).add("value", expected);
+            var result = client.put(txHandle, TEST, record).await(10, TimeUnit.SECONDS);
+            assertEquals(1, result.size());
+
+            client.commit(txHandle).await(10, TimeUnit.SECONDS);
+        }
+
+        String sql = "select value from " + TEST + " where pk=1";
+        var resultMapping = TgResultMapping.ofSingle(OffsetTime.class);
+        var tm = createTransactionManagerOcc(session);
+        var result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(expected, result);
     }
 }

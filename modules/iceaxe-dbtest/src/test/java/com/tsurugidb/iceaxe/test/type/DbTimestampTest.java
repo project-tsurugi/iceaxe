@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -23,6 +24,8 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.sql.proto.SqlCommon;
+import com.tsurugidb.tsubakuro.kvs.KvsClient;
+import com.tsurugidb.tsubakuro.kvs.RecordBuffer;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -60,12 +63,16 @@ class DbTimestampTest extends DbTestTableTester {
             var tm = createTransactionManagerOcc(session);
             tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
-                    var parameter = TgBindParameters.of().addInt("pk", i).addDateTime("value", LocalDateTime.of(2024, 5, 9, 23, 59, 1, (size - i) * 1000_000));
+                    var parameter = TgBindParameters.of().addInt("pk", i).addDateTime("value", value(size, i));
                     transaction.executeAndGetCount(ps, parameter);
                 }
                 return;
             });
         }
+    }
+
+    private static LocalDateTime value(int size, int i) {
+        return LocalDateTime.of(2024, 5, 9, 23, 59, 1, (size - i) * 1000_000);
     }
 
     @Test
@@ -188,5 +195,43 @@ class DbTimestampTest extends DbTestTableTester {
         });
         assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
         assertContains("function 'sum' is not found", e.getMessage());
+    }
+
+    @Test
+    void kvsGet() throws Exception {
+        var session = getSession();
+        try (var client = KvsClient.attach(session.getLowSession()); // TODO Iceaxe KVS
+                var txHandle = client.beginTransaction().await(10, TimeUnit.SECONDS)) {
+            var key = new RecordBuffer().add("pk", 1);
+            var result = client.get(txHandle, TEST, key).await(10, TimeUnit.SECONDS);
+            assertEquals(1, result.size());
+
+            client.commit(txHandle).await(10, TimeUnit.SECONDS);
+
+            var record = result.asRecord();
+            assertEquals(1, record.getInt("pk"));
+            assertEquals(value(SIZE, 1), record.getTimePoint("value"));
+        }
+    }
+
+    @Test
+    void kvsPut() throws Exception {
+        var expected = LocalDateTime.of(2023, 5, 28, 12, 34, 56, 789_000_001);
+
+        var session = getSession();
+        try (var client = KvsClient.attach(session.getLowSession()); // TODO Iceaxe KVS
+                var txHandle = client.beginTransaction().await(10, TimeUnit.SECONDS)) {
+            var record = new RecordBuffer().add("pk", 1).add("value", expected);
+            var result = client.put(txHandle, TEST, record).await(10, TimeUnit.SECONDS);
+            assertEquals(1, result.size());
+
+            client.commit(txHandle).await(10, TimeUnit.SECONDS);
+        }
+
+        String sql = "select value from " + TEST + " where pk=1";
+        var resultMapping = TgResultMapping.ofSingle(LocalDateTime.class);
+        var tm = createTransactionManagerOcc(session);
+        var result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(expected, result);
     }
 }
