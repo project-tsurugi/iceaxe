@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.opentest4j.AssertionFailedError;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
@@ -45,7 +46,12 @@ public class DbServerStopTransactionTest extends DbTimetoutTest {
             try {
                 transaction.getLowTransaction();
             } catch (IOException e) {
-                assertEquals("Server crashed", e.getMessage());
+                try {
+                    assertEquals("lost connection", e.getMessage());
+                } catch (AssertionFailedError t) {
+                    t.addSuppressed(e);
+                    throw t;
+                }
                 return;
             } finally {
                 pipeServer.setPipeWrite(true);

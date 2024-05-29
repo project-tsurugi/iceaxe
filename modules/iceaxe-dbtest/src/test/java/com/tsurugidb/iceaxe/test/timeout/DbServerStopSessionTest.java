@@ -48,9 +48,10 @@ public class DbServerStopSessionTest extends DbTimetoutTest {
             session.getLowSqlClient();
         });
         try {
-            assertEquals("Server crashed", e.getMessage());
+            assertEquals("lost connection", e.getMessage());
         } catch (AssertionFailedError t) {
-            throw e;
+            t.addSuppressed(e);
+            throw t;
         }
     }
 }

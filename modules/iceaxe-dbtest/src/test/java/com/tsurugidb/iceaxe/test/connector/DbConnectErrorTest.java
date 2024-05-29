@@ -37,9 +37,10 @@ public class DbConnectErrorTest extends DbTestTableTester {
 
             var e = assertThrowsExactly(IOException.class, () -> connect(port));
             try {
-                assertEquals("Server crashed", e.getMessage());
+                assertEquals("lost connection", e.getMessage());
             } catch (AssertionFailedError t) {
-                throw e;
+                t.addSuppressed(e);
+                throw t;
             }
         }
     }
@@ -77,7 +78,7 @@ public class DbConnectErrorTest extends DbTestTableTester {
 
             var e = assertThrowsExactly(IOException.class, () -> connect(port));
             try {
-                assertEquals("Server crashed", e.getMessage());
+                assertEquals("lost connection", e.getMessage());
             } catch (AssertionFailedError t) {
                 throw e;
             }
