@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.select;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
@@ -133,7 +132,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                 transaction.executeAndGetList(ps);
             });
             assertEqualsCode(IceaxeErrorCode.TX_ALREADY_CLOSED, e);
-            assertEquals("transaction already closed", e.getMessage());
+            assertEqualsMessage("transaction already closed", e);
         }
     }
 
@@ -150,7 +149,7 @@ class DbSelectErrorTest extends DbTestTableTester {
             var e = assertThrowsExactly(IOException.class, () -> {
                 result.getRecordList();
             });
-            assertEquals("resultSet already closed", e.getMessage());
+            assertEqualsMessage("resultSet already closed", e);
         }
     }
 
@@ -170,7 +169,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                             i.next();
                         }
                     });
-                    assertEquals("resultSet already closed", e.getMessage());
+                    assertEqualsMessage("resultSet already closed", e);
                 }
             }
         }

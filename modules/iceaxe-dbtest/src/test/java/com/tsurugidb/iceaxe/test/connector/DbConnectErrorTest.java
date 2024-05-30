@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.opentest4j.AssertionFailedError;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
@@ -36,12 +35,7 @@ public class DbConnectErrorTest extends DbTestTableTester {
             thread.start();
 
             var e = assertThrowsExactly(IOException.class, () -> connect(port));
-            try {
-                assertEquals("lost connection", e.getMessage());
-            } catch (AssertionFailedError t) {
-                t.addSuppressed(e);
-                throw t;
-            }
+            assertEqualsMessage("lost connection", e);
         }
     }
 
@@ -77,11 +71,7 @@ public class DbConnectErrorTest extends DbTestTableTester {
             thread.start();
 
             var e = assertThrowsExactly(IOException.class, () -> connect(port));
-            try {
-                assertEquals("lost connection", e.getMessage());
-            } catch (AssertionFailedError t) {
-                throw e;
-            }
+            assertEqualsMessage("lost connection", e);
         }
     }
 
@@ -138,7 +128,7 @@ public class DbConnectErrorTest extends DbTestTableTester {
                         int len = is.read(buf);
                         assertEquals(-1, len);
                     } catch (SocketException e) {
-                        assertEquals("Connection reset", e.getMessage());
+                        assertEqualsMessage("Connection reset", e);
                     }
                 }
             }

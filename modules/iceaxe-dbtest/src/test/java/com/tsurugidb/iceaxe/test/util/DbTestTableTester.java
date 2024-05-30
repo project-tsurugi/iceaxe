@@ -22,6 +22,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
+import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -578,6 +579,15 @@ public class DbTestTableTester {
             return; // success
         }
         assertEquals(expectedRegexp, actual, "unmatched");
+    }
+
+    protected static void assertEqualsMessage(String expected, Throwable actual) {
+        try {
+            assertEquals(expected, actual.getMessage());
+        } catch (AssertionFailedError e) {
+            e.addSuppressed(actual);
+            throw e;
+        }
     }
 
     protected static void assertUpdateCount(int expected, int actual) {

@@ -45,7 +45,7 @@ class DbMultiSessionTest extends DbTestTableTester {
                 try {
                     session = DbTestConnector.createSession();
                 } catch (IOException e) {
-                    assertEquals("the server has declined the connection request", e.getMessage());
+                    assertEqualsMessage("the server has declined the connection request", e);
                     int count = sessionList.size();
                     if (count < EXPECTED_SESSION_SIZE) {
                         fail(MessageFormat.format("less session.size expected: {1} but was: {0}", count, EXPECTED_SESSION_SIZE));

@@ -212,7 +212,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
                 var e = assertThrowsExactly(IllegalArgumentException.class, () -> {
                     entity.getInt(GENERATED_KEY);
                 });
-                assertEquals("not found column. name=__generated_rowid___test", e.getMessage());
+                assertEqualsMessage("not found column. name=__generated_rowid___test", e);
             }
         }
     }

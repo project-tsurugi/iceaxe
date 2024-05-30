@@ -1,6 +1,5 @@
 package com.tsurugidb.iceaxe.test.select;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -44,7 +43,7 @@ class DbResultRecordTest extends DbTestTableTester {
                     transaction.executeAndFindRecord(ps);
                 });
             });
-            assertEquals("TsurugiResultRecord.getInt(foo) is null", e.getMessage());
+            assertEqualsMessage("TsurugiResultRecord.getInt(foo) is null", e);
         }
     }
 
@@ -61,7 +60,7 @@ class DbResultRecordTest extends DbTestTableTester {
                     transaction.executeAndFindRecord(ps);
                 });
             });
-            assertEquals("TsurugiResultRecord.nextInt(0) is null", e.getMessage());
+            assertEqualsMessage("TsurugiResultRecord.nextInt(0) is null", e);
         }
     }
 }
