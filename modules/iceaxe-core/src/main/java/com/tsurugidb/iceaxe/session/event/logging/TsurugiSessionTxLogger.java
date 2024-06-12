@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.session.TgSessionShutdownType;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
 import com.tsurugidb.iceaxe.session.event.logging.TgSessionTxLog.TgSessionTxExecuteLog;
@@ -330,6 +331,11 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     }
 
     @Override
+    public final void shutdownSession(TsurugiSession session, TgSessionShutdownType shutdownType, long timeoutNanos, @Nullable Throwable occurred) {
+        logSessionShutdown(session, shutdownType, occurred);
+    }
+
+    @Override
     public final void closeSession(TsurugiSession session, long timeoutNanos, @Nullable Throwable occurred) {
         logSessionClose(session, occurred);
     }
@@ -342,6 +348,18 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param ps SQL definition
      */
     protected void logCreateSqlStatement(TsurugiSql ps) {
+        // do override
+    }
+
+    /**
+     * called when shutdown session.
+     *
+     * @param session      session
+     * @param shutdownType shutdown type
+     * @param occurred     exception
+     * @since X.X.X
+     */
+    protected void logSessionShutdown(TsurugiSession session, TgSessionShutdownType shutdownType, @Nullable Throwable occurred) {
         // do override
     }
 

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableListHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
@@ -44,6 +45,7 @@ import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.tsubakuro.common.Session;
+import com.tsurugidb.tsubakuro.common.ShutdownType;
 import com.tsurugidb.tsubakuro.sql.SqlClient;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -67,6 +69,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
     private final IceaxeTimeout closeTimeout;
     private List<TsurugiSessionEventListener> eventListenerList = null;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
+    private TgSessionShutdownType closeShutdownType = null;
     private volatile boolean closed = false;
 
     /**
@@ -137,6 +140,30 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      */
     public void setCloseTimeout(TgTimeValue timeout) {
         closeTimeout.set(timeout);
+    }
+
+    /**
+     * set shutdown type on close.
+     *
+     * @param shutdownType shutdown type
+     * @since X.X.X
+     */
+    public void setCloseShutdownType(TgSessionShutdownType shutdownType) {
+        this.closeShutdownType = shutdownType;
+    }
+
+    /**
+     * get shutdown type on close.
+     *
+     * @return shutdown type
+     * @since X.X.X
+     */
+    public TgSessionShutdownType getCloseShutdownType() {
+        var shutdownType = this.closeShutdownType;
+        if (shutdownType == null) {
+            shutdownType = sessionOption.getCloseShutdownType();
+        }
+        return shutdownType;
     }
 
     /**
@@ -237,6 +264,10 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
     @IceaxeInternal
 //  @ThreadSafe
     public final synchronized Session getLowSession() throws IOException, InterruptedException {
+        return getLowSession(connectTimeout, null);
+    }
+
+    private Session getLowSession(IceaxeTimeout timeout, @Nullable IceaxeErrorCode timeoutErrorCode) throws IOException, InterruptedException {
         if (this.lowSession == null) {
             if (this.lowFutureException != null) {
                 throw new IceaxeIOException(IceaxeErrorCode.SESSION_LOW_ERROR, lowFutureException);
@@ -245,8 +276,15 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
             LOG.trace("lowSession get start");
             try {
                 this.lowSession = IceaxeIoUtil.getAndCloseFuture(lowSessionFuture, //
-                        connectTimeout, IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, //
+                        timeout, IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, //
                         IceaxeErrorCode.SESSION_CLOSE_TIMEOUT);
+            } catch (IceaxeIOException e) {
+                IceaxeErrorCode code = e.getDiagnosticCode();
+                if (code.isTimeout() && timeoutErrorCode != null) {
+                    e = new IceaxeTimeoutIOException(timeoutErrorCode, e);
+                }
+                this.lowFutureException = e;
+                throw e;
             } catch (Throwable e) {
                 this.lowFutureException = e;
                 throw e;
@@ -256,6 +294,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
             this.lowSessionFuture = null;
         }
         return this.lowSession;
+
     }
 
     /**
@@ -606,6 +645,82 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
 
     // close
 
+    /**
+     * shutdown this session.
+     *
+     * @param shutdownType shutdown type
+     * @param time         timeout time
+     * @param unit         timeout unit
+     * @throws IOException          if an I/O error occurs during shutdown
+     * @throws InterruptedException if interrupted during shutdown
+     * @since X.X.X
+     */
+    public void shutdown(TgSessionShutdownType shutdownType, long time, TimeUnit unit) throws IOException, InterruptedException {
+        checkClose();
+        shutdown(shutdownType, unit.toNanos(time));
+    }
+
+    /**
+     * shutdown this session.
+     *
+     * @param shutdownType shutdown type
+     * @param timeout      timeout
+     * @throws IOException          if an I/O error occurs during shutdown
+     * @throws InterruptedException if interrupted during shutdown
+     * @since X.X.X
+     */
+    public void shutdown(TgSessionShutdownType shutdownType, TgTimeValue timeout) throws IOException, InterruptedException {
+        checkClose();
+        shutdown(shutdownType, timeout.toNanos());
+    }
+
+    private void shutdown(TgSessionShutdownType shutdownType, long timeoutNanos) throws IOException, InterruptedException {
+        LOG.trace("session shutdown start. shutdownType={}", shutdownType);
+        Throwable occurred = null;
+        try {
+            IceaxeIoUtil.close(timeoutNanos, closeableSet, IceaxeErrorCode.SESSION_CHILD_CLOSE_ERROR, t -> {
+                if (shutdownType == null) {
+                    LOG.trace("do not shutdown. shutdownType=null");
+                    return;
+                }
+                var lowShutdownType = shutdownType.getLowShutdownType();
+                if (lowShutdownType == null) {
+                    LOG.trace("do not shutdown. shutdownType={}", shutdownType);
+                    return;
+                }
+
+                long start = System.nanoTime();
+                var lowSession0 = getLowSession(new IceaxeTimeout(t, TimeUnit.NANOSECONDS), IceaxeErrorCode.SESSION_SHUTDOWN_TIMEOUT);
+                var lowShutdownFuture = shutdownLow(lowSession0, lowShutdownType);
+
+                var timeout = new IceaxeTimeout(IceaxeIoUtil.calculateTimeoutNanos(t, start), TimeUnit.NANOSECONDS);
+                IceaxeIoUtil.getAndCloseFuture(lowShutdownFuture, //
+                        timeout, IceaxeErrorCode.SESSION_SHUTDOWN_TIMEOUT, //
+                        IceaxeErrorCode.SESSION_SHUTDOWN_CLOSE_TIMEOUT);
+            });
+        } catch (Throwable e) {
+            LOG.trace("session shutdown error", e);
+            occurred = e;
+            throw e;
+        } finally {
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.shutdownSession(this, shutdownType, timeoutNanos, finalOccurred));
+        }
+        LOG.trace("session shutdown end");
+    }
+
+    /**
+     * shutdown.
+     *
+     * @param lowSession0     low session
+     * @param lowShutdownType low shutdown type
+     * @return future for shutdown
+     * @throws IOException if I/O error was occurred while sending request
+     */
+    protected FutureResponse<Void> shutdownLow(Session lowSession0, ShutdownType lowShutdownType) throws IOException {
+        return lowSession0.shutdown(lowShutdownType);
+    }
+
     @Override
     @OverridingMethodsMustInvokeSuper
     public void close() throws IOException, InterruptedException {
@@ -620,10 +735,16 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
         Throwable occurred = null;
         try {
             IceaxeIoUtil.close(timeoutNanos, closeableSet, IceaxeErrorCode.SESSION_CHILD_CLOSE_ERROR, t -> {
+                IceaxeTimeoutCloseable shutdownCloseable = shutdownTimeout -> {
+                    if (this.lowSession != null) {
+                        shutdown(getCloseShutdownType(), shutdownTimeout);
+                    }
+                };
                 IceaxeIoUtil.close(t, IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_ERROR, //
-                        lowSqlClient, lowSession, lowSessionFuture);
+                        lowSqlClient, shutdownCloseable, lowSession, lowSessionFuture);
             });
         } catch (Throwable e) {
+            LOG.trace("session close error", e);
             occurred = e;
             throw e;
         } finally {

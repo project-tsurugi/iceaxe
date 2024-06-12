@@ -27,6 +27,18 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /** low session error. */
     SESSION_LOW_ERROR(IceaxeErrorCodeBlock.SESSION + 2, "low session error"),
     /**
+     * {@link TsurugiSession#shutdown(com.tsurugidb.iceaxe.session.TgSessionShutdownType, long, java.util.concurrent.TimeUnit)} timeout.
+     *
+     * @since X.X.X
+     */
+    SESSION_SHUTDOWN_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 801, "session shutdown timeout"),
+    /**
+     * {@link TsurugiSession#shutdown(com.tsurugidb.iceaxe.session.TgSessionShutdownType, long, java.util.concurrent.TimeUnit)} close timeout.
+     *
+     * @since X.X.X
+     */
+    SESSION_SHUTDOWN_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 802, "session shutdown close timeout"),
+    /**
      * session child resource close error at {@link TsurugiSession#close()}.
      *
      * @since 1.3.0
@@ -268,10 +280,12 @@ public enum IceaxeErrorCode implements DiagnosticCode {
 
     private final int codeNumber;
     private final String message;
+    private final boolean isTimeout;
 
     private IceaxeErrorCode(int codeNumber, String message) {
         this.codeNumber = codeNumber;
         this.message = message;
+        this.isTimeout = name().endsWith("TIMEOUT");
     }
 
     /**
@@ -296,6 +310,16 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      */
     public String getMessage() {
         return this.message;
+    }
+
+    /**
+     * Returns timeout.
+     *
+     * @return {@code true}: timeout
+     * @since X.X.X
+     */
+    public boolean isTimeout() {
+        return this.isTimeout;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.session;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
@@ -124,6 +125,7 @@ public class TgSessionOption {
     private String applicationName;
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
     private TgCommitType commitType = TgCommitType.DEFAULT;
+    private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.NOTHING;
 
     /**
      * Tsurugi Session Option.
@@ -209,7 +211,7 @@ public class TgSessionOption {
      * @return this
      */
     public TgSessionOption setCommitType(@Nonnull TgCommitType commitType) {
-        this.commitType = commitType;
+        this.commitType = Objects.requireNonNull(commitType);
         return this;
     }
 
@@ -222,8 +224,36 @@ public class TgSessionOption {
         return this.commitType;
     }
 
+    /**
+     * set shutdown type on close.
+     *
+     * @param shutdownType shutdown type
+     * @return this
+     * @since X.X.X
+     */
+    public TgSessionOption setCloseShutdownType(@Nonnull TgSessionShutdownType shutdownType) {
+        this.closeShutdownType = Objects.requireNonNull(shutdownType);
+        return this;
+    }
+
+    /**
+     * get shutdown type on close.
+     *
+     * @return shutdown type
+     * @since X.X.X
+     */
+    public TgSessionShutdownType getCloseShutdownType() {
+        return this.closeShutdownType;
+    }
+
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{label=" + sessionLabel + ", applicationName=" + applicationName + ", timeout=" + timeoutMap + ", commitType=" + commitType + "}";
+        return getClass().getSimpleName() //
+                + "{label=" + sessionLabel //
+                + ", applicationName=" + applicationName //
+                + ", timeout=" + timeoutMap //
+                + ", commitType=" + commitType //
+                + ", closeShutdownType=" + closeShutdownType //
+                + "}";
     }
 }

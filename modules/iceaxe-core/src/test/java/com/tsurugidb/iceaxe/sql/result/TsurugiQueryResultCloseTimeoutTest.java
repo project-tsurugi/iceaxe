@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.IceaxeIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.test.TestTsurugiSession;
@@ -62,7 +62,7 @@ class TsurugiQueryResultCloseTimeoutTest {
                         modifier.accept(rs);
                     }
 
-                    var e = assertThrowsExactly(IceaxeIOException.class, () -> rs.close());
+                    var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> rs.close());
                     assertEquals(IceaxeErrorCode.RS_CLOSE_TIMEOUT, e.getDiagnosticCode());
 
                     future.setExpectedCloseTimeout(null);
@@ -120,7 +120,7 @@ class TsurugiQueryResultCloseTimeoutTest {
                     lowRs.setExpectedCloseTimeout(1, TimeUnit.SECONDS);
                     lowRs.setThrowCloseTimeout(true);
 
-                    var e = assertThrowsExactly(IceaxeIOException.class, () -> rs.close());
+                    var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> rs.close());
                     assertEquals(IceaxeErrorCode.RS_CLOSE_TIMEOUT, e.getDiagnosticCode());
 
                     assertTrue(lowRs.isClosed());

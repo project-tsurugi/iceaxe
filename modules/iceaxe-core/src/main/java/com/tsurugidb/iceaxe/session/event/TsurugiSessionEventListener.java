@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.session.event;
 
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.session.TgSessionShutdownType;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
@@ -70,6 +71,19 @@ public interface TsurugiSessionEventListener {
      * @param transaction transaction
      */
     default void createTransaction(TsurugiTransaction transaction) {
+        // do override
+    }
+
+    /**
+     * called when shutdown session.
+     *
+     * @param session      session
+     * @param shutdownType shutdown type
+     * @param timeoutNanos shutdown timeout
+     * @param occurred     exception
+     * @since X.X.X
+     */
+    default void shutdownSession(TsurugiSession session, TgSessionShutdownType shutdownType, long timeoutNanos, @Nullable Throwable occurred) {
         // do override
     }
 

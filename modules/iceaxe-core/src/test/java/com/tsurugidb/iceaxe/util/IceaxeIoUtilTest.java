@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.IceaxeServerExceptionTestMock;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
@@ -136,7 +138,7 @@ class IceaxeIoUtilTest {
         };
         var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
-        var actual = assertThrowsExactly(IceaxeIOException.class,
+        var actual = assertThrowsExactly(IceaxeTimeoutIOException.class,
                 () -> IceaxeIoUtil.getAndCloseFuture(future, timeout, IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_TIMEOUT));
         assertEquals(IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, actual.getDiagnosticCode());
         assertEquals(1, count.get());
@@ -234,7 +236,7 @@ class IceaxeIoUtilTest {
         };
         var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
-        var actual = assertThrowsExactly(IceaxeIOException.class,
+        var actual = assertThrowsExactly(IceaxeTimeoutIOException.class,
                 () -> IceaxeIoUtil.getAndCloseFuture(future, timeout, IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_TIMEOUT));
         assertEquals(IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, actual.getDiagnosticCode());
     }
@@ -368,7 +370,7 @@ class IceaxeIoUtilTest {
         };
         var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.SESSION_CONNECT, 123, TimeUnit.MILLISECONDS);
         var timeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.SESSION_CONNECT);
-        var actual = assertThrowsExactly(IceaxeIOException.class,
+        var actual = assertThrowsExactly(IceaxeTimeoutIOException.class,
                 () -> IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout, IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_TIMEOUT));
         assertEquals(IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, actual.getDiagnosticCode());
         assertInstanceOf(TimeoutException.class, actual.getCause());
@@ -651,6 +653,76 @@ class IceaxeIoUtilTest {
     }
 
     @Test
+    void testClose_IceaxeIOException() {
+        { // e1 is timeout, e1.code != close.timeoutCode
+            var e1 = new IceaxeTimeoutIOException(IceaxeErrorCode.SESSION_SHUTDOWN_CLOSE_TIMEOUT);
+            var e2 = new IceaxeIOException(CLOSE_ERROR);
+            AutoCloseable close1 = () -> {
+                throw e1;
+            };
+            AutoCloseable close2 = () -> {
+                throw e2;
+            };
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> {
+                IceaxeIoUtil.close(0, CLOSE_TIMEOUT_ERROR, CLOSE_ERROR, close1, close2);
+            });
+            assertEquals(CLOSE_TIMEOUT_ERROR, e.getDiagnosticCode());
+            assertSame(e1, e.getCause());
+            var s0 = e.getSuppressed()[0];
+            assertSame(e2, s0);
+        }
+        { // e1 is timeout, e1.code == close.timeoutCode
+            var e1 = new IceaxeTimeoutIOException(CLOSE_TIMEOUT_ERROR);
+            var e2 = new IceaxeIOException(CLOSE_ERROR);
+            AutoCloseable close1 = () -> {
+                throw e1;
+            };
+            AutoCloseable close2 = () -> {
+                throw e2;
+            };
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> {
+                IceaxeIoUtil.close(0, CLOSE_TIMEOUT_ERROR, CLOSE_ERROR, close1, close2);
+            });
+            assertSame(e1, e);
+            var s0 = e.getSuppressed()[0];
+            assertSame(e2, s0);
+        }
+        { // e1 is not timeout, e1.code != close.errorCode
+            var e1 = new IceaxeIOException(IceaxeErrorCode.SESSION_LOW_ERROR);
+            var e2 = new IceaxeIOException(CLOSE_ERROR);
+            AutoCloseable close1 = () -> {
+                throw e1;
+            };
+            AutoCloseable close2 = () -> {
+                throw e2;
+            };
+            var e = assertThrowsExactly(IceaxeIOException.class, () -> {
+                IceaxeIoUtil.close(0, CLOSE_TIMEOUT_ERROR, CLOSE_ERROR, close1, close2);
+            });
+            assertEquals(CLOSE_ERROR, e.getDiagnosticCode());
+            assertSame(e1, e.getCause());
+            var s0 = e.getSuppressed()[0];
+            assertSame(e2, s0);
+        }
+        { // e1 is not timeout, e1.code == close.errorCode
+            var e1 = new IceaxeIOException(CLOSE_ERROR);
+            var e2 = new IceaxeIOException(IceaxeErrorCode.SESSION_CHILD_CLOSE_ERROR);
+            AutoCloseable close1 = () -> {
+                throw e1;
+            };
+            AutoCloseable close2 = () -> {
+                throw e2;
+            };
+            var e = assertThrowsExactly(IceaxeIOException.class, () -> {
+                IceaxeIoUtil.close(0, CLOSE_TIMEOUT_ERROR, CLOSE_ERROR, close1, close2);
+            });
+            assertSame(e1, e);
+            var s0 = e.getSuppressed()[0];
+            assertSame(e2, s0);
+        }
+    }
+
+    @Test
     void testClose_IOException() {
         AutoCloseable close1 = () -> {
             throw new IOException("abc");
@@ -726,7 +798,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new ResponseTimeoutException("def");
         };
-        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> {
             IceaxeIoUtil.close(0, CLOSE_TIMEOUT_ERROR, CLOSE_ERROR, close1, close2);
         });
         assertEquals(CLOSE_TIMEOUT_ERROR.getMessage() + ": abc", e.getMessage());
@@ -782,7 +854,7 @@ class IceaxeIoUtilTest {
         AutoCloseable close2 = () -> {
             throw new ResponseTimeoutException("def");
         };
-        var e = assertThrowsExactly(IceaxeIOException.class, () -> {
+        var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> {
             IceaxeIoUtil.closeInTransaction(0, CLOSE_TIMEOUT_ERROR, CLOSE_ERROR, close1, close2);
         });
         assertEquals(CLOSE_TIMEOUT_ERROR.getMessage() + ": abc", e.getMessage());

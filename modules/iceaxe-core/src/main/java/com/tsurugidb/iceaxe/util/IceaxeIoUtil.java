@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.exception.TsurugiDiagnosticCodeProvider;
 import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -77,7 +78,7 @@ public final class IceaxeIoUtil {
             occurred = wrapper;
             throw wrapper;
         } catch (TimeoutException | ResponseTimeoutException e) {
-            var ioe = new IceaxeIOException(timeoutErrorCode, e);
+            var ioe = new IceaxeTimeoutIOException(timeoutErrorCode, e);
             occurred = ioe;
             throw ioe;
         } catch (Throwable e) {
@@ -96,7 +97,7 @@ public final class IceaxeIoUtil {
                     throw wrapper;
                 }
             } catch (ResponseTimeoutException e) {
-                var ie = new IceaxeIOException(closeTimeoutErrorCode, e);
+                var ie = new IceaxeTimeoutIOException(closeTimeoutErrorCode, e);
                 if (occurred != null) {
                     occurred.addSuppressed(ie);
                 } else {
@@ -136,7 +137,7 @@ public final class IceaxeIoUtil {
             } catch (ServerException e) {
                 throw new TsurugiIOException(e);
             } catch (ResponseTimeoutException e) {
-                throw new IceaxeIOException(closeTimeoutErrorCode, e);
+                throw new IceaxeTimeoutIOException(closeTimeoutErrorCode, e);
             }
         };
     }
@@ -263,11 +264,28 @@ public final class IceaxeIoUtil {
                     occurred.addSuppressed(wrapper);
                 }
             } catch (ResponseTimeoutException e) {
-                var ie = new IceaxeIOException(closeTimeoutErrorCode, e);
+                var ie = new IceaxeTimeoutIOException(closeTimeoutErrorCode, e);
                 if (occurred == null) {
                     occurred = ie;
                 } else {
                     occurred.addSuppressed(ie);
+                }
+            } catch (IceaxeIOException e) {
+                if (occurred == null) {
+                    IceaxeErrorCode code = e.getDiagnosticCode();
+                    if (code.isTimeout()) {
+                        if (code != closeTimeoutErrorCode) {
+                            occurred = new IceaxeTimeoutIOException(closeTimeoutErrorCode, e);
+                        } else {
+                            occurred = e;
+                        }
+                    } else if (code != closeErrorCode) {
+                        occurred = new IceaxeIOException(closeErrorCode, e);
+                    } else {
+                        occurred = e;
+                    }
+                } else {
+                    occurred.addSuppressed(e);
                 }
             } catch (IOException | InterruptedException | RuntimeException | Error e) {
                 if (occurred == null) {

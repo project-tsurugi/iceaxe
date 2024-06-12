@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.exception;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -25,6 +26,9 @@ class IceaxeErrorCodeTest {
             if (name.contains("CONNECT")) {
                 assertTrue(message.contains("connect"), "not contains 'connect'. name=" + name);
             }
+            if (name.contains("SHUTDOWN")) {
+                assertTrue(message.contains("shutdown"), "not contains 'shutdown'. name=" + name);
+            }
             if (name.contains("CLOSE")) {
                 assertTrue(message.contains("close"), "not contains 'close'. name=" + name);
             }
@@ -33,6 +37,9 @@ class IceaxeErrorCodeTest {
             }
             if (name.contains("TIMEOUT")) {
                 assertTrue(message.contains("timeout"), "not contains 'timeout'. name=" + name);
+                assertTrue(code.isTimeout());
+            } else {
+                assertFalse(code.isTimeout());
             }
             if (name.contains("ERROR")) {
                 assertTrue(message.contains("error"), "not contains 'error'. name=" + name);

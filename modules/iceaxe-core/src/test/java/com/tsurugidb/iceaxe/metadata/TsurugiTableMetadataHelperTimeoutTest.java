@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.IceaxeIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.test.TestTsurugiSession;
@@ -34,7 +34,7 @@ class TsurugiTableMetadataHelperTimeoutTest {
 
             var target = new TsurugiTableMetadataHelper();
 
-            var e = assertThrowsExactly(IceaxeIOException.class, () -> target.findTableMetadata(session, "test"));
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> target.findTableMetadata(session, "test"));
             assertEquals(IceaxeErrorCode.TABLE_METADATA_CONNECT_TIMEOUT, e.getDiagnosticCode());
         }
 
@@ -56,7 +56,7 @@ class TsurugiTableMetadataHelperTimeoutTest {
 
             var target = new TsurugiTableMetadataHelper();
 
-            var e = assertThrowsExactly(IceaxeIOException.class, () -> target.findTableMetadata(session, "test"));
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> target.findTableMetadata(session, "test"));
             assertEquals(IceaxeErrorCode.TABLE_METADATA_CLOSE_TIMEOUT, e.getDiagnosticCode());
         }
 

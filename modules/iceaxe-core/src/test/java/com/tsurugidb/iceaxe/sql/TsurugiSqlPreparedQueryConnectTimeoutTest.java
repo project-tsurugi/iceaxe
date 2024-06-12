@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.IceaxeIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
@@ -58,7 +58,7 @@ class TsurugiSqlPreparedQueryConnectTimeoutTest {
                     modifier.accept(ps);
                 }
 
-                var e = assertThrowsExactly(IceaxeIOException.class, () -> ps.getLowPreparedStatement());
+                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> ps.getLowPreparedStatement());
                 assertEquals(IceaxeErrorCode.PS_CONNECT_TIMEOUT, e.getDiagnosticCode());
             }
         }
@@ -103,7 +103,7 @@ class TsurugiSqlPreparedQueryConnectTimeoutTest {
                     modifier.accept(ps);
                 }
 
-                var e = assertThrowsExactly(IceaxeIOException.class, () -> ps.getLowPreparedStatement());
+                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> ps.getLowPreparedStatement());
                 assertEquals(IceaxeErrorCode.PS_CLOSE_TIMEOUT, e.getDiagnosticCode());
 
                 future.setExpectedCloseTimeout(null);

@@ -79,6 +79,12 @@ class TgSessionOptionTest {
     }
 
     @Test
+    void closeShutdownType() {
+        var sessionOption = new TgSessionOption().setCloseShutdownType(TgSessionShutdownType.GRACEFUL);
+        assertEquals(TgSessionShutdownType.GRACEFUL, sessionOption.getCloseShutdownType());
+    }
+
+    @Test
     void testOf() {
         var sessionOption = TgSessionOption.of();
 
@@ -88,18 +94,32 @@ class TgSessionOptionTest {
         assertEquals(Long.MAX_VALUE, timeout.value());
         assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
         assertEquals(TgCommitType.DEFAULT, sessionOption.getCommitType());
+        assertEquals(TgSessionShutdownType.NOTHING, sessionOption.getCloseShutdownType());
     }
 
     @Test
     void testToString() {
         var empty = new TgSessionOption();
-        assertEquals("TgSessionOption{label=null, applicationName=null, timeout={DEFAULT=9223372036854775807nanoseconds}, commitType=DEFAULT}", empty.toString());
+        assertEquals("TgSessionOption{" //
+                + "label=null" //
+                + ", applicationName=null" //
+                + ", timeout={DEFAULT=9223372036854775807nanoseconds}" //
+                + ", commitType=DEFAULT" //
+                + ", closeShutdownType=NOTHING" //
+                + "}", empty.toString());
 
         var sessionOption = TgSessionOption.of() //
                 .setLabel("test") //
                 .setApplicationName("test-app") //
                 .setTimeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS) //
-                .setCommitType(TgCommitType.STORED);
-        assertEquals("TgSessionOption{label=test, applicationName=test-app, timeout={DEFAULT=123seconds}, commitType=STORED}", sessionOption.toString());
+                .setCommitType(TgCommitType.STORED) //
+                .setCloseShutdownType(TgSessionShutdownType.GRACEFUL);
+        assertEquals("TgSessionOption{" //
+                + "label=test" //
+                + ", applicationName=test-app" //
+                + ", timeout={DEFAULT=123seconds}" //
+                + ", commitType=STORED" //
+                + ", closeShutdownType=GRACEFUL" //
+                + "}", sessionOption.toString());
     }
 }

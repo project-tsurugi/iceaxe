@@ -31,6 +31,29 @@ class TsurugiSessionTest {
     }
 
     @Test
+    void getCloseShutdownType() throws Exception {
+        {
+            var sessionOption = TgSessionOption.of();
+            try (var session = new TsurugiSession(null, sessionOption)) {
+                assertEquals(TgSessionShutdownType.NOTHING, session.getCloseShutdownType());
+            }
+        }
+        {
+            var sessionOption = TgSessionOption.of().setCloseShutdownType(TgSessionShutdownType.GRACEFUL);
+            try (var session = new TsurugiSession(null, sessionOption)) {
+                assertEquals(TgSessionShutdownType.GRACEFUL, session.getCloseShutdownType());
+            }
+        }
+        {
+            var sessionOption = TgSessionOption.of().setCloseShutdownType(TgSessionShutdownType.GRACEFUL);
+            try (var session = new TsurugiSession(null, sessionOption)) {
+                session.setCloseShutdownType(TgSessionShutdownType.FORCEFUL);
+                assertEquals(TgSessionShutdownType.FORCEFUL, session.getCloseShutdownType());
+            }
+        }
+    }
+
+    @Test
     void testToString() throws Exception {
         {
             var sessionOption = TgSessionOption.of();

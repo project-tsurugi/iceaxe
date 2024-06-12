@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.IceaxeIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.test.TestTsurugiSession;
@@ -58,7 +58,7 @@ class TsurugiTransactionRollbackTimeoutTest {
                 var lowTx = (TestLowTransaction) transaction.getLowTransaction();
                 lowTx.setTestRollbackFutureResponse(future);
 
-                var e = assertThrowsExactly(IceaxeIOException.class, () -> transaction.rollback());
+                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.rollback());
                 assertEquals(IceaxeErrorCode.TX_ROLLBACK_TIMEOUT, e.getDiagnosticCode());
             }
         }
@@ -103,7 +103,7 @@ class TsurugiTransactionRollbackTimeoutTest {
                 var lowTx = (TestLowTransaction) transaction.getLowTransaction();
                 lowTx.setTestRollbackFutureResponse(future);
 
-                var e = assertThrowsExactly(IceaxeIOException.class, () -> transaction.rollback());
+                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.rollback());
                 assertEquals(IceaxeErrorCode.TX_ROLLBACK_CLOSE_TIMEOUT, e.getDiagnosticCode());
             }
 
@@ -165,7 +165,7 @@ class TsurugiTransactionRollbackTimeoutTest {
             var lowTx = (TestLowTransaction) transaction.getLowTransaction();
             lowTx.setTestRollbackFutureResponse(future);
 
-            var e = assertThrowsExactly(IceaxeIOException.class, () -> transaction.rollback());
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.rollback());
             assertEquals(IceaxeErrorCode.TX_ROLLBACK_CLOSE_TIMEOUT, e.getDiagnosticCode());
         }
 

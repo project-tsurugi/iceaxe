@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
-import com.tsurugidb.iceaxe.exception.IceaxeIOException;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.test.TestTsurugiSession;
@@ -60,7 +60,7 @@ class TsurugiTransactionCloseTimeoutTest {
                 modifier.accept(transaction);
             }
 
-            var e = assertThrowsExactly(IceaxeIOException.class, () -> transaction.close());
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.close());
             assertEquals(IceaxeErrorCode.TX_CLOSE_TIMEOUT, e.getDiagnosticCode());
 
             future.setExpectedCloseTimeout(null);
@@ -104,7 +104,7 @@ class TsurugiTransactionCloseTimeoutTest {
             lowTx.setExpectedCloseTimeout(1, TimeUnit.SECONDS);
             lowTx.setThrowCloseTimeout(true);
 
-            var e = assertThrowsExactly(IceaxeIOException.class, () -> transaction.close());
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.close());
             assertEquals(IceaxeErrorCode.TX_CLOSE_TIMEOUT, e.getDiagnosticCode());
 
             assertTrue(lowTx.isClosed());
@@ -162,7 +162,7 @@ class TsurugiTransactionCloseTimeoutTest {
             lowTx.setExpectedCloseTimeout(TimeUnit.SECONDS.toNanos(1) - childSleep, TimeUnit.NANOSECONDS);
             lowTx.setThrowCloseTimeout(true);
 
-            var e = assertThrowsExactly(IceaxeIOException.class, () -> transaction.close());
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.close());
             assertEquals(IceaxeErrorCode.TX_CLOSE_TIMEOUT, e.getDiagnosticCode());
 
             assertTrue(lowTx.isClosed());
