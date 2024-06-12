@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.session.TgSessionShutdownType;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
@@ -63,9 +66,11 @@ class DbSessionTest extends DbTestTableTester {
         }
     }
 
-    @Test
-    void closeTwice() throws Exception {
-        try (var session = DbTestConnector.createSession()) {
+    @ParameterizedTest
+    @ValueSource(strings = { "NOTHING", "GRACEFUL", "FORCEFUL" })
+    void closeTwice(String s) throws Exception {
+        var shutdownType = TgSessionShutdownType.valueOf(s);
+        try (var session = DbTestConnector.createSession(shutdownType)) {
             session.getLowSqlClient();
             assertTrue(session.isAlive());
 

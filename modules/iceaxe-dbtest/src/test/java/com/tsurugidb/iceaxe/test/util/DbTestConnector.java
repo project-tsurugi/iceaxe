@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionShutdownType;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -61,13 +62,24 @@ public class DbTestConnector {
         return TsurugiConnector.of(endpoint);
     }
 
+    private static final TgSessionShutdownType CLOSE_SHUTDOWN_TYPE = TgSessionShutdownType.GRACEFUL;
+
     public static TsurugiSession createSession() throws IOException {
         return createSession(20, TimeUnit.SECONDS);
     }
 
     public static TsurugiSession createSession(long time, TimeUnit unit) throws IOException {
+        return createSession(time, unit, CLOSE_SHUTDOWN_TYPE);
+    }
+
+    public static TsurugiSession createSession(TgSessionShutdownType shutdownType) throws IOException {
+        return createSession(20, TimeUnit.SECONDS, shutdownType);
+    }
+
+    public static TsurugiSession createSession(long time, TimeUnit unit, TgSessionShutdownType shutdownType) throws IOException {
         var sessionOption = TgSessionOption.of();
         sessionOption.setTimeout(TgTimeoutKey.DEFAULT, time, unit);
+        sessionOption.setCloseShutdownType(shutdownType);
 
         var connector = createConnector();
         var session = connector.createSession(sessionOption);
