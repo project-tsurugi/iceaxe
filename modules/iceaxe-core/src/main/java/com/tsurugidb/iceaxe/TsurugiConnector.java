@@ -114,6 +114,7 @@ public class TsurugiConnector {
     private final URI endpoint;
     private final Credential defaultCredential;
     private final TgSessionOption defaultSessionOption;
+    private String defaultApplicationName = null;
     private BiFunction<FutureResponse<? extends Session>, TgSessionOption, ? extends TsurugiSession> sessionGenerator = null;
     private List<Consumer<TsurugiSession>> eventListenerList = null;
     private TsurugiSessionTxFileLogConfig txFileLogConfig = TsurugiSessionTxFileLogConfig.DEFAULT;
@@ -149,6 +150,46 @@ public class TsurugiConnector {
      */
     public TgSessionOption getSessionOption() {
         return this.defaultSessionOption;
+    }
+
+    /**
+     * set application name.
+     *
+     * @param name application name
+     * @return this
+     * @since X.X.X
+     */
+    public TsurugiConnector setApplicationName(@Nullable String name) {
+        this.defaultApplicationName = name;
+        return this;
+    }
+
+    /**
+     * get application name.
+     *
+     * @return application name
+     * @since X.X.X
+     */
+    public @Nullable String getApplicationName() {
+        return this.defaultApplicationName;
+    }
+
+    /**
+     * get application name.
+     *
+     * @param sessionOption session option
+     * @return application name
+     * @since X.X.X
+     */
+    public Optional<String> findApplicationName(TgSessionOption sessionOption) {
+        String name = null;
+        if (sessionOption != null) {
+            name = sessionOption.getApplicationName();
+        }
+        if (name == null) {
+            name = this.defaultApplicationName;
+        }
+        return Optional.ofNullable(name);
     }
 
     /**
@@ -299,10 +340,9 @@ public class TsurugiConnector {
             lowBuilder.withLabel(label);
         }
 
-        String applicationName = sessionOption.getApplicationName();
-        if (applicationName != null) {
-            lowBuilder.withApplicationName(applicationName);
-        }
+        findApplicationName(sessionOption).ifPresent(name -> {
+            lowBuilder.withApplicationName(name);
+        });
 
         return lowBuilder;
     }
