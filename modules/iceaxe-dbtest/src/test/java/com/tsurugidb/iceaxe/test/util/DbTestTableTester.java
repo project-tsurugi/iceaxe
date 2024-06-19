@@ -65,7 +65,9 @@ public class DbTestTableTester {
     protected static TsurugiSession getSession() throws IOException {
         synchronized (DbTestTableTester.class) {
             if (staticSession == null) {
-                staticSession = DbTestConnector.createSession();
+                String baseLabel = DbTestConnector.getSessionLabel();
+                String label = baseLabel + " (staticSession)";
+                staticSession = DbTestConnector.createSession(label);
             }
         }
         return staticSession;
@@ -121,14 +123,17 @@ public class DbTestTableTester {
     }
 
     protected static void logInitEnd(Logger log, TestInfo info) {
-        DbTestConnector.setSessionLabel(null);
-
-        if (START_END_LOG_INFO) {
-            log.info("init all end");
-        } else {
-            log.debug("init all end");
+        setSessionLabel(info, null, "init all end");
+        try {
+            if (START_END_LOG_INFO) {
+                log.info("init all end");
+            } else {
+                log.debug("init all end");
+            }
+            serverLog(log, null, "init all end");
+        } finally {
+            DbTestConnector.setSessionLabel(null);
         }
-        serverLog(log, null, "init all end");
     }
 
     protected void logInitStart(TestInfo info) {
@@ -144,15 +149,19 @@ public class DbTestTableTester {
     }
 
     protected void logInitEnd(TestInfo info) {
-        DbTestConnector.setSessionLabel(null);
-
         String displayName = getDisplayName(info);
-        if (START_END_LOG_INFO) {
-            LOG.info("{} init end", displayName);
-        } else {
-            LOG.debug("{} init end", displayName);
+        setSessionLabel(info, displayName, "init end");
+
+        try {
+            if (START_END_LOG_INFO) {
+                LOG.info("{} init end", displayName);
+            } else {
+                LOG.debug("{} init end", displayName);
+            }
+            serverLog(LOG, displayName, "init end");
+        } finally {
+            DbTestConnector.setSessionLabel(null);
         }
-        serverLog(LOG, displayName, "init end");
     }
 
     @BeforeEach
@@ -170,15 +179,19 @@ public class DbTestTableTester {
 
     @AfterEach
     void testerAfterEach(TestInfo info) {
-        DbTestConnector.setSessionLabel(null);
-
         String displayName = getDisplayName(info);
-        if (START_END_LOG_INFO) {
-            LOG.info("{} end", displayName);
-        } else {
-            LOG.debug("{} end", displayName);
+        setSessionLabel(info, displayName, "end");
+
+        try {
+            if (START_END_LOG_INFO) {
+                LOG.info("{} end", displayName);
+            } else {
+                LOG.debug("{} end", displayName);
+            }
+            serverLog(LOG, displayName, "end");
+        } finally {
+            DbTestConnector.setSessionLabel(null);
         }
-        serverLog(LOG, displayName, "end");
     }
 
     private static void setSessionLabel(TestInfo info, String displayName, String suffix) {
