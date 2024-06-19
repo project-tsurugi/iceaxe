@@ -30,7 +30,7 @@ public class DbTestConnector {
     private static URI staticEndpoint;
     private static final List<TsurugiSession> staticSessionList = new CopyOnWriteArrayList<>();
 
-    private static URI getEndPoint() {
+    public static URI getEndPoint() {
         if (staticEndpoint == null) {
             String endpoint = System.getProperty(SYSPROP_DBTEST_ENDPOINT, "tcp://localhost:12345");
             staticEndpoint = URI.create(endpoint);
