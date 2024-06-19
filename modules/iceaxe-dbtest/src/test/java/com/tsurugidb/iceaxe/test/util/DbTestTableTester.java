@@ -402,6 +402,10 @@ public class DbTestTableTester {
         return session.createTransactionManager(TgTmSetting.ofAlways(TgTxOption.ofOCC().label(txLabel), max));
     }
 
+    protected static TsurugiTransactionManager createTransactionManagerLtx(TsurugiSession session, String tableName) {
+        return session.createTransactionManager(TgTxOption.ofLTX(tableName));
+    }
+
     // assertion
 
     protected static void assertEqualsCode(DiagnosticCode expected, Throwable actual) {
