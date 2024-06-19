@@ -40,10 +40,11 @@ class DbMultiSessionTest extends DbTestTableTester {
         var sessionList = new ArrayList<TsurugiSession>();
         Throwable occurred = null;
         try {
+            String baseLabel = DbTestConnector.getSessionLabel();
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 TsurugiSession session;
                 try {
-                    session = DbTestConnector.createSession();
+                    session = DbTestConnector.createSession(baseLabel + "[" + i + "]");
                 } catch (IOException e) {
                     assertEqualsMessage("the server has declined the connection request", e);
                     int count = sessionList.size();
@@ -60,23 +61,7 @@ class DbMultiSessionTest extends DbTestTableTester {
             occurred = e;
             throw e;
         } finally {
-            var exceptionList = new ArrayList<Exception>();
-            for (var session : sessionList) {
-                try {
-                    session.close();
-                } catch (Exception e) {
-                    exceptionList.add(e);
-                }
-            }
-            if (!exceptionList.isEmpty()) {
-                var e = new Exception("session close error. errorCount=" + exceptionList.size());
-                exceptionList.forEach(e::addSuppressed);
-                if (occurred != null) {
-                    occurred.addSuppressed(e);
-                } else {
-                    throw e;
-                }
-            }
+            closeSession(sessionList, occurred);
         }
     }
 
@@ -121,11 +106,13 @@ class DbMultiSessionTest extends DbTestTableTester {
 
     private void manySession(boolean sqlClient, boolean transaction) throws IOException, InterruptedException {
         LOG.debug("create session start");
-        var list = new ArrayList<TsurugiSession>();
+        var sessionList = new ArrayList<TsurugiSession>();
+        Throwable occurred = null;
         try {
+            String baseLabel = DbTestConnector.getSessionLabel();
             for (int i = 0; i < 60; i++) {
-                var session = DbTestConnector.createSession();
-                list.add(session);
+                var session = DbTestConnector.createSession(baseLabel + "[" + i + "]");
+                sessionList.add(session);
 
                 if (sqlClient) {
                     session.getLowSqlClient();
@@ -136,7 +123,7 @@ class DbMultiSessionTest extends DbTestTableTester {
             if (transaction) {
                 LOG.debug("createTransaction start");
                 int i = 0;
-                for (var session : list) {
+                for (var session : sessionList) {
                     LOG.debug("createTransaction {}", i++);
                     try (var tx = session.createTransaction(TgTxOption.ofOCC())) {
                         tx.getLowTransaction();
@@ -144,12 +131,11 @@ class DbMultiSessionTest extends DbTestTableTester {
                 }
                 LOG.debug("createTransaction end");
             }
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
         } finally {
-            LOG.debug("close session start");
-            for (var session : list) {
-                session.close();
-            }
-            LOG.debug("close session end");
+            closeSession(sessionList, occurred);
         }
     }
 
@@ -157,14 +143,17 @@ class DbMultiSessionTest extends DbTestTableTester {
     void multiThread() {
         LOG.debug("create session start");
         var sessionList = new CopyOnWriteArrayList<TsurugiSession>();
+        Throwable occurred = null;
         try {
             var threadList = new ArrayList<Thread>();
             var alive = new AtomicBoolean(true);
+            String baseLabel = DbTestConnector.getSessionLabel();
             for (int i = 0; i < 60; i++) {
+                String label = baseLabel + "[" + i + "]";
                 var thread = new Thread(() -> {
                     TsurugiSession session;
                     try {
-                        session = DbTestConnector.createSession();
+                        session = DbTestConnector.createSession(label);
                         sessionList.add(session);
                         session.getLowSqlClient();
                     } catch (Exception e) {
@@ -196,16 +185,36 @@ class DbMultiSessionTest extends DbTestTableTester {
                 }
             }
             LOG.debug("thread join end");
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
         } finally {
-            LOG.debug("close session start");
-            for (var session : sessionList) {
-                try {
-                    session.close();
-                } catch (Exception e) {
-                    LOG.warn("close error", e);
-                }
-            }
-            LOG.debug("close session end");
+            closeSession(sessionList, occurred);
         }
+    }
+
+    private void closeSession(List<TsurugiSession> sessionList, Throwable occurred) {
+        LOG.debug("close session start");
+
+        var exceptionList = new ArrayList<Exception>();
+        for (var session : sessionList) {
+            try {
+                session.close();
+            } catch (Exception e) {
+                exceptionList.add(e);
+            }
+        }
+
+        if (!exceptionList.isEmpty()) {
+            var e = new RuntimeException("session close error. errorCount=" + exceptionList.size());
+            exceptionList.forEach(e::addSuppressed);
+            if (occurred != null) {
+                occurred.addSuppressed(e);
+            } else {
+                throw e;
+            }
+        }
+
+        LOG.debug("close session end");
     }
 }

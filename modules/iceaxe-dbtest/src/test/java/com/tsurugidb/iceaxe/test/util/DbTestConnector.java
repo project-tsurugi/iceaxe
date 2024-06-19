@@ -30,6 +30,8 @@ public class DbTestConnector {
     private static URI staticEndpoint;
     private static final List<TsurugiSession> staticSessionList = new CopyOnWriteArrayList<>();
 
+    private static String sessionLabel;
+
     public static URI getEndPoint() {
         if (staticEndpoint == null) {
             String endpoint = System.getProperty(SYSPROP_DBTEST_ENDPOINT, "tcp://localhost:12345");
@@ -57,27 +59,40 @@ public class DbTestConnector {
         return endpoint;
     }
 
+    public static void setSessionLabel(String label) {
+        sessionLabel = label;
+    }
+
+    public static String getSessionLabel() {
+        return sessionLabel;
+    }
+
     public static TsurugiConnector createConnector() {
         URI endpoint = getEndPoint();
-        return TsurugiConnector.of(endpoint);
+        return TsurugiConnector.of(endpoint).setApplicationName("iceaxe-dbtest");
     }
 
     private static final TgSessionShutdownType CLOSE_SHUTDOWN_TYPE = TgSessionShutdownType.GRACEFUL;
 
     public static TsurugiSession createSession() throws IOException {
-        return createSession(20, TimeUnit.SECONDS);
+        return createSession(sessionLabel);
+    }
+
+    public static TsurugiSession createSession(String label) throws IOException {
+        return createSession(label, 20, TimeUnit.SECONDS, CLOSE_SHUTDOWN_TYPE);
     }
 
     public static TsurugiSession createSession(long time, TimeUnit unit) throws IOException {
-        return createSession(time, unit, CLOSE_SHUTDOWN_TYPE);
+        return createSession(sessionLabel, time, unit, CLOSE_SHUTDOWN_TYPE);
     }
 
     public static TsurugiSession createSession(TgSessionShutdownType shutdownType) throws IOException {
-        return createSession(20, TimeUnit.SECONDS, shutdownType);
+        return createSession(sessionLabel, 20, TimeUnit.SECONDS, shutdownType);
     }
 
-    public static TsurugiSession createSession(long time, TimeUnit unit, TgSessionShutdownType shutdownType) throws IOException {
+    public static TsurugiSession createSession(String label, long time, TimeUnit unit, TgSessionShutdownType shutdownType) throws IOException {
         var sessionOption = TgSessionOption.of();
+        sessionOption.setLabel(label);
         sessionOption.setTimeout(TgTimeoutKey.DEFAULT, time, unit);
         sessionOption.setCloseShutdownType(shutdownType);
 

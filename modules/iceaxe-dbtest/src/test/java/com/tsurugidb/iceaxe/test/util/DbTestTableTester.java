@@ -110,6 +110,8 @@ public class DbTestTableTester {
     private static final boolean START_END_LOG_INFO = true;
 
     protected static void logInitStart(Logger log, TestInfo info) {
+        setSessionLabel(info, null, "init all");
+
         if (START_END_LOG_INFO) {
             log.info("init all start");
         } else {
@@ -119,6 +121,8 @@ public class DbTestTableTester {
     }
 
     protected static void logInitEnd(Logger log, TestInfo info) {
+        DbTestConnector.setSessionLabel(null);
+
         if (START_END_LOG_INFO) {
             log.info("init all end");
         } else {
@@ -129,6 +133,8 @@ public class DbTestTableTester {
 
     protected void logInitStart(TestInfo info) {
         String displayName = getDisplayName(info);
+        setSessionLabel(info, displayName, "init");
+
         if (START_END_LOG_INFO) {
             LOG.info("{} init start", displayName);
         } else {
@@ -138,6 +144,8 @@ public class DbTestTableTester {
     }
 
     protected void logInitEnd(TestInfo info) {
+        DbTestConnector.setSessionLabel(null);
+
         String displayName = getDisplayName(info);
         if (START_END_LOG_INFO) {
             LOG.info("{} init end", displayName);
@@ -150,6 +158,8 @@ public class DbTestTableTester {
     @BeforeEach
     void tetsterBeforeEach(TestInfo info) {
         String displayName = getDisplayName(info);
+        setSessionLabel(info, displayName, null);
+
         if (START_END_LOG_INFO) {
             LOG.info("{} start", displayName);
         } else {
@@ -160,6 +170,8 @@ public class DbTestTableTester {
 
     @AfterEach
     void testerAfterEach(TestInfo info) {
+        DbTestConnector.setSessionLabel(null);
+
         String displayName = getDisplayName(info);
         if (START_END_LOG_INFO) {
             LOG.info("{} end", displayName);
@@ -167,6 +179,18 @@ public class DbTestTableTester {
             LOG.debug("{} end", displayName);
         }
         serverLog(LOG, displayName, "end");
+    }
+
+    private static void setSessionLabel(TestInfo info, String displayName, String suffix) {
+        String className = info.getTestClass().map(c -> c.getSimpleName()).orElse("Unknown");
+        String label = className;
+        if (displayName != null) {
+            label += "." + displayName;
+        }
+        if (suffix != null) {
+            label += " " + suffix;
+        }
+        DbTestConnector.setSessionLabel(label);
     }
 
     private static String getDisplayName(TestInfo info) {
