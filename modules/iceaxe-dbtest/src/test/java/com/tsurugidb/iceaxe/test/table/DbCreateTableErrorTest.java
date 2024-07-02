@@ -37,7 +37,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + ")";
         var e = executeErrorDdl(sql);
         assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-        assertContains("compile failed with error:column_not_found message:\"primary key column \"goo\" is not found\" location:(unknown)", e.getMessage());
+        assertContains("compile failed with error:symbol_not_found message:\"symbol 'goo' is not found\" location:<input>:", e.getMessage());
     }
 
     @Test
@@ -51,7 +51,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + ")";
         var e = executeErrorDdl(sql);
         assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-        assertContains("compile failed with error:invalid_default_value message:\"primary key definition must be upto one\" location:(unknown)", e.getMessage());
+        assertContains("compile failed with error:primary_index_not_found message:\"multiple primary keys are not supported\" location:<input>:", e.getMessage());
     }
 
     @Test
@@ -63,8 +63,9 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  zzz varchar(10)," //
                 + "  primary key(foo, foo)" //
                 + ")";
-        // TODO executeErrorDdl(sql)
-        executeDdl(getSession(), sql);
+        var e = executeErrorDdl(sql);
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+        assertContains("compile failed with error:column_already_exists message:\"duplicate column in index definition: foo\" location:<input>:", e.getMessage());
     }
 
     @Test
@@ -76,13 +77,9 @@ class DbCreateTableErrorTest extends DbTestTableTester {
             }
 
             dropTestTable();
-            try {
-                // TODO executeErrorDdl(sql)
-                executeDdl(getSession(), sql);
-            } catch (Throwable e) {
-                LOG.error("duplicateColumnName fail. ddl={}", sql, e);
-                throw e;
-            }
+            var e = executeErrorDdl(sql);
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            assertContains("compile failed with error:column_already_exists message:\"duplicate column in table definition: test.foo\" location:<input>:", e.getMessage());
         }
     }
 
