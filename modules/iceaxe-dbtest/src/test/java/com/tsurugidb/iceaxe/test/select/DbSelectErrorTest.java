@@ -58,7 +58,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"hoge\" location:(unknown)", e.getMessage());
+            assertContains("compile failed with error:symbol_not_found message:\"symbol 'hoge' is not found\" location:<input>:", e.getMessage());
         }
     }
 
@@ -73,7 +73,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("compile failed with error:invalid_aggregation_column message:\"target column must be aggregated\" location:(unknown)", e.getMessage()); // TODO カラム名が欲しい
+            assertContains("compile failed with error:invalid_aggregation_column message:\"column must be aggregated\" location:<input>:", e.getMessage()); // TODO カラム名が欲しい
         }
     }
 
