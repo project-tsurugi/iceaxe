@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -17,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * select literal test
@@ -69,13 +66,10 @@ class DbSelectLiteralTest extends DbTestTableTester {
     }
 
     @Test
-    void doubleLiteralError() throws Exception {
-        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-            test("1e2", entity -> {
-            });
+    void doubleLiteralE() throws Exception {
+        test("1e2", entity -> {
+            assertEquals(100d, entity.getDouble(COLUMN));
         });
-        assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e);
-        assertContains("parsing statement failed: mismatched input 'as' expecting K_FROM (<input>:1:11)", e.getMessage());
     }
 
     @Test
