@@ -48,7 +48,8 @@ class DbDropTableTest extends DbTestTableTester {
                 tm.executeAndGetCount(ps);
             });
             assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:table_not_found message:\"table `" + TEST + "' is not found\" location:(unknown). TsurugiTransaction(OCC{}, iceaxeTxId=", e.getMessage());
+            assertContains("compile failed with error:table_not_found message:\"'{\"node_kind\":\"simple\",\"identifier\":\"" + TEST
+                    + "\",\"identifier_kind\":\"regular\"}' is not found\" location:<input>:1:12+4", e.getMessage());
         }
     }
 
