@@ -104,7 +104,7 @@ class DbPsExecuteErrorTest extends DbTestTableTester {
                 tm.executeAndGetCount(ps, parameter);
             });
             assertEqualsCode(SqlServiceCode.TYPE_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:inconsistent_type message:\"int4() (expected: {character_string})\" location:(unknown)", e.getMessage()); // TODO カラム名の確認
+            assertContains("compile failed with error:inconsistent_type message:\"int4() (expected: {character_string})\" location:<input>:", e.getMessage()); // TODO カラム名の確認
         }
 
         assertEqualsTestTable(SIZE);
