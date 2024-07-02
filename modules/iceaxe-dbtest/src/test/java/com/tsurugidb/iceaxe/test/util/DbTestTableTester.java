@@ -525,6 +525,13 @@ public class DbTestTableTester {
         return Arrays.stream(snakeCase.split("_")).map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1).toLowerCase()).collect(Collectors.joining());
     }
 
+    protected static void assertErrorTableNotFound(String expectedTableName, Exception actual) {
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, actual);
+
+        String expected = "compile failed with error:symbol_not_found message:\"symbol '" + expectedTableName + "' is not found\" location:<input>:";
+        assertContains(expected, actual.getMessage());
+    }
+
     protected static void assertEqualsTestTable(TestEntity... expected) throws IOException, InterruptedException {
         var expectedList = List.of(expected);
         assertEqualsTestTable(expectedList);

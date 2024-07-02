@@ -56,8 +56,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                         throw e;
                     });
                 });
-                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e0);
-                assertContains("compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)", e0.getMessage());
+                assertErrorTableNotFound(TEST, e0);
             }
         }
     }
@@ -65,25 +64,22 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     @Test
     void insert() throws Exception {
         var sql = "insert into " + TEST + "(" + TEST_COLUMNS + ") values(123, 456, 'abc')";
-        var expected = "compile failed with error:table_not_found message:\"table `" + TEST + "' is not found\" location:(unknown)";
-        statement(sql, expected);
+        statement(sql);
     }
 
     @Test
     void update() throws Exception {
         var sql = "update " + TEST + " set bar = 0";
-        var expected = "compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)";
-        statement(sql, expected);
+        statement(sql);
     }
 
     @Test
     void delete() throws Exception {
         var sql = "delete from " + TEST;
-        var expected = "compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)";
-        statement(sql, expected);
+        statement(sql);
     }
 
-    private void statement(String sql, String expected) throws IOException, InterruptedException {
+    private void statement(String sql) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql)) {
@@ -97,8 +93,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                         throw e;
                     });
                 });
-                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e0);
-                assertContains(expected, e0.getMessage());
+                assertErrorTableNotFound(TEST, e0);
             }
         }
     }
@@ -117,8 +112,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetList(ps, parameter);
                 });
-                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-                assertContains("compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)", e.getMessage());
+                assertErrorTableNotFound(TEST, e);
             });
             tm.execute(transaction -> {
                 var parameter = TgBindParameters.of(foo.bind(1));
@@ -134,8 +128,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
     @Test
     void insertBind() throws Exception {
         var entity = new TestEntity(123, 456, "abc");
-        var expected = "compile failed with error:table_not_found message:\"table `" + TEST + "' is not found\" location:(unknown)";
-        preparedStatement(INSERT_SQL, INSERT_MAPPING, entity, expected);
+        preparedStatement(INSERT_SQL, INSERT_MAPPING, entity);
     }
 
     @Test
@@ -144,8 +137,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var sql = "update " + TEST + " set bar = " + bar;
         var mapping = TgParameterMapping.of(bar);
         var parameter = TgBindParameters.of(bar.bind(0));
-        var expected = "compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)";
-        preparedStatement(sql, mapping, parameter, expected);
+        preparedStatement(sql, mapping, parameter);
     }
 
     @Test
@@ -154,11 +146,10 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
         var sql = "delete from " + TEST + " where foo=" + foo;
         var mapping = TgParameterMapping.of(foo);
         var parameter = TgBindParameters.of(foo.bind(1));
-        var expected = "compile failed with error:table_not_found message:\"" + TEST + "\" location:(unknown)";
-        preparedStatement(sql, mapping, parameter, expected);
+        preparedStatement(sql, mapping, parameter);
     }
 
-    private <P> void preparedStatement(String sql, TgParameterMapping<P> parameterMapping, P parameter, String expected) throws IOException, InterruptedException {
+    private <P> void preparedStatement(String sql, TgParameterMapping<P> parameterMapping, P parameter) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {
@@ -166,8 +157,7 @@ class DbErrorTableNotExistsTest extends DbTestTableTester {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                     transaction.executeAndGetCount(ps, parameter);
                 });
-                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-                assertContains(expected, e.getMessage());
+                assertErrorTableNotFound(TEST, e);
             });
             tm.execute(transaction -> {
                 var e = assertThrowsExactly(IceaxeIOException.class, () -> {
