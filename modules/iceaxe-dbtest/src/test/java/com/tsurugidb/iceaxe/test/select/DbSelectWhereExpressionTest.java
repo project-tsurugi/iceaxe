@@ -54,7 +54,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e);
-            assertContains("parsing statement failed: mismatched input '!=' expecting <EOF> (<input>:1:41)", e.getMessage());
+            assertContains("compile failed with message:\"syntax error, unexpected <ERROR>\" region:", e.getMessage()); // TODO <ERROR>は分かりにくい
         }
     }
 
@@ -143,7 +143,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 var list = tm.executeAndGetList(ps);
                 assertWhere(entity -> expectedList.contains(entity.getFoo()), list);
             });
-            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO in実装待ち
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e); // TODO in実装待ち
         }
     }
 
@@ -161,7 +161,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 var list = tm.executeAndGetList(ps);
                 assertWhere(entity -> start <= entity.getFoo() && entity.getFoo() <= end, list);
             });
-            assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e); // TODO between実装待ち
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e); // TODO between実装待ち
         }
     }
 
@@ -176,7 +176,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 var list = tm.executeAndGetList(ps);
                 assertWhere(entity -> entity.getZzz().startsWith("1"), list);
             });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
         }
     }
 
@@ -191,7 +191,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 var list = tm.executeAndGetList(ps);
                 assertWhere(entity -> !entity.getZzz().startsWith("1"), list);
             });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
         }
     }
 
