@@ -77,6 +77,6 @@ class DbSystemReservedWordTest extends DbTestTableTester {
 
     private static void assertErrorSystemReservedWord(Exception actual) {
         assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, actual);
-        assertContains("compile failed with message:\"syntax error, unexpected _\" region:", actual.getMessage());
+        assertContains("compile failed with message:\"identifier starting with '__' is reserved for internal use\" region:", actual.getMessage());
     }
 }
