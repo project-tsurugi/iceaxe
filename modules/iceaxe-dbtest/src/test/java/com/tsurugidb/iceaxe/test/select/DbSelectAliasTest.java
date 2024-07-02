@@ -52,16 +52,18 @@ class DbSelectAliasTest extends DbTestTableTester {
         }
     }
 
-    @Test
-    void selectAsName() throws Exception {
-        var sql = "select count(*) as count from " + TEST;
-        selectCount(sql, "count");
+    @ParameterizedTest
+    @ValueSource(strings = { "cnt"/* , "count" */ }) // TODO countも別名として使いたい
+    void selectAsName(String name) throws Exception {
+        var sql = "select count(*) as " + name + " from " + TEST;
+        selectCount(sql, name);
     }
 
-    @Test
-    void selectName() throws Exception {
-        var sql = "select count(*) cnt from " + TEST;
-        selectCount(sql, "cnt");
+    @ParameterizedTest
+    @ValueSource(strings = { "cnt"/* , "count" */ }) // TODO countも別名として使いたい
+    void selectName(String name) throws Exception {
+        var sql = "select count(*) " + name + " from " + TEST;
+        selectCount(sql, name);
     }
 
     @Test
