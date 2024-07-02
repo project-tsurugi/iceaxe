@@ -60,8 +60,8 @@ class DbCreateTableTest extends DbTestTableTester {
         var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             tm.executeDdl(SQL);
         });
-        assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-        assertContains("compile failed with error:duplicate_table message:\"table `" + TEST + "' is already defined\" location:(unknown)", e.getMessage());
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+        assertContains("compile failed with error:index_already_exists message:\"table is already defined: " + TEST + "\" location:<input>:", e.getMessage());
     }
 
     @Test
@@ -86,8 +86,8 @@ class DbCreateTableTest extends DbTestTableTester {
         try (var ps = session.createStatement(CREATE_TEST_SQL, TgParameterMapping.of())) {
             try (var transaction = session.createTransaction(txOption)) {
                 var e = assertThrowsExactly(TsurugiIOException.class, () -> transaction.executeAndGetCount(ps, TgBindParameters.of()));
-                assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-                assertContains("compile failed with error:duplicate_table message:\"table `" + TEST + "' is already defined\" location:(unknown)", e.getMessage());
+                assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+                assertContains("compile failed with error:index_already_exists message:\"table is already defined: " + TEST + "\" location:<input>:", e.getMessage());
                 transaction.rollback();
             }
         }
