@@ -1,12 +1,14 @@
 package com.tsurugidb.iceaxe.test.error;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * system reserved word test
@@ -28,7 +30,6 @@ class DbSystemReservedWordTest extends DbTestTableTester {
 
     @Test
     void createTable() throws Exception {
-        // TODO アンダースコア2個で始まるテーブル名はシステム予約でありユーザーが使用できないので、使ったらエラーになるべき
         String tableName = "__test";
         dropTable(tableName);
         var sql = "create table " + tableName //
@@ -37,19 +38,24 @@ class DbSystemReservedWordTest extends DbTestTableTester {
                 + "  bar bigint," //
                 + "  zzz varchar(10)" //
                 + ")";
-        executeDdl(getSession(), sql, tableName);
+        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+            executeDdl(getSession(), sql, tableName);
+        });
+        assertErrorSystemReservedWord(e);
     }
 
     @Test
     void createTableColumn() throws Exception {
-        // TODO アンダースコア2個で始まるカラム名はシステム予約でありユーザーが使用できないので、使ったらエラーになるべき
         var sql = "create table " + TEST //
                 + "(" //
                 + "  __foo int," //
                 + "  __bar bigint," //
                 + "  __zzz varchar(10)" //
                 + ")";
-        executeDdl(getSession(), sql);
+        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+            executeDdl(getSession(), sql);
+        });
+        assertErrorSystemReservedWord(e);
     }
 
     @Test
@@ -58,17 +64,19 @@ class DbSystemReservedWordTest extends DbTestTableTester {
         createTestTable();
         insertTestTable(size);
 
-        // TODO アンダースコア2個で始まるカラム名はシステム予約でありユーザーが使用できないので、使ったらエラーになるべき
         var sql = "select foo as __foo from " + TEST + " order by foo";
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(size, list.size());
-            int i = 0;
-            for (var entity : list) {
-                assertEquals(i++, entity.getInt("__foo"));
-            }
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.executeAndGetList(ps);
+            });
+            assertErrorSystemReservedWord(e);
         }
+    }
+
+    private static void assertErrorSystemReservedWord(Exception actual) {
+        assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, actual);
+        assertContains("compile failed with message:\"syntax error, unexpected _\" region:", actual.getMessage());
     }
 }
