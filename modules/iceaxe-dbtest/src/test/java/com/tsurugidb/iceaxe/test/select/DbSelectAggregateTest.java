@@ -50,11 +50,6 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, resultMapping)) {
-            if (order.contains("order by")) { // TODO 集約のorder by実装待ち
-                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndFindRecord(ps));
-                assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
-                return;
-            }
             int count = tm.executeAndFindRecord(ps).get();
             assertEquals(SIZE, count);
         }
@@ -63,18 +58,13 @@ class DbSelectAggregateTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "", " order by sum(bar)" })
     void selectSum(String order) throws Exception {
-        var sql = "select sum(bar) as sum, min(zzz) as zzz from " + TEST + order;
+        var sql = "select sum(bar) as bar, min(zzz) as zzz from " + TEST + order;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            if (order.contains("order by")) { // TODO 集約のorder by実装待ち
-                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndFindRecord(ps));
-                assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
-                return;
-            }
             TsurugiResultEntity entity = tm.executeAndFindRecord(ps).get();
-            assertEquals(LongStream.range(0, SIZE).sum(), entity.getLongOrNull("sum"));
+            assertEquals(LongStream.range(0, SIZE).sum(), entity.getLongOrNull("bar"));
             assertEquals("0", entity.getStringOrNull("zzz"));
         }
     }
@@ -87,11 +77,6 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            if (order.contains("order by")) { // TODO 集約のorder by実装待ち
-                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetList(ps));
-                assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
-                return;
-            }
             var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
 
@@ -109,16 +94,11 @@ class DbSelectAggregateTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "", " order by foo" })
     void selectKeySum(String order) throws Exception {
-        var sql = "select foo, sum(bar) as sum, min(zzz) as zzz from " + TEST + " group by foo" + order;
+        var sql = "select foo, sum(bar) as bar, min(zzz) as zzz from " + TEST + " group by foo" + order;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            if (order.contains("order by")) { // TODO 集約のorder by実装待ち
-                var e = assertThrowsExactly(TsurugiTmIOException.class, () -> tm.executeAndGetList(ps));
-                assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
-                return;
-            }
             var list = tm.executeAndGetList(ps);
             assertEquals(SIZE, list.size());
 
@@ -128,7 +108,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
                 if (!order.isEmpty()) {
                     assertEquals(i, foo);
                 }
-                assertEquals(Long.valueOf(foo), actual.getLong("sum"));
+                assertEquals(Long.valueOf(foo), actual.getLong("bar"));
                 assertEquals(Integer.toString(foo), actual.getString("zzz"));
                 i++;
             }
@@ -185,7 +165,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
                 tm.executeAndGetList(ps, TgBindParameters.of());
             });
             assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-            assertContains("compile failed with error:invalid_aggregation_column message:\"target column must be aggregated\" location:(unknown)", e.getMessage()); // TODO エラー情報詳細
+            assertContains("compile failed with error:invalid_aggregation_column message:\"column must be aggregated\" location:<input>:", e.getMessage()); // TODO エラー情報詳細
         }
     }
 
@@ -200,7 +180,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"k\" location:(unknown))", e.getMessage());
+            assertContains("compile failed with error:symbol_not_found message:\"symbol 'k' is not found\" location:<input>:", e.getMessage());
         }
     }
 }
