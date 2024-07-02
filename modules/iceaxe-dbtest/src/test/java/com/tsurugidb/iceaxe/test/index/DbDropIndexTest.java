@@ -37,8 +37,7 @@ class DbDropIndexTest extends DbTestTableTester {
         var e = assertThrows(TsurugiTmIOException.class, () -> {
             tm.executeDdl(sql);
         });
-        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-        assertContains("index `idx_test_bar' is not found", e.getMessage());
+        assertErrorIndexNotFound(e);
     }
 
     @Test
@@ -51,7 +50,13 @@ class DbDropIndexTest extends DbTestTableTester {
         var e = assertThrows(TsurugiTmIOException.class, () -> {
             tm.executeDdl("drop index idx_test_bar");
         });
-        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-        assertContains("index `idx_test_bar' is not found", e.getMessage());
+        assertErrorIndexNotFound(e);
+    }
+
+    private static void assertErrorIndexNotFound(Exception actual) {
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, actual);
+        assertContains(
+                "compile failed with error:index_not_found message:\"'{\"node_kind\":\"simple\",\"identifier\":\"idx_test_bar\",\"identifier_kind\":\"regular\"}' is not found\" location:<input>:",
+                actual.getMessage());
     }
 }
