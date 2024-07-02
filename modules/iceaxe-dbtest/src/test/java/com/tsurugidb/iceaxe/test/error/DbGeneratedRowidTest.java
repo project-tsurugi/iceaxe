@@ -83,8 +83,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
+            assertErrorVariableNotFound(e);
         }
 
         assertEqualsTestTable(SIZE);
@@ -100,8 +99,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
+            assertErrorVariableNotFound(e);
         }
 
         assertEqualsTestTable(SIZE);
@@ -117,8 +115,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
+            assertErrorVariableNotFound(e);
         }
 
         assertEqualsTestTable(SIZE);
@@ -134,8 +131,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
+            assertErrorVariableNotFound(e);
         }
 
         assertEqualsTestTable(SIZE);
@@ -151,8 +147,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
+            assertErrorVariableNotFound(e);
         }
 
         assertEqualsTestTable(SIZE);
@@ -169,8 +164,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
+            assertErrorVariableNotFound(e);
         }
 
         assertEqualsTestTable(SIZE);
@@ -187,8 +181,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:variable_not_found message:\"" + GENERATED_KEY + "\" location:(unknown)", e.getMessage());
+            assertErrorVariableNotFound(e);
         }
 
         assertEqualsTestTable(SIZE);
@@ -200,20 +193,19 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         createTestTable();
         insertTestTable(SIZE);
 
-        // TODO アンダースコア2個で始まるカラム名はシステム予約でありユーザーが使用できないので、使ったらエラーになるべき
         var sql = "select foo as " + GENERATED_KEY + " from " + TEST + " order by foo";
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
-            for (var entity : list) {
-                // 現状、generated_rowidで始まる別名は取得できない
-                var e = assertThrowsExactly(IllegalArgumentException.class, () -> {
-                    entity.getInt(GENERATED_KEY);
-                });
-                assertEqualsMessage("not found column. name=__generated_rowid___test", e);
-            }
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.executeAndGetList(ps);
+            });
+            assertErrorVariableNotFound(e);
         }
+    }
+
+    private static void assertErrorVariableNotFound(Exception actual) {
+        assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, actual);
+        assertContains("compile failed with message:\"syntax error, unexpected _\" region:", actual.getMessage());
     }
 }
