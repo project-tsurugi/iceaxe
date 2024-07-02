@@ -88,13 +88,13 @@ class DbSelectEmptyTest extends DbTestTableTester {
     }
 
     void selectSum(String where) throws IOException, InterruptedException {
-        var sql = "select sum(bar) as sum, min(zzz) as zzz from " + TEST + where;
+        var sql = "select sum(bar) as bar, min(zzz) as zzz from " + TEST + where;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
             TsurugiResultEntity entity = tm.executeAndFindRecord(ps).get();
-            assertNull(entity.getIntOrNull("sum"));
+            assertNull(entity.getIntOrNull("bar"));
             assertNull(entity.getStringOrNull("zzz"));
         }
     }
@@ -123,7 +123,7 @@ class DbSelectEmptyTest extends DbTestTableTester {
     }
 
     void selectKeySum(String where) throws IOException, InterruptedException {
-        var sql = "select foo, sum(bar) as sum, min(zzz) as zzz from " + TEST //
+        var sql = "select foo, sum(bar) as bar, min(zzz) as zzz from " + TEST //
                 + where //
                 + " group by foo";
 
