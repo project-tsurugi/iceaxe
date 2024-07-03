@@ -39,6 +39,18 @@ class DbInsertErrorTest extends DbTestTableTester {
     }
 
     @Test
+    void notFoundColumn() throws Exception {
+        var sql = "insert into " + TEST + " (aaa) values(1)";
+
+        var tm = createTransactionManagerOcc(getSession());
+        var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+            tm.executeAndGetCount(sql);
+        });
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+        assertContains("compile failed with error:column_not_found message:\"column is not found: test.aaa\" location:<input>:", e.getMessage());
+    }
+
+    @Test
     void insertNullToPK() throws Exception {
         var sql = "insert into " + TEST //
                 + "(" + TEST_COLUMNS + ")" //
