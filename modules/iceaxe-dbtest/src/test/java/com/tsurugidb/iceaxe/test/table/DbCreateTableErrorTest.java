@@ -51,7 +51,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + ")";
         var e = executeErrorDdl(sql);
         assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
-        assertContains("compile failed with error:primary_index_not_found message:\"multiple primary keys are not supported\" location:<input>:", e.getMessage());
+        assertContains("compile failed with error:primary_index_already_exists message:\"multiple primary keys are not supported\" location:<input>:", e.getMessage());
     }
 
     @Test
