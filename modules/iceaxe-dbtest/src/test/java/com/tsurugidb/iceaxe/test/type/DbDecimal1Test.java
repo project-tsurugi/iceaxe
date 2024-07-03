@@ -89,6 +89,20 @@ class DbDecimal1Test extends DbTestTableTester {
     }
 
     @Test
+    void insertLiteral() throws Exception {
+        var tm = createTransactionManagerOcc(getSession());
+        tm.executeAndGetCount("insert into " + TEST + " values(" + (SIZE + 1) + ", 1)");
+        tm.executeAndGetCount("insert into " + TEST + " values(" + (SIZE + 2) + ", 2.0)");
+        tm.executeAndGetCount("insert into " + TEST + " values(" + (SIZE + 3) + ", 3e2)");
+
+        var list = tm.executeAndGetList("select * from " + TEST + " where pk>" + SIZE + " order by pk");
+        assertEquals(3, list.size());
+        assertEquals(1d, list.get(0).getDouble("value"));
+        assertEquals(2.0, list.get(1).getDouble("value"));
+        assertEquals(300d, list.get(2).getDouble("value"));
+    }
+
+    @Test
     void bindWhereEq() throws Exception {
         var variable = TgBindVariable.ofDecimal("value");
         var sql = "select * from " + TEST + " where value=" + variable;
