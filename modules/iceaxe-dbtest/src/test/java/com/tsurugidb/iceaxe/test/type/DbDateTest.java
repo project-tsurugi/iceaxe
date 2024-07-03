@@ -172,7 +172,7 @@ class DbDateTest extends DbTestTableTester {
             tm.executeAndFindRecord(sql, resultMapping);
         });
         assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-        assertContains("function 'sum' is not found", e.getMessage());
+        assertContains("compile failed with error:function_not_found message:\"set function not found: sum(date())\" location:<input>:", e.getMessage());
     }
 
     @Test

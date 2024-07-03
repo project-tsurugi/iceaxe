@@ -182,7 +182,7 @@ class DbVarcharTest extends DbTestTableTester {
             tm.executeAndFindRecord(sql, resultMapping);
         });
         assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-        assertContains("function 'sum' is not found", e.getMessage());
+        assertContains("compile failed with error:function_not_found message:\"set function not found: sum(character-varying(10))\" location:<input>:", e.getMessage());
     }
 
     @Test
