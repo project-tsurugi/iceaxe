@@ -2,8 +2,12 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.stream.LongStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -19,6 +23,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
@@ -27,7 +32,16 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbSelectAggregateTest extends DbTestTableTester {
 
-    private static final int SIZE = 4;
+    private static final List<TestEntity> LIST = List.of( //
+            new TestEntity(1, 2, "a"), //
+            new TestEntity(2, 4, "b"), //
+            new TestEntity(3, 8, "b"), //
+            new TestEntity(4, 16, "c"), //
+            new TestEntity(5, 32, "c"), //
+            new TestEntity(6, 64, "d"), //
+            new TestEntity(7, 128, "d"), //
+            new TestEntity(8, 256, "d"));
+    private static final Map<String, List<TestEntity>> ZZZ_MAP = LIST.stream().collect(Collectors.groupingBy(TestEntity::getZzz));
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
@@ -36,7 +50,9 @@ class DbSelectAggregateTest extends DbTestTableTester {
 
         dropTestTable();
         createTestTable();
-        insertTestTable(SIZE);
+        for (var entity : LIST) {
+            insertTestTable(entity);
+        }
 
         logInitEnd(LOG, info);
     }
@@ -47,12 +63,9 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var sql = "select count(*) from " + TEST + order;
         var resultMapping = TgResultMapping.of(record -> record.nextInt());
 
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(sql, resultMapping)) {
-            int count = tm.executeAndFindRecord(ps).get();
-            assertEquals(SIZE, count);
-        }
+        var tm = createTransactionManagerOcc(getSession());
+        int count = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(LIST.size(), count);
     }
 
     @ParameterizedTest
@@ -64,53 +77,55 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
             TsurugiResultEntity entity = tm.executeAndFindRecord(ps).get();
-            assertEquals(LongStream.range(0, SIZE).sum(), entity.getLongOrNull("bar"));
-            assertEquals("0", entity.getStringOrNull("zzz"));
+            assertEquals(LIST.stream().mapToLong(TestEntity::getBar).sum(), entity.getLong("bar"));
+            assertEquals(LIST.stream().map(TestEntity::getZzz).min(String::compareTo).get(), entity.getString("zzz"));
         }
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "", " order by foo" })
+    @ValueSource(strings = { "", " order by zzz" })
     void selectKeyCount(String order) throws Exception {
-        var sql = "select foo, count(*) as cnt from " + TEST + " group by foo" + order;
+        var sql = "select zzz, count(*) as cnt from " + TEST + " group by zzz" + order;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
+            assertEquals(ZZZ_MAP.size(), list.size());
 
-            int i = 0;
+            String prev = "";
             for (var actual : list) {
+                String zzz = actual.getString("zzz");
                 if (!order.isEmpty()) {
-                    assertEquals(i, actual.getInt("foo"));
+                    assertTrue(zzz.compareTo(prev) > 0);
+                    prev = zzz;
                 }
-                assertEquals(1, actual.getInt("cnt"));
-                i++;
+                assertEquals(ZZZ_MAP.get(zzz).size(), actual.getInt("cnt"));
             }
         }
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "", " order by foo" })
+    @ValueSource(strings = { "", " order by zzz" })
     void selectKeySum(String order) throws Exception {
-        var sql = "select foo, sum(bar) as bar, min(zzz) as zzz from " + TEST + " group by foo" + order;
+        var sql = "select zzz, sum(bar) as bar, min(foo) as foo from " + TEST + " group by zzz" + order;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
+            assertEquals(ZZZ_MAP.size(), list.size());
 
-            int i = 0;
+            String prev = "";
             for (var actual : list) {
-                int foo = actual.getInt("foo");
+                String zzz = actual.getString("zzz");
                 if (!order.isEmpty()) {
-                    assertEquals(i, foo);
+                    assertTrue(zzz.compareTo(prev) > 0);
+                    prev = zzz;
                 }
-                assertEquals(Long.valueOf(foo), actual.getLong("bar"));
-                assertEquals(Integer.toString(foo), actual.getString("zzz"));
-                i++;
+                var l = ZZZ_MAP.get(zzz);
+                assertEquals(l.stream().mapToInt(TestEntity::getFoo).min().getAsInt(), actual.getInt("foo"));
+                assertEquals(l.stream().mapToLong(TestEntity::getBar).sum(), actual.getLong("bar"));
             }
         }
     }
@@ -145,7 +160,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql)) {
             var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
+            assertEquals(LIST.size(), list.size());
 
             for (var actual : list) {
                 assertEquals(1, actual.getInt("cnt"));
@@ -181,6 +196,52 @@ class DbSelectAggregateTest extends DbTestTableTester {
             });
             assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
             assertContains("compile failed with error:symbol_not_found message:\"symbol 'k' is not found\" location:<input>:", e.getMessage());
+        }
+    }
+
+    @Test
+    void selectKeyOrderByCount() throws Exception {
+        var sql = "select zzz, count(*) as cnt from " + TEST + " group by zzz order by count(*) desc";
+
+        var tm = createTransactionManagerOcc(getSession());
+        var list = tm.executeAndGetList(sql);
+        assertEquals(ZZZ_MAP.size(), list.size());
+
+        int prev = Integer.MAX_VALUE;
+        for (var actual : list) {
+            int count = actual.getInt("cnt");
+            assertTrue(count <= prev);
+            prev = count;
+
+            String zzz = actual.getString("zzz");
+            assertEquals(ZZZ_MAP.get(zzz).size(), actual.getInt("cnt"));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", " order by zzz" })
+    void having(String order) throws Exception {
+        var sql = "select zzz, count(*) cnt from " + TEST + " group by zzz having count(*) >= 2" + order;
+
+        var tm = createTransactionManagerOcc(getSession());
+        var list = tm.executeAndGetList(sql);
+
+        var expectedMap = new HashMap<String, List<TestEntity>>();
+        ZZZ_MAP.forEach((k, l) -> {
+            if (l.size() >= 2) {
+                expectedMap.put(k, l);
+            }
+        });
+        assertEquals(expectedMap.size(), list.size());
+
+        String prev = "";
+        for (var actual : list) {
+            String zzz = actual.getString("zzz");
+            if (!order.isEmpty()) {
+                assertTrue(zzz.compareTo(prev) > 0);
+                prev = zzz;
+            }
+            assertEquals(expectedMap.get(zzz).size(), actual.getInt("cnt"));
         }
     }
 }
