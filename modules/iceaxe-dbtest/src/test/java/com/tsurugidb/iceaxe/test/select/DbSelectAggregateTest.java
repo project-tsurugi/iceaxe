@@ -177,7 +177,7 @@ class DbSelectAggregateTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiIOException.class, () -> {
                 tm.executeAndGetList(ps, TgBindParameters.of());
             });
-            assertEqualsCode(SqlServiceCode.COMPILE_EXCEPTION, e);
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
             assertContains("compile failed with error:invalid_aggregation_column message:\"column must be aggregated\" location:<input>:", e.getMessage()); // TODO エラー情報詳細
         }
     }
