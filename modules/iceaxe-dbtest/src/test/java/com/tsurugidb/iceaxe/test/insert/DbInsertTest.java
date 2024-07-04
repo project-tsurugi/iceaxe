@@ -241,4 +241,74 @@ class DbInsertTest extends DbTestTableTester {
         assertNull(actual.getBar());
         assertNull(actual.getZzz());
     }
+
+    @Test
+    void insertMultipleValues() throws Exception {
+        var sql = new StringBuilder("insert into " + TEST + " (foo, bar, zzz) values");
+        int size = 4;
+        for (int i = 0; i < size; i++) {
+            if (i != 0) {
+                sql.append(", ");
+            }
+            sql.append(String.format("(%d, %d, '%d')", i, i * 2, i * 3));
+        }
+
+        var tm = createTransactionManagerOcc(getSession());
+        var detail = tm.execute(transaction -> {
+            try (var ps = transaction.getSession().createStatement(sql.toString())) {
+                return transaction.executeAndGetCountDetail(ps);
+            }
+        });
+        assertEquals(size, detail.getInsertedCount());
+        assertEquals(size, detail.getTotalCount());
+
+        var list = selectAllFromTest();
+        assertEquals(size, list.size());
+        for (int i = 0; i < size; i++) {
+            var actual = list.get(i);
+            assertEquals(i, actual.getFoo());
+            assertEquals((long) i * 2, actual.getBar());
+            assertEquals(Integer.toString(i * 3), actual.getZzz());
+        }
+    }
+
+    @Test
+    void insertMultipleValues_bingVariable() throws Exception {
+        var sql = new StringBuilder("insert into " + TEST + " (foo, bar, zzz) values");
+        var variables = TgBindVariables.of();
+        var parameter = TgBindParameters.of();
+
+        int size = 4;
+        for (int i = 0; i < size; i++) {
+            if (i != 0) {
+                sql.append(", ");
+            }
+            sql.append(String.format("(:foo%d, :bar%d, :zzz%d)", i, i, i));
+
+            variables.addInt("foo" + i);
+            parameter.addInt("foo" + i, i);
+            variables.addLong("bar" + i);
+            parameter.addLong("bar" + i, i * 2);
+            variables.addString("zzz" + i);
+            parameter.addString("zzz" + i, Integer.toString(i * 3));
+        }
+
+        var tm = createTransactionManagerOcc(getSession());
+        var detail = tm.execute(transaction -> {
+            try (var ps = transaction.getSession().createStatement(sql.toString(), TgParameterMapping.of(variables))) {
+                return transaction.executeAndGetCountDetail(ps, parameter);
+            }
+        });
+        assertEquals(size, detail.getInsertedCount());
+        assertEquals(size, detail.getTotalCount());
+
+        var list = selectAllFromTest();
+        assertEquals(size, list.size());
+        for (int i = 0; i < size; i++) {
+            var actual = list.get(i);
+            assertEquals(i, actual.getFoo());
+            assertEquals((long) i * 2, actual.getBar());
+            assertEquals(Integer.toString(i * 3), actual.getZzz());
+        }
+    }
 }
