@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -152,7 +151,6 @@ class DbSelectAggregateTest extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "foo,foo", "foo,foo,foo" })
-    @Disabled // TODO remove Disabled. group byに同カラムが複数あるとtateyama-serverがクラッシュする
     void selectGroupBySameKey(String groupKey) throws Exception {
         var sql = "select foo, count(*) as cnt from " + TEST + " group by " + groupKey;
 
