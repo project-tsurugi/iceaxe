@@ -95,14 +95,14 @@ class DbDecimal1Test extends DbTestTableTester {
     void insertLiteral() throws Exception {
         var tm = createTransactionManagerOcc(getSession());
         tm.executeAndGetCount("insert into " + TEST + " values(" + (SIZE + 1) + ", 1)");
-        tm.executeAndGetCount("insert into " + TEST + " values(" + (SIZE + 2) + ", 2.0)");
+        tm.executeAndGetCount("insert into " + TEST + " values(" + (SIZE + 2) + ", 2.1)");
 //      tm.executeAndGetCount("insert into " + TEST + " values(" + (SIZE + 3) + ", 3e2)");
 
         var list = tm.executeAndGetList("select * from " + TEST + " where pk>" + SIZE + " order by pk");
         assertEquals(2, list.size());
-        assertEquals(1d, list.get(0).getDouble("value"));
-        assertEquals(2.0, list.get(1).getDouble("value"));
-//      assertEquals(300d, list.get(2).getDouble("value"));
+        assertEquals(new BigDecimal("1.0"), list.get(0).getDecimal("value"));
+        assertEquals(new BigDecimal("2.1"), list.get(1).getDecimal("value"));
+//      assertEquals(new BigDecimal("300.0"), list.get(2).getDecimal("value"));
     }
 
     @Test
@@ -113,6 +113,16 @@ class DbDecimal1Test extends DbTestTableTester {
         });
         assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
         assertContains("unsupported type conversion source:float8 target:decimal", e.getMessage());
+    }
+
+    @Test
+    void insertLiteralECast() throws Exception {
+        var tm = createTransactionManagerOcc(getSession());
+        tm.executeAndGetCount("insert into " + TEST + " values(" + (SIZE + 3) + ", cast(3e2 as decimal))");
+
+        var list = tm.executeAndGetList("select * from " + TEST + " where pk>" + SIZE + " order by pk");
+        assertEquals(1, list.size());
+        assertEquals(new BigDecimal("300.0"), list.get(0).getDecimal("value"));
     }
 
     @Test
