@@ -2,12 +2,14 @@ package com.tsurugidb.iceaxe.test.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -455,6 +457,22 @@ public class DbTestTableTester {
                 var actualServerException = findLowServerException(actual);
                 assertEquals(expectedClass, actualServerException.getClass());
             }
+        } catch (Throwable e) {
+            var log = LoggerFactory.getLogger(DbTestTableTester.class);
+            log.error("assertEqualsCode fail. {}", e.getMessage(), actual);
+
+            e.addSuppressed(actual);
+            throw e;
+        }
+    }
+
+    protected static void assertEqualsCode(Set<DiagnosticCode> expected, Throwable actual) {
+        try {
+            var code = findDiagnosticCode(actual);
+            if (expected.contains(code)) {
+                return;
+            }
+            fail(String.format("expected: %s but was: %s", expected, actual));
         } catch (Throwable e) {
             var log = LoggerFactory.getLogger(DbTestTableTester.class);
             log.error("assertEqualsCode fail. {}", e.getMessage(), actual);

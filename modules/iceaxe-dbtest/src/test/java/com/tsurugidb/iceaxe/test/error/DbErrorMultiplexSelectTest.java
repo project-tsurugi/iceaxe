@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.error;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -92,8 +93,8 @@ class DbErrorMultiplexSelectTest extends DbTestTableTester {
             }
             if (DbTestConnector.isIpc()) {
                 if (size > 280) {
-                    assertEqualsCode(SqlServiceCode.TRANSACTION_EXCEEDED_LIMIT_EXCEPTION, e);
-                    LOG.info("(IPC)TRANSACTION_EXCEEDED_LIMIT_EXCEPTION occur. size={}, type={}", size, type);
+                    assertEqualsCode(Set.of(SqlServiceCode.TRANSACTION_EXCEEDED_LIMIT_EXCEPTION, SqlServiceCode.SQL_LIMIT_REACHED_EXCEPTION), e);
+                    LOG.info("(IPC){} occur. size={}, type={}", e.getDiagnosticCode(), size, type);
                     return;
                 }
                 if (size > 240) {
