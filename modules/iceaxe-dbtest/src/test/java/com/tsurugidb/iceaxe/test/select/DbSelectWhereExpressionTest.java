@@ -54,7 +54,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e);
-            assertContains("compile failed with message:\"syntax error, unexpected <ERROR>\" region:", e.getMessage()); // TODO <ERROR>は分かりにくい
+            assertContains("unrecognized character: \"!\"", e.getMessage());
         }
     }
 

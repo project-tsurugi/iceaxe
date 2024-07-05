@@ -206,6 +206,6 @@ class DbGeneratedRowidTest extends DbTestTableTester {
 
     private static void assertErrorVariableNotFound(Exception actual) {
         assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, actual);
-        assertContains("compile failed with message:\"identifier starting with '__' is reserved for internal use\" region:", actual.getMessage());
+        assertContains("identifier must not start with two underscores: " + GENERATED_KEY, actual.getMessage());
     }
 }

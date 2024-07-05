@@ -41,7 +41,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
         var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             executeDdl(getSession(), sql, tableName);
         });
-        assertErrorSystemReservedWord(e);
+        assertErrorSystemReservedWord(tableName, e);
     }
 
     @Test
@@ -55,7 +55,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
         var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
             executeDdl(getSession(), sql);
         });
-        assertErrorSystemReservedWord(e);
+        assertErrorSystemReservedWord("__foo", e);
     }
 
     @Test
@@ -71,12 +71,12 @@ class DbSystemReservedWordTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertErrorSystemReservedWord(e);
+            assertErrorSystemReservedWord("__foo", e);
         }
     }
 
-    private static void assertErrorSystemReservedWord(Exception actual) {
+    private static void assertErrorSystemReservedWord(String expected, Exception actual) {
         assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, actual);
-        assertContains("compile failed with message:\"identifier starting with '__' is reserved for internal use\" region:", actual.getMessage());
+        assertContains("identifier must not start with two underscores: " + expected, actual.getMessage());
     }
 }
