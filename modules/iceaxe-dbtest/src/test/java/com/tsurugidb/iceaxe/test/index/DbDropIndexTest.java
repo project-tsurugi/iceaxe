@@ -8,7 +8,6 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * drop index test
@@ -37,7 +36,7 @@ class DbDropIndexTest extends DbTestTableTester {
         var e = assertThrows(TsurugiTmIOException.class, () -> {
             tm.executeDdl(sql);
         });
-        assertErrorIndexNotFound(e);
+        assertErrorIndexNotFound("idx_test_bar", e);
     }
 
     @Test
@@ -50,13 +49,6 @@ class DbDropIndexTest extends DbTestTableTester {
         var e = assertThrows(TsurugiTmIOException.class, () -> {
             tm.executeDdl("drop index idx_test_bar");
         });
-        assertErrorIndexNotFound(e);
-    }
-
-    private static void assertErrorIndexNotFound(Exception actual) {
-        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, actual);
-        assertContains(
-                "compile failed with error:index_not_found message:\"'{\"node_kind\":\"simple\",\"identifier\":\"idx_test_bar\",\"identifier_kind\":\"regular\"}' is not found\" location:<input>:",
-                actual.getMessage());
+        assertErrorIndexNotFound("idx_test_bar", e);
     }
 }

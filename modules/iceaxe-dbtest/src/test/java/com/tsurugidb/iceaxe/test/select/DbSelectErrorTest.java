@@ -57,8 +57,7 @@ class DbSelectErrorTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetList(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:symbol_not_found message:\"symbol 'hoge' is not found\" location:<input>:", e.getMessage());
+            assertErrorVariableNotFound("hoge", e);
         }
     }
 

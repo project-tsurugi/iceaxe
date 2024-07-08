@@ -10,7 +10,6 @@ import org.junit.jupiter.api.TestInfo;
 
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * drop table test
@@ -47,9 +46,7 @@ class DbDropTableTest extends DbTestTableTester {
             var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
                 tm.executeAndGetCount(ps);
             });
-            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-            assertContains("compile failed with error:table_not_found message:\"'{\"node_kind\":\"simple\",\"identifier\":\"" + TEST
-                    + "\",\"identifier_kind\":\"regular\"}' is not found\" location:<input>:1:12+4", e.getMessage());
+            assertErrorTableNotFound(TEST, e);
         }
     }
 

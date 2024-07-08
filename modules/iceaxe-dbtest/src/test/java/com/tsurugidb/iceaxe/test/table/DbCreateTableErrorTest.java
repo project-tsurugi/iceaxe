@@ -36,8 +36,7 @@ class DbCreateTableErrorTest extends DbTestTableTester {
                 + "  primary key(goo)" //
                 + ")";
         var e = executeErrorDdl(sql);
-        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
-        assertContains("compile failed with error:symbol_not_found message:\"symbol 'goo' is not found\" location:<input>:", e.getMessage());
+        assertErrorVariableNotFound("goo", e);
     }
 
     @Test

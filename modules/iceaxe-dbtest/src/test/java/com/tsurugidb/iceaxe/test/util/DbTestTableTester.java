@@ -546,8 +546,25 @@ public class DbTestTableTester {
     protected static void assertErrorTableNotFound(String expectedTableName, Exception actual) {
         assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, actual);
 
-        String expected = "compile failed with error:symbol_not_found message:\"symbol '" + expectedTableName + "' is not found\" location:<input>:";
-        assertContains(expected, actual.getMessage());
+        String message = actual.getMessage();
+        assertContains("compile failed with error:table_not_found", message);
+        assertContains('"' + expectedTableName + '"', message);
+    }
+
+    protected static void assertErrorVariableNotFound(String expectedVariableName, Exception actual) {
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, actual);
+
+        String message = actual.getMessage();
+        assertContains("compile failed with error:variable_not_found", message);
+        assertContains('"' + expectedVariableName + '"', message);
+    }
+
+    protected static void assertErrorIndexNotFound(String expectedIndexName, Exception actual) {
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, actual);
+
+        String message = actual.getMessage();
+        assertContains("compile failed with error:index_not_found", message);
+        assertContains('"' + expectedIndexName + '"', message);
     }
 
     protected static void assertEqualsTestTable(TestEntity... expected) throws IOException, InterruptedException {
