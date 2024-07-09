@@ -2,6 +2,8 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +24,8 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * select join test
@@ -169,9 +173,10 @@ class DbSelectJoinTest extends DbTestTableTester {
             .addInt("d_master_id", DetailEntity::getMasterId) //
             .addString("d_memo", DetailEntity::getMemo);
 
-    @Test
-    void simpleJoin() throws Exception {
-        var sql = "select * from " + DETAIL + " d, " + MASTER + " m\n" //
+    @ParameterizedTest
+    @ValueSource(strings = { "*", "d.*, m.*" })
+    void simpleJoin(String select) throws Exception {
+        var sql = "select " + select + " from " + DETAIL + " d, " + MASTER + " m\n" //
                 + "where m.m_id = d.d_master_id\n" //
                 + "order by d_id";
 
@@ -192,8 +197,107 @@ class DbSelectJoinTest extends DbTestTableTester {
     }
 
     @Test
+    void simpleJoinSameAlias() throws Exception {
+        var sql = "select * from " + DETAIL + " a\n" //
+                + ", " + MASTER + " a";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql)) {
+            var list = tm.executeAndGetList(ps);
+            assertEquals(MASTER_LIST.size() * DETAIL_LIST.size(), list.size());
+        }
+    }
+
+    @Test
+    void simpleJoinSameAliasError() throws Exception {
+        var sql = "select a.* from " + DETAIL + " a\n" //
+                + ", " + MASTER + " a";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql)) {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.executeAndGetList(ps);
+            });
+            assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
+            String message = e.getMessage();
+            assertContains("compile failed with error:relation_ambiguous", message);
+            assertContains("'a'", message);
+        }
+    }
+
+    @Test
+    void simpleJoinSameTableSameAlias() throws Exception {
+        var sql = "select * from " + MASTER + " a\n" //
+                + ", " + MASTER + " a";
+
+        var expectedList = new ArrayList<MasterEntity>();
+        for (@SuppressWarnings("unused")
+        var master1 : MASTER_LIST) {
+            for (var master2 : MASTER_LIST) {
+                // TODO 重複カラムがあるとき、それらが区別できるべき？
+                expectedList.add(master2);
+            }
+        }
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql)) {
+            var list = tm.executeAndGetList(ps);
+            assertEquals(expectedList.size(), list.size());
+            for (var actual : list) {
+                findAndRemove(expectedList, actual);
+            }
+        }
+    }
+
+    @Test
+    void simpleJoinSameTable() throws Exception {
+        var sql = "select m1.* from " + MASTER + " m1\n" //
+                + ", " + MASTER + " m2";
+
+        var expectedList = new ArrayList<MasterEntity>();
+        for (var master1 : MASTER_LIST) {
+//          for (var master2 : MASTER_LIST) { // TODO m1とm2の直積が返るべき
+            expectedList.add(master1);
+//          }
+        }
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql)) {
+            var list = tm.executeAndGetList(ps);
+            assertEquals(expectedList.size(), list.size());
+            for (var actual : list) {
+                findAndRemove(expectedList, actual);
+            }
+        }
+    }
+
+    private void findAndRemove(List<MasterEntity> expectedList, TsurugiResultEntity actual) {
+        for (var i = expectedList.iterator(); i.hasNext();) {
+            var expected = i.next();
+            if (expected.getId() == actual.getInt("m_id") && expected.getName().equals(actual.getString("m_name"))) {
+                i.remove();
+                return;
+            }
+        }
+        fail("not found " + actual + " in " + expectedList);
+    }
+
+    @Test
     void innerJoin() throws Exception {
-        var sql = "select * from " + DETAIL + " d\n" //
+        innerJoin("*");
+    }
+
+    @Test
+    void innerJoinAlias() throws Exception {
+        innerJoin("d.*, m.*");
+    }
+
+    private void innerJoin(String select) throws Exception {
+        var sql = "select " + select + " from " + DETAIL + " d\n" //
                 + "inner join " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";
 
@@ -216,7 +320,16 @@ class DbSelectJoinTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "left join", "left outer join" })
     void leftJoin(String join) throws Exception {
-        var sql = "select * from " + DETAIL + " d\n" //
+        leftJoin("*", join);
+    }
+
+    @Test
+    void leftJoinAlias() throws Exception {
+        leftJoin("d.*, m.*", "left join");
+    }
+
+    private void leftJoin(String select, String join) throws Exception {
+        var sql = "select " + select + " from " + DETAIL + " d\n" //
                 + join + " " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";
 
@@ -237,7 +350,16 @@ class DbSelectJoinTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "right join", "right outer join" })
     void rightJoin(String join) throws Exception {
-        var sql = "select * from " + DETAIL + " d\n" //
+        rightJoin("*", join);
+    }
+
+    @Test
+    void rightJoinAlias() throws Exception {
+        rightJoin("d.*, m.*", "right join");
+    }
+
+    private void rightJoin(String select, String join) throws Exception {
+        var sql = "select " + select + " from " + DETAIL + " d\n" //
                 + join + " " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";
 
@@ -264,7 +386,16 @@ class DbSelectJoinTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "full join", "full outer join" })
     void fullJoin(String join) throws Exception {
-        var sql = "select * from " + DETAIL + " d\n" //
+        fullJoin("*", join);
+    }
+
+    @Test
+    void fullJoinAlias() throws Exception {
+        fullJoin("d.*, m.*", "full join");
+    }
+
+    private void fullJoin(String select, String join) throws Exception {
+        var sql = "select " + select + " from " + DETAIL + " d\n" //
                 + join + " " + MASTER + " m on m.m_id = d.d_master_id\n" //
                 + "order by d_id";
 
@@ -291,8 +422,18 @@ class DbSelectJoinTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "cross join", "," })
     void crossJoin(String join) throws Exception {
-        var sql = "select * from " + DETAIL + " d\n" //
-                + join + " " + MASTER + "\n" //
+        crossJoin("*", join);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "cross join", "," })
+    void crossJoinAlias(String join) throws Exception {
+        crossJoin("d.*, m.*", join);
+    }
+
+    private void crossJoin(String select, String join) throws Exception {
+        var sql = "select " + select + " from " + DETAIL + " d\n" //
+                + join + " " + MASTER + " m\n" //
                 + "order by d_id, m_id";
 
         var expectedList = new ArrayList<MasterDetailPair>();

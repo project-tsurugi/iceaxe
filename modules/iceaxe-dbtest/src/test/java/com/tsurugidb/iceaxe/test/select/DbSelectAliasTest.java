@@ -53,6 +53,24 @@ class DbSelectAliasTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = { " as", "" })
+    void selectAllTableAlias(String as) throws Exception {
+        var sql = "select t.* from " + TEST + as + " t order by t.foo";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            assertEquals(SIZE, list.size());
+            for (int i = 0; i < SIZE; i++) {
+                var expected = createTestEntity(i);
+                var actual = list.get(i);
+                assertEquals(expected, actual);
+            }
+        }
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = { "cnt"/* , "count" */ }) // TODO countも別名として使いたい
     void selectAsName(String name) throws Exception {
         var sql = "select count(*) as " + name + " from " + TEST;
