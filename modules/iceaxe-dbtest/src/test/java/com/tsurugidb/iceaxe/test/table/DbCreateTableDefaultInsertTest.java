@@ -28,7 +28,7 @@ class DbCreateTableDefaultInsertTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "1", "0", "1.0" /* TODO ,"-1", "1+1" */ })
+    @ValueSource(strings = { "1", "0", "1.0", "-1" /* TODO, "1+1" */ })
     void insertInt(String defaultValue) throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
