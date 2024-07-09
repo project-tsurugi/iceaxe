@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.sql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
@@ -62,10 +64,17 @@ class DbBindVariableTest extends DbTestTableTester {
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createStatement(sql, parameterMapping)) {
             var entity = createTestEntity(SIZE);
-            tm.executeAndGetCount(ps, entity);
+            if (f.startsWith(":")) {
+                tm.executeAndGetCount(ps, entity);
+                assertEqualsTestTable(SIZE + 1);
+            } else {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                    tm.executeAndGetCount(ps, entity);
+                });
+                assertErrorVariableNotFound(f, e);
+                assertEqualsTestTable(SIZE);
+            }
         }
-
-        assertEqualsTestTable(SIZE + 1);
     }
 
     @Test
@@ -116,13 +125,19 @@ class DbBindVariableTest extends DbTestTableTester {
         try (var ps = session.createQuery(sql, parameterMapping, SELECT_MAPPING)) {
             int key = 2;
             var parameter = TgBindParameters.of(bar.bind(key));
-            var list = tm.executeAndGetList(ps, parameter);
 
-            if (b.equals("bar")) {
-                assertEquals(SIZE, list.size());
-            } else {
+            if (b.startsWith(":")) {
+                var list = tm.executeAndGetList(ps, parameter);
                 assertEquals(1, list.size());
                 assertEquals(createTestEntity(key), list.get(0));
+            } else if (b.equals("bar")) {
+                var list = tm.executeAndGetList(ps, parameter);
+                assertEquals(SIZE, list.size());
+            } else {
+                var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+                    tm.executeAndGetList(ps, parameter);
+                });
+                assertErrorVariableNotFound(b, e);
             }
         }
     }
