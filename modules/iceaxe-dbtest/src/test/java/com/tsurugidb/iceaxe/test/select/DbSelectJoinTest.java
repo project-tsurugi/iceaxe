@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
+import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
@@ -259,9 +260,10 @@ class DbSelectJoinTest extends DbTestTableTester {
 
         var expectedList = new ArrayList<MasterEntity>();
         for (var master1 : MASTER_LIST) {
-//          for (var master2 : MASTER_LIST) { // TODO m1とm2の直積が返るべき
-            expectedList.add(master1);
-//          }
+            for (@SuppressWarnings("unused")
+            var master2 : MASTER_LIST) {
+                expectedList.add(master1);
+            }
         }
 
         var session = getSession();
@@ -284,6 +286,19 @@ class DbSelectJoinTest extends DbTestTableTester {
             }
         }
         fail("not found " + actual + " in " + expectedList);
+    }
+
+    @Test
+    void simpleJoinSameTableCount() throws Exception {
+        var sql = "select count(*) from " + MASTER + " m1\n" //
+                + ", " + MASTER + " m2";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, TgResultMapping.ofSingle(int.class))) {
+            int count = tm.executeAndFindRecord(ps).get();
+            assertEquals(MASTER_LIST.size() * MASTER_LIST.size(), count);
+        }
     }
 
     @Test
