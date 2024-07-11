@@ -146,7 +146,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      * set shutdown type on close.
      *
      * @param shutdownType shutdown type
-     * @since X.X.X
+     * @since 1.4.0
      */
     public void setCloseShutdownType(TgSessionShutdownType shutdownType) {
         this.closeShutdownType = shutdownType;
@@ -156,7 +156,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      * get shutdown type on close.
      *
      * @return shutdown type
-     * @since X.X.X
+     * @since 1.4.0
      */
     public TgSessionShutdownType getCloseShutdownType() {
         var shutdownType = this.closeShutdownType;
@@ -248,7 +248,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      *
      * @param lowSession session
      * @return SqlClient
-     * @since X.X.X
+     * @since 1.4.0
      */
     protected SqlClient newSqlClient(Session lowSession) {
         return SqlClient.attach(lowSession);
@@ -613,7 +613,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      *
      * @param txOption transaction option
      * @return transaction
-     * @since X.X.X
+     * @since 1.4.0
      */
     protected TsurugiTransaction newTsurugiTransaction(TgTxOption txOption) {
         return new TsurugiTransaction(this, txOption);
@@ -653,7 +653,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      * @param unit         timeout unit
      * @throws IOException          if an I/O error occurs during shutdown
      * @throws InterruptedException if interrupted during shutdown
-     * @since X.X.X
+     * @since 1.4.0
      */
     public void shutdown(TgSessionShutdownType shutdownType, long time, TimeUnit unit) throws IOException, InterruptedException {
         checkClose();
@@ -667,7 +667,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      * @param timeout      timeout
      * @throws IOException          if an I/O error occurs during shutdown
      * @throws InterruptedException if interrupted during shutdown
-     * @since X.X.X
+     * @since 1.4.0
      */
     public void shutdown(TgSessionShutdownType shutdownType, TgTimeValue timeout) throws IOException, InterruptedException {
         checkClose();

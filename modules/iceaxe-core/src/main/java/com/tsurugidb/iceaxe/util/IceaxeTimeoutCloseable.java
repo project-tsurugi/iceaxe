@@ -3,7 +3,7 @@ package com.tsurugidb.iceaxe.util;
 /**
  * AutoCloseable with timeout.
  *
- * @since X.X.X
+ * @since 1.4.0
  */
 @FunctionalInterface
 @IceaxeInternal

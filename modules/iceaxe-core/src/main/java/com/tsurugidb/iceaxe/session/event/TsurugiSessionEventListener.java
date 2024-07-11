@@ -81,7 +81,7 @@ public interface TsurugiSessionEventListener {
      * @param shutdownType shutdown type
      * @param timeoutNanos shutdown timeout
      * @param occurred     exception
-     * @since X.X.X
+     * @since 1.4.0
      */
     default void shutdownSession(TsurugiSession session, TgSessionShutdownType shutdownType, long timeoutNanos, @Nullable Throwable occurred) {
         // do override

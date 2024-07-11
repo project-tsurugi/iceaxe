@@ -8,7 +8,7 @@ import com.tsurugidb.tsubakuro.common.ShutdownType;
 /**
  * Tsurugi Session Shutdown Type.
  *
- * @since X.X.X
+ * @since 1.4.0
  */
 public enum TgSessionShutdownType {
 

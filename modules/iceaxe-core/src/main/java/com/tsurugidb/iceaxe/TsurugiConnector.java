@@ -157,7 +157,7 @@ public class TsurugiConnector {
      *
      * @param name application name
      * @return this
-     * @since X.X.X
+     * @since 1.4.0
      */
     public TsurugiConnector setApplicationName(@Nullable String name) {
         this.defaultApplicationName = name;
@@ -168,7 +168,7 @@ public class TsurugiConnector {
      * get application name.
      *
      * @return application name
-     * @since X.X.X
+     * @since 1.4.0
      */
     public @Nullable String getApplicationName() {
         return this.defaultApplicationName;
@@ -179,7 +179,7 @@ public class TsurugiConnector {
      *
      * @param sessionOption session option
      * @return application name
-     * @since X.X.X
+     * @since 1.4.0
      */
     public Optional<String> findApplicationName(TgSessionOption sessionOption) {
         String name = null;
@@ -326,7 +326,7 @@ public class TsurugiConnector {
      * @param credential    credential
      * @param sessionOption session option
      * @return session builder
-     * @since X.X.X
+     * @since 1.4.0
      */
     protected SessionBuilder createLowSessionBuilder(@Nullable Credential credential, TgSessionOption sessionOption) {
         var lowBuilder = SessionBuilder.connect(lowConnector);

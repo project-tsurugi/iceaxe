@@ -34,7 +34,7 @@ public class IceaxeTimeout {
      *
      * @param time time value
      * @param unit time unit
-     * @since X.X.X
+     * @since 1.4.0
      */
     public IceaxeTimeout(long time, TimeUnit unit) {
         this.sessionOption = null;
@@ -77,7 +77,7 @@ public class IceaxeTimeout {
      * get time.
      *
      * @return time [nanosecond]
-     * @since X.X.X
+     * @since 1.4.0
      */
     public long getNanos() {
         return get().toNanos();

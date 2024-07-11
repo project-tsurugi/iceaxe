@@ -58,7 +58,7 @@ public class TsurugiTransactionStatusHelper {
      * @param sessionOption session option
      * @return timeout
      */
-    @Deprecated(since = "X.X.X")
+    @Deprecated(since = "1.4.0")
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CLOSE);
     }

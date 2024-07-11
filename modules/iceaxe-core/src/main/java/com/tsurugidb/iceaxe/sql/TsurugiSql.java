@@ -146,7 +146,7 @@ public abstract class TsurugiSql implements IceaxeTimeoutCloseable {
      * @param time timeout time
      * @param unit timeout unit
      */
-    @Deprecated(since = "X.X.X")
+    @Deprecated(since = "1.4.0")
     public void setExplainCloseTimeout(long time, TimeUnit unit) {
         setExplainCloseTimeout(TgTimeValue.of(time, unit));
     }
@@ -156,7 +156,7 @@ public abstract class TsurugiSql implements IceaxeTimeoutCloseable {
      *
      * @param timeout time
      */
-    @Deprecated(since = "X.X.X")
+    @Deprecated(since = "1.4.0")
     public void setExplainCloseTimeout(TgTimeValue timeout) {
         getExplainCloseTimeout().set(timeout);
     }
@@ -166,7 +166,7 @@ public abstract class TsurugiSql implements IceaxeTimeoutCloseable {
      *
      * @return timeout
      */
-    @Deprecated(since = "X.X.X")
+    @Deprecated(since = "1.4.0")
     protected synchronized IceaxeTimeout getExplainCloseTimeout() {
         if (this.explainCloseTimeout == null) {
             var sessionOption = ownerSession.getSessionOption();

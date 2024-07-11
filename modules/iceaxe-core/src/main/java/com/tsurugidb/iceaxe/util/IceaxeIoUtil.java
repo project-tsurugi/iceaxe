@@ -145,7 +145,7 @@ public final class IceaxeIoUtil {
     /**
      * close action.
      *
-     * @since X.X.X
+     * @since 1.4.0
      */
     @FunctionalInterface
     public interface IceaxeCloseAction {
@@ -347,7 +347,7 @@ public final class IceaxeIoUtil {
      * @param totalTimeoutNanos total timeout
      * @param start             start time
      * @return timeout
-     * @since X.X.X
+     * @since 1.4.0
      */
     public static long calculateTimeoutNanos(long totalTimeoutNanos, long start) {
         long now = System.nanoTime();

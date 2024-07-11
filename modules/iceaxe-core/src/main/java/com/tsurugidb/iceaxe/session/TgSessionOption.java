@@ -62,7 +62,7 @@ public class TgSessionOption {
         /** {@link TsurugiTransactionStatusHelper} connect */
         TX_STATUS_CONNECT,
         /** {@link TsurugiTransactionStatusHelper} close */
-        @Deprecated(since = "X.X.X")
+        @Deprecated(since = "1.4.0")
         TX_STATUS_CLOSE,
 
         /** {@link TsurugiSqlPrepared} connect */
@@ -82,18 +82,18 @@ public class TgSessionOption {
         /** {@link TsurugiExplainHelper} connect */
         EXPLAIN_CONNECT,
         /** {@link TsurugiExplainHelper} close */
-        @Deprecated(since = "X.X.X")
+        @Deprecated(since = "1.4.0")
         EXPLAIN_CLOSE,
 
         /** {@link TsurugiTableListHelper} connect */
         TABLE_LIST_CONNECT,
         /** {@link TsurugiTableListHelper} close */
-        @Deprecated(since = "X.X.X")
+        @Deprecated(since = "1.4.0")
         TABLE_LIST_CLOSE,
         /** {@link TsurugiTableMetadataHelper} connect */
         TABLE_METADATA_CONNECT,
         /** {@link TsurugiTableMetadataHelper} close */
-        @Deprecated(since = "X.X.X")
+        @Deprecated(since = "1.4.0")
         TABLE_METADATA_CLOSE,
 
         ;
@@ -159,7 +159,7 @@ public class TgSessionOption {
      *
      * @param name application name
      * @return this
-     * @since X.X.X
+     * @since 1.4.0
      */
     public TgSessionOption setApplicationName(@Nullable String name) {
         this.applicationName = name;
@@ -170,7 +170,7 @@ public class TgSessionOption {
      * get application name.
      *
      * @return application name
-     * @since X.X.X
+     * @since 1.4.0
      */
     public @Nullable String getApplicationName() {
         return this.applicationName;
@@ -229,7 +229,7 @@ public class TgSessionOption {
      *
      * @param shutdownType shutdown type
      * @return this
-     * @since X.X.X
+     * @since 1.4.0
      */
     public TgSessionOption setCloseShutdownType(@Nonnull TgSessionShutdownType shutdownType) {
         this.closeShutdownType = Objects.requireNonNull(shutdownType);
@@ -240,7 +240,7 @@ public class TgSessionOption {
      * get shutdown type on close.
      *
      * @return shutdown type
-     * @since X.X.X
+     * @since 1.4.0
      */
     public TgSessionShutdownType getCloseShutdownType() {
         return this.closeShutdownType;

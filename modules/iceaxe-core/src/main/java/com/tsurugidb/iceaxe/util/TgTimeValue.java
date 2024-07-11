@@ -57,7 +57,7 @@ public /* record */ class TgTimeValue {
      * get time value[nanosecond].
      *
      * @return time value
-     * @since X.X.X
+     * @since 1.4.0
      */
     public long toNanos() {
         return unit.toNanos(this.value);

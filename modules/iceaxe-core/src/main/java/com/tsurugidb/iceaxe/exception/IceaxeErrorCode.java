@@ -29,13 +29,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiSession#shutdown(com.tsurugidb.iceaxe.session.TgSessionShutdownType, long, java.util.concurrent.TimeUnit)} timeout.
      *
-     * @since X.X.X
+     * @since 1.4.0
      */
     SESSION_SHUTDOWN_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 801, "session shutdown timeout"),
     /**
      * {@link TsurugiSession#shutdown(com.tsurugidb.iceaxe.session.TgSessionShutdownType, long, java.util.concurrent.TimeUnit)} close timeout.
      *
-     * @since X.X.X
+     * @since 1.4.0
      */
     SESSION_SHUTDOWN_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 802, "session shutdown close timeout"),
     /**
@@ -93,7 +93,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
-    @Deprecated(since = "X.X.X")
+    @Deprecated(since = "1.4.0")
     TX_STATUS_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 192, "transaction getTransactionStatus close error"),
     /**
      * transaction child resource close error at {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitType)}.
@@ -232,7 +232,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
-    @Deprecated(since = "X.X.X")
+    @Deprecated(since = "1.4.0")
     EXPLAIN_CLOSE_ERROR(IceaxeErrorCodeBlock.EXPLAIN + 902, "explain close error"),
 
     // metadata
@@ -253,7 +253,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
-    @Deprecated(since = "X.X.X")
+    @Deprecated(since = "1.4.0")
     TABLE_LIST_CLOSE_ERROR(IceaxeErrorCodeBlock.METADATA + 192, "getTableList close error"),
     /**
      * {@link TsurugiTableMetadataHelper} connect timeout.
@@ -272,7 +272,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
-    @Deprecated(since = "X.X.X")
+    @Deprecated(since = "1.4.0")
     TABLE_METADATA_CLOSE_ERROR(IceaxeErrorCodeBlock.METADATA + 292, "getTableMetadata close error"),
 
     //
@@ -316,7 +316,7 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      * Returns timeout.
      *
      * @return {@code true}: timeout
-     * @since X.X.X
+     * @since 1.4.0
      */
     public boolean isTimeout() {
         return this.isTimeout;

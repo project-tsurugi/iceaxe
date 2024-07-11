@@ -357,7 +357,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param session      session
      * @param shutdownType shutdown type
      * @param occurred     exception
-     * @since X.X.X
+     * @since 1.4.0
      */
     protected void logSessionShutdown(TsurugiSession session, TgSessionShutdownType shutdownType, @Nullable Throwable occurred) {
         // do override
