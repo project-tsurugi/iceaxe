@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.4.0'
-    implementation 'com.tsurugidb.tsubakuro:tsubakuro-kvs:1.4.0'
-    implementation 'com.tsurugidb.tsubakuro:tsubakuro-debug:1.4.0'
+    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.5.0-SNAPSHOT'
+    implementation 'com.tsurugidb.tsubakuro:tsubakuro-kvs:1.5.0-SNAPSHOT'
+    implementation 'com.tsurugidb.tsubakuro:tsubakuro-debug:1.5.0-SNAPSHOT'
 
     testImplementation "ch.qos.logback:logback-classic:1.2.3"
 }
