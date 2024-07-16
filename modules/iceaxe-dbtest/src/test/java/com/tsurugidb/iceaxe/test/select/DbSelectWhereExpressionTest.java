@@ -1,6 +1,8 @@
 package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -73,60 +75,79 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
 
     @Test
     void isNull() throws Exception {
-        var sql = SELECT_SQL + " where bar is null";
+        var tm = createTransactionManagerOcc(getSession());
 
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(1, list.size());
-            var entity = list.get(0);
-            assertEquals(NULL_ENTITY, entity);
+        var sql = SELECT_SQL + " where bar is null";
+        var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+        assertEquals(1, list.size());
+        for (var entity : list) {
+            assertNull(entity.getBar());
         }
     }
 
     @Test
     void isNotNull() throws Exception {
-        var sql = SELECT_SQL + " where bar is not null" + " order by foo";
+        var tm = createTransactionManagerOcc(getSession());
 
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var list = tm.executeAndGetList(ps);
-            assertEquals(SIZE, list.size());
-            for (int i = 0; i < SIZE; i++) {
-                assertEquals(i, list.get(i).getFoo());
-            }
+        var sql = SELECT_SQL + " where bar is not null";
+        var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+        assertEquals(SIZE, list.size());
+        for (var entity : list) {
+            assertNotNull(entity.getBar());
         }
     }
 
     @Test
     void isTrue() throws Exception {
-        var sql = SELECT_SQL + " where (1=1) is true";
+        var tm = createTransactionManagerOcc(getSession());
 
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // TODO isTrue実装待ち
-                var list = tm.executeAndGetList(ps);
-                assertEquals(SIZE, list.size());
-            });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
+        {
+            var sql = SELECT_SQL + " where (1=1) is true";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(SIZE + 1, list.size());
+        }
+        {
+            var sql = SELECT_SQL + " where (foo<10) is true";
+            var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+            assertEquals(10, list.size());
+            for (var entity : list) {
+                assertTrue(entity.getFoo() < 10);
+            }
+        }
+        {
+            var sql = SELECT_SQL + " where (bar<10) is true";
+            var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+            assertEquals(10, list.size());
+            for (var entity : list) {
+                assertTrue(entity.getBar() < 10);
+            }
         }
     }
 
     @Test
     void isFalse() throws Exception {
-        var sql = SELECT_SQL + " where (1=0) is false";
+        var tm = createTransactionManagerOcc(getSession());
 
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // TODO isFalse実装待ち
-                var list = tm.executeAndGetList(ps);
-                assertEquals(SIZE, list.size());
-            });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
+        {
+            var sql = SELECT_SQL + " where (1=0) is false";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(SIZE + 1, list.size());
+        }
+        {
+            var sql = SELECT_SQL + " where (foo<10) is false";
+            var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+            assertEquals((SIZE + 1) - 10, list.size());
+            for (var entity : list) {
+                assertTrue(entity.getFoo() >= 10);
+            }
+        }
+        {
+            var sql = SELECT_SQL + " where (bar<10) is false";
+            var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+            assertEquals(SIZE - 10, list.size());
+            for (var entity : list) {
+                assertTrue(entity.getBar() >= 10);
+            }
         }
     }
 
