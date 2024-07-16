@@ -125,6 +125,37 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
     }
 
     @Test
+    void isNotTrue() throws Exception {
+        var tm = createTransactionManagerOcc(getSession());
+
+        {
+            var sql = SELECT_SQL + " where (1=1) is not true";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(0, list.size());
+        }
+        {
+            var sql = SELECT_SQL + " where (foo<10) is not true";
+            var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+            assertEquals((SIZE + 1) - 10, list.size());
+            for (var entity : list) {
+                assertTrue(entity.getFoo() >= 10);
+            }
+        }
+        {
+            var sql = SELECT_SQL + " where (bar<10) is not true";
+            var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+            assertEquals((SIZE + 1) - 10, list.size());
+            for (var entity : list) {
+                if (entity.getBar() == null) {
+                    // OK
+                } else {
+                    assertTrue(entity.getBar() >= 10);
+                }
+            }
+        }
+    }
+
+    @Test
     void isFalse() throws Exception {
         var tm = createTransactionManagerOcc(getSession());
 
@@ -148,6 +179,79 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
             for (var entity : list) {
                 assertTrue(entity.getBar() >= 10);
             }
+        }
+    }
+
+    @Test
+    void isNotFalse() throws Exception {
+        var tm = createTransactionManagerOcc(getSession());
+
+        {
+            var sql = SELECT_SQL + " where (1=0) is not false";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(0, list.size());
+        }
+        {
+            var sql = SELECT_SQL + " where (foo<10) is not false";
+            var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+            assertEquals(10, list.size());
+            for (var entity : list) {
+                assertTrue(entity.getFoo() < 10);
+            }
+        }
+        {
+            var sql = SELECT_SQL + " where (bar<10) is not false";
+            var list = tm.executeAndGetList(sql, SELECT_MAPPING);
+            assertEquals(10 + 1, list.size());
+            for (var entity : list) {
+                if (entity.getBar() == null) {
+                    // OK
+                } else {
+                    assertTrue(entity.getBar() < 10);
+                }
+            }
+        }
+    }
+
+    @Test
+    void isUnknown() throws Exception {
+        var tm = createTransactionManagerOcc(getSession());
+
+        {
+            var sql = SELECT_SQL + " where (1=0) is unknown";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(0, list.size());
+        }
+        {
+            var sql = SELECT_SQL + " where null is unknown";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(SIZE + 1, list.size());
+        }
+        {
+            var sql = SELECT_SQL + " where (1=null) is unknown";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(SIZE + 1, list.size());
+        }
+    }
+
+    @Test
+    void isNotUnknown() throws Exception {
+        var tm = createTransactionManagerOcc(getSession());
+
+        {
+            var sql = SELECT_SQL + " where (1=0) is not unknown";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(SIZE + 1, list.size());
+        }
+        {
+            var sql = SELECT_SQL + " where null is not unknown";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(0, list.size());
+        }
+        {
+            var sql = SELECT_SQL + " where (1=null) is not unknown";
+            var list = tm.executeAndGetList(sql);
+            assertEquals(0, list.size());
         }
     }
 
