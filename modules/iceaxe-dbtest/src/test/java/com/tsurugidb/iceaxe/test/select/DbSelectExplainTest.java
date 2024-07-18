@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.test.select;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,10 +43,8 @@ class DbSelectExplainTest extends DbTestTableTester {
 
         var session = getSession();
         try (var ps = session.createQuery(sql)) {
-            assertThrowsExactly(UnsupportedOperationException.class, () -> {
-                var result = ps.explain();
-                assertExplain(result);
-            }); // TODO explain実装待ち
+            var result = ps.explain();
+            assertExplain(result);
         }
     }
 

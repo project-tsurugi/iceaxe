@@ -7,9 +7,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.tsubakuro.explain.PlanGraphException;
+import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * explain drop table test
@@ -33,20 +35,18 @@ class DbDropTableExplainTest extends DbTestTableTester {
 
         var session = getSession();
         var helper = session.getExplainHelper();
-        assertThrowsExactly(UnsupportedOperationException.class, () -> {
-            var result = helper.explain(session, SQL);
-            assertExplain(result);
-        }); // TODO explain実装待ち
+        var result = helper.explain(session, SQL);
+        assertExplain(result);
     }
 
     @Test
     void dropNotExists() throws Exception {
         var session = getSession();
         var helper = session.getExplainHelper();
-        assertThrowsExactly(UnsupportedOperationException.class, () -> {
-            var result = helper.explain(session, SQL);
-            assertExplain(result);
-        }); // TODO explain実装待ち
+        var e = assertThrowsExactly(TsurugiIOException.class, () -> {
+            helper.explain(session, SQL);
+        });
+        assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
     }
 
     private static void assertExplain(TgStatementMetadata actual) throws Exception {

@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.test.insert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,10 +35,8 @@ class DbInsertExplainTest extends DbTestTableTester {
 
         var session = getSession();
         try (var ps = session.createStatement(sql)) {
-            assertThrowsExactly(UnsupportedOperationException.class, () -> {
-                var result = ps.explain();
-                assertExplain(result);
-            }); // TODO explain実装待ち
+            var result = ps.explain();
+            assertExplain(result);
         }
     }
 

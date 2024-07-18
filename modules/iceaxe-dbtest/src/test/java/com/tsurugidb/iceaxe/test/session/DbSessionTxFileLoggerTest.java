@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,7 +132,7 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
 
             assertEquals(1, logCount);
             if ((writeExplain & TsurugiSessionTxFileLogConfig.EXPLAIN_FILE) != 0) {
-                assertEquals(0, explainCount); // TODO explainCount==1
+                assertEquals(0, explainCount); // create tableはPlanGraphに対応していないため、ファイルは出力されない
             } else {
                 assertEquals(0, explainCount);
             }
@@ -164,7 +163,7 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
 
             assertEquals(1, logCount);
             if ((writeExplain & TsurugiSessionTxFileLogConfig.EXPLAIN_FILE) != 0) {
-                assertEquals(2, explainCount); // TODO explainCount==4
+                assertEquals(4, explainCount);
             } else {
                 assertEquals(0, explainCount);
             }
@@ -173,9 +172,7 @@ class DbSessionTxFileLoggerTest extends DbTestTableTester {
 
     private static List<Path> listFiles(Path dir) throws IOException {
         try (var stream = Files.list(dir)) {
-            var list = stream.collect(Collectors.toList());
-            Collections.sort(list);
-            return list;
+            return stream.sorted().collect(Collectors.toList());
         }
     }
 
