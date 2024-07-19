@@ -359,23 +359,12 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      */
     public List<String> getNameList() throws IOException, InterruptedException, TsurugiTransactionException {
         try {
-            return getNameList(this, getLowResultSet());
+            var lowColumnList = getLowColumnList(this, getLowResultSet());
+            return IceaxeResultNameList.toNameList(lowColumnList);
         } catch (Throwable e) {
             event(e, listener -> listener.readException(this, e));
             throw e;
         }
-    }
-
-    static List<String> getNameList(TsurugiQueryResult<?> rs, ResultSet lowResultSet) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowColumnList = getLowColumnList(rs, lowResultSet);
-        var size = lowColumnList.size();
-        var list = new ArrayList<String>(size);
-        int i = 0;
-        for (var lowColumn : lowColumnList) {
-            var name = getColumnName(lowColumn, i++);
-            list.add(name);
-        }
-        return list;
     }
 
     static List<? extends Column> getLowColumnList(TsurugiQueryResult<?> rs, ResultSet lowResultSet) throws IOException, InterruptedException, TsurugiTransactionException {
@@ -385,14 +374,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         } catch (ServerException e) {
             throw rs.fillToTsurugiException(new TsurugiTransactionException(e));
         }
-    }
-
-    static String getColumnName(Column lowColumn, int index) {
-        var lowName = lowColumn.getName();
-        if (lowName == null || lowName.isEmpty()) {
-            return "@#" + index;
-        }
-        return lowName;
     }
 
     // read

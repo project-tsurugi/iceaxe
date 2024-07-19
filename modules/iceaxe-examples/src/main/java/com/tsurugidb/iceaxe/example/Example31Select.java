@@ -111,15 +111,12 @@ public class Example31Select {
     }
 
     private TgResultMapping<TestEntity> resultMappingForTestEntity() {
-        switch (4) {
+        switch (0) {
         default:
-            return TgResultMapping.of(record -> {
-                var entity = new TestEntity();
-                entity.setFoo(record.getIntOrNull("FOO"));
-                entity.setBar(record.getLongOrNull("BAR"));
-                entity.setZzz(record.getStringOrNull("ZZZ"));
-                return entity;
-            });
+            return TgResultMapping.of(TestEntity::new) //
+                    .addInt("FOO", TestEntity::setFoo) //
+                    .addLong("BAR", TestEntity::setBar) //
+                    .addString("ZZZ", TestEntity::setZzz);
         case 1:
             return TgResultMapping.of(TestEntity::of);
         case 2: // selectのカラムの順序依存
@@ -132,11 +129,30 @@ public class Example31Select {
                     .addInt(0, TestEntity::setFoo) //
                     .addLong(1, TestEntity::setBar) //
                     .addString(2, TestEntity::setZzz);
-        case 4:
-            return TgResultMapping.of(TestEntity::new) //
-                    .addInt("FOO", TestEntity::setFoo) //
-                    .addLong("BAR", TestEntity::setBar) //
-                    .addString("ZZZ", TestEntity::setZzz);
+        case 10:
+            return TgResultMapping.of(record -> {
+                var entity = new TestEntity();
+                entity.setFoo(record.getIntOrNull("FOO"));
+                entity.setBar(record.getLongOrNull("BAR"));
+                entity.setZzz(record.getStringOrNull("ZZZ"));
+                return entity;
+            });
+        case 12: // selectのカラムの順序依存
+            return TgResultMapping.of(record -> {
+                var entity = new TestEntity();
+                entity.setFoo(record.nextIntOrNull());
+                entity.setBar(record.nextLongOrNull());
+                entity.setZzz(record.nextStringOrNull());
+                return entity;
+            });
+        case 13: // selectのカラムの順序依存
+            return TgResultMapping.of(record -> {
+                var entity = new TestEntity();
+                entity.setFoo(record.getIntOrNull(0));
+                entity.setBar(record.getLongOrNull(1));
+                entity.setZzz(record.getStringOrNull(2));
+                return entity;
+            });
         }
     }
 

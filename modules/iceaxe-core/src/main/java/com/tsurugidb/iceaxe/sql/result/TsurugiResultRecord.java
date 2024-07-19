@@ -1,20 +1,9 @@
 package com.tsurugidb.iceaxe.sql.result;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,10 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
+import com.tsurugidb.iceaxe.sql.result.IceaxeResultNameList.IceaxeAmbiguousNamePolicy;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
-import com.tsurugidb.sql.proto.SqlCommon.AtomType;
-import com.tsurugidb.sql.proto.SqlCommon.Column;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.ResultSet;
 
@@ -50,15 +39,21 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * }
  * </pre>
  *
- * <h2><code>name</code> group</h2>
+ * <h2><code>name</code>/<code>index</code> group</h2>
  * <p>
- * Get the value by specifying the column name.
+ * Get the value by specifying the column name or index.
  * </p>
  *
  * <pre>
  * entity.setFoo(record.getInt("foo"));
  * entity.setBar(record.getLong("bar"));
  * entity.setZzz(record.getString("zzz"));
+ * </pre>
+ *
+ * <pre>
+ * entity.setFoo(record.getInt(0));
+ * entity.setBar(record.getLong(1));
+ * entity.setZzz(record.getString(2));
  * </pre>
  *
  * <h2><code>next</code> group</h2>
@@ -81,51 +76,42 @@ import com.tsurugidb.tsubakuro.sql.ResultSet;
  * </p>
  */
 @NotThreadSafe
-public class TsurugiResultRecord {
+public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiResultNameRecord, TsurugiResultNextRecord {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiResultRecord.class);
 
+    private static IceaxeAmbiguousNamePolicy defaultAmbiguousNamePolicy = IceaxeAmbiguousNamePolicy.FIRST;
+
     /**
-     * column value.
+     * set default ambiguous name policy.
+     *
+     * @param policy default ambiguous name policy
+     * @since X.X.X
      */
-    protected /* record */ static class TsurugiResultColumnValue {
-        private final int index;
-        private final Object value;
+    public static void setDefaultAmbiguousNamePolicy(IceaxeAmbiguousNamePolicy policy) {
+        defaultAmbiguousNamePolicy = Objects.requireNonNull(policy);
+    }
 
-        /**
-         * Creates a new instance.
-         *
-         * @param index column index
-         * @param value column value
-         */
-        public TsurugiResultColumnValue(int index, Object value) {
-            this.index = index;
-            this.value = value;
-        }
-
-        /**
-         * get column index.
-         *
-         * @return column index
-         */
-        public int index() {
-            return index;
-        }
-
-        /**
-         * get column value.
-         *
-         * @return column value
-         */
-        public Object value() {
-            return value;
-        }
+    /**
+     * get default ambiguous name policy.
+     *
+     * @return default ambiguous name policy
+     * @since X.X.X
+     */
+    public static IceaxeAmbiguousNamePolicy getDefaultAmbiguousNamePolicy() {
+        return defaultAmbiguousNamePolicy;
     }
 
     private final TsurugiQueryResult<?> ownerResult;
     private final ResultSet lowResultSet;
     private final IceaxeConvertUtil convertUtil;
+    private IceaxeAmbiguousNamePolicy ambiguousNamePolicy = null;
+
+    private IceaxeResultNameList resultNameList = null;
+    private List<TgDataType> typeList = null;
+
     private int currentColumnIndex;
-    private Map<String, TsurugiResultColumnValue> columnMap;
+    private Object[] values = null;
+    private boolean isValuesAvailable;
 
     /**
      * Creates a new instance.
@@ -143,18 +129,63 @@ public class TsurugiResultRecord {
 
     void reset() {
         this.currentColumnIndex = -1;
-        if (this.columnMap != null) {
-            columnMap.clear();
-        }
+        this.isValuesAvailable = false;
+    }
+
+    @Override
+    public IceaxeConvertUtil getConvertUtil() {
+        return this.convertUtil;
     }
 
     /**
-     * get convert type utility.
+     * get name list.
      *
-     * @return convert type utility
+     * @return list of column name
+     * @throws IOException                 if an I/O error occurs while retrieving metadata
+     * @throws InterruptedException        if interrupted while retrieving metadata
+     * @throws TsurugiTransactionException if server error occurs while retrieving metadata
      */
-    public IceaxeConvertUtil getConvertUtil() {
-        return this.convertUtil;
+    public @Nonnull List<String> getNameList() throws IOException, InterruptedException, TsurugiTransactionException {
+        return getResultNameList().getNameList();
+    }
+
+    /**
+     * get name utility.
+     *
+     * @return name utility
+     * @throws IOException                 if an I/O error occurs while retrieving metadata
+     * @throws InterruptedException        if interrupted while retrieving metadata
+     * @throws TsurugiTransactionException if server error occurs while retrieving metadata
+     * @since X.X.X
+     */
+    @IceaxeInternal
+    public IceaxeResultNameList getResultNameList() throws IOException, InterruptedException, TsurugiTransactionException {
+        if (this.resultNameList == null) {
+            var lowColumnList = TsurugiQueryResult.getLowColumnList(ownerResult, lowResultSet);
+            this.resultNameList = IceaxeResultNameList.of(lowColumnList);
+        }
+        return this.resultNameList;
+    }
+
+    /**
+     * get data type list.
+     *
+     * @return list of data type
+     * @throws IOException                 if an I/O error occurs while retrieving metadata
+     * @throws InterruptedException        if interrupted while retrieving metadata
+     * @throws TsurugiTransactionException if server error occurs while retrieving metadata
+     */
+    protected @Nonnull List<TgDataType> getTypeList() throws IOException, InterruptedException, TsurugiTransactionException {
+        if (this.typeList == null) {
+            var lowColumnList = TsurugiQueryResult.getLowColumnList(ownerResult, lowResultSet);
+            var list = new ArrayList<TgDataType>(lowColumnList.size());
+            for (var lowColumn : lowColumnList) {
+                var type = TgDataType.of(lowColumn.getAtomType());
+                list.add(type);
+            }
+            this.typeList = List.copyOf(list);
+        }
+        return this.typeList;
     }
 
     /*
@@ -188,18 +219,10 @@ public class TsurugiResultRecord {
         }
     }
 
-    /**
-     * get low column.
-     *
-     * @param index column index
-     * @return low column
-     * @throws IOException                 if an I/O error occurs while retrieving metadata
-     * @throws InterruptedException        if interrupted while retrieving metadata
-     * @throws TsurugiTransactionException if server error occurs while retrieving metadata
-     */
-    protected @Nonnull Column getLowColumn(int index) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowColumnList = TsurugiQueryResult.getLowColumnList(ownerResult, lowResultSet);
-        return lowColumnList.get(index);
+    @IceaxeInternal
+    @Override
+    public int getCurrentColumnIndex() {
+        return this.currentColumnIndex;
     }
 
     /**
@@ -212,8 +235,7 @@ public class TsurugiResultRecord {
      * @see #moveCurrentColumnNext()
      */
     public @Nonnull String getCurrentColumnName() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowColumn = getLowColumn(currentColumnIndex);
-        return TsurugiQueryResult.getColumnName(lowColumn, currentColumnIndex);
+        return getNameList().get(currentColumnIndex);
     }
 
     /**
@@ -226,21 +248,7 @@ public class TsurugiResultRecord {
      * @see #moveCurrentColumnNext()
      */
     public @Nonnull TgDataType getCurrentColumnType() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowType = getCurrentColumnLowType();
-        return TgDataType.of(lowType);
-    }
-
-    /**
-     * get current column low type.
-     *
-     * @return low data type
-     * @throws IOException                 if an I/O error occurs while retrieving metadata
-     * @throws InterruptedException        if interrupted while retrieving metadata
-     * @throws TsurugiTransactionException if server error occurs while retrieving metadata
-     */
-    protected @Nonnull AtomType getCurrentColumnLowType() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowColumn = getLowColumn(currentColumnIndex);
-        return lowColumn.getAtomType();
+        return getType(currentColumnIndex);
     }
 
     /**
@@ -256,7 +264,7 @@ public class TsurugiResultRecord {
         if (lowResultSet.isNull()) {
             return null;
         }
-        var lowType = getCurrentColumnLowType();
+        var lowType = getCurrentColumnType().getLowDataType();
         try {
             switch (lowType) {
             case BOOLEAN:
@@ -298,74 +306,110 @@ public class TsurugiResultRecord {
     }
 
     /*
+     * get by index
+     */
+
+    @Override
+    public @Nullable Object getValueOrNull(int index) throws IOException, InterruptedException, TsurugiTransactionException {
+        if (!isValuesAvailable) {
+            if (this.values == null) {
+                int size = getResultNameList().size();
+                this.values = new Object[size];
+            }
+
+            readValues(this.values);
+
+            this.isValuesAvailable = true;
+        }
+        return values[index];
+    }
+
+    void readValues(Object[] values) throws IOException, InterruptedException, TsurugiTransactionException {
+        int i = 0;
+        while (moveCurrentColumnNext()) {
+            var value = fetchCurrentColumnValue();
+            values[i++] = value;
+        }
+        if (i != values.length) {
+            throw new IllegalStateException(String.format("column size unmatch. readColumn=%d, columnSize=%d", i, values.length));
+        }
+    }
+
+    /**
+     * get data type.
+     *
+     * @param index column index
+     * @return data type
+     * @throws IOException                 if an I/O error occurs while retrieving the column data
+     * @throws InterruptedException        if interrupted while retrieving the column data
+     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
+     */
+    public @Nonnull TgDataType getType(int index) throws IOException, InterruptedException, TsurugiTransactionException {
+        return getTypeList().get(index);
+    }
+
+    /*
      * get by name
      */
 
     /**
-     * get name list.
+     * set ambiguous name policy.
      *
-     * @return list of column name
-     * @throws IOException                 if an I/O error occurs while retrieving metadata
-     * @throws InterruptedException        if interrupted while retrieving metadata
-     * @throws TsurugiTransactionException if server error occurs while retrieving metadata
+     * @param policy ambiguous name policy
+     * @since X.X.X
      */
-    public @Nonnull List<String> getNameList() throws IOException, InterruptedException, TsurugiTransactionException {
-        return TsurugiQueryResult.getNameList(ownerResult, lowResultSet);
+    public void setAmbiguousNamePolicy(IceaxeAmbiguousNamePolicy policy) {
+        this.ambiguousNamePolicy = policy;
     }
 
     /**
-     * get column value map.
+     * get ambiguous name policy.
      *
-     * @return column value map
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
+     * @return ambiguous name policy
+     * @since X.X.X
      */
-    protected @Nonnull Map<String, TsurugiResultColumnValue> getColumnMap() throws IOException, InterruptedException, TsurugiTransactionException {
-        if (this.columnMap == null) {
-            this.columnMap = new LinkedHashMap<>();
-        }
-        if (columnMap.isEmpty()) {
-            while (moveCurrentColumnNext()) {
-                var name = getCurrentColumnName();
-                var value = fetchCurrentColumnValue();
-                var column = new TsurugiResultColumnValue(currentColumnIndex, value);
-                columnMap.put(name, column);
-            }
-        }
-        return this.columnMap;
+    public IceaxeAmbiguousNamePolicy getAmbiguousNamePolicy() {
+        return this.ambiguousNamePolicy;
     }
 
     /**
-     * get column value.
+     * get index.
      *
      * @param name column name
-     * @return column value
+     * @return column index
+     * @see #setAmbiguousNamePolicy(IceaxeAmbiguousNamePolicy)
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
+     * @since X.X.X
      */
-    protected @Nonnull TsurugiResultColumnValue getColumn(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var map = getColumnMap();
-        var column = map.get(name);
-        if (column == null) {
-            throw new IllegalArgumentException("not found column. name=" + name);
+    public int getIndex(String name) throws IOException, InterruptedException, TsurugiTransactionException {
+        var policy = this.ambiguousNamePolicy;
+        if (policy == null) {
+            policy = defaultAmbiguousNamePolicy;
         }
-        return column;
+        return getResultNameList().getIndex(name, policy);
     }
 
     /**
-     * get value.
+     * get index.
      *
-     * @param name column name
-     * @return value
+     * @param name     column name
+     * @param subIndex index for same name
+     * @return column index
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
+     * @since X.X.X
      */
-    public @Nullable Object getValue(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var column = getColumn(name);
-        return column.value();
+    public int getIndex(String name, int subIndex) throws IOException, InterruptedException, TsurugiTransactionException {
+        return getResultNameList().getIndex(name, subIndex);
+    }
+
+    @Override
+    public @Nullable Object getValueOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
+        int index = getIndex(name);
+        return getValueOrNull(index);
     }
 
     /**
@@ -378,978 +422,8 @@ public class TsurugiResultRecord {
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      */
     public @Nonnull TgDataType getType(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var column = getColumn(name);
-        var lowColumn = getLowColumn(column.index());
-        var lowType = lowColumn.getAtomType();
-        return TgDataType.of(lowType);
-    }
-
-    private static void requireNonNull(String name, Object value, String getterName) {
-        Objects.requireNonNull(value, () -> MessageFormat.format("TsurugiResultRecord.{0}({1}) is null", getterName, name));
-    }
-
-    // boolean
-
-    /**
-     * get column value as boolean.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public boolean getBoolean(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBooleanOrNull(name);
-        requireNonNull(name, value, "getBoolean");
-        return value;
-    }
-
-    /**
-     * get column value as boolean.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public boolean getBoolean(String name, boolean defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBooleanOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as boolean.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Boolean> findBoolean(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBooleanOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as boolean.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Boolean getBooleanOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toBoolean(lowValue);
-    }
-
-    // int
-
-    /**
-     * get column value as int.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public int getInt(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getIntOrNull(name);
-        requireNonNull(name, value, "getInt");
-        return value;
-    }
-
-    /**
-     * get column value as int.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public int getInt(String name, int defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getIntOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as int.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Integer> findInt(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getIntOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as int.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Integer getIntOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toInt(lowValue);
-    }
-
-    // long
-
-    /**
-     * get column value as long.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public long getLong(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getLongOrNull(name);
-        requireNonNull(name, value, "getLong");
-        return value;
-    }
-
-    /**
-     * get column value as long.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public long getLong(String name, long defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getLongOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as long.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Long> findLong(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getLongOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as long.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Long getLongOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toLong(lowValue);
-    }
-
-    // float
-
-    /**
-     * get column value as float.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public float getFloat(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getFloatOrNull(name);
-        requireNonNull(name, value, "getFloat");
-        return value;
-    }
-
-    /**
-     * get column value as float.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public float getFloat(String name, float defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getFloatOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as float.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Float> findFloat(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getFloatOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as float.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Float getFloatOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toFloat(lowValue);
-    }
-
-    // double
-
-    /**
-     * get column value as double.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public double getDouble(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDoubleOrNull(name);
-        requireNonNull(name, value, "getDouble");
-        return value;
-    }
-
-    /**
-     * get column value as double.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public double getDouble(String name, float defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDoubleOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as double.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Double> findDouble(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDoubleOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as double.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Double getDoubleOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toDouble(lowValue);
-    }
-
-    // decimal
-
-    /**
-     * get column value as decimal.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull BigDecimal getDecimal(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDecimalOrNull(name);
-        requireNonNull(name, value, "getDecimal");
-        return value;
-    }
-
-    /**
-     * get column value as decimal.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public BigDecimal getDecimal(String name, BigDecimal defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDecimalOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as decimal.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<BigDecimal> findDecimal(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDecimalOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as decimal.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable BigDecimal getDecimalOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toDecimal(lowValue);
-    }
-
-    // string
-
-    /**
-     * get column value as String.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull String getString(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getStringOrNull(name);
-        requireNonNull(name, value, "getString");
-        return value;
-    }
-
-    /**
-     * get column value as String.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public String getString(String name, String defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getStringOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as String.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<String> findString(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getStringOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as String.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable String getStringOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toString(lowValue);
-    }
-
-    // byte[]
-
-    /**
-     * get column value as byte[].
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull byte[] getBytes(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBytesOrNull(name);
-        requireNonNull(name, value, "getBytes");
-        return value;
-    }
-
-    /**
-     * get column value as byte[].
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public byte[] getBytes(String name, byte[] defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBytesOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as byte[].
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<byte[]> findBytes(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBytesOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as byte[].
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable byte[] getBytesOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toBytes(lowValue);
-    }
-
-    // boolean[]
-
-    /**
-     * get column value as boolean[].
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull boolean[] getBits(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBitsOrNull(name);
-        requireNonNull(name, value, "getBits");
-        return value;
-    }
-
-    /**
-     * get column value as boolean[].
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public boolean[] getBits(String name, boolean[] defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBitsOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as boolean[].
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<boolean[]> findBits(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getBitsOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as boolean[].
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable boolean[] getBitsOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toBits(lowValue);
-    }
-
-    // date
-
-    /**
-     * get column value as date.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull LocalDate getDate(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDateOrNull(name);
-        requireNonNull(name, value, "getDate");
-        return value;
-    }
-
-    /**
-     * get column value as date.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public LocalDate getDate(String name, LocalDate defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDateOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as date.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<LocalDate> findDate(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDateOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as date.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable LocalDate getDateOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toDate(lowValue);
-    }
-
-    // time
-
-    /**
-     * get column value as time.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull LocalTime getTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getTimeOrNull(name);
-        requireNonNull(name, value, "getTime");
-        return value;
-    }
-
-    /**
-     * get column value as time.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public LocalTime getTime(String name, LocalTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getTimeOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as time.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<LocalTime> findTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getTimeOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as time.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable LocalTime getTimeOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toTime(lowValue);
-    }
-
-    // date time
-
-    /**
-     * get column value as dateTime.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull LocalDateTime getDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDateTimeOrNull(name);
-        requireNonNull(name, value, "getDateTime");
-        return value;
-    }
-
-    /**
-     * get column value as dateTime.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public LocalDateTime getDateTime(String name, LocalDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDateTimeOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as dateTime.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<LocalDateTime> findDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getDateTimeOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as dateTime.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable LocalDateTime getDateTimeOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toDateTime(lowValue);
-    }
-
-    // offset time
-
-    /**
-     * get column value as offset time.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull OffsetTime getOffsetTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getOffsetTimeOrNull(name);
-        requireNonNull(name, value, "getOffsetTime");
-        return value;
-    }
-
-    /**
-     * get column value as offset time.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public OffsetTime getOffsetTime(String name, OffsetTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getOffsetTimeOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as offset time.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<OffsetTime> findOffsetTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getOffsetTimeOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as offset time.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable OffsetTime getOffsetTimeOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toOffsetTime(lowValue);
-    }
-
-    // offset dateTime
-
-    /**
-     * get column value as offset dateTime.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull OffsetDateTime getOffsetDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getOffsetDateTimeOrNull(name);
-        requireNonNull(name, value, "getOffsetDateTime");
-        return value;
-    }
-
-    /**
-     * get column value as offset dateTime.
-     *
-     * @param name         column name
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public OffsetDateTime getOffsetDateTime(String name, OffsetDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getOffsetDateTimeOrNull(name);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as offset dateTime.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<OffsetDateTime> findOffsetDateTime(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getOffsetDateTimeOrNull(name);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as offset dateTime.
-     *
-     * @param name column name
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable OffsetDateTime getOffsetDateTimeOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toOffsetDateTime(lowValue);
-    }
-
-    // zoned dateTime
-
-    /**
-     * get column value as ZonedDateTime.
-     *
-     * @param name column name
-     * @param zone time-zone
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull ZonedDateTime getZonedDateTime(String name, ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getZonedDateTimeOrNull(name, zone);
-        requireNonNull(name, value, "getZonedDateTime");
-        return value;
-    }
-
-    /**
-     * get column value as ZonedDateTime.
-     *
-     * @param name         column name
-     * @param zone         time-zone
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public ZonedDateTime getZonedDateTime(String name, ZoneId zone, ZonedDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getZonedDateTimeOrNull(name, zone);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get column value as ZonedDateTime.
-     *
-     * @param name column name
-     * @param zone time-zone
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<ZonedDateTime> findZonedDateTime(String name, ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = getZonedDateTimeOrNull(name, zone);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get column value as ZonedDateTime.
-     *
-     * @param name column name
-     * @param zone time-zone
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable ZonedDateTime getZonedDateTimeOrNull(String name, ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = getValue(name);
-        return convertUtil.toZonedDateTime(lowValue, zone);
+        int index = getIndex(name);
+        return getType(index);
     }
 
     /*
@@ -1379,917 +453,10 @@ public class TsurugiResultRecord {
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      */
-    protected @Nullable Object nextLowValue() throws IOException, InterruptedException, TsurugiTransactionException {
+    @Override
+    public @Nullable Object nextValueOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         nextColumn();
         return fetchCurrentColumnValue();
-    }
-
-    private void requireNonNull(Object value, String getterName) {
-        Objects.requireNonNull(value, () -> MessageFormat.format("TsurugiResultRecord.{0}({1}) is null", getterName, currentColumnIndex));
-    }
-
-    // boolean
-
-    /**
-     * get current column value as boolean and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public boolean nextBoolean() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBooleanOrNull();
-        requireNonNull(value, "nextBoolean");
-        return value;
-    }
-
-    /**
-     * get current column value as boolean and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public boolean nextBoolean(boolean defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBooleanOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as boolean and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Boolean> nextBooleanOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBooleanOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as boolean and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Boolean nextBooleanOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toBoolean(lowValue);
-    }
-
-    // int
-
-    /**
-     * get current column value as int and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public int nextInt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextIntOrNull();
-        requireNonNull(value, "nextInt");
-        return value;
-    }
-
-    /**
-     * get current column value as int and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public int nextInt(int defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextIntOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as int and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Integer> nextIntOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextIntOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as int and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Integer nextIntOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toInt(lowValue);
-    }
-
-    // long
-
-    /**
-     * get current column value as long and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public long nextLong() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextLongOrNull();
-        requireNonNull(value, "nextLong");
-        return value;
-    }
-
-    /**
-     * get current column value as long and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public long nextLong(long defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextLongOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as long and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Long> nextLongOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextLongOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as long and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Long nextLongOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toLong(lowValue);
-    }
-
-    // float
-
-    /**
-     * get current column value as float and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public float nextFloat() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextFloatOrNull();
-        requireNonNull(value, "nextFloat");
-        return value;
-    }
-
-    /**
-     * get current column value as float and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public float nextFloat(int defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextFloatOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as float and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Float> nextFloatOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextFloatOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as float and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Float nextFloatOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toFloat(lowValue);
-    }
-
-    // double
-
-    /**
-     * get current column value as double and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public double nextDouble() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDoubleOrNull();
-        requireNonNull(value, "nextDouble");
-        return value;
-    }
-
-    /**
-     * get current column value as double and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public double nextDouble(int defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDoubleOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as double and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<Double> nextDoubleOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDoubleOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as double and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable Double nextDoubleOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toDouble(lowValue);
-    }
-
-    // decimal
-
-    /**
-     * get current column value as decimal and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull BigDecimal nextDecimal() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDecimalOrNull();
-        requireNonNull(value, "nextDecimal");
-        return value;
-    }
-
-    /**
-     * get current column value as decimal and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public BigDecimal nextDecimal(BigDecimal defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDecimalOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as decimal and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<BigDecimal> nextDecimalOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDecimalOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as decimal and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable BigDecimal nextDecimalOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toDecimal(lowValue);
-    }
-
-    // string
-
-    /**
-     * get current column value as String and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull String nextString() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextStringOrNull();
-        requireNonNull(value, "nextString");
-        return value;
-    }
-
-    /**
-     * get current column value as String and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public String nextString(String defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextStringOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as String and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<String> nextStringOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextStringOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as String and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable String nextStringOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toString(lowValue);
-    }
-
-    // byte[]
-
-    /**
-     * get current column value as byte[] and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull byte[] nextBytes() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBytesOrNull();
-        requireNonNull(value, "nextBytes");
-        return value;
-    }
-
-    /**
-     * get current column value as byte[] and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public byte[] nextBytes(byte[] defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBytesOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as byte[] and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<byte[]> nextBytesOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBytesOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as byte[] and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable byte[] nextBytesOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toBytes(lowValue);
-    }
-
-    // boolean[]
-
-    /**
-     * get current column value as boolean[] and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull boolean[] nextBits() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBitsOrNull();
-        requireNonNull(value, "nextBits");
-        return value;
-    }
-
-    /**
-     * get current column value as boolean[] and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public boolean[] nextBits(boolean[] defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBitsOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as boolean[] and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<boolean[]> nextBitsOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextBitsOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as boolean[] and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable boolean[] nextBitsOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toBits(lowValue);
-    }
-
-    // date
-
-    /**
-     * get current column value as date and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull LocalDate nextDate() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDateOrNull();
-        requireNonNull(value, "nextDate");
-        return value;
-    }
-
-    /**
-     * get current column value as date and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public LocalDate nextDate(LocalDate defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDateOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as date and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<LocalDate> nextDateOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDateOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as date and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable LocalDate nextDateOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toDate(lowValue);
-    }
-
-    // time
-
-    /**
-     * get current column value as time and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull LocalTime nextTime() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextTimeOrNull();
-        requireNonNull(value, "nextTime");
-        return value;
-    }
-
-    /**
-     * get current column value as time and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public LocalTime nextTime(LocalTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextTimeOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as time and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<LocalTime> nextTimeOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextTimeOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as time and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable LocalTime nextTimeOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toTime(lowValue);
-    }
-
-    // dateTime
-
-    /**
-     * get current column value as dateTime and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull LocalDateTime nextDateTime() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDateTimeOrNull();
-        requireNonNull(value, "nextDateTime");
-        return value;
-    }
-
-    /**
-     * get current column value as dateTime and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public LocalDateTime nextDateTime(LocalDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDateTimeOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as dateTime and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<LocalDateTime> nextDateTimeOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextDateTimeOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as dateTime and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable LocalDateTime nextDateTimeOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toDateTime(lowValue);
-    }
-
-    // offset time
-
-    /**
-     * get current column value as offset time and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull OffsetTime nextOffsetTime() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextOffsetTimeOrNull();
-        requireNonNull(value, "nextOffsetTime");
-        return value;
-    }
-
-    /**
-     * get current column value as offset time and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public OffsetTime nextOffsetTime(OffsetTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextOffsetTimeOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as offset time and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<OffsetTime> nextOffsetTimeOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextOffsetTimeOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as offset time and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable OffsetTime nextOffsetTimeOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toOffsetTime(lowValue);
-    }
-
-    // offset dateTime
-
-    /**
-     * get current column value as offset dateTime and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull OffsetDateTime nextOffsetDateTime() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextOffsetDateTimeOrNull();
-        requireNonNull(value, "nextOffsetDateTime");
-        return value;
-    }
-
-    /**
-     * get current column value as offset dateTime and move next column.
-     *
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public OffsetDateTime nextOffsetDateTime(OffsetDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextOffsetDateTimeOrNull();
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as offset dateTime and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<OffsetDateTime> nextOffsetDateTimeOpt() throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextOffsetDateTimeOrNull();
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as offset dateTime and move next column.
-     *
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable OffsetDateTime nextOffsetDateTimeOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toOffsetDateTime(lowValue);
-    }
-
-    // zoned dateTime
-
-    /**
-     * get current column value as ZonedDateTime and move next column.
-     *
-     * @param zone time-zone
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @throws NullPointerException        if value is null
-     */
-    public @Nonnull ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextZonedDateTimeOrNull(zone);
-        requireNonNull(value, "nextZonedDateTime");
-        return value;
-    }
-
-    /**
-     * get current column value as ZonedDateTime and move next column.
-     *
-     * @param zone         time-zone
-     * @param defaultValue value to return if column value is null
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public ZonedDateTime nextZonedDateTime(@Nonnull ZoneId zone, ZonedDateTime defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextZonedDateTimeOrNull(zone);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    /**
-     * get current column value as ZonedDateTime and move next column.
-     *
-     * @param zone time-zone
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nonnull Optional<ZonedDateTime> nextZonedDateTimeOpt(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
-        var value = nextZonedDateTimeOrNull(zone);
-        return Optional.ofNullable(value);
-    }
-
-    /**
-     * get current column value as ZonedDateTime and move next column.
-     *
-     * @param zone time-zone
-     * @return column value
-     * @throws IOException                 if an I/O error occurs while retrieving the column data
-     * @throws InterruptedException        if interrupted while retrieving the column data
-     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     */
-    public @Nullable ZonedDateTime nextZonedDateTimeOrNull(@Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
-        var lowValue = nextLowValue();
-        return convertUtil.toZonedDateTime(lowValue, zone);
     }
 
     @Override

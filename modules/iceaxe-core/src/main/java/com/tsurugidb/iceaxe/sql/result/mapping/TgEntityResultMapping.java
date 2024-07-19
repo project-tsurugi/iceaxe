@@ -46,7 +46,26 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
 
     private Supplier<R> entitySupplier;
     private final List<TsurugiTransactionBiConsumer<R, TsurugiResultRecord>> columnConverterList = new ArrayList<>();
-    private Map<String, TsurugiTransactionBiConsumer<R, TsurugiResultRecord>> columnConverterMap;
+
+    private static /* record */ class NameConverter<R> {
+        private final String name;
+        private final TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter;
+
+        public NameConverter(String name, TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter) {
+            this.name = name;
+            this.converter = converter;
+        }
+
+        public String name() {
+            return this.name;
+        }
+
+        public TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter() {
+            return this.converter;
+        }
+    }
+
+    private List<NameConverter<R>> nameConverterList = null;
 
     /**
      * Tsurugi Result Mapping.
@@ -1409,16 +1428,18 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param converter converter to R
      */
     protected void set(String name, TsurugiTransactionBiConsumer<R, TsurugiResultRecord> converter) {
-        if (this.columnConverterMap == null) {
-            this.columnConverterMap = new HashMap<>();
+        if (this.nameConverterList == null) {
+            this.nameConverterList = new ArrayList<>();
         }
-        columnConverterMap.put(name, converter);
+
+        var entry = new NameConverter<>(name, converter);
+        nameConverterList.add(entry);
     }
 
 //  @ThreadSafe
     @Override
     protected R convert(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
-        mergeColumnConverterMap(record);
+        mergeNameConverterList(record);
 
         R entity = entitySupplier.get();
         for (var converter : columnConverterList) {
@@ -1432,25 +1453,29 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * merge record to columnConverterMap.
+     * merge nameConverterList.
      *
      * @param record record
      * @throws IOException                 if an I/O error occurs while retrieving metadata
      * @throws InterruptedException        if interrupted while retrieving metadata
      * @throws TsurugiTransactionException if server error occurs while retrieving metadata
      */
-    protected synchronized void mergeColumnConverterMap(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
-        if (this.columnConverterMap != null) {
-            var nameList = record.getNameList();
-            int i = 0;
-            for (var name : nameList) {
-                var converter = columnConverterMap.get(name);
-                if (converter != null) {
-                    set(i, converter);
-                }
-                i++;
+    protected synchronized void mergeNameConverterList(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {
+        if (this.nameConverterList != null) {
+            var nameList = record.getResultNameList();
+
+            var countMap = new HashMap<String, int[]>(nameList.size());
+            for (var entry : nameConverterList) {
+                String name = entry.name();
+                int[] counter = countMap.computeIfAbsent(name, k -> new int[] { 0 });
+                int subIndex = counter[0]++;
+                int index = nameList.getIndex(name, subIndex);
+
+                var converter = entry.converter();
+                set(index, converter);
             }
-            this.columnConverterMap = null;
+
+            this.nameConverterList = null;
         }
     }
 }
