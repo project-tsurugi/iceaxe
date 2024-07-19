@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
-import java.time.LocalTime;
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -59,7 +58,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
     private static void createTable() throws IOException, InterruptedException {
         String sql = "create table " + TEST + "(" //
                 + "  pk int primary key," //
-                + "value time with time zone" //
+                + "  value time with time zone" //
                 + ")";
         var session = getSession();
         executeDdl(session, sql);
@@ -116,8 +115,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         assertEquals(1, count);
 
         var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
-        assertEquals(expected.withOffsetSameLocal(ZoneOffset.UTC), // TODO remove withOffsetSameLocal()
-                actual.getOffsetTime("value"));
+        assertEquals(toZ(expected), actual.getOffsetTime("value"));
     }
 
     @Test
@@ -134,13 +132,12 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
                 var list = tm.executeAndGetList(ps, parameter);
 //TODO          assertEquals(1, list.size());
                 for (var entity : list) {
-                    assertEquals(toZ(date), entity.getOffsetTime("value")); // TODO remove toZ()
+                    assertEquals(toZ(date), entity.getOffsetTime("value"));
                 }
             }
         }
     }
 
-    // TODO remove toZ()
     private static OffsetTime toZ(OffsetTime date) {
         return date.withOffsetSameLocal(ZoneOffset.UTC);
     }
@@ -160,7 +157,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
             var parameter = TgBindParameters.of(start.bind(start0), end.bind(end0));
             var list = tm.executeAndGetList(ps, parameter);
 
-            var expectedList = LIST.stream().map(d -> toZ(d)) // TODO remove toZ()
+            var expectedList = LIST.stream().map(d -> toZ(d)) //
                     .filter(d -> toZ(start0).compareTo(d) <= 0 && d.compareTo(toZ(end0)) <= 0) //
                     .sorted().collect(Collectors.toList());
             assertEquals(expectedList.size(), list.size());
@@ -199,20 +196,20 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
     void min() throws Exception {
         var session = getSession();
         String sql = "select min(value) from " + TEST;
-        var resultMapping = TgResultMapping.ofSingle(LocalTime.class); // TODO OffsetTime
+        var resultMapping = TgResultMapping.ofSingle(OffsetTime.class);
         var tm = createTransactionManagerOcc(session);
-        LocalTime result = tm.executeAndFindRecord(sql, resultMapping).get();
-        assertEquals(LIST.stream().min(OffsetTime::compareTo).get().toLocalTime(), result);
+        OffsetTime result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(toZ(LIST.stream().min(OffsetTime::compareTo).get()), result);
     }
 
     @Test
     void max() throws Exception {
         var session = getSession();
         String sql = "select max(value) from " + TEST;
-        var resultMapping = TgResultMapping.ofSingle(LocalTime.class); // TODO OffsetTime
+        var resultMapping = TgResultMapping.ofSingle(OffsetTime.class);
         var tm = createTransactionManagerOcc(session);
-        LocalTime result = tm.executeAndFindRecord(sql, resultMapping).get();
-        assertEquals(LIST.stream().max(OffsetTime::compareTo).get().toLocalTime(), result);
+        OffsetTime result = tm.executeAndFindRecord(sql, resultMapping).get();
+        assertEquals(toZ(LIST.stream().max(OffsetTime::compareTo).get()), result);
     }
 
     @Test
