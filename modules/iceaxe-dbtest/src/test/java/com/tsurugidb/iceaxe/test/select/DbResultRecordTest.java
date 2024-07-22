@@ -1,6 +1,11 @@
 package com.tsurugidb.iceaxe.test.select;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -10,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
+import com.tsurugidb.iceaxe.test.util.TestEntity;
 
 /**
  * {@link TsurugiResultRecord} test
@@ -43,7 +49,7 @@ class DbResultRecordTest extends DbTestTableTester {
                     transaction.executeAndFindRecord(ps);
                 });
             });
-            assertEqualsMessage("TsurugiResultRecord.getInt(foo) is null", e);
+            assertEqualsMessage("getInt(foo) is null", e);
         }
     }
 
@@ -60,7 +66,85 @@ class DbResultRecordTest extends DbTestTableTester {
                     transaction.executeAndFindRecord(ps);
                 });
             });
-            assertEqualsMessage("TsurugiResultRecord.nextInt(0) is null", e);
+            assertEqualsMessage("nextInt(0) is null", e);
+        }
+    }
+
+    @Test
+    void fewColumn_currentColumn() throws Exception {
+        var sql = "select * from " + TEST + " order by foo";
+        var resultMapping = TgResultMapping.of(record -> {
+            var entity = new TestEntity();
+            assertTrue(record.moveCurrentColumnNext());
+            entity.setFoo((Integer) record.fetchCurrentColumnValue());
+            assertTrue(record.moveCurrentColumnNext());
+            entity.setBar((Long) record.fetchCurrentColumnValue());
+            return entity;
+        });
+
+        var tm = createTransactionManagerOcc(getSession());
+        var actualList = tm.executeAndGetList(sql, resultMapping);
+
+        assertFewColumn(actualList);
+    }
+
+    @Test
+    void fewColumn_getByIndex() throws Exception {
+        var sql = "select * from " + TEST + " order by foo";
+        var resultMapping = TgResultMapping.of(record -> {
+            var entity = new TestEntity();
+            int i = 0;
+            entity.setFoo(record.getInt(i++));
+            entity.setBar(record.getLong(i++));
+            return entity;
+        });
+
+        var tm = createTransactionManagerOcc(getSession());
+        var actualList = tm.executeAndGetList(sql, resultMapping);
+
+        assertFewColumn(actualList);
+    }
+
+    @Test
+    void fewColumn_getByName() throws Exception {
+        var sql = "select * from " + TEST + " order by foo";
+        var resultMapping = TgResultMapping.of(record -> {
+            var entity = new TestEntity();
+            entity.setFoo(record.getInt("foo"));
+            entity.setBar(record.getLong("bar"));
+            return entity;
+        });
+
+        var tm = createTransactionManagerOcc(getSession());
+        var actualList = tm.executeAndGetList(sql, resultMapping);
+
+        assertFewColumn(actualList);
+    }
+
+    @Test
+    void fewColumn_next() throws Exception {
+        var sql = "select * from " + TEST + " order by foo";
+        var resultMapping = TgResultMapping.of(record -> {
+            var entity = new TestEntity();
+            entity.setFoo(record.nextInt());
+            entity.setBar(record.nextLong());
+            return entity;
+        });
+
+        var tm = createTransactionManagerOcc(getSession());
+        var actualList = tm.executeAndGetList(sql, resultMapping);
+
+        assertFewColumn(actualList);
+    }
+
+    private static void assertFewColumn(List<TestEntity> actualList) {
+        assertEquals(SIZE, actualList.size());
+        int i = 0;
+        for (var actual : actualList) {
+            assertEquals(i, actual.getFoo());
+            assertEquals(i, actual.getBar());
+            assertNull(actual.getZzz());
+            i++;
         }
     }
 }
