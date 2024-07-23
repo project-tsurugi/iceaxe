@@ -1200,17 +1200,38 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
         event(null, listener -> listener.rollbackStart(this));
 
         Throwable occurred = null;
+        List<Throwable> saveList = List.of();
         try {
             long start = System.nanoTime();
-            closeableSet.closeInTransaction(rollbackTimeout.getNanos(), IceaxeErrorCode.TX_ROLLBACK_CHILD_CLOSE_ERROR);
+            saveList = closeableSet.close(rollbackTimeout.getNanos());
             finish(start, Transaction::rollback, rollbackTimeout, IceaxeErrorCode.TX_ROLLBACK_TIMEOUT, IceaxeErrorCode.TX_ROLLBACK_CLOSE_TIMEOUT);
             this.rollbacked = true;
+
+            if (!saveList.isEmpty()) {
+                Throwable e = null;
+                for (var save : saveList) {
+                    if (e == null) {
+                        e = closeableSet.convertExceptionInTransaction(save, IceaxeErrorCode.TX_ROLLBACK_CHILD_CLOSE_ERROR);
+                    } else {
+                        e.addSuppressed(save);
+                    }
+                }
+                saveList = List.of();
+                closeableSet.throwExceptionInTransaction(e); // throw exception
+                throw new InternalError(e); // don't come here
+            }
         } catch (TsurugiTransactionException e) {
             occurred = e;
             e.setTxMethod(TgTxMethod.ROLLBACK, 0);
+            for (var save : saveList) {
+                e.addSuppressed(save);
+            }
             throw e;
         } catch (Throwable e) {
             occurred = e;
+            for (var save : saveList) {
+                e.addSuppressed(save);
+            }
             throw e;
         } finally {
             var finalOccurred = occurred;

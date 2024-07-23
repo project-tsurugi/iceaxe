@@ -55,7 +55,7 @@ public class TestFutureResponse<V> extends TestServerResource implements FutureR
         return getInternal();
     }
 
-    protected V getInternal() {
+    protected V getInternal() throws IOException, ServerException, InterruptedException {
         return null; // do override
     }
 }

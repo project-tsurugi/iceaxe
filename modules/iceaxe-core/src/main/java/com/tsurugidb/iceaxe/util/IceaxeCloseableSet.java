@@ -91,41 +91,66 @@ public class IceaxeCloseableSet {
         var saveList = close(timeoutNanos);
         for (var save : saveList) {
             if (e == null) {
-                if (save instanceof IOException) {
-                    e = save;
-                } else if (save instanceof ServerException) {
-                    e = new TsurugiTransactionException((ServerException) save);
-                } else if (save instanceof TsurugiTransactionException) {
-                    e = save;
-                } else if (save instanceof TsurugiTransactionRuntimeException) {
-                    e = save.getCause();
-                } else if (save instanceof RuntimeException) {
-                    e = save;
-                } else if (save instanceof InterruptedException) {
-                    e = save;
-                } else {
-                    e = new IceaxeIOException(closeErrorCode, save);
-                }
+                e = convertExceptionInTransaction(save, closeErrorCode);
             } else {
                 e.addSuppressed(save);
             }
         }
 
         if (e != null) {
-            if (e instanceof IOException) {
-                throw (IOException) e;
-            } else if (e instanceof TsurugiTransactionException) {
-                throw (TsurugiTransactionException) e;
-            } else if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else if (e instanceof InterruptedException) {
-                throw (InterruptedException) e;
-            } else {
-                throw new AssertionError(e);
-            }
+            throwExceptionInTransaction(e);
         }
 
         LOG.trace("close end");
+    }
+
+    /**
+     * convert exception.
+     *
+     * @param save           exception
+     * @param closeErrorCode error code for close
+     * @return converted exception
+     * @since X.X.X
+     */
+    public Throwable convertExceptionInTransaction(Throwable save, IceaxeErrorCode closeErrorCode) {
+        if (save instanceof IOException) {
+            return save;
+        } else if (save instanceof ServerException) {
+            return new TsurugiTransactionException((ServerException) save);
+        } else if (save instanceof TsurugiTransactionException) {
+            return save;
+        } else if (save instanceof TsurugiTransactionRuntimeException) {
+            return save.getCause();
+        } else if (save instanceof RuntimeException) {
+            return save;
+        } else if (save instanceof InterruptedException) {
+            return save;
+        } else {
+            return new IceaxeIOException(closeErrorCode, save);
+        }
+    }
+
+    /**
+     * throw exception.
+     *
+     * @param e exception
+     * @throws IOException                 if an I/O error occurs while disposing the resources
+     * @throws InterruptedException        if interrupted while requesting cancel
+     * @throws TsurugiTransactionException if server error occurs while disposing the resources
+     * @since X.X.X
+     */
+    public void throwExceptionInTransaction(Throwable e) throws IOException, InterruptedException, TsurugiTransactionException {
+        if (e instanceof IOException) {
+            throw (IOException) e;
+        } else if (e instanceof TsurugiTransactionException) {
+            throw (TsurugiTransactionException) e;
+        } else if (e instanceof RuntimeException) {
+            throw (RuntimeException) e;
+        } else if (e instanceof InterruptedException) {
+            throw (InterruptedException) e;
+        } else {
+            throw new AssertionError(e);
+        }
     }
 
     /**
