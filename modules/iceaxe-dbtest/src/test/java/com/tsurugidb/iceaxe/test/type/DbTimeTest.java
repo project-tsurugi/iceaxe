@@ -49,7 +49,7 @@ class DbTimeTest extends DbTestTableTester {
     private static void createTable() throws IOException, InterruptedException {
         String sql = "create table " + TEST + "(" //
                 + "  pk int primary key," //
-                + "value time" //
+                + "  value time" //
                 + ")";
         var session = getSession();
         executeDdl(session, sql);
@@ -69,6 +69,21 @@ class DbTimeTest extends DbTestTableTester {
                 return;
             });
         }
+    }
+
+    @SuppressWarnings("unused")
+    private static void insertLiteral(int size) throws IOException, InterruptedException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(transaction -> {
+            for (int i = 0; i < size; i++) {
+                var insertSql = "insert into " + TEST + " values(" + i + ", time'" + value(size, i) + "')";
+                try (var ps = session.createStatement(insertSql)) {
+                    transaction.executeAndGetCount(ps);
+                }
+            }
+            return;
+        });
     }
 
     private static LocalTime value(int size, int i) {
@@ -109,6 +124,22 @@ class DbTimeTest extends DbTestTableTester {
         assertEquals(expected, actual.getTime("value"));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "23:45:56.123456789", "00:00:00", "00:00:01", "00:00:00.000000001", "23:59:59.999999999" })
+    void valueLiteral(String s) throws Exception {
+        var expected = LocalTime.parse(s);
+
+        var updateSql = "update " + TEST + " set value= time'" + s + "' where pk=1";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        int count = tm.executeAndGetCount(updateSql);
+        assertEquals(1, count);
+
+        var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
+        assertEquals(expected, actual.getTime("value"));
+    }
+
     @Test
     void bindWhereEq() throws Exception {
         var variable = TgBindVariable.ofTime("value");
@@ -141,6 +172,15 @@ class DbTimeTest extends DbTestTableTester {
             assertEquals(LocalTime.of(23, 59, 1, 2 * 1000_000), list.get(0).getTime("value"));
             assertEquals(LocalTime.of(23, 59, 1, 3 * 1000_000), list.get(1).getTime("value"));
         }
+    }
+
+    @Test
+    void whereEq() throws Exception {
+        var session = getSession();
+        String sql = "select * from " + TEST + " where value = time'23:59:01.002'";
+        var tm = createTransactionManagerOcc(session);
+        TsurugiResultEntity entity = tm.executeAndFindRecord(sql).get();
+        assertEquals(LocalTime.of(23, 59, 1, 2 * 1000_000), entity.getTime("value"));
     }
 
     @Test

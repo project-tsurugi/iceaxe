@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -47,7 +49,7 @@ class DbDateTest extends DbTestTableTester {
     private static void createTable() throws IOException, InterruptedException {
         String sql = "create table " + TEST + "(" //
                 + "  pk int primary key," //
-                + "value date" //
+                + "  value date" //
                 + ")";
         var session = getSession();
         executeDdl(session, sql);
@@ -69,6 +71,21 @@ class DbDateTest extends DbTestTableTester {
         }
     }
 
+    @SuppressWarnings("unused")
+    private static void insertLiteral(int size) throws IOException, InterruptedException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(transaction -> {
+            for (int i = 0; i < size; i++) {
+                var insertSql = "insert into " + TEST + " values(" + i + ", date'" + value(size, i) + "')";
+                try (var ps = session.createStatement(insertSql)) {
+                    transaction.executeAndGetCount(ps);
+                }
+            }
+            return;
+        });
+    }
+
     private static LocalDate value(int size, int i) {
         return LocalDate.of(2024, 5, size - i);
     }
@@ -86,6 +103,53 @@ class DbDateTest extends DbTestTableTester {
     private static void assertColumn(String name, TgDataType type, SqlCommon.Column actual) {
         assertEquals(name, actual.getName());
         assertEquals(type.getLowDataType(), actual.getAtomType());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "2024-07-24", "0000-01-01", "0001-01-01", "1970-01-01", "1969-12-31", "9999-12-31", "-999999999-01-01", "+99999999-12-31" })
+    void value(String s) throws Exception {
+        var expected = LocalDate.parse(s);
+
+        var variable = TgBindVariable.ofDate("value");
+        var updateSql = "update " + TEST + " set value=" + variable + " where pk=1";
+        var updateMapping = TgParameterMapping.of(variable);
+        var updateParameter = TgBindParameters.of(variable.bind(expected));
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        int count = tm.executeAndGetCount(updateSql, updateMapping, updateParameter);
+        assertEquals(1, count);
+
+        var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
+        assertEquals(expected, actual.getDate("value"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "2024-07-24", "0000-01-01", "0001-01-01", "1970-01-01", "1969-12-31", "9999-12-31", "-999999999-01-01", "+99999999-12-31" })
+    void valueLiteral(String s) throws Exception {
+        var expected = LocalDate.parse(s);
+        if (s.startsWith("+")) {
+            s = s.substring(1);
+        }
+
+        var updateSql = "update " + TEST + " set value= date'" + s + "' where pk=1";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+
+        if (expected.getYear() <= 0) {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.executeAndGetCount(updateSql);
+            });
+            assertEqualsCode(SqlServiceCode.VALUE_ANALYZE_EXCEPTION, e);
+            return;
+        }
+
+        int count = tm.executeAndGetCount(updateSql);
+        assertEquals(1, count);
+
+        var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
+        assertEquals(expected, actual.getDate("value"));
     }
 
     @Test
@@ -120,6 +184,15 @@ class DbDateTest extends DbTestTableTester {
             assertEquals(LocalDate.of(2024, 5, 2), list.get(0).getDate("value"));
             assertEquals(LocalDate.of(2024, 5, 3), list.get(1).getDate("value"));
         }
+    }
+
+    @Test
+    void whereEq() throws Exception {
+        var session = getSession();
+        String sql = "select * from " + TEST + " where value = date'2024-05-02'";
+        var tm = createTransactionManagerOcc(session);
+        TsurugiResultEntity entity = tm.executeAndFindRecord(sql).get();
+        assertEquals(LocalDate.of(2024, 5, 2), entity.getDate("value"));
     }
 
     @Test

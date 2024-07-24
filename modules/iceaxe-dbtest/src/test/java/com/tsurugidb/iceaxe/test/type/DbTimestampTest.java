@@ -49,7 +49,7 @@ class DbTimestampTest extends DbTestTableTester {
     private static void createTable() throws IOException, InterruptedException {
         String sql = "create table " + TEST + "(" //
                 + "  pk int primary key," //
-                + "value timestamp" //
+                + "  value timestamp" //
                 + ")";
         var session = getSession();
         executeDdl(session, sql);
@@ -69,6 +69,21 @@ class DbTimestampTest extends DbTestTableTester {
                 return;
             });
         }
+    }
+
+    @SuppressWarnings("unused")
+    private static void insertLiteral(int size) throws IOException, InterruptedException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(transaction -> {
+            for (int i = 0; i < size; i++) {
+                var insertSql = "insert into " + TEST + " values(" + i + ", timestamp'" + value(size, i) + "')";
+                try (var ps = session.createStatement(insertSql)) {
+                    transaction.executeAndGetCount(ps);
+                }
+            }
+            return;
+        });
     }
 
     private static LocalDateTime value(int size, int i) {
@@ -91,8 +106,8 @@ class DbTimestampTest extends DbTestTableTester {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "2024-05-24T23:45:56.123456789", "0001-01-01T00:00:00", "0001-01-01T00:00:01", "0001-01-01T00:00:00.000000001", "1970-01-01T00:00:00", "1969-12-31T00:00:01",
-            "9999-12-31T23:59:59.999999999", "-999999999-01-01T00:00:00", "+99999999-12-31T23:59:59.999999999" })
+    @ValueSource(strings = { "2024-05-24T23:45:56.123456789", "0000-01-01T00:00:00", "0001-01-01T00:00:00", "0001-01-01T00:00:01", "0001-01-01T00:00:00.000000001", "1970-01-01T00:00:00",
+            "1969-12-31T00:00:01", "9999-12-31T23:59:59.999999999", "-999999999-01-01T00:00:00", "+99999999-12-31T23:59:59.999999999" })
     void value(String s) throws Exception {
         var expected = LocalDateTime.parse(s);
 
@@ -104,6 +119,35 @@ class DbTimestampTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         int count = tm.executeAndGetCount(updateSql, updateMapping, updateParameter);
+        assertEquals(1, count);
+
+        var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
+        assertEquals(expected, actual.getDateTime("value"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "2024-05-24T23:45:56.123456789", "0000-01-01T00:00:00", "0001-01-01T00:00:00", "0001-01-01T00:00:01", "0001-01-01T00:00:00.000000001", "1970-01-01T00:00:00",
+            "1969-12-31T00:00:01", "9999-12-31T23:59:59.999999999", "-999999999-01-01T00:00:00", "+99999999-12-31T23:59:59.999999999" })
+    void valueLiteral(String s) throws Exception {
+        var expected = LocalDateTime.parse(s);
+        if (s.startsWith("+")) {
+            s = s.substring(1);
+        }
+
+        var updateSql = "update " + TEST + " set value= timestamp'" + s + "' where pk=1";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+
+        if (expected.getYear() <= 0) {
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
+                tm.executeAndGetCount(updateSql);
+            });
+            assertEqualsCode(SqlServiceCode.VALUE_ANALYZE_EXCEPTION, e);
+            return;
+        }
+
+        int count = tm.executeAndGetCount(updateSql);
         assertEquals(1, count);
 
         var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
@@ -142,6 +186,15 @@ class DbTimestampTest extends DbTestTableTester {
             assertEquals(LocalDateTime.of(2024, 5, 9, 23, 59, 1, 2 * 1000_000), list.get(0).getDateTime("value"));
             assertEquals(LocalDateTime.of(2024, 5, 9, 23, 59, 1, 3 * 1000_000), list.get(1).getDateTime("value"));
         }
+    }
+
+    @Test
+    void whereEq() throws Exception {
+        var session = getSession();
+        String sql = "select * from " + TEST + " where value = timestamp'2024-05-09 23:59:01.002'";
+        var tm = createTransactionManagerOcc(session);
+        TsurugiResultEntity entity = tm.executeAndFindRecord(sql).get();
+        assertEquals(LocalDateTime.of(2024, 5, 9, 23, 59, 1, 2 * 1000_000), entity.getDateTime("value"));
     }
 
     @Test

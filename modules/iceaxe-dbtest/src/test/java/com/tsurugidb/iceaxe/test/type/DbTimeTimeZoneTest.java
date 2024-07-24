@@ -72,7 +72,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
             var tm = createTransactionManagerOcc(session);
             tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
-                    var parameter = TgBindParameters.of().addInt("pk", i).addOffsetTime("value", value(size, i));
+                    var parameter = TgBindParameters.of().addInt("pk", i).addOffsetTime("value", value(i));
                     transaction.executeAndGetCount(ps, parameter);
                 }
                 return;
@@ -80,7 +80,22 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         }
     }
 
-    private static OffsetTime value(int size, int i) {
+    @SuppressWarnings("unused")
+    private static void insertLiteral(int size) throws IOException, InterruptedException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(transaction -> {
+            for (int i = 0; i < size; i++) {
+                var insertSql = "insert into " + TEST + " values(" + i + ", time with time zone'" + value(i) + "')";
+                try (var ps = session.createStatement(insertSql)) {
+                    transaction.executeAndGetCount(ps);
+                }
+            }
+            return;
+        });
+    }
+
+    private static OffsetTime value(int i) {
         return LIST.get(i);
     }
 
@@ -118,6 +133,8 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         assertEquals(toZ(expected), actual.getOffsetTime("value"));
     }
 
+    // TODO @Test valueLiteral()
+
     @Test
     void bindWhereEq() throws Exception {
         var variable = TgBindVariable.ofOffsetTime("value");
@@ -139,7 +156,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
     }
 
     private static OffsetTime toZ(OffsetTime date) {
-        return date.withOffsetSameLocal(ZoneOffset.UTC);
+        return date.withOffsetSameLocal(ZoneOffset.UTC); // TODO date.withOffsetSameInstant(ZoneOffset.UTC)
     }
 
     @Test
@@ -166,29 +183,39 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // TODO implicit conversion: char to timestamp with time zone
-    void implicitConversion() throws Exception {
+    @Disabled // TODO literal for time with time zone
+    void whereEq() throws Exception {
         var session = getSession();
-        String sql = "select * from " + TEST + " where value = '2024-05-22 23:59:01.002+01:00'";
+        String sql = "select * from " + TEST + " where value = time with time zone'23:59:01.002+01:00'";
         var tm = createTransactionManagerOcc(session);
         TsurugiResultEntity entity = tm.executeAndFindRecord(sql).get();
-        assertEquals(OffsetTime.of(23, 59, 1, 2 * 1000_000, ZoneOffset.ofHours(1)), entity.getOffsetTime("value"));
+        assertEquals(toZ(OffsetTime.of(23, 59, 1, 2 * 1000_000, ZoneOffset.ofHours(1))), entity.getOffsetTime("value"));
     }
 
     @Test
-    @Disabled // TODO cast as timestamp with time zone
+    @Disabled // TODO implicit conversion: char to time with time zone
+    void implicitConversion() throws Exception {
+        var session = getSession();
+        String sql = "select * from " + TEST + " where value = '23:59:01.002+01:00'";
+        var tm = createTransactionManagerOcc(session);
+        TsurugiResultEntity entity = tm.executeAndFindRecord(sql).get();
+        assertEquals(toZ(OffsetTime.of(23, 59, 1, 2 * 1000_000, ZoneOffset.ofHours(1))), entity.getOffsetTime("value"));
+    }
+
+    @Test
+    @Disabled // TODO cast as time with time zone
     void cast() throws Exception {
         var session = getSession();
-        String sql = "update " + TEST + " set value = cast('2024-05-10 01:02:03.456+01:00' as timestamp with time zone)";
+        String sql = "update " + TEST + " set value = cast('23:59:01.002+01:00' as time with time zone)";
         var tm = createTransactionManagerOcc(session);
         int count = tm.executeAndGetCount(sql);
         assertEquals(SIZE, count);
 
         var list = tm.executeAndGetList("select * from " + TEST);
         assertEquals(count, list.size());
-        var expected = OffsetTime.parse("2024-05-10T01:02:03.456+01:00");
+        var expected = OffsetTime.parse("23:59:01.002+01:00");
         for (var entity : list) {
-            assertEquals(expected, entity.getOffsetTime("value"));
+            assertEquals(toZ(expected), entity.getOffsetTime("value"));
         }
     }
 
@@ -238,7 +265,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
 
             var record = result.asRecord();
             assertEquals(1, record.getInt("pk"));
-            assertEquals(value(SIZE, 1).toLocalTime(), record.getTimeOfDay("value"));// TODO assertEquals(value(SIZE, 1), record.getTimeOfDayWithTimeZone("value"));
+            assertEquals(value(1).toLocalTime(), record.getTimeOfDay("value"));// TODO assertEquals(value(SIZE, 1), record.getTimeOfDayWithTimeZone("value"));
         }
     }
 
