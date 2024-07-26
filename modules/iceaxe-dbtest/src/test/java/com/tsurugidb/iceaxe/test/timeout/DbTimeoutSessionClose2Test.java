@@ -81,7 +81,7 @@ public class DbTimeoutSessionClose2Test extends DbTimetoutTest {
         try {
             session.close();
         } catch (IceaxeIOException e) {
-            assertEqualsCode(IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, e);
+            assertEqualsCode(IceaxeErrorCode.PS_CLOSE_TIMEOUT, e);
             assertFalse(session.isAlive());
             assertTrue(session.isClosed());
             return;

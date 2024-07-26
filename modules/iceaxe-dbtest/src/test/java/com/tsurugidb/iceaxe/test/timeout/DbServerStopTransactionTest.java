@@ -1,7 +1,7 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -43,9 +43,11 @@ public class DbServerStopTransactionTest extends DbTimetoutTest {
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
             pipeServer.close(); // server stop
 
+            boolean ioe = false;
             try {
                 transaction.getLowTransaction();
             } catch (IOException e) {
+                ioe = true;
                 try {
                     assertEquals("lost connection", e.getMessage());
                 } catch (AssertionFailedError t) {
@@ -56,12 +58,12 @@ public class DbServerStopTransactionTest extends DbTimetoutTest {
             } finally {
                 pipeServer.setPipeWrite(true);
 
-                var e = assertThrowsExactly(IOException.class, () -> {
-                    session.close();
-                });
-                assertEquals("socket is already closed", e.getMessage());
+                session.close();
+
+                assertTrue(ioe);
             }
-            fail("didn't time out");
+
+            fail("didn't I/O error");
         }
     }
 }

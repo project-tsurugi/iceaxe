@@ -2,7 +2,6 @@ package com.tsurugidb.iceaxe.test.timeout;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.concurrent.TimeUnit;
 
@@ -68,6 +67,8 @@ public class DbTimeoutSessionCloseTest extends DbTimetoutTest {
         } finally {
             pipeServer.setPipeWrite(true);
         }
-        fail("didn't time out");
+
+        // Session.closeはタイムアウトするような通信処理が無い
+//      fail("didn't time out");
     }
 }
