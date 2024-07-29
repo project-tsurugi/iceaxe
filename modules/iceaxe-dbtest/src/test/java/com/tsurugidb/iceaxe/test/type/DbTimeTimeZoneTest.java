@@ -156,7 +156,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
     }
 
     private static OffsetTime toZ(OffsetTime date) {
-        return date.withOffsetSameLocal(ZoneOffset.UTC); // TODO date.withOffsetSameInstant(ZoneOffset.UTC)
+        return date.withOffsetSameInstant(ZoneOffset.UTC);
     }
 
     @Test
@@ -226,7 +226,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         var resultMapping = TgResultMapping.ofSingle(OffsetTime.class);
         var tm = createTransactionManagerOcc(session);
         OffsetTime result = tm.executeAndFindRecord(sql, resultMapping).get();
-        assertEquals(toZ(LIST.stream().min(OffsetTime::compareTo).get()), result);
+        assertEquals(LIST.stream().map(v -> toZ(v)).min(OffsetTime::compareTo).get(), result);
     }
 
     @Test
@@ -236,7 +236,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         var resultMapping = TgResultMapping.ofSingle(OffsetTime.class);
         var tm = createTransactionManagerOcc(session);
         OffsetTime result = tm.executeAndFindRecord(sql, resultMapping).get();
-        assertEquals(toZ(LIST.stream().max(OffsetTime::compareTo).get()), result);
+        assertEquals(LIST.stream().map(v -> toZ(v)).max(OffsetTime::compareTo).get(), result);
     }
 
     @Test
@@ -265,7 +265,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
 
             var record = result.asRecord();
             assertEquals(1, record.getInt("pk"));
-            assertEquals(value(1).toLocalTime(), record.getTimeOfDay("value"));// TODO assertEquals(value(SIZE, 1), record.getTimeOfDayWithTimeZone("value"));
+            assertEquals(toZ(value(1)).toLocalTime(), record.getTimeOfDay("value"));// TODO getTimeOfDayWithTimeZone("value")
         }
     }
 

@@ -50,7 +50,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
 
         dropTestTable();
         createTable();
-        insertLiteral(SIZE); // TODO insert(SIZE)
+        insert(SIZE);
 
         logInitEnd(info);
     }
@@ -64,7 +64,6 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         executeDdl(session, sql);
     }
 
-    @SuppressWarnings("unused")
     private static void insert(int size) throws IOException, InterruptedException {
         var session = getSession();
         var insertSql = "insert into " + TEST + " values(:pk, :value)";
@@ -81,6 +80,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         }
     }
 
+    @SuppressWarnings("unused")
     private static void insertLiteral(int size) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -134,7 +134,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         if (expected.getOffset().getTotalSeconds() == 0) { // TODO 常にtoZで判定
             assertEquals(toZ(expected), actual.getOffsetDateTime("value"));
         } else {
-            assertEquals(expected.withOffsetSameLocal(ZoneOffset.UTC), actual.getOffsetDateTime("value"));
+            assertEquals(toZ(expected), actual.getOffsetDateTime("value"));
         }
     }
 
@@ -181,8 +181,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
                 var list = tm.executeAndGetList(ps, parameter);
                 assertEquals(1, list.size());
                 for (var entity : list) {
-//TODO              assertEquals(toZ(date), entity.getOffsetDateTime("value"));
-                    assertEquals(date.withOffsetSameLocal(ZoneOffset.UTC), entity.getOffsetDateTime("value"));
+                    assertEquals(toZ(date), entity.getOffsetDateTime("value"));
                 }
             }
         }
@@ -208,8 +207,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
             var list = tm.executeAndGetList(ps, parameter);
 
             var expectedList = LIST.stream().map(v -> toZ(v)) //
-//TODO              .filter(d -> toZ(start0).compareTo(d) <= 0 && d.compareTo(toZ(end0)) <= 0) //
-                    .filter(d -> start0.withOffsetSameLocal(ZoneOffset.UTC).compareTo(d) <= 0 && d.compareTo(end0.withOffsetSameLocal(ZoneOffset.UTC)) <= 0) //
+                    .filter(d -> toZ(start0).compareTo(d) <= 0 && d.compareTo(toZ(end0)) <= 0) //
                     .sorted().collect(Collectors.toList());
             assertEquals(expectedList.size(), list.size());
             assertEquals(expectedList, list.stream().map(entity -> entity.getOffsetDateTime("value")).collect(Collectors.toList()));
