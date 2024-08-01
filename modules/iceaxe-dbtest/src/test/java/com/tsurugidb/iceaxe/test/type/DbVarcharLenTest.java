@@ -32,7 +32,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbVarcharLenTest extends DbTestTableTester {
 
-    private static final int MAX_LENGTH = 30716;
+    private static final int MAX_LENGTH = 2097132;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
