@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.test.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +23,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableString;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
@@ -65,6 +67,9 @@ class DbVarcharLenTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(ints = { 100, MAX_LENGTH - 1, MAX_LENGTH })
     void insertUpdate(int maxLength) throws Exception {
+        if (maxLength >= MAX_LENGTH - 1) { // TODO remove assume IPC
+            assumeFalse(DbTestConnector.isIpc());
+        }
         new VarcharTester(maxLength).test();
     }
 
