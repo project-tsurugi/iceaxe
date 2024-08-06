@@ -101,4 +101,9 @@ public class TgResultCount {
         var counterMap = getLowCounterMap();
         return counterMap.getOrDefault(lowCounterType, 0L);
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + getLowCounterMap();
+    }
 }
