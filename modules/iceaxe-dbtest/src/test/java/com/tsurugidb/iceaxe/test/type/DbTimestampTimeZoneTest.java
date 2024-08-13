@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.test.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -131,11 +132,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         assertEquals(1, count);
 
         var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
-        if (expected.getOffset().getTotalSeconds() == 0) { // TODO 常にtoZで判定
-            assertEquals(toZ(expected), actual.getOffsetDateTime("value"));
-        } else {
-            assertEquals(toZ(expected), actual.getOffsetDateTime("value"));
-        }
+        assertEquals(toZ(expected), actual.getOffsetDateTime("value"));
     }
 
     @ParameterizedTest
@@ -281,6 +278,30 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         });
         assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
         assertContains("compile failed with error:function_not_found message:\"set function not found: sum(time_point(with_time_zone))\" location:<input>:", e.getMessage());
+    }
+
+    @Test
+    void currentTimestamp() throws Exception {
+        var sql = "select current_timestamp from " + TEST;
+        var resultMapping = TgResultMapping.ofSingle(OffsetDateTime.class);
+        var tm = createTransactionManagerOcc(getSession());
+
+        var nowBeforeTransaction = toZ(OffsetDateTime.now());
+        var list = tm.executeAndGetList(sql, resultMapping);
+        var nowAfterTransaction = toZ(OffsetDateTime.now());
+
+        assertEquals(SIZE, list.size());
+        OffsetDateTime first = null;
+        for (OffsetDateTime currentTimestamp : list) {
+            if (first == null) {
+                first = currentTimestamp;
+            } else {
+                assertEquals(first, currentTimestamp);
+            }
+
+            var actual = toZ(currentTimestamp);
+            assertTrue(nowBeforeTransaction.compareTo(actual) <= 0 && actual.compareTo(nowAfterTransaction) <= 0);
+        }
     }
 
     @Test

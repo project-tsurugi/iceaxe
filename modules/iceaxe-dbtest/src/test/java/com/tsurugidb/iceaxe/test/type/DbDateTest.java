@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -246,6 +247,21 @@ class DbDateTest extends DbTestTableTester {
         });
         assertEqualsCode(SqlServiceCode.SYMBOL_ANALYZE_EXCEPTION, e);
         assertContains("compile failed with error:function_not_found message:\"set function not found: sum(date())\" location:<input>:", e.getMessage());
+    }
+
+    @Test
+    void currentDate() throws Exception {
+        var sql = "select current_date, localtimestamp from " + TEST; // compare with localtimestamp (not current_timestamp)
+        var tm = createTransactionManagerOcc(getSession());
+
+        var list = tm.executeAndGetList(sql);
+
+        assertEquals(SIZE, list.size());
+        for (var actual : list) {
+            LocalDate currentDate = actual.getDate(0);
+            LocalDateTime localTimestamp = actual.getDateTime(1);
+            assertEquals(localTimestamp.toLocalDate(), currentDate);
+        }
     }
 
     @Test

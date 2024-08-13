@@ -252,6 +252,8 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         assertContains("compile failed with error:function_not_found message:\"set function not found: sum(time_of_day(with_time_zone))\" location:<input>:", e.getMessage());
     }
 
+    // TODO current_time関数
+
     @Test
     void kvsGet() throws Exception {
         var session = getSession();
