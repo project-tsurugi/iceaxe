@@ -29,7 +29,6 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeExcep
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
-import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
@@ -53,8 +52,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     private final IceaxeConvertUtil convertUtil;
     private FutureResponse<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
-    private final IceaxeTimeout connectTimeout;
-    private final IceaxeTimeout closeTimeout;
     private List<TsurugiQueryResultEventListener<R>> eventListenerList = null;
     private int readCount = 0;
     private TsurugiResultRecord record;
@@ -77,13 +74,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      */
     @IceaxeInternal
     public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil) {
-        super(sqlExecuteId, transaction, ps, parameter);
+        super(sqlExecuteId, transaction, ps, parameter, TgTimeoutKey.RS_CONNECT, TgTimeoutKey.RS_CLOSE);
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
-
-        var sessionOption = transaction.getSessionOption();
-        this.connectTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RS_CONNECT);
-        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RS_CLOSE);
     }
 
     /**
@@ -126,18 +119,22 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @param time time value
      * @param unit time unit
+     * @see #setConnectTimeout(long, TimeUnit)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     public void setRsConnectTimeout(long time, TimeUnit unit) {
-        setRsConnectTimeout(TgTimeValue.of(time, unit));
+        setConnectTimeout(time, unit);
     }
 
     /**
      * set ResetSet-timeout.
      *
      * @param timeout time
+     * @see #setConnectTimeout(TgTimeValue)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     public void setRsConnectTimeout(TgTimeValue timeout) {
-        connectTimeout.set(timeout);
+        setConnectTimeout(timeout);
     }
 
     /**
@@ -145,18 +142,22 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @param time timeout time
      * @param unit timeout unit
+     * @see #setCloseTimeout(long, TimeUnit)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     public void setRsCloseTimeout(long time, TimeUnit unit) {
-        setRsCloseTimeout(TgTimeValue.of(time, unit));
+        setCloseTimeout(time, unit);
     }
 
     /**
      * set ResetSet-close-timeout.
      *
      * @param timeout time
+     * @see #setCloseTimeout(TgTimeValue)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     public void setRsCloseTimeout(TgTimeValue timeout) {
-        closeTimeout.set(timeout);
+        setCloseTimeout(timeout);
     }
 
     /**

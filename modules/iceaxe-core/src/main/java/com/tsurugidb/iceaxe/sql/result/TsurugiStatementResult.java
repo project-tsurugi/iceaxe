@@ -24,7 +24,6 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
-import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.tsubakuro.sql.ExecuteResult;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
@@ -41,8 +40,6 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
 
     private FutureResponse<ExecuteResult> lowResultFuture;
     private TgResultCount resultCount = null;
-    private final IceaxeTimeout checkTimeout;
-    private final IceaxeTimeout closeTimeout;
     private List<TsurugiStatementResultEventListener> eventListenerList = null;
     private boolean checkResultOnClose = true;
 
@@ -59,11 +56,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      */
     @IceaxeInternal
     public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter) {
-        super(sqlExecuteId, transaction, ps, parameter);
-
-        var sessionOption = transaction.getSessionOption();
-        this.checkTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CONNECT);
-        this.closeTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RESULT_CLOSE);
+        super(sqlExecuteId, transaction, ps, parameter, TgTimeoutKey.RESULT_CONNECT, TgTimeoutKey.RESULT_CLOSE);
     }
 
     /**
@@ -106,37 +99,22 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      *
      * @param time timeout time
      * @param unit timeout unit
+     * @see #setConnectTimeout(long, TimeUnit)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     public void setCheckTimeout(long time, TimeUnit unit) {
-        setCheckTimeout(TgTimeValue.of(time, unit));
+        setConnectTimeout(time, unit);
     }
 
     /**
      * set check-timeout.
      *
      * @param timeout time
+     * @see #setConnectTimeout(TgTimeValue)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     public void setCheckTimeout(TgTimeValue timeout) {
-        checkTimeout.set(timeout);
-    }
-
-    /**
-     * set close-timeout.
-     *
-     * @param time timeout time
-     * @param unit timeout unit
-     */
-    public void setCloseTimeout(long time, TimeUnit unit) {
-        setCloseTimeout(TgTimeValue.of(time, unit));
-    }
-
-    /**
-     * set close-timeout.
-     *
-     * @param timeout time
-     */
-    public void setCloseTimeout(TgTimeValue timeout) {
-        closeTimeout.set(timeout);
+        setConnectTimeout(timeout);
     }
 
     /**
@@ -206,7 +184,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
             LOG.trace("lowResult get start");
             try {
                 var lowExecuteResult = IceaxeIoUtil.getAndCloseFutureInTransaction(lowResultFuture, //
-                        checkTimeout, IceaxeErrorCode.RESULT_CONNECT_TIMEOUT, //
+                        connectTimeout, IceaxeErrorCode.RESULT_CONNECT_TIMEOUT, //
                         IceaxeErrorCode.RESULT_CLOSE_TIMEOUT);
                 this.resultCount = new TgResultCount(lowExecuteResult);
             } catch (TsurugiTransactionException e) {

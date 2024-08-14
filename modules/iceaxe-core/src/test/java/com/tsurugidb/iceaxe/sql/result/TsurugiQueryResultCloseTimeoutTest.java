@@ -42,7 +42,7 @@ class TsurugiQueryResultCloseTimeoutTest {
     void futureCloseTimeout_set() throws Exception {
         var sessionOption = TgSessionOption.of();
 
-        testFutureCloseTimeout(sessionOption, rs -> rs.setRsCloseTimeout(1, TimeUnit.SECONDS));
+        testFutureCloseTimeout(sessionOption, rs -> rs.setCloseTimeout(1, TimeUnit.SECONDS));
     }
 
     // FIXME rs.close()内部でgetLowResultSet()を呼んでいるため、rs.close()でのfutureクローズタイムアウト単独は実行できない
@@ -92,6 +92,14 @@ class TsurugiQueryResultCloseTimeoutTest {
 
     @Test
     void lowCloseTimeout_set() throws Exception {
+        var sessionOption = TgSessionOption.of();
+
+        testLowCloseTimeout(sessionOption, ps -> ps.setCloseTimeout(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @SuppressWarnings("removal") // TODO remove this test
+    void lowCloseTimeout_set_old() throws Exception {
         var sessionOption = TgSessionOption.of();
 
         testLowCloseTimeout(sessionOption, ps -> ps.setRsCloseTimeout(1, TimeUnit.SECONDS));

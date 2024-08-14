@@ -41,6 +41,14 @@ class TsurugiQueryResultConnectTimeoutTest {
     void connectTimeout_set() throws Exception {
         var sessionOption = TgSessionOption.of();
 
+        testConnectTimeout(sessionOption, rs -> rs.setConnectTimeout(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @SuppressWarnings("removal") // TODO remove this test
+    void connectTimeout_set_old() throws Exception {
+        var sessionOption = TgSessionOption.of();
+
         testConnectTimeout(sessionOption, rs -> rs.setRsConnectTimeout(1, TimeUnit.SECONDS));
     }
 
@@ -88,6 +96,14 @@ class TsurugiQueryResultConnectTimeoutTest {
 
     @Test
     void futureCloseTimeout_set() throws Exception {
+        var sessionOption = TgSessionOption.of();
+
+        testFutureCloseTimeout(sessionOption, rs -> rs.setConnectTimeout(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @SuppressWarnings("removal") // TODO remove this test
+    void futureCloseTimeout_set_old() throws Exception {
         var sessionOption = TgSessionOption.of();
 
         testFutureCloseTimeout(sessionOption, rs -> rs.setRsConnectTimeout(1, TimeUnit.SECONDS));
