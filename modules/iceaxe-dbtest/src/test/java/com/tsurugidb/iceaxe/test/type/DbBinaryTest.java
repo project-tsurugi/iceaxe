@@ -72,6 +72,22 @@ class DbBinaryTest extends DbTestTableTester {
         }
     }
 
+    @SuppressWarnings("unused")
+    private static void insertLiteral(int size) throws IOException, InterruptedException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(transaction -> {
+            for (int i = 0; i < size; i++) {
+                var value = value(size, i);
+                var insertSql = "insert into " + TEST + " values(" + i + ", " + toLiteral(value) + ")";
+                try (var ps = session.createStatement(insertSql)) {
+                    transaction.executeAndGetCount(ps);
+                }
+            }
+            return;
+        });
+    }
+
     private static byte[] value(int size, int i) {
         byte[] buf = new byte[size - i];
         Arrays.fill(buf, (byte) (i + 1));
@@ -112,6 +128,23 @@ class DbBinaryTest extends DbTestTableTester {
         assertArrayEquals(pad(expected), actual.getBytesOrNull("value"));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "00000000", "ffffffff", "123400abcdef", "", "null" })
+    void valueLiteral(String s) throws Exception {
+        var expected = toBytes(s);
+
+        var literal = s.equals("null") ? "null" : "X'" + s + "'";
+        var updateSql = "update " + TEST + " set value=" + literal + " where pk=1";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        int count = tm.executeAndGetCount(updateSql);
+        assertEquals(1, count);
+
+        var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
+        assertArrayEquals(pad(expected), actual.getBytesOrNull("value"));
+    }
+
     private static byte[] toBytes(String s) {
         if (s.equals("null")) {
             return null;
@@ -140,6 +173,16 @@ class DbBinaryTest extends DbTestTableTester {
         }
     }
 
+    @Test
+    void whereEq() throws Exception {
+        var session = getSession();
+        var value = pad(2);
+        var sql = "select * from " + TEST + " where value=" + toLiteral(value);
+        var tm = createTransactionManagerOcc(session);
+        var entity = tm.executeAndFindRecord(sql).get();
+        assertArrayEquals(value, entity.getBytes("value"));
+    }
+
     private static byte[] pad(int n) {
         return Arrays.copyOf(value(SIZE, n), 10);
     }
@@ -151,9 +194,14 @@ class DbBinaryTest extends DbTestTableTester {
         return Arrays.copyOf(s, 10);
     }
 
-    @SuppressWarnings("unused")
-    private static String toString(String s) {
-        return (s + " ".repeat(10)).substring(0, 10);
+    private static String toLiteral(byte[] s) {
+        var sb = new StringBuilder(s.length * 2 + 3);
+        sb.append("X'");
+        for (byte b : s) {
+            sb.append(String.format("%02x", b));
+        }
+        sb.append("'");
+        return sb.toString();
     }
 
     @Test
