@@ -22,7 +22,9 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
     private final TsurugiSql sqlStatement;
     private final Object sqlParameter;
 
+    /** connect timeout. */
     protected final IceaxeTimeout connectTimeout;
+    /** close timeout. */
     protected final IceaxeTimeout closeTimeout;
 
     /**
