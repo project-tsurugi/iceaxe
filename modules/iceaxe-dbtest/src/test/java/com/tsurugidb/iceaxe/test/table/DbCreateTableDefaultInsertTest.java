@@ -2,8 +2,12 @@ package com.tsurugidb.iceaxe.test.table;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -219,5 +223,57 @@ class DbCreateTableDefaultInsertTest extends DbTestTableTester {
             assertNull(actual.getStringOrNull("value1"));
             assertEquals("abc", actual.getString("value2"));
         }
+    }
+
+    @Test
+    void currentTimestamp() throws Exception {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        String createSql = "create table " + TEST + " (" //
+                + " pk int primary key," //
+                + " local_date        date                     default current_date," //
+                + " local_time        time                     default localtime," //
+                + " local_date_time   timestamp                default localtimestamp," //
+                + " current_date_time timestamp with time zone default current_timestamp" //
+                + ")";
+        tm.executeDdl(createSql);
+
+        int size = 20;
+
+        var nowBeforeTransaction = toZ(OffsetDateTime.now());
+        var nowAfterTransaction = tm.execute(transaction -> {
+            transaction.getLowTransaction();
+            var now = toZ(OffsetDateTime.now());
+
+            for (int i = 0; i < size; i++) {
+                var sql = "insert into " + TEST + "(pk) values(" + i + ")";
+                try (var ps = session.createStatement(sql)) {
+                    transaction.executeAndGetCount(ps);
+                }
+                TimeUnit.MILLISECONDS.sleep(1);
+            }
+            return now;
+        });
+
+        var list = tm.executeAndGetList("select * from " + TEST);
+        assertEquals(size, list.size());
+        OffsetDateTime first = null;
+        for (var actual : list) {
+            if (first == null) {
+                first = actual.getOffsetDateTime("current_date_time");
+                var currentDateTime = toZ(first);
+                assertTrue(nowBeforeTransaction.compareTo(currentDateTime) <= 0 && currentDateTime.compareTo(nowAfterTransaction) <= 0);
+            } else {
+                assertEquals(first, actual.getOffsetDateTime("current_date_time"));
+            }
+
+            assertEquals(actual.getDate("local_date_time"), actual.getDate("local_date"));
+            assertEquals(actual.getTime("local_date_time"), actual.getTime("local_time"));
+            assertEquals(actual.getDateTime("current_date_time"), actual.getDateTime("local_date_time"));
+        }
+    }
+
+    private static OffsetDateTime toZ(OffsetDateTime date) {
+        return date.withOffsetSameInstant(ZoneOffset.UTC);
     }
 }
