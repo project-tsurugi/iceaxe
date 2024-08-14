@@ -56,7 +56,7 @@ public class DbTimeoutRsConnectTest extends DbTimetoutTest {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifyQueryResult(TsurugiQueryResult<?> result) {
-                result.setRsConnectTimeout(1, TimeUnit.SECONDS);
+                result.setConnectTimeout(1, TimeUnit.SECONDS);
             }
         });
     }

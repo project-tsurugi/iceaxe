@@ -87,8 +87,8 @@ public class DbSlotLimitTest extends DbTimetoutTest {
             LOG.trace("i={}", i);
             try {
                 var result = ps.execute(transaction);
-                result.setRsConnectTimeout(1, TimeUnit.MILLISECONDS);
-                result.setRsCloseTimeout(1, TimeUnit.MILLISECONDS);
+                result.setConnectTimeout(1, TimeUnit.MILLISECONDS);
+                result.setCloseTimeout(1, TimeUnit.MILLISECONDS);
                 resultList.add(result);
             } catch (Throwable t) {
                 LOG.error("excption occurred. i={}", i, t);

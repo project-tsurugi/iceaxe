@@ -54,7 +54,7 @@ public class DbTimeoutRsCloseTest extends DbTimetoutTest {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifyQueryResult(TsurugiQueryResult<?> result) {
-                result.setRsCloseTimeout(1, TimeUnit.SECONDS);
+                result.setCloseTimeout(1, TimeUnit.SECONDS);
             }
         });
     }

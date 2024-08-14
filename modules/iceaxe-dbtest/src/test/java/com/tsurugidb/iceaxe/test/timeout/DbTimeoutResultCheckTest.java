@@ -56,7 +56,7 @@ public class DbTimeoutResultCheckTest extends DbTimetoutTest {
         testTimeout(new TimeoutModifier() {
             @Override
             public void modifyStatementResult(TsurugiStatementResult result) {
-                result.setCheckTimeout(1, TimeUnit.SECONDS);
+                result.setConnectTimeout(1, TimeUnit.SECONDS);
             }
         });
     }
