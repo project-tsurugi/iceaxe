@@ -18,29 +18,38 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example32Count {
 
-    void main() throws IOException, InterruptedException {
+    public static void main(String... args) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
-            var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
-            var tm = session.createTransactionManager(setting);
+            Example11Ddl.dropAndCreateTable(session);
+            Example21Insert.insert(session);
 
-            countAll_executeQuery(session, tm);
-            countAll_executeAndFindRecord(session, tm);
-            countAll_tm(session, tm);
-            countAll_tm_sql(tm);
-
-            countAllAsInteger(session, tm);
-            countAllAsInteger_singleColumn(session, tm);
-
-            countGroup(session, tm);
+            new Example32Count().main(session);
         }
     }
 
+    void main(TsurugiSession session) throws IOException, InterruptedException {
+        var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
+        var tm = session.createTransactionManager(setting);
+
+        countAll_executeQuery(session, tm);
+        countAll_executeAndFindRecord(session, tm);
+        countAll_tm(session, tm);
+        countAll_tm_sql(tm);
+        countAll_tm_sql_index(tm);
+
+        countAllAsInteger(session, tm);
+        countAllAsInteger_singleColumn(session, tm);
+
+        countGroup(session, tm);
+        countGroup_userEntity(session, tm);
+    }
+
     void countAll_executeQuery(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        try (var ps = session.createQuery("select count(*) count from TEST")) {
+        try (var ps = session.createQuery("select count(*) cnt from TEST")) {
             int count = tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     Optional<TsurugiResultEntity> recordOpt = result.findRecord();
-                    return recordOpt.get().getInt("count");
+                    return recordOpt.get().getInt("cnt");
                 }
             });
             System.out.println(count);
@@ -48,26 +57,32 @@ public class Example32Count {
     }
 
     void countAll_executeAndFindRecord(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        try (var ps = session.createQuery("select count(*) count from TEST")) {
+        try (var ps = session.createQuery("select count(*) cnt from TEST")) {
             int count = tm.execute(transaction -> {
                 Optional<TsurugiResultEntity> recordOpt = transaction.executeAndFindRecord(ps);
-                return recordOpt.get().getInt("count");
+                return recordOpt.get().getInt("cnt");
             });
             System.out.println(count);
         }
     }
 
     void countAll_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        try (var ps = session.createQuery("select count(*) count from TEST")) {
+        try (var ps = session.createQuery("select count(*) cnt from TEST")) {
             Optional<TsurugiResultEntity> recordOpt = tm.executeAndFindRecord(ps);
-            int count = recordOpt.get().getInt("count");
+            int count = recordOpt.get().getInt("cnt");
             System.out.println(count);
         }
     }
 
     void countAll_tm_sql(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        Optional<TsurugiResultEntity> recordOpt = tm.executeAndFindRecord("select count(*) count from TEST");
-        int count = recordOpt.get().getInt("count");
+        Optional<TsurugiResultEntity> recordOpt = tm.executeAndFindRecord("select count(*) cnt from TEST");
+        int count = recordOpt.get().getInt("cnt");
+        System.out.println(count);
+    }
+
+    void countAll_tm_sql_index(TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        Optional<TsurugiResultEntity> recordOpt = tm.executeAndFindRecord("select count(*) from TEST");
+        int count = recordOpt.get().getInt(0);
         System.out.println(count);
     }
 
@@ -94,19 +109,19 @@ public class Example32Count {
     }
 
     void countGroup(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "select ZZZ, count(*) from TEST group by ZZZ";
+        var sql = "select ZZZ, count(*) from TEST group by ZZZ order by ZZZ";
         try (var ps = session.createQuery(sql)) {
             List<TsurugiResultEntity> list = tm.execute(transaction -> {
                 return transaction.executeAndGetList(ps);
             });
             for (TsurugiResultEntity entity : list) {
-                System.out.printf("%s: %d%n", entity.getString("ZZZ"), entity.getInt(entity.getName(1)));
+                System.out.printf("%s: %d%n", entity.getString("ZZZ"), entity.getInt(1));
             }
         }
     }
 
     void countGroup_userEntity(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "select ZZZ, count(*) from TEST group by ZZZ";
+        var sql = "select ZZZ, count(*) from TEST group by ZZZ order by ZZZ";
         var resultMapping = TgResultMapping.of(CountByZzzEntity::of);
         try (var ps = session.createQuery(sql, resultMapping)) {
             List<CountByZzzEntity> list = tm.execute(transaction -> {
@@ -134,6 +149,11 @@ public class Example32Count {
 
         public void setCount(int count) {
             this.count = count;
+        }
+
+        @Override
+        public String toString() {
+            return "CountByZzzEntity{zzz=" + zzz + ", count=" + count + "}";
         }
 
         public static CountByZzzEntity of(TsurugiResultRecord record) throws IOException, InterruptedException, TsurugiTransactionException {

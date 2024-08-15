@@ -11,15 +11,26 @@ import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * batch example
+ * batch application example
  */
 public class Example81Batch {
 
-    void main() throws IOException, InterruptedException {
+    public static void main(String... args) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
-            batch1(session, List.of(/* entities */));
-            batch2(session, List.of(/* entities */));
+            Example11Ddl.dropAndCreateTable(session);
+            Example21Insert.insert(session);
+
+            new Example81Batch().main(session);
         }
+    }
+
+    void main(TsurugiSession session) throws IOException, InterruptedException {
+        var entityList = List.of( //
+                new TestEntity(122, 122L, "new122"), //
+                new TestEntity(124, 124L, "new124"), //
+                new TestEntity(126, 126L, "new126"));
+        batch1(session, entityList);
+        batch2(session, entityList);
     }
 
     void batch1(TsurugiSession session, List<TestEntity> entityList) throws IOException, InterruptedException {

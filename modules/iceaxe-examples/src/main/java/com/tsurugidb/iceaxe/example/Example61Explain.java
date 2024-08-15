@@ -11,16 +11,21 @@ import com.tsurugidb.tsubakuro.explain.PlanGraphException;
 /**
  * explain example
  */
-@SuppressWarnings("unused")
 public class Example61Explain {
 
-    void main() throws Exception {
+    public static void main(String... args) throws IOException, InterruptedException, PlanGraphException {
         try (var session = Example02Session.createSession()) {
-            explainQuery(session);
-            explainPreparedQuery(session);
-            explainStatement(session);
-            explainPreparedStatement(session);
+            Example11Ddl.dropAndCreateTable(session);
+
+            new Example61Explain().main(session);
         }
+    }
+
+    void main(TsurugiSession session) throws IOException, InterruptedException, PlanGraphException {
+        explainQuery(session);
+        explainPreparedQuery(session);
+        explainStatement(session);
+        explainPreparedStatement(session);
     }
 
     void explainQuery(TsurugiSession session) throws IOException, InterruptedException, PlanGraphException {
@@ -29,6 +34,7 @@ public class Example61Explain {
         try (var ps = session.createQuery(sql)) {
             var statementMetadata = ps.explain();
             var planGraph = statementMetadata.getLowPlanGraph();
+            System.out.println(planGraph);
         }
     }
 
@@ -41,6 +47,7 @@ public class Example61Explain {
             var parameter = TgBindParameters.of(foo.bind(123));
             var statementMetadata = ps.explain(parameter);
             var planGraph = statementMetadata.getLowPlanGraph();
+            System.out.println(planGraph);
         }
     }
 
@@ -50,6 +57,7 @@ public class Example61Explain {
         try (var ps = session.createStatement(sql)) {
             var statementMetadata = ps.explain();
             var planGraph = statementMetadata.getLowPlanGraph();
+            System.out.println(planGraph);
         }
     }
 
@@ -62,6 +70,7 @@ public class Example61Explain {
             var parameter = TgBindParameters.of(bar.bind(123));
             var statementMetadata = ps.explain(parameter);
             var planGraph = statementMetadata.getLowPlanGraph();
+            System.out.println(planGraph);
         }
     }
 }

@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe.example;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
@@ -24,24 +25,32 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example21Insert {
 
-    void main() throws IOException, InterruptedException {
+    public static void main(String... args) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
-            var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
-            var tm = session.createTransactionManager(setting);
+            Example11Ddl.dropAndCreateTable(session);
 
-            insert_executeStatement(session, tm);
-            insert_executeAndGetCount(session, tm);
-            insert_tm(session, tm);
-            insert_tm_sql(tm);
-
-            insertBindParameter(session, tm);
-            insertEntity(session, tm);
-            insertEntityMapping(session, tm);
-            insertForkJoin(session, tm, List.of(/* entities */));
+            new Example21Insert().main(session);
         }
     }
 
+    void main(TsurugiSession session) throws IOException, InterruptedException {
+        var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofLTX("TEST"));
+        var tm = session.createTransactionManager(setting);
+
+        insert_executeStatement(session, tm);
+        insert_executeAndGetCount(session, tm);
+        insert_tm(session, tm);
+        insert_tm_sql(tm);
+
+        insertBindParameter(session, tm);
+        insertEntity(session, tm);
+        insertEntityMapping(session, tm);
+        insertForkJoin(session, tm);
+    }
+
     void insert_executeStatement(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        deleteAll(tm);
+
         try (var ps = session.createStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.execute(transaction -> {
                 try (var result = transaction.executeStatement(ps)) {
@@ -53,6 +62,8 @@ public class Example21Insert {
     }
 
     void insert_executeAndGetCount(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        deleteAll(tm);
+
         try (var ps = session.createStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.execute(transaction -> {
                 return transaction.executeAndGetCount(ps);
@@ -62,6 +73,8 @@ public class Example21Insert {
     }
 
     void insert_tm(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        deleteAll(tm);
+
         try (var ps = session.createStatement("insert into TEST values(123, 456, 'abc')")) {
             int count = tm.executeAndGetCount(ps);
             System.out.println(count);
@@ -69,11 +82,15 @@ public class Example21Insert {
     }
 
     void insert_tm_sql(TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        deleteAll(tm);
+
         int count = tm.executeAndGetCount("insert into TEST values(123, 456, 'abc')");
         System.out.println(count);
     }
 
     void insertBindParameter(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        deleteAll(tm);
+
         var foo = TgBindVariable.ofInt("foo");
         var bar = TgBindVariable.ofLong("bar");
         var zzz = TgBindVariable.ofString("zzz");
@@ -124,6 +141,8 @@ public class Example21Insert {
     }
 
     void insertEntity(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        deleteAll(tm);
+
         try (var ps = session.createStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLES, TestEntity::toParameter))) {
             tm.execute(transaction -> {
 //              var entity = new TestEntity(123, 456L, "abc");
@@ -139,6 +158,8 @@ public class Example21Insert {
     }
 
     void insertEntityMapping(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        deleteAll(tm);
+
         var sql = "insert into TEST values(:foo, :bar, :zzz)";
 
         TgParameterMapping<TestEntity> parameterMapping;
@@ -172,7 +193,15 @@ public class Example21Insert {
         }
     }
 
-    void insertForkJoin(TsurugiSession session, TsurugiTransactionManager tm, List<TestEntity> entityList) throws IOException, InterruptedException {
+    void insertForkJoin(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        deleteAll(tm);
+
+        var entityList = new ArrayList<TestEntity>();
+        for (int i = 0; i < 500; i++) {
+            var entity = new TestEntity(i, (long) i, Integer.toString(i));
+            entityList.add(entity);
+        }
+
         try (var ps = session.createStatement(TestEntity.INSERT_SQL, TgParameterMapping.of(TestEntity.VARIABLES, TestEntity::toParameter))) {
             tm.execute(transaction -> {
                 var task = new InsertTask(transaction, ps, entityList).fork();
@@ -216,5 +245,29 @@ public class Example21Insert {
                 task2.join();
             }
         }
+    }
+
+    private static void deleteAll(TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        tm.executeAndGetCountDetail("delete from TEST");
+    }
+
+    public static void insert(TsurugiSession session) throws IOException, InterruptedException {
+        var tm = session.createTransactionManager(TgTxOption.ofLTX("TEST"));
+        tm.execute(transaction -> {
+            var foo = TgBindVariable.ofInt("foo");
+            var bar = TgBindVariable.ofLong("bar");
+            var zzz = TgBindVariable.ofString("zzz");
+            var variables = TgBindVariables.of(foo, bar, zzz);
+            var sql = "insert into TEST values(" + variables.getSqlNames() + ")";
+            var parameterMapping = TgParameterMapping.of(variables);
+
+            try (var ps = session.createStatement(sql, parameterMapping)) {
+                for (int i = 0; i < 5; i++) {
+                    var parameter = TgBindParameters.of(foo.bind(i + 121), bar.bind(i * 10 + i), zzz.bind(String.valueOf((char) ('a' + i % 3))));
+                    transaction.executeAndGetCountDetail(ps, parameter);
+                }
+            }
+            return;
+        });
     }
 }

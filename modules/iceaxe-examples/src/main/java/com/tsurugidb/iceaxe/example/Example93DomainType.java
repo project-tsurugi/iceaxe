@@ -19,39 +19,47 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example93DomainType {
 
-    void main() throws IOException, InterruptedException {
+    public static void main(String... args) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
-            var setting = TgTmSetting.of(TgTxOption.ofOCC());
-            var tm = session.createTransactionManager(setting);
-
-            createTable(tm);
-
-            var entity = new Example93Entity2();
-            switch (1) {
-            case 1:
-                insert_getterAsString(session, tm, entity);
-                break;
-            case 2:
-                insert_getterWithConverter(session, tm, entity);
-                break;
-            case 3:
-                insert_bindVariable(session, tm, entity);
-                break;
-            }
-
-            select_setterAsString(session, tm);
-            select_setterWithConverter(session, tm);
-            select_converter(session, tm);
+            new Example93DomainType().main(session);
         }
     }
 
+    void main(TsurugiSession session) throws IOException, InterruptedException {
+        var setting = TgTmSetting.of(TgTxOption.ofOCC());
+        var tm = session.createTransactionManager(setting);
+
+        createTable(tm);
+
+        var entity = new Example93Entity2();
+        entity.setKey(1);
+        entity.setType(ExampleType.A);
+
+        switch (1) {
+        case 1:
+            insert_getterAsString(session, tm, entity);
+            break;
+        case 2:
+            insert_getterWithConverter(session, tm, entity);
+            break;
+        case 3:
+            insert_bindVariable(session, tm, entity);
+            break;
+        }
+
+        select_setterAsString(session, tm);
+        select_setterWithConverter(session, tm);
+        select_converter(session, tm);
+    }
+
     void createTable(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "create table example93 (" //
+        var sql = "create table if not exists example93 (" //
                 + "key1 int," //
                 + "type varchar," // @see ExampleType
                 + "primary key(key1)" //
                 + ")";
         tm.executeDdl(sql);
+        tm.executeAndGetCountDetail("delete from example93");
     }
 
     /**
@@ -79,6 +87,11 @@ public class Example93DomainType {
 
         public ExampleType getType() {
             return this.type;
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + "{key=" + key + ", type=" + type + "}";
         }
     }
 

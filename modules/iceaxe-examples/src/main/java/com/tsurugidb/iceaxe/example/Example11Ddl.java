@@ -11,19 +11,23 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example11Ddl {
 
-    void main() throws IOException, InterruptedException {
+    public static void main(String... args) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
-            // TsurugiTransactionManagerのexecuteDdlメソッドを使う場合、
-            // TgTmSettingが指定されていなかったら、暗黙にLTXとして実行する。
-            var tm = session.createTransactionManager();
-            createTable(tm);
-            dropTable(tm);
-
-            existsTable(session);
-            getTableMetadata(session);
-
-            dropAndCreateTable(session);
+            new Example11Ddl().main(session);
         }
+    }
+
+    void main(TsurugiSession session) throws IOException, InterruptedException {
+        // TsurugiTransactionManagerのexecuteDdlメソッドを使う場合、
+        // TgTmSettingが指定されていなかったら、暗黙にLTXとして実行する。
+        var tm = session.createTransactionManager();
+
+        if (existsTable(session)) {
+            dropTable(tm);
+        }
+        createTable(tm);
+
+        getTableMetadata(session);
     }
 
     void createTable(TsurugiTransactionManager tm) throws IOException, InterruptedException {
@@ -42,12 +46,14 @@ public class Example11Ddl {
         tm.executeDdl(sql);
     }
 
-    void existsTable(TsurugiSession session) throws IOException, InterruptedException {
+    boolean existsTable(TsurugiSession session) throws IOException, InterruptedException {
         var metadataOpt = session.findTableMetadata("TEST");
         if (metadataOpt.isPresent()) {
             System.out.println("table exists");
+            return true;
         } else {
             System.out.println("table not exists");
+            return false;
         }
     }
 
@@ -62,7 +68,7 @@ public class Example11Ddl {
         }
     }
 
-    void dropAndCreateTable(TsurugiSession session) throws IOException, InterruptedException {
+    public static void dropAndCreateTable(TsurugiSession session) throws IOException, InterruptedException {
         var tm = session.createTransactionManager(TgTxOption.ofDDL());
         tm.execute(transaction -> {
             if (transaction.getSession().findTableMetadata("TEST").isPresent()) {

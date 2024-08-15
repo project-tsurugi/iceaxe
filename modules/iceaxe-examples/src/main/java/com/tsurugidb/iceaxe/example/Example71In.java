@@ -18,13 +18,20 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example71In {
 
-    void main() throws IOException, InterruptedException {
+    public static void main(String... args) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
-            var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
-            var tm = session.createTransactionManager(setting);
+            Example11Ddl.dropAndCreateTable(session);
+            Example21Insert.insert(session);
 
-            in1(session, tm, List.of(/* foo list */));
+            new Example71In().main(session);
         }
+    }
+
+    void main(TsurugiSession session) throws IOException, InterruptedException {
+        var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
+        var tm = session.createTransactionManager(setting);
+
+        in1(session, tm, List.of(122, 124));
     }
 
     void in1(TsurugiSession session, TsurugiTransactionManager tm, List<Integer> fooList) throws IOException, InterruptedException {
@@ -38,6 +45,7 @@ public class Example71In {
         }
 
         var sql = "select * from TEST where FOO in(" + variables.getSqlNames() + ")";
+        System.out.println(sql);
         var parameterMapping = TgParameterMapping.of(variables);
         var resultMapping = TgResultMapping.of(TestEntity::new) //
                 .addInt(TestEntity::setFoo) //

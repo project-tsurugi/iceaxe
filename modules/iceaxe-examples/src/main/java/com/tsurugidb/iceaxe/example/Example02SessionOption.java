@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.session.TgSessionShutdownType;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 
 /**
@@ -12,6 +13,14 @@ import com.tsurugidb.iceaxe.transaction.TgCommitType;
  * @see Example02Session
  */
 public class Example02SessionOption {
+
+    void label() {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setApplicationName("application name");
+        sessionOption.setLabel("session label");
+
+        // $TSURUGI_HOME/bin/tgctl session list --verbose
+    }
 
     void timeout() {
         var sessionOption = TgSessionOption.of();
@@ -22,5 +31,10 @@ public class Example02SessionOption {
     void commitType() {
         var sessionOption = TgSessionOption.of();
         sessionOption.setCommitType(TgCommitType.DEFAULT);
+    }
+
+    void shutdownType() {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setCloseShutdownType(TgSessionShutdownType.GRACEFUL);
     }
 }

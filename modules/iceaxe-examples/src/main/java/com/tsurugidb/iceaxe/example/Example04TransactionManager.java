@@ -27,11 +27,15 @@ public class Example04TransactionManager {
      */
     private static final TgTmSetting SETTING = TgTmSetting.of(OCC, LTX);
 
-    void main() throws IOException, InterruptedException {
+    public static void main(String... args) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
-            manager1(session);
-            manager2(session);
+            new Example04TransactionManager().main(session);
         }
+    }
+
+    void main(TsurugiSession session) throws IOException, InterruptedException {
+        manager1(session);
+        manager2(session);
     }
 
     void manager1(TsurugiSession session) throws IOException, InterruptedException {

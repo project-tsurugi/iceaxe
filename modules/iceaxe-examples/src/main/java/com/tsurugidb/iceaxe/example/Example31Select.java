@@ -20,30 +20,37 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 public class Example31Select {
 
-    void main() throws IOException, InterruptedException {
+    public static void main(String... args) throws IOException, InterruptedException {
         try (var session = Example02Session.createSession()) {
-            var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
-            var tm = session.createTransactionManager(setting);
+            Example11Ddl.dropAndCreateTable(session);
+            Example21Insert.insert(session);
 
-            selectLoop(session, tm);
-
-            selectAsList_executeQuery(session, tm);
-            selectAsList_executeAndGetList(session, tm);
-            selectAsList_tm(session, tm);
-            selectAsList_tm_sql(tm);
-
-            selectAsEntityLoop(session, tm);
-            selectAsEntityList(session, tm);
-
-            selectByParameter1(session, tm);
-            selectByParameter1_singleVariable(session, tm);
-            selectByParameter2(session, tm);
-            selectByParameter2_bindVariable(session, tm);
-            selectByParameter2_asEntityList_executeQuery(session, tm);
-            selectByParameter2_asEntityList_executeAndGetList(session, tm);
-            selectByParameter2_asEntityList_tm(session, tm);
-            selectByParameter2_asEntityList_tm_sql(tm);
+            new Example31Select().main(session);
         }
+    }
+
+    void main(TsurugiSession session) throws IOException, InterruptedException {
+        var setting = TgTmSetting.of(TgTxOption.ofOCC(), TgTxOption.ofRTX());
+        var tm = session.createTransactionManager(setting);
+
+        selectLoop(session, tm);
+
+        selectAsList_executeQuery(session, tm);
+        selectAsList_executeAndGetList(session, tm);
+        selectAsList_tm(session, tm);
+        selectAsList_tm_sql(tm);
+
+        selectAsEntityLoop(session, tm);
+        selectAsEntityList(session, tm);
+
+        selectByParameter1(session, tm);
+        selectByParameter1_singleVariable(session, tm);
+        selectByParameter2(session, tm);
+        selectByParameter2_bindVariable(session, tm);
+        selectByParameter2_asEntityList_executeQuery(session, tm);
+        selectByParameter2_asEntityList_executeAndGetList(session, tm);
+        selectByParameter2_asEntityList_tm(session, tm);
+        selectByParameter2_asEntityList_tm_sql(tm);
     }
 
     void selectLoop(TsurugiSession session, TsurugiTransactionManager tm) throws IOException, InterruptedException {
@@ -51,12 +58,12 @@ public class Example31Select {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     List<String> nameList = result.getNameList();
-                    System.out.println(nameList);
+                    System.out.println("nameList=" + nameList);
 
                     for (TsurugiResultEntity entity : result) {
-                        System.out.println(entity.getIntOrNull("FOO"));
-                        System.out.println(entity.getLongOrNull("BAR"));
-                        System.out.println(entity.getStringOrNull("ZZZ"));
+                        System.out.print("FOO=" + entity.getIntOrNull("FOO"));
+                        System.out.print(", BAR=" + entity.getLongOrNull("BAR"));
+                        System.out.println(", ZZZ=" + entity.getStringOrNull("ZZZ"));
                     }
                 }
             });
@@ -101,9 +108,9 @@ public class Example31Select {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     for (TestEntity entity : result) {
-                        System.out.println(entity.getFoo());
-                        System.out.println(entity.getBar());
-                        System.out.println(entity.getZzz());
+                        System.out.print("FOO=" + entity.getFoo());
+                        System.out.print(", BAR=" + entity.getBar());
+                        System.out.println(", ZZZ=" + entity.getZzz());
                     }
                 }
             });
