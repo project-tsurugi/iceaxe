@@ -257,36 +257,131 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
 
     @Test
     void in() throws Exception {
-        var expectedList = List.of(2, 4, 5, 7);
-        var sql = SELECT_SQL + " where foo in (" + expectedList.stream().map(n -> Integer.toString(n)).collect(Collectors.joining(",")) + ")";
-//      var sql = SELECT_SQL + " where " + expectedList.stream().map(n -> "foo=" + n).collect(Collectors.joining(" or ")) ;
+        var expectedList = List.of(2L, 4L, 5L, 7L);
+        var sql = SELECT_SQL + " where bar in (" + expectedList.stream().map(n -> Long.toString(n)).collect(Collectors.joining(",")) + ")";
+//      var sql = SELECT_SQL + " where " + expectedList.stream().map(n -> "bar=" + n).collect(Collectors.joining(" or "));
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-                var list = tm.executeAndGetList(ps);
-                assertWhere(entity -> expectedList.contains(entity.getFoo()), list);
-            });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e); // TODO in実装待ち
+            var list = tm.executeAndGetList(ps);
+            assertWhere(entity -> {
+                if (entity.getBar() == null) {
+                    return false;
+                }
+                return expectedList.contains(entity.getBar());
+            }, list);
         }
     }
 
     @Test
-    void between() throws Exception {
-        int start = 4;
-        int end = 6;
-        var sql = SELECT_SQL + " where foo between " + start + " and " + end;
-//      var sql = SELECT_SQL + " where " + start + " <= foo and foo <= " + end;
+    void notIn() throws Exception {
+        var expectedList = List.of(2L, 4L, 5L, 7L);
+        var sql = SELECT_SQL + " where bar not in (" + expectedList.stream().map(n -> Long.toString(n)).collect(Collectors.joining(",")) + ")";
+//      var sql = SELECT_SQL + " where not(" + expectedList.stream().map(n -> "bar=" + n).collect(Collectors.joining(" or "))+ ")";
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-                var list = tm.executeAndGetList(ps);
-                assertWhere(entity -> start <= entity.getFoo() && entity.getFoo() <= end, list);
-            });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e); // TODO between実装待ち
+            var list = tm.executeAndGetList(ps);
+            assertWhere(entity -> {
+                if (entity.getBar() == null) {
+                    return false;
+                }
+                return !expectedList.contains(entity.getBar());
+            }, list);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "symmetric", "asymmetric" })
+    void between(String betweenType) throws Exception {
+        int start = 4;
+        int end = 6;
+        var sql = SELECT_SQL + " where bar between " + betweenType + " " + start + " and " + end;
+//      var sql = SELECT_SQL + " where " + start + " <= bar and bar <= " + end;
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            assertWhere(entity -> {
+                if (entity.getBar() == null) {
+                    return false;
+                }
+                return start <= entity.getBar() && entity.getBar() <= end;
+            }, list);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "symmetric", "asymmetric" })
+    void betweenSymmetric(String betweenType) throws Exception {
+        int start = 6;
+        int end = 4;
+        var sql = SELECT_SQL + " where bar between " + betweenType + " " + start + " and " + end;
+//      var sql = SELECT_SQL + " where " + end + " <= bar and bar <= " + start;
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            if (betweenType.equals("symmetric")) {
+                assertWhere(entity -> {
+                    if (entity.getBar() == null) {
+                        return false;
+                    }
+                    return end <= entity.getBar() && entity.getBar() <= start;
+                }, list);
+            } else {
+                assertEquals(0, list.size());
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "symmetric", "asymmetric" })
+    void notBetween(String betweenType) throws Exception {
+        int start = 4;
+        int end = 6;
+        var sql = SELECT_SQL + " where bar not between " + betweenType + " " + start + " and " + end;
+//      var sql = SELECT_SQL + " where not(" + start + " <= bar and bar <= " + end + ")";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            assertWhere(entity -> {
+                if (entity.getBar() == null) {
+                    return false;
+                }
+                return !(start <= entity.getBar() && entity.getBar() <= end);
+            }, list);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "symmetric", "asymmetric" })
+    void notBetweenSymmetric(String betweenType) throws Exception {
+        int start = 6;
+        int end = 4;
+        var sql = SELECT_SQL + " where bar not between " + betweenType + " " + start + " and " + end;
+//      var sql = SELECT_SQL + " where not(" + end + " <= bar and bar <= " + start + ")";
+
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
+            var list = tm.executeAndGetList(ps);
+            if (betweenType.equals("symmetric")) {
+                assertWhere(entity -> {
+                    if (entity.getBar() == null) {
+                        return false;
+                    }
+                    return !(end <= entity.getBar() && entity.getBar() <= start);
+                }, list);
+            } else {
+                assertWhere(entity -> entity.getBar() != null, list);
+            }
         }
     }
 
@@ -297,9 +392,14 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // // TODO like実装待ち
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // TODO like実装待ち
                 var list = tm.executeAndGetList(ps);
-                assertWhere(entity -> entity.getZzz().startsWith("1"), list);
+                assertWhere(entity -> {
+                    if (entity.getZzz() == null) {
+                        return false;
+                    }
+                    return entity.getZzz().startsWith("1");
+                }, list);
             });
             assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
         }
@@ -312,9 +412,14 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // // TODO like実装待ち
+            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // TODO like実装待ち
                 var list = tm.executeAndGetList(ps);
-                assertWhere(entity -> !entity.getZzz().startsWith("1"), list);
+                assertWhere(entity -> {
+                    if (entity.getZzz() == null) {
+                        return false;
+                    }
+                    return !entity.getZzz().startsWith("1");
+                }, list);
             });
             assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
         }
@@ -336,6 +441,12 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 map.put(entity.getFoo(), entity);
             }
         }
+
+        var entity = NULL_ENTITY;
+        if (where.test(entity)) {
+            map.put(entity.getFoo(), entity);
+        }
+
         return map;
     }
 }
