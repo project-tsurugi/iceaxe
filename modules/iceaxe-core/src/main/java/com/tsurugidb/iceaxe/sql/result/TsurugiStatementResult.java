@@ -101,7 +101,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * @param unit timeout unit
      * @see #setConnectTimeout(long, TimeUnit)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.5.0", forRemoval = true)
     public void setCheckTimeout(long time, TimeUnit unit) {
         setConnectTimeout(time, unit);
     }
@@ -112,7 +112,7 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * @param timeout time
      * @see #setConnectTimeout(TgTimeValue)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.5.0", forRemoval = true)
     public void setCheckTimeout(TgTimeValue timeout) {
         setConnectTimeout(timeout);
     }

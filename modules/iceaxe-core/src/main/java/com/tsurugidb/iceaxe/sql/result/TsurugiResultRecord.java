@@ -85,7 +85,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * set default ambiguous name policy.
      *
      * @param policy default ambiguous name policy
-     * @since X.X.X
+     * @since 1.5.0
      */
     public static void setDefaultAmbiguousNamePolicy(IceaxeAmbiguousNamePolicy policy) {
         defaultAmbiguousNamePolicy = Objects.requireNonNull(policy);
@@ -95,7 +95,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * get default ambiguous name policy.
      *
      * @return default ambiguous name policy
-     * @since X.X.X
+     * @since 1.5.0
      */
     public static IceaxeAmbiguousNamePolicy getDefaultAmbiguousNamePolicy() {
         return defaultAmbiguousNamePolicy;
@@ -156,7 +156,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * @throws IOException                 if an I/O error occurs while retrieving metadata
      * @throws InterruptedException        if interrupted while retrieving metadata
      * @throws TsurugiTransactionException if server error occurs while retrieving metadata
-     * @since X.X.X
+     * @since 1.5.0
      */
     @IceaxeInternal
     public IceaxeResultNameList getResultNameList() throws IOException, InterruptedException, TsurugiTransactionException {
@@ -356,7 +356,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * set ambiguous name policy.
      *
      * @param policy ambiguous name policy
-     * @since X.X.X
+     * @since 1.5.0
      */
     public void setAmbiguousNamePolicy(IceaxeAmbiguousNamePolicy policy) {
         this.ambiguousNamePolicy = policy;
@@ -366,7 +366,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * get ambiguous name policy.
      *
      * @return ambiguous name policy
-     * @since X.X.X
+     * @since 1.5.0
      */
     public IceaxeAmbiguousNamePolicy getAmbiguousNamePolicy() {
         return this.ambiguousNamePolicy;
@@ -381,7 +381,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.5.0
      */
     public int getIndex(String name) throws IOException, InterruptedException, TsurugiTransactionException {
         var policy = this.ambiguousNamePolicy;
@@ -400,7 +400,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.5.0
      */
     public int getIndex(String name, int subIndex) throws IOException, InterruptedException, TsurugiTransactionException {
         return getResultNameList().getIndex(name, subIndex);

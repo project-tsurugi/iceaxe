@@ -110,7 +110,7 @@ public class IceaxeCloseableSet {
      * @param save           exception
      * @param closeErrorCode error code for close
      * @return converted exception
-     * @since X.X.X
+     * @since 1.5.0
      */
     public Throwable convertExceptionInTransaction(Throwable save, IceaxeErrorCode closeErrorCode) {
         if (save instanceof IOException) {
@@ -137,7 +137,7 @@ public class IceaxeCloseableSet {
      * @throws IOException                 if an I/O error occurs while disposing the resources
      * @throws InterruptedException        if interrupted while requesting cancel
      * @throws TsurugiTransactionException if server error occurs while disposing the resources
-     * @since X.X.X
+     * @since 1.5.0
      */
     public void throwExceptionInTransaction(Throwable e) throws IOException, InterruptedException, TsurugiTransactionException {
         if (e instanceof IOException) {

@@ -27,7 +27,7 @@ public class TsurugiResultEntity implements TsurugiResultIndexEntity, TsurugiRes
      * set default ambiguous name policy.
      *
      * @param policy default ambiguous name policy
-     * @since X.X.X
+     * @since 1.5.0
      */
     public static void setDefaultAmbiguousNamePolicy(IceaxeAmbiguousNamePolicy policy) {
         defaultAmbiguousNamePolicy = Objects.requireNonNull(policy);
@@ -37,7 +37,7 @@ public class TsurugiResultEntity implements TsurugiResultIndexEntity, TsurugiRes
      * get default ambiguous name policy.
      *
      * @return default ambiguous name policy
-     * @since X.X.X
+     * @since 1.5.0
      */
     public static IceaxeAmbiguousNamePolicy getDefaultAmbiguousNamePolicy() {
         return defaultAmbiguousNamePolicy;
@@ -73,7 +73,7 @@ public class TsurugiResultEntity implements TsurugiResultIndexEntity, TsurugiRes
      *
      * @param nameList name utility
      * @param values   column values
-     * @since X.X.X
+     * @since 1.5.0
      */
     @IceaxeInternal
     protected TsurugiResultEntity(IceaxeResultNameList nameList, Object[] values) {
@@ -132,7 +132,7 @@ public class TsurugiResultEntity implements TsurugiResultIndexEntity, TsurugiRes
      * set ambiguous name policy.
      *
      * @param policy ambiguous name policy
-     * @since X.X.X
+     * @since 1.5.0
      */
     public void setAmbiguousNamePolicy(IceaxeAmbiguousNamePolicy policy) {
         this.ambiguousNamePolicy = policy;
@@ -142,7 +142,7 @@ public class TsurugiResultEntity implements TsurugiResultIndexEntity, TsurugiRes
      * get ambiguous name policy.
      *
      * @return ambiguous name policy
-     * @since X.X.X
+     * @since 1.5.0
      */
     public IceaxeAmbiguousNamePolicy getAmbiguousNamePolicy() {
         return this.ambiguousNamePolicy;
@@ -154,7 +154,7 @@ public class TsurugiResultEntity implements TsurugiResultIndexEntity, TsurugiRes
      * @param name column name
      * @return column index
      * @see #setAmbiguousNamePolicy(IceaxeAmbiguousNamePolicy)
-     * @since X.X.X
+     * @since 1.5.0
      */
     public int getIndex(String name) {
         var policy = this.ambiguousNamePolicy;
@@ -170,7 +170,7 @@ public class TsurugiResultEntity implements TsurugiResultIndexEntity, TsurugiRes
      * @param name     column name
      * @param subIndex index for same name
      * @return column index
-     * @since X.X.X
+     * @since 1.5.0
      */
     public int getIndex(String name, int subIndex) {
         return resultNameList.getIndex(name, subIndex);

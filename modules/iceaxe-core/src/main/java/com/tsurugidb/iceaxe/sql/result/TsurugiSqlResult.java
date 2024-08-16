@@ -70,7 +70,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      *
      * @param time time value
      * @param unit time unit
-     * @since X.X.X
+     * @since 1.5.0
      */
     public void setConnectTimeout(long time, TimeUnit unit) {
         setConnectTimeout(TgTimeValue.of(time, unit));
@@ -80,7 +80,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      * set connect timeout.
      *
      * @param timeout time
-     * @since X.X.X
+     * @since 1.5.0
      */
     public void setConnectTimeout(TgTimeValue timeout) {
         connectTimeout.set(timeout);
@@ -91,7 +91,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      *
      * @param time timeout time
      * @param unit timeout unit
-     * @since X.X.X
+     * @since 1.5.0
      */
     public void setCloseTimeout(long time, TimeUnit unit) {
         setCloseTimeout(TgTimeValue.of(time, unit));
@@ -101,7 +101,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      * set close timeout.
      *
      * @param timeout time
-     * @since X.X.X
+     * @since 1.5.0
      */
     public void setCloseTimeout(TgTimeValue timeout) {
         closeTimeout.set(timeout);

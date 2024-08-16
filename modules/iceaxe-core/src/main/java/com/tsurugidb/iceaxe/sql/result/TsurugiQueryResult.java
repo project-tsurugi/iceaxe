@@ -121,7 +121,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @param unit time unit
      * @see #setConnectTimeout(long, TimeUnit)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.5.0", forRemoval = true)
     public void setRsConnectTimeout(long time, TimeUnit unit) {
         setConnectTimeout(time, unit);
     }
@@ -132,7 +132,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @param timeout time
      * @see #setConnectTimeout(TgTimeValue)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.5.0", forRemoval = true)
     public void setRsConnectTimeout(TgTimeValue timeout) {
         setConnectTimeout(timeout);
     }
@@ -144,7 +144,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @param unit timeout unit
      * @see #setCloseTimeout(long, TimeUnit)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.5.0", forRemoval = true)
     public void setRsCloseTimeout(long time, TimeUnit unit) {
         setCloseTimeout(time, unit);
     }
@@ -155,7 +155,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @param timeout time
      * @see #setCloseTimeout(TgTimeValue)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.5.0", forRemoval = true)
     public void setRsCloseTimeout(TgTimeValue timeout) {
         setCloseTimeout(timeout);
     }
