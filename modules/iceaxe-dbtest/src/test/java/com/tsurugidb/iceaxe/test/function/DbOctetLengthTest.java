@@ -57,6 +57,24 @@ class DbOctetLengthTest extends DbTestTableTester {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "", "a", "abc", "あいう", "null", "\0" })
+    void testPlaceholder(String s) throws Exception {
+        String value = s.equals("null") ? null : s;
+        insert("dummy");
+
+        var tm = createTransactionManagerOcc(getSession());
+        var entity = tm.executeAndFindRecord("select octet_length(:v) from " + TEST, //
+                TgParameterMapping.ofSingle("v", String.class), //
+                value).get();
+        Long result = entity.getLongOrNull(0);
+        if (value == null) {
+            assertNull(result);
+        } else {
+            assertEquals(s.getBytes(StandardCharsets.UTF_8).length, result.longValue());
+        }
+    }
+
     private static void insert(String value) throws IOException, InterruptedException {
         var session = getSession();
         var v = TgBindVariable.ofString("value");
