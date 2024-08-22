@@ -344,6 +344,10 @@ public class TsurugiConnector {
             lowBuilder.withApplicationName(name);
         });
 
+        sessionOption.findKeepAlive().ifPresent(keepAlive -> {
+            lowBuilder.withKeepAlive(keepAlive);
+        });
+
         return lowBuilder;
     }
 

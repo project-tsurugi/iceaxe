@@ -22,6 +22,11 @@ public class Example02SessionOption {
         // $TSURUGI_HOME/bin/tgctl session list --verbose
     }
 
+    void keepAlive() {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setKeepAlive(true);
+    }
+
     void timeout() {
         var sessionOption = TgSessionOption.of();
         sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);

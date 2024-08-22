@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
@@ -123,6 +124,7 @@ public class TgSessionOption {
 
     private String sessionLabel;
     private String applicationName;
+    private Optional<Boolean> keepAlive = Optional.empty();
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
     private TgCommitType commitType = TgCommitType.DEFAULT;
     private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.NOTHING;
@@ -174,6 +176,28 @@ public class TgSessionOption {
      */
     public @Nullable String getApplicationName() {
         return this.applicationName;
+    }
+
+    /**
+     * set session keep-alive.
+     *
+     * @param enabled {@code true} to enable session keep-alive, or {@code false} to disable it
+     * @return this
+     * @since X.X.X
+     */
+    public TgSessionOption setKeepAlive(@Nullable Boolean enabled) {
+        this.keepAlive = Optional.ofNullable(enabled);
+        return this;
+    }
+
+    /**
+     * get session keep-alive.
+     *
+     * @return session keep-alive
+     * @since X.X.X
+     */
+    public Optional<Boolean> findKeepAlive() {
+        return this.keepAlive;
     }
 
     /**

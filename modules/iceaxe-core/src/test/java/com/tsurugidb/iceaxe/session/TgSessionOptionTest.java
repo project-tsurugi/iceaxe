@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -51,12 +52,45 @@ class TgSessionOptionTest {
         assertEquals("test-app", actual);
     }
 
+    @Test
+    void keepAlive() {
+        {
+            var sessionOption = new TgSessionOption();
+            testKeepAlive(Optional.empty(), sessionOption);
+        }
+        {
+            var sessionOption = new TgSessionOption().setKeepAlive(true);
+            testKeepAlive(Optional.of(true), sessionOption);
+        }
+        {
+            var sessionOption = new TgSessionOption().setKeepAlive(false);
+            testKeepAlive(Optional.of(false), sessionOption);
+        }
+        {
+            var sessionOption = new TgSessionOption().setKeepAlive(null);
+            testKeepAlive(Optional.empty(), sessionOption);
+        }
+    }
+
+    private void testKeepAlive(Optional<Boolean> expected, TgSessionOption sessionOption) {
+        assertEquals(expected, sessionOption.findKeepAlive());
+
+        var connector = new SessionOptionTestConnector();
+        var lowBuilder = connector.createLowSessionBuilder(null, sessionOption);
+        boolean actual = getField(lowBuilder, "doKeepAlive");
+        assertEquals(expected.orElseGet(() -> {
+            var defaultBuilder = SessionBuilder.connect("tcp://test:12345");
+            return getField(defaultBuilder, "doKeepAlive");
+        }), actual);
+    }
+
     // FIXME リフレクションを使わずにSessionBuilderから取得したい
-    private static String getField(SessionBuilder lowBuilder, String name) {
+    @SuppressWarnings("unchecked")
+    private static <T> T getField(SessionBuilder lowBuilder, String name) {
         try {
             var field = lowBuilder.getClass().getDeclaredField(name);
             field.setAccessible(true);
-            return (String) field.get(lowBuilder);
+            return (T) field.get(lowBuilder);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
