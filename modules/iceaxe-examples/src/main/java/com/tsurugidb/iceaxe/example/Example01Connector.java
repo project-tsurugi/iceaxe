@@ -19,13 +19,15 @@ public class Example01Connector {
         var endpoint = URI.create("tcp://localhost:12345");
         var credential = Example01Credential.getCredential();
         var connector = TsurugiConnector.of(endpoint, credential);
+//      var connector = TsurugiConnector.of("application-name", endpoint, credential);
         return connector;
     }
 
-    static TsurugiConnector createConnectorString() {
+    static TsurugiConnector createConnector_endpointString() {
         var endpoint = "tcp://localhost:12345";
         var credential = Example01Credential.getCredential();
         var connector = TsurugiConnector.of(endpoint, credential);
+//      var connector = TsurugiConnector.of("application-name", endpoint, credential);
         return connector;
     }
 
@@ -42,6 +44,7 @@ public class Example01Connector {
         var credential = Example01Credential.getCredential();
         var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES).setCommitType(TgCommitType.DEFAULT);
         var connector = TsurugiConnector.of(endpoint, credential, sessionOption);
+//      var connector = TsurugiConnector.of("application-name", endpoint, credential, sessionOption);
         return connector;
     }
 }

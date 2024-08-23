@@ -2,6 +2,7 @@ package com.tsurugidb.iceaxe;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,6 +20,7 @@ import com.tsurugidb.iceaxe.test.low.TestFutureResponse;
 import com.tsurugidb.iceaxe.test.low.TestLowSession;
 import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
 import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
+import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
 import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 import com.tsurugidb.tsubakuro.common.Session;
 import com.tsurugidb.tsubakuro.common.SessionBuilder;
@@ -26,6 +28,144 @@ import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 class TsurugiConnectorTest {
+
+    @Test
+    void of_endpointStr() {
+        String endpoint = "tcp://test:12345";
+        var connector = TsurugiConnector.of(endpoint);
+        assertNull(connector.getApplicationName());
+        assertEquals(URI.create(endpoint), connector.getEndpoint());
+        assertSame(NullCredential.INSTANCE, connector.getCredential());
+        assertNotNull(connector.getSessionOption());
+    }
+
+    @Test
+    void of_name_endpointStr() {
+        String applicationName = "test-app";
+        String endpoint = "tcp://test:12345";
+        var connector = TsurugiConnector.of(applicationName, endpoint);
+        assertEquals(applicationName, connector.getApplicationName());
+        assertEquals(URI.create(endpoint), connector.getEndpoint());
+        assertSame(NullCredential.INSTANCE, connector.getCredential());
+        assertNotNull(connector.getSessionOption());
+    }
+
+    @Test
+    void of_endpointUri() {
+        URI endpoint = URI.create("tcp://test:12345");
+        var connector = TsurugiConnector.of(endpoint);
+        assertNull(connector.getApplicationName());
+        assertEquals(endpoint, connector.getEndpoint());
+        assertSame(NullCredential.INSTANCE, connector.getCredential());
+        assertNotNull(connector.getSessionOption());
+    }
+
+    @Test
+    void of_name_endpointUri() {
+        String applicationName = "test-app";
+        URI endpoint = URI.create("tcp://test:12345");
+        var connector = TsurugiConnector.of(applicationName, endpoint);
+        assertEquals(applicationName, connector.getApplicationName());
+        assertEquals(endpoint, connector.getEndpoint());
+        assertSame(NullCredential.INSTANCE, connector.getCredential());
+        assertNotNull(connector.getSessionOption());
+    }
+
+    @Test
+    void of_endpointStr_credential() {
+        String endpoint = "tcp://test:12345";
+        var credential = new UsernamePasswordCredential("test-user", "test-password");
+        var connector = TsurugiConnector.of(endpoint, credential);
+        assertNull(connector.getApplicationName());
+        assertEquals(URI.create(endpoint), connector.getEndpoint());
+        assertSame(credential, connector.getCredential());
+        assertNotNull(connector.getSessionOption());
+    }
+
+    @Test
+    void of_name_endpointStr_credential() {
+        String applicationName = "test-app";
+        String endpoint = "tcp://test:12345";
+        var credential = new UsernamePasswordCredential("test-user", "test-password");
+        var connector = TsurugiConnector.of(applicationName, endpoint, credential);
+        assertEquals(applicationName, connector.getApplicationName());
+        assertEquals(URI.create(endpoint), connector.getEndpoint());
+        assertSame(credential, connector.getCredential());
+        assertNotNull(connector.getSessionOption());
+    }
+
+    @Test
+    void of_endpointUri_credential() {
+        URI endpoint = URI.create("tcp://test:12345");
+        var credential = new UsernamePasswordCredential("test-user", "test-password");
+        var connector = TsurugiConnector.of(endpoint, credential);
+        assertNull(connector.getApplicationName());
+        assertEquals(endpoint, connector.getEndpoint());
+        assertSame(credential, connector.getCredential());
+        assertNotNull(connector.getSessionOption());
+    }
+
+    @Test
+    void of_name_endpointUri_credential() {
+        String applicationName = "test-app";
+        URI endpoint = URI.create("tcp://test:12345");
+        var credential = new UsernamePasswordCredential("test-user", "test-password");
+        var connector = TsurugiConnector.of(applicationName, endpoint, credential);
+        assertEquals(applicationName, connector.getApplicationName());
+        assertEquals(endpoint, connector.getEndpoint());
+        assertSame(credential, connector.getCredential());
+        assertNotNull(connector.getSessionOption());
+    }
+
+    @Test
+    void of_endpointStr_credential_option() {
+        String endpoint = "tcp://test:12345";
+        var credential = new UsernamePasswordCredential("test-user", "test-password");
+        var sessionOption = TgSessionOption.of();
+        var connector = TsurugiConnector.of(endpoint, credential, sessionOption);
+        assertNull(connector.getApplicationName());
+        assertEquals(URI.create(endpoint), connector.getEndpoint());
+        assertSame(credential, connector.getCredential());
+        assertSame(sessionOption, connector.getSessionOption());
+    }
+
+    @Test
+    void of_name_endpointStr_credential_option() {
+        String applicationName = "test-app";
+        String endpoint = "tcp://test:12345";
+        var credential = new UsernamePasswordCredential("test-user", "test-password");
+        var sessionOption = TgSessionOption.of();
+        var connector = TsurugiConnector.of(applicationName, endpoint, credential, sessionOption);
+        assertEquals(applicationName, connector.getApplicationName());
+        assertEquals(URI.create(endpoint), connector.getEndpoint());
+        assertSame(credential, connector.getCredential());
+        assertSame(sessionOption, connector.getSessionOption());
+    }
+
+    @Test
+    void of_endpointUri_credential_option() {
+        URI endpoint = URI.create("tcp://test:12345");
+        var credential = new UsernamePasswordCredential("test-user", "test-password");
+        var sessionOption = TgSessionOption.of();
+        var connector = TsurugiConnector.of(endpoint, credential, sessionOption);
+        assertNull(connector.getApplicationName());
+        assertEquals(endpoint, connector.getEndpoint());
+        assertSame(credential, connector.getCredential());
+        assertSame(sessionOption, connector.getSessionOption());
+    }
+
+    @Test
+    void of_name_endpointUri_credential_option() {
+        String applicationName = "test-app";
+        URI endpoint = URI.create("tcp://test:12345");
+        var credential = new UsernamePasswordCredential("test-user", "test-password");
+        var sessionOption = TgSessionOption.of();
+        var connector = TsurugiConnector.of(applicationName, endpoint, credential, sessionOption);
+        assertEquals(applicationName, connector.getApplicationName());
+        assertEquals(endpoint, connector.getEndpoint());
+        assertSame(credential, connector.getCredential());
+        assertSame(sessionOption, connector.getSessionOption());
+    }
 
     @Test
     void getEndpoint() {

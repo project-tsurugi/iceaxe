@@ -46,11 +46,36 @@ public class TsurugiConnector {
     /**
      * create connector.
      *
+     * @param applicationName application name
+     * @param endpoint        the end-point URI
+     * @return connector
+     * @since X.X.X
+     */
+    public static TsurugiConnector of(String applicationName, String endpoint) {
+        var uri = URI.create(endpoint);
+        return of(uri, NullCredential.INSTANCE, TgSessionOption.of()).setApplicationName(applicationName);
+    }
+
+    /**
+     * create connector.
+     *
      * @param endpoint the end-point URI
      * @return connector
      */
     public static TsurugiConnector of(URI endpoint) {
         return of(endpoint, NullCredential.INSTANCE, TgSessionOption.of());
+    }
+
+    /**
+     * create connector.
+     *
+     * @param applicationName application name
+     * @param endpoint        the end-point URI
+     * @return connector
+     * @since X.X.X
+     */
+    public static TsurugiConnector of(String applicationName, URI endpoint) {
+        return of(endpoint, NullCredential.INSTANCE, TgSessionOption.of()).setApplicationName(applicationName);
     }
 
     /**
@@ -68,12 +93,39 @@ public class TsurugiConnector {
     /**
      * create connector.
      *
+     * @param applicationName application name
+     * @param endpoint        the end-point URI
+     * @param credential      credential. if null, use NullCredential
+     * @return connector
+     * @since X.X.X
+     */
+    public static TsurugiConnector of(String applicationName, String endpoint, Credential credential) {
+        var uri = URI.create(endpoint);
+        return of(uri, credential, TgSessionOption.of()).setApplicationName(applicationName);
+    }
+
+    /**
+     * create connector.
+     *
      * @param endpoint   the end-point URI
      * @param credential credential. if null, use NullCredential
      * @return connector
      */
     public static TsurugiConnector of(URI endpoint, Credential credential) {
         return of(endpoint, credential, TgSessionOption.of());
+    }
+
+    /**
+     * create connector.
+     *
+     * @param applicationName application name
+     * @param endpoint        the end-point URI
+     * @param credential      credential. if null, use NullCredential
+     * @return connector
+     * @since X.X.X
+     */
+    public static TsurugiConnector of(String applicationName, URI endpoint, Credential credential) {
+        return of(endpoint, credential, TgSessionOption.of()).setApplicationName(applicationName);
     }
 
     /**
@@ -87,6 +139,21 @@ public class TsurugiConnector {
     public static TsurugiConnector of(@Nonnull String endpoint, @Nullable Credential credential, @Nullable TgSessionOption sessionOption) {
         var uri = URI.create(endpoint);
         return of(uri, credential, sessionOption);
+    }
+
+    /**
+     * create connector.
+     *
+     * @param applicationName application name
+     * @param endpoint        the end-point URI
+     * @param credential      credential. if null, use NullCredential
+     * @param sessionOption   session option. if null, use new SessionOption instance
+     * @return connector
+     * @since X.X.X
+     */
+    public static TsurugiConnector of(String applicationName, @Nonnull String endpoint, @Nullable Credential credential, @Nullable TgSessionOption sessionOption) {
+        var uri = URI.create(endpoint);
+        return of(uri, credential, sessionOption).setApplicationName(applicationName);
     }
 
     /**
@@ -107,6 +174,20 @@ public class TsurugiConnector {
         var lowConnector = Connector.create(endpoint);
         var connector = new TsurugiConnector(lowConnector, endpoint, credential0, sessionOption0);
         return connector;
+    }
+
+    /**
+     * create connector.
+     *
+     * @param applicationName application name
+     * @param endpoint        the end-point URI
+     * @param credential      credential. if null, use NullCredential
+     * @param sessionOption   session option. if null, use new SessionOption instance
+     * @return connector
+     * @since X.X.X
+     */
+    public static TsurugiConnector of(String applicationName, @Nonnull URI endpoint, @Nullable Credential credential, @Nullable TgSessionOption sessionOption) {
+        return of(endpoint, credential, sessionOption).setApplicationName(applicationName);
     }
 
     /** low connector */
@@ -141,6 +222,10 @@ public class TsurugiConnector {
      */
     public URI getEndpoint() {
         return this.endpoint;
+    }
+
+    Credential getCredential() {
+        return this.defaultCredential;
     }
 
     /**
