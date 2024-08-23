@@ -24,9 +24,14 @@ class TgSessionOptionTest {
             super(Connector.create("tcp://test:12345"), URI.create("tcp://test:12345"), null, null);
         }
 
-        @Override
         public SessionBuilder createLowSessionBuilder(Credential credential, TgSessionOption sessionOption) {
-            return super.createLowSessionBuilder(credential, sessionOption);
+            String label = null;
+            return createLowSessionBuilder(label, credential, sessionOption);
+        }
+
+        @Override
+        public SessionBuilder createLowSessionBuilder(String label, Credential credential, TgSessionOption sessionOption) {
+            return super.createLowSessionBuilder(label, credential, sessionOption);
         }
     }
 
@@ -38,7 +43,7 @@ class TgSessionOptionTest {
         var connector = new SessionOptionTestConnector();
         var lowBuilder = connector.createLowSessionBuilder(null, sessionOption);
         String actual = getField(lowBuilder, "connectionLabel");
-        assertEquals("label-test", actual);
+        assertNull(actual);
     }
 
     @Test

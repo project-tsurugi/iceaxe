@@ -260,7 +260,20 @@ public class TsurugiConnector {
      * @throws IOException if an I/O error occurs during connection
      */
     public TsurugiSession createSession() throws IOException {
-        return createSession(defaultCredential, defaultSessionOption);
+        String label = defaultSessionOption.getLabel();
+        return createSession(label, defaultCredential, defaultSessionOption);
+    }
+
+    /**
+     * create session.
+     *
+     * @param label session label
+     * @return session
+     * @throws IOException if an I/O error occurs during connection
+     * @since X.X.X
+     */
+    public TsurugiSession createSession(String label) throws IOException {
+        return createSession(label, defaultCredential, defaultSessionOption);
     }
 
     /**
@@ -271,7 +284,21 @@ public class TsurugiConnector {
      * @throws IOException if an I/O error occurs during connection
      */
     public TsurugiSession createSession(Credential credential) throws IOException {
-        return createSession(credential, defaultSessionOption);
+        String label = defaultSessionOption.getLabel();
+        return createSession(label, credential, defaultSessionOption);
+    }
+
+    /**
+     * create session.
+     *
+     * @param label      session label
+     * @param credential credential
+     * @return session
+     * @throws IOException if an I/O error occurs during connection
+     * @since X.X.X
+     */
+    public TsurugiSession createSession(String label, Credential credential) throws IOException {
+        return createSession(label, credential, defaultSessionOption);
     }
 
     /**
@@ -282,7 +309,21 @@ public class TsurugiConnector {
      * @throws IOException if an I/O error occurs during connection
      */
     public TsurugiSession createSession(TgSessionOption sessionOption) throws IOException {
-        return createSession(defaultCredential, sessionOption);
+        String label = sessionOption.getLabel();
+        return createSession(label, defaultCredential, sessionOption);
+    }
+
+    /**
+     * create session.
+     *
+     * @param label         session label
+     * @param sessionOption session option
+     * @return session
+     * @throws IOException if an I/O error occurs during connection
+     * @since X.X.X
+     */
+    public TsurugiSession createSession(String label, TgSessionOption sessionOption) throws IOException {
+        return createSession(label, defaultCredential, sessionOption);
     }
 
     /**
@@ -294,9 +335,24 @@ public class TsurugiConnector {
      * @throws IOException if an I/O error occurs during connection
      */
     public TsurugiSession createSession(Credential credential, TgSessionOption sessionOption) throws IOException {
-        LOG.trace("create session. credential={}, option={}", credential, sessionOption);
+        String label = sessionOption.getLabel();
+        return createSession(label, credential, sessionOption);
+    }
+
+    /**
+     * create session.
+     *
+     * @param label         session label
+     * @param credential    credential
+     * @param sessionOption session option
+     * @return session
+     * @throws IOException if an I/O error occurs during connection
+     * @since X.X.X
+     */
+    public TsurugiSession createSession(String label, Credential credential, TgSessionOption sessionOption) throws IOException {
+        LOG.trace("create session. label={}, credential={}, option={}", label, credential, sessionOption);
         var option = (sessionOption != null) ? sessionOption : TgSessionOption.of();
-        var lowSessionFuture = createLowSession(credential, option);
+        var lowSessionFuture = createLowSession(label, credential, option);
         var session = newTsurugiSession(lowSessionFuture, option);
 
         if (this.txFileLogConfig != null) {
@@ -310,32 +366,33 @@ public class TsurugiConnector {
     /**
      * create low session.
      *
+     * @param label         session label
      * @param credential    credential
      * @param sessionOption session option
      * @return future of session
      * @throws IOException if an I/O error occurs during connection
      */
-    protected FutureResponse<? extends Session> createLowSession(@Nullable Credential credential, TgSessionOption sessionOption) throws IOException {
-        var lowBuilder = createLowSessionBuilder(credential, sessionOption);
+    protected FutureResponse<? extends Session> createLowSession(@Nullable String label, @Nullable Credential credential, TgSessionOption sessionOption) throws IOException {
+        var lowBuilder = createLowSessionBuilder(label, credential, sessionOption);
         return lowBuilder.createAsync();
     }
 
     /**
      * create low session builder.
      *
+     * @param label         session label
      * @param credential    credential
      * @param sessionOption session option
      * @return session builder
      * @since 1.4.0
      */
-    protected SessionBuilder createLowSessionBuilder(@Nullable Credential credential, TgSessionOption sessionOption) {
+    protected SessionBuilder createLowSessionBuilder(@Nullable String label, @Nullable Credential credential, TgSessionOption sessionOption) {
         var lowBuilder = SessionBuilder.connect(lowConnector);
 
         if (credential != null) {
             lowBuilder.withCredential(credential);
         }
 
-        String label = sessionOption.getLabel();
         if (label != null) {
             lowBuilder.withLabel(label);
         }

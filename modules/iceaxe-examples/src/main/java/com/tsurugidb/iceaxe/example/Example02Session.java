@@ -22,8 +22,8 @@ public class Example02Session {
         var sessionOption = TgSessionOption.of();
         var connector = TsurugiConnector.of(endpoint, credential, sessionOption);
         try (var session = connector.createSession()) {
-//          session.createStatement()
-//          session.createTransactionManager()
+//      try (var session = connector.createSession("session-label")) {
+            // ...
         }
     }
 
@@ -31,8 +31,8 @@ public class Example02Session {
         var connector = TsurugiConnector.of(endpoint, credential);
         var sessionOption = TgSessionOption.of();
         try (var session = connector.createSession(sessionOption)) {
-//          session.createStatement()
-//          session.createTransactionManager()
+//      try (var session = connector.createSession("session-label", sessionOption)) {
+            // ...
         }
     }
 
@@ -40,15 +40,14 @@ public class Example02Session {
         var connector = TsurugiConnector.of(endpoint);
         var sessionOption = TgSessionOption.of();
         try (var session = connector.createSession(credential, sessionOption)) {
-//          session.createStatement()
-//          session.createTransactionManager()
+//      try (var session = connector.createSession("session-label", credential, sessionOption)) {
+            // ...
         }
     }
 
     void shutdown(TsurugiConnector connector) throws IOException, InterruptedException {
         try (var session = connector.createSession()) {
-//          session.createStatement()
-//          session.createTransactionManager()
+            // ...
             session.shutdown(TgSessionShutdownType.GRACEFUL, 10, TimeUnit.SECONDS);
         }
     }
@@ -57,8 +56,7 @@ public class Example02Session {
         var sessionOption = TgSessionOption.of();
         sessionOption.setCloseShutdownType(TgSessionShutdownType.GRACEFUL); // shutdown is called on close
         try (var session = connector.createSession(sessionOption)) {
-//          session.createStatement()
-//          session.createTransactionManager()
+            // ...
         }
     }
 
