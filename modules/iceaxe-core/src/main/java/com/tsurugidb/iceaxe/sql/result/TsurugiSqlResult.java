@@ -17,6 +17,28 @@ import com.tsurugidb.iceaxe.util.TgTimeValue;
  */
 public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
 
+    private static boolean defaultEnableCheckResultOnClose = true; // TODO デフォルトをfalseにしたい
+
+    /**
+     * set default enable check result on close.
+     *
+     * @param enabled {@code true}: check result on close
+     * @since X.X.X
+     */
+    public static void setDefaultEnableCheckResultOnClose(boolean enabled) {
+        defaultEnableCheckResultOnClose = enabled;
+    }
+
+    /**
+     * get default enable check result on close.
+     *
+     * @return {@code true}: check result on close
+     * @since X.X.X
+     */
+    public static boolean getDefaultEnableCheckResultOnClose() {
+        return defaultEnableCheckResultOnClose;
+    }
+
     private final int iceaxeSqlExecuteId;
     private final TsurugiTransaction ownerTransaction;
     private final TsurugiSql sqlStatement;
@@ -26,6 +48,8 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
     protected final IceaxeTimeout connectTimeout;
     /** close timeout. */
     protected final IceaxeTimeout closeTimeout;
+
+    private Boolean enableCheckResultOnClose = null;
 
     /**
      * Creates a new instance.
@@ -132,5 +156,29 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
 //  @OverridingMethodsMustInvokeSuper
     public void close() throws IOException, InterruptedException, TsurugiTransactionException {
         ownerTransaction.removeChild(this);
+    }
+
+    /**
+     * set enable check result on close.
+     *
+     * @param enabled {@code true}: check result on close
+     * @since X.X.X
+     */
+    public void setEnableCheckResultOnClose(boolean enabled) {
+        this.enableCheckResultOnClose = enabled;
+    }
+
+    /**
+     * get enable check result on close.
+     *
+     * @return {@code true}: check result on close
+     * @since X.X.X
+     */
+    protected boolean enableCheckResultOnClose() {
+        Boolean enabled = this.enableCheckResultOnClose;
+        if (enabled != null) {
+            return enabled.booleanValue();
+        }
+        return getDefaultEnableCheckResultOnClose();
     }
 }

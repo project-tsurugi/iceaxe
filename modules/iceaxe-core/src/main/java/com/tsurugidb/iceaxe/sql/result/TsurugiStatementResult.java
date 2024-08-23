@@ -246,8 +246,10 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
 
         Throwable occurred = null;
         try {
-            if (this.checkResultOnClose) {
-                checkLowResult();
+            if (enableCheckResultOnClose()) {
+                if (this.checkResultOnClose) {
+                    checkLowResult();
+                }
             }
         } catch (Throwable e) {
             occurred = e;

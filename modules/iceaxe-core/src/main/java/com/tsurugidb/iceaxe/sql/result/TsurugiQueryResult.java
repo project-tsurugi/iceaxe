@@ -583,8 +583,10 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
 
         Throwable occurred = null;
         try {
-            if (this.checkResultOnClose) {
-                getLowResultSet();
+            if (enableCheckResultOnClose()) {
+                if (this.checkResultOnClose) {
+                    getLowResultSet();
+                }
             }
             callEndEvent();
         } catch (Throwable e) {
