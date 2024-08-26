@@ -97,14 +97,6 @@ class TsurugiQueryResultCloseTimeoutTest {
         testLowCloseTimeout(sessionOption, ps -> ps.setCloseTimeout(1, TimeUnit.SECONDS));
     }
 
-    @Test
-    @SuppressWarnings("removal") // TODO remove this test
-    void lowCloseTimeout_set_old() throws Exception {
-        var sessionOption = TgSessionOption.of();
-
-        testLowCloseTimeout(sessionOption, ps -> ps.setRsCloseTimeout(1, TimeUnit.SECONDS));
-    }
-
     private void testLowCloseTimeout(TgSessionOption sessionOption, Consumer<TsurugiQueryResult<?>> modifier) throws Exception {
         var future = new TestFutureResponse<ResultSet>() {
             @Override

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -30,7 +29,6 @@ import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
-import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
 import com.tsurugidb.sql.proto.SqlCommon.Column;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -112,52 +110,6 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             log.trace("TsurugiQueryResult.initialize close end");
             throw e;
         }
-    }
-
-    /**
-     * set ResetSet-timeout.
-     *
-     * @param time time value
-     * @param unit time unit
-     * @see #setConnectTimeout(long, TimeUnit)
-     */
-    @Deprecated(since = "1.5.0", forRemoval = true)
-    public void setRsConnectTimeout(long time, TimeUnit unit) {
-        setConnectTimeout(time, unit);
-    }
-
-    /**
-     * set ResetSet-timeout.
-     *
-     * @param timeout time
-     * @see #setConnectTimeout(TgTimeValue)
-     */
-    @Deprecated(since = "1.5.0", forRemoval = true)
-    public void setRsConnectTimeout(TgTimeValue timeout) {
-        setConnectTimeout(timeout);
-    }
-
-    /**
-     * set ResetSet-close-timeout.
-     *
-     * @param time timeout time
-     * @param unit timeout unit
-     * @see #setCloseTimeout(long, TimeUnit)
-     */
-    @Deprecated(since = "1.5.0", forRemoval = true)
-    public void setRsCloseTimeout(long time, TimeUnit unit) {
-        setCloseTimeout(time, unit);
-    }
-
-    /**
-     * set ResetSet-close-timeout.
-     *
-     * @param timeout time
-     * @see #setCloseTimeout(TgTimeValue)
-     */
-    @Deprecated(since = "1.5.0", forRemoval = true)
-    public void setRsCloseTimeout(TgTimeValue timeout) {
-        setCloseTimeout(timeout);
     }
 
     /**

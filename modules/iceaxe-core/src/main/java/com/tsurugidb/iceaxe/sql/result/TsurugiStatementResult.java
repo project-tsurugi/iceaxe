@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -24,7 +23,6 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
-import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.tsubakuro.sql.ExecuteResult;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -92,29 +90,6 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
             log.trace("TsurugiStatementResult.initialize close end");
             throw e;
         }
-    }
-
-    /**
-     * set check-timeout.
-     *
-     * @param time timeout time
-     * @param unit timeout unit
-     * @see #setConnectTimeout(long, TimeUnit)
-     */
-    @Deprecated(since = "1.5.0", forRemoval = true)
-    public void setCheckTimeout(long time, TimeUnit unit) {
-        setConnectTimeout(time, unit);
-    }
-
-    /**
-     * set check-timeout.
-     *
-     * @param timeout time
-     * @see #setConnectTimeout(TgTimeValue)
-     */
-    @Deprecated(since = "1.5.0", forRemoval = true)
-    public void setCheckTimeout(TgTimeValue timeout) {
-        setConnectTimeout(timeout);
     }
 
     /**
