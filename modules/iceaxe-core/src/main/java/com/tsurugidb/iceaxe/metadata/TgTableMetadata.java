@@ -26,22 +26,22 @@ public class TgTableMetadata {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get database name.
      *
      * @return database name
      */
-    @Nullable
-    public String getDatabaseName() {
+    public @Nullable String getDatabaseName() {
         return lowTableMetadata.getDatabaseName().orElse(null);
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get schema name.
      *
      * @return schema name
      */
-    @Nullable
-    public String getSchemaName() {
+    public @Nullable String getSchemaName() {
         return lowTableMetadata.getSchemaName().orElse(null);
     }
 
@@ -50,8 +50,7 @@ public class TgTableMetadata {
      *
      * @return table name
      */
-    @Nonnull
-    public String getTableName() {
+    public @Nonnull String getTableName() {
         return lowTableMetadata.getTableName();
     }
 

@@ -749,6 +749,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // boolean[]
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add setter.
      *
      * @param setter setter to R
@@ -760,6 +761,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add setter.
      *
      * @param <V>       value type
@@ -773,6 +775,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add setter.
      *
      * @param index  column index
@@ -785,6 +788,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add setter.
      *
      * @param <V>       value type
@@ -801,6 +805,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add setter.
      *
      * @param name   column name
@@ -813,6 +818,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add setter.
      *
      * @param <V>       value type

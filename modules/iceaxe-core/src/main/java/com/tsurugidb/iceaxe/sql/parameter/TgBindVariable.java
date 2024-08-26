@@ -464,6 +464,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * create bind variable.
      *
      * @param name name
@@ -474,6 +475,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
+     * <em>This class is not yet implemented:</em>
      * Tsurugi Bind Variable&lt;boolean[]&gt;.
      */
     public static class TgBindVariableBits extends TgBindVariable<boolean[]> {

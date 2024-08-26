@@ -53,6 +53,7 @@ public enum TgDataType {
      */
     BYTES(AtomType.OCTET, List.of(byte[].class)),
     /**
+     * <em>This enum is not yet implemented:</em>
      * boolean[]
      */
     BITS(AtomType.BIT, List.of(boolean[].class)),

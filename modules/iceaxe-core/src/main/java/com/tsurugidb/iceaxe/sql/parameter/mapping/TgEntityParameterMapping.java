@@ -321,6 +321,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add variable.
      *
      * @param name   name
@@ -337,6 +338,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add variable.
      *
      * @param <V>       value type

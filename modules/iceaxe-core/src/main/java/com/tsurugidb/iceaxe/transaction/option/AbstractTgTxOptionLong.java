@@ -19,6 +19,7 @@ public abstract class AbstractTgTxOptionLong<T extends AbstractTgTxOptionLong<T>
     private TransactionPriority lowPriority = null;
 
     /**
+     * <em>This method is not yet implemented:</em>
      * set priority.
      *
      * @param priority priority

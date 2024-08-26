@@ -210,6 +210,7 @@ public class TgBindVariables {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add type(boolean[]).
      *
      * @param name name

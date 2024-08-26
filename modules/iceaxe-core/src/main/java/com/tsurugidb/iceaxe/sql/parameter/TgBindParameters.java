@@ -265,6 +265,7 @@ public class TgBindParameters {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add value(boolean[]).
      *
      * @param name  name
@@ -517,6 +518,7 @@ public class TgBindParameters {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * add value(boolean[]).
      *
      * @param name  name

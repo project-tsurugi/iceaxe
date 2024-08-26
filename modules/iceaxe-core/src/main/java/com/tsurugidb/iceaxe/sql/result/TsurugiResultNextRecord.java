@@ -502,6 +502,7 @@ public interface TsurugiResultNextRecord {
     // boolean[]
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get current value as boolean[] and move next column.
      *
      * @return value
@@ -516,6 +517,7 @@ public interface TsurugiResultNextRecord {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get current value as boolean[] and move next column.
      *
      * @param defaultValue value to return if original value is null
@@ -530,6 +532,7 @@ public interface TsurugiResultNextRecord {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get current value as boolean[] and move next column.
      *
      * @return value
@@ -543,6 +546,7 @@ public interface TsurugiResultNextRecord {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get current value as boolean[] and move next column.
      *
      * @return value

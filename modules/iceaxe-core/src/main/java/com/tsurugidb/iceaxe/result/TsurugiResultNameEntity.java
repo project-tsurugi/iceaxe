@@ -425,6 +425,7 @@ public interface TsurugiResultNameEntity {
     // boolean[]
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get value as boolean[].
      *
      * @param name column name
@@ -437,6 +438,7 @@ public interface TsurugiResultNameEntity {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get value as boolean[].
      *
      * @param name         column name
@@ -449,6 +451,7 @@ public interface TsurugiResultNameEntity {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get value as boolean[].
      *
      * @param name column name
@@ -460,6 +463,7 @@ public interface TsurugiResultNameEntity {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get value as boolean[].
      *
      * @param name column name

@@ -131,6 +131,7 @@ public class TsurugiSqlPreparedStatement<P> extends TsurugiSqlPrepared<P> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * execute batch.
      *
      * @param transaction   Transaction

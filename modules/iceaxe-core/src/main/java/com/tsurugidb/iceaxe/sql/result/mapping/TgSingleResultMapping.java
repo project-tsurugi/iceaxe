@@ -139,6 +139,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<boolean[]> bitsMapping;
 
     /**
+     * <em>This method is not yet implemented:</em>
      * create result mapping.
      *
      * @return result mapping

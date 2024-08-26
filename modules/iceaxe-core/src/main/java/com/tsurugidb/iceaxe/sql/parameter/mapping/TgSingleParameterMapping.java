@@ -133,6 +133,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * create parameter mapping.
      *
      * @param name bind variable name

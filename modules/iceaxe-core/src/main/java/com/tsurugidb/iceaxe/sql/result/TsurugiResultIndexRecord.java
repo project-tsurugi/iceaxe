@@ -526,6 +526,7 @@ public interface TsurugiResultIndexRecord {
     // boolean[]
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get value as boolean[].
      *
      * @param index column index
@@ -541,6 +542,7 @@ public interface TsurugiResultIndexRecord {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get value as boolean[].
      *
      * @param index        column index
@@ -556,6 +558,7 @@ public interface TsurugiResultIndexRecord {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get value as boolean[].
      *
      * @param index column index
@@ -570,6 +573,7 @@ public interface TsurugiResultIndexRecord {
     }
 
     /**
+     * <em>This method is not yet implemented:</em>
      * get value as boolean[].
      *
      * @param index column index
