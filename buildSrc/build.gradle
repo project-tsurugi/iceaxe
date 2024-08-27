@@ -8,4 +8,5 @@ repositories {
 
 dependencies {
     implementation 'com.github.spotbugs.snom:spotbugs-gradle-plugin:5.2.5'
+    implementation 'gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.16.1'
 }
