@@ -3,6 +3,7 @@ plugins {
     id 'checkstyle'
 
     id 'com.github.spotbugs'
+    id 'com.github.hierynomus.license'
 }
 
 group = 'com.tsurugidb.iceaxe'
@@ -115,4 +116,12 @@ task showTsubakuroManifest {
         def version = resources.text.fromArchiveEntry(tsubakuroJar, "META-INF/MANIFEST.MF")
         print(version.asString())
     }
+}
+
+license {
+    def confDir = 'buildSrc/src/main/resources'
+    header rootProject.file("$confDir/source-header.txt")
+    mapping('java', 'SLASHSTAR_STYLE')
+    include('**/*.java')
+    ignoreFailures true
 }
