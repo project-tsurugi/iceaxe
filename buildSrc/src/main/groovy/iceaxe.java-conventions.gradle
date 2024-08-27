@@ -123,5 +123,4 @@ license {
     header rootProject.file("$confDir/source-header.txt")
     mapping('java', 'SLASHSTAR_STYLE')
     include('**/*.java')
-    ignoreFailures true
 }
