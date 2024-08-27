@@ -1,10 +1,16 @@
 package com.tsurugidb.iceaxe.test.select;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -88,7 +94,47 @@ class DbSelectLiteralTest extends DbTestTableTester {
         });
     }
 
-    // TODO date literal
+    @Test
+    void dateLiteral() throws Exception {
+        var literal = LocalDate.now();
+        test(String.format("date'%s'", literal), entity -> {
+            assertEquals(literal, entity.getDate(COLUMN));
+        });
+    }
+
+    @Test
+    void timeLiteral() throws Exception {
+        var literal = LocalTime.now();
+        test(String.format("time'%s'", literal), entity -> {
+            assertEquals(literal, entity.getTime(COLUMN));
+        });
+    }
+
+    @Test
+    void dateTimeLiteral() throws Exception {
+        var literal = LocalDateTime.now();
+        test(String.format("timestamp'%s'", literal), entity -> {
+            assertEquals(literal, entity.getDateTime(COLUMN));
+        });
+    }
+
+    // TODO time with time zone literal
+
+    @Test
+    void offsetDateTimeLiteral() throws Exception {
+        var literal = OffsetDateTime.now();
+        test(String.format("timestamp with time zone'%s'", literal), entity -> {
+            assertEquals(literal.withOffsetSameInstant(ZoneOffset.UTC), entity.getOffsetDateTime(COLUMN).withOffsetSameInstant(ZoneOffset.UTC));
+        });
+    }
+
+    @Test
+    void binaryLiteral() throws Exception {
+        var literal = new byte[] { 0x12, (byte) 0xef };
+        test("X'12ef'", entity -> {
+            assertArrayEquals(literal, entity.getBytes(COLUMN));
+        });
+    }
 
     private static void test(String literal, Consumer<TsurugiResultEntity> assertion) throws IOException, InterruptedException {
         var sql = "select " + literal + " as " + COLUMN + " from " + TEST;
