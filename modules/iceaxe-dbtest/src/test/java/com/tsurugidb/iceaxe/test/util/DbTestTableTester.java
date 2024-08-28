@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.sql.result.mapping.TgEntityResultMapping;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
@@ -365,6 +367,9 @@ public class DbTestTableTester {
     protected static final String INSERT_SQL = "insert into " + TEST //
             + "(" + TEST_COLUMNS + ")" //
             + "values(:foo, :bar, :zzz)";
+    private static final String UPSERT_SQL = "insert or replace into " + TEST //
+            + "(" + TEST_COLUMNS + ")" //
+            + "values(:foo, :bar, :zzz)";
     protected static final TgEntityParameterMapping<TestEntity> INSERT_MAPPING = TgParameterMapping.of(TestEntity.class) //
             .addInt("foo", TestEntity::getFoo) //
             .addLong("bar", TestEntity::getBar) //
@@ -373,7 +378,7 @@ public class DbTestTableTester {
     protected static void insertTestTable(int size) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, "insertTestTable", 3);
-        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(UPSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
                 for (int i = 0; i < size; i++) {
                     var entity = createTestEntity(i);
@@ -391,9 +396,28 @@ public class DbTestTableTester {
     protected static void insertTestTable(TestEntity entity) throws IOException, InterruptedException {
         var session = getSession();
         var tm = createTransactionManagerOcc(session, "insertTestTable", 3);
-        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
+        try (var ps = session.createStatement(UPSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
                 transaction.executeAndGetCount(ps, entity);
+            });
+        }
+    }
+
+    protected static void insertTestTable(List<TestEntity> list) throws IOException, InterruptedException {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session, "insertTestTable", 3);
+        try (var ps = session.createStatement(UPSERT_SQL, INSERT_MAPPING)) {
+            tm.execute(transaction -> {
+                // TODO use Transaction.batch()
+                var resultList = new ArrayList<TsurugiStatementResult>(list.size());
+                for (var entity : list) {
+                    var result = transaction.executeStatement(ps, entity);
+                    resultList.add(result);
+                }
+                for (var result : resultList) {
+                    result.checkLowResult();
+                }
+                return;
             });
         }
     }

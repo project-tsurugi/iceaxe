@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -106,7 +107,7 @@ class DbSelectUnionTest extends DbTestTableTester {
         var list = tm.executeAndGetList(sql);
         sortWorkAroundZzzFoo(list);
 
-        var expected = new ArrayList<TestEntity>();
+        var expected = new ArrayList<TestEntity>(TEST_LIST.size() + TEST2_LIST.size());
         expected.addAll(TEST_LIST);
         expected.addAll(TEST2_LIST);
         if (!union.contains("all")) {
@@ -114,6 +115,73 @@ class DbSelectUnionTest extends DbTestTableTester {
         }
         sortZzzFoo(expected);
         assertAllColumn(expected, list);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "union", "union all", "union distinct" })
+    void union_limit(String union) throws Exception {
+        var expected = new ArrayList<TestEntity>(TEST_LIST.size() + TEST2_LIST.size());
+        expected.addAll(TEST_LIST);
+        expected.addAll(TEST2_LIST);
+        if (!union.contains("all")) {
+            distinctAllColumn(expected);
+        }
+        sortZzzFoo(expected);
+
+        int limit = expected.size() - 5;
+        while (expected.size() > limit) {
+            expected.remove(expected.size() - 1);
+        }
+
+        // TODO union + limit
+//        var sql = "select * from " + TEST + "\n"//
+//                + union + "\n" //
+//                + "select * from " + TEST2 + "\n" //
+//                + "order by zzz, foo, bar\n" //
+//                + "limit " + limit;
+        var sql = "select * from (\n" //
+                + "select * from " + TEST + "\n"//
+                + union + "\n" //
+                + "select * from " + TEST2 + "\n" //
+                + ") t\n" //
+                + "order by zzz, foo, bar\n" //
+                + "limit " + limit;
+        var tm = createTransactionManagerOcc(getSession());
+        var list = tm.executeAndGetList(sql);
+        sortWorkAroundZzzFoo(list);
+
+        assertAllColumn(expected, list);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "union", "union all", "union distinct" })
+    @Disabled // TODO remove Disabled. union + limit
+    void union_limit2(String union) throws Exception {
+        int limit;
+        {
+            var expected = new ArrayList<TestEntity>(TEST_LIST.size() + TEST2_LIST.size());
+            expected.addAll(TEST_LIST);
+            expected.addAll(TEST2_LIST);
+            if (!union.contains("all")) {
+                distinctAllColumn(expected);
+            }
+            limit = expected.size() - 5;
+        }
+
+        var sql = "select * from " + TEST + "\n"//
+                + union + "\n" //
+                + "select * from " + TEST2;
+        var sql1 = sql + "\n" //
+                + "order by zzz, foo, bar\n" //
+                + "limit " + limit;
+        var sql2 = "select * from (\n" + sql + ") t\n" //
+                + "order by zzz, foo, bar\n" //
+                + "limit " + limit;
+
+        var tm = createTransactionManagerOcc(getSession());
+        var list1 = tm.executeAndGetList(sql1, SELECT_MAPPING);
+        var list2 = tm.executeAndGetList(sql2, SELECT_MAPPING);
+        assertEquals(list2, list1);
     }
 
     @ParameterizedTest
@@ -127,7 +195,7 @@ class DbSelectUnionTest extends DbTestTableTester {
         var list = tm.executeAndGetList(sql);
         sortWorkAroundZzzFoo(list);
 
-        var expected = new ArrayList<TestEntity>();
+        var expected = new ArrayList<TestEntity>(TEST_LIST.size());
         expected.addAll(TEST_LIST);
         for (var entity : TEST2_LIST) {
             expected.remove(entity);
@@ -150,7 +218,7 @@ class DbSelectUnionTest extends DbTestTableTester {
         var list = tm.executeAndGetList(sql);
         sortWorkAroundZzzFoo(list);
 
-        var expected = new ArrayList<TestEntity>();
+        var expected = new ArrayList<TestEntity>(TEST2_LIST.size());
         var set = Set.copyOf(TEST_LIST);
         for (var entity : TEST2_LIST) {
             if (set.contains(entity)) {
