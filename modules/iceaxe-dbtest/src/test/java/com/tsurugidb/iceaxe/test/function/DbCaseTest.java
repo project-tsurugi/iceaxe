@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -91,6 +90,35 @@ class DbCaseTest extends DbTestTableTester {
     }
 
     @Test
+    void caseSwitch_differentType() throws Exception {
+        var sql = "select bar," //
+                + " case bar % 3" //
+                + "     when 0 then   0" //
+                + "     when 1 then 1.0" //
+                + "     else        9e0" //
+                + " end c0" //
+                + "\nfrom " + TEST;
+
+        var tm = createTransactionManagerOcc(getSession());
+        var list = tm.executeAndGetList(sql);
+        assertEquals(SIZE, list.size());
+
+        for (var entity : list) {
+            switch (entity.getInt("bar") % 3) {
+            case 0:
+                assertEquals(0, entity.getDouble("c0"));
+                break;
+            case 1:
+                assertEquals(1, entity.getDouble("c0"));
+                break;
+            default:
+                assertEquals(9, entity.getDouble("c0"));
+                break;
+            }
+        }
+    }
+
+    @Test
     void caseIf() throws Exception {
         var sql = "select bar," //
                 + " case when bar%15 = 0 then 'FizzBuzz' " //
@@ -123,27 +151,6 @@ class DbCaseTest extends DbTestTableTester {
     }
 
     @Test
-    @Disabled // remove Disabled. case unmatch type
-    void caseIf_noCast() throws Exception {
-        var sql = "select bar," //
-                + " case when bar%15 = 0 then 'FizzBuzz' " //
-                + "      when bar% 3 = 0 then 'Fizz'" //
-                + "      when bar% 5 = 0 then 'Buzz'" //
-                + "      else bar" //
-                + " end c0" //
-                + "\nfrom " + TEST;
-
-        var tm = createTransactionManagerOcc(getSession());
-        var list = tm.executeAndGetList(sql);
-        assertEquals(SIZE, list.size());
-
-        for (var entity : list) {
-            String expected = getFizzBuzz(entity.getInt("bar"));
-            assertEquals(expected, entity.getString("c0"));
-        }
-    }
-
-    @Test
     void caseIf_noElse() throws Exception {
         var sql = "select bar," //
                 + " case when bar%15 = 0 then 'FizzBuzz' " //
@@ -162,6 +169,39 @@ class DbCaseTest extends DbTestTableTester {
                 assertEquals(expected, entity.getString("c0"));
             } else {
                 assertNull(entity.getStringOrNull("c0"));
+            }
+        }
+    }
+
+    @Test
+    void caseIf_differntType() throws Exception {
+        var sql = "select foo, bar," //
+                + " case when bar%15 = 0 then  15 " //
+                + "      when bar% 3 = 0 then 3.0" //
+                + "      when bar% 5 = 0 then 5e0" //
+                + "      else foo" //
+                + " end c0" //
+                + "\nfrom " + TEST;
+
+        var tm = createTransactionManagerOcc(getSession());
+        var list = tm.executeAndGetList(sql);
+        assertEquals(SIZE, list.size());
+
+        for (var entity : list) {
+            String expected = getFizzBuzz(entity.getInt("bar"));
+            switch (expected) {
+            case "FizzBuzz":
+                assertEquals(15, entity.getDouble("c0"));
+                break;
+            case "Fizz":
+                assertEquals(3, entity.getDouble("c0"));
+                break;
+            case "Buzz":
+                assertEquals(5, entity.getDouble("c0"));
+                break;
+            default:
+                assertEquals(entity.getInt("foo"), entity.getDouble("c0"));
+                break;
             }
         }
     }
