@@ -1,12 +1,14 @@
 package com.tsurugidb.iceaxe.test.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
@@ -61,6 +63,34 @@ class DbCaseTest extends DbTestTableTester {
     }
 
     @Test
+    void caseSwitch_noElse() throws Exception {
+        var sql = "select bar," //
+                + " case bar % 3" //
+                + "     when 0 then 'a'" //
+                + "     when 1 then 'b'" //
+                + " end c0" //
+                + "\nfrom " + TEST;
+
+        var tm = createTransactionManagerOcc(getSession());
+        var list = tm.executeAndGetList(sql);
+        assertEquals(SIZE, list.size());
+
+        for (var entity : list) {
+            switch (entity.getInt("bar") % 3) {
+            case 0:
+                assertEquals("a", entity.getString("c0"));
+                break;
+            case 1:
+                assertEquals("b", entity.getString("c0"));
+                break;
+            default:
+                assertNull(entity.getStringOrNull("c0"));
+                break;
+            }
+        }
+    }
+
+    @Test
     void caseIf() throws Exception {
         var sql = "select bar," //
                 + " case when bar%15 = 0 then 'FizzBuzz' " //
@@ -89,6 +119,50 @@ class DbCaseTest extends DbTestTableTester {
             return "Buzz";
         } else {
             return Integer.toString(n);
+        }
+    }
+
+    @Test
+    @Disabled // remove Disabled. case unmatch type
+    void caseIf_noCast() throws Exception {
+        var sql = "select bar," //
+                + " case when bar%15 = 0 then 'FizzBuzz' " //
+                + "      when bar% 3 = 0 then 'Fizz'" //
+                + "      when bar% 5 = 0 then 'Buzz'" //
+                + "      else bar" //
+                + " end c0" //
+                + "\nfrom " + TEST;
+
+        var tm = createTransactionManagerOcc(getSession());
+        var list = tm.executeAndGetList(sql);
+        assertEquals(SIZE, list.size());
+
+        for (var entity : list) {
+            String expected = getFizzBuzz(entity.getInt("bar"));
+            assertEquals(expected, entity.getString("c0"));
+        }
+    }
+
+    @Test
+    void caseIf_noElse() throws Exception {
+        var sql = "select bar," //
+                + " case when bar%15 = 0 then 'FizzBuzz' " //
+                + "      when bar% 3 = 0 then 'Fizz'" //
+                + "      when bar% 5 = 0 then 'Buzz'" //
+                + " end c0" //
+                + "\nfrom " + TEST;
+
+        var tm = createTransactionManagerOcc(getSession());
+        var list = tm.executeAndGetList(sql);
+        assertEquals(SIZE, list.size());
+
+        for (var entity : list) {
+            String expected = getFizzBuzz(entity.getInt("bar"));
+            if (!Character.isDigit(expected.charAt(0))) {
+                assertEquals(expected, entity.getString("c0"));
+            } else {
+                assertNull(entity.getStringOrNull("c0"));
+            }
         }
     }
 
