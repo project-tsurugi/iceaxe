@@ -64,7 +64,7 @@ public class TsurugiConnector {
      * @param applicationName application name
      * @param endpoint        the end-point URI
      * @return connector
-     * @since X.X.X
+     * @since 1.6.0
      */
     public static TsurugiConnector of(String applicationName, String endpoint) {
         var uri = URI.create(endpoint);
@@ -87,7 +87,7 @@ public class TsurugiConnector {
      * @param applicationName application name
      * @param endpoint        the end-point URI
      * @return connector
-     * @since X.X.X
+     * @since 1.6.0
      */
     public static TsurugiConnector of(String applicationName, URI endpoint) {
         return of(endpoint, NullCredential.INSTANCE, TgSessionOption.of()).setApplicationName(applicationName);
@@ -112,7 +112,7 @@ public class TsurugiConnector {
      * @param endpoint        the end-point URI
      * @param credential      credential. if null, use NullCredential
      * @return connector
-     * @since X.X.X
+     * @since 1.6.0
      */
     public static TsurugiConnector of(String applicationName, String endpoint, Credential credential) {
         var uri = URI.create(endpoint);
@@ -137,7 +137,7 @@ public class TsurugiConnector {
      * @param endpoint        the end-point URI
      * @param credential      credential. if null, use NullCredential
      * @return connector
-     * @since X.X.X
+     * @since 1.6.0
      */
     public static TsurugiConnector of(String applicationName, URI endpoint, Credential credential) {
         return of(endpoint, credential, TgSessionOption.of()).setApplicationName(applicationName);
@@ -164,7 +164,7 @@ public class TsurugiConnector {
      * @param credential      credential. if null, use NullCredential
      * @param sessionOption   session option. if null, use new SessionOption instance
      * @return connector
-     * @since X.X.X
+     * @since 1.6.0
      */
     public static TsurugiConnector of(String applicationName, @Nonnull String endpoint, @Nullable Credential credential, @Nullable TgSessionOption sessionOption) {
         var uri = URI.create(endpoint);
@@ -199,7 +199,7 @@ public class TsurugiConnector {
      * @param credential      credential. if null, use NullCredential
      * @param sessionOption   session option. if null, use new SessionOption instance
      * @return connector
-     * @since X.X.X
+     * @since 1.6.0
      */
     public static TsurugiConnector of(String applicationName, @Nonnull URI endpoint, @Nullable Credential credential, @Nullable TgSessionOption sessionOption) {
         return of(endpoint, credential, sessionOption).setApplicationName(applicationName);
@@ -370,7 +370,7 @@ public class TsurugiConnector {
      * @param label session label
      * @return session
      * @throws IOException if an I/O error occurs during connection
-     * @since X.X.X
+     * @since 1.6.0
      */
     public TsurugiSession createSession(String label) throws IOException {
         return createSession(label, defaultCredential, defaultSessionOption);
@@ -395,7 +395,7 @@ public class TsurugiConnector {
      * @param credential credential
      * @return session
      * @throws IOException if an I/O error occurs during connection
-     * @since X.X.X
+     * @since 1.6.0
      */
     public TsurugiSession createSession(String label, Credential credential) throws IOException {
         return createSession(label, credential, defaultSessionOption);
@@ -420,7 +420,7 @@ public class TsurugiConnector {
      * @param sessionOption session option
      * @return session
      * @throws IOException if an I/O error occurs during connection
-     * @since X.X.X
+     * @since 1.6.0
      */
     public TsurugiSession createSession(String label, TgSessionOption sessionOption) throws IOException {
         return createSession(label, defaultCredential, sessionOption);
@@ -447,7 +447,7 @@ public class TsurugiConnector {
      * @param sessionOption session option
      * @return session
      * @throws IOException if an I/O error occurs during connection
-     * @since X.X.X
+     * @since 1.6.0
      */
     public TsurugiSession createSession(String label, Credential credential, TgSessionOption sessionOption) throws IOException {
         LOG.trace("create session. label={}, credential={}, option={}", label, credential, sessionOption);

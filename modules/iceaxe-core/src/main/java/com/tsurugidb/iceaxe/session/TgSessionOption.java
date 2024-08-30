@@ -176,7 +176,7 @@ public class TgSessionOption {
      *
      * @param enabled {@code true} to enable session keep-alive, or {@code false} to disable it
      * @return this
-     * @since X.X.X
+     * @since 1.6.0
      */
     public TgSessionOption setKeepAlive(@Nullable Boolean enabled) {
         this.keepAlive = Optional.ofNullable(enabled);
@@ -187,7 +187,7 @@ public class TgSessionOption {
      * get session keep-alive.
      *
      * @return session keep-alive
-     * @since X.X.X
+     * @since 1.6.0
      */
     public Optional<Boolean> findKeepAlive() {
         return this.keepAlive;

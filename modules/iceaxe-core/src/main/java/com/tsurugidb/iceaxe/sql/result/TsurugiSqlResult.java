@@ -38,7 +38,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      * set default enable check result on close.
      *
      * @param enabled {@code true}: check result on close
-     * @since X.X.X
+     * @since 1.6.0
      */
     public static void setDefaultEnableCheckResultOnClose(boolean enabled) {
         defaultEnableCheckResultOnClose = enabled;
@@ -48,7 +48,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      * get default enable check result on close.
      *
      * @return {@code true}: check result on close
-     * @since X.X.X
+     * @since 1.6.0
      */
     public static boolean getDefaultEnableCheckResultOnClose() {
         return defaultEnableCheckResultOnClose;
@@ -177,7 +177,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      * set enable check result on close.
      *
      * @param enabled {@code true}: check result on close
-     * @since X.X.X
+     * @since 1.6.0
      */
     public void setEnableCheckResultOnClose(boolean enabled) {
         this.enableCheckResultOnClose = enabled;
@@ -187,7 +187,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      * get enable check result on close.
      *
      * @return {@code true}: check result on close
-     * @since X.X.X
+     * @since 1.6.0
      */
     protected boolean enableCheckResultOnClose() {
         Boolean enabled = this.enableCheckResultOnClose;
