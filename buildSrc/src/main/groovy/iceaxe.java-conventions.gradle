@@ -7,10 +7,10 @@ plugins {
 }
 
 group = 'com.tsurugidb.iceaxe'
-version = '1.6.0'
+version = '1.7.0-SNAPSHOT'
 
 ext {
-    tsubakuroVersion = '1.6.0'
+    tsubakuroVersion = '1.7.0-SNAPSHOT'
     isReleaseVersion = !version.endsWith("SNAPSHOT")
 }
 
