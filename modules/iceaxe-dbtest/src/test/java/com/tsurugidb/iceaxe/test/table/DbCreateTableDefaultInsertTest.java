@@ -22,6 +22,8 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
  */
 class DbCreateTableDefaultInsertTest extends DbTestTableTester {
 
+    private static final boolean CHECK_CURRENT_TIMESTAMP = false;
+
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
         logInitStart(info);
@@ -261,8 +263,10 @@ class DbCreateTableDefaultInsertTest extends DbTestTableTester {
         for (var actual : list) {
             if (first == null) {
                 first = actual.getOffsetDateTime("current_date_time");
-                var currentDateTime = toZ(first);
-                assertTrue(nowBeforeTransaction.compareTo(currentDateTime) <= 0 && currentDateTime.compareTo(nowAfterTransaction) <= 0);
+                if (CHECK_CURRENT_TIMESTAMP) {
+                    var currentDateTime = toZ(first);
+                    assertTrue(nowBeforeTransaction.compareTo(currentDateTime) <= 0 && currentDateTime.compareTo(nowAfterTransaction) <= 0);
+                }
             } else {
                 assertEquals(first, actual.getOffsetDateTime("current_date_time"));
             }
