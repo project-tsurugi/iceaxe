@@ -53,6 +53,11 @@ class DbMultiTransactionTest extends DbTestTableTester {
                 }
             }
         }
+
+        try (var session = DbTestConnector.createSession()) {
+            var tm = session.createTransactionManager();
+            tm.executeDdl("drop table if exists test");
+        }
     }
 
     @ParameterizedTest
