@@ -130,7 +130,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         assertEquals(1, count);
 
         var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
-        assertEquals(toZ(expected), actual.getOffsetTime("value"));
+        assertEquals(toZ(expected), toZ(actual.getOffsetTime("value")));
     }
 
     // TODO @Test valueLiteral()
@@ -147,9 +147,9 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
             for (var date : LIST) {
                 var parameter = TgBindParameters.of(variable.bind(date));
                 var list = tm.executeAndGetList(ps, parameter);
-//TODO          assertEquals(1, list.size());
+                assertEquals(1, list.size());
                 for (var entity : list) {
-                    assertEquals(toZ(date), entity.getOffsetTime("value"));
+                    assertEquals(toZ(date), toZ(entity.getOffsetTime("value")));
                 }
             }
         }
@@ -226,7 +226,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         var resultMapping = TgResultMapping.ofSingle(OffsetTime.class);
         var tm = createTransactionManagerOcc(session);
         OffsetTime result = tm.executeAndFindRecord(sql, resultMapping).get();
-        assertEquals(LIST.stream().map(v -> toZ(v)).min(OffsetTime::compareTo).get(), result);
+        assertEquals(LIST.stream().map(v -> toZ(v)).min(OffsetTime::compareTo).get(), toZ(result));
     }
 
     @Test
@@ -236,7 +236,7 @@ class DbTimeTimeZoneTest extends DbTestTableTester {
         var resultMapping = TgResultMapping.ofSingle(OffsetTime.class);
         var tm = createTransactionManagerOcc(session);
         OffsetTime result = tm.executeAndFindRecord(sql, resultMapping).get();
-        assertEquals(LIST.stream().map(v -> toZ(v)).max(OffsetTime::compareTo).get(), result);
+        assertEquals(LIST.stream().map(v -> toZ(v)).max(OffsetTime::compareTo).get(), toZ(result));
     }
 
     @Test

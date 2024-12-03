@@ -134,7 +134,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         assertEquals(1, count);
 
         var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
-        assertEquals(toZ(expected), actual.getOffsetDateTime("value"));
+        assertEquals(toZ(expected), toZ(actual.getOffsetDateTime("value")));
     }
 
     @ParameterizedTest
@@ -163,7 +163,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         assertEquals(1, count);
 
         var actual = tm.executeAndFindRecord("select * from " + TEST + " where pk=1").get();
-        assertEquals(toZ(expected), actual.getOffsetDateTime("value"));
+        assertEquals(toZ(expected), toZ(actual.getOffsetDateTime("value")));
     }
 
     @Test
@@ -180,7 +180,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
                 var list = tm.executeAndGetList(ps, parameter);
                 assertEquals(1, list.size());
                 for (var entity : list) {
-                    assertEquals(toZ(date), entity.getOffsetDateTime("value"));
+                    assertEquals(toZ(date), toZ(entity.getOffsetDateTime("value")));
                 }
             }
         }
@@ -209,7 +209,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
                     .filter(d -> toZ(start0).compareTo(d) <= 0 && d.compareTo(toZ(end0)) <= 0) //
                     .sorted().collect(Collectors.toList());
             assertEquals(expectedList.size(), list.size());
-            assertEquals(expectedList, list.stream().map(entity -> entity.getOffsetDateTime("value")).collect(Collectors.toList()));
+            assertEquals(expectedList, list.stream().map(entity -> toZ(entity.getOffsetDateTime("value"))).collect(Collectors.toList()));
         }
     }
 
@@ -219,7 +219,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         String sql = "select * from " + TEST + " where value = timestamp with time zone'2024-05-22 23:59:01.002+01:00'";
         var tm = createTransactionManagerOcc(session);
         TsurugiResultEntity entity = tm.executeAndFindRecord(sql).get();
-        assertEquals(toZ(OffsetDateTime.of(2024, 5, 22, 23, 59, 1, 2 * 1000_000, ZoneOffset.ofHours(1))), entity.getOffsetDateTime("value"));
+        assertEquals(toZ(OffsetDateTime.of(2024, 5, 22, 23, 59, 1, 2 * 1000_000, ZoneOffset.ofHours(1))), toZ(entity.getOffsetDateTime("value")));
     }
 
     @Test
@@ -256,7 +256,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         var resultMapping = TgResultMapping.ofSingle(OffsetDateTime.class);
         var tm = createTransactionManagerOcc(session);
         OffsetDateTime result = tm.executeAndFindRecord(sql, resultMapping).get();
-        assertEquals(LIST.stream().map(v -> toZ(v)).min(OffsetDateTime::compareTo).get(), result);
+        assertEquals(LIST.stream().map(v -> toZ(v)).min(OffsetDateTime::compareTo).get(), toZ(result));
     }
 
     @Test
@@ -266,7 +266,7 @@ class DbTimestampTimeZoneTest extends DbTestTableTester {
         var resultMapping = TgResultMapping.ofSingle(OffsetDateTime.class);
         var tm = createTransactionManagerOcc(session);
         OffsetDateTime result = tm.executeAndFindRecord(sql, resultMapping).get();
-        assertEquals(LIST.stream().map(v -> toZ(v)).max(OffsetDateTime::compareTo).get(), result);
+        assertEquals(LIST.stream().map(v -> toZ(v)).max(OffsetDateTime::compareTo).get(), toZ(result));
     }
 
     @Test
