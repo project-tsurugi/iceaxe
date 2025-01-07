@@ -4,7 +4,7 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   Build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       checks: write
     timeout-minutes: 30

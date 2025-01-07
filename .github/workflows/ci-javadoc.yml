@@ -4,7 +4,7 @@ on: [workflow_dispatch, workflow_call]
 
 jobs:
   Prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
     defaults:
       run:
@@ -33,7 +33,7 @@ jobs:
 
   Deplpy:
     needs: Prepare
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       pages: write
       id-token: write
