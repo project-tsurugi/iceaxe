@@ -2,6 +2,8 @@ package com.tsurugidb.iceaxe.test.error;
 
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
+import java.io.IOException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -28,6 +30,11 @@ class DbSystemReservedWordTest extends DbTestTableTester {
         logInitEnd(info);
     }
 
+    private static void executeErrorDdl(String sql) throws IOException, InterruptedException {
+        var tm = createTransactionManagerOcc(getSession(), "executeErrorDdl", 1);
+        tm.executeDdl(sql);
+    }
+
     @Test
     void createTable() throws Exception {
         String tableName = "__test";
@@ -39,7 +46,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
                 + "  zzz varchar(10)" //
                 + ")";
         var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-            executeDdl(getSession(), sql, tableName);
+            executeErrorDdl(sql);
         });
         assertErrorSystemReservedWord(tableName, e);
     }
@@ -53,7 +60,7 @@ class DbSystemReservedWordTest extends DbTestTableTester {
                 + "  __zzz varchar(10)" //
                 + ")";
         var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-            executeDdl(getSession(), sql);
+            executeErrorDdl(sql);
         });
         assertErrorSystemReservedWord("__foo", e);
     }
