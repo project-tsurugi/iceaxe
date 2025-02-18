@@ -14,14 +14,14 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.Link;
 
 /**
  * select empty-table test
  */
 class DbSelectEmptyTest extends DbTestTableTester {
 
-    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
+    private static final int ATTEMPT_SIZE = Link.responseBoxSize() + 100;
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {

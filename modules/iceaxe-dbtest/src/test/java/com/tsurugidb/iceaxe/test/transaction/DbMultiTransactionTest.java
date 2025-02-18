@@ -23,15 +23,15 @@ import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.Link;
 
 /**
  * multi transaction test
  */
 class DbMultiTransactionTest extends DbTestTableTester {
 
-    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
-    private static final int THREAD_SIZE = ResponseBox.responseBoxSize() + 10;
+    private static final int ATTEMPT_SIZE = Link.responseBoxSize() + 100;
+    private static final int THREAD_SIZE = Link.responseBoxSize() + 10;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {

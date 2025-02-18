@@ -20,7 +20,7 @@ import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.manager.exception.TsurugiTmIOException;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.Link;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -28,7 +28,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbErrorTableNotExistsTest extends DbTestTableTester {
 
-    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 200;
+    private static final int ATTEMPT_SIZE = Link.responseBoxSize() + 200;
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {

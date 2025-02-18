@@ -18,14 +18,14 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.Link;
 
 /**
  * slot limit test
  */
 public class DbSlotLimitTest extends DbTimetoutTest {
 
-    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
+    private static final int ATTEMPT_SIZE = Link.responseBoxSize() + 100;
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {

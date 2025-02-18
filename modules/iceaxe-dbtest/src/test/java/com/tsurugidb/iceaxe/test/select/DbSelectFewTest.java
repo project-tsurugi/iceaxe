@@ -13,14 +13,14 @@ import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.test.util.TestEntity;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.Link;
 
 /**
  * select few record test
  */
 class DbSelectFewTest extends DbTestTableTester {
 
-    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 200;
+    private static final int ATTEMPT_SIZE = Link.responseBoxSize() + 200;
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {

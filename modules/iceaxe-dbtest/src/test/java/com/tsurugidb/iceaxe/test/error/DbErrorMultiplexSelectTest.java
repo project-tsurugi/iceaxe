@@ -15,7 +15,7 @@ import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
-import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.ResponseBox;
+import com.tsurugidb.tsubakuro.channel.common.connection.wire.impl.Link;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
@@ -23,7 +23,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbErrorMultiplexSelectTest extends DbTestTableTester {
 
-    private static final int ATTEMPT_SIZE = ResponseBox.responseBoxSize() + 100;
+    private static final int ATTEMPT_SIZE = Link.responseBoxSize() + 100;
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
