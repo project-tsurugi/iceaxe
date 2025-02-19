@@ -158,7 +158,7 @@ class DbQueryResultTest extends DbTestTableTester {
                 var future = FutureResponseCloseWrapper.of(transaction.getLowTransaction().executeQuery(ps.getSql()));
 
                 transaction.close();
-                try (var target = new TsurugiQueryResult<>(0, transaction, ps, null, SELECT_MAPPING, null)) {
+                try (var target = new TsurugiQueryResult<>(0, transaction, ps, null, SELECT_MAPPING, null, null)) {
                     var e = assertThrows(TsurugiIOException.class, () -> {
                         target.initialize(future);
                     });

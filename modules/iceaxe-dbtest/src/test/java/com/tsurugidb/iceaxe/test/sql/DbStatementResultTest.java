@@ -40,7 +40,7 @@ class DbStatementResultTest extends DbTestTableTester {
                 var future = FutureResponseCloseWrapper.of(transaction.getLowTransaction().executeStatement(ps.getSql()));
 
                 transaction.close();
-                try (var target = new TsurugiStatementResult(0, transaction, ps, null)) {
+                try (var target = new TsurugiStatementResult(0, transaction, ps, null, null)) {
                     var e = assertThrows(TsurugiIOException.class, () -> {
                         target.initialize(future);
                     });
