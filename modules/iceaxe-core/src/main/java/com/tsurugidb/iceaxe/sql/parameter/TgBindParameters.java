@@ -15,8 +15,12 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,10 +35,13 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
@@ -280,8 +287,7 @@ public class TgBindParameters {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add value(boolean[]).
+     * <em>This method is not yet implemented:</em> add value(boolean[]).
      *
      * @param name  name
      * @param value value
@@ -361,6 +367,60 @@ public class TgBindParameters {
      */
     public TgBindParameters addZonedDateTime(@Nonnull String name, @Nullable ZonedDateTime value) {
         add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(BLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindParameters addBlob(@Nonnull String name, @Nullable TgBlob value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(BLOB).
+     *
+     * @param name name
+     * @param path path
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindParameters addBlob(@Nonnull String name, @Nullable Path path) {
+        add(TgBindParameter.ofBlob(name, path));
+        return this;
+    }
+
+    /**
+     * add value(BLOB).
+     *
+     * @param name name
+     * @param is   input stream
+     * @return this
+     * @throws IOException if an I/O error occurs when reading or writing
+     * @since X.X.X
+     */
+    public TgBindParameters addBlob(@Nonnull String name, @Nullable InputStream is) throws IOException {
+        add(TgBindParameter.ofBlob(name, is));
+        return this;
+    }
+
+    /**
+     * add value(BLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @throws IOException if an I/O error occurs writing to the file
+     * @since X.X.X
+     */
+    public TgBindParameters addBlob(@Nonnull String name, @Nullable byte[] value) throws IOException {
+        add(TgBindParameter.ofBlob(name, value));
         return this;
     }
 
@@ -533,8 +593,7 @@ public class TgBindParameters {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add value(boolean[]).
+     * <em>This method is not yet implemented:</em> add value(boolean[]).
      *
      * @param name  name
      * @param value value
@@ -611,6 +670,38 @@ public class TgBindParameters {
     }
 
     /**
+     * add value(BLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable TgBlob value) {
+        return addBlob(name, value);
+    }
+
+    /**
+     * add value(Path).
+     *
+     * @param name name
+     * @param type type
+     * @param path path
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindParameters add(@Nonnull String name, TgDataType type, @Nullable Path path) {
+        switch (type) {
+        case BLOB:
+            return addBlob(name, path);
+        case CLOB:
+            // TODO CLOB
+        default:
+            throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
+        }
+    }
+
+    /**
      * add parameter.
      *
      * @param parameter parameter
@@ -635,13 +726,14 @@ public class TgBindParameters {
     /**
      * convert to {@link Parameter} list.
      *
+     * @param closeableSet Closeable set for execute finished
      * @return parameter list
      */
     @IceaxeInternal
-    public List<Parameter> toLowParameterList() {
+    public List<Parameter> toLowParameterList(IceaxeCloseableSet closeableSet) {
         var list = new ArrayList<Parameter>(parameterList.size());
         for (var parameter : parameterList) {
-            list.add(parameter.toLowParameter());
+            list.add(parameter.toLowParameter(closeableSet));
         }
         return list;
     }

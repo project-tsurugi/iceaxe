@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -24,6 +25,7 @@ import com.tsurugidb.iceaxe.sql.parameter.mapping.TgConverterParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEmptyParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgSingleParameterMapping;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
@@ -163,10 +165,12 @@ public abstract class TgParameterMapping<P> {
     /**
      * convert to {@link Parameter} list.
      *
-     * @param parameter   parameter
-     * @param convertUtil convert type utility
+     * @param parameter    parameter
+     * @param convertUtil  convert type utility
+     * @param closeableSet Closeable set for execute finished
      * @return parameter list
+     * @throws IOException if an I/O error occurs
      */
     @IceaxeInternal
-    public abstract List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil);
+    public abstract List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil, IceaxeCloseableSet closeableSet) throws IOException;
 }

@@ -22,6 +22,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
+import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
@@ -247,7 +248,6 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since 1.3.0
      */
-    @Deprecated(since = "1.4.0")
     EXPLAIN_CLOSE_ERROR(IceaxeErrorCodeBlock.EXPLAIN + 902, "explain close error"),
 
     // metadata
@@ -289,6 +289,32 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      */
     @Deprecated(since = "1.4.0")
     TABLE_METADATA_CLOSE_ERROR(IceaxeErrorCodeBlock.METADATA + 292, "getTableMetadata close error"),
+
+    // object
+    /**
+     * {@link TgBlobReference} get timeout.
+     *
+     * @since X.X.X
+     */
+    BLOB_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 11, "BLOB get timeout"),
+    /**
+     * {@link TgBlobReference} close timeout.
+     *
+     * @since X.X.X
+     */
+    BLOB_CACHE_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 12, "BLOB cache close timeout"),
+    /**
+     * {@link TgBlobReference} close timeout.
+     *
+     * @since X.X.X
+     */
+    BLOB_CACHE_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 13, "BLOB cache close timeout"),
+    /**
+     * {@link TgBlobReference} close timeout.
+     *
+     * @since X.X.X
+     */
+    BLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 19, "BLOB close timeout"),
 
     //
     ;

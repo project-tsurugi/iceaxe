@@ -30,6 +30,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 
@@ -964,5 +965,69 @@ public interface TsurugiResultNameRecord {
     public default @Nullable ZonedDateTime getZonedDateTimeOrNull(String name, @Nonnull ZoneId zone) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getValueOrNull(name);
         return getConvertUtil().toZonedDateTime(value, zone);
+    }
+
+    // BLOB
+
+    /**
+     * get value as BLOB.
+     *
+     * @param name column name
+     * @return value
+     * @throws IOException                 if an I/O error occurs while retrieving the column data
+     * @throws InterruptedException        if interrupted while retrieving the column data
+     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
+     * @throws NullPointerException        if value is null
+     * @since X.X.X
+     */
+    public default @Nonnull TgBlobReference getBlob(String name) throws IOException, InterruptedException, TsurugiTransactionException {
+        var value = getBlobOrNull(name);
+        return Objects.requireNonNull(value, () -> "getBlob(" + name + ") is null");
+    }
+
+    /**
+     * get value as BLOB.
+     *
+     * @param name         column name
+     * @param defaultValue value to return if original value is null
+     * @return value
+     * @throws IOException                 if an I/O error occurs while retrieving the column data
+     * @throws InterruptedException        if interrupted while retrieving the column data
+     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
+     * @since X.X.X
+     */
+    public default TgBlobReference getBlob(String name, TgBlobReference defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
+        var value = getBlobOrNull(name);
+        return (value != null) ? value : defaultValue;
+    }
+
+    /**
+     * get value as BLOB.
+     *
+     * @param name column name
+     * @return value
+     * @throws IOException                 if an I/O error occurs while retrieving the column data
+     * @throws InterruptedException        if interrupted while retrieving the column data
+     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
+     * @since X.X.X
+     */
+    public default @Nonnull Optional<TgBlobReference> findBlob(String name) throws IOException, InterruptedException, TsurugiTransactionException {
+        var value = getBlobOrNull(name);
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get value as BLOB.
+     *
+     * @param name column name
+     * @return value
+     * @throws IOException                 if an I/O error occurs while retrieving the column data
+     * @throws InterruptedException        if interrupted while retrieving the column data
+     * @throws TsurugiTransactionException if server error occurs while retrieving the column data
+     * @since X.X.X
+     */
+    public default @Nullable TgBlobReference getBlobOrNull(String name) throws IOException, InterruptedException, TsurugiTransactionException {
+        var value = getValueOrNull(name);
+        return getConvertUtil().toBlobReference(value);
     }
 }

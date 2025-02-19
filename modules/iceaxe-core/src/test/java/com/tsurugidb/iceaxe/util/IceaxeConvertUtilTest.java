@@ -17,12 +17,17 @@ package com.tsurugidb.iceaxe.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -34,6 +39,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.Test;
+
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.test.TestTsurugiTransaction;
+import com.tsurugidb.tsubakuro.sql.BlobReference;
 
 class IceaxeConvertUtilTest {
 
@@ -298,5 +308,58 @@ class IceaxeConvertUtilTest {
             }
         }.toZonedDateTime("123", zone));
         assertEquals("test", e.getCause().getMessage());
+    }
+
+    @Test
+    void testToBlob() throws Exception {
+        assertNull(target.toBlob(null));
+
+        {
+            var expected = TgBlob.of(Path.of("/path/to/file"));
+            var actual = target.toBlob(expected);
+            assertFalse(actual.isDeleteOnExecuteFinished());
+            assertSame(expected, actual);
+        }
+        {
+            var expected = Path.of("/path/to/file");
+            var actual = target.toBlob(expected);
+            assertFalse(actual.isDeleteOnExecuteFinished());
+            assertSame(expected, actual.getPath());
+        }
+        {
+            byte[] expected = { 1, 2, 3 };
+            try (var actual = target.toBlob(new ByteArrayInputStream(expected))) {
+                assertTrue(actual.isDeleteOnExecuteFinished());
+                byte[] actualBytes = actual.readAllBytes();
+                assertArrayEquals(expected, actualBytes);
+            }
+        }
+        {
+            byte[] expected = { 1, 2, 3 };
+            try (var actual = target.toBlob(expected)) {
+                assertTrue(actual.isDeleteOnExecuteFinished());
+                byte[] actualBytes = actual.readAllBytes();
+                assertArrayEquals(expected, actualBytes);
+            }
+        }
+
+        assertThrowsExactly(UnsupportedOperationException.class, () -> target.toBlob("aaa"));
+    }
+
+    @Test
+    void testToBlobReference() throws Exception {
+        assertNull(target.toBlobReference(null));
+
+        {
+            var transaction = TestTsurugiTransaction.of();
+            var ref = new BlobReference() {
+            };
+            try (var expected = TgBlobReference.of(transaction, ref)) {
+                var actual = target.toBlobReference(expected);
+                assertSame(expected, actual);
+            }
+        }
+
+        assertThrowsExactly(UnsupportedOperationException.class, () -> target.toBlobReference("aaa"));
     }
 }

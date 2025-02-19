@@ -122,6 +122,8 @@ class TgSingleResultMappingTest {
         assertMapping(value, expected, TgSingleResultMapping.ofZonedDateTime(zone));
     }
 
+    // BLOB, CLOB → iceaxe-dbtest
+
     @Test
     void testOfClass() {
         assertMapping(123, TgSingleResultMapping.of(int.class));
@@ -138,10 +140,10 @@ class TgSingleResultMappingTest {
         assertMapping(value, value, actual);
     }
 
-    private static void assertMapping(Object value, Object expectedValue, TgSingleResultMapping<?> actual) {
-        var type = TgDataType.of(value.getClass());
+    private static void assertMapping(Object lowValue, Object expectedValue, TgSingleResultMapping<?> actual) {
+        var type = TgDataType.of(lowValue.getClass());
         var list = new ArrayList<>();
-        list.add(value);
+        list.add(lowValue);
         var lowResultSet = new ResultSet() {
             private int index = -1;
 

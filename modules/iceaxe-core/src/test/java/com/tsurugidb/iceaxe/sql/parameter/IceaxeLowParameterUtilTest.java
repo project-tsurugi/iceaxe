@@ -18,6 +18,7 @@ package com.tsurugidb.iceaxe.sql.parameter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,6 +30,7 @@ import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
 class IceaxeLowParameterUtilTest {
@@ -186,4 +188,22 @@ class IceaxeLowParameterUtilTest {
         var parameter = IceaxeLowParameterUtil.create("foo", dateTime);
         assertEquals(Parameters.of("foo", dateTime.toOffsetDateTime()), parameter);
     }
+
+    @Test
+    void testCreateStringBlob() {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (TgBlob) null));
+
+        var parameter = IceaxeLowParameterUtil.create("foo", TgBlob.of(Path.of("/path/to/flie")));
+        assertEquals(Parameters.blobOf("foo", Path.of("/path/to/flie")), parameter);
+    }
+
+    @Test
+    void testCreateBlobStringPath() {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createBlob("foo", (Path) null));
+
+        var parameter = IceaxeLowParameterUtil.createBlob("foo", Path.of("/path/to/flie"));
+        assertEquals(Parameters.blobOf("foo", Path.of("/path/to/flie")), parameter);
+    }
+
+    // TODO CLOB
 }

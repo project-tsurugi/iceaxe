@@ -21,6 +21,7 @@ import java.util.function.Function;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;;
@@ -64,7 +65,7 @@ public class TgConverterParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     @Override
-    public List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil) {
-        return parameterConverter.apply(parameter).toLowParameterList();
+    public List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil, IceaxeCloseableSet closeableSet) {
+        return parameterConverter.apply(parameter).toLowParameterList(closeableSet);
     }
 }

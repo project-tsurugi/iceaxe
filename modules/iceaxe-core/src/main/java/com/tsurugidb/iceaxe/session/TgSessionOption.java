@@ -33,6 +33,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
+import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
@@ -98,7 +99,6 @@ public class TgSessionOption {
         /** {@link TsurugiExplainHelper} connect */
         EXPLAIN_CONNECT,
         /** {@link TsurugiExplainHelper} close */
-        @Deprecated(since = "1.4.0")
         EXPLAIN_CLOSE,
 
         /** {@link TsurugiTableListHelper} connect */
@@ -112,6 +112,26 @@ public class TgSessionOption {
         @Deprecated(since = "1.4.0")
         TABLE_METADATA_CLOSE,
 
+        /**
+         * {@link TgBlobReference} get.
+         *
+         * @since X.X.X
+         */
+        BLOB_GET,
+        /**
+         * {@link TgBlobReference} get.
+         *
+         * @since X.X.X
+         */
+        BLOB_CACHE_GET,
+        /**
+         * {@link TgClobReference} get.
+         *
+         * @since X.X.X
+         */
+        CLOB_GET,
+
+        //
         ;
     }
 

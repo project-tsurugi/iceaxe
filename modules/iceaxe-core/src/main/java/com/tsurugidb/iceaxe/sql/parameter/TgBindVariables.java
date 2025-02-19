@@ -225,8 +225,7 @@ public class TgBindVariables {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add type(boolean[]).
+     * <em>This method is not yet implemented:</em> add type(boolean[]).
      *
      * @param name name
      * @return this
@@ -299,6 +298,18 @@ public class TgBindVariables {
      */
     public TgBindVariables addZonedDateTime(@Nonnull String name) {
         addInternal(name, TgDataType.ZONED_DATE_TIME);
+        return this;
+    }
+
+    /**
+     * add type(BLOB).
+     *
+     * @param name name
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindVariables addBlob(@Nonnull String name) {
+        addInternal(name, TgDataType.BLOB);
         return this;
     }
 

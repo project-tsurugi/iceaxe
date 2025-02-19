@@ -36,6 +36,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlStatement;
 import com.tsurugidb.iceaxe.sql.result.event.TsurugiStatementResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.tsubakuro.sql.ExecuteResult;
@@ -62,14 +63,15 @@ public class TsurugiStatementResult extends TsurugiSqlResult {
      * Call {@link #initialize(FutureResponse)} after construct.
      * </p>
      *
-     * @param sqlExecuteId iceaxe SQL executeId
-     * @param transaction  transaction
-     * @param ps           SQL definition
-     * @param parameter    SQL parameter
+     * @param sqlExecuteId      iceaxe SQL executeId
+     * @param transaction       transaction
+     * @param ps                SQL definition
+     * @param parameter         SQL parameter
+     * @param afterCloseableSet Closeable set for execute finished
      */
     @IceaxeInternal
-    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter) {
-        super(sqlExecuteId, transaction, ps, parameter, TgTimeoutKey.RESULT_CONNECT, TgTimeoutKey.RESULT_CLOSE);
+    public TsurugiStatementResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, IceaxeCloseableSet afterCloseableSet) {
+        super(sqlExecuteId, transaction, ps, parameter, afterCloseableSet, TgTimeoutKey.RESULT_CONNECT, TgTimeoutKey.RESULT_CLOSE);
     }
 
     /**

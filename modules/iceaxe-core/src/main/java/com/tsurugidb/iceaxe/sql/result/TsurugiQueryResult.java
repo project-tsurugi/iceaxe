@@ -40,6 +40,7 @@ import com.tsurugidb.iceaxe.sql.result.event.TsurugiQueryResultEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
@@ -78,16 +79,18 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * Call {@link #initialize(FutureResponse)} after construct.
      * </p>
      *
-     * @param sqlExecuteId  iceaxe SQL executeId
-     * @param transaction   transaction
-     * @param ps            SQL definition
-     * @param parameter     SQL parameter
-     * @param resultMapping result mapping
-     * @param convertUtil   convert type utility
+     * @param sqlExecuteId      iceaxe SQL executeId
+     * @param transaction       transaction
+     * @param ps                SQL definition
+     * @param parameter         SQL parameter
+     * @param resultMapping     result mapping
+     * @param convertUtil       convert type utility
+     * @param afterCloseableSet Closeable set for execute finished
      */
     @IceaxeInternal
-    public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil) {
-        super(sqlExecuteId, transaction, ps, parameter, TgTimeoutKey.RS_CONNECT, TgTimeoutKey.RS_CLOSE);
+    public TsurugiQueryResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TgResultMapping<R> resultMapping, IceaxeConvertUtil convertUtil,
+            IceaxeCloseableSet afterCloseableSet) {
+        super(sqlExecuteId, transaction, ps, parameter, afterCloseableSet, TgTimeoutKey.RS_CONNECT, TgTimeoutKey.RS_CLOSE);
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
     }

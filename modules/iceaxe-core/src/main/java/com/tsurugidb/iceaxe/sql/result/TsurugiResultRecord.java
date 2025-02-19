@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.result.IceaxeResultNameList.IceaxeAmbiguousNamePolicy;
+import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
@@ -145,6 +147,16 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
     void reset() {
         this.currentColumnIndex = -1;
         this.isValuesAvailable = false;
+    }
+
+    /**
+     * get transaction.
+     *
+     * @return transaction
+     * @since X.X.X
+     */
+    protected TsurugiTransaction getTransaction() {
+        return ownerResult.getTransaction();
     }
 
     @Override
@@ -312,6 +324,10 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
                 return lowResultSet.fetchTimeOfDayWithTimeZoneValue();
             case TIME_POINT_WITH_TIME_ZONE:
                 return lowResultSet.fetchTimePointWithTimeZoneValue();
+            case BLOB:
+                var bref = lowResultSet.fetchBlob();
+                return TgBlobReference.of(getTransaction(), bref);
+            // TODO CLOB
             default:
                 throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);
             }
@@ -332,17 +348,26 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
                 this.values = new Object[size];
             }
 
-            readValues(this.values);
+            readValues(this.values, false);
 
             this.isValuesAvailable = true;
         }
         return values[index];
     }
 
-    void readValues(Object[] values) throws IOException, InterruptedException, TsurugiTransactionException {
+    void readValues(Object[] values, boolean forEntity) throws IOException, InterruptedException, TsurugiTransactionException {
         int i = 0;
         while (moveCurrentColumnNext()) {
             var value = fetchCurrentColumnValue();
+
+            if (forEntity) {
+                if (value instanceof TgBlobReference) {
+                    var factory = getConvertUtil().getIceaxeObjectFactory();
+                    value = factory.createBlob((TgBlobReference) value);
+                }
+                // TODO CLOB
+            }
+
             values[i++] = value;
         }
         if (i != values.length) {

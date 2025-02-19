@@ -24,6 +24,13 @@
     <Bug pattern="OVERRIDING_METHODS_MUST_INVOKE_SUPER" />
   </Match>
   <Match>
+    <Class name="com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory" />
+    <Or>
+      <Bug pattern="MS_EXPOSE_REP" />
+      <Bug pattern="EI_EXPOSE_STATIC_REP2" />
+    </Or>
+  </Match>
+  <Match>
     <Or>
       <Bug pattern="EI_EXPOSE_REP" />
       <Bug pattern="EI_EXPOSE_REP2" />

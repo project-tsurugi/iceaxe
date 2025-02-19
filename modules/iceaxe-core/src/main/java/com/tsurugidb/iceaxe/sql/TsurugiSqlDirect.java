@@ -71,7 +71,6 @@ public abstract class TsurugiSqlDirect extends TsurugiSql {
         var session = getSession();
         var helper = session.getExplainHelper();
         var connectTimeout = getExplainConnectTimeout();
-        @SuppressWarnings("deprecation")
         var closeTimeout = getExplainCloseTimeout();
         return helper.explain(session, sql, connectTimeout, closeTimeout);
     }

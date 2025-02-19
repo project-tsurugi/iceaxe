@@ -36,6 +36,8 @@ import java.util.function.Supplier;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionBiConsumer;
@@ -764,8 +766,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     // boolean[]
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add setter.
+     * <em>This method is not yet implemented:</em> add setter.
      *
      * @param setter setter to R
      * @return this
@@ -776,8 +777,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add setter.
+     * <em>This method is not yet implemented:</em> add setter.
      *
      * @param <V>       value type
      * @param setter    setter to R
@@ -790,8 +790,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add setter.
+     * <em>This method is not yet implemented:</em> add setter.
      *
      * @param index  column index
      * @param setter setter to R
@@ -803,8 +802,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add setter.
+     * <em>This method is not yet implemented:</em> add setter.
      *
      * @param <V>       value type
      * @param index     column index
@@ -820,8 +818,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add setter.
+     * <em>This method is not yet implemented:</em> add setter.
      *
      * @param name   column name
      * @param setter setter to R
@@ -833,8 +830,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add setter.
+     * <em>This method is not yet implemented:</em> add setter.
      *
      * @param <V>       value type
      * @param name      column name
@@ -1345,6 +1341,102 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
             V v = (value != null) ? converter.apply(value) : null;
             setter.accept(entity, v);
         }, zone);
+    }
+
+    // BLOB
+
+    /**
+     * add setter.
+     *
+     * @param setter setter to R
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityResultMapping<R> addBlob(BiConsumer<R, TgBlob> setter) {
+        int index = columnConverterList.size();
+        return addBlob(index, setter);
+    }
+
+    /**
+     * add setter.
+     *
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityResultMapping<R> addBlob(BiConsumer<R, V> setter, Function<TgBlob, V> converter) {
+        int index = columnConverterList.size();
+        return addBlob(index, setter, converter);
+    }
+
+    /**
+     * add setter.
+     *
+     * @param index  column index
+     * @param setter setter to R
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityResultMapping<R> addBlob(int index, BiConsumer<R, TgBlob> setter) {
+        set(index, record -> {
+            TgBlobReference value = record.nextBlobOrNull();
+            var factory = record.getConvertUtil().getIceaxeObjectFactory();
+            return factory.createBlob(value);
+        }, setter);
+        return this;
+    }
+
+    /**
+     * add setter.
+     *
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityResultMapping<R> addBlob(int index, BiConsumer<R, V> setter, Function<TgBlob, V> converter) {
+        return addBlob(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter.
+     *
+     * @param name   column name
+     * @param setter setter to R
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityResultMapping<R> addBlob(String name, BiConsumer<R, TgBlob> setter) {
+        set(name, record -> {
+            TgBlobReference value = record.nextBlobOrNull();
+            var factory = record.getConvertUtil().getIceaxeObjectFactory();
+            return factory.createBlob(value);
+        }, setter);
+        return this;
+    }
+
+    /**
+     * add setter.
+     *
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityResultMapping<R> addBlob(String name, BiConsumer<R, V> setter, Function<TgBlob, V> converter) {
+        return addBlob(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
     }
 
     // Object

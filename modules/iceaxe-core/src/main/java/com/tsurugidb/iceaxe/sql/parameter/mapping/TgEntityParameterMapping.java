@@ -15,7 +15,9 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter.mapping;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,13 +26,14 @@ import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.IceaxeLowParameterUtil;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
@@ -65,7 +68,13 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     private final List<Placeholder> lowPlaceholderList = new ArrayList<>();
-    private final List<BiFunction<P, IceaxeConvertUtil, Parameter>> parameterConverterList = new ArrayList<>();
+
+    @FunctionalInterface
+    private interface LowParameterGenerator<P> {
+        Parameter apply(P parameter, IceaxeConvertUtil convertUtil, IceaxeCloseableSet closeableSet) throws IOException;
+    }
+
+    private final List<LowParameterGenerator<P>> parameterConverterList = new ArrayList<>();
 
     /**
      * Creates a new instance.
@@ -88,7 +97,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addBoolean(String name, Function<P, Boolean> getter) {
         addVariable(name, TgDataType.BOOLEAN);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -120,7 +129,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addInt(String name, Function<P, Integer> getter) {
         addVariable(name, TgDataType.INT);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -152,7 +161,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addLong(String name, Function<P, Long> getter) {
         addVariable(name, TgDataType.LONG);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -184,7 +193,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addFloat(String name, Function<P, Float> getter) {
         addVariable(name, TgDataType.FLOAT);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -216,7 +225,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addDouble(String name, Function<P, Double> getter) {
         addVariable(name, TgDataType.DOUBLE);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -248,7 +257,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addDecimal(String name, Function<P, BigDecimal> getter) {
         addVariable(name, TgDataType.DECIMAL);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -280,7 +289,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addString(String name, Function<P, String> getter) {
         addVariable(name, TgDataType.STRING);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -312,7 +321,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addBytes(String name, Function<P, byte[]> getter) {
         addVariable(name, TgDataType.BYTES);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -336,8 +345,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add variable.
+     * <em>This method is not yet implemented:</em> add variable.
      *
      * @param name   name
      * @param getter getter from parameter
@@ -345,7 +353,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addBits(String name, Function<P, boolean[]> getter) {
         addVariable(name, TgDataType.BITS);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -353,8 +361,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * add variable.
+     * <em>This method is not yet implemented:</em> add variable.
      *
      * @param <V>       value type
      * @param name      name
@@ -378,7 +385,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addDate(String name, Function<P, LocalDate> getter) {
         addVariable(name, TgDataType.DATE);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -410,7 +417,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addTime(String name, Function<P, LocalTime> getter) {
         addVariable(name, TgDataType.DATE);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -442,7 +449,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addOffsetTime(String name, Function<P, OffsetTime> getter) {
         addVariable(name, TgDataType.OFFSET_TIME);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -474,7 +481,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addDateTime(String name, Function<P, LocalDateTime> getter) {
         addVariable(name, TgDataType.DATE_TIME);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -506,7 +513,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addOffsetDateTime(String name, Function<P, OffsetDateTime> getter) {
         addVariable(name, TgDataType.OFFSET_DATE_TIME);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -538,7 +545,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public TgEntityParameterMapping<P> addZonedDateTime(String name, Function<P, ZonedDateTime> getter) {
         addVariable(name, TgDataType.ZONED_DATE_TIME);
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
         });
@@ -565,6 +572,99 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * add variable.
      *
      * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityParameterMapping<P> addBlob(String name, Function<P, TgBlob> getter) {
+        addVariable(name, TgDataType.BLOB);
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
+            var value = getter.apply(parameter);
+            if (value.isDeleteOnExecuteFinished()) {
+                closeableSet.add(value);
+            }
+            return IceaxeLowParameterUtil.create(name, value);
+        });
+        return this;
+    }
+
+    /**
+     * add variable.
+     *
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityParameterMapping<P> addBlob(String name, Function<P, V> getter, Function<V, TgBlob> converter) {
+        return addBlob(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable.
+     *
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityParameterMapping<P> addBlobPath(String name, Function<P, Path> getter) {
+        addVariable(name, TgDataType.BLOB);
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
+            var value = getter.apply(parameter);
+            return IceaxeLowParameterUtil.createBlob(name, value);
+        });
+        return this;
+    }
+
+    /**
+     * add variable.
+     *
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityParameterMapping<P> addBlobPath(String name, Function<P, V> getter, Function<V, Path> converter) {
+        return addBlobPath(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable.
+     *
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityParameterMapping<P> addBlobBytes(String name, Function<P, byte[]> getter) {
+        addVariable(name, TgDataType.BLOB);
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
+            var value = getter.apply(parameter);
+            var factory = convertUtil.getIceaxeObjectFactory();
+            var blob = factory.createBlob(value, true);
+            closeableSet.add(blob);
+            return IceaxeLowParameterUtil.create(name, blob);
+        });
+        return this;
+    }
+
+    // x addBlobBytes(String name, Function<P, V> getter, Function<V, byte[]> converter)
+
+    /**
+     * add variable.
+     *
+     * @param name   name
      * @param type   type
      * @param getter getter from parameter
      * @return this
@@ -573,89 +673,99 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         addVariable(name, type);
         switch (type) {
         case BOOLEAN:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toBoolean(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case INT:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toInt(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case LONG:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toLong(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case FLOAT:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toFloat(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case DOUBLE:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toDouble(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case DECIMAL:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toDecimal(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case STRING:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toString(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case BYTES:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toBytes(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case BITS:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toBits(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case DATE:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toDate(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case TIME:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toTime(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case DATE_TIME:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toDateTime(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case OFFSET_TIME:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toOffsetTime(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
         case OFFSET_DATE_TIME:
-            parameterConverterList.add((parameter, convertUtil) -> {
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
                 var value = convertUtil.toOffsetDateTime(getter.apply(parameter));
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
+        case BLOB:
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
+                var value = convertUtil.toBlob(getter.apply(parameter));
+                if (value.isDeleteOnExecuteFinished()) {
+                    closeableSet.add(value);
+                }
+                return IceaxeLowParameterUtil.create(name, value);
+            });
+            return this;
+        // TODO CLOB
         case ZONED_DATE_TIME:
         default:
             throw new UnsupportedOperationException("unsupported type error. type=" + type);
@@ -720,9 +830,9 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     public <V> TgEntityParameterMapping<P> add(TgBindVariable<V> variable, Function<P, V> getter) {
         // return add(variable.name(), variable.type(), getter);
         addVariable(variable.name(), variable.type());
-        parameterConverterList.add((parameter, convertUtil) -> {
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             V value = getter.apply(parameter);
-            return variable.bind(value).toLowParameter();
+            return variable.bind(value).toLowParameter(closeableSet);
         });
         return this;
     }
@@ -744,10 +854,10 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     @Override
-    public List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil) {
+    public List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil, IceaxeCloseableSet closeableSet) throws IOException {
         var list = new ArrayList<Parameter>(parameterConverterList.size());
         for (var converter : parameterConverterList) {
-            list.add(converter.apply(parameter, convertUtil));
+            list.add(converter.apply(parameter, convertUtil, closeableSet));
         }
         return list;
     }

@@ -55,7 +55,7 @@ class TsurugiSqlResultTest {
         private TsurugiSession session;
 
         public TestSqlResult(TsurugiTransaction transaction) {
-            super(0, transaction, null, null, null, null);
+            super(0, transaction, null, null, null, null, null);
             this.session = transaction.getSession();
         }
 

@@ -32,6 +32,7 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -134,12 +135,13 @@ public class TsurugiSqlPreparedQuery<P, R> extends TsurugiSqlPrepared<P> {
         TsurugiQueryResult<R> result;
         try {
             var lowPs = getLowPreparedStatement();
-            var lowParameterList = getLowParameterList(parameter);
+            var closeableSet = new IceaxeCloseableSet();
+            var lowParameterList = getLowParameterList(parameter, closeableSet);
             var lowResultSetFuture = transaction.executeLow(lowTransaction -> lowTransaction.executeQuery(lowPs, lowParameterList));
             LOG.trace("execute started");
 
             var convertUtil = getConvertUtil(resultMapping.getConvertUtil());
-            result = new TsurugiQueryResult<>(sqlExecuteId, transaction, this, parameter, resultMapping, convertUtil);
+            result = new TsurugiQueryResult<>(sqlExecuteId, transaction, this, parameter, resultMapping, convertUtil, closeableSet);
             result.initialize(lowResultSetFuture);
         } catch (Throwable e) {
             event(e, listener -> listener.executeQueryStartException(transaction, this, parameter, sqlExecuteId, e));

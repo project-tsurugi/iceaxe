@@ -15,7 +15,11 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,7 +32,12 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.sql.TgDataType;
+import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
+import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
 /**
@@ -279,7 +288,92 @@ public class TgBindParameter {
         return new TgBindParameter(IceaxeLowParameterUtil.create(name, value), () -> toString(name, value, ZonedDateTime.class));
     }
 
+    /**
+     * create bind parameter.
+     *
+     * @param name  name
+     * @param value value
+     * @return bind parameter
+     * @since X.X.X
+     */
+    public static TgBindParameter of(@Nonnull String name, @Nullable TgBlob value) {
+        return new TgBindParameter(IceaxeLowParameterUtil.create(name, value), () -> toString(name, value, TgBlob.class));
+    }
+
+    /**
+     * create bind parameter.
+     *
+     * @param name name
+     * @param path path
+     * @return bind parameter
+     * @since X.X.X
+     */
+    public static TgBindParameter ofBlob(@Nonnull String name, @Nullable Path path) {
+        return new TgBindParameter(IceaxeLowParameterUtil.createBlob(name, path), () -> toString(name, path, Path.class));
+    }
+
+    /**
+     * create bind parameter.
+     *
+     * @param name name
+     * @param is   input stream
+     * @return bind parameter
+     * @throws IOException if an I/O error occurs when reading or writing
+     * @since X.X.X
+     */
+    public static TgBindParameter ofBlob(@Nonnull String name, @Nullable InputStream is) throws IOException {
+        TgBlob blob;
+        if (is == null) {
+            blob = null;
+        } else {
+            var factory = IceaxeObjectFactory.getDefaultInstance();
+            blob = factory.createBlob(is, true);
+        }
+        return new TgBindParameter(IceaxeLowParameterUtil.create(name, blob), blob, () -> toString(name, is, InputStream.class));
+    }
+
+    /**
+     * create bind parameter.
+     *
+     * @param name  name
+     * @param value value
+     * @return bind parameter
+     * @throws IOException if an I/O error occurs writing to the file
+     * @since X.X.X
+     */
+    public static TgBindParameter ofBlob(@Nonnull String name, @Nullable byte[] value) throws IOException {
+        TgBlob blob;
+        if (value == null) {
+            blob = null;
+        } else {
+            var factory = IceaxeObjectFactory.getDefaultInstance();
+            blob = factory.createBlob(value, true);
+        }
+        return new TgBindParameter(IceaxeLowParameterUtil.create(name, blob), blob, () -> toString(name, value, byte[].class));
+    }
+
+    /**
+     * create bind parameter.
+     *
+     * @param name name
+     * @param type type
+     * @param path value
+     * @return bind parameter
+     * @since X.X.X
+     */
+    public static TgBindParameter of(@Nonnull String name, @Nonnull TgDataType type, @Nullable Path path) {
+        switch (type) {
+        case BLOB:
+            return ofBlob(name, path);
+        case CLOB:
+            // TODO CLOB
+        default:
+            throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
+        }
+    }
+
     private final Parameter lowParameter;
+    private final IceaxeTimeoutCloseable closeable;
     private final Supplier<String> stringSupplier;
 
     /**
@@ -289,17 +383,34 @@ public class TgBindParameter {
      * @param stringSupplier string supplier
      */
     protected TgBindParameter(Parameter lowParameter, Supplier<String> stringSupplier) {
+        this(lowParameter, null, stringSupplier);
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param lowParameter   low parameter
+     * @param closeable      object to close on execute finished
+     * @param stringSupplier string supplier
+     * @since X.X.X
+     */
+    protected TgBindParameter(Parameter lowParameter, IceaxeTimeoutCloseable closeable, Supplier<String> stringSupplier) {
         this.lowParameter = lowParameter;
+        this.closeable = closeable;
         this.stringSupplier = stringSupplier;
     }
 
     /**
      * convert to {@link Parameter}.
      *
+     * @param closeableSet Closeable set for execute finished
      * @return parameter
      */
     @IceaxeInternal
-    public Parameter toLowParameter() {
+    public Parameter toLowParameter(IceaxeCloseableSet closeableSet) {
+        if (this.closeable != null) {
+            closeableSet.add(closeable);
+        }
         return this.lowParameter;
     }
 

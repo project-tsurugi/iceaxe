@@ -29,6 +29,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 
 /**
@@ -779,5 +780,57 @@ public interface TsurugiResultIndexEntity {
     public default @Nullable ZonedDateTime getZonedDateTimeOrNull(int index, @Nonnull ZoneId zone) {
         var value = getValueOrNull(index);
         return getConvertUtil().toZonedDateTime(value, zone);
+    }
+
+    // BLOB
+
+    /**
+     * get value as BLOB.
+     *
+     * @param index column index
+     * @return value
+     * @throws NullPointerException if value is null
+     * @since X.X.X
+     */
+    public default @Nonnull TgBlob getBlob(int index) {
+        var value = getBlobOrNull(index);
+        return Objects.requireNonNull(value, () -> "getBlob(" + index + ") is null");
+    }
+
+    /**
+     * get value as BLOB.
+     *
+     * @param index        column index
+     * @param defaultValue value to return if original value is null
+     * @return value
+     * @since X.X.X
+     */
+    public default TgBlob getBlob(int index, TgBlob defaultValue) {
+        var value = getBlobOrNull(index);
+        return (value != null) ? value : defaultValue;
+    }
+
+    /**
+     * get value as BLOB.
+     *
+     * @param index column index
+     * @return value
+     * @since X.X.X
+     */
+    public default @Nonnull Optional<TgBlob> findBlob(int index) {
+        var value = getBlobOrNull(index);
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get value as BLOB.
+     *
+     * @param index column index
+     * @return value
+     * @since X.X.X
+     */
+    public default @Nullable TgBlob getBlobOrNull(int index) {
+        var value = getValueOrNull(index);
+        return getConvertUtil().toBlob(value);
     }
 }

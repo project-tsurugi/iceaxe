@@ -181,7 +181,6 @@ public abstract class TsurugiSql implements IceaxeTimeoutCloseable {
      *
      * @return timeout
      */
-    @Deprecated(since = "1.4.0")
     protected synchronized IceaxeTimeout getExplainCloseTimeout() {
         if (this.explainCloseTimeout == null) {
             var sessionOption = ownerSession.getSessionOption();

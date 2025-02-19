@@ -71,7 +71,7 @@ public class TsurugiResultEntity implements TsurugiResultIndexEntity, TsurugiRes
         IceaxeResultNameList nameList = record.getResultNameList();
 
         var values = new Object[nameList.size()];
-        record.readValues(values);
+        record.readValues(values, true);
 
         var entity = new TsurugiResultEntity(nameList, values);
         entity.setConvertUtil(record.getConvertUtil());

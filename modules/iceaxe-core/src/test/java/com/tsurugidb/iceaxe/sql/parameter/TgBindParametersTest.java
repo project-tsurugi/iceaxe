@@ -15,10 +15,18 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -34,7 +42,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.test.TestBlobUtil;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 
 class TgBindParametersTest {
 
@@ -265,6 +277,46 @@ class TgBindParametersTest {
     }
 
     @Test
+    void testBlob() throws Exception {
+        {
+            var path = Files.createTempFile("iceaxe-core-test", ".dat");
+            Files.write(path, new byte[] { 1, 2, 3 });
+            var blob = TgBlob.of(path);
+            var parameter = TgBindParameters.of();
+            parameter.addBlob("foo", blob);
+            parameter.addBlob("bar", (TgBlob) null);
+
+            assertParameterListBlob(TgBindParameter.of("foo", blob), TgBindParameter.of("bar", (TgBlob) null), parameter, false);
+        }
+        {
+            var path = Files.createTempFile("iceaxe-core-test", ".dat");
+            Files.write(path, new byte[] { 1, 2, 3 });
+            var parameter = TgBindParameters.of();
+            parameter.addBlob("foo", path);
+            parameter.addBlob("bar", (Path) null);
+
+            assertParameterListBlob(TgBindParameter.ofBlob("foo", path), TgBindParameter.ofBlob("bar", (Path) null), parameter, false);
+        }
+        {
+            var parameter = TgBindParameters.of();
+            parameter.addBlob("foo", new ByteArrayInputStream(new byte[] { 1, 2, 3 }));
+            parameter.addBlob("bar", (InputStream) null);
+
+            assertParameterListBlob(TgBindParameter.ofBlob("foo", new ByteArrayInputStream(new byte[] { 1, 2, 3 })), TgBindParameter.ofBlob("bar", (InputStream) null), parameter, true);
+        }
+        {
+            var value = new byte[] { 1, 2, 3 };
+            var parameter = TgBindParameters.of();
+            parameter.addBlob("foo", value);
+            parameter.addBlob("bar", (byte[]) null);
+
+            assertParameterListBlob(TgBindParameter.ofBlob("foo", value), TgBindParameter.ofBlob("bar", (byte[]) null), parameter, true);
+        }
+    }
+
+    // TODO CLOB
+
+    @Test
     void testAddStringBoolean() {
         var parameter = TgBindParameters.of();
         parameter.add("foo", true);
@@ -392,7 +444,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringByteArray() {
+    void testAddStringBytes() {
         var parameter = TgBindParameters.of();
         parameter.add("foo", new byte[] { 1, 2, 3 });
         parameter.add("bar", (byte[]) null);
@@ -467,6 +519,35 @@ class TgBindParametersTest {
     }
 
     @Test
+    void testAddStringBlob() throws Exception {
+        var path = Files.createTempFile("iceaxe-core-test", ".dat");
+        Files.write(path, new byte[] { 1, 2, 3 });
+
+        var blob = TgBlob.of(path);
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", blob);
+        parameter.add("bar", (TgBlob) null);
+
+        assertParameterListBlob(TgBindParameter.of("foo", blob), TgBindParameter.of("bar", (TgBlob) null), parameter, false);
+    }
+
+    // TODO CLOB
+
+    @Test
+    void testAddStringPath() throws Exception {
+        var path = Files.createTempFile("iceaxe-core-test", ".dat");
+        Files.write(path, new byte[] { 1, 2, 3 });
+
+        var parameter = TgBindParameters.of();
+        parameter.add("foo", TgDataType.BLOB, path);
+        parameter.add("bar", TgDataType.BLOB, (Path) null);
+
+        assertParameterListBlob(TgBindParameter.ofBlob("foo", path), TgBindParameter.ofBlob("bar", (Path) null), parameter, false);
+
+        // TODO CLOB
+    }
+
+    @Test
     void testAddTgParameter() {
         var parameter = TgBindParameters.of();
         parameter.add(TgBindParameter.of("foo", 123));
@@ -504,9 +585,58 @@ class TgBindParametersTest {
     }
 
     private void assertParameterList(List<TgBindParameter> expected, TgBindParameters actual) {
-        var expectedLow = expected.stream().map(TgBindParameter::toLowParameter).collect(Collectors.toList());
-        var actualLow = actual.toLowParameterList();
+        IceaxeCloseableSet closeableSet1 = new IceaxeCloseableSet();
+        var expectedLow = expected.stream().map(v -> v.toLowParameter(closeableSet1)).collect(Collectors.toList());
+        IceaxeCloseableSet closeableSet2 = new IceaxeCloseableSet();
+        var actualLow = actual.toLowParameterList(closeableSet2);
+
         assertEquals(expectedLow, actualLow);
+    }
+
+    private void assertParameterListBlob(TgBindParameter expected1, TgBindParameter expected2, TgBindParameters actual, boolean deleteOnExecuteFinished) {
+        IceaxeCloseableSet closeableSet1 = new IceaxeCloseableSet();
+        var expectedLow = List.of(expected1, expected2).stream().map(v -> v.toLowParameter(closeableSet1)).collect(Collectors.toList());
+        IceaxeCloseableSet closeableSet2 = new IceaxeCloseableSet();
+        var actualLow = actual.toLowParameterList(closeableSet2);
+
+        if (deleteOnExecuteFinished) {
+            var list = TestBlobUtil.getBlobList(closeableSet2);
+            assertEquals(1, list.size());
+            for (var blob : list) {
+                assertTrue(blob.isDeleteOnExecuteFinished());
+            }
+        } else {
+            assertEquals(0, closeableSet2.size());
+        }
+
+        assertEquals(expectedLow.size(), actualLow.size());
+        for (int i = 0; i < actualLow.size(); i++) {
+            var expectLowParameter = expectedLow.get(i);
+            var actualLowParameter = actualLow.get(i);
+            assertEquals(expectLowParameter.getName(), actualLowParameter.getName());
+
+            var expectedPathStr = expectLowParameter.getBlob().getLocalPath();
+            var actualPathStr = actualLowParameter.getBlob().getLocalPath();
+
+            if (expectedPathStr.isEmpty()) {
+                assertEquals("", actualPathStr);
+                return;
+            }
+
+            var expectedPath = Path.of(expectedPathStr);
+            var actualPath = Path.of(actualPathStr);
+
+            try {
+                var expectedValue = Files.readAllBytes(expectedPath);
+                var actualValue = Files.readAllBytes(actualPath);
+                assertArrayEquals(expectedValue, actualValue);
+
+                Files.deleteIfExists(expectedPath);
+                Files.deleteIfExists(actualPath);
+            } catch (IOException ie) {
+                throw new UncheckedIOException(ie.getMessage(), ie);
+            }
+        }
     }
 
     @Test

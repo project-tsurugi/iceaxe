@@ -29,6 +29,8 @@ import java.time.ZonedDateTime;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
+import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionFunction;
 
@@ -154,8 +156,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
     private static TgSingleResultMapping<boolean[]> bitsMapping;
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * create result mapping.
+     * <em>This method is not yet implemented:</em> create result mapping.
      *
      * @return result mapping
      */
@@ -251,6 +252,25 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
         return zonedDateTimeMapping;
     }
 
+    private static TgSingleResultMapping<TgBlob> blobMapping;
+
+    /**
+     * create result mapping.
+     *
+     * @return result mapping
+     * @since X.X.X
+     */
+    public static TgSingleResultMapping<TgBlob> ofBlob() {
+        if (blobMapping == null) {
+            blobMapping = new TgSingleResultMapping<>(record -> {
+                var value = record.nextBlobOrNull();
+                var factory = IceaxeObjectFactory.getDefaultInstance();
+                return factory.createBlob(value);
+            });
+        }
+        return blobMapping;
+    }
+
     private final TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter;
 
     /**
@@ -313,6 +333,9 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
             return ofOffsetTime();
         case OFFSET_DATE_TIME:
             return ofOffsetDateTime();
+        case BLOB:
+            return ofBlob();
+        // TODO CLOB
         case ZONED_DATE_TIME:
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));

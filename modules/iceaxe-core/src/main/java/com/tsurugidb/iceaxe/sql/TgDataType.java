@@ -27,6 +27,8 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 
@@ -68,8 +70,7 @@ public enum TgDataType {
      */
     BYTES(AtomType.OCTET, List.of(byte[].class)),
     /**
-     * <em>This enum is not yet implemented:</em>
-     * boolean[]
+     * <em>This enum is not yet implemented:</em> boolean[]
      */
     BITS(AtomType.BIT, List.of(boolean[].class)),
     /**
@@ -96,6 +97,18 @@ public enum TgDataType {
      * zoned dateTime
      */
     ZONED_DATE_TIME(AtomType.TIME_POINT_WITH_TIME_ZONE, List.of(ZonedDateTime.class)),
+    /**
+     * character large objects
+     *
+     * @since X.X.X
+     */
+    CLOB(AtomType.CLOB, List.of(TgClob.class)),
+    /**
+     * binary large objects
+     *
+     * @since X.X.X
+     */
+    BLOB(AtomType.BLOB, List.of(TgBlob.class)),
     //
     ;
 

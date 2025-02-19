@@ -18,6 +18,12 @@ package com.tsurugidb.iceaxe.sql.parameter;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,6 +31,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 
 class TgBindVariablesTest {
 
@@ -158,19 +166,49 @@ class TgBindVariablesTest {
     }
 
     @Test
+    void testBlob() {
+        var variables = new TgBindVariables().addBlob("foo");
+        assertVariable(Map.of("foo", TgDataType.BLOB), variables);
+    }
+
+    // TODO CLOB
+
+    @Test
     void testSetDataType() {
         var variables = new TgBindVariables() //
                 .add("i4", TgDataType.INT) //
                 .add("i8", TgDataType.LONG) //
                 .add("f4", TgDataType.FLOAT) //
                 .add("f8", TgDataType.DOUBLE) //
-                .add("c", TgDataType.STRING);
+                .add("c", TgDataType.STRING) //
+                .add("bytes", TgDataType.BYTES) //
+                .add("bits", TgDataType.BITS) //
+                .add("date", TgDataType.DATE) //
+                .add("time", TgDataType.TIME) //
+                .add("dateTime", TgDataType.DATE_TIME) //
+                .add("offsetTime", TgDataType.OFFSET_TIME) //
+                .add("offsetDateTime", TgDataType.OFFSET_DATE_TIME) //
+                .add("zonedDateTime", TgDataType.ZONED_DATE_TIME) //
+                .add("blob", TgDataType.BLOB) //
+                .add("clob", TgDataType.CLOB) //
+        ;
         assertVariable(Map.ofEntries( //
                 entry("i4", TgDataType.INT), //
                 entry("i8", TgDataType.LONG), //
                 entry("f4", TgDataType.FLOAT), //
                 entry("f8", TgDataType.DOUBLE), //
-                entry("c", TgDataType.STRING)), variables);
+                entry("c", TgDataType.STRING), //
+                entry("bytes", TgDataType.BYTES), //
+                entry("bits", TgDataType.BITS), //
+                entry("date", TgDataType.DATE), //
+                entry("time", TgDataType.TIME), //
+                entry("dateTime", TgDataType.DATE_TIME), //
+                entry("offsetTime", TgDataType.OFFSET_TIME), //
+                entry("offsetDateTime", TgDataType.OFFSET_DATE_TIME), //
+                entry("zonedDateTime", TgDataType.ZONED_DATE_TIME), //
+                entry("blob", TgDataType.BLOB), //
+                entry("clob", TgDataType.CLOB) //
+        ), variables);
     }
 
     @Test
@@ -184,7 +222,18 @@ class TgBindVariablesTest {
                 .add("F4", Float.class) //
                 .add("f8", double.class) //
                 .add("F8", Double.class) //
-                .add("c", String.class);
+                .add("c", String.class) //
+                .add("bytes", byte[].class) //
+                .add("bits", boolean[].class) //
+                .add("date", LocalDate.class) //
+                .add("time", LocalTime.class) //
+                .add("dateTime", LocalDateTime.class) //
+                .add("offsetTime", OffsetTime.class) //
+                .add("offsetDateTime", OffsetDateTime.class) //
+                .add("zonedDateTime", ZonedDateTime.class) //
+                .add("blob", TgBlob.class) //
+                .add("clob", TgClob.class) //
+        ;
         assertVariable(Map.ofEntries( //
                 entry("i4", TgDataType.INT), //
                 entry("I4", TgDataType.INT), //
@@ -194,7 +243,18 @@ class TgBindVariablesTest {
                 entry("F4", TgDataType.FLOAT), //
                 entry("f8", TgDataType.DOUBLE), //
                 entry("F8", TgDataType.DOUBLE), //
-                entry("c", TgDataType.STRING)), variables);
+                entry("c", TgDataType.STRING), //
+                entry("bytes", TgDataType.BYTES), //
+                entry("bits", TgDataType.BITS), //
+                entry("date", TgDataType.DATE), //
+                entry("time", TgDataType.TIME), //
+                entry("dateTime", TgDataType.DATE_TIME), //
+                entry("offsetTime", TgDataType.OFFSET_TIME), //
+                entry("offsetDateTime", TgDataType.OFFSET_DATE_TIME), //
+                entry("zonedDateTime", TgDataType.ZONED_DATE_TIME), //
+                entry("blob", TgDataType.BLOB), //
+                entry("clob", TgDataType.CLOB) //
+        ), variables);
     }
 
     @Test

@@ -18,10 +18,12 @@ package com.tsurugidb.iceaxe.sql.result;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
@@ -58,6 +60,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
     private final TsurugiTransaction ownerTransaction;
     private final TsurugiSql sqlStatement;
     private final Object sqlParameter;
+    private final IceaxeCloseableSet afterCloseableSet;
 
     /** connect timeout. */
     protected final IceaxeTimeout connectTimeout;
@@ -72,19 +75,21 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      * Call {@link #initialize()} after construct.
      * </p>
      *
-     * @param sqlExecuteId iceaxe SQL executeId
-     * @param transaction  transaction
-     * @param ps           SQL definition
-     * @param parameter    SQL parameter
-     * @param connectKey   connect timeout key
-     * @param closeKey     close timeout key
+     * @param sqlExecuteId      iceaxe SQL executeId
+     * @param transaction       transaction
+     * @param ps                SQL definition
+     * @param parameter         SQL parameter
+     * @param afterCloseableSet Closeable set for execute finished
+     * @param connectKey        connect timeout key
+     * @param closeKey          close timeout key
      */
     @IceaxeInternal
-    public TsurugiSqlResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, TgTimeoutKey connectKey, TgTimeoutKey closeKey) {
+    public TsurugiSqlResult(int sqlExecuteId, TsurugiTransaction transaction, TsurugiSql ps, Object parameter, IceaxeCloseableSet afterCloseableSet, TgTimeoutKey connectKey, TgTimeoutKey closeKey) {
         this.iceaxeSqlExecuteId = sqlExecuteId;
         this.ownerTransaction = transaction;
         this.sqlStatement = ps;
         this.sqlParameter = parameter;
+        this.afterCloseableSet = afterCloseableSet;
 
         var sessionOption = transaction.getSessionOption();
         this.connectTimeout = new IceaxeTimeout(sessionOption, connectKey);
@@ -102,6 +107,16 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
     @IceaxeInternal
     protected void initialize() throws IOException {
         ownerTransaction.addChild(this);
+    }
+
+    /**
+     * get transaction.
+     *
+     * @return transaction
+     * @since X.X.X
+     */
+    public TsurugiTransaction getTransaction() {
+        return ownerTransaction;
     }
 
     /**
@@ -171,6 +186,10 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
 //  @OverridingMethodsMustInvokeSuper
     public void close() throws IOException, InterruptedException, TsurugiTransactionException {
         ownerTransaction.removeChild(this);
+
+        if (this.afterCloseableSet != null) {
+            afterCloseableSet.closeInTransaction(closeTimeout.getNanos(), IceaxeErrorCode.RESULT_CLOSE_TIMEOUT);
+        }
     }
 
     /**

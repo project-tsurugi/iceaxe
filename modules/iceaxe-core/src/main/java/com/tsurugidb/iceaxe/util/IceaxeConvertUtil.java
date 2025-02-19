@@ -15,8 +15,12 @@
  */
 package com.tsurugidb.iceaxe.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -30,6 +34,12 @@ import java.time.ZonedDateTime;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
+
 /**
  * convert type utility.
  */
@@ -37,6 +47,32 @@ public class IceaxeConvertUtil {
 
     /** convert type utility singleton instance */
     public static final IceaxeConvertUtil INSTANCE = new IceaxeConvertUtil();
+
+    private IceaxeObjectFactory objectFactory = null;
+
+    /**
+     * set object factory.
+     *
+     * @param factory object factory
+     * @since X.X.X
+     */
+    public void setIceaxeObjectFactory(IceaxeObjectFactory factory) {
+        this.objectFactory = factory;
+    }
+
+    /**
+     * get object factory.
+     *
+     * @return object factory
+     * @since X.X.X
+     */
+    public @Nonnull IceaxeObjectFactory getIceaxeObjectFactory() {
+        var factory = this.objectFactory;
+        if (factory == null) {
+            return IceaxeObjectFactory.getDefaultInstance();
+        }
+        return factory;
+    }
 
     /**
      * convert to Boolean.
@@ -330,6 +366,7 @@ public class IceaxeConvertUtil {
         if (obj instanceof BigDecimal) {
             return ((BigDecimal) obj).toPlainString();
         }
+        // TODO CLOB
         return obj.toString();
     }
 
@@ -363,6 +400,26 @@ public class IceaxeConvertUtil {
     protected @Nullable byte[] convertBytes(@Nonnull Object obj) {
         if (obj instanceof byte[]) {
             return (byte[]) obj;
+        }
+        if (obj instanceof TgBlob) {
+            var blob = (TgBlob) obj;
+            try {
+                return blob.readAllBytes();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            }
+        }
+        if (obj instanceof TgBlobReference) {
+            var blob = (TgBlobReference) obj;
+            try {
+                return blob.readAllBytes();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                throw new InterruptedRuntimeException(e);
+            } catch (TsurugiTransactionException e) {
+                throw new TsurugiTransactionRuntimeException(e);
+            }
         }
         return null;
     }
@@ -695,6 +752,97 @@ public class IceaxeConvertUtil {
         }
         if (obj instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) obj).toInstant();
+        }
+        return null;
+    }
+
+    /**
+     * convert to TgBlob.
+     *
+     * @param obj value
+     * @return value
+     * @since X.X.X
+     */
+    public @Nullable TgBlob toBlob(@Nullable Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        try {
+            var value = convertBlob(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(OffsetTime.class, obj, e);
+        }
+        throw createException(OffsetTime.class, obj, null);
+    }
+
+    /**
+     * convert to TgBlob.
+     *
+     * @param obj value
+     * @return value
+     * @since X.X.X
+     */
+    protected @Nullable TgBlob convertBlob(@Nonnull Object obj) {
+        if (obj instanceof TgBlob) {
+            return (TgBlob) obj;
+        }
+        if (obj instanceof Path) {
+            return TgBlob.of((Path) obj);
+        }
+        if (obj instanceof InputStream) {
+            var factory = getIceaxeObjectFactory();
+            try {
+                return factory.createBlob((InputStream) obj, true);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            }
+        }
+        if (obj instanceof byte[]) {
+            var factory = getIceaxeObjectFactory();
+            try {
+                return factory.createBlob((byte[]) obj, true);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * convert to TgBlobReference.
+     *
+     * @param obj value
+     * @return value
+     * @since X.X.X
+     */
+    public @Nullable TgBlobReference toBlobReference(@Nullable Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        try {
+            var value = convertBlobReference(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(OffsetTime.class, obj, e);
+        }
+        throw createException(OffsetTime.class, obj, null);
+    }
+
+    /**
+     * convert to TgBlobReference.
+     *
+     * @param obj value
+     * @return value
+     * @since X.X.X
+     */
+    protected @Nullable TgBlobReference convertBlobReference(@Nonnull Object obj) {
+        if (obj instanceof TgBlobReference) {
+            return (TgBlobReference) obj;
         }
         return null;
     }

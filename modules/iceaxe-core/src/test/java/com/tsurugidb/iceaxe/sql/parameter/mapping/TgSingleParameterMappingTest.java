@@ -18,9 +18,11 @@ package com.tsurugidb.iceaxe.sql.parameter.mapping;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -33,13 +35,14 @@ import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
 class TgSingleParameterMappingTest {
 
     @Test
-    void testOfBoolean() {
+    void testOfBoolean() throws Exception {
         var mapping = TgSingleParameterMapping.ofBoolean("foo");
 
         var type = TgDataType.BOOLEAN;
@@ -48,7 +51,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfInt() {
+    void testOfInt() throws Exception {
         var mapping = TgSingleParameterMapping.ofInt("foo");
 
         var type = TgDataType.INT;
@@ -57,7 +60,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfLong() {
+    void testOfLong() throws Exception {
         var mapping = TgSingleParameterMapping.ofLong("foo");
 
         var type = TgDataType.LONG;
@@ -66,7 +69,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfFloat() {
+    void testOfFloat() throws Exception {
         var mapping = TgSingleParameterMapping.ofFloat("foo");
 
         var type = TgDataType.FLOAT;
@@ -75,7 +78,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfDouble() {
+    void testOfDouble() throws Exception {
         var mapping = TgSingleParameterMapping.ofDouble("foo");
 
         var type = TgDataType.DOUBLE;
@@ -84,7 +87,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfDecimal() {
+    void testOfDecimal() throws Exception {
         var mapping = TgSingleParameterMapping.ofDecimal("foo");
 
         var type = TgDataType.DECIMAL;
@@ -93,7 +96,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfDecimalInt() {
+    void testOfDecimalInt() throws Exception {
         var mapping = TgSingleParameterMapping.ofDecimal("foo", 2);
 
         var type = TgDataType.DECIMAL;
@@ -102,7 +105,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfDecimalIntRoundingMode() {
+    void testOfDecimalIntRoundingMode() throws Exception {
         var mapping = TgSingleParameterMapping.ofDecimal("foo", 2, RoundingMode.HALF_UP);
 
         var type = TgDataType.DECIMAL;
@@ -111,7 +114,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfString() {
+    void testOfString() throws Exception {
         var mapping = TgSingleParameterMapping.ofString("foo");
 
         var type = TgDataType.STRING;
@@ -120,7 +123,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfBytes() {
+    void testOfBytes() throws Exception {
         var mapping = TgSingleParameterMapping.ofBytes("foo");
 
         var type = TgDataType.BYTES;
@@ -129,7 +132,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfBits() {
+    void testOfBits() throws Exception {
         var mapping = TgSingleParameterMapping.ofBits("foo");
 
         var type = TgDataType.BITS;
@@ -138,7 +141,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfDate() {
+    void testOfDate() throws Exception {
         var mapping = TgSingleParameterMapping.ofDate("foo");
 
         var type = TgDataType.DATE;
@@ -147,7 +150,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfTime() {
+    void testOfTime() throws Exception {
         var mapping = TgSingleParameterMapping.ofTime("foo");
 
         var type = TgDataType.TIME;
@@ -156,7 +159,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfDateTime() {
+    void testOfDateTime() throws Exception {
         var mapping = TgSingleParameterMapping.ofDateTime("foo");
 
         var type = TgDataType.DATE_TIME;
@@ -165,7 +168,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfOffsetTime() {
+    void testOfOffsetTime() throws Exception {
         var mapping = TgSingleParameterMapping.ofOffsetTime("foo");
 
         var type = TgDataType.OFFSET_TIME;
@@ -174,7 +177,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfOffsetDateTime() {
+    void testOfOffsetDateTime() throws Exception {
         var mapping = TgSingleParameterMapping.ofOffsetDateTime("foo");
 
         var type = TgDataType.OFFSET_DATE_TIME;
@@ -183,7 +186,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfZonedDateTime() {
+    void testOfZonedDateTime() throws Exception {
         var mapping = TgSingleParameterMapping.ofZonedDateTime("foo");
 
         var type = TgDataType.ZONED_DATE_TIME;
@@ -192,7 +195,18 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfClass() {
+    void testOfBlob() throws Exception {
+        var mapping = TgSingleParameterMapping.ofBlob("foo");
+
+        var type = TgDataType.BLOB;
+        assertMapping(type, null, mapping);
+        assertMapping(type, TgBlob.of(Path.of("/path/to/file")), mapping);
+    }
+
+    // TODO CLOB
+
+    @Test
+    void testOfClass() throws Exception {
         var mapping = TgSingleParameterMapping.of("foo", int.class);
 
         var type = TgDataType.INT;
@@ -205,7 +219,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfDataType() {
+    void testOfDataType() throws Exception {
         var mapping = TgSingleParameterMapping.of("foo", TgDataType.INT);
 
         var type = TgDataType.INT;
@@ -214,7 +228,7 @@ class TgSingleParameterMappingTest {
     }
 
     @Test
-    void testOfVariable() {
+    void testOfVariable() throws Exception {
         var variable = TgBindVariable.ofInt("foo");
         var mapping = TgSingleParameterMapping.of(variable);
 
@@ -223,11 +237,11 @@ class TgSingleParameterMappingTest {
         assertMapping(type, 123, mapping);
     }
 
-    private static <P> void assertMapping(TgDataType type, P parameter, TgSingleParameterMapping<P> actualMapping) {
+    private static <P> void assertMapping(TgDataType type, P parameter, TgSingleParameterMapping<P> actualMapping) throws IOException {
         assertMapping(type, parameter, parameter, actualMapping);
     }
 
-    private static <P> void assertMapping(TgDataType type, P value, P expectedValue, TgSingleParameterMapping<P> actualMapping) {
+    private static <P> void assertMapping(TgDataType type, P value, P expectedValue, TgSingleParameterMapping<P> actualMapping) throws IOException {
         {
             var list = actualMapping.toLowPlaceholderList();
             assertEquals(1, list.size());
@@ -236,7 +250,7 @@ class TgSingleParameterMappingTest {
             assertEquals(type.getLowDataType(), actual.getAtomType());
         }
         {
-            var list = actualMapping.toLowParameterList(value, null);
+            var list = actualMapping.toLowParameterList(value, null, null);
             assertEquals(1, list.size());
             var actual = list.get(0);
             assertEquals("foo", actual.getName());
@@ -312,6 +326,12 @@ class TgSingleParameterMappingTest {
             assertEquals(Parameters.of("foo", ((ZonedDateTime) expected).toOffsetDateTime()), actual);
             return;
         }
+        if (expected instanceof TgBlob) {
+            var path = ((TgBlob) expected).getPath();
+            assertEquals(Parameters.blobOf("foo", path), actual);
+            return;
+        }
+        // TODO CLOB
         throw new UnsupportedOperationException(expected.getClass().getName());
     }
 }

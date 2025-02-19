@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
@@ -199,9 +201,24 @@ public final class IceaxeIoUtil {
             throw e;
         }
 
+        IOException ioe = toIOException(saveList, closeErrorCode);
+        if (ioe != null) {
+            throw ioe;
+        }
+    }
+
+    /**
+     * convert to IOException.
+     *
+     * @param throwableList throwable list
+     * @param errorCode     error code for IceaxeIOException
+     * @return IOException
+     * @since X.X.X
+     */
+    public static @Nullable IOException toIOException(List<Throwable> throwableList, IceaxeErrorCode errorCode) {
         IOException ioe = null;
-        for (var save : saveList) {
-            var s = (save instanceof ServerException) ? new TsurugiIOException((ServerException) save) : save;
+        for (var e : throwableList) {
+            var s = (e instanceof ServerException) ? new TsurugiIOException((ServerException) e) : e;
             if (ioe == null) {
                 if (s instanceof IOException) {
                     ioe = (IOException) s;
@@ -209,16 +226,14 @@ public final class IceaxeIoUtil {
                     if (hasDiagnosticCode(s)) {
                         ioe = new TsurugiIOException(s.getMessage(), s);
                     } else {
-                        ioe = new IceaxeIOException(closeErrorCode, s);
+                        ioe = new IceaxeIOException(errorCode, s);
                     }
                 }
             } else {
                 ioe.addSuppressed(s);
             }
         }
-        if (ioe != null) {
-            throw ioe;
-        }
+        return ioe;
     }
 
     private static boolean hasDiagnosticCode(Throwable t) {

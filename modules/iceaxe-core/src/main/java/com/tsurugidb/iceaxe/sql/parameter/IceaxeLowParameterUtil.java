@@ -16,6 +16,7 @@
 package com.tsurugidb.iceaxe.sql.parameter;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -26,6 +27,7 @@ import java.time.ZonedDateTime;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.Parameters;
@@ -304,5 +306,37 @@ public final class IceaxeLowParameterUtil {
         }
         var offsetDateTime = value.toOffsetDateTime();
         return Parameters.of(name, offsetDateTime);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     * @since X.X.X
+     */
+    public static Parameter create(@Nonnull String name, @Nullable TgBlob value) {
+        if (value == null) {
+            return Parameters.ofNull(name);
+        }
+
+        var path = value.getPath();
+        return Parameters.blobOf(name, path);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name parameter name
+     * @param path path
+     * @return parameter
+     * @since X.X.X
+     */
+    public static Parameter createBlob(@Nonnull String name, @Nullable Path path) {
+        if (path == null) {
+            return Parameters.ofNull(name);
+        }
+        return Parameters.blobOf(name, path);
     }
 }

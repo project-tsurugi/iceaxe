@@ -29,6 +29,7 @@ import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
+import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
@@ -184,12 +185,14 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     /**
      * get low parameter list.
      *
-     * @param parameter SQL parameter
+     * @param parameter    SQL parameter
+     * @param closeableSet Closeable set for execute finished
      * @return list of parameter
+     * @throws IOException if an I/O error occurs
      */
-    protected final List<Parameter> getLowParameterList(P parameter) {
+    protected final List<Parameter> getLowParameterList(P parameter, IceaxeCloseableSet closeableSet) throws IOException {
         var convertUtil = getConvertUtil(parameterMapping.getConvertUtil());
-        return parameterMapping.toLowParameterList(parameter, convertUtil);
+        return parameterMapping.toLowParameterList(parameter, convertUtil, closeableSet);
     }
 
     /**
@@ -203,13 +206,35 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
     public TgStatementMetadata explain(P parameter) throws IOException, InterruptedException {
         var session = getSession();
         var lowPs = getLowPreparedStatement();
-        var lowParameterList = getLowParameterList(parameter);
+        var closeableSet = new IceaxeCloseableSet();
 
-        var helper = session.getExplainHelper();
         var connectTimeout = getExplainConnectTimeout();
-        @SuppressWarnings("deprecation")
         var closeTimeout = getExplainCloseTimeout();
-        return helper.explain(session, sql, parameter, lowPs, lowParameterList, connectTimeout, closeTimeout);
+
+        Exception save = null;
+        try {
+            var lowParameterList = getLowParameterList(parameter, closeableSet);
+
+            var helper = session.getExplainHelper();
+            return helper.explain(session, sql, parameter, lowPs, lowParameterList, connectTimeout, closeTimeout);
+        } catch (Exception e) {
+            save = e;
+            throw e;
+        } finally {
+            var exceptionList = closeableSet.close(closeTimeout.getNanos());
+            if (!exceptionList.isEmpty()) {
+                if (save != null) {
+                    for (var e : exceptionList) {
+                        save.addSuppressed(e);
+                    }
+                } else {
+                    var ioe = IceaxeIoUtil.toIOException(exceptionList, IceaxeErrorCode.EXPLAIN_CLOSE_ERROR);
+                    if (ioe != null) {
+                        throw ioe;
+                    }
+                }
+            }
+        }
     }
 
     // close

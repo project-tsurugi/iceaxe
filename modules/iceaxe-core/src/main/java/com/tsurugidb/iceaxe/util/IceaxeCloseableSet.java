@@ -177,6 +177,17 @@ public class IceaxeCloseableSet {
         return closeableSet.size();
     }
 
+    /**
+     * get internal closeable set.
+     *
+     * @return closeable set
+     * @since X.X.X
+     */
+    @IceaxeInternal
+    public Set<IceaxeTimeoutCloseable> getInternalSet() {
+        return this.closeableSet;
+    }
+
     @Override
     public String toString() {
         return "IceaxeCloseableSet(" + closeableSet.size() + ")";

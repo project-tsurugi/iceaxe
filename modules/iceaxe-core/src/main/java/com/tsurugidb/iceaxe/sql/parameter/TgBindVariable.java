@@ -15,8 +15,11 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,6 +32,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
 
 /**
  * Tsurugi Bind Variable.
@@ -479,8 +483,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * <em>This method is not yet implemented:</em>
-     * create bind variable.
+     * <em>This method is not yet implemented:</em> create bind variable.
      *
      * @param name name
      * @return bind variable
@@ -490,8 +493,7 @@ public abstract class TgBindVariable<T> {
     }
 
     /**
-     * <em>This class is not yet implemented:</em>
-     * Tsurugi Bind Variable&lt;boolean[]&gt;.
+     * <em>This class is not yet implemented:</em> Tsurugi Bind Variable&lt;boolean[]&gt;.
      */
     public static class TgBindVariableBits extends TgBindVariable<boolean[]> {
 
@@ -722,6 +724,76 @@ public abstract class TgBindVariable<T> {
         @Override
         public TgBindVariableZonedDateTime clone(@Nonnull String name) {
             return new TgBindVariableZonedDateTime(name);
+        }
+    }
+
+    /**
+     * create bind variable.
+     *
+     * @param name name
+     * @return bind variable
+     * @since X.X.X
+     */
+    public static TgBindVariableBlob ofBlob(@Nonnull String name) {
+        return new TgBindVariableBlob(name);
+    }
+
+    /**
+     * Tsurugi Bind Variable&lt;TgBlob&gt;.
+     *
+     * @since X.X.X
+     */
+    public static class TgBindVariableBlob extends TgBindVariable<TgBlob> {
+
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
+        protected TgBindVariableBlob(@Nonnull String name) {
+            super(name, TgDataType.BLOB);
+        }
+
+        @Override
+        public TgBindParameter bind(@Nullable TgBlob value) {
+            return TgBindParameter.of(name(), value);
+        }
+
+        /**
+         * bind value.
+         *
+         * @param path path
+         * @return bind parameter
+         */
+        public TgBindParameter bind(@Nullable Path path) {
+            return TgBindParameter.ofBlob(name(), path);
+        }
+
+        /**
+         * bind value.
+         *
+         * @param is input stream
+         * @return bind parameter
+         * @throws IOException if an I/O error occurs when reading or writing
+         */
+        public TgBindParameter bind(@Nullable InputStream is) throws IOException {
+            return TgBindParameter.ofBlob(name(), is);
+        }
+
+        /**
+         * bind value.
+         *
+         * @param value value
+         * @return bind parameter
+         * @throws IOException if an I/O error occurs writing to the file
+         */
+        public TgBindParameter bind(@Nullable byte[] value) throws IOException {
+            return TgBindParameter.ofBlob(name(), value);
+        }
+
+        @Override
+        public TgBindVariableBlob clone(@Nonnull String name) {
+            return new TgBindVariableBlob(name);
         }
     }
 
