@@ -18,12 +18,12 @@ package com.tsurugidb.iceaxe.session.event.logging.file;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
 
 /**
  * {@link TsurugiSessionTxFileLogger} writer.
@@ -96,7 +96,7 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
      */
     public void writeExplain(int sqlId, String contents) throws IOException {
         String fileName = String.format("sql-%d.explain.json", sqlId);
-        Files.writeString(outputDir.resolve(fileName), contents, StandardCharsets.UTF_8);
+        IceaxeFileUtil.writeString(outputDir.resolve(fileName), contents);
     }
 
     @Override

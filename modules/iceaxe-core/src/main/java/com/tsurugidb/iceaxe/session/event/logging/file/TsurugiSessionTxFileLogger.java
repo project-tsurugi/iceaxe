@@ -43,6 +43,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
+import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
 import com.tsurugidb.iceaxe.util.function.IoSupplier;
 
 /**
@@ -83,7 +84,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var outputDir = config.outputDir().resolve("sql_statement");
         try {
             Files.createDirectories(outputDir);
-            Files.writeString(outputDir.resolve(fileName), ps.getSql(), StandardCharsets.UTF_8);
+            IceaxeFileUtil.writeString(outputDir.resolve(fileName), ps.getSql());
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }
