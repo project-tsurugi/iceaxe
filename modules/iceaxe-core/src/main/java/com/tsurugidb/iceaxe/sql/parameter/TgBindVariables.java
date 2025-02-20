@@ -314,6 +314,18 @@ public class TgBindVariables {
     }
 
     /**
+     * add type(CLOB).
+     *
+     * @param name name
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindVariables addClob(@Nonnull String name) {
+        addInternal(name, TgDataType.CLOB);
+        return this;
+    }
+
+    /**
      * add type.
      *
      * @param name name

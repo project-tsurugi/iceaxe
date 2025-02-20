@@ -17,6 +17,7 @@ package com.tsurugidb.iceaxe.sql.parameter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -41,6 +42,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
@@ -425,6 +427,60 @@ public class TgBindParameters {
     }
 
     /**
+     * add value(CLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindParameters addClob(@Nonnull String name, @Nullable TgClob value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(CLOB).
+     *
+     * @param name name
+     * @param path path
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindParameters addClob(@Nonnull String name, @Nullable Path path) {
+        add(TgBindParameter.ofClob(name, path));
+        return this;
+    }
+
+    /**
+     * add value(CLOB).
+     *
+     * @param name   name
+     * @param reader reader
+     * @return this
+     * @throws IOException if an I/O error occurs when reading or writing
+     * @since X.X.X
+     */
+    public TgBindParameters addClob(@Nonnull String name, @Nullable Reader reader) throws IOException {
+        add(TgBindParameter.ofClob(name, reader));
+        return this;
+    }
+
+    /**
+     * add value(CLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @throws IOException if an I/O error occurs writing to the file
+     * @since X.X.X
+     */
+    public TgBindParameters addClob(@Nonnull String name, @Nullable String value) throws IOException {
+        add(TgBindParameter.ofClob(name, value));
+        return this;
+    }
+
+    /**
      * add value(boolean).
      *
      * @param name  name
@@ -682,6 +738,18 @@ public class TgBindParameters {
     }
 
     /**
+     * add value(CLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since X.X.X
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable TgClob value) {
+        return addClob(name, value);
+    }
+
+    /**
      * add value(Path).
      *
      * @param name name
@@ -695,7 +763,7 @@ public class TgBindParameters {
         case BLOB:
             return addBlob(name, path);
         case CLOB:
-            // TODO CLOB
+            return addClob(name, path);
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
         }

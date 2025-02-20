@@ -31,6 +31,7 @@ import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
 class IceaxeLowParameterUtilTest {
@@ -205,5 +206,19 @@ class IceaxeLowParameterUtilTest {
         assertEquals(Parameters.blobOf("foo", Path.of("/path/to/flie")), parameter);
     }
 
-    // TODO CLOB
+    @Test
+    void testCreateStringClob() {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (TgClob) null));
+
+        var parameter = IceaxeLowParameterUtil.create("foo", TgClob.of(Path.of("/path/to/flie")));
+        assertEquals(Parameters.clobOf("foo", Path.of("/path/to/flie")), parameter);
+    }
+
+    @Test
+    void testCreateClobStringPath() {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createClob("foo", (Path) null));
+
+        var parameter = IceaxeLowParameterUtil.createClob("foo", Path.of("/path/to/flie"));
+        assertEquals(Parameters.clobOf("foo", Path.of("/path/to/flie")), parameter);
+    }
 }

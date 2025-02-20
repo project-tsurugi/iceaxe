@@ -35,7 +35,7 @@ public interface TgClob extends IceaxeTimeoutCloseable {
      * @return instance
      */
     public static TgClob of(Path path) {
-        throw new AssertionError("TODO");
+        return new TgClobPath(path);
     }
 
     /**
@@ -60,7 +60,7 @@ public interface TgClob extends IceaxeTimeoutCloseable {
     public boolean isDeleteOnExecuteFinished();
 
     /**
-     * Returns an reader.
+     * Returns a reader.
      *
      * @return reader
      * @throws IOException if an I/O error occurs

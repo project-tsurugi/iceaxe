@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.result.IceaxeResultNameList.IceaxeAmbiguousNamePolicy;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.sql.type.TgClobReference;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
@@ -327,7 +328,9 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
             case BLOB:
                 var bref = lowResultSet.fetchBlob();
                 return TgBlobReference.of(getTransaction(), bref);
-            // TODO CLOB
+            case CLOB:
+                var cref = lowResultSet.fetchClob();
+                return TgClobReference.of(getTransaction(), cref);
             default:
                 throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);
             }
@@ -361,11 +364,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
             var value = fetchCurrentColumnValue();
 
             if (forEntity) {
-                if (value instanceof TgBlobReference) {
-                    var factory = getConvertUtil().getIceaxeObjectFactory();
-                    value = factory.createBlob((TgBlobReference) value);
-                }
-                // TODO CLOB
+                value = convertForEntity(value);
             }
 
             values[i++] = value;
@@ -373,6 +372,18 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
         if (i != values.length) {
             throw new IllegalStateException(String.format("column size unmatch. readColumn=%d, columnSize=%d", i, values.length));
         }
+    }
+
+    private Object convertForEntity(Object value) throws IOException, InterruptedException, TsurugiTransactionException {
+        if (value instanceof TgBlobReference) {
+            var factory = getConvertUtil().getIceaxeObjectFactory();
+            return factory.createBlob((TgBlobReference) value);
+        }
+        if (value instanceof TgClobReference) {
+            var factory = getConvertUtil().getIceaxeObjectFactory();
+            return factory.createClob((TgClobReference) value);
+        }
+        return value;
     }
 
     /**

@@ -30,6 +30,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 
 /**
@@ -832,5 +833,57 @@ public interface TsurugiResultIndexEntity {
     public default @Nullable TgBlob getBlobOrNull(int index) {
         var value = getValueOrNull(index);
         return getConvertUtil().toBlob(value);
+    }
+
+    // CLOB
+
+    /**
+     * get value as CLOB.
+     *
+     * @param index column index
+     * @return value
+     * @throws NullPointerException if value is null
+     * @since X.X.X
+     */
+    public default @Nonnull TgClob getClob(int index) {
+        var value = getClobOrNull(index);
+        return Objects.requireNonNull(value, () -> "getClob(" + index + ") is null");
+    }
+
+    /**
+     * get value as CLOB.
+     *
+     * @param index        column index
+     * @param defaultValue value to return if original value is null
+     * @return value
+     * @since X.X.X
+     */
+    public default TgClob getClob(int index, TgClob defaultValue) {
+        var value = getClobOrNull(index);
+        return (value != null) ? value : defaultValue;
+    }
+
+    /**
+     * get value as CLOB.
+     *
+     * @param index column index
+     * @return value
+     * @since X.X.X
+     */
+    public default @Nonnull Optional<TgClob> findClob(int index) {
+        var value = getClobOrNull(index);
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * get value as CLOB.
+     *
+     * @param index column index
+     * @return value
+     * @since X.X.X
+     */
+    public default @Nullable TgClob getClobOrNull(int index) {
+        var value = getValueOrNull(index);
+        return getConvertUtil().toClob(value);
     }
 }

@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Path;
@@ -42,8 +43,11 @@ import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
+import com.tsurugidb.iceaxe.sql.type.TgClobReference;
 import com.tsurugidb.iceaxe.test.TestTsurugiTransaction;
 import com.tsurugidb.tsubakuro.sql.BlobReference;
+import com.tsurugidb.tsubakuro.sql.ClobReference;
 
 class IceaxeConvertUtilTest {
 
@@ -361,5 +365,58 @@ class IceaxeConvertUtilTest {
         }
 
         assertThrowsExactly(UnsupportedOperationException.class, () -> target.toBlobReference("aaa"));
+    }
+
+    @Test
+    void testToClob() throws Exception {
+        assertNull(target.toClob(null));
+
+        {
+            var expected = TgClob.of(Path.of("/path/to/file"));
+            var actual = target.toClob(expected);
+            assertFalse(actual.isDeleteOnExecuteFinished());
+            assertSame(expected, actual);
+        }
+        {
+            var expected = Path.of("/path/to/file");
+            var actual = target.toClob(expected);
+            assertFalse(actual.isDeleteOnExecuteFinished());
+            assertSame(expected, actual.getPath());
+        }
+        {
+            String expected = "abc\ndef\r\nあいうえお";
+            try (var actual = target.toClob(new StringReader(expected))) {
+                assertTrue(actual.isDeleteOnExecuteFinished());
+                String actualString = actual.readString();
+                assertEquals(expected, actualString);
+            }
+        }
+        {
+            String expected = "abc\ndef\r\nあいうえお";
+            try (var actual = target.toClob(expected)) {
+                assertTrue(actual.isDeleteOnExecuteFinished());
+                String actualString = actual.readString();
+                assertEquals(expected, actualString);
+            }
+        }
+
+        assertThrowsExactly(UnsupportedOperationException.class, () -> target.toClob(new byte[0]));
+    }
+
+    @Test
+    void testToClobReference() throws Exception {
+        assertNull(target.toClobReference(null));
+
+        {
+            var transaction = TestTsurugiTransaction.of();
+            var ref = new ClobReference() {
+            };
+            try (var expected = TgClobReference.of(transaction, ref)) {
+                var actual = target.toClobReference(expected);
+                assertSame(expected, actual);
+            }
+        }
+
+        assertThrowsExactly(UnsupportedOperationException.class, () -> target.toClobReference("aaa"));
     }
 }

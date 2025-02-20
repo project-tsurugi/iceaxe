@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
@@ -203,7 +204,14 @@ class TgSingleParameterMappingTest {
         assertMapping(type, TgBlob.of(Path.of("/path/to/file")), mapping);
     }
 
-    // TODO CLOB
+    @Test
+    void testOfClob() throws Exception {
+        var mapping = TgSingleParameterMapping.ofClob("foo");
+
+        var type = TgDataType.CLOB;
+        assertMapping(type, null, mapping);
+        assertMapping(type, TgClob.of(Path.of("/path/to/file")), mapping);
+    }
 
     @Test
     void testOfClass() throws Exception {
@@ -331,7 +339,11 @@ class TgSingleParameterMappingTest {
             assertEquals(Parameters.blobOf("foo", path), actual);
             return;
         }
-        // TODO CLOB
+        if (expected instanceof TgClob) {
+            var path = ((TgClob) expected).getPath();
+            assertEquals(Parameters.clobOf("foo", path), actual);
+            return;
+        }
         throw new UnsupportedOperationException(expected.getClass().getName());
     }
 }

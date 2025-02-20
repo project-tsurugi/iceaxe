@@ -17,6 +17,7 @@ package com.tsurugidb.iceaxe.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -37,6 +38,8 @@ import javax.annotation.Nullable;
 import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
+import com.tsurugidb.iceaxe.sql.type.TgClobReference;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionRuntimeException;
 
@@ -366,7 +369,25 @@ public class IceaxeConvertUtil {
         if (obj instanceof BigDecimal) {
             return ((BigDecimal) obj).toPlainString();
         }
-        // TODO CLOB
+        if (obj instanceof TgClob) {
+            try {
+                return ((TgClob) obj).readString();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            }
+        }
+        if (obj instanceof TgClobReference) {
+            var clob = (TgClobReference) obj;
+            try {
+                return clob.readString();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                throw new InterruptedRuntimeException(e);
+            } catch (TsurugiTransactionException e) {
+                throw new TsurugiTransactionRuntimeException(e);
+            }
+        }
         return obj.toString();
     }
 
@@ -843,6 +864,97 @@ public class IceaxeConvertUtil {
     protected @Nullable TgBlobReference convertBlobReference(@Nonnull Object obj) {
         if (obj instanceof TgBlobReference) {
             return (TgBlobReference) obj;
+        }
+        return null;
+    }
+
+    /**
+     * convert to TgClob.
+     *
+     * @param obj value
+     * @return value
+     * @since X.X.X
+     */
+    public @Nullable TgClob toClob(@Nullable Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        try {
+            var value = convertClob(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(OffsetTime.class, obj, e);
+        }
+        throw createException(OffsetTime.class, obj, null);
+    }
+
+    /**
+     * convert to TgClob.
+     *
+     * @param obj value
+     * @return value
+     * @since X.X.X
+     */
+    protected @Nullable TgClob convertClob(@Nonnull Object obj) {
+        if (obj instanceof TgClob) {
+            return (TgClob) obj;
+        }
+        if (obj instanceof Path) {
+            return TgClob.of((Path) obj);
+        }
+        if (obj instanceof Reader) {
+            var factory = getIceaxeObjectFactory();
+            try {
+                return factory.createClob((Reader) obj, true);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            }
+        }
+        if (obj instanceof String) {
+            var factory = getIceaxeObjectFactory();
+            try {
+                return factory.createClob((String) obj, true);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * convert to TgClobReference.
+     *
+     * @param obj value
+     * @return value
+     * @since X.X.X
+     */
+    public @Nullable TgClobReference toClobReference(@Nullable Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        try {
+            var value = convertClobReference(obj);
+            if (value != null) {
+                return value;
+            }
+        } catch (Throwable e) {
+            throw createException(OffsetTime.class, obj, e);
+        }
+        throw createException(OffsetTime.class, obj, null);
+    }
+
+    /**
+     * convert to TgClobReference.
+     *
+     * @param obj value
+     * @return value
+     * @since X.X.X
+     */
+    protected @Nullable TgClobReference convertClobReference(@Nonnull Object obj) {
+        if (obj instanceof TgClobReference) {
+            return (TgClobReference) obj;
         }
         return null;
     }

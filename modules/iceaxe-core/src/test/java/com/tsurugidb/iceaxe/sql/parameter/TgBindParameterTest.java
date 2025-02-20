@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -33,7 +35,9 @@ import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.test.TestBlobUtil;
+import com.tsurugidb.iceaxe.test.TestClobUtil;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
@@ -331,5 +335,61 @@ class TgBindParameterTest {
         }
     }
 
-    // TODO CLOB
+    @Test
+    void testOfStringClob() {
+        var closeableSet = new IceaxeCloseableSet();
+        assertEquals(Parameters.ofNull("foo"), TgBindParameter.of("foo", (TgClob) null).toLowParameter(closeableSet));
+
+        var path = Path.of("/path/to/file");
+        var parameter = TgBindParameter.of("foo", TgClob.of(path));
+        assertEquals(Parameters.clobOf("foo", path), parameter.toLowParameter(closeableSet));
+        assertEquals("foo=TgClobPath(" + path + ")(TgClob)", parameter.toString());
+
+        assertEquals(0, closeableSet.size());
+    }
+
+    @Test
+    void testOfClobStringPath() {
+        var closeableSet = new IceaxeCloseableSet();
+        assertEquals(Parameters.ofNull("foo"), TgBindParameter.ofClob("foo", (Path) null).toLowParameter(closeableSet));
+
+        var path = Path.of("/path/to/file");
+        var parameter = TgBindParameter.ofClob("foo", path);
+        assertEquals(Parameters.clobOf("foo", path), parameter.toLowParameter(closeableSet));
+        assertEquals("foo=" + path + "(Path)", parameter.toString());
+
+        assertEquals(0, closeableSet.size());
+    }
+
+    @Test
+    void testOfClobStringReader() throws Exception {
+        var closeableSet = new IceaxeCloseableSet();
+        assertEquals(Parameters.ofNull("foo"), TgBindParameter.ofClob("foo", (Reader) null).toLowParameter(closeableSet));
+        assertEquals(0, closeableSet.size());
+
+        var parameter = TgBindParameter.ofClob("foo", new StringReader("abc"));
+        var actual = parameter.toLowParameter(closeableSet);
+
+        try (var clob = TestClobUtil.getClob1(closeableSet)) {
+            var path = clob.getPath();
+
+            assertEquals(Parameters.clobOf("foo", path), actual);
+        }
+    }
+
+    @Test
+    void testOfClobStringString() throws Exception {
+        var closeableSet = new IceaxeCloseableSet();
+        assertEquals(Parameters.ofNull("foo"), TgBindParameter.ofClob("foo", (String) null).toLowParameter(closeableSet));
+        assertEquals(0, closeableSet.size());
+
+        var parameter = TgBindParameter.ofClob("foo", "abc");
+        var actual = parameter.toLowParameter(closeableSet);
+
+        try (var clob = TestClobUtil.getClob1(closeableSet)) {
+            var path = clob.getPath();
+
+            assertEquals(Parameters.clobOf("foo", path), actual);
+        }
+    }
 }

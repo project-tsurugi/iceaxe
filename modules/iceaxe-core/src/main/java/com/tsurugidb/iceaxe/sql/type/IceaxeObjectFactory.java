@@ -17,15 +17,15 @@ package com.tsurugidb.iceaxe.sql.type;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
 
 /**
  * object factory.
@@ -54,6 +54,7 @@ public class IceaxeObjectFactory {
         defaultInstance = Objects.requireNonNull(factory);
     }
 
+    private final long pid = ProcessHandle.current().pid();
     private Path tempDirectory;
 
     /**
@@ -80,13 +81,17 @@ public class IceaxeObjectFactory {
     }
 
     /**
-     * create temporary file.
+     * create temporary file path.
      *
      * @return file
-     * @throws IOException if an I/O error occurs
      */
-    public Path createTempFile() throws IOException {
-        return Files.createTempFile(getTempDirectory(), "iceaxe-object-temp-", ".dat");
+    public Path createTempFilePath() throws IOException {
+        String s = "iceaxe-object-temp-" + pid //
+                + "-" + Thread.currentThread().getId() //
+                + "-" + System.currentTimeMillis() //
+                + "-" + System.nanoTime() //
+                + ".dat";
+        return getTempDirectory().resolve(s);
     }
 
     /**
@@ -108,8 +113,8 @@ public class IceaxeObjectFactory {
      * @throws IOException if an I/O error occurs when reading or writing
      */
     public TgBlob createBlob(InputStream is, boolean deleteOnExecuteFinished) throws IOException {
-        var file = createTempFile();
-        Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING);
+        var file = createTempFilePath();
+        Files.copy(is, file);
         return new TgBlobTempFile(file, deleteOnExecuteFinished);
     }
 
@@ -122,8 +127,8 @@ public class IceaxeObjectFactory {
      * @throws IOException if an I/O error occurs writing to the file
      */
     public TgBlob createBlob(byte[] value, boolean deleteOnExecuteFinished) throws IOException {
-        var file = createTempFile();
-        Files.write(file, value, StandardOpenOption.TRUNCATE_EXISTING);
+        var file = createTempFilePath();
+        Files.write(file, value);
         return new TgBlobTempFile(file, deleteOnExecuteFinished);
     }
 
@@ -138,9 +143,75 @@ public class IceaxeObjectFactory {
      */
     public TgBlob createBlob(TgBlobReference value) throws IOException, InterruptedException, TsurugiTransactionException {
         try (value) {
-            var file = createTempFile();
+            var file = createTempFilePath();
             value.copyTo(file);
             return new TgBlobTempFile(file, false);
+        }
+    }
+
+    /**
+     * creates a new TgClob instance.
+     *
+     * @param path path
+     * @return TgClob instance
+     */
+    public TgClob createClob(Path path) {
+        return new TgClobPath(path);
+    }
+
+    private static final int READ_BUFFER_SIZE = 4 * 1024;
+
+    /**
+     * creates a new TgClob instance.
+     *
+     * @param reader                  reader
+     * @param deleteOnExecuteFinished delete on execute finished
+     * @return TgClob instance
+     * @throws IOException if an I/O error occurs when reading or writing
+     */
+    public TgClob createClob(Reader reader, boolean deleteOnExecuteFinished) throws IOException {
+        var file = createTempFilePath();
+        try (var writer = Files.newBufferedWriter(file)) {
+            var buffer = new char[READ_BUFFER_SIZE];
+            for (;;) {
+                int len = reader.read(buffer);
+                if (len < 0) {
+                    break;
+                }
+                writer.write(buffer, 0, len);
+            }
+        }
+        return new TgClobTempFile(file, deleteOnExecuteFinished);
+    }
+
+    /**
+     * creates a new TgClob instance.
+     *
+     * @param value                   value
+     * @param deleteOnExecuteFinished delete on execute finished
+     * @return TgClob instance
+     * @throws IOException if an I/O error occurs writing to the file
+     */
+    public TgClob createClob(String value, boolean deleteOnExecuteFinished) throws IOException {
+        var file = createTempFilePath();
+        IceaxeFileUtil.writeString(file, value);
+        return new TgClobTempFile(file, deleteOnExecuteFinished);
+    }
+
+    /**
+     * creates a new TgClob instance from TgClobReference.
+     *
+     * @param value TgClobReference
+     * @return TgClob instance
+     * @throws IOException                 if an I/O error occurs
+     * @throws InterruptedException        if interrupted while processing the request
+     * @throws TsurugiTransactionException if server error occurs while processing the request
+     */
+    public TgClob createClob(TgClobReference value) throws IOException, InterruptedException, TsurugiTransactionException {
+        try (value) {
+            var file = createTempFilePath();
+            value.copyTo(file);
+            return new TgClobTempFile(file, false);
         }
     }
 }

@@ -18,6 +18,7 @@ package com.tsurugidb.iceaxe.sql.parameter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -37,7 +38,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.test.TestBlobUtil;
+import com.tsurugidb.iceaxe.test.TestClobUtil;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
@@ -383,7 +386,47 @@ class TgBindVariableTest {
         assertEquals(variable.type(), copy.type());
     }
 
-    // TODO CLOB
+    @Test
+    void testOfClob() throws Exception {
+        var variable = TgBindVariable.ofClob("foo");
+        assertEquals("foo", variable.name());
+        assertEquals(TgDataType.CLOB, variable.type());
+        {
+            var closeableSet = new IceaxeCloseableSet();
+            assertEquals(Parameters.clobOf("foo", Path.of("/path/to/file")), variable.bind(TgClob.of(Path.of("/path/to/file"))).toLowParameter(closeableSet));
+            assertEquals(0, closeableSet.size());
+        }
+        {
+            var closeableSet = new IceaxeCloseableSet();
+            assertEquals(Parameters.clobOf("foo", Path.of("/path/to/file")), variable.bind(Path.of("/path/to/file")).toLowParameter(closeableSet));
+            assertEquals(0, closeableSet.size());
+        }
+        {
+            var closeableSet = new IceaxeCloseableSet();
+            var actual = variable.bind(new StringReader("abc")).toLowParameter(closeableSet);
+
+            try (var clob = TestClobUtil.getClob1(closeableSet)) {
+                var path = clob.getPath();
+
+                assertEquals(Parameters.clobOf("foo", path), actual);
+            }
+        }
+        {
+            var closeableSet = new IceaxeCloseableSet();
+            var actual = variable.bind("abc").toLowParameter(closeableSet);
+
+            try (var clob = TestClobUtil.getClob1(closeableSet)) {
+                var path = clob.getPath();
+
+                assertEquals(Parameters.clobOf("foo", path), actual);
+            }
+        }
+
+        var copy = variable.clone("bar");
+        assertEquals(variable.getClass(), copy.getClass());
+        assertEquals("bar", copy.name());
+        assertEquals(variable.type(), copy.type());
+    }
 
     @Test
     void testSqlName() {

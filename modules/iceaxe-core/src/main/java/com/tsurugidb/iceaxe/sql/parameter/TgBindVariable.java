@@ -17,6 +17,7 @@ package com.tsurugidb.iceaxe.sql.parameter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
@@ -33,6 +34,7 @@ import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 
 /**
  * Tsurugi Bind Variable.
@@ -794,6 +796,76 @@ public abstract class TgBindVariable<T> {
         @Override
         public TgBindVariableBlob clone(@Nonnull String name) {
             return new TgBindVariableBlob(name);
+        }
+    }
+
+    /**
+     * create bind variable.
+     *
+     * @param name name
+     * @return bind variable
+     * @since X.X.X
+     */
+    public static TgBindVariableClob ofClob(@Nonnull String name) {
+        return new TgBindVariableClob(name);
+    }
+
+    /**
+     * Tsurugi Bind Variable&lt;TgClob&gt;.
+     *
+     * @since X.X.X
+     */
+    public static class TgBindVariableClob extends TgBindVariable<TgClob> {
+
+        /**
+         * Creates a new instance.
+         *
+         * @param name name
+         */
+        protected TgBindVariableClob(@Nonnull String name) {
+            super(name, TgDataType.CLOB);
+        }
+
+        @Override
+        public TgBindParameter bind(@Nullable TgClob value) {
+            return TgBindParameter.of(name(), value);
+        }
+
+        /**
+         * bind value.
+         *
+         * @param path path
+         * @return bind parameter
+         */
+        public TgBindParameter bind(@Nullable Path path) {
+            return TgBindParameter.ofClob(name(), path);
+        }
+
+        /**
+         * bind value.
+         *
+         * @param reader reader
+         * @return bind parameter
+         * @throws IOException if an I/O error occurs when reading or writing
+         */
+        public TgBindParameter bind(@Nullable Reader reader) throws IOException {
+            return TgBindParameter.ofClob(name(), reader);
+        }
+
+        /**
+         * bind value.
+         *
+         * @param value value
+         * @return bind parameter
+         * @throws IOException if an I/O error occurs writing to the file
+         */
+        public TgBindParameter bind(@Nullable String value) throws IOException {
+            return TgBindParameter.ofClob(name(), value);
+        }
+
+        @Override
+        public TgBindVariableClob clone(@Nonnull String name) {
+            return new TgBindVariableClob(name);
         }
     }
 

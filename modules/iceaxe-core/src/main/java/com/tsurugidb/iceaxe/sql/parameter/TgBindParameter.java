@@ -17,6 +17,7 @@ package com.tsurugidb.iceaxe.sql.parameter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -35,6 +36,7 @@ import javax.annotation.Nullable;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
@@ -355,6 +357,70 @@ public class TgBindParameter {
     /**
      * create bind parameter.
      *
+     * @param name  name
+     * @param value value
+     * @return bind parameter
+     * @since X.X.X
+     */
+    public static TgBindParameter of(@Nonnull String name, @Nullable TgClob value) {
+        return new TgBindParameter(IceaxeLowParameterUtil.create(name, value), () -> toString(name, value, TgClob.class));
+    }
+
+    /**
+     * create bind parameter.
+     *
+     * @param name name
+     * @param path path
+     * @return bind parameter
+     * @since X.X.X
+     */
+    public static TgBindParameter ofClob(@Nonnull String name, @Nullable Path path) {
+        return new TgBindParameter(IceaxeLowParameterUtil.createClob(name, path), () -> toString(name, path, Path.class));
+    }
+
+    /**
+     * create bind parameter.
+     *
+     * @param name   name
+     * @param reader reader
+     * @return bind parameter
+     * @throws IOException if an I/O error occurs when reading or writing
+     * @since X.X.X
+     */
+    public static TgBindParameter ofClob(@Nonnull String name, @Nullable Reader reader) throws IOException {
+        TgClob clob;
+        if (reader == null) {
+            clob = null;
+        } else {
+            var factory = IceaxeObjectFactory.getDefaultInstance();
+            clob = factory.createClob(reader, true);
+        }
+        return new TgBindParameter(IceaxeLowParameterUtil.create(name, clob), clob, () -> toString(name, reader, Reader.class));
+    }
+
+    /**
+     * create bind parameter.
+     *
+     * @param name  name
+     * @param value value
+     * @return bind parameter
+     * @throws IOException if an I/O error occurs writing to the file
+     * @since X.X.X
+     */
+    public static TgBindParameter ofClob(@Nonnull String name, @Nullable String value) throws IOException {
+        TgClob clob;
+        if (value == null) {
+            clob = null;
+        } else {
+            var factory = IceaxeObjectFactory.getDefaultInstance();
+            clob = factory.createClob(value, true);
+        }
+        return new TgBindParameter(IceaxeLowParameterUtil.create(name, clob), clob, () -> toString(name, value, String.class));
+    }
+
+    /**
+     * create bind parameter.
+     *
      * @param name name
      * @param type type
      * @param path value
@@ -366,7 +432,7 @@ public class TgBindParameter {
         case BLOB:
             return ofBlob(name, path);
         case CLOB:
-            // TODO CLOB
+            return ofClob(name, path);
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
         }

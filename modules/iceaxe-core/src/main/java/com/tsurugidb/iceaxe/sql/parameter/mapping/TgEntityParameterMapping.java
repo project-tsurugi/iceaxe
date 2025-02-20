@@ -33,6 +33,7 @@ import com.tsurugidb.iceaxe.sql.parameter.IceaxeLowParameterUtil;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
@@ -659,7 +660,130 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         return this;
     }
 
-    // x addBlobBytes(String name, Function<P, V> getter, Function<V, byte[]> converter)
+    /**
+     * add variable.
+     *
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityParameterMapping<P> addBlobBytes(String name, Function<P, V> getter, Function<V, byte[]> converter) {
+        return addBlobBytes(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable.
+     *
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityParameterMapping<P> addClob(String name, Function<P, TgClob> getter) {
+        addVariable(name, TgDataType.CLOB);
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
+            var value = getter.apply(parameter);
+            if (value.isDeleteOnExecuteFinished()) {
+                closeableSet.add(value);
+            }
+            return IceaxeLowParameterUtil.create(name, value);
+        });
+        return this;
+    }
+
+    /**
+     * add variable.
+     *
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityParameterMapping<P> addClob(String name, Function<P, V> getter, Function<V, TgClob> converter) {
+        return addClob(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable.
+     *
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityParameterMapping<P> addClobPath(String name, Function<P, Path> getter) {
+        addVariable(name, TgDataType.CLOB);
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
+            var value = getter.apply(parameter);
+            return IceaxeLowParameterUtil.createClob(name, value);
+        });
+        return this;
+    }
+
+    /**
+     * add variable.
+     *
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityParameterMapping<P> addClobPath(String name, Function<P, V> getter, Function<V, Path> converter) {
+        return addClobPath(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable.
+     *
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityParameterMapping<P> addClobString(String name, Function<P, String> getter) {
+        addVariable(name, TgDataType.CLOB);
+        parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
+            var value = getter.apply(parameter);
+            var factory = convertUtil.getIceaxeObjectFactory();
+            var blob = factory.createClob(value, true);
+            closeableSet.add(blob);
+            return IceaxeLowParameterUtil.create(name, blob);
+        });
+        return this;
+    }
+
+    /**
+     * add variable.
+     *
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityParameterMapping<P> addClobString(String name, Function<P, V> getter, Function<V, String> converter) {
+        return addClobString(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
 
     /**
      * add variable.
@@ -765,7 +889,15 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
                 return IceaxeLowParameterUtil.create(name, value);
             });
             return this;
-        // TODO CLOB
+        case CLOB:
+            parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
+                var value = convertUtil.toClob(getter.apply(parameter));
+                if (value.isDeleteOnExecuteFinished()) {
+                    closeableSet.add(value);
+                }
+                return IceaxeLowParameterUtil.create(name, value);
+            });
+            return this;
         case ZONED_DATE_TIME:
         default:
             throw new UnsupportedOperationException("unsupported type error. type=" + type);

@@ -171,7 +171,11 @@ class TgBindVariablesTest {
         assertVariable(Map.of("foo", TgDataType.BLOB), variables);
     }
 
-    // TODO CLOB
+    @Test
+    void testClob() {
+        var variables = new TgBindVariables().addClob("foo");
+        assertVariable(Map.of("foo", TgDataType.CLOB), variables);
+    }
 
     @Test
     void testSetDataType() {

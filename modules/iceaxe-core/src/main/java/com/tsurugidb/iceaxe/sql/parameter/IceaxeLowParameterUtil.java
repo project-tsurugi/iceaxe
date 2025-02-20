@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.Parameters;
@@ -338,5 +339,37 @@ public final class IceaxeLowParameterUtil {
             return Parameters.ofNull(name);
         }
         return Parameters.blobOf(name, path);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name  parameter name
+     * @param value value
+     * @return parameter
+     * @since X.X.X
+     */
+    public static Parameter create(@Nonnull String name, @Nullable TgClob value) {
+        if (value == null) {
+            return Parameters.ofNull(name);
+        }
+
+        var path = value.getPath();
+        return Parameters.clobOf(name, path);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name parameter name
+     * @param path path
+     * @return parameter
+     * @since X.X.X
+     */
+    public static Parameter createClob(@Nonnull String name, @Nullable Path path) {
+        if (path == null) {
+            return Parameters.ofNull(name);
+        }
+        return Parameters.clobOf(name, path);
     }
 }

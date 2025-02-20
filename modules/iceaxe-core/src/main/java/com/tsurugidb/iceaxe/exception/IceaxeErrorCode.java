@@ -23,6 +23,7 @@ import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.sql.type.TgClobReference;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
@@ -298,13 +299,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      */
     BLOB_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 11, "BLOB get timeout"),
     /**
-     * {@link TgBlobReference} close timeout.
+     * {@link TgBlobReference} cache get timeout.
      *
      * @since X.X.X
      */
-    BLOB_CACHE_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 12, "BLOB cache close timeout"),
+    BLOB_CACHE_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 12, "BLOB cache get timeout"),
     /**
-     * {@link TgBlobReference} close timeout.
+     * {@link TgBlobReference} cache close timeout.
      *
      * @since X.X.X
      */
@@ -315,6 +316,30 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      * @since X.X.X
      */
     BLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 19, "BLOB close timeout"),
+    /**
+     * {@link TgClobReference} get timeout.
+     *
+     * @since X.X.X
+     */
+    CLOB_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 21, "CLOB get timeout"),
+    /**
+     * {@link TgClobReference} cache get timeout.
+     *
+     * @since X.X.X
+     */
+    CLOB_CACHE_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 22, "CLOB cache get timeout"),
+    /**
+     * {@link TgClobReference} cache close timeout.
+     *
+     * @since X.X.X
+     */
+    CLOB_CACHE_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 23, "CLOB cache close timeout"),
+    /**
+     * {@link TgClobReference} close timeout.
+     *
+     * @since X.X.X
+     */
+    CLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 29, "CLOB close timeout"),
 
     //
     ;

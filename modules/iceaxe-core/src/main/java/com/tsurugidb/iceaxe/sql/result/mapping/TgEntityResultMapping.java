@@ -38,6 +38,8 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
+import com.tsurugidb.iceaxe.sql.type.TgClobReference;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionBiConsumer;
@@ -1434,6 +1436,102 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      */
     public <V> TgEntityResultMapping<R> addBlob(String name, BiConsumer<R, V> setter, Function<TgBlob, V> converter) {
         return addBlob(name, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    // CLOB
+
+    /**
+     * add setter.
+     *
+     * @param setter setter to R
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityResultMapping<R> addClob(BiConsumer<R, TgClob> setter) {
+        int index = columnConverterList.size();
+        return addClob(index, setter);
+    }
+
+    /**
+     * add setter.
+     *
+     * @param <V>       value type
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityResultMapping<R> addClob(BiConsumer<R, V> setter, Function<TgClob, V> converter) {
+        int index = columnConverterList.size();
+        return addClob(index, setter, converter);
+    }
+
+    /**
+     * add setter.
+     *
+     * @param index  column index
+     * @param setter setter to R
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityResultMapping<R> addClob(int index, BiConsumer<R, TgClob> setter) {
+        set(index, record -> {
+            TgClobReference value = record.nextClobOrNull();
+            var factory = record.getConvertUtil().getIceaxeObjectFactory();
+            return factory.createClob(value);
+        }, setter);
+        return this;
+    }
+
+    /**
+     * add setter.
+     *
+     * @param <V>       value type
+     * @param index     column index
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityResultMapping<R> addClob(int index, BiConsumer<R, V> setter, Function<TgClob, V> converter) {
+        return addClob(index, (entity, value) -> {
+            V v = (value != null) ? converter.apply(value) : null;
+            setter.accept(entity, v);
+        });
+    }
+
+    /**
+     * add setter.
+     *
+     * @param name   column name
+     * @param setter setter to R
+     * @return this
+     * @since X.X.X
+     */
+    public TgEntityResultMapping<R> addClob(String name, BiConsumer<R, TgClob> setter) {
+        set(name, record -> {
+            TgClobReference value = record.nextClobOrNull();
+            var factory = record.getConvertUtil().getIceaxeObjectFactory();
+            return factory.createClob(value);
+        }, setter);
+        return this;
+    }
+
+    /**
+     * add setter.
+     *
+     * @param <V>       value type
+     * @param name      column name
+     * @param setter    setter to R
+     * @param converter converter to V
+     * @return this
+     * @since X.X.X
+     */
+    public <V> TgEntityResultMapping<R> addClob(String name, BiConsumer<R, V> setter, Function<TgClob, V> converter) {
+        return addClob(name, (entity, value) -> {
             V v = (value != null) ? converter.apply(value) : null;
             setter.accept(entity, v);
         });

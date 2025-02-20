@@ -35,6 +35,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
@@ -237,7 +238,21 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
         });
     }
 
-    // TODO CLOB
+    /**
+     * create parameter mapping.
+     *
+     * @param name bind variable name
+     * @return parameter mapping
+     * @since X.X.X
+     */
+    public static TgSingleParameterMapping<TgClob> ofClob(String name) {
+        return create(name, TgDataType.CLOB, (n, v, c) -> {
+            if (v != null && v.isDeleteOnExecuteFinished()) {
+                c.add(v);
+            }
+            return IceaxeLowParameterUtil.create(n, v);
+        });
+    }
 
     /**
      * create parameter mapping.
@@ -252,7 +267,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
         case BLOB:
             return create(name, type, IceaxeLowParameterUtil::createBlob);
         case CLOB:
-            // TODO CLOB
+            return create(name, type, IceaxeLowParameterUtil::createClob);
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
         }
@@ -324,7 +339,8 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
             return ofZonedDateTime(name);
         case BLOB:
             return ofBlob(name);
-        // TODO CLOB
+        case CLOB:
+            return ofClob(name);
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
         }

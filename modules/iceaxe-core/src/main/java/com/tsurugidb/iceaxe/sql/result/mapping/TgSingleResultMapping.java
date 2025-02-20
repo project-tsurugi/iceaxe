@@ -31,6 +31,7 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionFunction;
 
@@ -271,7 +272,24 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
         return blobMapping;
     }
 
-    private final TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter;
+    private static TgSingleResultMapping<TgClob> clobMapping;
+
+    /**
+     * create result mapping.
+     *
+     * @return result mapping
+     * @since X.X.X
+     */
+    public static TgSingleResultMapping<TgClob> ofClob() {
+        if (clobMapping == null) {
+            clobMapping = new TgSingleResultMapping<>(record -> {
+                var value = record.nextClobOrNull();
+                var factory = IceaxeObjectFactory.getDefaultInstance();
+                return factory.createClob(value);
+            });
+        }
+        return clobMapping;
+    }
 
     /**
      * create result mapping.
@@ -335,12 +353,15 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
             return ofOffsetDateTime();
         case BLOB:
             return ofBlob();
-        // TODO CLOB
+        case CLOB:
+            return ofClob();
         case ZONED_DATE_TIME:
         default:
             throw new IllegalArgumentException(MessageFormat.format("unsupported type. type={0}", type));
         }
     }
+
+    private final TsurugiTransactionFunction<TsurugiResultRecord, R> resultConverter;
 
     /**
      * Tsurugi Result Mapping for single column.
