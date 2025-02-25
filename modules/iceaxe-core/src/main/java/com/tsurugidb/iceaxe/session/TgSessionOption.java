@@ -126,6 +126,12 @@ public class TgSessionOption {
          */
         BLOB_CACHE_GET,
         /**
+         * {@link TgBlobReference} close.
+         *
+         * @since X.X.X
+         */
+        BLOB_CLOSE,
+        /**
          * {@link TgClobReference} get.
          *
          * @since X.X.X
@@ -137,6 +143,12 @@ public class TgSessionOption {
          * @since X.X.X
          */
         CLOB_CACHE_GET,
+        /**
+         * {@link TgClobReference} close.
+         *
+         * @since X.X.X
+         */
+        CLOB_CLOSE,
 
         //
         ;

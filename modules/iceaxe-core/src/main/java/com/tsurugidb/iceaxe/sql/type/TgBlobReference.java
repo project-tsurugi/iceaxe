@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,17 +235,15 @@ public class TgBlobReference implements IceaxeTimeoutCloseable {
     }
 
     @Override
-    @OverridingMethodsMustInvokeSuper
-    public void close() throws IOException {
-        ownerTransaction.removeChild(this);
-
-        try (var c = lowLargeObjectCache) {
-            return; // close only
-        }
+    public void close() throws IOException, InterruptedException, TsurugiTransactionException {
+        var timeout = new IceaxeTimeout(ownerTransaction.getSessionOption(), TgTimeoutKey.BLOB_CLOSE);
+        close(timeout.getNanos());
     }
 
     @Override
-    public void close(long timeoutNanos) throws IOException {
-        close();
+    public void close(long timeoutNanos) throws IOException, InterruptedException, TsurugiTransactionException {
+        ownerTransaction.removeChild(this);
+
+        IceaxeIoUtil.closeInTransaction(timeoutNanos, IceaxeErrorCode.BLOB_CLOSE_TIMEOUT, IceaxeErrorCode.BLOB_CLOSE_ERROR, lowLargeObjectCache);
     }
 }

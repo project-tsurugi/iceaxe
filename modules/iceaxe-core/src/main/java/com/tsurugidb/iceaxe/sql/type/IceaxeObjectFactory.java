@@ -85,7 +85,7 @@ public class IceaxeObjectFactory {
      *
      * @return file
      */
-    public Path createTempFilePath() throws IOException {
+    public Path createTempFilePath() {
         String s = "iceaxe-object-temp-" + pid //
                 + "-" + Thread.currentThread().getId() //
                 + "-" + System.currentTimeMillis() //

@@ -315,7 +315,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since X.X.X
      */
-    BLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 19, "BLOB close timeout"),
+    BLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 18, "BLOB close timeout"),
+    /**
+     * {@link TgBlobReference} close error.
+     *
+     * @since X.X.X
+     */
+    BLOB_CLOSE_ERROR(IceaxeErrorCodeBlock.OBJECT + 19, "BLOB close error"),
     /**
      * {@link TgClobReference} get timeout.
      *
@@ -339,7 +345,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      *
      * @since X.X.X
      */
-    CLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 29, "CLOB close timeout"),
+    CLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 28, "CLOB close timeout"),
+    /**
+     * {@link TgClobReference} close error.
+     *
+     * @since X.X.X
+     */
+    CLOB_CLOSE_ERROR(IceaxeErrorCodeBlock.OBJECT + 29, "CLOB close error"),
 
     //
     ;
