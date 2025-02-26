@@ -265,6 +265,9 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
         if (blobMapping == null) {
             blobMapping = new TgSingleResultMapping<>(record -> {
                 var value = record.nextBlobOrNull();
+                if (value == null) {
+                    return null;
+                }
                 var factory = IceaxeObjectFactory.getDefaultInstance();
                 return factory.createBlob(value);
             });
@@ -284,6 +287,9 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
         if (clobMapping == null) {
             clobMapping = new TgSingleResultMapping<>(record -> {
                 var value = record.nextClobOrNull();
+                if (value == null) {
+                    return null;
+                }
                 var factory = IceaxeObjectFactory.getDefaultInstance();
                 return factory.createClob(value);
             });

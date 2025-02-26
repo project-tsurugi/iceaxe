@@ -581,7 +581,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         addVariable(name, TgDataType.BLOB);
         parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
-            if (value.isDeleteOnExecuteFinished()) {
+            if (value != null && value.isDeleteOnExecuteFinished()) {
                 closeableSet.add(value);
             }
             return IceaxeLowParameterUtil.create(name, value);
@@ -652,9 +652,14 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         addVariable(name, TgDataType.BLOB);
         parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
-            var factory = convertUtil.getIceaxeObjectFactory();
-            var blob = factory.createBlob(value, true);
-            closeableSet.add(blob);
+            TgBlob blob;
+            if (value != null) {
+                var factory = convertUtil.getIceaxeObjectFactory();
+                blob = factory.createBlob(value, true);
+                closeableSet.add(blob);
+            } else {
+                blob = null;
+            }
             return IceaxeLowParameterUtil.create(name, blob);
         });
         return this;
@@ -689,7 +694,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         addVariable(name, TgDataType.CLOB);
         parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
-            if (value.isDeleteOnExecuteFinished()) {
+            if (value != null && value.isDeleteOnExecuteFinished()) {
                 closeableSet.add(value);
             }
             return IceaxeLowParameterUtil.create(name, value);
@@ -760,10 +765,15 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
         addVariable(name, TgDataType.CLOB);
         parameterConverterList.add((parameter, convertUtil, closeableSet) -> {
             var value = getter.apply(parameter);
-            var factory = convertUtil.getIceaxeObjectFactory();
-            var blob = factory.createClob(value, true);
-            closeableSet.add(blob);
-            return IceaxeLowParameterUtil.create(name, blob);
+            TgClob clob;
+            if (value != null) {
+                var factory = convertUtil.getIceaxeObjectFactory();
+                clob = factory.createClob(value, true);
+                closeableSet.add(clob);
+            } else {
+                clob = null;
+            }
+            return IceaxeLowParameterUtil.create(name, clob);
         });
         return this;
     }
