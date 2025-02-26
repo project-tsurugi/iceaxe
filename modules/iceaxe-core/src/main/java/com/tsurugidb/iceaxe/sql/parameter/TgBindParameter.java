@@ -299,7 +299,8 @@ public class TgBindParameter {
      * @since X.X.X
      */
     public static TgBindParameter of(@Nonnull String name, @Nullable TgBlob value) {
-        return new TgBindParameter(IceaxeLowParameterUtil.create(name, value), () -> toString(name, value, TgBlob.class));
+        var closeable = (value != null && value.isDeleteOnExecuteFinished()) ? value : null;
+        return new TgBindParameter(IceaxeLowParameterUtil.create(name, value), closeable, () -> toString(name, value, TgBlob.class));
     }
 
     /**
@@ -363,7 +364,8 @@ public class TgBindParameter {
      * @since X.X.X
      */
     public static TgBindParameter of(@Nonnull String name, @Nullable TgClob value) {
-        return new TgBindParameter(IceaxeLowParameterUtil.create(name, value), () -> toString(name, value, TgClob.class));
+        var closeable = (value != null && value.isDeleteOnExecuteFinished()) ? value : null;
+        return new TgBindParameter(IceaxeLowParameterUtil.create(name, value), closeable, () -> toString(name, value, TgClob.class));
     }
 
     /**
