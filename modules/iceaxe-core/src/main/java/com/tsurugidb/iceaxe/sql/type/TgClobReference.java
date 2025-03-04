@@ -37,7 +37,7 @@ import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 import com.tsurugidb.tsubakuro.sql.ClobReference;
 import com.tsurugidb.tsubakuro.sql.LargeObjectCache;
-import com.tsurugidb.tsubakuro.sql.SqlClient;
+import com.tsurugidb.tsubakuro.sql.Transaction;
 
 /**
  * CLOB used in query result.
@@ -96,14 +96,15 @@ public class TgClobReference implements IceaxeTimeoutCloseable {
     }
 
     /**
-     * get low SQL client.
+     * get low transaction.
      *
      * @return low SQL client
      * @throws IOException          if an I/O error occurs while communicating to the server
      * @throws InterruptedException if interrupted while communicating to the server
      */
-    protected SqlClient getLowSqlClient() throws IOException, InterruptedException {
-        return ownerTransaction.getSession().getLowSqlClient();
+    @IceaxeInternal
+    protected Transaction getLowTransaction() throws IOException, InterruptedException {
+        return ownerTransaction.getLowTransaction();
     }
 
     /**
@@ -116,7 +117,7 @@ public class TgClobReference implements IceaxeTimeoutCloseable {
      */
     public Reader openReader() throws IOException, InterruptedException, TsurugiTransactionException {
         LOG.trace("SqlClient.openReader start");
-        var future = getLowSqlClient().openReader(lowReference);
+        var future = getLowTransaction().openReader(lowReference);
         LOG.trace("SqlClient.openReader started");
         var is = IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout, IceaxeErrorCode.CLOB_GET_TIMEOUT, IceaxeErrorCode.CLOB_CLOSE_TIMEOUT);
         LOG.trace("SqlClient.openReader end");
@@ -133,7 +134,7 @@ public class TgClobReference implements IceaxeTimeoutCloseable {
      */
     public void copyTo(Path destination) throws IOException, InterruptedException, TsurugiTransactionException {
         LOG.trace("SqlClient.copyTo start");
-        var future = getLowSqlClient().copyTo(lowReference, destination);
+        var future = getLowTransaction().copyTo(lowReference, destination);
         LOG.trace("SqlClient.copyTo started");
         IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout, IceaxeErrorCode.CLOB_GET_TIMEOUT, IceaxeErrorCode.CLOB_CLOSE_TIMEOUT);
         LOG.trace("SqlClient.copyTo end");
@@ -224,7 +225,7 @@ public class TgClobReference implements IceaxeTimeoutCloseable {
         var lowCache = this.lowLargeObjectCache;
         if (lowCache == null) {
             LOG.trace("SqlClient.getLargeObjectCache start");
-            var future = getLowSqlClient().getLargeObjectCache(lowReference);
+            var future = getLowTransaction().getLargeObjectCache(lowReference);
             LOG.trace("SqlClient.getLargeObjectCache started");
             var timeout = new IceaxeTimeout(ownerTransaction.getSessionOption(), TgTimeoutKey.CLOB_CACHE_GET);
             lowCache = IceaxeIoUtil.getAndCloseFutureInTransaction(future, timeout, IceaxeErrorCode.CLOB_CACHE_GET_TIMEOUT, IceaxeErrorCode.CLOB_CACHE_CLOSE_TIMEOUT);
