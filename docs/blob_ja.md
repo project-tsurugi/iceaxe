@@ -13,13 +13,18 @@ TsurugiはインメモリーDBなので、基本的にデータは全てDBサー
 すなわち、BLOB, CLOBデータをDBに登録する際は、ユーザー（クライアントアプリケーション）がBLOB, CLOBデータのファイルを用意し、そのファイルのパスをTsurugi DBに渡します（Tsurugi DBは渡されたパスのファイルをコピーします）。  
 DBからBLOB, CLOBデータを取得する際も、DB内で保持されているファイルのパスが返るので、そのファイルを読むことになります（実際は、ファイルのパスは隠蔽されます）。
 
-このようにBLOB, CLOBデータはファイルで受け渡しするため、BLOB, CLOBを扱うクライアントアプリケーションはTsurugi DBサーバーと同じマシン上で実行する必要があります。
+このようにBLOB, CLOBデータはファイルで受け渡しするため、BLOB, CLOBを扱うクライアントアプリケーションはTsurugi DBと同じサーバー上で実行する必要があります。
 
-なお、BLOB, CLOBを扱えるのはIPC接続のみです。  
-（IPC接続もDBサーバーと同じマシン上でないと使用できないため、BLOB, CLOBを扱う条件と合致しています）
+なお、BLOB, CLOBを扱えるのはTsurugi DBのエンドポイントが特権モードで稼働している場合のみです。  
+（デフォルトでは、IPC接続は特権モードで稼働しています）
 
 Iceaxeもこれらの制約を受けるため、BLOB, CLOBデータをファイルで扱います。
 
+> [!NOTE]
+>
+> 小さなデータを登録するのであれば、リテラル（BLOBは `X'十六進数'`、CLOBは `'文字列'` ）が使用できます。（この場合はデータを渡す際にファイルを使用しません）
+>
+> また、selectする際にvarbinaryやvarcharにキャストすれば（ファイルを経由せずに）データを直接取得できます。（BLOBは `cast(blob_column as varbinary)`、CLOBは `cast(clob_column as varchar)` ）
 
 
 ## IceaxeにおけるBLOB, CLOBの扱い
@@ -62,7 +67,7 @@ IceaxeでBLOBを使用する例は [iceaxe-examplesの例](https://github.com/pr
 
 ```java
 void insert(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-    var sql = "insert into blob_test values(:pk, :value)";
+    var sql = "insert into blob_example values(:pk, :value)";
     var variables = TgBindVariables.of().addInt("pk").addBlob("value");
     var parameterMapping = TgParameterMapping.of(variables);
 
@@ -91,7 +96,7 @@ void insert(TsurugiTransactionManager tm) throws IOException, InterruptedExcepti
 
 ```java
 void select(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-    var sql = "select pk, value from blob_test order by pk";
+    var sql = "select pk, value from blob_example order by pk";
     var resultMapping = TgResultMapping.of(record -> record);
 
     try (var ps = tm.getSession().createQuery(sql, resultMapping)) {
@@ -146,7 +151,7 @@ trueであればexecute系メソッド内でクローズするのでblobに対�
 #### TgBlobReferenceからTgBlobへの変換
 
 TsurugiResultRecordから返される、トランザクション内でselect結果のBLOBデータを扱うクラスがTgBlobReferenceです。
-BLOBデータをトランザクションの外に出す（Entityクラスにセットする）際には、TgBlobReferenceから一時ファイルにコピーしてTgBlobを生成します。
+BLOBデータをトランザクションの外に出す（Entityクラスにセットする）際には、データをTgBlobReferenceから一時ファイルにコピーしてTgBlobを生成します。
 この際にIceaxeObjectFactoryが使われます。
 
 TsurugiResultRecordは、IceaxeConvertUtilという型変換ユーティリティーのインスタンスを保持しています。（TgResultMappingまたはTsurugiSessionでセットされたIceaxeConvertUtilです）  
