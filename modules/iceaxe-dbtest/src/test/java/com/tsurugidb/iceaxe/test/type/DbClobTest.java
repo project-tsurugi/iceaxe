@@ -30,7 +30,6 @@ import com.tsurugidb.iceaxe.sql.result.mapping.TgSingleResultMapping;
 import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.sql.type.TgClobReference;
-import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
@@ -142,7 +141,7 @@ class DbClobTest extends DbTestTableTester {
                         transaction.executeAndGetCount(ps, parameter);
                     } catch (TsurugiTransactionException e) {
                         assertTrue(Files.exists(path));
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -187,7 +186,7 @@ class DbClobTest extends DbTestTableTester {
                         } else {
                             assertTrue(Files.exists(path));
                         }
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -233,7 +232,7 @@ class DbClobTest extends DbTestTableTester {
                         transaction.executeAndGetCount(ps, parameter);
                     } catch (TsurugiTransactionException e) {
                         assertTrue(Files.exists(path));
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -269,7 +268,7 @@ class DbClobTest extends DbTestTableTester {
                     try {
                         transaction.executeAndGetCount(ps, parameter);
                     } catch (TsurugiTransactionException e) {
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -301,7 +300,7 @@ class DbClobTest extends DbTestTableTester {
                     try {
                         transaction.executeAndGetCount(ps, parameter);
                     } catch (TsurugiTransactionException e) {
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -338,7 +337,7 @@ class DbClobTest extends DbTestTableTester {
                         transaction.executeAndGetCount(ps, parameter);
                     } catch (TsurugiTransactionException e) {
                         assertTrue(Files.exists(path));
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -377,7 +376,7 @@ class DbClobTest extends DbTestTableTester {
                         transaction.executeAndGetCount(ps, parameter);
                     } catch (TsurugiTransactionException e) {
                         assertTrue(Files.exists(path));
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -414,7 +413,7 @@ class DbClobTest extends DbTestTableTester {
                     try {
                         transaction.executeAndGetCount(ps, parameter);
                     } catch (TsurugiTransactionException e) {
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -447,7 +446,7 @@ class DbClobTest extends DbTestTableTester {
                     try {
                         transaction.executeAndGetCount(ps, parameter);
                     } catch (TsurugiTransactionException e) {
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -502,7 +501,7 @@ class DbClobTest extends DbTestTableTester {
                         transaction.executeAndGetCount(ps, entity);
                     } catch (TsurugiTransactionException e) {
                         assertTrue(Files.exists(path));
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -559,7 +558,7 @@ class DbClobTest extends DbTestTableTester {
                         transaction.executeAndGetCount(ps, entity);
                     } catch (TsurugiTransactionException e) {
                         assertTrue(Files.exists(path));
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -613,7 +612,7 @@ class DbClobTest extends DbTestTableTester {
                     try {
                         transaction.executeAndGetCount(ps, entity);
                     } catch (TsurugiTransactionException e) {
-                        assertTcpInsert(e);
+                        assertPrivilegedMode(e);
                         transaction.rollback();
                         return false;
                     }
@@ -627,16 +626,17 @@ class DbClobTest extends DbTestTableTester {
         }
     }
 
-    private static void assertTcpInsert(TsurugiTransactionException e) throws TsurugiTransactionException {
-        if (DbTestConnector.isIpc()) {
-            throw e;
+    private static void assertPrivilegedMode(TsurugiTransactionException e) throws TsurugiTransactionException {
+        if (e.getDiagnosticCode() == CoreServiceCode.INVALID_REQUEST) {
+            String message = e.getMessage();
+            if (message.contains("BLOB handling in privileged mode is not allowed on this endpoint")) {
+                return;
+            }
+            if (message.contains("BLOB file in privileged mode")) {
+                return;
+            }
         }
-        try {
-            assertEqualsCode(CoreServiceCode.IO_ERROR, e);
-        } catch (Throwable t) {
-            e.addSuppressed(t);
-            throw e;
-        }
+        throw e;
     }
 
     private void assertSelect() throws Exception {
