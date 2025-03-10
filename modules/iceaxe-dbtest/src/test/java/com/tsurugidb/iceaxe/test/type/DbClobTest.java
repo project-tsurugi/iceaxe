@@ -25,6 +25,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.sql.result.mapping.TgSingleResultMapping;
 import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
@@ -35,7 +36,6 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
 import com.tsurugidb.sql.proto.SqlCommon;
 import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
-import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
 
 /**
  * CLOB test
@@ -80,7 +80,7 @@ class DbClobTest extends DbTestTableTester {
     void insertLiteral() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        boolean inserted = tm.execute(transaction -> {
+        tm.execute(transaction -> {
             { // null
                 var sql = "insert into " + TEST + " values(0, null)";
                 try (var ps = session.createStatement(sql)) {
@@ -90,21 +90,34 @@ class DbClobTest extends DbTestTableTester {
             {
                 var sql = "insert into " + TEST + " values(1, 'abc')";
                 try (var ps = session.createStatement(sql)) {
-                    try {
-                        transaction.executeAndGetCount(ps);
-                    } catch (TsurugiTransactionException e) {
-                        assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
-                        transaction.rollback();
-                        return false;
-                    }
+                    transaction.executeAndGetCount(ps);
                 }
             }
-            return true;
         });
 
-        if (inserted) {
-            assertSelect();
-        }
+        assertSelectCast();
+    }
+
+    @Test
+    void insertCast() throws Exception {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        tm.execute(transaction -> {
+            { // null
+                var sql = "insert into " + TEST + " values(0, cast(null as clob))";
+                try (var ps = session.createStatement(sql)) {
+                    transaction.executeAndGetCount(ps);
+                }
+            }
+            {
+                var sql = "insert into " + TEST + " values(1, cast('abc' as clob))";
+                try (var ps = session.createStatement(sql)) {
+                    transaction.executeAndGetCount(ps);
+                }
+            }
+        });
+
+        assertSelectCast();
     }
 
     @Test
@@ -631,6 +644,7 @@ class DbClobTest extends DbTestTableTester {
         assertSelectResultEntity();
         assertSelectUserEntity();
         assertSelectSingle();
+        assertSelectCast();
     }
 
     private void assertSelectResultRecord() throws Exception {
@@ -737,6 +751,24 @@ class DbClobTest extends DbTestTableTester {
                 assertEquals("abc", value.readString());
             }
             assertFalse(Files.exists(path));
+        }
+    }
+
+    private void assertSelectCast() throws Exception {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        var sql = "select pk, cast(value as varchar) from " + TEST + " order by pk";
+        List<TsurugiResultEntity> list = tm.executeAndGetList(sql);
+        assertEquals(2, list.size());
+        {
+            var entity = list.get(0);
+            assertEquals(0, entity.getInt("pk"));
+            assertNull(entity.getStringOrNull(1));
+        }
+        {
+            var entity = list.get(1);
+            assertEquals(1, entity.getInt("pk"));
+            assertEquals("abc", entity.getStringOrNull(1));
         }
     }
 
