@@ -56,8 +56,8 @@ public class Example72Blob {
     }
 
     void main(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        tm.executeDdl("drop table if exists blob_test");
-        tm.executeDdl("create table blob_test (" //
+        tm.executeDdl("drop table if exists blob_example");
+        tm.executeDdl("create table blob_example (" //
                 + "  pk int primary key," //
                 + "  value blob" //
                 + ")" //
@@ -90,7 +90,7 @@ public class Example72Blob {
     // insert
 
     void insert(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "insert into blob_test values(:pk, :value)";
+        var sql = "insert into blob_example values(:pk, :value)";
         var variables = TgBindVariables.of().addInt("pk").addBlob("value");
         var parameterMapping = TgParameterMapping.of(variables);
 
@@ -120,7 +120,7 @@ public class Example72Blob {
     }
 
     void insertBind(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "insert into blob_test values(:pk, :value)";
+        var sql = "insert into blob_example values(:pk, :value)";
         var pk = TgBindVariable.ofInt("pk");
         var value = TgBindVariable.ofBlob("value");
         var parameterMapping = TgParameterMapping.of(pk, value);
@@ -151,7 +151,7 @@ public class Example72Blob {
     }
 
     void inserFromInputStream(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "insert into blob_test values(:pk, :value)";
+        var sql = "insert into blob_example values(:pk, :value)";
         var variables = TgBindVariables.of().addInt("pk").addBlob("value");
         var parameterMapping = TgParameterMapping.of(variables);
 
@@ -209,7 +209,7 @@ public class Example72Blob {
     }
 
     void inserFromBytes(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "insert into blob_test values(:pk, :value)";
+        var sql = "insert into blob_example values(:pk, :value)";
         var variables = TgBindVariables.of().addInt("pk").addBlob("value");
         var parameterMapping = TgParameterMapping.of(variables);
 
@@ -228,7 +228,7 @@ public class Example72Blob {
     }
 
     void insertFromEntity(TsurugiTransactionManager tm, List<ExampleBlobEntity> entityList) throws IOException, InterruptedException {
-        var sql = "insert into blob_test values(:pk, :value)";
+        var sql = "insert into blob_example values(:pk, :value)";
         var parameterMapping = TgParameterMapping.of(ExampleBlobEntity.class) //
                 .addInt("pk", ExampleBlobEntity::getPk) //
                 .addBlob("value", ExampleBlobEntity::getBlobValue); // TgBlob getter
@@ -243,7 +243,7 @@ public class Example72Blob {
     }
 
     void insertFromEntityPath(TsurugiTransactionManager tm, List<ExampleBlobEntity> entityList) throws IOException, InterruptedException {
-        var sql = "insert into blob_test values(:pk, :value)";
+        var sql = "insert into blob_example values(:pk, :value)";
         var parameterMapping = TgParameterMapping.of(ExampleBlobEntity.class) //
                 .addInt("pk", ExampleBlobEntity::getPk) //
                 .addBlobPath("value", ExampleBlobEntity::getBlobPath); // Path getter
@@ -260,7 +260,7 @@ public class Example72Blob {
     // select
 
     void select(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "select pk, value from blob_test order by pk";
+        var sql = "select pk, value from blob_example order by pk";
         var resultMapping = TgResultMapping.of(record -> record);
 
         try (var ps = tm.getSession().createQuery(sql, resultMapping)) {
@@ -276,8 +276,23 @@ public class Example72Blob {
         }
     }
 
+    void select_copyTo(TsurugiTransactionManager tm) throws IOException, InterruptedException {
+        var sql = "select pk, value from blob_example order by pk";
+        var resultMapping = TgResultMapping.of(record -> record);
+
+        try (var ps = tm.getSession().createQuery(sql, resultMapping)) {
+            tm.execute(transaction -> {
+                transaction.executeAndForEach(ps, record -> {
+                    try (TgBlobReference blob = record.getBlob("value")) {
+                        blob.copyTo(Path.of("/path/to/destination"));
+                    }
+                });
+            });
+        }
+    }
+
     void selectToResultEntity(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "select pk, value from blob_test order by pk";
+        var sql = "select pk, value from blob_example order by pk";
 
         try (var ps = tm.getSession().createQuery(sql)) {
             List<TsurugiResultEntity> list = tm.executeAndGetList(ps); // copy to temporary file
@@ -293,7 +308,7 @@ public class Example72Blob {
     }
 
     void selectToEntity(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "select pk, value from blob_test order by pk";
+        var sql = "select pk, value from blob_example order by pk";
         var resultMapping = TgResultMapping.of(ExampleBlobEntity::new) //
                 .addInt("pk", ExampleBlobEntity::setPk) //
                 .addBlob("value", ExampleBlobEntity::setBlobValue);
@@ -312,7 +327,7 @@ public class Example72Blob {
     }
 
     void selectSingle(TsurugiTransactionManager tm) throws IOException, InterruptedException {
-        var sql = "select value from blob_test order by pk";
+        var sql = "select value from blob_example order by pk";
         var resultMapping = TgSingleResultMapping.ofBlob();
 
         try (var ps = tm.getSession().createQuery(sql, resultMapping)) {
