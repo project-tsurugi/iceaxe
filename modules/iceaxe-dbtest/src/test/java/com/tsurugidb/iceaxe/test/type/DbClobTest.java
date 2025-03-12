@@ -627,14 +627,8 @@ class DbClobTest extends DbTestTableTester {
     }
 
     private static void assertPrivilegedMode(TsurugiTransactionException e) throws TsurugiTransactionException {
-        if (e.getDiagnosticCode() == CoreServiceCode.INVALID_REQUEST) {
-            String message = e.getMessage();
-            if (message.contains("BLOB handling in privileged mode is not allowed on this endpoint")) {
-                return;
-            }
-            if (message.contains("BLOB file in privileged mode")) {
-                return;
-            }
+        if (e.getDiagnosticCode() == CoreServiceCode.OPERATION_DENIED) {
+            return;
         }
         throw e;
     }
