@@ -259,7 +259,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
      * create result mapping.
      *
      * @return result mapping
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgSingleResultMapping<TgBlob> ofBlob() {
         if (blobMapping == null) {
@@ -281,7 +281,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
      * create result mapping.
      *
      * @return result mapping
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgSingleResultMapping<TgClob> ofClob() {
         if (clobMapping == null) {

@@ -30,7 +30,7 @@ import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
 /**
  * object factory.
  *
- * @since X.X.X
+ * @since 1.8.0
  */
 public class IceaxeObjectFactory {
 

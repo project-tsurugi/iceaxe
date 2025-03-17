@@ -306,7 +306,7 @@ public class TgBindVariables {
      *
      * @param name name
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindVariables addBlob(@Nonnull String name) {
         addInternal(name, TgDataType.BLOB);
@@ -318,7 +318,7 @@ public class TgBindVariables {
      *
      * @param name name
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindVariables addClob(@Nonnull String name) {
         addInternal(name, TgDataType.CLOB);

@@ -25,7 +25,7 @@ import java.util.Objects;
 /**
  * Iceaxe file utility.
  *
- * @since X.X.X
+ * @since 1.8.0
  */
 public final class IceaxeFileUtil {
 

@@ -295,61 +295,61 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TgBlobReference} get timeout.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     BLOB_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 11, "BLOB get timeout"),
     /**
      * {@link TgBlobReference} cache get timeout.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     BLOB_CACHE_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 12, "BLOB cache get timeout"),
     /**
      * {@link TgBlobReference} cache close timeout.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     BLOB_CACHE_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 13, "BLOB cache close timeout"),
     /**
      * {@link TgBlobReference} close timeout.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     BLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 18, "BLOB close timeout"),
     /**
      * {@link TgBlobReference} close error.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     BLOB_CLOSE_ERROR(IceaxeErrorCodeBlock.OBJECT + 19, "BLOB close error"),
     /**
      * {@link TgClobReference} get timeout.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     CLOB_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 21, "CLOB get timeout"),
     /**
      * {@link TgClobReference} cache get timeout.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     CLOB_CACHE_GET_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 22, "CLOB cache get timeout"),
     /**
      * {@link TgClobReference} cache close timeout.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     CLOB_CACHE_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 23, "CLOB cache close timeout"),
     /**
      * {@link TgClobReference} close timeout.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     CLOB_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 28, "CLOB close timeout"),
     /**
      * {@link TgClobReference} close error.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     CLOB_CLOSE_ERROR(IceaxeErrorCodeBlock.OBJECT + 29, "CLOB close error"),
 

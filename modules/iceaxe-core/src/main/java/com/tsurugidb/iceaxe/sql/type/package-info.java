@@ -16,6 +16,6 @@
 /**
  * Iceaxe SQL type classes.
  *
- * @since X.X.X
+ * @since 1.8.0
  */
 package com.tsurugidb.iceaxe.sql.type;

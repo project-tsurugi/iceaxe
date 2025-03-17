@@ -979,7 +979,7 @@ public interface TsurugiResultIndexRecord {
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      * @throws NullPointerException        if value is null
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull TgBlobReference getBlob(int index) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBlobOrNull(index);
@@ -995,7 +995,7 @@ public interface TsurugiResultIndexRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default TgBlobReference getBlob(int index, TgBlobReference defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBlobOrNull(index);
@@ -1010,7 +1010,7 @@ public interface TsurugiResultIndexRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull Optional<TgBlobReference> findBlob(int index) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getBlobOrNull(index);
@@ -1025,7 +1025,7 @@ public interface TsurugiResultIndexRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nullable TgBlobReference getBlobOrNull(int index) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getValueOrNull(index);
@@ -1043,7 +1043,7 @@ public interface TsurugiResultIndexRecord {
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      * @throws NullPointerException        if value is null
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull TgClobReference getClob(int index) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getClobOrNull(index);
@@ -1059,7 +1059,7 @@ public interface TsurugiResultIndexRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default TgClobReference getClob(int index, TgClobReference defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getClobOrNull(index);
@@ -1074,7 +1074,7 @@ public interface TsurugiResultIndexRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull Optional<TgClobReference> findClob(int index) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getClobOrNull(index);
@@ -1089,7 +1089,7 @@ public interface TsurugiResultIndexRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nullable TgClobReference getClobOrNull(int index) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = getValueOrNull(index);

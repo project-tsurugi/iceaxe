@@ -227,7 +227,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      *
      * @param name bind variable name
      * @return parameter mapping
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgSingleParameterMapping<TgBlob> ofBlob(String name) {
         return create(name, TgDataType.BLOB, (n, v, c) -> {
@@ -243,7 +243,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      *
      * @param name bind variable name
      * @return parameter mapping
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgSingleParameterMapping<TgClob> ofClob(String name) {
         return create(name, TgDataType.CLOB, (n, v, c) -> {
@@ -260,7 +260,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @param name bind variable name
      * @param type type
      * @return parameter mapping
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgSingleParameterMapping<Path> ofPath(String name, TgDataType type) {
         switch (type) {

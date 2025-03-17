@@ -791,7 +791,7 @@ public interface TsurugiResultNameEntity {
      * @param name column name
      * @return value
      * @throws NullPointerException if value is null
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull TgBlob getBlob(String name) {
         var value = getBlobOrNull(name);
@@ -804,7 +804,7 @@ public interface TsurugiResultNameEntity {
      * @param name         column name
      * @param defaultValue value to return if original value is null
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default TgBlob getBlob(String name, TgBlob defaultValue) {
         var value = getBlobOrNull(name);
@@ -816,7 +816,7 @@ public interface TsurugiResultNameEntity {
      *
      * @param name column name
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull Optional<TgBlob> findBlob(String name) {
         var value = getBlobOrNull(name);
@@ -828,7 +828,7 @@ public interface TsurugiResultNameEntity {
      *
      * @param name column name
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nullable TgBlob getBlobOrNull(String name) {
         var value = getValueOrNull(name);
@@ -843,7 +843,7 @@ public interface TsurugiResultNameEntity {
      * @param name column name
      * @return value
      * @throws NullPointerException if value is null
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull TgClob getClob(String name) {
         var value = getClobOrNull(name);
@@ -856,7 +856,7 @@ public interface TsurugiResultNameEntity {
      * @param name         column name
      * @param defaultValue value to return if original value is null
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default TgClob getClob(String name, TgClob defaultValue) {
         var value = getClobOrNull(name);
@@ -868,7 +868,7 @@ public interface TsurugiResultNameEntity {
      *
      * @param name column name
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull Optional<TgClob> findClob(String name) {
         var value = getClobOrNull(name);
@@ -880,7 +880,7 @@ public interface TsurugiResultNameEntity {
      *
      * @param name column name
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nullable TgClob getClobOrNull(String name) {
         var value = getValueOrNull(name);

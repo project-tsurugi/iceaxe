@@ -213,7 +213,7 @@ public final class IceaxeIoUtil {
      * @param throwableList throwable list
      * @param errorCode     error code for IceaxeIOException
      * @return IOException
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static @Nullable IOException toIOException(List<Throwable> throwableList, IceaxeErrorCode errorCode) {
         IOException ioe = null;

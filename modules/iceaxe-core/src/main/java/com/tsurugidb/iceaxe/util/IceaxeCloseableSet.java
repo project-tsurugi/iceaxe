@@ -181,7 +181,7 @@ public class IceaxeCloseableSet {
      * get internal closeable set.
      *
      * @return closeable set
-     * @since X.X.X
+     * @since 1.8.0
      */
     @IceaxeInternal
     public Set<IceaxeTimeoutCloseable> getInternalSet() {

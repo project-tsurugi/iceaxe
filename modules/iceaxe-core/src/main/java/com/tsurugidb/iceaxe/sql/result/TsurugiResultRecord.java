@@ -154,7 +154,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * get transaction.
      *
      * @return transaction
-     * @since X.X.X
+     * @since 1.8.0
      */
     protected TsurugiTransaction getTransaction() {
         return ownerResult.getTransaction();

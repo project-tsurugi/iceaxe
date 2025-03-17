@@ -116,37 +116,37 @@ public class TgSessionOption {
         /**
          * {@link TgBlobReference} get.
          *
-         * @since X.X.X
+         * @since 1.8.0
          */
         BLOB_GET,
         /**
          * {@link TgBlobReference} cache get.
          *
-         * @since X.X.X
+         * @since 1.8.0
          */
         BLOB_CACHE_GET,
         /**
          * {@link TgBlobReference} close.
          *
-         * @since X.X.X
+         * @since 1.8.0
          */
         BLOB_CLOSE,
         /**
          * {@link TgClobReference} get.
          *
-         * @since X.X.X
+         * @since 1.8.0
          */
         CLOB_GET,
         /**
          * {@link TgClobReference} cache get.
          *
-         * @since X.X.X
+         * @since 1.8.0
          */
         CLOB_CACHE_GET,
         /**
          * {@link TgClobReference} close.
          *
-         * @since X.X.X
+         * @since 1.8.0
          */
         CLOB_CLOSE,
 

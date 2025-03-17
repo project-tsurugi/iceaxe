@@ -100,13 +100,13 @@ public enum TgDataType {
     /**
      * character large objects
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     CLOB(AtomType.CLOB, List.of(TgClob.class)),
     /**
      * binary large objects
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     BLOB(AtomType.BLOB, List.of(TgBlob.class)),
     //

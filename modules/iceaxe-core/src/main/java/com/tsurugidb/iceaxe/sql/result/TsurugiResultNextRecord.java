@@ -926,7 +926,7 @@ public interface TsurugiResultNextRecord {
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      * @throws NullPointerException        if value is null
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull TgBlobReference nextBlob() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBlobOrNull();
@@ -941,7 +941,7 @@ public interface TsurugiResultNextRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default TgBlobReference nextBlob(TgBlobReference defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBlobOrNull();
@@ -955,7 +955,7 @@ public interface TsurugiResultNextRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull Optional<TgBlobReference> nextBlobOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextBlobOrNull();
@@ -969,7 +969,7 @@ public interface TsurugiResultNextRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nullable TgBlobReference nextBlobOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextValueOrNull();
@@ -986,7 +986,7 @@ public interface TsurugiResultNextRecord {
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
      * @throws NullPointerException        if value is null
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull TgClobReference nextClob() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextClobOrNull();
@@ -1001,7 +1001,7 @@ public interface TsurugiResultNextRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default TgClobReference nextClob(TgClobReference defaultValue) throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextClobOrNull();
@@ -1015,7 +1015,7 @@ public interface TsurugiResultNextRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull Optional<TgClobReference> nextClobOpt() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextClobOrNull();
@@ -1029,7 +1029,7 @@ public interface TsurugiResultNextRecord {
      * @throws IOException                 if an I/O error occurs while retrieving the column data
      * @throws InterruptedException        if interrupted while retrieving the column data
      * @throws TsurugiTransactionException if server error occurs while retrieving the column data
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nullable TgClobReference nextClobOrNull() throws IOException, InterruptedException, TsurugiTransactionException {
         var value = nextValueOrNull();

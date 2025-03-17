@@ -113,7 +113,7 @@ public abstract class TsurugiSqlResult implements IceaxeTimeoutCloseable {
      * get transaction.
      *
      * @return transaction
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TsurugiTransaction getTransaction() {
         return ownerTransaction;

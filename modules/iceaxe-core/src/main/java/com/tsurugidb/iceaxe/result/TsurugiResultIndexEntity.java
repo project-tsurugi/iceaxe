@@ -791,7 +791,7 @@ public interface TsurugiResultIndexEntity {
      * @param index column index
      * @return value
      * @throws NullPointerException if value is null
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull TgBlob getBlob(int index) {
         var value = getBlobOrNull(index);
@@ -804,7 +804,7 @@ public interface TsurugiResultIndexEntity {
      * @param index        column index
      * @param defaultValue value to return if original value is null
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default TgBlob getBlob(int index, TgBlob defaultValue) {
         var value = getBlobOrNull(index);
@@ -816,7 +816,7 @@ public interface TsurugiResultIndexEntity {
      *
      * @param index column index
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull Optional<TgBlob> findBlob(int index) {
         var value = getBlobOrNull(index);
@@ -828,7 +828,7 @@ public interface TsurugiResultIndexEntity {
      *
      * @param index column index
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nullable TgBlob getBlobOrNull(int index) {
         var value = getValueOrNull(index);
@@ -843,7 +843,7 @@ public interface TsurugiResultIndexEntity {
      * @param index column index
      * @return value
      * @throws NullPointerException if value is null
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull TgClob getClob(int index) {
         var value = getClobOrNull(index);
@@ -856,7 +856,7 @@ public interface TsurugiResultIndexEntity {
      * @param index        column index
      * @param defaultValue value to return if original value is null
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default TgClob getClob(int index, TgClob defaultValue) {
         var value = getClobOrNull(index);
@@ -868,7 +868,7 @@ public interface TsurugiResultIndexEntity {
      *
      * @param index column index
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nonnull Optional<TgClob> findClob(int index) {
         var value = getClobOrNull(index);
@@ -880,7 +880,7 @@ public interface TsurugiResultIndexEntity {
      *
      * @param index column index
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public default @Nullable TgClob getClobOrNull(int index) {
         var value = getValueOrNull(index);

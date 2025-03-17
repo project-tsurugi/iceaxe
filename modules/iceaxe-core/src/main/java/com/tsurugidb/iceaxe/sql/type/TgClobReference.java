@@ -42,7 +42,7 @@ import com.tsurugidb.tsubakuro.sql.Transaction;
 /**
  * CLOB used in query result.
  *
- * @since X.X.X
+ * @since 1.8.0
  */
 public class TgClobReference implements IceaxeTimeoutCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TgClobReference.class);

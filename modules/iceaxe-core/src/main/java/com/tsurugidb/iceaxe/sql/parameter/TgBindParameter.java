@@ -296,7 +296,7 @@ public class TgBindParameter {
      * @param name  name
      * @param value value
      * @return bind parameter
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter of(@Nonnull String name, @Nullable TgBlob value) {
         var closeable = (value != null && value.isDeleteOnExecuteFinished()) ? value : null;
@@ -309,7 +309,7 @@ public class TgBindParameter {
      * @param name name
      * @param path path
      * @return bind parameter
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter ofBlob(@Nonnull String name, @Nullable Path path) {
         return new TgBindParameter(IceaxeLowParameterUtil.createBlob(name, path), () -> toString(name, path, Path.class));
@@ -322,7 +322,7 @@ public class TgBindParameter {
      * @param is   input stream
      * @return bind parameter
      * @throws IOException if an I/O error occurs when reading or writing
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter ofBlob(@Nonnull String name, @Nullable InputStream is) throws IOException {
         TgBlob blob;
@@ -342,7 +342,7 @@ public class TgBindParameter {
      * @param value value
      * @return bind parameter
      * @throws IOException if an I/O error occurs writing to the file
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter ofBlob(@Nonnull String name, @Nullable byte[] value) throws IOException {
         TgBlob blob;
@@ -361,7 +361,7 @@ public class TgBindParameter {
      * @param name  name
      * @param value value
      * @return bind parameter
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter of(@Nonnull String name, @Nullable TgClob value) {
         var closeable = (value != null && value.isDeleteOnExecuteFinished()) ? value : null;
@@ -374,7 +374,7 @@ public class TgBindParameter {
      * @param name name
      * @param path path
      * @return bind parameter
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter ofClob(@Nonnull String name, @Nullable Path path) {
         return new TgBindParameter(IceaxeLowParameterUtil.createClob(name, path), () -> toString(name, path, Path.class));
@@ -387,7 +387,7 @@ public class TgBindParameter {
      * @param reader reader
      * @return bind parameter
      * @throws IOException if an I/O error occurs when reading or writing
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter ofClob(@Nonnull String name, @Nullable Reader reader) throws IOException {
         TgClob clob;
@@ -407,7 +407,7 @@ public class TgBindParameter {
      * @param value value
      * @return bind parameter
      * @throws IOException if an I/O error occurs writing to the file
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter ofClob(@Nonnull String name, @Nullable String value) throws IOException {
         TgClob clob;
@@ -427,7 +427,7 @@ public class TgBindParameter {
      * @param type type
      * @param path value
      * @return bind parameter
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindParameter of(@Nonnull String name, @Nonnull TgDataType type, @Nullable Path path) {
         switch (type) {
@@ -460,7 +460,7 @@ public class TgBindParameter {
      * @param lowParameter   low parameter
      * @param closeable      object to close on execute finished
      * @param stringSupplier string supplier
-     * @since X.X.X
+     * @since 1.8.0
      */
     protected TgBindParameter(Parameter lowParameter, IceaxeTimeoutCloseable closeable, Supplier<String> stringSupplier) {
         this.lowParameter = lowParameter;

@@ -378,7 +378,7 @@ public class TgBindParameters {
      * @param name  name
      * @param value value
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters addBlob(@Nonnull String name, @Nullable TgBlob value) {
         add(TgBindParameter.of(name, value));
@@ -391,7 +391,7 @@ public class TgBindParameters {
      * @param name name
      * @param path path
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters addBlob(@Nonnull String name, @Nullable Path path) {
         add(TgBindParameter.ofBlob(name, path));
@@ -405,7 +405,7 @@ public class TgBindParameters {
      * @param is   input stream
      * @return this
      * @throws IOException if an I/O error occurs when reading or writing
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters addBlob(@Nonnull String name, @Nullable InputStream is) throws IOException {
         add(TgBindParameter.ofBlob(name, is));
@@ -419,7 +419,7 @@ public class TgBindParameters {
      * @param value value
      * @return this
      * @throws IOException if an I/O error occurs writing to the file
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters addBlob(@Nonnull String name, @Nullable byte[] value) throws IOException {
         add(TgBindParameter.ofBlob(name, value));
@@ -432,7 +432,7 @@ public class TgBindParameters {
      * @param name  name
      * @param value value
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters addClob(@Nonnull String name, @Nullable TgClob value) {
         add(TgBindParameter.of(name, value));
@@ -445,7 +445,7 @@ public class TgBindParameters {
      * @param name name
      * @param path path
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters addClob(@Nonnull String name, @Nullable Path path) {
         add(TgBindParameter.ofClob(name, path));
@@ -459,7 +459,7 @@ public class TgBindParameters {
      * @param reader reader
      * @return this
      * @throws IOException if an I/O error occurs when reading or writing
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters addClob(@Nonnull String name, @Nullable Reader reader) throws IOException {
         add(TgBindParameter.ofClob(name, reader));
@@ -473,7 +473,7 @@ public class TgBindParameters {
      * @param value value
      * @return this
      * @throws IOException if an I/O error occurs writing to the file
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters addClob(@Nonnull String name, @Nullable String value) throws IOException {
         add(TgBindParameter.ofClob(name, value));
@@ -731,7 +731,7 @@ public class TgBindParameters {
      * @param name  name
      * @param value value
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters add(@Nonnull String name, @Nullable TgBlob value) {
         return addBlob(name, value);
@@ -743,7 +743,7 @@ public class TgBindParameters {
      * @param name  name
      * @param value value
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters add(@Nonnull String name, @Nullable TgClob value) {
         return addClob(name, value);
@@ -756,7 +756,7 @@ public class TgBindParameters {
      * @param type type
      * @param path path
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgBindParameters add(@Nonnull String name, TgDataType type, @Nullable Path path) {
         switch (type) {

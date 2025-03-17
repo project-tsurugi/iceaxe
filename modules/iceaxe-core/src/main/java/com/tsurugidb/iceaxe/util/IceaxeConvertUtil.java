@@ -57,7 +57,7 @@ public class IceaxeConvertUtil {
      * set object factory.
      *
      * @param factory object factory
-     * @since X.X.X
+     * @since 1.8.0
      */
     public void setIceaxeObjectFactory(IceaxeObjectFactory factory) {
         this.objectFactory = factory;
@@ -67,7 +67,7 @@ public class IceaxeConvertUtil {
      * get object factory.
      *
      * @return object factory
-     * @since X.X.X
+     * @since 1.8.0
      */
     public @Nonnull IceaxeObjectFactory getIceaxeObjectFactory() {
         var factory = this.objectFactory;
@@ -782,7 +782,7 @@ public class IceaxeConvertUtil {
      *
      * @param obj value
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public @Nullable TgBlob toBlob(@Nullable Object obj) {
         if (obj == null) {
@@ -804,7 +804,7 @@ public class IceaxeConvertUtil {
      *
      * @param obj value
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     protected @Nullable TgBlob convertBlob(@Nonnull Object obj) {
         if (obj instanceof TgBlob) {
@@ -837,7 +837,7 @@ public class IceaxeConvertUtil {
      *
      * @param obj value
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public @Nullable TgBlobReference toBlobReference(@Nullable Object obj) {
         if (obj == null) {
@@ -859,7 +859,7 @@ public class IceaxeConvertUtil {
      *
      * @param obj value
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     protected @Nullable TgBlobReference convertBlobReference(@Nonnull Object obj) {
         if (obj instanceof TgBlobReference) {
@@ -873,7 +873,7 @@ public class IceaxeConvertUtil {
      *
      * @param obj value
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public @Nullable TgClob toClob(@Nullable Object obj) {
         if (obj == null) {
@@ -895,7 +895,7 @@ public class IceaxeConvertUtil {
      *
      * @param obj value
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     protected @Nullable TgClob convertClob(@Nonnull Object obj) {
         if (obj instanceof TgClob) {
@@ -928,7 +928,7 @@ public class IceaxeConvertUtil {
      *
      * @param obj value
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     public @Nullable TgClobReference toClobReference(@Nullable Object obj) {
         if (obj == null) {
@@ -950,7 +950,7 @@ public class IceaxeConvertUtil {
      *
      * @param obj value
      * @return value
-     * @since X.X.X
+     * @since 1.8.0
      */
     protected @Nullable TgClobReference convertClobReference(@Nonnull Object obj) {
         if (obj instanceof TgClobReference) {

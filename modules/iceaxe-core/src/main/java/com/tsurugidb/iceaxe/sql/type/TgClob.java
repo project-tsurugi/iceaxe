@@ -24,7 +24,7 @@ import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 /**
  * CLOB.
  *
- * @since X.X.X
+ * @since 1.8.0
  */
 public interface TgClob extends IceaxeTimeoutCloseable {
 

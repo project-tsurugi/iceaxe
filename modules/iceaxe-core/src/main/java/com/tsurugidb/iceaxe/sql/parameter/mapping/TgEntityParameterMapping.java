@@ -575,7 +575,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param name   name
      * @param getter getter from parameter
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityParameterMapping<P> addBlob(String name, Function<P, TgBlob> getter) {
         addVariable(name, TgDataType.BLOB);
@@ -597,7 +597,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param getter    getter from parameter
      * @param converter converter to database data type
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityParameterMapping<P> addBlob(String name, Function<P, V> getter, Function<V, TgBlob> converter) {
         return addBlob(name, p -> {
@@ -612,7 +612,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param name   name
      * @param getter getter from parameter
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityParameterMapping<P> addBlobPath(String name, Function<P, Path> getter) {
         addVariable(name, TgDataType.BLOB);
@@ -631,7 +631,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param getter    getter from parameter
      * @param converter converter to database data type
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityParameterMapping<P> addBlobPath(String name, Function<P, V> getter, Function<V, Path> converter) {
         return addBlobPath(name, p -> {
@@ -646,7 +646,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param name   name
      * @param getter getter from parameter
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityParameterMapping<P> addBlobBytes(String name, Function<P, byte[]> getter) {
         addVariable(name, TgDataType.BLOB);
@@ -673,7 +673,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param getter    getter from parameter
      * @param converter converter to database data type
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityParameterMapping<P> addBlobBytes(String name, Function<P, V> getter, Function<V, byte[]> converter) {
         return addBlobBytes(name, p -> {
@@ -688,7 +688,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param name   name
      * @param getter getter from parameter
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityParameterMapping<P> addClob(String name, Function<P, TgClob> getter) {
         addVariable(name, TgDataType.CLOB);
@@ -710,7 +710,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param getter    getter from parameter
      * @param converter converter to database data type
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityParameterMapping<P> addClob(String name, Function<P, V> getter, Function<V, TgClob> converter) {
         return addClob(name, p -> {
@@ -725,7 +725,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param name   name
      * @param getter getter from parameter
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityParameterMapping<P> addClobPath(String name, Function<P, Path> getter) {
         addVariable(name, TgDataType.CLOB);
@@ -744,7 +744,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param getter    getter from parameter
      * @param converter converter to database data type
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityParameterMapping<P> addClobPath(String name, Function<P, V> getter, Function<V, Path> converter) {
         return addClobPath(name, p -> {
@@ -759,7 +759,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param name   name
      * @param getter getter from parameter
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityParameterMapping<P> addClobString(String name, Function<P, String> getter) {
         addVariable(name, TgDataType.CLOB);
@@ -786,7 +786,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param getter    getter from parameter
      * @param converter converter to database data type
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityParameterMapping<P> addClobString(String name, Function<P, V> getter, Function<V, String> converter) {
         return addClobString(name, p -> {

@@ -1352,7 +1352,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      *
      * @param setter setter to R
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityResultMapping<R> addBlob(BiConsumer<R, TgBlob> setter) {
         int index = columnConverterList.size();
@@ -1366,7 +1366,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter    setter to R
      * @param converter converter to V
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityResultMapping<R> addBlob(BiConsumer<R, V> setter, Function<TgBlob, V> converter) {
         int index = columnConverterList.size();
@@ -1379,7 +1379,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param index  column index
      * @param setter setter to R
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityResultMapping<R> addBlob(int index, BiConsumer<R, TgBlob> setter) {
         set(index, record -> {
@@ -1401,7 +1401,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter    setter to R
      * @param converter converter to V
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityResultMapping<R> addBlob(int index, BiConsumer<R, V> setter, Function<TgBlob, V> converter) {
         return addBlob(index, (entity, value) -> {
@@ -1416,7 +1416,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param name   column name
      * @param setter setter to R
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityResultMapping<R> addBlob(String name, BiConsumer<R, TgBlob> setter) {
         set(name, record -> {
@@ -1438,7 +1438,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter    setter to R
      * @param converter converter to V
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityResultMapping<R> addBlob(String name, BiConsumer<R, V> setter, Function<TgBlob, V> converter) {
         return addBlob(name, (entity, value) -> {
@@ -1454,7 +1454,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      *
      * @param setter setter to R
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityResultMapping<R> addClob(BiConsumer<R, TgClob> setter) {
         int index = columnConverterList.size();
@@ -1468,7 +1468,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter    setter to R
      * @param converter converter to V
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityResultMapping<R> addClob(BiConsumer<R, V> setter, Function<TgClob, V> converter) {
         int index = columnConverterList.size();
@@ -1481,7 +1481,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param index  column index
      * @param setter setter to R
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityResultMapping<R> addClob(int index, BiConsumer<R, TgClob> setter) {
         set(index, record -> {
@@ -1503,7 +1503,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter    setter to R
      * @param converter converter to V
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityResultMapping<R> addClob(int index, BiConsumer<R, V> setter, Function<TgClob, V> converter) {
         return addClob(index, (entity, value) -> {
@@ -1518,7 +1518,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param name   column name
      * @param setter setter to R
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public TgEntityResultMapping<R> addClob(String name, BiConsumer<R, TgClob> setter) {
         set(name, record -> {
@@ -1537,7 +1537,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
      * @param setter    setter to R
      * @param converter converter to V
      * @return this
-     * @since X.X.X
+     * @since 1.8.0
      */
     public <V> TgEntityResultMapping<R> addClob(String name, BiConsumer<R, V> setter, Function<TgClob, V> converter) {
         return addClob(name, (entity, value) -> {

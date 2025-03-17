@@ -41,7 +41,7 @@ import com.tsurugidb.tsubakuro.sql.Transaction;
 /**
  * BLOB used in query result.
  *
- * @since X.X.X
+ * @since 1.8.0
  */
 public class TgBlobReference implements IceaxeTimeoutCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(TgBlobReference.class);

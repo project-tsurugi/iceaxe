@@ -23,7 +23,7 @@ import java.nio.file.Path;
 /**
  * BLOB using temporary file.
  *
- * @since X.X.X
+ * @since 1.8.0
  */
 public class TgBlobTempFile implements TgBlob {
 

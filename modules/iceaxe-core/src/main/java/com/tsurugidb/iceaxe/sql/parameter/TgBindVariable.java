@@ -734,7 +734,7 @@ public abstract class TgBindVariable<T> {
      *
      * @param name name
      * @return bind variable
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindVariableBlob ofBlob(@Nonnull String name) {
         return new TgBindVariableBlob(name);
@@ -743,7 +743,7 @@ public abstract class TgBindVariable<T> {
     /**
      * Tsurugi Bind Variable&lt;TgBlob&gt;.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static class TgBindVariableBlob extends TgBindVariable<TgBlob> {
 
@@ -804,7 +804,7 @@ public abstract class TgBindVariable<T> {
      *
      * @param name name
      * @return bind variable
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static TgBindVariableClob ofClob(@Nonnull String name) {
         return new TgBindVariableClob(name);
@@ -813,7 +813,7 @@ public abstract class TgBindVariable<T> {
     /**
      * Tsurugi Bind Variable&lt;TgClob&gt;.
      *
-     * @since X.X.X
+     * @since 1.8.0
      */
     public static class TgBindVariableClob extends TgBindVariable<TgClob> {
 
