@@ -401,7 +401,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                     return entity.getZzz().startsWith("1");
                 }, list);
             });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
         }
     }
 
@@ -421,7 +421,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                     return !entity.getZzz().startsWith("1");
                 }, list);
             });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_COMPILER_FEATURE_EXCEPTION, e);
+            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
         }
     }
 
