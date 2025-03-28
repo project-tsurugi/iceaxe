@@ -77,12 +77,12 @@ class DbSelectCountTest extends DbTestTableTester {
     }
 
     @RepeatedTest(30)
-    void countWhileInserLtx() throws Exception {
+    void countWhileInsertLtx() throws Exception {
         countWhileInsert(TgTxOption.ofLTX());
     }
 
     @RepeatedTest(30)
-    void countWhileInserRtx() throws Exception {
+    void countWhileInsertRtx() throws Exception {
         countWhileInsert(TgTxOption.ofRTX());
     }
 
