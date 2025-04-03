@@ -90,6 +90,12 @@ public class TgSessionOption {
 
         /** {@link TsurugiQueryResult} connect */
         RS_CONNECT,
+        /**
+         * {@link TsurugiQueryResult} nextRow, nextColumn, fetch.
+         *
+         * @since X.X.X
+         */
+        RS_FETCH,
         /** {@link TsurugiQueryResult} close */
         RS_CLOSE,
         /** {@link TsurugiStatementResult} connect */

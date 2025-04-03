@@ -21,6 +21,7 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
+import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.sql.type.TgClobReference;
@@ -200,6 +201,24 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      * @since 1.3.0
      */
     RS_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 101, "resultSet connect timeout"),
+    /**
+     * {@link TsurugiQueryResult#nextLowRecord()} timeout.
+     *
+     * @since X.X.X
+     */
+    RS_NEXT_ROW_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 111, "resultSet nextRow timeout"),
+    /**
+     * {@link TsurugiResultRecord#moveCurrentColumnNext()} timeout.
+     *
+     * @since X.X.X
+     */
+    RS_NEXT_COLUMN_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 112, "resultSet nextColumn timeout"),
+    /**
+     * {@link TsurugiResultRecord#fetchCurrentColumnValue()} timeout.
+     *
+     * @since X.X.X
+     */
+    RS_FETCH_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 113, "resultSet fetch timeout"),
     /**
      * {@link TsurugiQueryResult#close()} timeout.
      *

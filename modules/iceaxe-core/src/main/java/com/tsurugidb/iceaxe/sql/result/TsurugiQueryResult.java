@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedQuery;
@@ -44,9 +46,12 @@ import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
+import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
+import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
 import com.tsurugidb.sql.proto.SqlCommon.Column;
+import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.ResultSet;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
@@ -66,6 +71,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     private final IceaxeConvertUtil convertUtil;
     private FutureResponse<ResultSet> lowResultSetFuture;
     private ResultSet lowResultSet;
+    private TgTimeValue fetchTimeout;
     private List<TsurugiQueryResultEventListener<R>> eventListenerList = null;
     private int readCount = 0;
     private TsurugiResultRecord record;
@@ -93,6 +99,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         super(sqlExecuteId, transaction, ps, parameter, afterCloseableSet, TgTimeoutKey.RS_CONNECT, TgTimeoutKey.RS_CLOSE);
         this.resultMapping = resultMapping;
         this.convertUtil = convertUtil;
+
+        var sessionOption = transaction.getSession().getSessionOption();
+        this.fetchTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.RS_FETCH).get();
     }
 
     /**
@@ -128,6 +137,29 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             log.trace("TsurugiQueryResult.initialize close end");
             throw e;
         }
+    }
+
+    /**
+     * set fetch-timeout.
+     *
+     * @param time timeout time
+     * @param unit timeout unit
+     * @since X.X.X
+     */
+    public void setFetchTimeout(long time, TimeUnit unit) {
+        this.fetchTimeout = new TgTimeValue(time, unit);
+        applyFetchTimeout();
+    }
+
+    /**
+     * set fetch-timeout.
+     *
+     * @param timeout time
+     * @since X.X.X
+     */
+    public void setFetchTimeout(TgTimeValue timeout) {
+        this.fetchTimeout = timeout;
+        applyFetchTimeout();
     }
 
     /**
@@ -207,8 +239,17 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             LOG.trace("lowResultSet get end");
 
             this.lowResultSetFuture = null;
+
+            applyFetchTimeout();
         }
         return this.lowResultSet;
+    }
+
+    private synchronized void applyFetchTimeout() {
+        var lowResultSet = this.lowResultSet;
+        if (lowResultSet != null) {
+            lowResultSet.setTimeout(fetchTimeout.value(), fetchTimeout.unit());
+        }
     }
 
     /**
@@ -228,6 +269,9 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             if (LOG.isTraceEnabled()) {
                 LOG.trace("nextLowRecord end. exists={}", exists);
             }
+        } catch (ResponseTimeoutException e) {
+            event(e, listener -> listener.readException(this, e));
+            throw new IceaxeTimeoutIOException(IceaxeErrorCode.RS_NEXT_ROW_TIMEOUT, e);
         } catch (ServerException e) {
             event(e, listener -> listener.readException(this, e));
             throw fillToTsurugiException(new TsurugiTransactionException(e));

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,6 +28,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.result.IceaxeResultNameList.IceaxeAmbiguousNamePolicy;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
@@ -35,6 +38,8 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
+import com.tsurugidb.iceaxe.util.TgTimeValue;
+import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.ResultSet;
 
@@ -166,6 +171,27 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
     }
 
     /**
+     * set fetch-timeout.
+     *
+     * @param time timeout time
+     * @param unit timeout unit
+     * @since X.X.X
+     */
+    public void setFetchTimeout(long time, TimeUnit unit) {
+        ownerResult.setFetchTimeout(time, unit);
+    }
+
+    /**
+     * set fetch-timeout.
+     *
+     * @param timeout time
+     * @since X.X.X
+     */
+    public void setFetchTimeout(TgTimeValue timeout) {
+        ownerResult.setFetchTimeout(timeout);
+    }
+
+    /**
      * get name list.
      *
      * @return list of column name
@@ -242,6 +268,8 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
                 this.currentColumnIndex++;
             }
             return exists;
+        } catch (ResponseTimeoutException e) {
+            throw new IceaxeTimeoutIOException(IceaxeErrorCode.RS_NEXT_COLUMN_TIMEOUT, e);
         } catch (ServerException e) {
             throw ownerResult.fillToTsurugiException(new TsurugiTransactionException(e));
         }
@@ -334,6 +362,8 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
             default:
                 throw new UnsupportedOperationException("unsupported type error. lowType=" + lowType);
             }
+        } catch (ResponseTimeoutException e) {
+            throw new IceaxeTimeoutIOException(IceaxeErrorCode.RS_FETCH_TIMEOUT, e);
         } catch (ServerException e) {
             throw ownerResult.fillToTsurugiException(new TsurugiTransactionException(e));
         }
