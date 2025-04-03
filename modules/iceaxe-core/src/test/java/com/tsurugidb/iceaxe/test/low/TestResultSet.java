@@ -22,13 +22,22 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.util.concurrent.TimeUnit;
 
+import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.tsubakuro.exception.ServerException;
 import com.tsurugidb.tsubakuro.sql.ResultSet;
 import com.tsurugidb.tsubakuro.sql.ResultSetMetadata;
 import com.tsurugidb.tsubakuro.sql.io.DateTimeInterval;
 
 public class TestResultSet extends TestServerResource implements ResultSet {
+
+    public TgTimeValue timeout;
+
+    @Override
+    public void setTimeout(long timeout, TimeUnit unit) {
+        this.timeout = new TgTimeValue(timeout, unit);
+    }
 
     @Override
     public boolean nextRow() throws IOException, ServerException, InterruptedException {
