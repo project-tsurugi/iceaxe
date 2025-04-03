@@ -380,9 +380,14 @@ public class DbTestTableTester {
         var tm = createTransactionManagerOcc(session, "insertTestTable", 3);
         try (var ps = session.createStatement(UPSERT_SQL, INSERT_MAPPING)) {
             tm.execute(transaction -> {
+                var list = new ArrayList<TsurugiStatementResult>(size);
                 for (int i = 0; i < size; i++) {
                     var entity = createTestEntity(i);
-                    transaction.executeAndGetCount(ps, entity);
+                    var result = transaction.executeStatement(ps, entity);
+                    list.add(result);
+                }
+                for (var result : list) {
+                    result.close();
                 }
                 return;
             });
