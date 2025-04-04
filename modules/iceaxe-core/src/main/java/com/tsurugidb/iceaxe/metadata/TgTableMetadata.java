@@ -16,10 +16,12 @@
 package com.tsurugidb.iceaxe.metadata;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlCommon.Column;
 import com.tsurugidb.tsubakuro.sql.TableMetadata;
 
@@ -73,7 +75,18 @@ public class TgTableMetadata {
      * get column list.
      *
      * @return column list
+     * @since X.X.X
      */
+    public List<TgSqlColumn> getColumnList() {
+        return lowTableMetadata.getColumns().stream().map(TgSqlColumn::new).collect(Collectors.toList());
+    }
+
+    /**
+     * get low column list.
+     *
+     * @return column list
+     */
+    @IceaxeInternal
     public List<? extends Column> getLowColumnList() {
         return lowTableMetadata.getColumns();
     }

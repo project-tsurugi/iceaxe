@@ -160,7 +160,7 @@ public enum TgDataType {
         var map = new EnumMap<AtomType, TgDataType>(AtomType.class);
         for (var type : values()) {
             var lowType = type.getLowDataType();
-            map.put(lowType, type);
+            map.putIfAbsent(lowType, type);
         }
         LOW_TYPE_MAP = map;
     }
