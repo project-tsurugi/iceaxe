@@ -19,6 +19,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.tsurugidb.iceaxe.metadata.TgSqlColumn;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
@@ -33,7 +34,6 @@ import com.tsurugidb.iceaxe.sql.type.TgClobReference;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
-import com.tsurugidb.sql.proto.SqlCommon;
 import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 
 /**
@@ -64,15 +64,16 @@ class DbClobTest extends DbTestTableTester {
     void tableMetadata() throws Exception {
         var session = getSession();
         var metadata = session.findTableMetadata(TEST).get();
-        var list = metadata.getLowColumnList();
+        var list = metadata.getColumnList();
         assertEquals(2, list.size());
-        assertColumn("pk", TgDataType.INT, list.get(0));
-        assertColumn("value", TgDataType.CLOB, list.get(1));
+        assertColumn("pk", TgDataType.INT, "INT", list.get(0));
+        assertColumn("value", TgDataType.CLOB, "CLOB", list.get(1));
     }
 
-    private static void assertColumn(String name, TgDataType type, SqlCommon.Column actual) {
+    private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn actual) {
         assertEquals(name, actual.getName());
-        assertEquals(type.getLowDataType(), actual.getAtomType());
+        assertEquals(type, actual.getDataType());
+        assertEquals(sqlType, actual.getSqlType());
     }
 
     @Test

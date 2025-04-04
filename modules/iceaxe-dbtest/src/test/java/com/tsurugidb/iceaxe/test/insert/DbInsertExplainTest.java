@@ -53,7 +53,7 @@ class DbInsertExplainTest extends DbTestTableTester {
     private static void assertExplain(TgStatementMetadata actual) throws Exception {
         assertNotNull(actual.getLowPlanGraph());
 
-        var list = actual.getLowColumnList();
+        var list = actual.getColumnList();
         assertEquals(0, list.size());
     }
 }

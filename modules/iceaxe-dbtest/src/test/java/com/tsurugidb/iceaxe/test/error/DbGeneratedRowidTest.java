@@ -55,7 +55,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
     void metadata() throws Exception {
         var session = getSession();
         var metadata = session.findTableMetadata(TEST).get();
-        var actualSet = metadata.getLowColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
+        var actualSet = metadata.getColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
         var expectedSet = Set.of("foo", "bar", "zzz");
         assertEquals(expectedSet, actualSet);
     }
@@ -67,7 +67,7 @@ class DbGeneratedRowidTest extends DbTestTableTester {
         var session = getSession();
         try (var ps = session.createQuery(sql, TgParameterMapping.of())) {
             var result = ps.explain(TgBindParameters.of());
-            var actualSet = result.getLowColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
+            var actualSet = result.getColumnList().stream().map(c -> c.getName()).collect(Collectors.toSet());
             var expectedSet = Set.of("foo", "bar", "zzz"); // 「select *」ではgenerated_rowidは出てこない
             assertEquals(expectedSet, actualSet);
         }

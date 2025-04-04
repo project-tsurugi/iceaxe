@@ -14,6 +14,7 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.tsurugidb.iceaxe.metadata.TgSqlColumn;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
@@ -22,7 +23,6 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.sql.proto.SqlCommon;
 import com.tsurugidb.tsubakuro.kvs.KvsClient;
 import com.tsurugidb.tsubakuro.kvs.RecordBuffer;
 
@@ -77,15 +77,16 @@ class DbDecimal1Test extends DbTestTableTester {
     void tableMetadata() throws Exception {
         var session = getSession();
         var metadata = session.findTableMetadata(TEST).get();
-        var list = metadata.getLowColumnList();
+        var list = metadata.getColumnList();
         assertEquals(2, list.size());
-        assertColumn("pk", TgDataType.INT, list.get(0));
-        assertColumn("value", TgDataType.DECIMAL, list.get(1));
+        assertColumn("pk", TgDataType.INT, "INT", list.get(0));
+        assertColumn("value", TgDataType.DECIMAL, "DECIMAL", list.get(1)); // TODO DECIMAL(5, 1)
     }
 
-    private static void assertColumn(String name, TgDataType type, SqlCommon.Column actual) {
+    private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn actual) {
         assertEquals(name, actual.getName());
-        assertEquals(type.getLowDataType(), actual.getAtomType());
+        assertEquals(type, actual.getDataType());
+        assertEquals(sqlType, actual.getSqlType());
     }
 
     @Test

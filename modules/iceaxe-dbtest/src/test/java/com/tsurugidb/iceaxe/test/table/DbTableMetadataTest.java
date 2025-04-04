@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import com.tsurugidb.iceaxe.metadata.TgSqlColumn;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.sql.proto.SqlCommon;
 
 /**
  * table metadata test
@@ -37,11 +37,21 @@ class DbTableMetadataTest extends DbTestTableTester {
                     + "  long bigint," //
                     + "  float4 real," //
                     + "  double8 double," //
+                    + "  decimal_ decimal," //
+                    + "  decimal10 decimal(10)," //
                     + "  decimal10_2 decimal(10, 2)," //
-                    + "  ftext char(10)," //
-                    + "  vtext varchar(10)," //
-//TODO              + "  fbytes binary(10)," //
-//TODO              + "  vbytes varbinary(10)," //
+                    + "  decimal_a decimal(*)," //
+                    + "  decimal_a_2 decimal(*, 2)," //
+                    + "  ftext char," //
+                    + "  ftext10 char(10)," //
+                    + "  vtext varchar," //
+                    + "  vtext10 varchar(10)," //
+                    + "  vtext_a varchar(*)," //
+                    + "  fbytes binary," //
+                    + "  fbytes10 binary(10)," //
+                    + "  vbytes varbinary," //
+                    + "  vbytes10 varbinary(10)," //
+                    + "  vbytes_a varbinary(*)," //
                     + "  date1 date," //
                     + "  time1 time," //
                     + "  date_time timestamp," //
@@ -57,28 +67,39 @@ class DbTableMetadataTest extends DbTestTableTester {
         assertNull(metadata.getSchemaName());
         assertEquals(TEST, metadata.getTableName());
 
-        var columnList = metadata.getLowColumnList();
-        assertEquals(12, columnList.size());
+        var columnList = metadata.getColumnList();
+        assertEquals(24, columnList.size());
         int i = 0;
-        assertColumn("int4", TgDataType.INT, columnList.get(i++));
-        assertColumn("long", TgDataType.LONG, columnList.get(i++));
-        assertColumn("float4", TgDataType.FLOAT, columnList.get(i++));
-        assertColumn("double8", TgDataType.DOUBLE, columnList.get(i++));
-        assertColumn("decimal10_2", TgDataType.DECIMAL, columnList.get(i++));
-        assertColumn("ftext", TgDataType.STRING, columnList.get(i++));
-        assertColumn("vtext", TgDataType.STRING, columnList.get(i++));
-//TODO  assertColumn("fbytes", TgDataType.BYTES, columnList.get(i++));
-//TODO  assertColumn("vbytes", TgDataType.BYTES, columnList.get(i++));
-        assertColumn("date1", TgDataType.DATE, columnList.get(i++));
-        assertColumn("time1", TgDataType.TIME, columnList.get(i++));
-        assertColumn("date_time", TgDataType.DATE_TIME, columnList.get(i++));
-        assertColumn("offset_time", TgDataType.OFFSET_TIME, columnList.get(i++));
-        assertColumn("offset_date_time", TgDataType.OFFSET_DATE_TIME, columnList.get(i++));
+        assertColumn("int4", TgDataType.INT, "INT", columnList.get(i++));
+        assertColumn("long", TgDataType.LONG, "BIGINT", columnList.get(i++));
+        assertColumn("float4", TgDataType.FLOAT, "REAL", columnList.get(i++));
+        assertColumn("double8", TgDataType.DOUBLE, "DOUBLE", columnList.get(i++));
+        assertColumn("decimal_", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
+        assertColumn("decimal10", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
+        assertColumn("decimal10_2", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
+        assertColumn("decimal_a", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
+        assertColumn("decimal_a_2", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
+        assertColumn("ftext", TgDataType.STRING, "CHARACTER", columnList.get(i++));
+        assertColumn("ftext10", TgDataType.STRING, "CHARACTER", columnList.get(i++));
+        assertColumn("vtext", TgDataType.STRING, "CHARACTER", columnList.get(i++));
+        assertColumn("vtext10", TgDataType.STRING, "CHARACTER", columnList.get(i++));
+        assertColumn("vtext_a", TgDataType.STRING, "CHARACTER", columnList.get(i++));
+        assertColumn("fbytes", TgDataType.BYTES, "BINARY", columnList.get(i++));
+        assertColumn("fbytes10", TgDataType.BYTES, "BINARY", columnList.get(i++));
+        assertColumn("vbytes", TgDataType.BYTES, "BINARY", columnList.get(i++));
+        assertColumn("vbytes10", TgDataType.BYTES, "BINARY", columnList.get(i++));
+        assertColumn("vbytes_a", TgDataType.BYTES, "BINARY", columnList.get(i++));
+        assertColumn("date1", TgDataType.DATE, "DATE", columnList.get(i++));
+        assertColumn("time1", TgDataType.TIME, "TIME", columnList.get(i++));
+        assertColumn("date_time", TgDataType.DATE_TIME, "TIMESTAMP", columnList.get(i++));
+        assertColumn("offset_time", TgDataType.OFFSET_TIME, "TIME WITH TIME ZONE", columnList.get(i++));
+        assertColumn("offset_date_time", TgDataType.OFFSET_DATE_TIME, "TIMESTAMP WITH TIME ZONE", columnList.get(i++));
     }
 
-    private static void assertColumn(String name, TgDataType type, SqlCommon.Column column) {
+    private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn column) {
         assertEquals(name, column.getName());
-        assertEquals(type.getLowDataType(), column.getAtomType());
+        assertEquals(type, column.getDataType());
+        assertEquals(sqlType, column.getSqlType());
     }
 
     @Test

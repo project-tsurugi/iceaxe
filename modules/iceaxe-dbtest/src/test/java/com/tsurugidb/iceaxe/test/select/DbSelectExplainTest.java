@@ -11,12 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
-import com.tsurugidb.sql.proto.SqlCommon.AtomType;
 
 /**
  * explain select test
@@ -65,17 +65,21 @@ class DbSelectExplainTest extends DbTestTableTester {
     private static void assertExplain(TgStatementMetadata actual) throws Exception {
         assertNotNull(actual.getLowPlanGraph());
 
-        var list = actual.getLowColumnList();
+        var list = actual.getColumnList();
         assertEquals(3, list.size());
         var c0 = list.get(0);
         assertEquals("foo", c0.getName());
-        assertEquals(AtomType.INT4, c0.getAtomType());
+        assertEquals(TgDataType.INT, c0.getDataType());
+        assertEquals("INT", c0.getSqlType());
         var c1 = list.get(1);
         assertEquals("bar", c1.getName());
-        assertEquals(AtomType.INT8, c1.getAtomType());
+        assertEquals(TgDataType.LONG, c1.getDataType());
+        assertEquals("BIGINT", c1.getSqlType());
         var c2 = list.get(2);
         assertEquals("zzz", c2.getName());
-        assertEquals(AtomType.CHARACTER, c2.getAtomType());
+        assertEquals(TgDataType.STRING, c2.getDataType());
+//TODO        assertEquals("VARCHAR(10)", c2.getSqlType());
+        assertEquals("CHARACTER", c2.getSqlType());
     }
 
     @Test

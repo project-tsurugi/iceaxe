@@ -60,7 +60,7 @@ class DbCreateTableExplainTest extends DbTestTableTester {
             actual.getLowPlanGraph();
         });
 
-        var list = actual.getLowColumnList();
+        var list = actual.getColumnList();
         assertEquals(0, list.size());
     }
 }
