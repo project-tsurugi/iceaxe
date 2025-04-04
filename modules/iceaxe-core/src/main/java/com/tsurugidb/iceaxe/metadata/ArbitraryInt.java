@@ -17,14 +17,28 @@ package com.tsurugidb.iceaxe.metadata;
 
 import java.util.Objects;
 
-public /* record */ class ArbitraryInt {
+/**
+ * Int with Arbitrary.
+ */
+public final /* record */ class ArbitraryInt {
 
+    /**
+     * Creates a new instance.
+     *
+     * @param value value
+     * @return instance
+     */
     public static ArbitraryInt of(int value) {
         return new ArbitraryInt(value, false);
     }
 
     private static final ArbitraryInt ARBITRARY = new ArbitraryInt(0, true);
 
+    /**
+     * Get arbitrary instance.
+     *
+     * @return instance
+     */
     public static ArbitraryInt ofArbitrary() {
         return ARBITRARY;
     }
@@ -37,13 +51,25 @@ public /* record */ class ArbitraryInt {
         this.arbitrary = arbitrary;
     }
 
+    /**
+     * Arbitrary exception.
+     */
     @SuppressWarnings("serial")
     public static class ArbitraryException extends RuntimeException {
+        /**
+         * Creates a new instance.
+         */
         public ArbitraryException() {
             super("arbitrary");
         }
     }
 
+    /**
+     * Get value.
+     *
+     * @return value
+     * @throws ArbitraryException if arbitrary
+     */
     public int value() throws ArbitraryException {
         if (this.arbitrary) {
             throw new ArbitraryException();
@@ -51,6 +77,11 @@ public /* record */ class ArbitraryInt {
         return this.value;
     }
 
+    /**
+     * Get arbitrary.
+     *
+     * @return arbitrary
+     */
     public boolean arbitrary() {
         return this.arbitrary;
     }

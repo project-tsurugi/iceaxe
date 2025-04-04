@@ -199,6 +199,11 @@ public class TgSqlColumn {
         }
     }
 
+    /**
+     * Get SQL type (DECIMAL).
+     *
+     * @return SQL type
+     */
     protected String getSqlTypeDecimal() {
         var sb = new StringBuilder("DECIMAL");
         var precision = findPrecision();
@@ -216,6 +221,13 @@ public class TgSqlColumn {
         return sb.toString();
     }
 
+    /**
+     * Get SQL type (VAR(length)).
+     *
+     * @param defaultName default name
+     * @param baseName    base name
+     * @return SQL type
+     */
     protected String getSqlTypeVarLength(String defaultName, String baseName) {
         var varying = findVarying();
         if (varying.isEmpty()) {
@@ -237,6 +249,11 @@ public class TgSqlColumn {
         return sb.toString();
     }
 
+    /**
+     * Get low column.
+     *
+     * @return low column
+     */
     @IceaxeInternal
     public Column getLowColumn() {
         return this.lowColumn;
