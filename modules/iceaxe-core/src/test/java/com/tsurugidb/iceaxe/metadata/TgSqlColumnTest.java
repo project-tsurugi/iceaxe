@@ -160,6 +160,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("BOOLEAN", column.getSqlType());
+        assertEquals("BOOLEAN", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -168,6 +169,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("INT", column.getSqlType());
+        assertEquals("INT", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -176,6 +178,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("BIGINT", column.getSqlType());
+        assertEquals("BIGINT", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -184,6 +187,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("REAL", column.getSqlType());
+        assertEquals("REAL", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -192,6 +196,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("DOUBLE", column.getSqlType());
+        assertEquals("DOUBLE", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -201,6 +206,7 @@ class TgSqlColumnTest {
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("DECIMAL", column.getSqlType());
+            assertEquals("DECIMAL", column.getSqlTypeOrAtomTypeName());
         }
 
         {
@@ -208,18 +214,21 @@ class TgSqlColumnTest {
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("DECIMAL(123)", column.getSqlType());
+            assertEquals("DECIMAL(123)", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.DECIMAL).setPrecision(123).setScale(4).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("DECIMAL(123, 4)", column.getSqlType());
+            assertEquals("DECIMAL(123, 4)", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.DECIMAL).setPrecision(123).setArbitraryScale(Empty.newBuilder().build()).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("DECIMAL(123, *)", column.getSqlType());
+            assertEquals("DECIMAL(123, *)", column.getSqlTypeOrAtomTypeName());
         }
 
         {
@@ -227,18 +236,21 @@ class TgSqlColumnTest {
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("DECIMAL(*)", column.getSqlType());
+            assertEquals("DECIMAL(*)", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.DECIMAL).setArbitraryPrecision(Empty.newBuilder().build()).setScale(123).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("DECIMAL(*, 123)", column.getSqlType());
+            assertEquals("DECIMAL(*, 123)", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.DECIMAL).setArbitraryPrecision(Empty.newBuilder().build()).setArbitraryScale(Empty.newBuilder().build()).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("DECIMAL(*, *)", column.getSqlType());
+            assertEquals("DECIMAL(*, *)", column.getSqlTypeOrAtomTypeName());
         }
     }
 
@@ -248,13 +260,15 @@ class TgSqlColumnTest {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.CHARACTER).build();
             var column = new TgSqlColumn(lowColumn);
 
-            assertEquals("CHARACTER", column.getSqlType());
+            assertEquals(null, column.getSqlType());
+            assertEquals("CHARACTER", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.CHARACTER).setLength(123).build();
             var column = new TgSqlColumn(lowColumn);
 
-            assertEquals("CHARACTER", column.getSqlType());
+            assertEquals(null, column.getSqlType());
+            assertEquals("CHARACTER", column.getSqlTypeOrAtomTypeName());
         }
 
         {
@@ -262,18 +276,21 @@ class TgSqlColumnTest {
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("CHAR", column.getSqlType());
+            assertEquals("CHAR", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.CHARACTER).setVarying(false).setLength(123).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("CHAR(123)", column.getSqlType());
+            assertEquals("CHAR(123)", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.CHARACTER).setVarying(false).setArbitraryLength(Empty.newBuilder().build()).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("CHAR(*)", column.getSqlType());
+            assertEquals("CHAR(*)", column.getSqlTypeOrAtomTypeName());
         }
 
         {
@@ -281,18 +298,21 @@ class TgSqlColumnTest {
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("VARCHAR", column.getSqlType());
+            assertEquals("VARCHAR", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.CHARACTER).setVarying(true).setLength(123).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("VARCHAR(123)", column.getSqlType());
+            assertEquals("VARCHAR(123)", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.CHARACTER).setVarying(true).setArbitraryLength(Empty.newBuilder().build()).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("VARCHAR(*)", column.getSqlType());
+            assertEquals("VARCHAR(*)", column.getSqlTypeOrAtomTypeName());
         }
     }
 
@@ -302,13 +322,15 @@ class TgSqlColumnTest {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.OCTET).build();
             var column = new TgSqlColumn(lowColumn);
 
-            assertEquals("BINARY", column.getSqlType());
+            assertEquals(null, column.getSqlType());
+            assertEquals("OCTET", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.OCTET).setLength(123).build();
             var column = new TgSqlColumn(lowColumn);
 
-            assertEquals("BINARY", column.getSqlType());
+            assertEquals(null, column.getSqlType());
+            assertEquals("OCTET", column.getSqlTypeOrAtomTypeName());
         }
 
         {
@@ -316,18 +338,21 @@ class TgSqlColumnTest {
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("BINARY", column.getSqlType());
+            assertEquals("BINARY", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.OCTET).setVarying(false).setLength(123).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("BINARY(123)", column.getSqlType());
+            assertEquals("BINARY(123)", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.OCTET).setVarying(false).setArbitraryLength(Empty.newBuilder().build()).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("BINARY(*)", column.getSqlType());
+            assertEquals("BINARY(*)", column.getSqlTypeOrAtomTypeName());
         }
 
         {
@@ -335,18 +360,21 @@ class TgSqlColumnTest {
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("VARBINARY", column.getSqlType());
+            assertEquals("VARBINARY", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.OCTET).setVarying(true).setLength(123).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("VARBINARY(123)", column.getSqlType());
+            assertEquals("VARBINARY(123)", column.getSqlTypeOrAtomTypeName());
         }
         {
             var lowColumn = Column.newBuilder().setAtomType(AtomType.OCTET).setVarying(true).setArbitraryLength(Empty.newBuilder().build()).build();
             var column = new TgSqlColumn(lowColumn);
 
             assertEquals("VARBINARY(*)", column.getSqlType());
+            assertEquals("VARBINARY(*)", column.getSqlTypeOrAtomTypeName());
         }
     }
 
@@ -356,6 +384,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("DATE", column.getSqlType());
+        assertEquals("DATE", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -364,6 +393,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("TIME", column.getSqlType());
+        assertEquals("TIME", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -372,6 +402,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("TIME WITH TIME ZONE", column.getSqlType());
+        assertEquals("TIME WITH TIME ZONE", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -380,6 +411,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("TIMESTAMP", column.getSqlType());
+        assertEquals("TIMESTAMP", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -388,6 +420,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("TIMESTAMP WITH TIME ZONE", column.getSqlType());
+        assertEquals("TIMESTAMP WITH TIME ZONE", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -396,6 +429,7 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("BLOB", column.getSqlType());
+        assertEquals("BLOB", column.getSqlTypeOrAtomTypeName());
     }
 
     @Test
@@ -404,5 +438,6 @@ class TgSqlColumnTest {
         var column = new TgSqlColumn(lowColumn);
 
         assertEquals("CLOB", column.getSqlType());
+        assertEquals("CLOB", column.getSqlTypeOrAtomTypeName());
     }
 }

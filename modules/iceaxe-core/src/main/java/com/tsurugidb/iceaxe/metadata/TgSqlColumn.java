@@ -17,6 +17,8 @@ package com.tsurugidb.iceaxe.metadata;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlCommon.Column;
@@ -160,43 +162,112 @@ public class TgSqlColumn {
     }
 
     /**
+     * Get SQL type or AtomType name.
+     *
+     * @return SQL type, or AtomType name if the server does not support detail.
+     */
+    public String getSqlTypeOrAtomTypeName() {
+        return findSqlType().orElse(lowColumn.getAtomType().name());
+    }
+
+    /**
      * Get SQL type.
-     * <p>
-     * Returns the name of AtomType if the server does not support detail. (e.g. DECIMAL, CHARACTER, OCTET)
-     * </p>
      *
      * @return SQL type
      */
-    public String getSqlType() {
+    public Optional<String> findSqlType() {
+        String type = getSqlType();
+        return Optional.ofNullable(type);
+    }
+
+    /**
+     * Get SQL type.
+     *
+     * @return SQL type. {@code null} if the server does not support detail.
+     */
+    public @Nullable String getSqlType() {
         var atomType = lowColumn.getAtomType();
         switch (atomType) {
+        case BOOLEAN:
+            return getSqlTypeBoolean();
         case INT4:
-            return "INT";
+            return getSqlTypeInt();
         case INT8:
-            return "BIGINT";
+            return getSqlTypeBigint();
         case FLOAT4:
-            return "REAL";
+            return getSqlTypeReal();
         case FLOAT8:
-            return "DOUBLE";
+            return getSqlTypeDouble();
         case DECIMAL:
             return getSqlTypeDecimal();
         case CHARACTER:
-            return getSqlTypeVarLength("CHARACTER", "CHAR");
+            return getSqlTypeVarLength("CHAR");
         case OCTET:
-            return getSqlTypeVarLength("BINARY", "BINARY");
+            return getSqlTypeVarLength("BINARY");
+        case BIT:
+            return getSqlTypeBit();
         case DATE:
-            return "DATE";
+            return getSqlTypeDate();
         case TIME_OF_DAY:
-            return "TIME";
-        case TIME_OF_DAY_WITH_TIME_ZONE:
-            return "TIME WITH TIME ZONE";
+            return getSqlTypeTime();
         case TIME_POINT:
-            return "TIMESTAMP";
+            return getSqlTypeTimestamp();
+        case TIME_OF_DAY_WITH_TIME_ZONE:
+            return getSqlTypeTimeWithTimeZone();
         case TIME_POINT_WITH_TIME_ZONE:
-            return "TIMESTAMP WITH TIME ZONE";
+            return getSqlTypeTimestampWithTimeZone();
+        case BLOB:
+            return getSqlTypeBlob();
+        case CLOB:
+            return getSqlTypeClob();
         default:
-            return atomType.toString();
+            return null;
         }
+    }
+
+    /**
+     * Get SQL type (BOOLEAN).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeBoolean() {
+        return "BOOLEAN";
+    }
+
+    /**
+     * Get SQL type (INT).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeInt() {
+        return "INT";
+    }
+
+    /**
+     * Get SQL type (BIGINT).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeBigint() {
+        return "BIGINT";
+    }
+
+    /**
+     * Get SQL type (REAL).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeReal() {
+        return "REAL";
+    }
+
+    /**
+     * Get SQL type (REAL).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeDouble() {
+        return "DOUBLE";
     }
 
     /**
@@ -224,14 +295,13 @@ public class TgSqlColumn {
     /**
      * Get SQL type (VAR(length)).
      *
-     * @param defaultName default name
-     * @param baseName    base name
+     * @param baseName base name
      * @return SQL type
      */
-    protected String getSqlTypeVarLength(String defaultName, String baseName) {
+    protected String getSqlTypeVarLength(String baseName) {
         var varying = findVarying();
         if (varying.isEmpty()) {
-            return defaultName;
+            return null;
         }
 
         var sb = new StringBuilder();
@@ -247,6 +317,78 @@ public class TgSqlColumn {
             sb.append(')');
         }
         return sb.toString();
+    }
+
+    /**
+     * Get SQL type (BIT).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeBit() {
+        return "BIT";
+    }
+
+    /**
+     * Get SQL type (DATE).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeDate() {
+        return "DATE";
+    }
+
+    /**
+     * Get SQL type (TIME).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeTime() {
+        return "TIME";
+    }
+
+    /**
+     * Get SQL type (TIMESTAMP).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeTimestamp() {
+        return "TIMESTAMP";
+    }
+
+    /**
+     * Get SQL type (TIME WITH TIME ZONE).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeTimeWithTimeZone() {
+        return "TIME WITH TIME ZONE";
+    }
+
+    /**
+     * Get SQL type (TIMESTAMP WITH TIME ZONE).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeTimestampWithTimeZone() {
+        return "TIMESTAMP WITH TIME ZONE";
+    }
+
+    /**
+     * Get SQL type (BLOB).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeBlob() {
+        return "BLOB";
+    }
+
+    /**
+     * Get SQL type (CLOB).
+     *
+     * @return SQL type
+     */
+    protected String getSqlTypeClob() {
+        return "CLOB";
     }
 
     /**
