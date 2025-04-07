@@ -87,7 +87,7 @@ class DbCharTest extends DbTestTableTester {
     private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn actual) {
         assertEquals(name, actual.getName());
         assertEquals(type, actual.getDataType());
-        assertEquals(sqlType, actual.getSqlType());
+        assertEquals(sqlType, actual.getSqlTypeOrAtomTypeName());
     }
 
     @Test

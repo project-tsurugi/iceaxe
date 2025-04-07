@@ -84,11 +84,11 @@ class DbTableMetadataTest extends DbTestTableTester {
         assertColumn("vtext", TgDataType.STRING, "CHARACTER", columnList.get(i++));
         assertColumn("vtext10", TgDataType.STRING, "CHARACTER", columnList.get(i++));
         assertColumn("vtext_a", TgDataType.STRING, "CHARACTER", columnList.get(i++));
-        assertColumn("fbytes", TgDataType.BYTES, "BINARY", columnList.get(i++));
-        assertColumn("fbytes10", TgDataType.BYTES, "BINARY", columnList.get(i++));
-        assertColumn("vbytes", TgDataType.BYTES, "BINARY", columnList.get(i++));
-        assertColumn("vbytes10", TgDataType.BYTES, "BINARY", columnList.get(i++));
-        assertColumn("vbytes_a", TgDataType.BYTES, "BINARY", columnList.get(i++));
+        assertColumn("fbytes", TgDataType.BYTES, "OCTET", columnList.get(i++));
+        assertColumn("fbytes10", TgDataType.BYTES, "OCTET", columnList.get(i++));
+        assertColumn("vbytes", TgDataType.BYTES, "OCTET", columnList.get(i++));
+        assertColumn("vbytes10", TgDataType.BYTES, "OCTET", columnList.get(i++));
+        assertColumn("vbytes_a", TgDataType.BYTES, "OCTET", columnList.get(i++));
         assertColumn("date1", TgDataType.DATE, "DATE", columnList.get(i++));
         assertColumn("time1", TgDataType.TIME, "TIME", columnList.get(i++));
         assertColumn("date_time", TgDataType.DATE_TIME, "TIMESTAMP", columnList.get(i++));
@@ -99,7 +99,7 @@ class DbTableMetadataTest extends DbTestTableTester {
     private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn column) {
         assertEquals(name, column.getName());
         assertEquals(type, column.getDataType());
-        assertEquals(sqlType, column.getSqlType());
+        assertEquals(sqlType, column.getSqlTypeOrAtomTypeName());
     }
 
     @Test

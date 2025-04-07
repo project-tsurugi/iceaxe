@@ -79,7 +79,7 @@ class DbSelectExplainTest extends DbTestTableTester {
         assertEquals("zzz", c2.getName());
         assertEquals(TgDataType.STRING, c2.getDataType());
 //TODO        assertEquals("VARCHAR(10)", c2.getSqlType());
-        assertEquals("CHARACTER", c2.getSqlType());
+        assertEquals("CHARACTER", c2.getSqlTypeOrAtomTypeName());
     }
 
     @Test
