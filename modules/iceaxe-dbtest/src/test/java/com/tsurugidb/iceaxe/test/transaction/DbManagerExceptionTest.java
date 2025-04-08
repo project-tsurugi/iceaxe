@@ -78,6 +78,8 @@ class DbManagerExceptionTest extends DbTestTableTester {
                         throw e0;
                     }
                 });
+
+                ltx.rollback();
             }
         });
         assertEqualsCode(SqlServiceCode.CONFLICT_ON_WRITE_PRESERVE_EXCEPTION, e);
