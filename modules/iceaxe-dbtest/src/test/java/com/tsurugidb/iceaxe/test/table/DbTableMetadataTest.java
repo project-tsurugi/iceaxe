@@ -74,21 +74,21 @@ class DbTableMetadataTest extends DbTestTableTester {
         assertColumn("long", TgDataType.LONG, "BIGINT", columnList.get(i++));
         assertColumn("float4", TgDataType.FLOAT, "REAL", columnList.get(i++));
         assertColumn("double8", TgDataType.DOUBLE, "DOUBLE", columnList.get(i++));
-        assertColumn("decimal_", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
-        assertColumn("decimal10", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
-        assertColumn("decimal10_2", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
-        assertColumn("decimal_a", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
-        assertColumn("decimal_a_2", TgDataType.DECIMAL, "DECIMAL", columnList.get(i++));
-        assertColumn("ftext", TgDataType.STRING, "CHARACTER", columnList.get(i++));
-        assertColumn("ftext10", TgDataType.STRING, "CHARACTER", columnList.get(i++));
-        assertColumn("vtext", TgDataType.STRING, "CHARACTER", columnList.get(i++));
-        assertColumn("vtext10", TgDataType.STRING, "CHARACTER", columnList.get(i++));
-        assertColumn("vtext_a", TgDataType.STRING, "CHARACTER", columnList.get(i++));
-        assertColumn("fbytes", TgDataType.BYTES, "OCTET", columnList.get(i++));
-        assertColumn("fbytes10", TgDataType.BYTES, "OCTET", columnList.get(i++));
-        assertColumn("vbytes", TgDataType.BYTES, "OCTET", columnList.get(i++));
-        assertColumn("vbytes10", TgDataType.BYTES, "OCTET", columnList.get(i++));
-        assertColumn("vbytes_a", TgDataType.BYTES, "OCTET", columnList.get(i++));
+        assertColumn("decimal_", TgDataType.DECIMAL, "DECIMAL(38, 0)", columnList.get(i++));
+        assertColumn("decimal10", TgDataType.DECIMAL, "DECIMAL(10, 0)", columnList.get(i++));
+        assertColumn("decimal10_2", TgDataType.DECIMAL, "DECIMAL(10, 2)", columnList.get(i++));
+        assertColumn("decimal_a", TgDataType.DECIMAL, "DECIMAL(38, 0)", columnList.get(i++));
+        assertColumn("decimal_a_2", TgDataType.DECIMAL, "DECIMAL(38, 2)", columnList.get(i++));
+        assertColumn("ftext", TgDataType.STRING, "CHAR(1)", columnList.get(i++));
+        assertColumn("ftext10", TgDataType.STRING, "CHAR(10)", columnList.get(i++));
+        assertColumn("vtext", TgDataType.STRING, "VARCHAR(*)", columnList.get(i++));
+        assertColumn("vtext10", TgDataType.STRING, "VARCHAR(10)", columnList.get(i++));
+        assertColumn("vtext_a", TgDataType.STRING, "VARCHAR(*)", columnList.get(i++));
+        assertColumn("fbytes", TgDataType.BYTES, "BINARY(1)", columnList.get(i++));
+        assertColumn("fbytes10", TgDataType.BYTES, "BINARY(10)", columnList.get(i++));
+        assertColumn("vbytes", TgDataType.BYTES, "VARBINARY(*)", columnList.get(i++));
+        assertColumn("vbytes10", TgDataType.BYTES, "VARBINARY(10)", columnList.get(i++));
+        assertColumn("vbytes_a", TgDataType.BYTES, "VARBINARY(*)", columnList.get(i++));
         assertColumn("date1", TgDataType.DATE, "DATE", columnList.get(i++));
         assertColumn("time1", TgDataType.TIME, "TIME", columnList.get(i++));
         assertColumn("date_time", TgDataType.DATE_TIME, "TIMESTAMP", columnList.get(i++));
@@ -99,7 +99,7 @@ class DbTableMetadataTest extends DbTestTableTester {
     private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn column) {
         assertEquals(name, column.getName());
         assertEquals(type, column.getDataType());
-        assertEquals(sqlType, column.getSqlTypeOrAtomTypeName());
+        assertEquals(sqlType, column.getSqlType());
     }
 
     @Test

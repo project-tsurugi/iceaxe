@@ -101,13 +101,13 @@ class DbVarbinaryTest extends DbTestTableTester {
         var list = metadata.getColumnList();
         assertEquals(2, list.size());
         assertColumn("pk", TgDataType.INT, "INT", list.get(0));
-        assertColumn("value", TgDataType.BYTES, "OCTET", list.get(1)); // TODO VARBINARY
+        assertColumn("value", TgDataType.BYTES, "VARBINARY(10)", list.get(1));
     }
 
     private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn actual) {
         assertEquals(name, actual.getName());
         assertEquals(type, actual.getDataType());
-        assertEquals(sqlType, actual.getSqlTypeOrAtomTypeName());
+        assertEquals(sqlType, actual.getSqlType());
     }
 
     @ParameterizedTest

@@ -80,7 +80,7 @@ class DbDecimal1Test extends DbTestTableTester {
         var list = metadata.getColumnList();
         assertEquals(2, list.size());
         assertColumn("pk", TgDataType.INT, "INT", list.get(0));
-        assertColumn("value", TgDataType.DECIMAL, "DECIMAL", list.get(1)); // TODO DECIMAL(5, 1)
+        assertColumn("value", TgDataType.DECIMAL, "DECIMAL(5, 1)", list.get(1));
     }
 
     private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn actual) {

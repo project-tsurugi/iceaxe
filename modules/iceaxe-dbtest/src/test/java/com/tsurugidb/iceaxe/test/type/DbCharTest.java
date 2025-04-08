@@ -81,13 +81,13 @@ class DbCharTest extends DbTestTableTester {
         var list = metadata.getColumnList();
         assertEquals(2, list.size());
         assertColumn("pk", TgDataType.INT, "INT", list.get(0));
-        assertColumn("value", TgDataType.STRING, "CHARACTER", list.get(1)); // TODO CHAR(10)
+        assertColumn("value", TgDataType.STRING, "CHAR(10)", list.get(1));
     }
 
     private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn actual) {
         assertEquals(name, actual.getName());
         assertEquals(type, actual.getDataType());
-        assertEquals(sqlType, actual.getSqlTypeOrAtomTypeName());
+        assertEquals(sqlType, actual.getSqlType());
     }
 
     @Test
