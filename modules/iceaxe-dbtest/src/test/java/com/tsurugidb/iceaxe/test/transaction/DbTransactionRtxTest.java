@@ -13,7 +13,8 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
  */
 class DbTransactionRtxTest extends DbTestTableTester {
 
-    private static final int SIZE = 4;
+    private static final int SIZE = 200;
+    private static final String SELECT_ORDER_BY_SQL = SELECT_SQL + " order by foo";
 
     @BeforeEach
     void beforeEach(TestInfo info) throws Exception {
@@ -36,7 +37,7 @@ class DbTransactionRtxTest extends DbTestTableTester {
 //              Thread.sleep(100);
 
                 try (var tx2 = session.createTransaction(TgTxOption.ofRTX())) {
-                    try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
+                    try (var selectPs = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
                         var list = tx2.executeAndGetList(selectPs);
                         assertEqualsTestTable(SIZE, list);
                     }
@@ -58,7 +59,7 @@ class DbTransactionRtxTest extends DbTestTableTester {
 //              Thread.sleep(100);
 
                 try (var tx2 = session.createTransaction(TgTxOption.ofRTX())) {
-                    try (var selectPs = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
+                    try (var selectPs = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
                         var list = tx2.executeAndGetList(selectPs);
                         assertEqualsTestTable(SIZE, list);
                     }
