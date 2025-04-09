@@ -27,6 +27,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 class DbQueryResultTest extends DbTestTableTester {
 
     private static final int SIZE = 4;
+    private static final String SELECT_ORDER_BY_SQL = SELECT_SQL + " order by foo";
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
@@ -44,7 +45,7 @@ class DbQueryResultTest extends DbTestTableTester {
     void whileEach() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), result.getHasNextRow());
@@ -67,7 +68,7 @@ class DbQueryResultTest extends DbTestTableTester {
     void getRecordList() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), result.getHasNextRow());
@@ -86,7 +87,7 @@ class DbQueryResultTest extends DbTestTableTester {
     void findRecord() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(SELECT_SQL + " order by foo", SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), result.getHasNextRow());
@@ -107,7 +108,7 @@ class DbQueryResultTest extends DbTestTableTester {
     void iterator() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), result.getHasNextRow());
@@ -131,7 +132,7 @@ class DbQueryResultTest extends DbTestTableTester {
     void forEach() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
             tm.execute(transaction -> {
                 try (var result = transaction.executeQuery(ps)) {
                     assertEquals(Optional.empty(), result.getHasNextRow());
@@ -153,7 +154,7 @@ class DbQueryResultTest extends DbTestTableTester {
     @Test
     void constructorError() throws Exception {
         var session = getSession();
-        try (var ps = session.createQuery(SELECT_SQL, SELECT_MAPPING)) {
+        try (var ps = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                 var future = FutureResponseCloseWrapper.of(transaction.getLowTransaction().executeQuery(ps.getSql()));
 
