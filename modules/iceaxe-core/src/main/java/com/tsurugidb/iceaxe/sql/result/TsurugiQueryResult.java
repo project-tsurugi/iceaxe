@@ -50,6 +50,7 @@ import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
+import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumerWithRowNumber;
 import com.tsurugidb.sql.proto.SqlCommon.Column;
 import com.tsurugidb.tsubakuro.exception.ResponseTimeoutException;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -408,6 +409,25 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
             R result = convertRecord(record);
             event(null, listener -> listener.readRecord(this, result));
             action.accept(result);
+        }
+    }
+
+    /**
+     * Performs the given action for each record.
+     *
+     * @param action The action to be performed for each record
+     * @throws IOException                 if an I/O error occurs while retrieving record
+     * @throws InterruptedException        if interrupted while retrieving record
+     * @throws TsurugiTransactionException if server error occurs while retrieving record
+     * @since X.X.X
+     */
+    public void whileEach(TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
+        var record = getRecord();
+        for (int i = 0; nextLowRecord(); i++) {
+            record.reset();
+            R result = convertRecord(record);
+            event(null, listener -> listener.readRecord(this, result));
+            action.accept(i, result);
         }
     }
 

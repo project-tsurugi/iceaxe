@@ -57,6 +57,7 @@ import com.tsurugidb.iceaxe.transaction.status.TgTxStatus;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.InterruptedRuntimeException;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
+import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumerWithRowNumber;
 
 /**
  * Tsurugi Transaction Manager.
@@ -715,6 +716,211 @@ public class TsurugiTransactionManager {
      * @throws InterruptedException if interrupted while execute query
      */
     public <P, R> void executeAndForEach(TgTmSetting setting, TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, InterruptedException {
+        execute(setting, transaction -> {
+            transaction.executeAndForEach(ps, parameter, action);
+        });
+    }
+
+    /**
+     * execute query.
+     *
+     * @param sql    SQL
+     * @param action The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public void executeAndForEach(String sql, TsurugiTransactionConsumerWithRowNumber<TsurugiResultEntity> action) throws IOException, InterruptedException {
+        executeAndForEach(defaultSetting(), sql, TgResultMapping.DEFAULT, action);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param setting transaction manager settings
+     * @param sql     SQL
+     * @param action  The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public void executeAndForEach(TgTmSetting setting, String sql, TsurugiTransactionConsumerWithRowNumber<TsurugiResultEntity> action) throws IOException, InterruptedException {
+        executeAndForEach(setting, sql, TgResultMapping.DEFAULT, action);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>           result type
+     * @param sql           SQL
+     * @param resultMapping result mapping
+     * @param action        The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <R> void executeAndForEach(String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException {
+        executeAndForEach(defaultSetting(), sql, resultMapping, action);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>           result type
+     * @param setting       transaction manager settings
+     * @param sql           SQL
+     * @param resultMapping result mapping
+     * @param action        The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <R> void executeAndForEach(TgTmSetting setting, String sql, TgResultMapping<R> resultMapping, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException {
+        var session = getSession();
+        try (var ps = session.createQuery(sql, resultMapping)) {
+            executeAndForEach(setting, ps, action);
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>              parameter type
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param parameter        SQL parameter
+     * @param action           The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <P> void executeAndForEach(String sql, TgParameterMapping<P> parameterMapping, P parameter, TsurugiTransactionConsumerWithRowNumber<TsurugiResultEntity> action)
+            throws IOException, InterruptedException {
+        executeAndForEach(defaultSetting(), sql, parameterMapping, parameter, TgResultMapping.DEFAULT, action);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>              parameter type
+     * @param setting          transaction manager settings
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param parameter        SQL parameter
+     * @param action           The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <P> void executeAndForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TsurugiTransactionConsumerWithRowNumber<TsurugiResultEntity> action)
+            throws IOException, InterruptedException {
+        executeAndForEach(setting, sql, parameterMapping, parameter, TgResultMapping.DEFAULT, action);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>              parameter type
+     * @param <R>              result type
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param parameter        SQL parameter
+     * @param resultMapping    result mapping
+     * @param action           The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <P, R> void executeAndForEach(String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping, TsurugiTransactionConsumerWithRowNumber<R> action)
+            throws IOException, InterruptedException {
+        executeAndForEach(defaultSetting(), sql, parameterMapping, parameter, resultMapping, action);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>              parameter type
+     * @param <R>              result type
+     * @param setting          transaction manager settings
+     * @param sql              SQL
+     * @param parameterMapping parameter mapping
+     * @param parameter        SQL parameter
+     * @param resultMapping    result mapping
+     * @param action           The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <P, R> void executeAndForEach(TgTmSetting setting, String sql, TgParameterMapping<P> parameterMapping, P parameter, TgResultMapping<R> resultMapping,
+            TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException {
+        var session = getSession();
+        try (var ps = session.createQuery(sql, parameterMapping, resultMapping)) {
+            executeAndForEach(setting, ps, parameter, action);
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>    result type
+     * @param ps     SQL definition
+     * @param action The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <R> void executeAndForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException {
+        executeAndForEach(defaultSetting(), ps, action);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>     result type
+     * @param setting transaction manager settings
+     * @param ps      SQL definition
+     * @param action  The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <R> void executeAndForEach(TgTmSetting setting, TsurugiSqlQuery<R> ps, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException {
+        execute(setting, transaction -> {
+            transaction.executeAndForEach(ps, action);
+        });
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param ps        SQL definition
+     * @param parameter SQL parameter
+     * @param action    The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException {
+        executeAndForEach(defaultSetting(), ps, parameter, action);
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param setting   transaction manager settings
+     * @param ps        SQL definition
+     * @param parameter SQL parameter
+     * @param action    The action to be performed for each record
+     * @throws IOException          if an I/O error occurs while execute query
+     * @throws InterruptedException if interrupted while execute query
+     * @since X.X.X
+     */
+    public <P, R> void executeAndForEach(TgTmSetting setting, TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumerWithRowNumber<R> action)
+            throws IOException, InterruptedException {
         execute(setting, transaction -> {
             transaction.executeAndForEach(ps, parameter, action);
         });

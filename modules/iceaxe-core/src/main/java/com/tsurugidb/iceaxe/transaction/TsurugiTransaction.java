@@ -57,6 +57,7 @@ import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
 import com.tsurugidb.iceaxe.util.function.IoFunction;
 import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumer;
+import com.tsurugidb.iceaxe.util.function.TsurugiTransactionConsumerWithRowNumber;
 import com.tsurugidb.tsubakuro.sql.Transaction;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
@@ -716,6 +717,78 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * @throws TsurugiTransactionException if server error occurs while execute query
      */
     public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumer<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
+        var method = TgTxMethod.EXECUTE_FOR_EACH;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
+
+        TsurugiQueryResult<R> result = null;
+        Throwable occurred = null;
+        try (var rs = ps.execute(this, parameter)) {
+            result = rs;
+            rs.whileEach(action);
+        } catch (TsurugiTransactionException e) {
+            occurred = e;
+            e.setTxMethod(method, txExecuteId);
+            throw e;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalResult = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, parameter, finalResult, finalOccurred));
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <R>    result type
+     * @param ps     SQL definition
+     * @param action The action to be performed for each record
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
+     * @since X.X.X
+     */
+    public <R> void executeAndForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
+        var method = TgTxMethod.EXECUTE_FOR_EACH;
+        int txExecuteId = getNewIceaxeTxExecuteId();
+        event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, null));
+
+        TsurugiQueryResult<R> result = null;
+        Throwable occurred = null;
+        try (var rs = ps.execute(this)) {
+            result = rs;
+            rs.whileEach(action);
+        } catch (TsurugiTransactionException e) {
+            occurred = e;
+            e.setTxMethod(method, txExecuteId);
+            throw e;
+        } catch (Throwable e) {
+            occurred = e;
+            throw e;
+        } finally {
+            var finalResult = result;
+            var finalOccurred = occurred;
+            event(occurred, listener -> listener.executeEnd(this, method, txExecuteId, ps, null, finalResult, finalOccurred));
+        }
+    }
+
+    /**
+     * execute query.
+     *
+     * @param <P>       parameter type
+     * @param <R>       result type
+     * @param ps        SQL definition
+     * @param parameter SQL parameter
+     * @param action    The action to be performed for each record
+     * @throws IOException                 if an I/O error occurs while execute query
+     * @throws InterruptedException        if interrupted while execute query
+     * @throws TsurugiTransactionException if server error occurs while execute query
+     * @since X.X.X
+     */
+    public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FOR_EACH;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
