@@ -18,13 +18,13 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
- * substring function test
+ * substr function test
  */
-class DbSubstringTest extends DbTestTableTester {
+class DbSubstrTest extends DbTestTableTester {
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
-        var LOG = LoggerFactory.getLogger(DbSubstringTest.class);
+        var LOG = LoggerFactory.getLogger(DbSubstrTest.class);
         logInitStart(LOG, info);
 
         dropTestTable();
@@ -47,32 +47,32 @@ class DbSubstringTest extends DbTestTableTester {
 
         var tm = createTransactionManagerOcc(getSession());
         {
-            var entity = tm.executeAndFindRecord("select substring(value from 1) from " + TEST).get();
+            var entity = tm.executeAndFindRecord("select substr(value, 1) from " + TEST).get();
             String result = entity.getStringOrNull(0);
             assertNull(result);
         }
         {
-            var entity = tm.executeAndFindRecord("select substring(value from 1 for 1) from " + TEST).get();
+            var entity = tm.executeAndFindRecord("select substr(value, 1, 1) from " + TEST).get();
             String result = entity.getStringOrNull(0);
             assertNull(result);
         }
         {
-            var entity = tm.executeAndFindRecord("select substring('abc' from null) from " + TEST).get();
+            var entity = tm.executeAndFindRecord("select substr('abc', null) from " + TEST).get();
             String result = entity.getStringOrNull(0);
             assertNull(result);
         }
         {
-            var entity = tm.executeAndFindRecord("select substring('abc' from null for 1) from " + TEST).get();
+            var entity = tm.executeAndFindRecord("select substr('abc', null, 1) from " + TEST).get();
             String result = entity.getStringOrNull(0);
             assertNull(result);
         }
         {
-            var entity = tm.executeAndFindRecord("select substring('abc' from 2 for null) from " + TEST).get();
+            var entity = tm.executeAndFindRecord("select substr('abc', 2, null) from " + TEST).get();
             String result = entity.getStringOrNull(0);
             assertNull(result);
         }
         {
-            var entity = tm.executeAndFindRecord("select substring('abc' from null for null) from " + TEST).get();
+            var entity = tm.executeAndFindRecord("select substr('abc', null, null) from " + TEST).get();
             String result = entity.getStringOrNull(0);
             assertNull(result);
         }
@@ -89,7 +89,7 @@ class DbSubstringTest extends DbTestTableTester {
         int length = codePoints.length;
         for (int i = 0; i <= length; i++) {
             for (int j = 0; j <= length; j++) {
-                var sql = String.format("select substring(value from %d for %d) from " + TEST, i, j);
+                var sql = String.format("select substr(value, %d, %d) from " + TEST, i, j);
                 var entity = tm.executeAndFindRecord(sql).get();
                 String result = entity.getStringOrNull(0);
 
@@ -121,7 +121,7 @@ class DbSubstringTest extends DbTestTableTester {
         int[] codePoints = value.codePoints().toArray();
         int length = codePoints.length;
         for (int i = 0; i <= length; i++) {
-            var sql = String.format("select substring(value from %d) from " + TEST, i);
+            var sql = String.format("select substr(value, %d) from " + TEST, i);
             var entity = tm.executeAndFindRecord(sql).get();
             String result = entity.getStringOrNull(0);
 
@@ -148,7 +148,7 @@ class DbSubstringTest extends DbTestTableTester {
         int length = codePoints.length;
         for (int i = 0; i <= length; i++) {
             for (int j = 0; j <= length; j++) {
-                var sql = String.format("select substring(:v from %d for %d) from " + TEST, i, j);
+                var sql = String.format("select substr(:v, %d, %d) from " + TEST, i, j);
                 var entity = tm.executeAndFindRecord(sql, //
                         TgParameterMapping.ofSingle("v", String.class), //
                         value).get();
