@@ -42,6 +42,35 @@ class DbQueryResultTest extends DbTestTableTester {
     }
 
     @Test
+    void nextRecord() throws Exception {
+        var session = getSession();
+        var tm = createTransactionManagerOcc(session);
+        try (var ps = session.createQuery(SELECT_ORDER_BY_SQL, SELECT_MAPPING)) {
+            tm.execute(transaction -> {
+                try (var result = transaction.executeQuery(ps)) {
+                    assertEquals(Optional.empty(), result.getHasNextRow());
+
+                    int count = 0;
+                    for (;;) {
+                        Optional<TestEntity> entityOpt = result.nextRecord();
+                        if (entityOpt.isEmpty()) {
+                            break;
+                        }
+                        var entity = entityOpt.get();
+
+                        var expected = createTestEntity(count++);
+                        assertEquals(expected, entity);
+                    }
+                    assertEquals(SIZE, count);
+
+                    assertEquals(Optional.of(false), result.getHasNextRow());
+                    assertEquals(SIZE, result.getReadCount());
+                }
+            });
+        }
+    }
+
+    @Test
     void whileEach() throws Exception {
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
