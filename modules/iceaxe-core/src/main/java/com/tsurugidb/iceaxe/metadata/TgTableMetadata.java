@@ -72,6 +72,16 @@ public class TgTableMetadata {
     }
 
     /**
+     * get description.
+     *
+     * @return description
+     * @since X.X.X
+     */
+    public @Nullable String getDescription() {
+        return lowTableMetadata.getDescription().orElse(null);
+    }
+
+    /**
      * get column list.
      *
      * @return column list

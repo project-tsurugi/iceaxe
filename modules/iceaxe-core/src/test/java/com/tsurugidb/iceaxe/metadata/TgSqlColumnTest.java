@@ -16,6 +16,7 @@
 package com.tsurugidb.iceaxe.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Optional;
 
@@ -439,5 +440,27 @@ class TgSqlColumnTest {
 
         assertEquals("CLOB", column.getSqlType());
         assertEquals("CLOB", column.getSqlTypeOrAtomTypeName());
+    }
+
+    @Test
+    void getDescription() {
+        {
+            var lowColumn = Column.newBuilder().setDescription("test").build();
+            var column = new TgSqlColumn(lowColumn);
+
+            assertEquals("test", column.getDescription());
+        }
+        {
+            var lowColumn = Column.newBuilder().setDescription("").build();
+            var column = new TgSqlColumn(lowColumn);
+
+            assertEquals("", column.getDescription());
+        }
+        {
+            var lowColumn = Column.newBuilder().build();
+            var column = new TgSqlColumn(lowColumn);
+
+            assertNull(column.getDescription());
+        }
     }
 }

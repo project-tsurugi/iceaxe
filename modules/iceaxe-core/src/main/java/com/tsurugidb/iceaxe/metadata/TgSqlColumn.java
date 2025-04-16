@@ -392,6 +392,25 @@ public class TgSqlColumn {
     }
 
     /**
+     * Get description.
+     *
+     * @return description
+     */
+    public @Nullable String getDescription() {
+        var c = lowColumn.getDescriptionOptCase();
+        if (c == null) {
+            return null;
+        }
+        switch (c) {
+        case DESCRIPTION:
+            return lowColumn.getDescription();
+        case DESCRIPTIONOPT_NOT_SET:
+        default:
+            return null;
+        }
+    }
+
+    /**
      * Get low column.
      *
      * @return low column
