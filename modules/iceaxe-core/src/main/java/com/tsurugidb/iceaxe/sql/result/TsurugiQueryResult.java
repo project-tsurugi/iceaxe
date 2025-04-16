@@ -395,6 +395,26 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
     // read
 
     /**
+     * Get next record.
+     *
+     * @return record. {@code empty} if end of record.
+     * @throws IOException                 if an I/O error occurs while retrieving record
+     * @throws InterruptedException        if interrupted while retrieving record
+     * @throws TsurugiTransactionException if server error occurs while retrieving record
+     * @since X.X.X
+     */
+    public Optional<R> nextRecord() throws IOException, InterruptedException, TsurugiTransactionException {
+        if (nextLowRecord()) {
+            var record = getRecord();
+            record.reset();
+            R result = convertRecord(record);
+            event(null, listener -> listener.readRecord(this, result));
+            return Optional.of(result);
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Performs the given action for each record.
      *
      * @param action The action to be performed for each record
