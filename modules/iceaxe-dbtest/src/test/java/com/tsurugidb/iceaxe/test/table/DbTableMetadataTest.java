@@ -30,12 +30,19 @@ class DbTableMetadataTest extends DbTestTableTester {
     void found() throws Exception {
         var session = getSession();
         {
-            var sql = "create table " + TEST //
-                    + "(" //
+            var sql = "/**\n" //
+                    + "   test table.\n" //
+                    + " */\n" //
+                    + "create table " + TEST //
+                    + "(\n" //
 //                  + "  bool boolean," //
+                    + "  /** int value */\n" //
                     + "  int4 int," //
-                    + "  long bigint," //
-                    + "  float4 real," //
+                    + "  /** long value */" //
+                    + "  long bigint,\n" //
+                    + "  /* float value */\n" //
+                    + "  float4 real,\n" //
+                    + "  -- double value\n" //
                     + "  double8 double," //
                     + "  decimal_ decimal," //
                     + "  decimal10 decimal(10)," //
@@ -59,13 +66,14 @@ class DbTableMetadataTest extends DbTestTableTester {
                     + "  offset_date_time timestamp with time zone," //
                     + "  primary key(int4)" //
                     + ")";
-            executeDdl(session, sql);
+            executeDdl(session, sql, TEST);
         }
 
         var metadata = session.findTableMetadata(TEST).get();
         assertNull(metadata.getDatabaseName());
         assertNull(metadata.getSchemaName());
         assertEquals(TEST, metadata.getTableName());
+        assertNull(metadata.getDescription());
 
         var columnList = metadata.getColumnList();
         assertEquals(24, columnList.size());
@@ -97,9 +105,14 @@ class DbTableMetadataTest extends DbTestTableTester {
     }
 
     private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn column) {
+        assertColumn(name, type, sqlType, null, column);
+    }
+
+    private static void assertColumn(String name, TgDataType type, String sqlType, String description, TgSqlColumn column) {
         assertEquals(name, column.getName());
         assertEquals(type, column.getDataType());
         assertEquals(sqlType, column.getSqlType());
+        assertEquals(description, column.getDescription());
     }
 
     @Test
