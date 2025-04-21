@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.iceaxe.session;
 
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
@@ -39,6 +40,7 @@ import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
 import com.tsurugidb.iceaxe.util.TgTimeValue;
+import com.tsurugidb.tsubakuro.common.BlobPathMapping;
 
 /**
  * Tsurugi Session Option.
@@ -164,6 +166,7 @@ public class TgSessionOption {
     private String applicationName;
     private Optional<Boolean> keepAlive = Optional.empty();
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
+    private BlobPathMapping.Builder blobPathMappingBuilder = null;
     private TgCommitType commitType = TgCommitType.DEFAULT;
     private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.NOTHING;
 
@@ -267,6 +270,74 @@ public class TgSessionOption {
     }
 
     /**
+     * Adds a path mapping entry for both sending and receiving BLOB/CLOB.
+     *
+     * @param clientPath the client path, must be a directory
+     * @param serverPath the server path, must be a directory
+     * @return this
+     * @since X.X.X
+     */
+    public TgSessionOption addLargeObjectPathMapping(Path clientPath, String serverPath) {
+        var builder = getBlobPathMappingBuilder();
+        builder.onBoth(clientPath, serverPath);
+        return this;
+    }
+
+    /**
+     * Adds a path mapping entry for sending BLOB/CLOB.
+     *
+     * @param clientPath the client path to be transformed, must be a directory
+     * @param serverPath the target server path, must be a directory
+     * @return this
+     * @since X.X.X
+     */
+    public TgSessionOption addLargeObjectPathMappingOnSend(Path clientPath, String serverPath) {
+        var builder = getBlobPathMappingBuilder();
+        builder.onSend(clientPath, serverPath);
+        return this;
+    }
+
+    /**
+     * Adds a path mapping entry for receiving BLOB/CLOB.
+     *
+     * @param serverPath the target server path to be transformed, must be a directory
+     * @param clientPath the target client path, must be a directory
+     * @return this
+     * @since X.X.X
+     */
+    public TgSessionOption addLargeObjectPathMappingOnReceive(String serverPath, Path clientPath) {
+        var builder = getBlobPathMappingBuilder();
+        builder.onReceive(serverPath, clientPath);
+        return this;
+    }
+
+    /**
+     * Get BlobPathMapping.Builder.
+     *
+     * @return BlobPathMapping.Builder
+     * @since X.X.X
+     */
+    protected BlobPathMapping.Builder getBlobPathMappingBuilder() {
+        if (this.blobPathMappingBuilder == null) {
+            this.blobPathMappingBuilder = BlobPathMapping.newBuilder();
+        }
+        return this.blobPathMappingBuilder;
+    }
+
+    /**
+     * Get BLOB/CLOB path mapping.
+     *
+     * @return path mapping
+     * @since X.X.X
+     */
+    public Optional<BlobPathMapping> findLargeObjectPathMapping() {
+        if (this.blobPathMappingBuilder == null) {
+            return Optional.empty();
+        }
+        return Optional.of(blobPathMappingBuilder.build());
+    }
+
+    /**
      * set commit type.
      *
      * @param commitType commit type
@@ -314,6 +385,7 @@ public class TgSessionOption {
                 + "{label=" + sessionLabel //
                 + ", applicationName=" + applicationName //
                 + ", timeout=" + timeoutMap //
+                + ", blobPathMapping=" + findLargeObjectPathMapping().orElse(null) //
                 + ", commitType=" + commitType //
                 + ", closeShutdownType=" + closeShutdownType //
                 + "}";

@@ -17,8 +17,10 @@ package com.tsurugidb.iceaxe.session;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +31,7 @@ import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
 import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
+import com.tsurugidb.tsubakuro.common.BlobPathMapping;
 import com.tsurugidb.tsubakuro.common.SessionBuilder;
 
 class TgSessionOptionTest {
@@ -127,6 +130,37 @@ class TgSessionOptionTest {
     }
 
     @Test
+    void findLargeObjectPathMapping_null() {
+        var sessionOption = new TgSessionOption();
+        var opt = sessionOption.findLargeObjectPathMapping();
+        assertTrue(opt.isEmpty());
+    }
+
+    @Test
+    void addLargeObjectPathMapping() {
+        var sessionOption = new TgSessionOption().addLargeObjectPathMapping(Path.of("/client"), "/server");
+        var mapping = sessionOption.findLargeObjectPathMapping().get();
+        var expected = BlobPathMapping.newBuilder().onBoth(Path.of("/client"), "/server").build();
+        assertEquals(expected, mapping);
+    }
+
+    @Test
+    void addLargeObjectPathMappingOnSend() {
+        var sessionOption = new TgSessionOption().addLargeObjectPathMappingOnSend(Path.of("/client"), "/server");
+        var mapping = sessionOption.findLargeObjectPathMapping().get();
+        var expected = BlobPathMapping.newBuilder().onSend(Path.of("/client"), "/server").build();
+        assertEquals(expected, mapping);
+    }
+
+    @Test
+    void addLargeObjectPathMappingOnReceive() {
+        var sessionOption = new TgSessionOption().addLargeObjectPathMappingOnReceive("/server", Path.of("/client"));
+        var mapping = sessionOption.findLargeObjectPathMapping().get();
+        var expected = BlobPathMapping.newBuilder().onReceive("/server", Path.of("/client")).build();
+        assertEquals(expected, mapping);
+    }
+
+    @Test
     void commitType() {
         var sessionOption = new TgSessionOption().setCommitType(TgCommitType.STORED);
         assertEquals(TgCommitType.STORED, sessionOption.getCommitType());
@@ -158,6 +192,7 @@ class TgSessionOptionTest {
                 + "label=null" //
                 + ", applicationName=null" //
                 + ", timeout={DEFAULT=9223372036854775807nanoseconds}" //
+                + ", blobPathMapping=null" //
                 + ", commitType=DEFAULT" //
                 + ", closeShutdownType=NOTHING" //
                 + "}", empty.toString());
@@ -166,12 +201,14 @@ class TgSessionOptionTest {
                 .setLabel("test") //
                 .setApplicationName("test-app") //
                 .setTimeout(TgTimeoutKey.DEFAULT, 123, TimeUnit.SECONDS) //
+                .addLargeObjectPathMapping(Path.of("/client"), "/server") //
                 .setCommitType(TgCommitType.STORED) //
                 .setCloseShutdownType(TgSessionShutdownType.GRACEFUL);
         assertEquals("TgSessionOption{" //
                 + "label=test" //
                 + ", applicationName=test-app" //
                 + ", timeout={DEFAULT=123seconds}" //
+                + ", blobPathMapping=onReceive\n clientPath(" + Path.of("/client") + ") - serverPath(/server)\nonSend\n clientPath(" + Path.of("/client") + ") - serverPath(/server)" //
                 + ", commitType=STORED" //
                 + ", closeShutdownType=GRACEFUL" //
                 + "}", sessionOption.toString());

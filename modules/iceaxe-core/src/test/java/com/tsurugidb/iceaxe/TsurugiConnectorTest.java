@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -37,6 +38,7 @@ import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
 import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
 import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
 import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
+import com.tsurugidb.tsubakuro.common.BlobPathMapping;
 import com.tsurugidb.tsubakuro.common.Session;
 import com.tsurugidb.tsubakuro.common.SessionBuilder;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -355,13 +357,24 @@ class TsurugiConnectorTest {
         var connector = TestConnector.create();
         String label = "test-label";
         var credential = new UsernamePasswordCredential("test-user", "test-password");
-        var sessionOption = TgSessionOption.of().setApplicationName("option-app").setLabel("option-label").setKeepAlive(false);
+        var sessionOption = TgSessionOption.of() //
+                .setApplicationName("option-app") //
+                .setLabel("option-label") //
+                .setKeepAlive(false) //
+                .addLargeObjectPathMappingOnSend(Path.of("/client1"), "/server1") //
+                .addLargeObjectPathMappingOnReceive("/server2", Path.of("/client2")) //
+        ;
         try (var session = connector.createSession(label, credential, sessionOption)) {
             var lowSession = (SessionBuilderTestLowSession) session.getLowSession();
             assertSame(credential, lowSession.getCredential());
             assertEquals("option-app", lowSession.getApplicationName());
             assertEquals(label, lowSession.getSessionLabel());
             assertFalse(lowSession.getKeepAlive());
+            {
+                var blobPathMapping = lowSession.getBlobPathMapping();
+                var expected = BlobPathMapping.newBuilder().onSend(Path.of("/client1"), "/server1").onReceive("/server2", Path.of("/client2")).build();
+                assertEquals(expected, blobPathMapping);
+            }
         }
     }
 
@@ -386,6 +399,10 @@ class TsurugiConnectorTest {
 
         public boolean getKeepAlive() {
             return getField("doKeepAlive");
+        }
+
+        public BlobPathMapping getBlobPathMapping() {
+            return getField("blobPathMapping");
         }
 
         @SuppressWarnings("unchecked")

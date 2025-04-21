@@ -505,6 +505,10 @@ public class TsurugiConnector {
             lowBuilder.withKeepAlive(keepAlive);
         });
 
+        sessionOption.findLargeObjectPathMapping().ifPresent(mapping -> {
+            lowBuilder.withBlobPathMapping(mapping);
+        });
+
         return lowBuilder;
     }
 
