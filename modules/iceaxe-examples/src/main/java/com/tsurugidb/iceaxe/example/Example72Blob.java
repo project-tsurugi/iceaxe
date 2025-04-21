@@ -20,10 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameter;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
@@ -53,6 +55,8 @@ public class Example72Blob {
 
             new Example72Blob().main(tm);
         }
+
+        new Example72Blob().largeObjectPathMapping();
     }
 
     void main(TsurugiTransactionManager tm) throws IOException, InterruptedException {
@@ -339,6 +343,43 @@ public class Example72Blob {
                         // read from `is`
                     }
                 } // delete temporary file in blob.close()
+            }
+        }
+    }
+
+    // docker run -d -p 12345:12345 --name tsurugi -v D:/tmp/client:/mnt/client -v D:/tmp/tsurugi:/opt/tsurugi/var/data/log -e GLOG_v=30 ghcr.io/project-tsurugi/tsurugidb:latest
+    void largeObjectPathMapping() throws IOException, InterruptedException {
+        var connector = TsurugiConnector.of("tcp://localhost:12345");
+        var sessionOption = TgSessionOption.of() //
+                .addLargeObjectPathMappingOnSend(Path.of("D:/tmp/client"), "/mnt/client") //
+                .addLargeObjectPathMappingOnReceive("/opt/tsurugi/var/data/log", Path.of("D:/tmp/tsurugi"));
+        try (var session = connector.createSession(sessionOption)) {
+            var tm = session.createTransactionManager(TgTxOption.ofOCC());
+
+            { // insert
+                var sql = "insert into blob_example values(:pk, :value)";
+                var variables = TgBindVariables.of().addInt("pk").addBlob("value");
+                var parameterMapping = TgParameterMapping.of(variables);
+                try (var ps = session.createStatement(sql, parameterMapping)) {
+                    tm.execute(transaction -> {
+                        var blobFile = Path.of("D:/tmp/client/blob.bin");
+                        Files.write(blobFile, new byte[] { 0x31, 0x32, 0x33 });
+                        var parameter = TgBindParameters.of().addInt("pk", 10).addBlob("value", blobFile);
+                        transaction.executeAndGetCountDetail(ps, parameter);
+                    });
+                }
+            }
+            { // select
+                var sql = "select * from blob_example order by pk";
+                var resultMapping = TgResultMapping.of(record -> record);
+                try (var ps = session.createQuery(sql, resultMapping)) {
+                    tm.executeAndForEach(ps, record -> {
+                        try (var blob = record.getBlob("value")) {
+                            byte[] buf = blob.readAllBytes();
+                            System.out.println(Arrays.toString(buf));
+                        }
+                    });
+                }
             }
         }
     }

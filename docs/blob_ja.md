@@ -116,6 +116,32 @@ void select(TsurugiTransactionManager tm) throws IOException, InterruptedExcepti
 TgBlobReferenceは、使用後にクローズする必要があります。
 明示的にクローズしなかった場合は、トランザクションクローズ時にクローズされます。
 
+### パスマッピングの例
+
+Iceaxe 1.9.0では、BLOB/CLOBファイルを扱うために、クライアント側のパスとサーバー側のパスを変換する機能があります。
+
+BLOB/CLOBファイルを扱う場合、クライアントとサーバーが同一ファイルシステムにアクセスできることを前提としていますが、環境によってはクライアントとサーバーのパスが一致しないことがあります。  
+このとき、パスマッピングを設定することで、BLOB/CLOBファイルのパスをクライアントからサーバーに送信する際にクライアント側のパスがサーバー側のパスに変換されます。同様に、サーバーからファイルのパスを受信した際にクライアント側のパスに変換されます。
+
+例えば以下のようにTsurugiのDockerでボリュームマウントしてIceaxeでパスマッピングを指定すると、`D:/tmp/client/blob.bin` のBLOBファイルをinsertすることができます。  
+また、`D:/tmp/tsurugi` の下にあるBLOBファイルを読むという扱いでselectすることができます。（selectする際のファイルパスはユーザーからは隠蔽されますが）
+
+```bash
+docker run -d -p 12345:12345 --name tsurugi -v D:/tmp/client:/mnt/client -v D:/tmp/tsurugi:/opt/tsurugi/var/data/log -e GLOG_v=30 ghcr.io/project-tsurugi/tsurugidb:latest
+```
+
+```java
+        var connector = TsurugiConnector.of("tcp://localhost:12345");
+        var sessionOption = TgSessionOption.of()
+            .addLargeObjectPathMappingOnSend(Path.of("D:/tmp/client"), "/mnt/client")
+            .addLargeObjectPathMappingOnReceive("/opt/tsurugi/var/data/log", Path.of("D:/tmp/tsurugi"));
+        try (var session = connector.createSession(sessionOption)) {
+            ～
+        }
+```
+
+
+
 
 
 ## BLOBの一時ファイルについて
