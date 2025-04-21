@@ -159,7 +159,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @since X.X.X
      */
     public void setFetchTimeout(TgTimeValue timeout) {
-        this.fetchTimeout = timeout;
+        this.fetchTimeout = Objects.requireNonNull(timeout);
         applyFetchTimeout();
     }
 
@@ -246,10 +246,11 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
         return this.lowResultSet;
     }
 
-    private synchronized void applyFetchTimeout() {
+    private void applyFetchTimeout() {
         var lowResultSet = this.lowResultSet;
         if (lowResultSet != null) {
-            lowResultSet.setTimeout(fetchTimeout.value(), fetchTimeout.unit());
+            var time = this.fetchTimeout;
+            lowResultSet.setTimeout(time.value(), time.unit());
         }
     }
 
