@@ -16,11 +16,10 @@
 package com.tsurugidb.iceaxe.session;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
@@ -165,7 +164,7 @@ public class TgSessionOption {
     private String sessionLabel;
     private String applicationName;
     private Optional<Boolean> keepAlive = Optional.empty();
-    private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = Collections.synchronizedMap(new EnumMap<>(TgTimeoutKey.class));
+    private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = new ConcurrentHashMap<>();
     private BlobPathMapping.Builder blobPathMappingBuilder = null;
     private TgCommitType commitType = TgCommitType.DEFAULT;
     private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.NOTHING;
