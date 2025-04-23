@@ -347,7 +347,7 @@ public class Example72Blob {
         }
     }
 
-    // docker run -d -p 12345:12345 --name tsurugi -v D:/tmp/client:/mnt/client -v D:/tmp/tsurugi:/opt/tsurugi/var/data/log -e GLOG_v=30 ghcr.io/project-tsurugi/tsurugidb:latest
+    // docker run -d -p 12345:12345 --name tsurugi -v D:/tmp/client:/mnt/client -v D:/tmp/tsurugi:/opt/tsurugi/var/data/log ghcr.io/project-tsurugi/tsurugidb:latest
     void largeObjectPathMapping() throws IOException, InterruptedException {
         var connector = TsurugiConnector.of("tcp://localhost:12345");
         var sessionOption = TgSessionOption.of() //
