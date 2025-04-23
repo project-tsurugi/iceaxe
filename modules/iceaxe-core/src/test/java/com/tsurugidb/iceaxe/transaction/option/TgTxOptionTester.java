@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.tsurugidb.sql.proto.SqlRequest.TransactionOption.ScanParallelOptCase;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionPriority;
 import com.tsurugidb.sql.proto.SqlRequest.TransactionType;
 
@@ -33,6 +34,11 @@ public class TgTxOptionTester {
 
     protected void assertLowOption(String label, TransactionPriority priority, boolean includeDdl, List<String> writePreserve, List<String> inclusiveReadArea, List<String> exclusiveReadArea,
             TgTxOption txOption) {
+        assertLowOption(label, priority, includeDdl, writePreserve, inclusiveReadArea, exclusiveReadArea, null, txOption);
+    }
+
+    protected void assertLowOption(String label, TransactionPriority priority, boolean includeDdl, List<String> writePreserve, List<String> inclusiveReadArea, List<String> exclusiveReadArea,
+            Integer scanParallel, TgTxOption txOption) {
         var builder = txOption.toLowTransactionOption();
         assertEquals(expectedType, builder.getType());
         assertEquals((label != null) ? label : "", builder.getLabel());
@@ -41,5 +47,12 @@ public class TgTxOptionTester {
         assertEquals(writePreserve, builder.getWritePreservesList().stream().map(wp -> wp.getTableName()).collect(Collectors.toList()));
         assertEquals(inclusiveReadArea, builder.getInclusiveReadAreasList().stream().map(ra -> ra.getTableName()).collect(Collectors.toList()));
         assertEquals(exclusiveReadArea, builder.getExclusiveReadAreasList().stream().map(ra -> ra.getTableName()).collect(Collectors.toList()));
+        if (scanParallel != null) {
+            assertEquals(ScanParallelOptCase.SCAN_PARALLEL, builder.getScanParallelOptCase());
+            assertEquals(scanParallel, builder.getScanParallel());
+        } else {
+            assertEquals(ScanParallelOptCase.SCANPARALLELOPT_NOT_SET, builder.getScanParallelOptCase());
+            assertEquals(0, builder.getScanParallel());
+        }
     }
 }

@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +49,7 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
     void of() {
         TgTxOptionRtx txOption = TgTxOption.ofRTX();
         String expected = "RTX{}";
-        assertOption(expected, null, null, txOption);
+        new RtxOptionAssert().text(expected).check(txOption);
     }
 
     @Test
@@ -59,7 +60,7 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         assertNotEquals(srcTxOption, txOption);
 
         String expected = "RTX{label=abc}";
-        assertOption(expected, "abc", null, txOption);
+        new RtxOptionAssert().text(expected).label("abc").check(txOption);
     }
 
     @Test
@@ -70,7 +71,7 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         assertNotEquals(srcTxOption, txOption);
 
         String expected = "RTX{label=abc, priority=INTERRUPT}";
-        assertOption(expected, "abc", TransactionPriority.INTERRUPT, txOption);
+        new RtxOptionAssert().text(expected).label("abc").priority(TransactionPriority.INTERRUPT).check(txOption);
     }
 
     @Test
@@ -82,26 +83,33 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         assertEquals(srcTxOption, txOption);
 
         String expected = "RTX{label=abc, priority=INTERRUPT}";
-        assertOption(expected, "abc", TransactionPriority.INTERRUPT, txOption);
+        new RtxOptionAssert().text(expected).label("abc").priority(TransactionPriority.INTERRUPT).check(txOption);
     }
 
     @Test
     void label() {
         TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc");
         String expected = "RTX{label=abc}";
-        assertOption(expected, "abc", null, txOption);
+        new RtxOptionAssert().text(expected).label("abc").check(txOption);
+    }
+
+    @Test
+    void scanParallel() {
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().scanParallel(123);
+        String expected = "RTX{scanParallel=123}";
+        new RtxOptionAssert().text(expected).scanParallel(123).check(txOption);
     }
 
     @Test
     void priority() {
         TgTxOptionRtx txOption = TgTxOption.ofRTX().priority(TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED);
         String expected = "RTX{priority=DEFAULT}";
-        assertOption(expected, null, TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED, txOption);
+        new RtxOptionAssert().text(expected).priority(TransactionPriority.TRANSACTION_PRIORITY_UNSPECIFIED).check(txOption);
     }
 
     @Test
     void clone0() {
-        TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc").scanParallel(123).priority(TransactionPriority.INTERRUPT);
         TgTxOptionRtx clone = txOption.clone();
         assertNotSame(txOption, clone);
         assertEquals(txOption.hashCode(), clone.hashCode());
@@ -109,22 +117,23 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
 
         txOption.label(null);
         txOption.priority(null);
-        assertOption("RTX{}", null, null, txOption);
+        txOption.scanParallel(0);
+        new RtxOptionAssert().text("RTX{scanParallel=0}").scanParallel(0).check(txOption);
         assertNotEquals(txOption, clone);
 
-        String expected = "RTX{label=abc, priority=INTERRUPT}";
-        assertOption(expected, "abc", TransactionPriority.INTERRUPT, clone);
+        String expected = "RTX{label=abc, priority=INTERRUPT, scanParallel=123}";
+        new RtxOptionAssert().text(expected).label("abc").scanParallel(123).priority(TransactionPriority.INTERRUPT).check(clone);
     }
 
     @Test
     void cloneLabel() {
-        TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc").priority(TransactionPriority.INTERRUPT);
+        TgTxOptionRtx txOption = TgTxOption.ofRTX().label("abc").scanParallel(123).priority(TransactionPriority.INTERRUPT);
         TgTxOptionRtx clone = txOption.clone("def");
 
-        assertOption("RTX{label=abc, priority=INTERRUPT}", "abc", TransactionPriority.INTERRUPT, txOption);
+        new RtxOptionAssert().text("RTX{label=abc, priority=INTERRUPT, scanParallel=123}").label("abc").scanParallel(123).priority(TransactionPriority.INTERRUPT).check(txOption);
 
-        String expected = "RTX{label=def, priority=INTERRUPT}";
-        assertOption(expected, "def", TransactionPriority.INTERRUPT, clone);
+        String expected = "RTX{label=def, priority=INTERRUPT, scanParallel=123}";
+        new RtxOptionAssert().text(expected).label("def").scanParallel(123).priority(TransactionPriority.INTERRUPT).check(clone);
     }
 
     @Test
@@ -155,12 +164,44 @@ class TgTxOptionRtxTest extends TgTxOptionTester {
         assertSame(txOption, cast);
     }
 
-    private void assertOption(String text, String label, TransactionPriority priority, TgTxOptionRtx txOption) {
-        assertEquals(text, txOption.toString());
-        assertEquals(expectedType, txOption.type());
-        assertEquals(label, txOption.label());
-        assertEquals(priority, txOption.priority());
+    private class RtxOptionAssert {
+        private String text;
+        private String label;
+        private TransactionPriority priority;
+        private Integer scanParallel;
 
-        assertLowOption(label, priority, false, List.of(), List.of(), List.of(), txOption);
+        public RtxOptionAssert text(String text) {
+            this.text = text;
+            return this;
+        }
+
+        public RtxOptionAssert label(String label) {
+            this.label = label;
+            return this;
+        }
+
+        public RtxOptionAssert priority(TransactionPriority priority) {
+            this.priority = priority;
+            return this;
+        }
+
+        public RtxOptionAssert scanParallel(int scanParallel) {
+            this.scanParallel = scanParallel;
+            return this;
+        }
+
+        public void check(TgTxOptionRtx txOption) {
+            assertEquals(text, txOption.toString());
+            assertEquals(expectedType, txOption.type());
+            assertEquals(label, txOption.label());
+            assertEquals(priority, txOption.priority());
+            if (scanParallel != null) {
+                assertEquals(OptionalInt.of(scanParallel), txOption.scanParallel());
+            } else {
+                assertTrue(txOption.scanParallel().isEmpty());
+            }
+
+            assertLowOption(label, priority, false, List.of(), List.of(), List.of(), scanParallel, txOption);
+        }
     }
 }
