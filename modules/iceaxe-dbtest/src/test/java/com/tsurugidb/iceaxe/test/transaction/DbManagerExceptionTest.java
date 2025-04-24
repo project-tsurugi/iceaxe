@@ -67,19 +67,21 @@ class DbManagerExceptionTest extends DbTestTableTester {
         var tm = session.createTransactionManager(TgTxOption.ofOCC());
         var e = assertThrowsExactly(TsurugiTmRetryOverIOException.class, () -> {
             try (var ltx = session.createTransaction(TgTxOption.ofLTX(TEST))) {
-                ltx.getLowTransaction();
-                tm.execute((TsurugiTransactionAction) transaction -> {
-                    try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
-                        var entity = createTestEntity(SIZE);
-                        var e0 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
-                            transaction.executeAndGetCount(ps, entity);
-                        });
-                        assertEqualsCode(SqlServiceCode.CONFLICT_ON_WRITE_PRESERVE_EXCEPTION, e0);
-                        throw e0;
-                    }
-                });
-
-                ltx.rollback();
+                try {
+                    ltx.getLowTransaction();
+                    tm.execute((TsurugiTransactionAction) transaction -> {
+                        try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
+                            var entity = createTestEntity(SIZE);
+                            var e0 = assertThrowsExactly(TsurugiTransactionException.class, () -> {
+                                transaction.executeAndGetCount(ps, entity);
+                            });
+                            assertEqualsCode(SqlServiceCode.CONFLICT_ON_WRITE_PRESERVE_EXCEPTION, e0);
+                            throw e0;
+                        }
+                    });
+                } finally {
+                    ltx.rollback();
+                }
             }
         });
         assertEqualsCode(SqlServiceCode.CONFLICT_ON_WRITE_PRESERVE_EXCEPTION, e);
