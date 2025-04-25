@@ -14,6 +14,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.tsubakuro.common.impl.SessionImpl;
 
 public abstract class DbTimetoutTest extends DbTestTableTester {
 
@@ -62,25 +63,33 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
 
         try (var pipeServer = new PipeServerThtread()) {
             pipeServer.start();
-
             var connector = getTsurugiConnector(pipeServer);
             var session = createSession(pipeServer, connector, modifier);
-            AutoCloseable sessionCloser = () -> {
-                if (closeSession) {
-                    session.close();
-                }
-            };
+            try {
+                AutoCloseable sessionCloser = () -> {
+                    if (closeSession) {
+                        session.close();
+                    }
+                };
 
-            try (sessionCloser) {
-                try {
-                    clientTask(pipeServer, session, modifier);
-                } finally {
-                    pipeServer.setPipeWrite(true);
+                try (sessionCloser) {
+                    try {
+                        clientTask(pipeServer, session, modifier);
+                    } finally {
+                        pipeServer.setPipeWrite(true);
+                    }
+                } catch (IOException | RuntimeException | Error e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (IOException | RuntimeException | Error e) {
-                throw e;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } finally {
+                try {
+                    var lowSession = (SessionImpl) session.getLowSession();
+                    lowSession.waitForCompletion();
+                } catch (Exception e) {
+                    LOG.error("lowSession.waitForCompletion() error", e);
+                }
             }
         }
     }
