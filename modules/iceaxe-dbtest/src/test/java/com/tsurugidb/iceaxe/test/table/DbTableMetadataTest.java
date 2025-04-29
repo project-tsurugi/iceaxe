@@ -73,13 +73,13 @@ class DbTableMetadataTest extends DbTestTableTester {
         assertNull(metadata.getDatabaseName());
         assertNull(metadata.getSchemaName());
         assertEquals(TEST, metadata.getTableName());
-        assertNull(metadata.getDescription());
+        assertEquals("test table.", metadata.getDescription());
 
         var columnList = metadata.getColumnList();
         assertEquals(24, columnList.size());
         int i = 0;
-        assertColumn("int4", TgDataType.INT, "INT", columnList.get(i++));
-        assertColumn("long", TgDataType.LONG, "BIGINT", columnList.get(i++));
+        assertColumn("int4", TgDataType.INT, "INT", "int value", columnList.get(i++));
+        assertColumn("long", TgDataType.LONG, "BIGINT", "long value", columnList.get(i++));
         assertColumn("float4", TgDataType.FLOAT, "REAL", columnList.get(i++));
         assertColumn("double8", TgDataType.DOUBLE, "DOUBLE", columnList.get(i++));
         assertColumn("decimal_", TgDataType.DECIMAL, "DECIMAL(38, 0)", columnList.get(i++));
