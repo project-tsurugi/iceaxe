@@ -167,7 +167,7 @@ public class TgSessionOption {
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = new ConcurrentHashMap<>();
     private BlobPathMapping.Builder blobPathMappingBuilder = null;
     private TgCommitType commitType = TgCommitType.DEFAULT;
-    private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.NOTHING;
+    private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.FORCEFUL;
 
     /**
      * Tsurugi Session Option.
