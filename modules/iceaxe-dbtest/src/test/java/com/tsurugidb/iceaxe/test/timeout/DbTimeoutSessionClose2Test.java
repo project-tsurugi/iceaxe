@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.Timeout;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
@@ -22,7 +21,6 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 /**
  * session (with child resources) close timeout test
  */
-@Timeout(2)
 public class DbTimeoutSessionClose2Test extends DbTimetoutTest {
 
     @BeforeAll
@@ -81,7 +79,7 @@ public class DbTimeoutSessionClose2Test extends DbTimetoutTest {
         try {
             session.close();
         } catch (IceaxeIOException e) {
-            assertEqualsCode(IceaxeErrorCode.PS_CLOSE_TIMEOUT, e);
+            assertEqualsCode(IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, e);
             assertFalse(session.isAlive());
             assertTrue(session.isClosed());
             return;

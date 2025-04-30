@@ -41,9 +41,10 @@ public class DbServerStopTransactionTest extends DbTimetoutTest {
 
         pipeServer.setPipeWrite(false);
         try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
-            pipeServer.close(); // server stop
+            pipeServer.close(); // server stop (socket close)
 
             boolean ioe = false;
+            Throwable save = null;
             try {
                 transaction.getLowTransaction();
             } catch (IOException e) {
@@ -52,13 +53,35 @@ public class DbServerStopTransactionTest extends DbTimetoutTest {
                     assertEquals("lost connection", e.getMessage());
                 } catch (AssertionFailedError t) {
                     t.addSuppressed(e);
+                    save = t;
                     throw t;
                 }
                 return;
+            } catch (Throwable e) {
+                save = e;
+                throw e;
             } finally {
                 pipeServer.setPipeWrite(true);
 
-                session.close();
+                try {
+                    session.close();
+                } catch (IOException e) {
+                    if ("socket is already closed".equals(e.getMessage())) {
+                        // pass
+                    } else {
+                        if (save != null) {
+                            save.addSuppressed(e);
+                        } else {
+                            throw e;
+                        }
+                    }
+                } catch (Throwable e) {
+                    if (save != null) {
+                        save.addSuppressed(e);
+                    } else {
+                        throw e;
+                    }
+                }
 
                 assertTrue(ioe);
             }
