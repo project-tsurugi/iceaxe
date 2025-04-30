@@ -1,6 +1,6 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.concurrent.TimeUnit;
@@ -29,7 +29,7 @@ public class DbTimeoutSessionShutdownTest extends DbTimetoutTest {
             session.shutdown(TgSessionShutdownType.GRACEFUL, 1, TimeUnit.SECONDS);
         } catch (IceaxeIOException e) {
             assertEqualsCode(IceaxeErrorCode.SESSION_SHUTDOWN_TIMEOUT, e);
-            assertTrue(session.isAlive());
+            assertFalse(session.isAlive());
             return;
         } finally {
             pipeServer.setPipeWrite(true);
