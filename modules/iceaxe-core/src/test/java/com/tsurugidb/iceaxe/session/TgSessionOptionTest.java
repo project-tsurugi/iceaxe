@@ -182,7 +182,7 @@ class TgSessionOptionTest {
         assertEquals(Long.MAX_VALUE, timeout.value());
         assertEquals(TimeUnit.NANOSECONDS, timeout.unit());
         assertEquals(TgCommitType.DEFAULT, sessionOption.getCommitType());
-        assertEquals(TgSessionShutdownType.NOTHING, sessionOption.getCloseShutdownType());
+        assertEquals(TgSessionShutdownType.FORCEFUL, sessionOption.getCloseShutdownType());
     }
 
     @Test
@@ -194,7 +194,7 @@ class TgSessionOptionTest {
                 + ", timeout={DEFAULT=9223372036854775807nanoseconds}" //
                 + ", blobPathMapping=null" //
                 + ", commitType=DEFAULT" //
-                + ", closeShutdownType=NOTHING" //
+                + ", closeShutdownType=FORCEFUL" //
                 + "}", empty.toString());
 
         var sessionOption = TgSessionOption.of() //

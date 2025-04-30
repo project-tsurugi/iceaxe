@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.Wire;
 import com.tsurugidb.tsubakuro.common.Session;
+import com.tsurugidb.tsubakuro.common.ShutdownType;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 import com.tsurugidb.tsubakuro.util.ServerResource;
 
@@ -54,5 +55,10 @@ public class TestLowSession extends TestServerResource implements Session {
     @Override
     public void remove(ServerResource resource) {
         throw new AssertionError("do override");
+    }
+
+    @Override
+    public FutureResponse<Void> shutdown(ShutdownType type) throws IOException {
+        return new TestFutureResponse<>();
     }
 }

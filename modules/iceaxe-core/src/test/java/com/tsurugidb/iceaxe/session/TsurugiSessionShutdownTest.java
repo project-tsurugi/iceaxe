@@ -107,6 +107,7 @@ class TsurugiSessionShutdownTest {
         };
 
         var sessionOption = TgSessionOption.of();
+        sessionOption.setCloseShutdownType(TgSessionShutdownType.NOTHING);
         try (var session = new TsurugiSession(sessionFuture, sessionOption)) {
             var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> {
                 caller.shutdown(session, TgSessionShutdownType.GRACEFUL);
@@ -146,6 +147,7 @@ class TsurugiSessionShutdownTest {
         };
 
         var sessionOption = TgSessionOption.of();
+        sessionOption.setCloseShutdownType(TgSessionShutdownType.NOTHING);
         try (var session = new TsurugiSession(sessionFuture, sessionOption)) {
             var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> {
                 caller.shutdown(session, TgSessionShutdownType.GRACEFUL);

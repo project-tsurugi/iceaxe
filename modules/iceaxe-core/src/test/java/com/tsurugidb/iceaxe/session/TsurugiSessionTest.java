@@ -50,7 +50,7 @@ class TsurugiSessionTest {
         {
             var sessionOption = TgSessionOption.of();
             try (var session = new TsurugiSession(null, sessionOption)) {
-                assertEquals(TgSessionShutdownType.NOTHING, session.getCloseShutdownType());
+                assertEquals(TgSessionShutdownType.FORCEFUL, session.getCloseShutdownType());
             }
         }
         {
