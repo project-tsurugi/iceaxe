@@ -23,6 +23,7 @@ import com.tsurugidb.tsubakuro.sql.exception.CcException;
 import com.tsurugidb.tsubakuro.sql.exception.ConflictOnWritePreserveException;
 import com.tsurugidb.tsubakuro.sql.exception.InactiveTransactionException;
 import com.tsurugidb.tsubakuro.sql.exception.TargetNotFoundException;
+import com.tsurugidb.tsubakuro.sql.exception.TransactionNotFoundException;
 import com.tsurugidb.tsubakuro.sql.exception.UniqueConstraintViolationException;
 
 /**
@@ -96,6 +97,23 @@ public class TsurugiExceptionUtil {
         var lowException = e.findLowServerException().orElse(null);
         if (lowException != null) {
             if (lowException instanceof InactiveTransactionException) { // SQL-02025
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * whether transaction not found.
+     *
+     * @param e exception
+     * @return {@code true} if transaction not found
+     * @since X.X.X
+     */
+    public boolean isTransactionNotFound(TsurugiDiagnosticCodeProvider e) {
+        var lowException = e.findLowServerException().orElse(null);
+        if (lowException != null) {
+            if (lowException instanceof TransactionNotFoundException) { // SQL-02045
                 return true;
             }
         }

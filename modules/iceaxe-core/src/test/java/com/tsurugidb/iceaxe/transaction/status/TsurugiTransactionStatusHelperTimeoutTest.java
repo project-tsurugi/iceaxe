@@ -32,6 +32,7 @@ import com.tsurugidb.iceaxe.test.low.TestFutureResponse;
 import com.tsurugidb.iceaxe.test.low.TestLowTransaction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceException;
+import com.tsurugidb.tsubakuro.sql.TransactionStatus.TransactionStatusWithMessage;
 
 class TsurugiTransactionStatusHelperTimeoutTest {
 
@@ -40,14 +41,17 @@ class TsurugiTransactionStatusHelperTimeoutTest {
         var sessionOption = TgSessionOption.of();
         sessionOption.setTimeout(TgTimeoutKey.TX_STATUS_CONNECT, 1, TimeUnit.SECONDS);
 
-        var future = new TestFutureResponse<SqlServiceException>();
-        future.setExpectedTimeout(1, TimeUnit.SECONDS);
-        future.setThrowTimeout(true);
+        var exceptionFuture = new TestFutureResponse<SqlServiceException>();
+        exceptionFuture.setExpectedTimeout(1, TimeUnit.SECONDS);
+        exceptionFuture.setThrowTimeout(true);
+
+        var statusFuture = new TestFutureResponse<TransactionStatusWithMessage>();
 
         try (var session = new TestTsurugiSession(sessionOption)) {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                 var lowTx = (TestLowTransaction) transaction.getLowTransaction();
-                lowTx.setTestTransactionStatusFutureResponse(future);
+                lowTx.setTestSqlServiceExceptionFutureResponse(exceptionFuture);
+                lowTx.setTestTransactionStatusFutureResponse(statusFuture);
 
                 var target = new TsurugiTransactionStatusHelper();
 
@@ -56,7 +60,34 @@ class TsurugiTransactionStatusHelperTimeoutTest {
             }
         }
 
-        assertTrue(future.isClosed());
+        assertTrue(exceptionFuture.isClosed());
+    }
+
+    @Test
+    void connectTimeout2() throws Exception {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setTimeout(TgTimeoutKey.TX_STATUS_CONNECT, 1, TimeUnit.SECONDS);
+
+        var exceptionFuture = new TestFutureResponse<SqlServiceException>();
+
+        var statusFuture = new TestFutureResponse<TransactionStatusWithMessage>();
+        statusFuture.setExpectedTimeout(1, TimeUnit.SECONDS);
+        statusFuture.setThrowTimeout(true);
+
+        try (var session = new TestTsurugiSession(sessionOption)) {
+            try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+                var lowTx = (TestLowTransaction) transaction.getLowTransaction();
+                lowTx.setTestSqlServiceExceptionFutureResponse(exceptionFuture);
+                lowTx.setTestTransactionStatusFutureResponse(statusFuture);
+
+                var target = new TsurugiTransactionStatusHelper();
+
+                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> target.getTransactionStatus(transaction));
+                assertEquals(IceaxeErrorCode.TX_STATUS_CONNECT_TIMEOUT, e.getDiagnosticCode());
+            }
+        }
+
+        assertTrue(exceptionFuture.isClosed());
     }
 
     @Test
@@ -64,14 +95,17 @@ class TsurugiTransactionStatusHelperTimeoutTest {
         var sessionOption = TgSessionOption.of();
         sessionOption.setTimeout(TgTimeoutKey.TX_STATUS_CONNECT, 1, TimeUnit.SECONDS);
 
-        var future = new TestFutureResponse<SqlServiceException>();
-        future.setExpectedCloseTimeout(1, TimeUnit.SECONDS);
-        future.setThrowCloseTimeout(true);
+        var exceptionFuture = new TestFutureResponse<SqlServiceException>();
+        exceptionFuture.setExpectedCloseTimeout(1, TimeUnit.SECONDS);
+        exceptionFuture.setThrowCloseTimeout(true);
+
+        var statusFuture = new TestFutureResponse<TransactionStatusWithMessage>();
 
         try (var session = new TestTsurugiSession(sessionOption)) {
             try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
                 var lowTx = (TestLowTransaction) transaction.getLowTransaction();
-                lowTx.setTestTransactionStatusFutureResponse(future);
+                lowTx.setTestSqlServiceExceptionFutureResponse(exceptionFuture);
+                lowTx.setTestTransactionStatusFutureResponse(statusFuture);
 
                 var target = new TsurugiTransactionStatusHelper();
 
@@ -80,6 +114,33 @@ class TsurugiTransactionStatusHelperTimeoutTest {
             }
         }
 
-        assertTrue(future.isClosed());
+        assertTrue(exceptionFuture.isClosed());
+    }
+
+    @Test
+    void closeTimeout2() throws Exception {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setTimeout(TgTimeoutKey.TX_STATUS_CONNECT, 1, TimeUnit.SECONDS);
+
+        var exceptionFuture = new TestFutureResponse<SqlServiceException>();
+
+        var statusFuture = new TestFutureResponse<TransactionStatusWithMessage>();
+        statusFuture.setExpectedCloseTimeout(1, TimeUnit.SECONDS);
+        statusFuture.setThrowCloseTimeout(true);
+
+        try (var session = new TestTsurugiSession(sessionOption)) {
+            try (var transaction = session.createTransaction(TgTxOption.ofOCC())) {
+                var lowTx = (TestLowTransaction) transaction.getLowTransaction();
+                lowTx.setTestSqlServiceExceptionFutureResponse(exceptionFuture);
+                lowTx.setTestTransactionStatusFutureResponse(statusFuture);
+
+                var target = new TsurugiTransactionStatusHelper();
+
+                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> target.getTransactionStatus(transaction));
+                assertEquals(IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT, e.getDiagnosticCode());
+            }
+        }
+
+        assertTrue(exceptionFuture.isClosed());
     }
 }

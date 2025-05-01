@@ -24,6 +24,8 @@ import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
+import com.tsurugidb.tsubakuro.sql.TransactionStatus;
+import com.tsurugidb.tsubakuro.sql.TransactionStatus.TransactionStatusWithMessage;
 
 /**
  * Tsurugi transaction status.
@@ -31,6 +33,7 @@ import com.tsurugidb.tsubakuro.exception.DiagnosticCode;
 public class TgTxStatus {
 
     private final TsurugiTransactionException exception;
+    private final TransactionStatusWithMessage lowTxStatus;
     private TsurugiExceptionUtil exceptionUtil = TsurugiExceptionUtil.getInstance();
 
     /**
@@ -54,10 +57,12 @@ public class TgTxStatus {
     /**
      * Creates a new instance.
      *
-     * @param exception transaction exception
+     * @param exception   transaction exception
+     * @param lowTxStatus transaction status
      */
-    public TgTxStatus(@Nullable TsurugiTransactionException exception) {
+    public TgTxStatus(@Nullable TsurugiTransactionException exception, @Nullable TransactionStatusWithMessage lowTxStatus) {
         this.exception = exception;
+        this.lowTxStatus = lowTxStatus;
     }
 
     /**
@@ -103,8 +108,44 @@ public class TgTxStatus {
         return this.exception;
     }
 
+    /**
+     * Whether the transaction is found.
+     *
+     * @return {@code true} if transaction is found
+     * @since X.X.X
+     */
+    public boolean isTransactionFound() {
+        return this.lowTxStatus != null;
+    }
+
+    /**
+     * get transaction status.
+     *
+     * @return transaction status
+     * @since X.X.X
+     */
+    public @Nullable TransactionStatus getLowTransactionStatus() {
+        if (this.lowTxStatus == null) {
+            return null;
+        }
+        return lowTxStatus.getStatus();
+    }
+
+    /**
+     * get transaction status message.
+     *
+     * @return message
+     * @since X.X.X
+     */
+    public @Nullable String getTransactionStatusMessage() {
+        if (this.lowTxStatus == null) {
+            return null;
+        }
+        return lowTxStatus.getMessage();
+    }
+
     @Override
     public String toString() {
-        return "TgTransactionStatus(" + exception + ")";
+        return "TgTransactionStatus(" + exception + ", " + getLowTransactionStatus() + ")";
     }
 }

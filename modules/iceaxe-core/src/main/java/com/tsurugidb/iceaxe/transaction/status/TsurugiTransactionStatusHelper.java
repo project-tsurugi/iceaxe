@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.TsurugiExceptionUtil;
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -30,6 +32,7 @@ import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
 import com.tsurugidb.tsubakuro.sql.SqlServiceException;
 import com.tsurugidb.tsubakuro.sql.Transaction;
+import com.tsurugidb.tsubakuro.sql.TransactionStatus.TransactionStatusWithMessage;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 /**
@@ -52,9 +55,10 @@ public class TsurugiTransactionStatusHelper {
 
         var lowTx = transaction.getLowTransaction();
         LOG.trace("getTransactionStatus start. tx={}", transaction);
-        var lowFuture = getLowSqlServiceException(lowTx);
+        var lowExceptionFuture = getLowSqlServiceException(lowTx);
+        var lowTxStatusFuture = getLowTransactionStatus(lowTx);
         LOG.trace("getTransactionStatus started");
-        return getTransactionStatus(transaction, lowFuture, connectTimeout);
+        return getTransactionStatus(transaction, lowExceptionFuture, lowTxStatusFuture, connectTimeout);
     }
 
     /**
@@ -90,27 +94,54 @@ public class TsurugiTransactionStatusHelper {
     }
 
     /**
+     * get low SQL service exception.
+     *
+     * @param lowTx low transaction
+     * @return future of transaction status
+     * @throws IOException if an I/O error occurs while retrieving transaction status
+     * @since X.X.X
+     */
+    protected FutureResponse<TransactionStatusWithMessage> getLowTransactionStatus(Transaction lowTx) throws IOException {
+        return lowTx.getStatus();
+    }
+
+    /**
      * get transaction status.
      *
-     * @param transaction    transaction
-     * @param lowFuture      future of SQL service exception
-     * @param connectTimeout close timeout
+     * @param transaction        transaction
+     * @param lowExceptionFuture future of SQL service exception
+     * @param lowTxStatusFuture  future of transaction status
+     * @param connectTimeout     close timeout
      * @return transaction status
      * @throws IOException          if an I/O error occurs while retrieving transaction status
      * @throws InterruptedException if interrupted while retrieving transaction status
      */
-    protected TgTxStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowFuture, IceaxeTimeout connectTimeout) throws IOException, InterruptedException {
-        var lowStatus = IceaxeIoUtil.getAndCloseFuture(lowFuture, //
+    protected TgTxStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowExceptionFuture, FutureResponse<TransactionStatusWithMessage> lowTxStatusFuture,
+            IceaxeTimeout connectTimeout) throws IOException, InterruptedException {
+        var lowException = IceaxeIoUtil.getAndCloseFuture(lowExceptionFuture, //
                 connectTimeout, IceaxeErrorCode.TX_STATUS_CONNECT_TIMEOUT, //
                 IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT);
+        TransactionStatusWithMessage lowTxStatus;
+        try {
+            lowTxStatus = IceaxeIoUtil.getAndCloseFuture(lowTxStatusFuture, //
+                    connectTimeout, IceaxeErrorCode.TX_STATUS_CONNECT_TIMEOUT, //
+                    IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT);
+        } catch (TsurugiIOException e) {
+            if (TsurugiExceptionUtil.getInstance().isTransactionNotFound(e)) {
+                lowTxStatus = null;
+            } else {
+                throw e;
+            }
+        }
         LOG.trace("getTransactionStatus end");
 
-        var exception = newTransactionException(lowStatus);
+        var exception = newTransactionException(lowException);
         if (exception != null) {
             exception.setSql(transaction, null, null, null);
             exception.setTxMethod(TgTxMethod.GET_TRANSACTION_STATUS, 0);
         }
-        return newTgTransactionStatus(exception);
+
+        return newTgTransactionStatus(exception, lowTxStatus);
     }
 
     /**
@@ -129,10 +160,11 @@ public class TsurugiTransactionStatusHelper {
     /**
      * Creates a new transaction status instance.
      *
-     * @param exception transaction exception
+     * @param exception   transaction exception
+     * @param lowTxStatus transaction status
      * @return transaction status
      */
-    protected TgTxStatus newTgTransactionStatus(TsurugiTransactionException exception) {
-        return new TgTxStatus(exception);
+    protected TgTxStatus newTgTransactionStatus(TsurugiTransactionException exception, TransactionStatusWithMessage lowTxStatus) {
+        return new TgTxStatus(exception, lowTxStatus);
     }
 }

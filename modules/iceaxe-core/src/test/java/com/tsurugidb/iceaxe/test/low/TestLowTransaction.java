@@ -26,13 +26,15 @@ import com.tsurugidb.tsubakuro.sql.PreparedStatement;
 import com.tsurugidb.tsubakuro.sql.ResultSet;
 import com.tsurugidb.tsubakuro.sql.SqlServiceException;
 import com.tsurugidb.tsubakuro.sql.Transaction;
+import com.tsurugidb.tsubakuro.sql.TransactionStatus.TransactionStatusWithMessage;
 import com.tsurugidb.tsubakuro.util.FutureResponse;
 
 public class TestLowTransaction extends TestServerResource implements Transaction {
 
     private FutureResponse<Void> commitFuture;
     private FutureResponse<Void> rollbackFuture;
-    private FutureResponse<SqlServiceException> transactionStatusFuture;
+    private FutureResponse<SqlServiceException> sqlServiceExceptionFuture;
+    private FutureResponse<TransactionStatusWithMessage> transactionStatusFuture;
     private FutureResponse<ResultSet> resultSetFuture;
     private FutureResponse<ExecuteResult> executeResultFuture;
 
@@ -59,12 +61,21 @@ public class TestLowTransaction extends TestServerResource implements Transactio
         return this.rollbackFuture;
     }
 
-    public void setTestTransactionStatusFutureResponse(FutureResponse<SqlServiceException> future) {
-        this.transactionStatusFuture = future;
+    public void setTestSqlServiceExceptionFutureResponse(FutureResponse<SqlServiceException> future) {
+        this.sqlServiceExceptionFuture = future;
     }
 
     @Override
     public FutureResponse<SqlServiceException> getSqlServiceException() throws IOException {
+        return this.sqlServiceExceptionFuture;
+    }
+
+    public void setTestTransactionStatusFutureResponse(FutureResponse<TransactionStatusWithMessage> future) {
+        this.transactionStatusFuture = future;
+    }
+
+    @Override
+    public FutureResponse<TransactionStatusWithMessage> getStatus() throws IOException {
         return this.transactionStatusFuture;
     }
 
