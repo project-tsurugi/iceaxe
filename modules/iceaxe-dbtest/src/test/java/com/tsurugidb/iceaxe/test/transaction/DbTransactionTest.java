@@ -217,9 +217,9 @@ class DbTransactionTest extends DbTestTableTester {
             var status = transaction.getTransactionStatus();
             assertTrue(status.isNormal());
             assertNull(status.getTransactionException());
-            assertFalse(status.isTransactionFound());
-            assertNull(status.getLowTransactionStatus());
-            assertNull(status.getTransactionStatusMessage());
+            assertTrue(status.isTransactionFound());
+            assertEquals(TransactionStatus.STORED, status.getLowTransactionStatus());
+            assertEquals("", status.getTransactionStatusMessage());
         }
     }
 
