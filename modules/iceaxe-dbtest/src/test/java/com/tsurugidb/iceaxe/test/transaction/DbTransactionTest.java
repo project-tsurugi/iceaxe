@@ -26,6 +26,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
+import com.tsurugidb.tsubakuro.sql.TransactionStatus;
 
 /**
  * transaction test
@@ -64,6 +65,9 @@ class DbTransactionTest extends DbTestTableTester {
             assertFalse(status.isError());
             assertNull(status.getDiagnosticCode());
             assertNull(status.getTransactionException());
+            assertTrue(status.isTransactionFound());
+            assertEquals(TransactionStatus.RUNNING, status.getLowTransactionStatus());
+            assertEquals("", status.getTransactionStatusMessage());
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(SIZE);
@@ -74,6 +78,9 @@ class DbTransactionTest extends DbTestTableTester {
                 assertFalse(status2.isError());
                 assertNull(status2.getDiagnosticCode());
                 assertNull(status2.getTransactionException());
+                assertTrue(status.isTransactionFound());
+                assertEquals(TransactionStatus.RUNNING, status2.getLowTransactionStatus());
+                assertEquals("", status2.getTransactionStatusMessage());
             }
         }
     }
@@ -94,6 +101,9 @@ class DbTransactionTest extends DbTestTableTester {
             assertTrue(status.isError());
             assertEquals(SqlServiceCode.SYNTAX_EXCEPTION, status.getDiagnosticCode());
             assertNotNull(status.getTransactionException());
+            assertTrue(status.isTransactionFound());
+            assertEquals(TransactionStatus.ABORTED, status.getLowTransactionStatus());
+            assertEquals("", status.getTransactionStatusMessage());
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(SIZE);
@@ -108,6 +118,9 @@ class DbTransactionTest extends DbTestTableTester {
             assertTrue(status2.isError());
             assertEquals(SqlServiceCode.SYNTAX_EXCEPTION, status2.getDiagnosticCode());
             assertNotNull(status2.getTransactionException());
+            assertTrue(status2.isTransactionFound());
+            assertEquals(TransactionStatus.ABORTED, status2.getLowTransactionStatus());
+            assertEquals("", status2.getTransactionStatusMessage());
         }
     }
 
@@ -127,6 +140,9 @@ class DbTransactionTest extends DbTestTableTester {
             assertFalse(status.isError());
             assertNull(status.getDiagnosticCode());
             assertNull(status.getTransactionException());
+            assertTrue(status.isTransactionFound());
+            assertEquals(TransactionStatus.RUNNING, status.getLowTransactionStatus());
+            assertEquals("", status.getTransactionStatusMessage());
 
             try (var ps = session.createStatement(INSERT_SQL, INSERT_MAPPING)) {
                 var entity = createTestEntity(SIZE);
@@ -137,6 +153,9 @@ class DbTransactionTest extends DbTestTableTester {
             assertFalse(status2.isError());
             assertNull(status2.getDiagnosticCode());
             assertNull(status2.getTransactionException());
+            assertTrue(status2.isTransactionFound());
+            assertEquals(TransactionStatus.RUNNING, status2.getLowTransactionStatus());
+            assertEquals("", status2.getTransactionStatusMessage());
         }
     }
 
@@ -156,6 +175,9 @@ class DbTransactionTest extends DbTestTableTester {
             assertTrue(status.isError());
             assertEquals(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, status.getDiagnosticCode());
             assertNotNull(status.getTransactionException());
+            assertTrue(status.isTransactionFound());
+            assertEquals(TransactionStatus.ABORTED, status.getLowTransactionStatus());
+            assertEquals("", status.getTransactionStatusMessage());
         }
     }
 
@@ -181,6 +203,9 @@ class DbTransactionTest extends DbTestTableTester {
             assertTrue(status.isError());
             assertEquals(SqlServiceCode.UNIQUE_CONSTRAINT_VIOLATION_EXCEPTION, status.getDiagnosticCode());
             assertNotNull(status.getTransactionException());
+            assertTrue(status.isTransactionFound());
+            assertEquals(TransactionStatus.ABORTED, status.getLowTransactionStatus());
+            assertEquals("", status.getTransactionStatusMessage());
         }
     }
 
@@ -192,6 +217,9 @@ class DbTransactionTest extends DbTestTableTester {
             var status = transaction.getTransactionStatus();
             assertTrue(status.isNormal());
             assertNull(status.getTransactionException());
+            assertFalse(status.isTransactionFound());
+            assertNull(status.getLowTransactionStatus());
+            assertNull(status.getTransactionStatusMessage());
         }
     }
 
@@ -203,6 +231,9 @@ class DbTransactionTest extends DbTestTableTester {
             var status = transaction.getTransactionStatus();
             assertTrue(status.isNormal());
             assertNull(status.getTransactionException());
+            assertTrue(status.isTransactionFound());
+            assertEquals(TransactionStatus.ABORTED, status.getLowTransactionStatus());
+            assertEquals("", status.getTransactionStatusMessage());
         }
     }
 
