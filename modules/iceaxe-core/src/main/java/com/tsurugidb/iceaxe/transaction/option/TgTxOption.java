@@ -188,6 +188,14 @@ public interface TgTxOption extends Cloneable {
     public String label();
 
     /**
+     * get rollback on transaction close.
+     *
+     * @return {@code true} if rollback on transaction close
+     * @since X.X.X
+     */
+    public boolean isRollbackOnTransactionClose();
+
+    /**
      * clone transaction option.
      *
      * @return new transaction option

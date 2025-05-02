@@ -33,6 +33,7 @@ import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.test.low.TestFutureResponse;
+import com.tsurugidb.iceaxe.test.low.TestLowTransaction;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 import com.tsurugidb.tsubakuro.exception.ServerException;
@@ -55,7 +56,12 @@ class TsurugiTransactionTest {
     @Test
     void initialize_twice1() throws Exception {
         var session = new TsurugiSession(null, TgSessionOption.of());
-        var future = new TestFutureResponse<Transaction>();
+        var future = new TestFutureResponse<Transaction>() {
+            @Override
+            public Transaction get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException {
+                return new TestLowTransaction();
+            }
+        };
 
         try (var target = new TsurugiTransaction(session, TgTxOption.ofOCC())) {
             target.initialize(future);
@@ -72,7 +78,7 @@ class TsurugiTransactionTest {
         var future = new TestFutureResponse<Transaction>() {
             @Override
             public Transaction get(long timeout, TimeUnit unit) throws IOException, ServerException, InterruptedException {
-                return new Transaction() {
+                return new TestLowTransaction() {
                     @Override
                     public String getTransactionId() {
                         return "TID-test";

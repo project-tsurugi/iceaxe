@@ -32,7 +32,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 public class TestLowTransaction extends TestServerResource implements Transaction {
 
     private FutureResponse<Void> commitFuture;
-    private FutureResponse<Void> rollbackFuture;
+    private FutureResponse<Void> rollbackFuture = new TestFutureResponse<Void>();
     private FutureResponse<SqlServiceException> sqlServiceExceptionFuture;
     private FutureResponse<TransactionStatusWithMessage> transactionStatusFuture;
     private FutureResponse<ResultSet> resultSetFuture;

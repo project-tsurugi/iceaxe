@@ -32,6 +32,7 @@ import com.tsurugidb.sql.proto.SqlRequest.TransactionOption;
 public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implements TgTxOption {
 
     private String label = null;
+    private boolean rollbackOnTransactionClose = true;
 
     private TransactionOption lowTransactionOption;
 
@@ -56,6 +57,21 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
     @Override
     public synchronized String label() {
         return this.label;
+    }
+
+    /**
+     * set rollback on transaction close.
+     *
+     * @param rollback {@code true} if rollback on transaction close
+     * @since X.X.X
+     */
+    public void setRollbackOnTransactionClose(boolean rollback) {
+        this.rollbackOnTransactionClose = rollback;
+    }
+
+    @Override
+    public boolean isRollbackOnTransactionClose() {
+        return this.rollbackOnTransactionClose;
     }
 
     /**

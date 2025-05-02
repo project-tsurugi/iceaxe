@@ -81,11 +81,13 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
     private TsurugiTransactionManager ownerTm = null;
     private int iceaxeTmExecuteId = 0;
     private int attempt = 0;
+    private boolean rollbackOnClose;
     private final IceaxeTimeout beginTimeout;
     private final IceaxeTimeout commitTimeout;
     private final IceaxeTimeout rollbackTimeout;
     private final IceaxeTimeout closeTimeout;
     private List<TsurugiTransactionEventListener> eventListenerList = null;
+    private boolean finishCalled = false;
     private boolean committed = false;
     private boolean rollbacked = false;
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
@@ -105,6 +107,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
         this.iceaxeTxId = TRANSACTION_COUNT.incrementAndGet();
         this.ownerSession = session;
         this.txOption = txOption;
+        this.rollbackOnClose = txOption.isRollbackOnTransactionClose();
 
         var sessionOption = session.getSessionOption();
         this.beginTimeout = new IceaxeTimeout(sessionOption, TgTimeoutKey.TRANSACTION_BEGIN);
@@ -210,6 +213,26 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      */
     public int getAttempt() {
         return this.attempt;
+    }
+
+    /**
+     * set rollback on close.
+     *
+     * @param rollback {@code true} if rollback on close
+     * @since X.X.X
+     */
+    public void setRollbackOnClose(boolean rollback) {
+        this.rollbackOnClose = rollback;
+    }
+
+    /**
+     * get rollback on close.
+     *
+     * @return {@code true} if rollback on close
+     * @since X.X.X
+     */
+    public boolean isRollbackOnClose() {
+        return this.rollbackOnClose;
     }
 
     /**
@@ -356,6 +379,10 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
     @IceaxeInternal
 //  @ThreadSafe
     public final synchronized Transaction getLowTransaction() throws IOException, InterruptedException {
+        return getLowTransaction(beginTimeout);
+    }
+
+    private Transaction getLowTransaction(IceaxeTimeout beginTimeout) throws IOException, InterruptedException {
         this.calledGetLowTransaction = true;
         if (this.lowTransaction == null) {
             if (this.lowFutureException != null) {
@@ -788,7 +815,8 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * @throws TsurugiTransactionException if server error occurs while execute query
      * @since X.X.X
      */
-    public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
+    public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumerWithRowNumber<R> action)
+            throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FOR_EACH;
         int txExecuteId = getNewIceaxeTxExecuteId();
         event(null, listener -> listener.executeStart(this, method, txExecuteId, ps, parameter));
@@ -1238,6 +1266,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * @throws TsurugiTransactionException if server error occurs while commit
      */
     public synchronized void commit(TgCommitType commitType) throws IOException, InterruptedException, TsurugiTransactionException {
+        this.finishCalled = true;
         checkClose();
         if (this.committed) {
             return;
@@ -1279,11 +1308,16 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * @throws TsurugiTransactionException if server error occurs while rollback
      */
     public synchronized void rollback() throws IOException, InterruptedException, TsurugiTransactionException {
+        this.finishCalled = true;
         checkClose();
         if (this.committed || this.rollbacked) {
             return;
         }
 
+        rollback(rollbackTimeout);
+    }
+
+    private void rollback(IceaxeTimeout rollbackTimeout) throws IOException, InterruptedException, TsurugiTransactionException {
         LOG.trace("transaction rollback start");
         event(null, listener -> listener.rollbackStart(this));
 
@@ -1343,7 +1377,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      */
     protected void finish(long start, IoFunction<Transaction, FutureResponse<Void>> finisher, IceaxeTimeout timeout, IceaxeErrorCode timeoutErrorCode, IceaxeErrorCode closeTimeoutErrorCode)
             throws IOException, InterruptedException, TsurugiTransactionException {
-        var transaction = getLowTransaction();
+        var transaction = getLowTransaction(timeout);
         var lowResultFuture = finisher.apply(transaction);
         long timeoutNanos = IceaxeIoUtil.calculateTimeoutNanos(timeout.getNanos(), start);
         var finishTimeout = new IceaxeTimeout(timeoutNanos, TimeUnit.NANOSECONDS);
@@ -1403,19 +1437,17 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
     public void close(long timeoutNanos) throws IOException, InterruptedException {
         this.closed = true;
 
-//      if (!(this.committed || this.rollbacked)) {
-        // commitやrollbackに失敗してもcloseは呼ばれるので、ここでIllegalStateException等を発生させるのは良くない
-//      }
-
         if (LOG.isTraceEnabled()) {
             LOG.trace("transaction close start. committed={}, rollbacked={}", committed, rollbacked);
         }
         Throwable occurred = null;
         try {
+            var rollback = rollbackCloser();
+
             IceaxeIoUtil.close(timeoutNanos, closeableSet, IceaxeErrorCode.TX_CHILD_CLOSE_ERROR, t -> {
                 // not try-finally
                 IceaxeIoUtil.close(t, IceaxeErrorCode.TX_CLOSE_TIMEOUT, IceaxeErrorCode.TX_CLOSE_ERROR, //
-                        lowTransaction, lowTransactionFuture);
+                        rollback, lowTransaction, lowTransactionFuture);
                 ownerSession.removeChild(this);
             });
         } catch (Throwable e) {
@@ -1426,6 +1458,27 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
             event(occurred, listener -> listener.closeTransaction(this, timeoutNanos, finalOccurred));
         }
         LOG.trace("transaction close end");
+    }
+
+    private IceaxeTimeoutCloseable rollbackCloser() {
+        if (!this.rollbackOnClose) {
+            return null;
+        }
+
+        if (this.finishCalled) {
+            // commit()またはrollback()が既に呼ばれているので、ロールバック不要
+            return null;
+        }
+        if (this.lowTransaction == null) {
+            // lowTransactionを取得していない、すなわち何のトランザクション処理も行っていないので、ロールバックは（FutureResponseのクローズで）Tsubakuroに任せる
+            return null;
+        }
+
+        return timeoutNanos -> {
+            this.finishCalled = true;
+            var timeout = new IceaxeTimeout(timeoutNanos, TimeUnit.NANOSECONDS);
+            rollback(timeout);
+        };
     }
 
     /**
