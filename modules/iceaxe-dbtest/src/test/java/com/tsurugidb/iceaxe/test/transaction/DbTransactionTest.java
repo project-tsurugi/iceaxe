@@ -12,6 +12,8 @@ import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
@@ -22,6 +24,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
+import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.transaction.function.TsurugiTransactionAction;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -343,6 +346,33 @@ class DbTransactionTest extends DbTestTableTester {
         }
 
         assertEqualsTestTable(SIZE);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void rollbackOnClose(boolean rollback) throws Exception {
+        var session = getSession();
+
+        var txOption = TgTxOption.ofOCC();
+        txOption.setRollbackOnTransactionClose(rollback);
+
+        boolean[] rollbackCalled = { false };
+        try (var transaction = session.createTransaction(txOption)) {
+            transaction.addEventListener(new TsurugiTransactionEventListener() {
+                @Override
+                public void rollbackStart(TsurugiTransaction transaction) {
+                    rollbackCalled[0] = true;
+                }
+            });
+
+            transaction.getLowTransaction();
+        }
+
+        if (rollback) {
+            assertTrue(rollbackCalled[0]);
+        } else {
+            assertFalse(rollbackCalled[0]);
+        }
     }
 
     private static void assertSelect(int expected, TsurugiSession session, TsurugiTransaction transaction) throws IOException, TsurugiTransactionException, InterruptedException {

@@ -1,9 +1,15 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -57,14 +63,14 @@ public class DbTimeoutTransactionCloseTest extends DbTimetoutTest {
         pipeServer.setPipeWrite(false);
         try {
             transaction.close();
-//      } catch (IceaxeIOException e) {
-//          assertEqualsCode(IceaxeErrorCode.TX_CLOSE_TIMEOUT, e);
-//          assertFalse(transaction.available());
-//          assertTrue(transaction.isClosed());
-//          return;
+        } catch (IceaxeIOException e) {
+            assertEqualsCode(IceaxeErrorCode.TX_CLOSE_TIMEOUT, e);
+            assertFalse(transaction.available());
+            assertTrue(transaction.isClosed());
+            return;
         } finally {
             pipeServer.setPipeWrite(true);
         }
-//      fail("didn't time out");
+        fail("didn't time out");
     }
 }
