@@ -8,7 +8,6 @@ import java.io.UncheckedIOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -175,7 +174,6 @@ class DbSelectErrorTest extends DbTestTableTester {
     }
 
     @RepeatedTest(60)
-    @Disabled // TODO remove Disabled. 挙動が不安定
     void closeWithSelectThread() throws Throwable {
         Thread thread;
         Throwable[] threadException = { null };
