@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,9 +14,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 
 /**
- * abs function test
+ * ceil function test
  */
-class DbAbsTest extends DbTestTableTester {
+class DbCeilTest extends DbTestTableTester {
 
     private static void createTable(String type) throws IOException, InterruptedException {
         dropTestTable();
@@ -67,7 +68,7 @@ class DbAbsTest extends DbTestTableTester {
     void nullTest() throws Exception {
         createTable("int");
 
-        var sql = "select abs(null) from " + TEST;
+        var sql = "select ceil(null) from " + TEST;
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -83,26 +84,26 @@ class DbAbsTest extends DbTestTableTester {
     void test(String type) throws Exception {
         createTable(type);
 
-        var sql = "select value, abs(value) from " + TEST;
+        var sql = "select value, ceil(value) from " + TEST;
 
         var tm = createTransactionManagerOcc(getSession());
         tm.executeAndForEach(sql, entity -> {
             switch (type) {
             case "int":
-                assertEquals(abs(entity.getIntOrNull(0)), entity.getIntOrNull(1));
+                assertEquals(ceil(entity.getIntOrNull(0)), entity.getIntOrNull(1));
                 break;
             case "bigint":
-                assertEquals(abs(entity.getLongOrNull(0)), entity.getLongOrNull(1));
+                assertEquals(ceil(entity.getLongOrNull(0)), entity.getLongOrNull(1));
                 break;
             case "real":
-                assertEquals(abs(entity.getFloatOrNull(0)), entity.getFloatOrNull(1));
+                assertEquals(ceil(entity.getFloatOrNull(0)), entity.getFloatOrNull(1));
                 break;
             case "double":
-                assertEquals(abs(entity.getDoubleOrNull(0)), entity.getDoubleOrNull(1));
+                assertEquals(ceil(entity.getDoubleOrNull(0)), entity.getDoubleOrNull(1));
                 break;
             case "decimal(10)":
             case "decimal(10, 1)":
-                assertEquals(abs(entity.getDecimalOrNull(0)), entity.getDecimalOrNull(1));
+                assertEquals(ceil(entity.getDecimalOrNull(0)), entity.getDecimalOrNull(1));
                 break;
             default:
                 throw new AssertionError(type);
@@ -110,38 +111,39 @@ class DbAbsTest extends DbTestTableTester {
         });
     }
 
-    private Integer abs(Integer value) {
+    private Integer ceil(Integer value) {
         if (value == null) {
             return null;
         }
-        return Math.abs(value);
+        return (int) Math.ceil(value);
     }
 
-    private Long abs(Long value) {
+    private Long ceil(Long value) {
         if (value == null) {
             return null;
         }
-        return Math.abs(value);
+        return (long) Math.ceil(value);
     }
 
-    private Float abs(Float value) {
+    private Float ceil(Float value) {
         if (value == null) {
             return null;
         }
-        return Math.abs(value);
+        return (float) Math.ceil(value);
     }
 
-    private Double abs(Double value) {
+    private Double ceil(Double value) {
         if (value == null) {
             return null;
         }
-        return Math.abs(value);
+        return Math.ceil(value);
     }
 
-    private BigDecimal abs(BigDecimal value) {
+    private BigDecimal ceil(BigDecimal value) {
         if (value == null) {
             return null;
         }
-        return value.abs();
+        int scale = value.scale();
+        return value.setScale(0, RoundingMode.CEILING).setScale(scale);
     }
 }
