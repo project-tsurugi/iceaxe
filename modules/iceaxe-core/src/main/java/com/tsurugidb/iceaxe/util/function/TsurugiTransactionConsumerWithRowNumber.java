@@ -23,7 +23,7 @@ import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
  * {@link TsurugiTransactionConsumer} with row number.
  *
  * @param <T> the type of the input to the operation
- * @since X.X.X
+ * @since 1.9.0
  */
 @FunctionalInterface
 public interface TsurugiTransactionConsumerWithRowNumber<T> {

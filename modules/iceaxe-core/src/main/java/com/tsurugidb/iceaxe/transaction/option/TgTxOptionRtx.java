@@ -47,7 +47,7 @@ public class TgTxOptionRtx extends AbstractTgTxOptionLong<TgTxOptionRtx> {
      *
      * @param scanParallel scan parallel
      * @return this
-     * @since X.X.X
+     * @since 1.9.0
      */
     public synchronized TgTxOptionRtx scanParallel(int scanParallel) {
         this.scanParallel = OptionalInt.of(scanParallel);
@@ -59,7 +59,7 @@ public class TgTxOptionRtx extends AbstractTgTxOptionLong<TgTxOptionRtx> {
      * Get scan parallel.
      *
      * @return scan parallel
-     * @since X.X.X
+     * @since 1.9.0
      */
     public synchronized OptionalInt scanParallel() {
         return this.scanParallel;

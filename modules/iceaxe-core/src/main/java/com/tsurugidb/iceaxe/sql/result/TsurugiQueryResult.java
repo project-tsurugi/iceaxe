@@ -145,7 +145,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      *
      * @param time timeout time
      * @param unit timeout unit
-     * @since X.X.X
+     * @since 1.9.0
      */
     public void setFetchTimeout(long time, TimeUnit unit) {
         this.fetchTimeout = new TgTimeValue(time, unit);
@@ -156,7 +156,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * set fetch-timeout.
      *
      * @param timeout time
-     * @since X.X.X
+     * @since 1.9.0
      */
     public void setFetchTimeout(TgTimeValue timeout) {
         this.fetchTimeout = Objects.requireNonNull(timeout);
@@ -402,7 +402,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @throws IOException                 if an I/O error occurs while retrieving record
      * @throws InterruptedException        if interrupted while retrieving record
      * @throws TsurugiTransactionException if server error occurs while retrieving record
-     * @since X.X.X
+     * @since 1.9.0
      */
     public Optional<R> nextRecord() throws IOException, InterruptedException, TsurugiTransactionException {
         if (nextLowRecord()) {
@@ -440,7 +440,7 @@ public class TsurugiQueryResult<R> extends TsurugiSqlResult implements Iterable<
      * @throws IOException                 if an I/O error occurs while retrieving record
      * @throws InterruptedException        if interrupted while retrieving record
      * @throws TsurugiTransactionException if server error occurs while retrieving record
-     * @since X.X.X
+     * @since 1.9.0
      */
     public void whileEach(TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var record = getRecord();

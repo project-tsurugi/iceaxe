@@ -175,7 +175,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      *
      * @param time timeout time
      * @param unit timeout unit
-     * @since X.X.X
+     * @since 1.9.0
      */
     public void setFetchTimeout(long time, TimeUnit unit) {
         ownerResult.setFetchTimeout(time, unit);
@@ -185,7 +185,7 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
      * set fetch-timeout.
      *
      * @param timeout time
-     * @since X.X.X
+     * @since 1.9.0
      */
     public void setFetchTimeout(TgTimeValue timeout) {
         ownerResult.setFetchTimeout(timeout);

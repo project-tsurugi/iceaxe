@@ -108,7 +108,7 @@ public class TsurugiExceptionUtil {
      *
      * @param e exception
      * @return {@code true} if transaction not found
-     * @since X.X.X
+     * @since 1.9.0
      */
     public boolean isTransactionNotFound(TsurugiDiagnosticCodeProvider e) {
         var lowException = e.findLowServerException().orElse(null);

@@ -94,7 +94,7 @@ public class TgSessionOption {
         /**
          * {@link TsurugiQueryResult} nextRow, nextColumn, fetch.
          *
-         * @since X.X.X
+         * @since 1.9.0
          */
         RS_FETCH,
         /** {@link TsurugiQueryResult} close */
@@ -274,7 +274,7 @@ public class TgSessionOption {
      * @param clientPath the client path, must be a directory
      * @param serverPath the server path, must be a directory
      * @return this
-     * @since X.X.X
+     * @since 1.9.0
      */
     public TgSessionOption addLargeObjectPathMapping(Path clientPath, String serverPath) {
         var builder = getBlobPathMappingBuilder();
@@ -288,7 +288,7 @@ public class TgSessionOption {
      * @param clientPath the client path to be transformed, must be a directory
      * @param serverPath the target server path, must be a directory
      * @return this
-     * @since X.X.X
+     * @since 1.9.0
      */
     public TgSessionOption addLargeObjectPathMappingOnSend(Path clientPath, String serverPath) {
         var builder = getBlobPathMappingBuilder();
@@ -302,7 +302,7 @@ public class TgSessionOption {
      * @param serverPath the target server path to be transformed, must be a directory
      * @param clientPath the target client path, must be a directory
      * @return this
-     * @since X.X.X
+     * @since 1.9.0
      */
     public TgSessionOption addLargeObjectPathMappingOnReceive(String serverPath, Path clientPath) {
         var builder = getBlobPathMappingBuilder();
@@ -314,7 +314,7 @@ public class TgSessionOption {
      * Get BlobPathMapping.Builder.
      *
      * @return BlobPathMapping.Builder
-     * @since X.X.X
+     * @since 1.9.0
      */
     protected BlobPathMapping.Builder getBlobPathMappingBuilder() {
         if (this.blobPathMappingBuilder == null) {
@@ -327,7 +327,7 @@ public class TgSessionOption {
      * Get BLOB/CLOB path mapping.
      *
      * @return path mapping
-     * @since X.X.X
+     * @since 1.9.0
      */
     public Optional<BlobPathMapping> findLargeObjectPathMapping() {
         if (this.blobPathMappingBuilder == null) {

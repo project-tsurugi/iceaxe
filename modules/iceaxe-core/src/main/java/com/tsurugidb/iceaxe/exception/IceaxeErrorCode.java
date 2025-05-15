@@ -204,19 +204,19 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiQueryResult#nextLowRecord()} timeout.
      *
-     * @since X.X.X
+     * @since 1.9.0
      */
     RS_NEXT_ROW_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 111, "resultSet nextRow timeout"),
     /**
      * {@link TsurugiResultRecord#moveCurrentColumnNext()} timeout.
      *
-     * @since X.X.X
+     * @since 1.9.0
      */
     RS_NEXT_COLUMN_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 112, "resultSet nextColumn timeout"),
     /**
      * {@link TsurugiResultRecord#fetchCurrentColumnValue()} timeout.
      *
-     * @since X.X.X
+     * @since 1.9.0
      */
     RS_FETCH_TIMEOUT(IceaxeErrorCodeBlock.RESULT + 113, "resultSet fetch timeout"),
     /**

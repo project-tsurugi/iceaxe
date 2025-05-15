@@ -63,7 +63,7 @@ public abstract class AbstractTgTxOption<T extends AbstractTgTxOption<T>> implem
      * set rollback on transaction close.
      *
      * @param rollback {@code true} if rollback on transaction close
-     * @since X.X.X
+     * @since 1.9.0
      */
     public void setRollbackOnTransactionClose(boolean rollback) {
         this.rollbackOnTransactionClose = rollback;

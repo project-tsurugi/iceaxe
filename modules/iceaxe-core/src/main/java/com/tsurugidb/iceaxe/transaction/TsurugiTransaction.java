@@ -219,7 +219,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * set rollback on close.
      *
      * @param rollback {@code true} if rollback on close
-     * @since X.X.X
+     * @since 1.9.0
      */
     public void setRollbackOnClose(boolean rollback) {
         this.rollbackOnClose = rollback;
@@ -229,7 +229,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * get rollback on close.
      *
      * @return {@code true} if rollback on close
-     * @since X.X.X
+     * @since 1.9.0
      */
     public boolean isRollbackOnClose() {
         return this.rollbackOnClose;
@@ -776,7 +776,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * @throws IOException                 if an I/O error occurs while execute query
      * @throws InterruptedException        if interrupted while execute query
      * @throws TsurugiTransactionException if server error occurs while execute query
-     * @since X.X.X
+     * @since 1.9.0
      */
     public <R> void executeAndForEach(TsurugiSqlQuery<R> ps, TsurugiTransactionConsumerWithRowNumber<R> action) throws IOException, InterruptedException, TsurugiTransactionException {
         var method = TgTxMethod.EXECUTE_FOR_EACH;
@@ -813,7 +813,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * @throws IOException                 if an I/O error occurs while execute query
      * @throws InterruptedException        if interrupted while execute query
      * @throws TsurugiTransactionException if server error occurs while execute query
-     * @since X.X.X
+     * @since 1.9.0
      */
     public <P, R> void executeAndForEach(TsurugiSqlPreparedQuery<P, R> ps, P parameter, TsurugiTransactionConsumerWithRowNumber<R> action)
             throws IOException, InterruptedException, TsurugiTransactionException {

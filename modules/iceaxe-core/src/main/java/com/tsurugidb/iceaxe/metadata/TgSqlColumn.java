@@ -26,7 +26,7 @@ import com.tsurugidb.sql.proto.SqlCommon.Column;
 /**
  * Tsurugi column.
  *
- * @since X.X.X
+ * @since 1.9.0
  */
 public class TgSqlColumn {
 

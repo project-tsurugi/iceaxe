@@ -112,7 +112,7 @@ public class TgStatementMetadata {
      * get column list.
      *
      * @return column list
-     * @since X.X.X
+     * @since 1.9.0
      */
     public List<TgSqlColumn> getColumnList() {
         return lowStatementMetadata.getColumns().stream().map(TgSqlColumn::new).collect(Collectors.toList());

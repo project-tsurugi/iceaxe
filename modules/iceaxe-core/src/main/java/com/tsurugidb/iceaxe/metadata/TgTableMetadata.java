@@ -75,7 +75,7 @@ public class TgTableMetadata {
      * get description.
      *
      * @return description
-     * @since X.X.X
+     * @since 1.9.0
      */
     public @Nullable String getDescription() {
         return lowTableMetadata.getDescription().orElse(null);
@@ -85,7 +85,7 @@ public class TgTableMetadata {
      * get column list.
      *
      * @return column list
-     * @since X.X.X
+     * @since 1.9.0
      */
     public List<TgSqlColumn> getColumnList() {
         return lowTableMetadata.getColumns().stream().map(TgSqlColumn::new).collect(Collectors.toList());

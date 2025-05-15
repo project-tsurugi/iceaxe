@@ -99,7 +99,7 @@ public class TsurugiTransactionStatusHelper {
      * @param lowTx low transaction
      * @return future of transaction status
      * @throws IOException if an I/O error occurs while retrieving transaction status
-     * @since X.X.X
+     * @since 1.9.0
      */
     protected FutureResponse<TransactionStatusWithMessage> getLowTransactionStatus(Transaction lowTx) throws IOException {
         return lowTx.getStatus();

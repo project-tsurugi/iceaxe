@@ -112,7 +112,7 @@ public class TgTxStatus {
      * Whether the transaction is found.
      *
      * @return {@code true} if transaction is found
-     * @since X.X.X
+     * @since 1.9.0
      */
     public boolean isTransactionFound() {
         return this.lowTxStatus != null;
@@ -122,7 +122,7 @@ public class TgTxStatus {
      * get transaction status.
      *
      * @return transaction status
-     * @since X.X.X
+     * @since 1.9.0
      */
     public @Nullable TransactionStatus getLowTransactionStatus() {
         if (this.lowTxStatus == null) {
@@ -135,7 +135,7 @@ public class TgTxStatus {
      * get transaction status message.
      *
      * @return message
-     * @since X.X.X
+     * @since 1.9.0
      */
     public @Nullable String getTransactionStatusMessage() {
         if (this.lowTxStatus == null) {

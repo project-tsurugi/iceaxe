@@ -191,7 +191,7 @@ public interface TgTxOption extends Cloneable {
      * get rollback on transaction close.
      *
      * @return {@code true} if rollback on transaction close
-     * @since X.X.X
+     * @since 1.9.0
      */
     public boolean isRollbackOnTransactionClose();
 
