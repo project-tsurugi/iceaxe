@@ -288,18 +288,10 @@ public final class IceaxeIoUtil {
                 close(timeout, closeable);
             } catch (ServerException e) {
                 var wrapper = serverExceptionWrapper.apply(e);
-                if (occurred == null) {
-                    occurred = wrapper;
-                } else {
-                    occurred.addSuppressed(wrapper);
-                }
+                occurred = addSuppressed(occurred, wrapper);
             } catch (ResponseTimeoutException e) {
                 var ie = new IceaxeTimeoutIOException(closeTimeoutErrorCode, e);
-                if (occurred == null) {
-                    occurred = ie;
-                } else {
-                    occurred.addSuppressed(ie);
-                }
+                occurred = addSuppressed(occurred, ie);
             } catch (IceaxeIOException e) {
                 if (occurred == null) {
                     IceaxeErrorCode code = e.getDiagnosticCode();
@@ -315,14 +307,10 @@ public final class IceaxeIoUtil {
                         occurred = e;
                     }
                 } else {
-                    occurred.addSuppressed(e);
+                    occurred = addSuppressed(occurred, e);
                 }
             } catch (IOException | InterruptedException | RuntimeException | Error e) {
-                if (occurred == null) {
-                    occurred = e;
-                } else {
-                    occurred.addSuppressed(e);
-                }
+                occurred = addSuppressed(occurred, e);
             } catch (Throwable e) {
                 if (occurred == null) {
                     if (hasDiagnosticCode(e)) {
@@ -331,7 +319,7 @@ public final class IceaxeIoUtil {
                         occurred = new IceaxeIOException(closeErrorCode, e);
                     }
                 } else {
-                    occurred.addSuppressed(e);
+                    occurred = addSuppressed(occurred, e);
                 }
             }
         }
@@ -369,6 +357,16 @@ public final class IceaxeIoUtil {
         }
 
         closeable.close();
+    }
+
+    private static Throwable addSuppressed(Throwable occurred, Throwable e) {
+        if (occurred == null) {
+            return e;
+        }
+        if (occurred != e) {
+            occurred.addSuppressed(e);
+        }
+        return occurred;
     }
 
     /**
