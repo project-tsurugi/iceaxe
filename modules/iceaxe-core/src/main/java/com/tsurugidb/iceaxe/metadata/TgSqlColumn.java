@@ -262,7 +262,7 @@ public class TgSqlColumn {
     }
 
     /**
-     * Get SQL type (REAL).
+     * Get SQL type (DOUBLE).
      *
      * @return SQL type
      */
