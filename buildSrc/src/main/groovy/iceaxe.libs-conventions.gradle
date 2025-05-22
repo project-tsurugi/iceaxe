@@ -1,61 +1,43 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
-    id 'signing'
+    id 'com.vanniktech.maven.publish'
 
     id 'iceaxe.java-conventions'
 }
 
-publishing {
-    repositories {
-        maven {
-            name 'OSSRH'
-            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            url isReleaseVersion ? releasesRepoUrl : snapshotsRepoUrl
-            credentials {
-                username findProperty('st.ossrh.user') ?: System.getenv('ST_OSSRH_USER')
-                password findProperty('st.ossrh.password') ?: System.getenv('ST_OSSRH_PASSWORD')
+import com.vanniktech.maven.publish.SonatypeHost
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
+
+mavenPublishing {
+    configure(new JavaLibrary(new JavadocJar.None(), true))
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+
+    if (isReleaseVersion) {
+        signAllPublications()
+    }
+
+    pom {
+        name = 'Iceaxe'
+        description = 'Iceaxe is a high-level Java API library for executing SQL for Tsurugi'
+        url = 'https://github.com/project-tsurugi/iceaxe'
+        licenses {
+            license {
+                name = 'The Apache License, Version 2.0'
+                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
             }
         }
-    }
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = project.name
-
-            from components.java
-            pom {
-                name = 'Iceaxe'
-                description = 'Iceaxe is a high-level Java API library for executing SQL for Tsurugi'
-                url = 'https://github.com/project-tsurugi/iceaxe'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'project-tsurugi'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:https://github.com/project-tsurugi/iceaxe.git'
-                    developerConnection = 'scm:git:https://github.com/project-tsurugi/iceaxe.git'
-                    url = 'https://github.com/project-tsurugi/iceaxe'
-                }
+        developers {
+            developer {
+                id = 'project-tsurugi'
             }
         }
+        scm {
+            connection = 'scm:git:https://github.com/project-tsurugi/iceaxe.git'
+            developerConnection = 'scm:git:https://github.com/project-tsurugi/iceaxe.git'
+            url = 'https://github.com/project-tsurugi/iceaxe'
+        }
     }
-}
-
-signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask(":${project.name}:publishMavenJavaPublicationToOSSRHRepository") }
-    def signingKeyId = findProperty("signingKeyId")
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
 }
 
 checkstyleMain.enabled = true
