@@ -35,6 +35,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.sql.type.TgClobReference;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
@@ -166,7 +167,7 @@ public class TgSessionOption {
     private Optional<Boolean> keepAlive = Optional.empty();
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = new ConcurrentHashMap<>();
     private BlobPathMapping.Builder blobPathMappingBuilder = null;
-    private TgCommitType commitType = TgCommitType.DEFAULT;
+    private TgCommitOption commitOption = TgCommitOption.of();
     private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.FORCEFUL;
 
     /**
@@ -343,7 +344,13 @@ public class TgSessionOption {
      * @return this
      */
     public TgSessionOption setCommitType(@Nonnull TgCommitType commitType) {
-        this.commitType = Objects.requireNonNull(commitType);
+        Objects.requireNonNull(commitType);
+
+        if (this.commitOption != null) {
+            commitOption.setCommitType(commitType);
+        } else {
+            setCommitOption(TgCommitOption.of(commitType));
+        }
         return this;
     }
 
@@ -353,7 +360,29 @@ public class TgSessionOption {
      * @return commit type
      */
     public TgCommitType getCommitType() {
-        return this.commitType;
+        return getCommitOption().getCommitType();
+    }
+
+    /**
+     * set commit option.
+     *
+     * @param commitOption commit option
+     * @return this
+     * @since X.X.X
+     */
+    public TgSessionOption setCommitOption(@Nonnull TgCommitOption commitOption) {
+        this.commitOption = Objects.requireNonNull(commitOption);
+        return this;
+    }
+
+    /**
+     * get commit option.
+     *
+     * @return commit option
+     * @since X.X.X
+     */
+    public TgCommitOption getCommitOption() {
+        return this.commitOption;
     }
 
     /**
@@ -385,7 +414,7 @@ public class TgSessionOption {
                 + ", applicationName=" + applicationName //
                 + ", timeout=" + timeoutMap //
                 + ", blobPathMapping=" + findLargeObjectPathMapping().orElse(null) //
-                + ", commitType=" + commitType //
+                + ", commitOption=" + commitOption //
                 + ", closeShutdownType=" + closeShutdownType //
                 + "}";
     }

@@ -17,7 +17,7 @@ package com.tsurugidb.iceaxe.transaction.manager.event.counter;
 
 import javax.annotation.concurrent.ThreadSafe;
 
-import com.tsurugidb.iceaxe.transaction.TgCommitType;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
@@ -47,12 +47,12 @@ public class TgTmSimpleCounter implements TsurugiTmEventListener {
     public void transactionStarted(TsurugiTransaction transaction) {
         transaction.addEventListener(new TsurugiTransactionEventListener() {
             @Override
-            public void commitStart(TsurugiTransaction transaction, TgCommitType commitType) {
+            public void commitStart(TsurugiTransaction transaction, TgCommitOption commitOption) {
                 counter.incrementBeforeCommitCount();
             }
 
             @Override
-            public void commitEnd(TsurugiTransaction transaction, TgCommitType commitType, Throwable occurred) {
+            public void commitEnd(TsurugiTransaction transaction, TgCommitOption commitOption, Throwable occurred) {
                 if (occurred == null) {
                     counter.incrementCommitCount();
                 }

@@ -16,6 +16,7 @@
 package com.tsurugidb.iceaxe.session;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.tsubakuro.channel.common.connection.Connector;
 import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
@@ -162,8 +164,31 @@ class TgSessionOptionTest {
 
     @Test
     void commitType() {
-        var sessionOption = new TgSessionOption().setCommitType(TgCommitType.STORED);
-        assertEquals(TgCommitType.STORED, sessionOption.getCommitType());
+        {
+            var sessionOption = new TgSessionOption().setCommitType(TgCommitType.STORED);
+            assertEquals(TgCommitType.STORED, sessionOption.getCommitType());
+        }
+        {
+            var commitOption = TgCommitOption.of();
+            assertFalse(commitOption.isAutoDispose());
+            commitOption.setAutoDispose(true);
+            assertTrue(commitOption.isAutoDispose());
+
+            var sessionOption = new TgSessionOption().setCommitOption(commitOption);
+            assertEquals(TgCommitType.DEFAULT, sessionOption.getCommitType());
+            assertTrue(sessionOption.getCommitOption().isAutoDispose());
+
+            sessionOption.setCommitType(TgCommitType.STORED);
+            assertEquals(TgCommitType.STORED, sessionOption.getCommitType());
+            assertTrue(sessionOption.getCommitOption().isAutoDispose());
+        }
+    }
+
+    @Test
+    void commitOption() {
+        var sessionOption = new TgSessionOption().setCommitOption(TgCommitOption.of(TgCommitType.PROPAGATED));
+        assertEquals(TgCommitType.PROPAGATED, sessionOption.getCommitOption().getCommitType());
+        assertFalse(sessionOption.getCommitOption().isAutoDispose());
     }
 
     @Test
@@ -193,7 +218,7 @@ class TgSessionOptionTest {
                 + ", applicationName=null" //
                 + ", timeout={DEFAULT=9223372036854775807nanoseconds}" //
                 + ", blobPathMapping=null" //
-                + ", commitType=DEFAULT" //
+                + ", commitOption=TgCommitOption{commitType=DEFAULT, autoDispose=false}" //
                 + ", closeShutdownType=FORCEFUL" //
                 + "}", empty.toString());
 
@@ -209,7 +234,7 @@ class TgSessionOptionTest {
                 + ", applicationName=test-app" //
                 + ", timeout={DEFAULT=123seconds}" //
                 + ", blobPathMapping=onReceive\n clientPath(" + Path.of("/client") + ") - serverPath(/server)\nonSend\n clientPath(" + Path.of("/client") + ") - serverPath(/server)" //
-                + ", commitType=STORED" //
+                + ", commitOption=TgCommitOption{commitType=STORED, autoDispose=false}" //
                 + ", closeShutdownType=GRACEFUL" //
                 + "}", sessionOption.toString());
     }

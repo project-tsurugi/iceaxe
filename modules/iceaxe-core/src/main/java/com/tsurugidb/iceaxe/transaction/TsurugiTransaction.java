@@ -1264,8 +1264,23 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * @throws IOException                 if an I/O error occurs while commit
      * @throws InterruptedException        if interrupted while commit
      * @throws TsurugiTransactionException if server error occurs while commit
+     * @see #commit(TgCommitOption)
      */
-    public synchronized void commit(TgCommitType commitType) throws IOException, InterruptedException, TsurugiTransactionException {
+    public void commit(TgCommitType commitType) throws IOException, InterruptedException, TsurugiTransactionException {
+        var commitOption = TgCommitOption.of(commitType);
+        commit(commitOption);
+    }
+
+    /**
+     * do commit.
+     *
+     * @param commitOption commit option
+     * @throws IOException                 if an I/O error occurs while commit
+     * @throws InterruptedException        if interrupted while commit
+     * @throws TsurugiTransactionException if server error occurs while commit
+     * @since X.X.X
+     */
+    public synchronized void commit(TgCommitOption commitOption) throws IOException, InterruptedException, TsurugiTransactionException {
         this.finishCalled = true;
         checkClose();
         if (this.committed) {
@@ -1275,15 +1290,15 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
             throw new IllegalStateException("rollback has already been called");
         }
 
-        LOG.trace("transaction commit start. commitType={}", commitType);
-        event(null, listener -> listener.commitStart(this, commitType));
+        LOG.trace("transaction commit start. commitOption={}", commitOption);
+        event(null, listener -> listener.commitStart(this, commitOption));
 
         Throwable occurred = null;
         try {
             long start = System.nanoTime();
             closeableSet.closeInTransaction(commitTimeout.getNanos(), IceaxeErrorCode.TX_COMMIT_CHILD_CLOSE_ERROR);
-            var lowCommitStatus = commitType.getLowCommitStatus();
-            finish(start, lowTx -> lowTx.commit(lowCommitStatus), commitTimeout, IceaxeErrorCode.TX_COMMIT_TIMEOUT, IceaxeErrorCode.TX_COMMIT_CLOSE_TIMEOUT);
+            var lowCommitOption = commitOption.toLowCommitOption();
+            finish(start, lowTx -> lowTx.commit(lowCommitOption), commitTimeout, IceaxeErrorCode.TX_COMMIT_TIMEOUT, IceaxeErrorCode.TX_COMMIT_CLOSE_TIMEOUT);
             this.committed = true;
         } catch (TsurugiTransactionException e) {
             occurred = e;
@@ -1294,7 +1309,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
             throw e;
         } finally {
             var finalOccurred = occurred;
-            event(occurred, listener -> listener.commitEnd(this, commitType, finalOccurred));
+            event(occurred, listener -> listener.commitEnd(this, commitOption, finalOccurred));
         }
 
         LOG.trace("transaction commit end");

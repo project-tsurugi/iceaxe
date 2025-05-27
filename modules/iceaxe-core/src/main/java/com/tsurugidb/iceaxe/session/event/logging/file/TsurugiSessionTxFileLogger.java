@@ -40,7 +40,7 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
-import com.tsurugidb.iceaxe.transaction.TgCommitType;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
 import com.tsurugidb.iceaxe.transaction.manager.option.TgTmTxOption;
 import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
@@ -443,15 +443,15 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
     }
 
     @Override
-    protected void logTransactionCommitStart(TgSessionTxLog txLog, TgCommitType commitType) {
+    protected void logTransactionCommitStart(TgSessionTxLog txLog, TgCommitOption commitOption) {
         var writer = getWriter(txLog);
 
         int txId = txLog.getTransaction().getIceaxeTxId();
-        writer.println(TX_HEADER + " commit start. commitType=%s", txId, commitType);
+        writer.println(TX_HEADER + " commit start. commitOption=%s", txId, commitOption);
     }
 
     @Override
-    protected void logTransactionCommitEnd(TgSessionTxLog txLog, TgCommitType commitType, Throwable occurred) {
+    protected void logTransactionCommitEnd(TgSessionTxLog txLog, TgCommitOption commitOption, Throwable occurred) {
         var writer = getWriter(txLog);
 
         int txId = txLog.getTransaction().getIceaxeTxId();

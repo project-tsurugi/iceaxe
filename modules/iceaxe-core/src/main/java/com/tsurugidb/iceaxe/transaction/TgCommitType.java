@@ -21,7 +21,7 @@ import com.tsurugidb.sql.proto.SqlRequest.CommitStatus;
 /**
  * Tsurugi Commit Type.
  * <p>
- * This commitType determines when the {@link TsurugiTransaction#commit(TgCommitType)} returns.
+ * This commitType is used in the {@link TgCommitOption#of(TgCommitType)}.
  * </p>
  */
 public enum TgCommitType {

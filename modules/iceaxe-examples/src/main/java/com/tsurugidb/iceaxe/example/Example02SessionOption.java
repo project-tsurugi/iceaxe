@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TgSessionShutdownType;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 
 /**
@@ -48,9 +49,11 @@ public class Example02SessionOption {
         sessionOption.setTimeout(TgTimeoutKey.TRANSACTION_COMMIT, 1, TimeUnit.HOURS);
     }
 
-    void commitType() {
+    void commitOption() {
         var sessionOption = TgSessionOption.of();
-        sessionOption.setCommitType(TgCommitType.DEFAULT);
+
+        var commitOption = TgCommitOption.of(TgCommitType.DEFAULT);
+        sessionOption.setCommitOption(commitOption);
     }
 
     void shutdownType() {

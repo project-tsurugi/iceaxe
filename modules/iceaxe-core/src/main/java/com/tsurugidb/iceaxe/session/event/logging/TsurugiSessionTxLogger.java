@@ -42,6 +42,7 @@ import com.tsurugidb.iceaxe.sql.event.TsurugiSqlStatementResultEventListener;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
@@ -115,13 +116,13 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
         }
 
         @Override
-        public void commitStart(TsurugiTransaction transaction, TgCommitType commitType) {
-            doLogTransactionCommitStart(transaction, commitType);
+        public void commitStart(TsurugiTransaction transaction, TgCommitOption commitOption) {
+            doLogTransactionCommitStart(transaction, commitOption);
         }
 
         @Override
-        public void commitEnd(TsurugiTransaction transaction, TgCommitType commitType, @Nullable Throwable occurred) {
-            doLogTransactionCommitEnd(transaction, commitType, occurred);
+        public void commitEnd(TsurugiTransaction transaction, TgCommitOption commitOption, @Nullable Throwable occurred) {
+            doLogTransactionCommitEnd(transaction, commitOption, occurred);
         }
 
         @Override
@@ -706,10 +707,10 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
     /**
      * do commit start.
      *
-     * @param transaction transaction
-     * @param commitType  commit type
+     * @param transaction  transaction
+     * @param commitOption commit option
      */
-    protected void doLogTransactionCommitStart(TsurugiTransaction transaction, TgCommitType commitType) {
+    protected void doLogTransactionCommitStart(TsurugiTransaction transaction, TgCommitOption commitOption) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
@@ -717,7 +718,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
 
         txLog.setCommitStartTime(ZonedDateTime.now());
 
-        logTransactionCommitStart(txLog, commitType);
+        logTransactionCommitStart(txLog, commitOption);
     }
 
     /**
@@ -725,19 +726,33 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      *
      * @param txLog      transaction log
      * @param commitType commit type
+     * @see #logTransactionCommitStart(TgSessionTxLog, TgCommitOption)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     protected void logTransactionCommitStart(TgSessionTxLog txLog, TgCommitType commitType) {
         // do override
     }
 
     /**
+     * called when commit start.
+     *
+     * @param txLog        transaction log
+     * @param commitOption commit option
+     * @since X.X.X
+     */
+    protected void logTransactionCommitStart(TgSessionTxLog txLog, TgCommitOption commitOption) {
+        // do override
+        logTransactionCommitStart(txLog, commitOption.getCommitType());
+    }
+
+    /**
      * do commit end.
      *
-     * @param transaction transaction
-     * @param commitType  commit type
-     * @param occurred    exception
+     * @param transaction  transaction
+     * @param commitOption commit option
+     * @param occurred     exception
      */
-    protected void doLogTransactionCommitEnd(TsurugiTransaction transaction, TgCommitType commitType, @Nullable Throwable occurred) {
+    protected void doLogTransactionCommitEnd(TsurugiTransaction transaction, TgCommitOption commitOption, @Nullable Throwable occurred) {
         var txLog = getTxLog(transaction);
         if (txLog == null) {
             return;
@@ -745,7 +760,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
 
         txLog.setCommitEndTime(ZonedDateTime.now());
 
-        logTransactionCommitEnd(txLog, commitType, occurred);
+        logTransactionCommitEnd(txLog, commitOption, occurred);
     }
 
     /**
@@ -754,9 +769,24 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param txLog      transaction log
      * @param commitType commit type
      * @param occurred   exception
+     * @see #logTransactionCommitEnd(TgSessionTxLog, TgCommitOption, Throwable)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     protected void logTransactionCommitEnd(TgSessionTxLog txLog, TgCommitType commitType, @Nullable Throwable occurred) {
         // do override
+    }
+
+    /**
+     * called when commit end.
+     *
+     * @param txLog        transaction log
+     * @param commitOption commit option
+     * @param occurred     exception
+     * @since X.X.X
+     */
+    protected void logTransactionCommitEnd(TgSessionTxLog txLog, TgCommitOption commitOption, @Nullable Throwable occurred) {
+        // do override
+        logTransactionCommitEnd(txLog, commitOption.getCommitType(), occurred);
     }
 
     /**

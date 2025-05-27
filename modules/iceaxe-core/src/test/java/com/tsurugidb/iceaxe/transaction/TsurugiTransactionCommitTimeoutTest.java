@@ -73,7 +73,7 @@ class TsurugiTransactionCommitTimeoutTest {
                 var lowTx = (TestLowTransaction) transaction.getLowTransaction();
                 lowTx.setTestCommitFutureResponse(future);
 
-                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.commit(TgCommitType.DEFAULT));
+                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.commit(TgCommitOption.of()));
                 assertEquals(IceaxeErrorCode.TX_COMMIT_TIMEOUT, e.getDiagnosticCode());
             }
         }
@@ -118,7 +118,7 @@ class TsurugiTransactionCommitTimeoutTest {
                 var lowTx = (TestLowTransaction) transaction.getLowTransaction();
                 lowTx.setTestCommitFutureResponse(future);
 
-                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.commit(TgCommitType.DEFAULT));
+                var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.commit(TgCommitOption.of()));
                 assertEquals(IceaxeErrorCode.TX_COMMIT_CLOSE_TIMEOUT, e.getDiagnosticCode());
             }
 
@@ -180,7 +180,7 @@ class TsurugiTransactionCommitTimeoutTest {
             var lowTx = (TestLowTransaction) transaction.getLowTransaction();
             lowTx.setTestCommitFutureResponse(future);
 
-            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.commit(TgCommitType.DEFAULT));
+            var e = assertThrowsExactly(IceaxeTimeoutIOException.class, () -> transaction.commit(TgCommitOption.of()));
             assertEquals(IceaxeErrorCode.TX_COMMIT_CLOSE_TIMEOUT, e.getDiagnosticCode());
         }
 

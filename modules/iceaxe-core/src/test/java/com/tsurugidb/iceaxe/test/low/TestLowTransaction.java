@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-import com.tsurugidb.sql.proto.SqlRequest.CommitStatus;
+import com.tsurugidb.sql.proto.SqlRequest.CommitOption;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.ExecuteResult;
 import com.tsurugidb.tsubakuro.sql.PreparedStatement;
@@ -48,7 +48,7 @@ public class TestLowTransaction extends TestServerResource implements Transactio
     }
 
     @Override
-    public FutureResponse<Void> commit(CommitStatus status) throws IOException {
+    public FutureResponse<Void> commit(CommitOption option) throws IOException {
         return this.commitFuture;
     }
 

@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.sql.TsurugiSql;
 import com.tsurugidb.iceaxe.sql.result.TsurugiSqlResult;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction.TgTxMethod;
@@ -82,9 +83,23 @@ public interface TsurugiTransactionEventListener {
      *
      * @param transaction transaction
      * @param commitType  commit type
+     * @see #commitStart(TsurugiTransaction, TgCommitOption)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     default void commitStart(TsurugiTransaction transaction, TgCommitType commitType) {
         // do override
+    }
+
+    /**
+     * called when commit start.
+     *
+     * @param transaction  transaction
+     * @param commitOption commit option
+     * @since X.X.X
+     */
+    default void commitStart(TsurugiTransaction transaction, TgCommitOption commitOption) {
+        // do override
+        commitStart(transaction, commitOption.getCommitType());
     }
 
     /**
@@ -93,9 +108,24 @@ public interface TsurugiTransactionEventListener {
      * @param transaction transaction
      * @param commitType  commit type
      * @param occurred    exception
+     * @see #commitEnd(TsurugiTransaction, TgCommitOption, Throwable)
      */
+    @Deprecated(since = "X.X.X", forRemoval = true)
     default void commitEnd(TsurugiTransaction transaction, TgCommitType commitType, @Nullable Throwable occurred) {
         // do override
+    }
+
+    /**
+     * called when commit end.
+     *
+     * @param transaction  transaction
+     * @param commitOption commit type
+     * @param occurred     exception
+     * @since X.X.X
+     */
+    default void commitEnd(TsurugiTransaction transaction, TgCommitOption commitOption, @Nullable Throwable occurred) {
+        // do override
+        commitEnd(transaction, commitOption.getCommitType(), occurred);
     }
 
     /**

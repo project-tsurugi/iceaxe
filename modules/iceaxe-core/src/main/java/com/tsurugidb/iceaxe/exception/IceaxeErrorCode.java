@@ -114,19 +114,19 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     @Deprecated(since = "1.4.0")
     TX_STATUS_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 192, "transaction getTransactionStatus close error"),
     /**
-     * transaction child resource close error at {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitType)}.
+     * transaction child resource close error at {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitOption)}.
      *
      * @since 1.3.0
      */
     TX_COMMIT_CHILD_CLOSE_ERROR(IceaxeErrorCodeBlock.TRANSACTION + 701, "transaction child resource close error before commit"),
     /**
-     * {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitType)} timeout.
+     * {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitOption)} timeout.
      *
      * @since 1.3.0
      */
     TX_COMMIT_TIMEOUT(IceaxeErrorCodeBlock.TRANSACTION + 711, "transaction commit timeout"),
     /**
-     * {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitType)} close timeout.
+     * {@link TsurugiTransaction#commit(com.tsurugidb.iceaxe.transaction.TgCommitOption)} close timeout.
      *
      * @since 1.3.0
      */

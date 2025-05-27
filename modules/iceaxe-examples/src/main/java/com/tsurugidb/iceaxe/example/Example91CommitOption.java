@@ -19,18 +19,20 @@ import java.io.IOException;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 
 /**
- * example to specify commitType
+ * example to specify commitOption
  */
-public class Example91CommitType {
+public class Example91CommitOption {
 
-    void commitTypeBySessionOption(TsurugiConnector connector) throws IOException, InterruptedException {
+    void commitOption_by_sessionOption(TsurugiConnector connector) throws IOException, InterruptedException {
         var sessionOption = TgSessionOption.of();
-        sessionOption.setCommitType(TgCommitType.STORED);
+        var commitOption = TgCommitOption.of(TgCommitType.STORED);
+        sessionOption.setCommitOption(commitOption);
 
         try (var session = connector.createSession(sessionOption)) {
             var setting = TgTmSetting.of(TgTxOption.ofOCC());
@@ -41,9 +43,9 @@ public class Example91CommitType {
         }
     }
 
-    void commitTypeByCreateTm(TsurugiConnector connector) throws IOException, InterruptedException {
+    void commitOption_by_createTm(TsurugiConnector connector) throws IOException, InterruptedException {
         try (var session = connector.createSession()) {
-            var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitType(TgCommitType.STORED);
+            var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitOptioon(TgCommitOption.of(TgCommitType.STORED));
             var tm = session.createTransactionManager(setting);
 
             tm.execute(transaction -> {
@@ -52,11 +54,11 @@ public class Example91CommitType {
         }
     }
 
-    void commitTypeByTmExecute(TsurugiConnector connector) throws IOException, InterruptedException {
+    void commitOption_by_tmExecute(TsurugiConnector connector) throws IOException, InterruptedException {
         try (var session = connector.createSession()) {
             var tm = session.createTransactionManager();
 
-            var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitType(TgCommitType.STORED);
+            var setting = TgTmSetting.of(TgTxOption.ofOCC()).commitOptioon(TgCommitOption.of(TgCommitType.STORED));
             tm.execute(setting, transaction -> {
                 // do sql
             });

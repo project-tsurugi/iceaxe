@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -141,7 +142,7 @@ public class TgTmSetting {
 
     private TgTmTxOptionSupplier txOptionSupplier;
     private String transactionLabel = null;
-    private TgCommitType commitType;
+    private TgCommitOption commitOption;
     private TgTimeValue beginTimeout;
     private TgTimeValue commitTimeout;
     private TgTimeValue rollbackTimeout;
@@ -246,7 +247,11 @@ public class TgTmSetting {
      * @param commitType commit type
      */
     public void setCommitType(TgCommitType commitType) {
-        this.commitType = commitType;
+        if (this.commitOption != null) {
+            commitOption.setCommitType(commitType);
+        } else {
+            setCommitOption(TgCommitOption.of(commitType));
+        }
     }
 
     /**
@@ -267,10 +272,43 @@ public class TgTmSetting {
      * @return commit type
      */
     public TgCommitType getCommitType(TgSessionOption sessionOption) {
-        if (this.commitType != null) {
-            return this.commitType;
+        return getCommitOption(sessionOption).getCommitType();
+    }
+
+    /**
+     * set commit option.
+     *
+     * @param commitOption commit option
+     * @since X.X.X
+     */
+    public void setCommitOption(TgCommitOption commitOption) {
+        this.commitOption = commitOption;
+    }
+
+    /**
+     * set commit option.
+     *
+     * @param commitOption commit option
+     * @return this
+     * @since X.X.X
+     */
+    public TgTmSetting commitOptioon(TgCommitOption commitOption) {
+        setCommitOption(commitOption);
+        return this;
+    }
+
+    /**
+     * get commit option.
+     *
+     * @param sessionOption session option
+     * @return commit option
+     * @since X.X.X
+     */
+    public TgCommitOption getCommitOption(TgSessionOption sessionOption) {
+        if (this.commitOption != null) {
+            return this.commitOption;
         }
-        return sessionOption.getCommitType();
+        return sessionOption.getCommitOption();
     }
 
     /**

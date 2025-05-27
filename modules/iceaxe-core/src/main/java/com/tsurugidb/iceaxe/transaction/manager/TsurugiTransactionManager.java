@@ -364,8 +364,8 @@ public class TsurugiTransactionManager {
                         return r;
                     }
                     var sessionOption = ownerSession.getSessionOption();
-                    var commitType = setting.getCommitType(sessionOption);
-                    transaction.commit(commitType);
+                    var commitOption = setting.getCommitOption(sessionOption);
+                    transaction.commit(commitOption);
                     LOG.trace("tm.execute end (committed)");
                     event(setting, null, listener -> listener.executeEndSuccess(transaction, true, r));
                     txCloseable.setReturn();
