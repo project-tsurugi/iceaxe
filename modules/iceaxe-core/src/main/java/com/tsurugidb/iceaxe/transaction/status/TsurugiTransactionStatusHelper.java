@@ -52,13 +52,14 @@ public class TsurugiTransactionStatusHelper {
     public TgTxStatus getTransactionStatus(TsurugiTransaction transaction) throws IOException, InterruptedException {
         var sessionOption = transaction.getSession().getSessionOption();
         var connectTimeout = getConnectTimeout(sessionOption);
+        var closeTimeout = getCloseTimeout(sessionOption);
 
         var lowTx = transaction.getLowTransaction();
         LOG.trace("getTransactionStatus start. tx={}", transaction);
         var lowExceptionFuture = getLowSqlServiceException(lowTx);
         var lowTxStatusFuture = getLowTransactionStatus(lowTx);
         LOG.trace("getTransactionStatus started");
-        return getTransactionStatus(transaction, lowExceptionFuture, lowTxStatusFuture, connectTimeout);
+        return getTransactionStatus(transaction, lowExceptionFuture, lowTxStatusFuture, connectTimeout, closeTimeout);
     }
 
     /**
@@ -77,7 +78,6 @@ public class TsurugiTransactionStatusHelper {
      * @param sessionOption session option
      * @return timeout
      */
-    @Deprecated(since = "1.4.0")
     protected IceaxeTimeout getCloseTimeout(TgSessionOption sessionOption) {
         return new IceaxeTimeout(sessionOption, TgTimeoutKey.TX_STATUS_CLOSE);
     }
@@ -111,37 +111,69 @@ public class TsurugiTransactionStatusHelper {
      * @param transaction        transaction
      * @param lowExceptionFuture future of SQL service exception
      * @param lowTxStatusFuture  future of transaction status
-     * @param connectTimeout     close timeout
+     * @param connectTimeout     connect timeout
+     * @param closeTimeout       close timeout
      * @return transaction status
      * @throws IOException          if an I/O error occurs while retrieving transaction status
      * @throws InterruptedException if interrupted while retrieving transaction status
      */
     protected TgTxStatus getTransactionStatus(TsurugiTransaction transaction, FutureResponse<SqlServiceException> lowExceptionFuture, FutureResponse<TransactionStatusWithMessage> lowTxStatusFuture,
-            IceaxeTimeout connectTimeout) throws IOException, InterruptedException {
-        var lowException = IceaxeIoUtil.getAndCloseFuture(lowExceptionFuture, //
+            IceaxeTimeout connectTimeout, IceaxeTimeout closeTimeout) throws IOException, InterruptedException {
+        try (var c1 = IceaxeIoUtil.closeable(lowExceptionFuture, closeTimeout, IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT);
+                var c2 = IceaxeIoUtil.closeable(lowTxStatusFuture, closeTimeout, IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT)) {
+            var lowException = getAndCloseLowSqlServiceException(lowExceptionFuture, connectTimeout);
+            var lowTxStatus = getAndCloseLowTxStatus(lowTxStatusFuture, connectTimeout);
+
+            var exception = newTransactionException(lowException);
+            if (exception != null) {
+                exception.setSql(transaction, null, null, null);
+                exception.setTxMethod(TgTxMethod.GET_TRANSACTION_STATUS, 0);
+            }
+
+            LOG.trace("getTransactionStatus end");
+            return newTgTransactionStatus(exception, lowTxStatus);
+        }
+    }
+
+    /**
+     * get from future of SQL service exception.
+     *
+     * @param lowExceptionFuture future of SQL service exception
+     * @param connectTimeout     connect timeout
+     * @return SQL service exception
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
+     * @since X.X.X
+     */
+    protected SqlServiceException getAndCloseLowSqlServiceException(FutureResponse<SqlServiceException> lowExceptionFuture, IceaxeTimeout connectTimeout) throws IOException, InterruptedException {
+        return IceaxeIoUtil.getAndCloseFuture(lowExceptionFuture, //
                 connectTimeout, IceaxeErrorCode.TX_STATUS_CONNECT_TIMEOUT, //
                 IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT);
-        TransactionStatusWithMessage lowTxStatus;
+    }
+
+    /**
+     * get from future of transaction status
+     *
+     * @param lowTxStatusFuture future of transaction status
+     * @param connectTimeout    connect timeout
+     * @return transaction status
+     * @throws IOException          if an I/O error occurs while retrieving transaction status
+     * @throws InterruptedException if interrupted while retrieving transaction status
+     * @since X.X.X
+     */
+    protected TransactionStatusWithMessage getAndCloseLowTxStatus(FutureResponse<TransactionStatusWithMessage> lowTxStatusFuture, IceaxeTimeout connectTimeout)
+            throws IOException, InterruptedException {
         try {
-            lowTxStatus = IceaxeIoUtil.getAndCloseFuture(lowTxStatusFuture, //
+            return IceaxeIoUtil.getAndCloseFuture(lowTxStatusFuture, //
                     connectTimeout, IceaxeErrorCode.TX_STATUS_CONNECT_TIMEOUT, //
                     IceaxeErrorCode.TX_STATUS_CLOSE_TIMEOUT);
         } catch (TsurugiIOException e) {
             if (TsurugiExceptionUtil.getInstance().isTransactionNotFound(e)) {
-                lowTxStatus = null;
+                return null;
             } else {
                 throw e;
             }
         }
-        LOG.trace("getTransactionStatus end");
-
-        var exception = newTransactionException(lowException);
-        if (exception != null) {
-            exception.setSql(transaction, null, null, null);
-            exception.setTxMethod(TgTxMethod.GET_TRANSACTION_STATUS, 0);
-        }
-
-        return newTgTransactionStatus(exception, lowTxStatus);
     }
 
     /**

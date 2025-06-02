@@ -82,7 +82,6 @@ public class TgSessionOption {
         /** {@link TsurugiTransactionStatusHelper} connect */
         TX_STATUS_CONNECT,
         /** {@link TsurugiTransactionStatusHelper} close */
-        @Deprecated(since = "1.4.0")
         TX_STATUS_CLOSE,
 
         /** {@link TsurugiSqlPrepared} connect */
