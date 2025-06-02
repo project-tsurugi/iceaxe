@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,8 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbSelectWhereExpressionTest extends DbTestTableTester {
 
-    private static final int SIZE = 20;
-    private static TestEntity NULL_ENTITY = new TestEntity(123, null, null);
+    private static final int SIZE = 200;
+    private static TestEntity NULL_ENTITY = new TestEntity(999, null, null);
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
@@ -387,41 +388,48 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
 
     @Test
     void like() throws Exception {
-        var sql = SELECT_SQL + " where zzz like'1%'";
+        testLike("like '1%'", zzz -> zzz.startsWith("1"));
+    }
 
-        var session = getSession();
-        var tm = createTransactionManagerOcc(session);
-        try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // TODO like実装待ち
-                var list = tm.executeAndGetList(ps);
-                assertWhere(entity -> {
-                    if (entity.getZzz() == null) {
-                        return false;
-                    }
-                    return entity.getZzz().startsWith("1");
-                }, list);
-            });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
-        }
+    @Test
+    void like_ends() throws Exception {
+        testLike("like '%1'", zzz -> zzz.endsWith("1"));
+    }
+
+    @Test
+    void like_contains() throws Exception {
+        testLike("like '%1%'", zzz -> zzz.contains("1"));
+    }
+
+    @Test
+    void like2() throws Exception {
+        testLike("like '1_'", zzz -> zzz.length() == 2 && zzz.startsWith("1"));
+    }
+
+    @Test
+    void like2_ends() throws Exception {
+        testLike("like '_1'", zzz -> zzz.length() == 2 && zzz.endsWith("1"));
     }
 
     @Test
     void notLike() throws Exception {
-        var sql = SELECT_SQL + " where zzz not like'1%'";
+        testLike("not like '1%'", zzz -> !zzz.startsWith("1"));
+    }
+
+    private void testLike(String like, Predicate<String> predicate) throws IOException, InterruptedException {
+        var sql = SELECT_SQL + " where zzz " + like + " order by foo";
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
         try (var ps = session.createQuery(sql, SELECT_MAPPING)) {
-            var e = assertThrowsExactly(TsurugiTmIOException.class, () -> { // TODO like実装待ち
-                var list = tm.executeAndGetList(ps);
-                assertWhere(entity -> {
-                    if (entity.getZzz() == null) {
-                        return false;
-                    }
-                    return !entity.getZzz().startsWith("1");
-                }, list);
-            });
-            assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
+            var list = tm.executeAndGetList(ps);
+            assertWhere(entity -> {
+                String zzz = entity.getZzz();
+                if (zzz == null) {
+                    return false;
+                }
+                return predicate.test(zzz);
+            }, list);
         }
     }
 
