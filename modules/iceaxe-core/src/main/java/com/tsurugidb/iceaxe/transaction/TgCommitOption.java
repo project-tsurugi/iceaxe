@@ -63,9 +63,11 @@ public class TgCommitOption {
      * Set commit type.
      *
      * @param commitType commit type
+     * @return this
      */
-    public void setCommitType(TgCommitType commitType) {
-        this.commitType = Objects.requireNonNull(commitType);
+    public TgCommitOption commitType(TgCommitType commitType) {
+        setCommitType(commitType);
+        return this;
     }
 
     /**
@@ -73,8 +75,37 @@ public class TgCommitOption {
      *
      * @return commit type
      */
-    public TgCommitType getCommitType() {
+    public TgCommitType commitType() {
         return this.commitType;
+    }
+
+    /**
+     * Set commit type.
+     *
+     * @param commitType commit type
+     */
+    public void setCommitType(TgCommitType commitType) {
+        this.commitType = Objects.requireNonNull(commitType);
+    }
+
+    /**
+     * Set auto dispose.
+     *
+     * @param autoDispose auto dispose
+     * @return this
+     */
+    public TgCommitOption autoDispose(boolean autoDispose) {
+        setAutoDispose(autoDispose);
+        return this;
+    }
+
+    /**
+     * Get auto dispose.
+     *
+     * @return auto dispose
+     */
+    public boolean autoDispose() {
+        return this.autoDispose;
     }
 
     /**
@@ -84,15 +115,6 @@ public class TgCommitOption {
      */
     public void setAutoDispose(boolean autoDispose) {
         this.autoDispose = autoDispose;
-    }
-
-    /**
-     * Get auto dispose.
-     *
-     * @return auto dispose
-     */
-    public boolean isAutoDispose() {
-        return this.autoDispose;
     }
 
     /**

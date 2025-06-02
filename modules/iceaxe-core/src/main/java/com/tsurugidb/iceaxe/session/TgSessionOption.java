@@ -359,7 +359,7 @@ public class TgSessionOption {
      * @return commit type
      */
     public TgCommitType getCommitType() {
-        return getCommitOption().getCommitType();
+        return getCommitOption().commitType();
     }
 
     /**

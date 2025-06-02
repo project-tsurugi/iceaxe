@@ -742,7 +742,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      */
     protected void logTransactionCommitStart(TgSessionTxLog txLog, TgCommitOption commitOption) {
         // do override
-        logTransactionCommitStart(txLog, commitOption.getCommitType());
+        logTransactionCommitStart(txLog, commitOption.commitType());
     }
 
     /**
@@ -786,7 +786,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      */
     protected void logTransactionCommitEnd(TgSessionTxLog txLog, TgCommitOption commitOption, @Nullable Throwable occurred) {
         // do override
-        logTransactionCommitEnd(txLog, commitOption.getCommitType(), occurred);
+        logTransactionCommitEnd(txLog, commitOption.commitType(), occurred);
     }
 
     /**

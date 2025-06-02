@@ -272,7 +272,7 @@ public class TgTmSetting {
      * @return commit type
      */
     public TgCommitType getCommitType(TgSessionOption sessionOption) {
-        return getCommitOption(sessionOption).getCommitType();
+        return getCommitOption(sessionOption).commitType();
     }
 
     /**

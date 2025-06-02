@@ -170,25 +170,25 @@ class TgSessionOptionTest {
         }
         {
             var commitOption = TgCommitOption.of();
-            assertFalse(commitOption.isAutoDispose());
+            assertFalse(commitOption.autoDispose());
             commitOption.setAutoDispose(true);
-            assertTrue(commitOption.isAutoDispose());
+            assertTrue(commitOption.autoDispose());
 
             var sessionOption = new TgSessionOption().setCommitOption(commitOption);
             assertEquals(TgCommitType.DEFAULT, sessionOption.getCommitType());
-            assertTrue(sessionOption.getCommitOption().isAutoDispose());
+            assertTrue(sessionOption.getCommitOption().autoDispose());
 
             sessionOption.setCommitType(TgCommitType.STORED);
             assertEquals(TgCommitType.STORED, sessionOption.getCommitType());
-            assertTrue(sessionOption.getCommitOption().isAutoDispose());
+            assertTrue(sessionOption.getCommitOption().autoDispose());
         }
     }
 
     @Test
     void commitOption() {
         var sessionOption = new TgSessionOption().setCommitOption(TgCommitOption.of(TgCommitType.PROPAGATED));
-        assertEquals(TgCommitType.PROPAGATED, sessionOption.getCommitOption().getCommitType());
-        assertFalse(sessionOption.getCommitOption().isAutoDispose());
+        assertEquals(TgCommitType.PROPAGATED, sessionOption.getCommitOption().commitType());
+        assertFalse(sessionOption.getCommitOption().autoDispose());
     }
 
     @Test

@@ -99,7 +99,7 @@ public interface TsurugiTransactionEventListener {
      */
     default void commitStart(TsurugiTransaction transaction, TgCommitOption commitOption) {
         // do override
-        commitStart(transaction, commitOption.getCommitType());
+        commitStart(transaction, commitOption.commitType());
     }
 
     /**
@@ -125,7 +125,7 @@ public interface TsurugiTransactionEventListener {
      */
     default void commitEnd(TsurugiTransaction transaction, TgCommitOption commitOption, @Nullable Throwable occurred) {
         // do override
-        commitEnd(transaction, commitOption.getCommitType(), occurred);
+        commitEnd(transaction, commitOption.commitType(), occurred);
     }
 
     /**
