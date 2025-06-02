@@ -152,7 +152,7 @@ public class TsurugiTransactionStatusHelper {
     }
 
     /**
-     * get from future of transaction status
+     * get from future of transaction status.
      *
      * @param lowTxStatusFuture future of transaction status
      * @param connectTimeout    connect timeout
