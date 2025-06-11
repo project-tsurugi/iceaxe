@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -102,6 +104,8 @@ class DbTableMetadataTest extends DbTestTableTester {
         assertColumn("date_time", TgDataType.DATE_TIME, "TIMESTAMP", columnList.get(i++));
         assertColumn("offset_time", TgDataType.OFFSET_TIME, "TIME WITH TIME ZONE", columnList.get(i++));
         assertColumn("offset_date_time", TgDataType.OFFSET_DATE_TIME, "TIMESTAMP WITH TIME ZONE", columnList.get(i++));
+
+        assertEquals(List.of("int4"), metadata.getPrimaryKeys());
     }
 
     private static void assertColumn(String name, TgDataType type, String sqlType, TgSqlColumn column) {
