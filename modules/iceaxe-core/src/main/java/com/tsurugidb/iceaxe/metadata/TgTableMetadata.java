@@ -101,6 +101,16 @@ public class TgTableMetadata {
         return lowTableMetadata.getColumns();
     }
 
+    /**
+     * get primary keys.
+     *
+     * @return primary key column name list
+     * @since X.X.X
+     */
+    public List<String> getPrimaryKeys() {
+        return lowTableMetadata.getPrimaryKeys();
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[" + getTableName() + "]";

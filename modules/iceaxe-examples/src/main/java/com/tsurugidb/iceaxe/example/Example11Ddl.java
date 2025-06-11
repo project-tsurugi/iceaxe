@@ -79,7 +79,8 @@ public class Example11Ddl {
             System.out.println(metadata.getDatabaseName());
             System.out.println(metadata.getSchemaName());
             System.out.println(metadata.getTableName());
-            System.out.println(metadata.getLowColumnList());
+            System.out.println(metadata.getColumnList());
+            System.out.println(metadata.getPrimaryKeys());
         }
     }
 
