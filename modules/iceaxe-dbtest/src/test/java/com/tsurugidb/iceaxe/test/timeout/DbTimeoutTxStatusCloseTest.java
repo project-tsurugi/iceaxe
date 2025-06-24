@@ -36,7 +36,6 @@ public class DbTimeoutTxStatusCloseTest extends DbTimetoutTest {
     @Test
     void timeoutSpecified() throws Exception {
         testTimeout(new TimeoutModifier() {
-            @SuppressWarnings("deprecation")
             @Override
             public void modifySessionInfo(TgSessionOption sessionOption) {
                 sessionOption.setTimeout(TgTimeoutKey.TX_STATUS_CLOSE, 1, TimeUnit.SECONDS);
