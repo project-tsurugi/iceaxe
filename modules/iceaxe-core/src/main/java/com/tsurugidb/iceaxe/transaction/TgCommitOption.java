@@ -23,6 +23,7 @@ import com.tsurugidb.sql.proto.SqlRequest.CommitOption;
 /**
  * Tsurugi Commit Option.
  *
+ * @see com.tsurugidb.tsubakuro.sql.Transaction#commit(CommitOption)
  * @since X.X.X
  */
 public class TgCommitOption {
