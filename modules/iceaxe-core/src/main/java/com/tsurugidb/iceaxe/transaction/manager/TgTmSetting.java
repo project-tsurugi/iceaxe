@@ -279,7 +279,7 @@ public class TgTmSetting {
      * set commit option.
      *
      * @param commitOption commit option
-     * @since X.X.X
+     * @since 1.10.0
      */
     public void setCommitOption(TgCommitOption commitOption) {
         this.commitOption = commitOption;
@@ -290,7 +290,7 @@ public class TgTmSetting {
      *
      * @param commitOption commit option
      * @return this
-     * @since X.X.X
+     * @since 1.10.0
      */
     public TgTmSetting commitOptioon(TgCommitOption commitOption) {
         setCommitOption(commitOption);
@@ -302,7 +302,7 @@ public class TgTmSetting {
      *
      * @param sessionOption session option
      * @return commit option
-     * @since X.X.X
+     * @since 1.10.0
      */
     public TgCommitOption getCommitOption(TgSessionOption sessionOption) {
         if (this.commitOption != null) {

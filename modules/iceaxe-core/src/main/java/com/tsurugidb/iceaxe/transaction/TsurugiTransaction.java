@@ -1278,7 +1278,7 @@ public class TsurugiTransaction implements IceaxeTimeoutCloseable {
      * @throws IOException                 if an I/O error occurs while commit
      * @throws InterruptedException        if interrupted while commit
      * @throws TsurugiTransactionException if server error occurs while commit
-     * @since X.X.X
+     * @since 1.10.0
      */
     public synchronized void commit(TgCommitOption commitOption) throws IOException, InterruptedException, TsurugiTransactionException {
         this.finishCalled = true;

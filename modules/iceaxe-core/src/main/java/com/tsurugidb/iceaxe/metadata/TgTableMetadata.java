@@ -105,7 +105,7 @@ public class TgTableMetadata {
      * get primary keys.
      *
      * @return primary key column name list
-     * @since X.X.X
+     * @since 1.10.0
      */
     public List<String> getPrimaryKeys() {
         return lowTableMetadata.getPrimaryKeys();

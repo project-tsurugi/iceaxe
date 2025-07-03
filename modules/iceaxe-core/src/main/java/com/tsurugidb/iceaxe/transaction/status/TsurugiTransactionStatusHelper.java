@@ -143,7 +143,7 @@ public class TsurugiTransactionStatusHelper {
      * @return SQL service exception
      * @throws IOException          if an I/O error occurs while retrieving transaction status
      * @throws InterruptedException if interrupted while retrieving transaction status
-     * @since X.X.X
+     * @since 1.10.0
      */
     protected SqlServiceException getAndCloseLowSqlServiceException(FutureResponse<SqlServiceException> lowExceptionFuture, IceaxeTimeout connectTimeout) throws IOException, InterruptedException {
         return IceaxeIoUtil.getAndCloseFuture(lowExceptionFuture, //
@@ -159,7 +159,7 @@ public class TsurugiTransactionStatusHelper {
      * @return transaction status
      * @throws IOException          if an I/O error occurs while retrieving transaction status
      * @throws InterruptedException if interrupted while retrieving transaction status
-     * @since X.X.X
+     * @since 1.10.0
      */
     protected TransactionStatusWithMessage getAndCloseLowTxStatus(FutureResponse<TransactionStatusWithMessage> lowTxStatusFuture, IceaxeTimeout connectTimeout)
             throws IOException, InterruptedException {

@@ -24,7 +24,7 @@ import com.tsurugidb.sql.proto.SqlRequest.CommitOption;
  * Tsurugi Commit Option.
  *
  * @see com.tsurugidb.tsubakuro.sql.Transaction#commit(CommitOption)
- * @since X.X.X
+ * @since 1.10.0
  */
 public class TgCommitOption {
 

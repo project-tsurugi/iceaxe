@@ -85,7 +85,7 @@ public interface TsurugiTransactionEventListener {
      * @param commitType  commit type
      * @see #commitStart(TsurugiTransaction, TgCommitOption)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.10.0", forRemoval = true)
     default void commitStart(TsurugiTransaction transaction, TgCommitType commitType) {
         // do override
     }
@@ -95,7 +95,7 @@ public interface TsurugiTransactionEventListener {
      *
      * @param transaction  transaction
      * @param commitOption commit option
-     * @since X.X.X
+     * @since 1.10.0
      */
     default void commitStart(TsurugiTransaction transaction, TgCommitOption commitOption) {
         // do override
@@ -110,7 +110,7 @@ public interface TsurugiTransactionEventListener {
      * @param occurred    exception
      * @see #commitEnd(TsurugiTransaction, TgCommitOption, Throwable)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.10.0", forRemoval = true)
     default void commitEnd(TsurugiTransaction transaction, TgCommitType commitType, @Nullable Throwable occurred) {
         // do override
     }
@@ -121,7 +121,7 @@ public interface TsurugiTransactionEventListener {
      * @param transaction  transaction
      * @param commitOption commit type
      * @param occurred     exception
-     * @since X.X.X
+     * @since 1.10.0
      */
     default void commitEnd(TsurugiTransaction transaction, TgCommitOption commitOption, @Nullable Throwable occurred) {
         // do override

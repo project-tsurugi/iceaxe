@@ -728,7 +728,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param commitType commit type
      * @see #logTransactionCommitStart(TgSessionTxLog, TgCommitOption)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.10.0", forRemoval = true)
     protected void logTransactionCommitStart(TgSessionTxLog txLog, TgCommitType commitType) {
         // do override
     }
@@ -738,7 +738,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      *
      * @param txLog        transaction log
      * @param commitOption commit option
-     * @since X.X.X
+     * @since 1.10.0
      */
     protected void logTransactionCommitStart(TgSessionTxLog txLog, TgCommitOption commitOption) {
         // do override
@@ -771,7 +771,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param occurred   exception
      * @see #logTransactionCommitEnd(TgSessionTxLog, TgCommitOption, Throwable)
      */
-    @Deprecated(since = "X.X.X", forRemoval = true)
+    @Deprecated(since = "1.10.0", forRemoval = true)
     protected void logTransactionCommitEnd(TgSessionTxLog txLog, TgCommitType commitType, @Nullable Throwable occurred) {
         // do override
     }
@@ -782,7 +782,7 @@ public class TsurugiSessionTxLogger implements TsurugiSessionEventListener {
      * @param txLog        transaction log
      * @param commitOption commit option
      * @param occurred     exception
-     * @since X.X.X
+     * @since 1.10.0
      */
     protected void logTransactionCommitEnd(TgSessionTxLog txLog, TgCommitOption commitOption, @Nullable Throwable occurred) {
         // do override

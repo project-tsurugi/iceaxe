@@ -367,7 +367,7 @@ public class TgSessionOption {
      *
      * @param commitOption commit option
      * @return this
-     * @since X.X.X
+     * @since 1.10.0
      */
     public TgSessionOption setCommitOption(@Nonnull TgCommitOption commitOption) {
         this.commitOption = Objects.requireNonNull(commitOption);
@@ -378,7 +378,7 @@ public class TgSessionOption {
      * get commit option.
      *
      * @return commit option
-     * @since X.X.X
+     * @since 1.10.0
      */
     public TgCommitOption getCommitOption() {
         return this.commitOption;
