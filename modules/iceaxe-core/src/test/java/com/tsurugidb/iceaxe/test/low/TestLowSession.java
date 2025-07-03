@@ -17,6 +17,7 @@ package com.tsurugidb.iceaxe.test.low;
 
 import java.io.IOException;
 
+import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
 import com.tsurugidb.tsubakuro.channel.common.connection.wire.Wire;
 import com.tsurugidb.tsubakuro.common.Session;
 import com.tsurugidb.tsubakuro.common.ShutdownType;
@@ -42,6 +43,11 @@ public class TestLowSession extends TestServerResource implements Session {
 
     @Override
     public void remove(ServerResource resource) {
+        throw new AssertionError("do override");
+    }
+
+    @Override
+    public FutureResponse<Void> updateCredential(Credential credential) throws IOException {
         throw new AssertionError("do override");
     }
 
