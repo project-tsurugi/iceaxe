@@ -111,7 +111,7 @@ class DbInsertDuplicate2Test extends DbTestTableTester {
     @Test
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbInsertDuplicate2Test-mix.*")
     void mix() throws Exception {
-        var setting = TgTmSetting.of(TgTxOption.ofOCC(), 3, TgTxOption.ofLTX(TEST, TEST2), 40);
+        var setting = TgTmSetting.of(TgTxOption.ofOCC(), 3, TgTxOption.ofLTX(TEST, TEST2), 50);
         test(setting, 10, 500, false);
     }
 
