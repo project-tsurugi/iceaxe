@@ -32,7 +32,7 @@ import com.tsurugidb.tsubakuro.sql.SqlServiceCode;
  */
 class DbSelectErrorTest extends DbTestTableTester {
 
-    private static final int SIZE = 100;
+    private static final int SIZE = 200;
 
     @BeforeAll
     static void beforeAll(TestInfo info) throws Exception {
