@@ -75,7 +75,7 @@ First, check out and install Tsubakuro locally, and build Iceaxe with Gradle Pro
 
 ```bash
 cd tsubakuro
-./gradlew publishMavenJavaPublicationToMavenLocal
+./gradlew PublishToMavenLocal -PskipBuildNative
 
 cd iceaxe
 ./gradlew build -PmavenLocal
