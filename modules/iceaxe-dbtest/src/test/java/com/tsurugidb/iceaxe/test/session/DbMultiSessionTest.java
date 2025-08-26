@@ -3,8 +3,10 @@ package com.tsurugidb.iceaxe.test.session;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,12 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
+import com.tsurugidb.tsubakuro.channel.common.connection.FileCredential;
+import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
+import com.tsurugidb.tsubakuro.channel.common.connection.RememberMeCredential;
+import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
+import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 
 /**
  * multiple session test
@@ -35,6 +43,51 @@ class DbMultiSessionTest extends DbTestTableTester {
     @RepeatedTest(10)
     @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbMultiSessionTest-limit.*")
     void limit() throws Exception {
+        var credential = DbTestConnector.getCredential();
+
+        limit(credential);
+    }
+
+    @RepeatedTest(10)
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbMultiSessionTest-limit.*")
+    void limit_UserCredential() throws Exception {
+        String user = DbTestConnector.getUser();
+        assumeTrue(user != null);
+        String password = DbTestConnector.getPassword();
+        var credential = new UsernamePasswordCredential(user, password);
+
+        limit(credential);
+    }
+
+    @RepeatedTest(10)
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbMultiSessionTest-limit.*")
+    void limit_AuthTokenCredential() throws Exception {
+        String authToken = DbTestConnector.getAuthToken();
+        assumeTrue(authToken != null);
+        var credential = new RememberMeCredential(authToken);
+
+        limit(credential);
+    }
+
+    @RepeatedTest(10)
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbMultiSessionTest-limit.*")
+    void limit_FileCredential() throws Exception {
+        Path path = DbTestConnector.getCredentials();
+        assumeTrue(path != null);
+        var credential = FileCredential.load(path);
+
+        limit(credential);
+    }
+
+    @RepeatedTest(10)
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbMultiSessionTest-limit.*")
+    void limit_NullCredential() throws Exception {
+        var credential = NullCredential.INSTANCE;
+
+        limit(credential);
+    }
+
+    private void limit(Credential credential) throws Exception {
         closeStaticSession();
 
         var sessionList = new ArrayList<TsurugiSession>();
@@ -44,7 +97,7 @@ class DbMultiSessionTest extends DbTestTableTester {
             for (int i = 0; i < ATTEMPT_SIZE; i++) {
                 TsurugiSession session;
                 try {
-                    session = DbTestConnector.createSession(baseLabel + "[" + i + "]");
+                    session = DbTestConnector.createSession(credential, baseLabel + "[" + i + "]");
                 } catch (IOException e) {
                     assertEqualsMessage("the server has declined the connection request", e);
                     int count = sessionList.size();
@@ -56,7 +109,7 @@ class DbMultiSessionTest extends DbTestTableTester {
                 sessionList.add(session);
             }
 
-            limit(sessionList);
+            limit(credential, sessionList);
         } catch (Throwable e) {
             occurred = e;
             throw e;
@@ -65,8 +118,9 @@ class DbMultiSessionTest extends DbTestTableTester {
         }
     }
 
-    private void limit(List<TsurugiSession> list) {
+    private void limit(Credential credential, List<TsurugiSession> list) {
         int count = 0;
+        int authError = 0;
         for (var session : list) {
             if (session.isAlive()) {
                 count++;
@@ -76,6 +130,15 @@ class DbMultiSessionTest extends DbTestTableTester {
                 });
                 assertEqualsCode(IceaxeErrorCode.SESSION_LOW_ERROR, e);
                 var c = e.getCause();
+
+                if (credential == NullCredential.INSTANCE) {
+                    var s = findLowServerException(c);
+                    if (s != null && s.getDiagnosticCode() == CoreServiceCode.AUTHENTICATION_ERROR) {
+                        authError++;
+                        continue;
+                    }
+                }
+
                 try {
                     assertEquals("the server has declined the connection request", c.getMessage());
                 } catch (Throwable t) {
@@ -84,7 +147,8 @@ class DbMultiSessionTest extends DbTestTableTester {
                 }
             }
         }
-        if (count < EXPECTED_SESSION_SIZE) {
+
+        if (count + authError < EXPECTED_SESSION_SIZE) {
             fail(MessageFormat.format("less session.size expected: {1} but was: {0}", count, EXPECTED_SESSION_SIZE));
         }
     }

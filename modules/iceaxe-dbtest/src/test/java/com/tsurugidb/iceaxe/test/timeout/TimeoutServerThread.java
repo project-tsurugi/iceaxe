@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.URI;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
+import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 
 abstract class TimeoutServerThread extends Thread implements Closeable {
 
@@ -25,7 +26,8 @@ abstract class TimeoutServerThread extends Thread implements Closeable {
     public TsurugiConnector getTsurugiConnector() {
         int port = server.getLocalPort();
         var endpoint = URI.create("tcp://localhost:" + port);
-        var connector = TsurugiConnector.of(endpoint);
+        var credential = DbTestConnector.getCredential();
+        var connector = TsurugiConnector.of(endpoint, credential);
         return connector;
     }
 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -21,13 +22,22 @@ import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
+import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
+import com.tsurugidb.tsubakuro.channel.common.connection.FileCredential;
+import com.tsurugidb.tsubakuro.channel.common.connection.RememberMeCredential;
+import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 
 public class DbTestConnector {
     private static final Logger LOG = LoggerFactory.getLogger(DbTestConnector.class);
 
     private static final String SYSPROP_DBTEST_ENDPOINT = "tsurugi.dbtest.endpoint";
+    private static final String SYSPROP_DBTEST_USER = "tsurugi.dbtest.user";
+    private static final String SYSPROP_DBTEST_PASSWORD = "tsurugi.dbtest.password";
+    private static final String SYSPROP_DBTEST_AUTH_TOKEN = "tsurugi.dbtest.auth-token";
+    private static final String SYSPROP_DBTEST_CREDENTIALS = "tsurugi.dbtest.credentials";
 
     private static URI staticEndpoint;
+    private static Credential staticCredential;
     private static final List<TsurugiSession> staticSessionList = new CopyOnWriteArrayList<>();
 
     private static String sessionLabel;
@@ -59,6 +69,66 @@ public class DbTestConnector {
         return endpoint;
     }
 
+    public static Credential getCredential() {
+        if (staticCredential == null) {
+            staticCredential = createCredential();
+        }
+        return staticCredential;
+    }
+
+    private static Credential createCredential() {
+        String user = getUser();
+        if (user != null) {
+            String password = getPassword();
+            return new UsernamePasswordCredential(user, password);
+        }
+
+        String authToken = getAuthToken();
+        if (authToken != null) {
+            return new RememberMeCredential(authToken);
+        }
+
+        Path credentials = getCredentials();
+        if (credentials != null) {
+            try {
+                return FileCredential.load(credentials);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e.getMessage(), e);
+            }
+        }
+
+//      return NullCredential.INSTANCE;
+        return new UsernamePasswordCredential("tsurugi", "password");
+    }
+
+    public static String getUser() {
+        return getSystemProperty(SYSPROP_DBTEST_USER);
+    }
+
+    public static String getPassword() {
+        return getSystemProperty(SYSPROP_DBTEST_PASSWORD);
+    }
+
+    public static String getAuthToken() {
+        return getSystemProperty(SYSPROP_DBTEST_AUTH_TOKEN);
+    }
+
+    public static Path getCredentials() {
+        String credentials = getSystemProperty(SYSPROP_DBTEST_CREDENTIALS);
+        if (credentials == null) {
+            return null;
+        }
+        return Path.of(credentials);
+    }
+
+    private static String getSystemProperty(String key) {
+        String value = System.getProperty(key);
+        if (value != null && value.isEmpty()) {
+            return null;
+        }
+        return value;
+    }
+
     public static void setSessionLabel(String label) {
         sessionLabel = label;
     }
@@ -68,8 +138,13 @@ public class DbTestConnector {
     }
 
     public static TsurugiConnector createConnector() {
+        var credential = getCredential();
+        return createConnector(credential);
+    }
+
+    public static TsurugiConnector createConnector(Credential credential) {
         URI endpoint = getEndPoint();
-        return TsurugiConnector.of(endpoint).setApplicationName("iceaxe-dbtest");
+        return TsurugiConnector.of(endpoint, credential).setApplicationName("iceaxe-dbtest");
     }
 
     private static final TgSessionShutdownType CLOSE_SHUTDOWN_TYPE = TgSessionShutdownType.GRACEFUL;
@@ -82,6 +157,11 @@ public class DbTestConnector {
         return createSession(label, 20, TimeUnit.SECONDS, CLOSE_SHUTDOWN_TYPE);
     }
 
+    public static TsurugiSession createSession(Credential credential, String label) throws IOException {
+        var connector = createConnector(credential);
+        return createSession(connector, label, 20, TimeUnit.SECONDS, CLOSE_SHUTDOWN_TYPE);
+    }
+
     public static TsurugiSession createSession(long time, TimeUnit unit) throws IOException {
         return createSession(sessionLabel, time, unit, CLOSE_SHUTDOWN_TYPE);
     }
@@ -91,12 +171,16 @@ public class DbTestConnector {
     }
 
     public static TsurugiSession createSession(String label, long time, TimeUnit unit, TgSessionShutdownType shutdownType) throws IOException {
+        var connector = createConnector();
+        return createSession(connector, label, time, unit, shutdownType);
+    }
+
+    public static TsurugiSession createSession(TsurugiConnector connector, String label, long time, TimeUnit unit, TgSessionShutdownType shutdownType) throws IOException {
         var sessionOption = TgSessionOption.of();
         sessionOption.setLabel(label);
         sessionOption.setTimeout(TgTimeoutKey.DEFAULT, time, unit);
         sessionOption.setCloseShutdownType(shutdownType);
 
-        var connector = createConnector();
         var session = connector.createSession(sessionOption);
         addSession(session);
 //      session.addEventListener(SESSION_LISTENER);
