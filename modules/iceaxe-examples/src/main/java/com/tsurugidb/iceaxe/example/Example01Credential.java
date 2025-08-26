@@ -47,7 +47,7 @@ public class Example01Credential {
     }
 
     static Credential getFileCredential() {
-        var file = Path.of("/path/to/credential.json");
+        var file = Path.of("/path/to/credential-file");
         try {
             return FileCredential.load(file);
         } catch (IOException e) {
