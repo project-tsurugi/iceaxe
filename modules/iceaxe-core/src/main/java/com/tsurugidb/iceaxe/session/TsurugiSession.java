@@ -240,6 +240,20 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
     }
 
     /**
+     * Retrieves the current logged-in user name of this session.
+     *
+     * @return user name
+     * @throws IOException          if an I/O error occurs while communicating to the server
+     * @throws InterruptedException if interrupted while communicating to the server
+     * @since X.X.X
+     */
+    public Optional<String> getUserName() throws IOException, InterruptedException {
+        var lowSession = getLowSession();
+        var future = lowSession.getUserName();
+        return IceaxeIoUtil.getAndCloseFuture(future, connectTimeout, IceaxeErrorCode.SESSION_USER_NAME_TIMEOUT, IceaxeErrorCode.SESSION_USER_NAME_CLOSE_TIMEOUT);
+    }
+
+    /**
      * get low SQL client.
      *
      * @return low SQL client

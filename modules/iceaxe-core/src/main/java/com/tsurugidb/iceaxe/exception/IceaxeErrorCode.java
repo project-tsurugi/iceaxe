@@ -45,6 +45,18 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /** low session error. */
     SESSION_LOW_ERROR(IceaxeErrorCodeBlock.SESSION + 2, "low session error"),
     /**
+     * {@link TsurugiSession#getUserName()} timeout.
+     *
+     * @since X.X.X
+     */
+    SESSION_USER_NAME_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 11, "get user name timeout"),
+    /**
+     * {@link TsurugiSession#getUserName()} close timeout.
+     *
+     * @since X.X.X
+     */
+    SESSION_USER_NAME_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 12, "get user name close timeout"),
+    /**
      * {@link TsurugiSession#shutdown(com.tsurugidb.iceaxe.session.TgSessionShutdownType, long, java.util.concurrent.TimeUnit)} timeout.
      *
      * @since 1.4.0
