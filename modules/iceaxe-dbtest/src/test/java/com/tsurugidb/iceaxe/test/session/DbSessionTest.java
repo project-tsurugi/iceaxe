@@ -1,7 +1,11 @@
 package com.tsurugidb.iceaxe.test.session;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,6 +19,7 @@ import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
 
 /**
  * session test
@@ -36,6 +41,19 @@ class DbSessionTest extends DbTestTableTester {
     void doNothing() throws Exception {
         try (var session = DbTestConnector.createSession()) {
             // do nothing
+        }
+    }
+
+    @Test
+    void getUserName() throws Exception {
+        String user = DbTestConnector.getUser();
+        assumeFalse(user == null, "user not specified");
+        String password = DbTestConnector.getPassword();
+        var credential = new UsernamePasswordCredential(user, password);
+
+        try (var session = DbTestConnector.createSession(credential, "getUserName test")) {
+            Optional<String> actual = session.getUserName();
+            assertEquals(Optional.of(user), actual);
         }
     }
 
