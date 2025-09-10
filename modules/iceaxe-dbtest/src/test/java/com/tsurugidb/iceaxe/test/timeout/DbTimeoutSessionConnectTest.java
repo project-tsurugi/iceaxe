@@ -3,6 +3,7 @@ package com.tsurugidb.iceaxe.test.timeout;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -67,5 +68,21 @@ public class DbTimeoutSessionConnectTest extends DbTimetoutTest {
             pipeServer.setPipeWrite(true);
         }
         fail("didn't time out");
+    }
+
+    @Override
+    protected void handleWaitCompletionError(Exception e) throws IOException {
+        if (e instanceof IceaxeIOException) {
+            try {
+                assertEqualsCode(IceaxeErrorCode.SESSION_LOW_ERROR, e);
+                var c = e.getCause();
+                assertEqualsCode(IceaxeErrorCode.SESSION_CONNECT_TIMEOUT, c);
+            } catch (Throwable t) {
+                t.addSuppressed(e);
+                throw t;
+            }
+        } else {
+            super.handleWaitCompletionError(e);
+        }
     }
 }

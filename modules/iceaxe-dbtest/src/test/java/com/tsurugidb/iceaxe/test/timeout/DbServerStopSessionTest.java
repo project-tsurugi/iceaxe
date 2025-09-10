@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Timeout;
 import org.opentest4j.AssertionFailedError;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
+import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
+import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -52,6 +54,22 @@ public class DbServerStopSessionTest extends DbTimetoutTest {
         } catch (AssertionFailedError t) {
             t.addSuppressed(e);
             throw t;
+        }
+    }
+
+    @Override
+    protected void handleWaitCompletionError(Exception e) throws IOException {
+        if (e instanceof IceaxeIOException) {
+            try {
+                assertEqualsCode(IceaxeErrorCode.SESSION_LOW_ERROR, e);
+                var c = e.getCause();
+                assertEquals("lost connection", c.getMessage());
+            } catch (Throwable t) {
+                t.addSuppressed(e);
+                throw t;
+            }
+        } else {
+            super.handleWaitCompletionError(e);
         }
     }
 }

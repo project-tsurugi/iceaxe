@@ -88,7 +88,7 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
                     var lowSession = (SessionImpl) session.getLowSession();
                     lowSession.waitForCompletion();
                 } catch (Exception e) {
-                    LOG.error("lowSession.waitForCompletion() error", e);
+                    handleWaitCompletionError(e);
                 }
             }
         }
@@ -123,4 +123,8 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
     }
 
     protected abstract void clientTask(PipeServerThtread pipeServer, TsurugiSession session, TimeoutModifier modifier) throws Exception;
+
+    protected void handleWaitCompletionError(Exception e) throws IOException {
+        LOG.error("lowSession.waitForCompletion() error", e);
+    }
 }
