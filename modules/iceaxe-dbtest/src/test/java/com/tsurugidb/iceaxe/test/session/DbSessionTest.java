@@ -14,12 +14,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 
+import com.tsurugidb.iceaxe.exception.TsurugiIOException;
 import com.tsurugidb.iceaxe.session.TgSessionShutdownType;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.test.util.DbTestConnector;
 import com.tsurugidb.iceaxe.test.util.DbTestTableTester;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
+import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
 import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredential;
+import com.tsurugidb.tsubakuro.exception.CoreServiceCode;
 
 /**
  * session test
@@ -46,14 +49,36 @@ class DbSessionTest extends DbTestTableTester {
 
     @Test
     void getUserName() throws Exception {
+        boolean noAuth;
+        try (var session = DbTestConnector.createSession(NullCredential.INSTANCE, "no-auth")) {
+            session.getLowSession();
+            noAuth = true;
+        } catch (TsurugiIOException e) {
+            var code = e.getDiagnosticCode();
+            if (code == CoreServiceCode.AUTHENTICATION_ERROR || code == CoreServiceCode.INVALID_REQUEST) {
+                noAuth = false;
+            } else {
+                throw e;
+            }
+        }
+
         String user = DbTestConnector.getUser();
-        assumeFalse(user == null, "user not specified");
+        Optional<String> expected = Optional.empty();
+        if (noAuth) {
+            if (user == null) {
+                user = "tsurugi";
+            }
+        } else {
+            assumeFalse(user == null, "user not specified");
+            expected = Optional.of(user);
+        }
+
         String password = DbTestConnector.getPassword();
         var credential = new UsernamePasswordCredential(user, password);
 
         try (var session = DbTestConnector.createSession(credential, "getUserName test")) {
             Optional<String> actual = session.getUserName();
-            assertEquals(Optional.of(user), actual);
+            assertEquals(expected, actual);
         }
     }
 
