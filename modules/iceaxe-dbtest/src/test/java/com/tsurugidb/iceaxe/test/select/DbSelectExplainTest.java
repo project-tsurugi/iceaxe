@@ -78,8 +78,8 @@ class DbSelectExplainTest extends DbTestTableTester {
         var c2 = list.get(2);
         assertEquals("zzz", c2.getName());
         assertEquals(TgDataType.STRING, c2.getDataType());
-//TODO        assertEquals("VARCHAR(10)", c2.getSqlType());
-        assertEquals("VARCHAR", c2.getSqlTypeOrAtomTypeName());
+        assertEquals("VARCHAR(10)", c2.getSqlType());
+        assertEquals("VARCHAR(10)", c2.getSqlTypeOrAtomTypeName());
     }
 
     @Test
