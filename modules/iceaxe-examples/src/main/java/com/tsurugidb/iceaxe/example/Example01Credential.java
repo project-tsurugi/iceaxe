@@ -17,8 +17,13 @@ package com.tsurugidb.iceaxe.example;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URI;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
+import com.tsurugidb.iceaxe.TsurugiConnector;
+import com.tsurugidb.iceaxe.session.TgSessionOption;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
 import com.tsurugidb.tsubakuro.channel.common.connection.FileCredential;
 import com.tsurugidb.tsubakuro.channel.common.connection.NullCredential;
@@ -30,8 +35,33 @@ import com.tsurugidb.tsubakuro.channel.common.connection.UsernamePasswordCredent
  */
 public class Example01Credential {
 
+    static void pass_credential_to_connector() throws IOException, InterruptedException {
+        var endpoint = URI.create("tcp://localhost:12345");
+        var credential = getCredential();
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
+
+        var connector = TsurugiConnector.of(endpoint, credential, sessionOption);
+        try (var session = connector.createSession()) {
+            // execute SQL
+        }
+    }
+
+    static void pass_credential_to_createSession() throws IOException, InterruptedException {
+        var endpoint = URI.create("tcp://localhost:12345");
+        var credential = getCredential();
+        var sessionOption = TgSessionOption.of().setTimeout(TgTimeoutKey.DEFAULT, 1, TimeUnit.MINUTES);
+
+        var connector = TsurugiConnector.of(endpoint);
+        try (var session = connector.createSession(credential, sessionOption)) {
+            // execute SQL
+        }
+    }
+
     public static Credential getCredential() {
-        return getNullCredential();
+//      return getNullCredential();
+        return getUserPasswordCredential();
+//      return getTokenCredential();
+//      return getFileCredential();
     }
 
     static Credential getNullCredential() {
