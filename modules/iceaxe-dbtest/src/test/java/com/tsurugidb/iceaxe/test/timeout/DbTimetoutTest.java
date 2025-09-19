@@ -1,6 +1,7 @@
 package com.tsurugidb.iceaxe.test.timeout;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
@@ -17,6 +18,8 @@ import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.tsubakuro.common.impl.SessionImpl;
 
 public abstract class DbTimetoutTest extends DbTestTableTester {
+
+    private static final int DEFULAT_TIMEOUT = 10; // seconds
 
     protected static class TimeoutModifier {
         public void modifySessionInfo(TgSessionOption sessionOption) {
@@ -65,10 +68,19 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
             pipeServer.start();
             var connector = getTsurugiConnector(pipeServer);
             var session = createSession(pipeServer, connector, modifier);
+
             try {
                 AutoCloseable sessionCloser = () -> {
                     if (closeSession) {
+                        long start = System.nanoTime();
+
                         session.close();
+
+                        long end = System.nanoTime();
+                        long duration = TimeUnit.NANOSECONDS.toSeconds(end - start);
+                        if (duration >= DEFULAT_TIMEOUT * 1.2) {
+                            throw new AssertionError(MessageFormat.format("Session.close() time exceeded {0} seconds", DEFULAT_TIMEOUT));
+                        }
                     }
                 };
 
@@ -100,7 +112,7 @@ public abstract class DbTimetoutTest extends DbTestTableTester {
 
     protected TsurugiSession createSession(PipeServerThtread pipeServer, TsurugiConnector connector, TimeoutModifier modifier) throws IOException {
         var sessionOption = TgSessionOption.of();
-        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, 10, TimeUnit.SECONDS);
+        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, DEFULAT_TIMEOUT, TimeUnit.SECONDS);
         modifier.modifySessionInfo(sessionOption);
 
         TsurugiSession session = null;
