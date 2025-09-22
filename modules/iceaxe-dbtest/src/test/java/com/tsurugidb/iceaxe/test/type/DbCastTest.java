@@ -40,7 +40,7 @@ class DbCastTest extends DbTestTableTester {
         test("123", "bigint", 123L);
         test("123", "double", 123d);
         test("123", "decimal", BigDecimal.valueOf(123));
-        test("123", "decimal(5,2)", new BigDecimal("123")); // TODO new BigDecimal("123.00")
+        test("123", "decimal(5,2)", new BigDecimal("123.00"));
         test("123", "decimal(2)", BigDecimal.valueOf(99));
         test("123", "char(5)", "123  ");
         test("123", "char", "1");
@@ -54,8 +54,8 @@ class DbCastTest extends DbTestTableTester {
         test("123e0", "bigint", 123L);
         test("123e0", "double", 123d);
         test("123.4e0", "decimal", BigDecimal.valueOf(123));
-        test("123e0", "decimal(5,2)", new BigDecimal("123")); // TODO new BigDecimal("123.00")
-        test("123.4e0", "decimal(5,2)", new BigDecimal("123.4")); // TODO new BigDecimal("123.40")
+        test("123e0", "decimal(5,2)", new BigDecimal("123.00"));
+        test("123.4e0", "decimal(5,2)", new BigDecimal("123.40"));
         test("123.4e0", "decimal(4,3)", BigDecimal.valueOf(9.999));
         test("123e0", "char(5)", "123  ");
         test("123e0", "char", "1");
@@ -69,8 +69,8 @@ class DbCastTest extends DbTestTableTester {
         test("123.0", "bigint", 123L);
         test("123.0", "double", 123d);
         test("123.4", "decimal", BigDecimal.valueOf(123));
-        test("123.0", "decimal(5,2)", new BigDecimal("123")); // TODO new BigDecimal("123.00")
-        test("123.4", "decimal(5,2)", new BigDecimal("123.4")); // TODO new BigDecimal("123.40")
+        test("123.0", "decimal(5,2)", new BigDecimal("123.00"));
+        test("123.4", "decimal(5,2)", new BigDecimal("123.40"));
         test("123.4", "decimal(4,3)", BigDecimal.valueOf(9.999));
         test("123.0", "char(7)", "123.0  ");
         test("123.00", "char(7)", "123.00 ");
@@ -85,8 +85,8 @@ class DbCastTest extends DbTestTableTester {
         test("'123'", "bigint", 123L);
         test("'123'", "double", 123d);
         test("'123.4'", "decimal", BigDecimal.valueOf(123));
-        test("'123'", "decimal(5,2)", new BigDecimal("123")); // TODO new BigDecimal("123.00")
-        test("'123.4'", "decimal(5,2)", new BigDecimal("123.4")); // TODO new BigDecimal("123.40")
+        test("'123'", "decimal(5,2)", new BigDecimal("123.00"));
+        test("'123.4'", "decimal(5,2)", new BigDecimal("123.40"));
         test("'123.4'", "decimal(4,3)", BigDecimal.valueOf(9.999));
         test("'123'", "char(5)", "123  ");
         test("'123'", "char", "1");
