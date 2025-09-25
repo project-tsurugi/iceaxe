@@ -33,7 +33,7 @@ To use on Gradle, add Iceaxe library to dependencies.
 
 ```
 dependencies {
-    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.10.0'
+    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.11.0'
 
     implementation 'org.slf4j:slf4j-simple:1.7.32'
 }

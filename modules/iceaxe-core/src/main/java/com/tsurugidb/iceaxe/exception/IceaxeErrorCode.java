@@ -47,13 +47,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiSession#getUserName()} timeout.
      *
-     * @since X.X.X
+     * @since 1.11.0
      */
     SESSION_USER_NAME_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 11, "get user name timeout"),
     /**
      * {@link TsurugiSession#getUserName()} close timeout.
      *
-     * @since X.X.X
+     * @since 1.11.0
      */
     SESSION_USER_NAME_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 12, "get user name close timeout"),
     /**

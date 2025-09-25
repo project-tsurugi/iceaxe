@@ -245,7 +245,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      * @return user name
      * @throws IOException          if an I/O error occurs while communicating to the server
      * @throws InterruptedException if interrupted while communicating to the server
-     * @since X.X.X
+     * @since 1.11.0
      */
     public Optional<String> getUserName() throws IOException, InterruptedException {
         var lowSession = getLowSession();
