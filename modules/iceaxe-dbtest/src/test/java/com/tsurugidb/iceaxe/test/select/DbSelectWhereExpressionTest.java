@@ -48,7 +48,7 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
 
     @Test
     void invalidExpression() throws Exception {
-        var sql = SELECT_SQL + " where foo != 1";
+        var sql = SELECT_SQL + " where foo === 1";
 
         var session = getSession();
         var tm = createTransactionManagerOcc(session);
@@ -57,12 +57,12 @@ class DbSelectWhereExpressionTest extends DbTestTableTester {
                 tm.executeAndGetList(ps);
             });
             assertEqualsCode(SqlServiceCode.SYNTAX_EXCEPTION, e);
-            assertContains("unrecognized character: \"!\"", e.getMessage());
+            assertContains("appeared unexpected token: \"=\"", e.getMessage());
         }
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "=", "<>", "<", ">", "<=", ">=" })
+    @ValueSource(strings = { "=", "<>", "<", ">", "<=", ">=", "!=" })
     void eqNull(String expression) throws Exception {
         var sql = SELECT_SQL + " where bar " + expression + " null";
 
