@@ -36,10 +36,11 @@ class DbBinaryLenTest extends DbTestTableTester {
     @Test
     void createError() throws Exception {
         var session = getSession();
+        var tm = createTransactionManagerOcc(session, "executeDdl", 1);
 
         var createSql = getCreateTable(MAX_LENGTH + 1);
         var e = assertThrowsExactly(TsurugiTmIOException.class, () -> {
-            executeDdl(session, createSql);
+            tm.executeDdl(createSql);
         });
         assertEqualsCode(SqlServiceCode.UNSUPPORTED_RUNTIME_FEATURE_EXCEPTION, e);
         assertContains("octet type on column \"value\" is unsupported (invalid length)", e.getMessage());
