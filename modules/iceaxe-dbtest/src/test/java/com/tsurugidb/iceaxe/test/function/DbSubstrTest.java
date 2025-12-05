@@ -78,6 +78,28 @@ class DbSubstrTest extends DbTestTableTester {
         }
     }
 
+    @Test
+    void testInt() throws Exception {
+        insert("abcd");
+
+        var tm = createTransactionManagerOcc(getSession());
+        {
+            var entity = tm.executeAndFindRecord("select substr(value, 2) from " + TEST).get();
+            String result = entity.getStringOrNull(0);
+            assertEquals("bcd", result);
+        }
+        {
+            var entity = tm.executeAndFindRecord("select substr(value, 2::bigint) from " + TEST).get();
+            String result = entity.getStringOrNull(0);
+            assertEquals("bcd", result);
+        }
+        {
+            var entity = tm.executeAndFindRecord("select substr(value, 2::int) from " + TEST).get();
+            String result = entity.getStringOrNull(0);
+            assertEquals("bcd", result);
+        }
+    }
+
     @ParameterizedTest
     @ValueSource(strings = { "", "abcd", "あいうえお", "\ud83d\ude0a\ud842\udfb7" })
     void test(String value) throws Exception {
