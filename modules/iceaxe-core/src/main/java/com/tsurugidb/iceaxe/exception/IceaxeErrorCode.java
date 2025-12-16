@@ -25,6 +25,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.sql.type.TgClobReference;
+import com.tsurugidb.iceaxe.system.TsurugiSystemHelper;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.status.TsurugiTransactionStatusHelper;
@@ -383,6 +384,19 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      * @since 1.8.0
      */
     CLOB_CLOSE_ERROR(IceaxeErrorCodeBlock.OBJECT + 29, "CLOB close error"),
+
+    /**
+     * {@link TsurugiSystemHelper} connect timeout.
+     *
+     * @since X.X.X
+     */
+    SYSTEM_INFO_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.SYSTEM + 1, "getSystemInfo connect timeout"),
+    /**
+     * {@link TsurugiSystemHelper} close timeout.
+     *
+     * @since X.X.X
+     */
+    SYSTEM_INFO_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.SYSTEM + 91, "getSystemInfo close timeout"),
 
     //
     ;

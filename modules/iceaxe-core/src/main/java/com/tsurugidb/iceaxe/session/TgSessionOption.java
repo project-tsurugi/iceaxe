@@ -35,6 +35,7 @@ import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.sql.type.TgClobReference;
+import com.tsurugidb.iceaxe.system.TsurugiSystemHelper;
 import com.tsurugidb.iceaxe.transaction.TgCommitOption;
 import com.tsurugidb.iceaxe.transaction.TgCommitType;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -156,6 +157,13 @@ public class TgSessionOption {
          * @since 1.8.0
          */
         CLOB_CLOSE,
+
+        /**
+         * {@link TsurugiSystemHelper} connect.
+         *
+         * @since X.X.X
+         */
+        SYSTEM_INFO_CONNECT,
 
         //
         ;

@@ -47,6 +47,8 @@ import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.system.TsurugiSystemHelper;
+import com.tsurugidb.iceaxe.system.TsurugiSystemInfo;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
@@ -75,14 +77,20 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
     private Session lowSession;
     private Throwable lowFutureException = null;
     private SqlClient lowSqlClient;
+
+    private TsurugiSystemHelper systemHelper = null;
     private TsurugiTableListHelper tableListHelper = null;
     private TsurugiTableMetadataHelper tableMetadataHelper = null;
     private TsurugiExplainHelper explainHelper = null;
     private TsurugiTransactionStatusHelper txStatusHelper = null;
+
     private IceaxeConvertUtil convertUtil = null;
+
     private final IceaxeTimeout connectTimeout;
     private final IceaxeTimeout closeTimeout;
+
     private List<TsurugiSessionEventListener> eventListenerList = null;
+
     private final IceaxeCloseableSet closeableSet = new IceaxeCloseableSet();
     private TgSessionShutdownType closeShutdownType = null;
     private volatile boolean closed = false;
@@ -338,6 +346,43 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
             LOG.trace("exception in isAlive()", e);
             return false;
         }
+    }
+
+    /**
+     * Set system helper.
+     *
+     * @param helper system helper
+     * @since X.X.X
+     */
+    public void setSystemHelper(TsurugiSystemHelper helper) {
+        this.systemHelper = helper;
+    }
+
+    /**
+     * Get system helper.
+     *
+     * @return system helper
+     * @since X.X.X
+     */
+    public TsurugiSystemHelper getSystemHelper() {
+        if (this.systemHelper == null) {
+            this.systemHelper = new TsurugiSystemHelper();
+        }
+        return this.systemHelper;
+    }
+
+    /**
+     * Get system info.
+     *
+     * @return system info
+     * @throws IOException          if an I/O error occurs while retrieving system info
+     * @throws InterruptedException if interrupted while retrieving system info
+     * @since X.X.X
+     */
+//  @ThreadSafe
+    public TsurugiSystemInfo getSystemInfo() throws IOException, InterruptedException {
+        var helper = getSystemHelper();
+        return helper.getSystemInfo(this);
     }
 
     /**

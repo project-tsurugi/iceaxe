@@ -32,6 +32,7 @@ public final class IceaxeErrorCodeBlock {
     static final int EXPLAIN = 7000;
     static final int METADATA = 8000;
     static final int OBJECT = 9000;
+    static final int SYSTEM = 10_000;
 
     private IceaxeErrorCodeBlock() {
     }
