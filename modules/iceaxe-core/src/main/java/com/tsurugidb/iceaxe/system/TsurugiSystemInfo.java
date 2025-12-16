@@ -46,6 +46,11 @@ public class TsurugiSystemInfo {
         return lowSystemInfo.getVersion();
     }
 
+    /**
+     * Get low system info.
+     *
+     * @return low system info
+     */
     @IceaxeInternal
     public SystemInfo getLowSystemInfo() {
         return this.lowSystemInfo;
