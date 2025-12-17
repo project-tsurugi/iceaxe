@@ -38,6 +38,15 @@ public class TsurugiSystemInfo {
     }
 
     /**
+     * Get tsurugidb name.
+     *
+     * @return version
+     */
+    public String getName() {
+        return lowSystemInfo.getName();
+    }
+
+    /**
      * Get tsurugidb version.
      *
      * @return version
