@@ -1,5 +1,6 @@
 package com.tsurugidb.iceaxe.test.system;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.regex.Pattern;
@@ -19,9 +20,16 @@ class DbSystemInfoTest extends DbTestTableTester {
         var session = getSession();
 
         TsurugiSystemInfo systemInfo = session.getSystemInfo();
-        String version = systemInfo.getVersion();
+        {
+            String name = systemInfo.getName();
 
-        String regex = "^\\d+\\.\\d+\\.\\S+$"; // 数値.数値.文字列
-        assertTrue(Pattern.matches(regex, version));
+            assertEquals("tsurugidb", name);
+        }
+        {
+            String version = systemInfo.getVersion();
+
+            String regex = "\\d+\\.\\d+\\.\\S+"; // 数値.数値.文字列
+            assertTrue(Pattern.matches(regex, version));
+        }
     }
 }
