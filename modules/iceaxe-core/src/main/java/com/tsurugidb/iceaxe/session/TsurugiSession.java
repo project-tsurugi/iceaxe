@@ -352,7 +352,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      * Set system helper.
      *
      * @param helper system helper
-     * @since X.X.X
+     * @since 1.13.0
      */
     public void setSystemHelper(TsurugiSystemHelper helper) {
         this.systemHelper = helper;
@@ -362,7 +362,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      * Get system helper.
      *
      * @return system helper
-     * @since X.X.X
+     * @since 1.13.0
      */
     public TsurugiSystemHelper getSystemHelper() {
         if (this.systemHelper == null) {
@@ -377,7 +377,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
      * @return system info
      * @throws IOException          if an I/O error occurs while retrieving system info
      * @throws InterruptedException if interrupted while retrieving system info
-     * @since X.X.X
+     * @since 1.13.0
      */
 //  @ThreadSafe
     public TsurugiSystemInfo getSystemInfo() throws IOException, InterruptedException {

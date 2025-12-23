@@ -161,7 +161,7 @@ public class TgSessionOption {
         /**
          * {@link TsurugiSystemHelper} connect.
          *
-         * @since X.X.X
+         * @since 1.13.0
          */
         SYSTEM_INFO_CONNECT,
 

@@ -21,7 +21,7 @@ import com.tsurugidb.system.proto.SystemResponse.SystemInfo;
 /**
  * Tsurugi system info.
  *
- * @since X.X.X
+ * @since 1.13.0
  */
 public class TsurugiSystemInfo {
 

@@ -388,13 +388,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
     /**
      * {@link TsurugiSystemHelper} connect timeout.
      *
-     * @since X.X.X
+     * @since 1.13.0
      */
     SYSTEM_INFO_CONNECT_TIMEOUT(IceaxeErrorCodeBlock.SYSTEM + 1, "getSystemInfo connect timeout"),
     /**
      * {@link TsurugiSystemHelper} close timeout.
      *
-     * @since X.X.X
+     * @since 1.13.0
      */
     SYSTEM_INFO_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.SYSTEM + 91, "getSystemInfo close timeout"),
 

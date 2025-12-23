@@ -35,7 +35,7 @@ import com.tsurugidb.tsubakuro.util.FutureResponse;
 /**
  * Tsurugi system helper.
  *
- * @since X.X.X
+ * @since 1.13.0
  */
 public class TsurugiSystemHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TsurugiSystemHelper.class);
