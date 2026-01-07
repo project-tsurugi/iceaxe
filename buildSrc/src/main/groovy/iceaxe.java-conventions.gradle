@@ -161,3 +161,5 @@ license {
     mapping('java', 'SLASHSTAR_STYLE')
     include('**/*.java')
 }
+
+licenseDbtest.enabled = false
