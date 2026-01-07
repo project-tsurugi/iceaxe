@@ -3,14 +3,13 @@ plugins {
 }
 
 dependencies {
-    implementation 'com.tsurugidb.iceaxe:iceaxe-core:1.14.0-SNAPSHOT'
-    implementation 'com.tsurugidb.tsubakuro:tsubakuro-kvs:1.14.0-SNAPSHOT'
-    implementation 'com.tsurugidb.tsubakuro:tsubakuro-debug:1.14.0-SNAPSHOT'
-
+    implementation project(':iceaxe-core')
+    implementation "com.tsurugidb.tsubakuro:tsubakuro-kvs:${tsubakuroVersion}"
+    implementation "com.tsurugidb.tsubakuro:tsubakuro-debug:${tsubakuroVersion}"
     testImplementation "ch.qos.logback:logback-classic:1.2.3"
 }
 
-tasks.named('test') {
+tasks.named('dbtest') {
     systemProperty 'tsurugi.dbtest.endpoint', findProperty('dbtest.endpoint') ?: 'tcp://localhost:12345'
     systemProperty 'tsurugi.dbtest.user', findProperty('dbtest.user') ?: ''
     systemProperty 'tsurugi.dbtest.password', findProperty('dbtest.password') ?: ''
