@@ -46,6 +46,18 @@ java {
     withJavadocJar()
 }
 
+sourceSets {
+    dbtest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    dbtestImplementation.extendsFrom implementation
+    dbtestRuntimeOnly.extendsFrom runtimeOnly
+}
+
 tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
 }
@@ -54,6 +66,10 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    dbtestImplementation platform('org.junit:junit-bom:5.10.1')
+    dbtestImplementation 'org.junit.jupiter:junit-jupiter'
+    dbtestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 checkstyle {
@@ -81,8 +97,10 @@ spotbugsMain {
 
 checkstyleMain.enabled = false
 checkstyleTest.enabled = false
+checkstyleDbtest.enabled = false
 spotbugsMain.enabled = false
 spotbugsTest.enabled = false
+spotbugsDbtest.enabled = false
 
 javadoc.failOnError = false
 
@@ -110,6 +128,23 @@ tasks.named('test') {
     }
 }
 
+tasks.register('dbtest', Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.dbtest.output.classesDirs
+    classpath = sourceSets.dbtest.runtimeClasspath
+    shouldRunAfter test
+
+    useJUnitPlatform()
+
+    testLogging {
+        showStandardStreams true
+        events 'started', 'skipped', 'passed', 'failed'
+        exceptionFormat 'full'
+    }
+}
+
 task showTsubakuroManifest {
     doLast {
         def tsubakuroJar = configurations["compileClasspath"].filter {
@@ -126,3 +161,5 @@ license {
     mapping('java', 'SLASHSTAR_STYLE')
     include('**/*.java')
 }
+
+licenseDbtest.enabled = false
