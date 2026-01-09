@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    implementation project(':iceaxe-core')
-    implementation "com.tsurugidb.tsubakuro:tsubakuro-kvs:${tsubakuroVersion}"
-    implementation "com.tsurugidb.tsubakuro:tsubakuro-debug:${tsubakuroVersion}"
-    testImplementation "ch.qos.logback:logback-classic:1.2.3"
+    dbtestImplementation project(':iceaxe-core')
+    dbtestImplementation "com.tsurugidb.tsubakuro:tsubakuro-kvs:${tsubakuroVersion}"
+    dbtestImplementation "com.tsurugidb.tsubakuro:tsubakuro-debug:${tsubakuroVersion}"
+    dbtestImplementation "ch.qos.logback:logback-classic:1.2.3"
 }
 
 tasks.named('dbtest') {
