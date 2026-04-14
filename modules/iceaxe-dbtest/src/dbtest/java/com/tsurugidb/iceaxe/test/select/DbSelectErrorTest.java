@@ -15,8 +15,8 @@
  */
 package com.tsurugidb.iceaxe.test.select;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -192,6 +192,7 @@ class DbSelectErrorTest extends DbTestTableTester {
     void closeWithSelectThread() throws Throwable {
         Thread thread;
         Throwable[] threadException = { null };
+        var normalEnd = new AtomicBoolean(false);
         try (var session = DbTestConnector.createSession()) {
             var started = new AtomicBoolean(false);
             var ended = new AtomicBoolean(false);
@@ -205,6 +206,7 @@ class DbSelectErrorTest extends DbTestTableTester {
                             transaction.executeAndGetList(ps);
                         }
                     });
+                    normalEnd.set(true);
                 } catch (Throwable e) {
                     threadException[0] = e;
                 } finally {
@@ -219,7 +221,10 @@ class DbSelectErrorTest extends DbTestTableTester {
         thread.join();
 
         Throwable e = threadException[0];
-        assertNotNull(e);
+        if (e == null) {
+            assertTrue(normalEnd.get(), "An exception has occurred, but the program has not terminated normally");
+            return;
+        }
         String message = e.getMessage();
         if (message != null) {
             try {
