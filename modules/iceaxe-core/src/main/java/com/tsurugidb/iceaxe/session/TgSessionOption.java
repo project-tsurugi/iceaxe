@@ -33,7 +33,9 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPrepared;
 import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.sql.type.TgClobReference;
 import com.tsurugidb.iceaxe.system.TsurugiSystemHelper;
 import com.tsurugidb.iceaxe.transaction.TgCommitOption;
@@ -122,6 +124,12 @@ public class TgSessionOption {
         TABLE_METADATA_CLOSE,
 
         /**
+         * {@link TgBlob} upload.
+         *
+         * @since 1.16.0
+         */
+        BLOB_UPLOAD,
+        /**
          * {@link TgBlobReference} get.
          *
          * @since 1.8.0
@@ -139,6 +147,12 @@ public class TgSessionOption {
          * @since 1.8.0
          */
         BLOB_CLOSE,
+        /**
+         * {@link TgClob} upload.
+         *
+         * @since 1.16.0
+         */
+        CLOB_UPLOAD,
         /**
          * {@link TgClobReference} get.
          *
@@ -173,6 +187,7 @@ public class TgSessionOption {
     private String applicationName;
     private Optional<Boolean> keepAlive = Optional.empty();
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = new ConcurrentHashMap<>();
+    private TgLobTransferType lobTransferType = TgLobTransferType.DEFAULT;
     private BlobPathMapping.Builder blobPathMappingBuilder = null;
     private TgCommitOption commitOption = TgCommitOption.of();
     private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.FORCEFUL;
@@ -274,6 +289,28 @@ public class TgSessionOption {
             return value;
         }
         return timeoutMap.get(TgTimeoutKey.DEFAULT);
+    }
+
+    /**
+     * set large object transfer type.
+     *
+     * @param lobTransferType large object transfer type
+     * @return this
+     * @since 1.16.0
+     */
+    public TgSessionOption setLobTransferType(@Nonnull TgLobTransferType lobTransferType) {
+        this.lobTransferType = Objects.requireNonNull(lobTransferType);
+        return this;
+    }
+
+    /**
+     * get large object transfer type.
+     *
+     * @return large object transfer type
+     * @since 1.16.0
+     */
+    public TgLobTransferType getLobTransferType() {
+        return this.lobTransferType;
     }
 
     /**

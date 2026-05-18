@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.exception.IceaxeTimeoutIOException;
+import com.tsurugidb.iceaxe.lob.TsurugiLargeObjectHelper;
+import com.tsurugidb.iceaxe.lob.TsurugiLargeObjectHelperFactory;
 import com.tsurugidb.iceaxe.metadata.TgTableMetadata;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableListHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
@@ -47,6 +49,7 @@ import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
+import com.tsurugidb.iceaxe.sql.type.TsurugiLobFactory;
 import com.tsurugidb.iceaxe.system.TsurugiSystemHelper;
 import com.tsurugidb.iceaxe.system.TsurugiSystemInfo;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -83,6 +86,9 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
     private TsurugiTableMetadataHelper tableMetadataHelper = null;
     private TsurugiExplainHelper explainHelper = null;
     private TsurugiTransactionStatusHelper txStatusHelper = null;
+    private TsurugiLargeObjectHelperFactory lobHelperFactory = null;
+    private TsurugiLargeObjectHelper lobHelper = null;
+    private TsurugiLobFactory lobFactory = null;
 
     private IceaxeConvertUtil convertUtil = null;
 
@@ -259,6 +265,20 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
         var lowSession = getLowSession();
         var future = lowSession.getUserName();
         return IceaxeIoUtil.getAndCloseFuture(future, connectTimeout, IceaxeErrorCode.SESSION_USER_NAME_TIMEOUT, IceaxeErrorCode.SESSION_USER_NAME_CLOSE_TIMEOUT);
+    }
+
+    /**
+     * Retrieves the large object transfer type of this session.
+     *
+     * @return large object transfer type (other than {@code DEFAULT})
+     * @throws IOException          if an I/O error occurs while communicating to the server
+     * @throws InterruptedException if interrupted while communicating to the server
+     * @since 1.16.0
+     */
+    public TgLobTransferType getLobTransferType() throws IOException, InterruptedException {
+        var lowSession = getLowSession();
+        var lowLobTransferType = lowSession.getBlobTransferMedium().getBlobTransferType();
+        return TgLobTransferType.valueOf(lowLobTransferType);
     }
 
     /**
@@ -693,6 +713,58 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
         return new TsurugiTransaction(this, txOption);
     }
 
+    /**
+     * get large object factory.
+     *
+     * @return large object factory
+     * @since 1.16.0
+     */
+    public TsurugiLobFactory getLobFactory() {
+        if (this.lobFactory == null) {
+            this.lobFactory = getLargeObjectHelperFactory().createLobFactory(this);
+        }
+        return this.lobFactory;
+    }
+
+    /**
+     * set large object helper factory.
+     *
+     * @param factory large object helper factory
+     * @since 1.16.0
+     */
+    public void setLargeObjectHelperFactory(TsurugiLargeObjectHelperFactory factory) {
+        this.lobHelperFactory = factory;
+    }
+
+    /**
+     * get large object helper factory.
+     *
+     * @return large object helper factory
+     * @since 1.16.0
+     */
+    public TsurugiLargeObjectHelperFactory getLargeObjectHelperFactory() {
+        if (this.lobHelperFactory == null) {
+            this.lobHelperFactory = new TsurugiLargeObjectHelperFactory();
+        }
+        return this.lobHelperFactory;
+    }
+
+    /**
+     * get large object helper.
+     *
+     * @return large object helper
+     * @throws IOException          if an I/O error occurs while creating large object helper
+     * @throws InterruptedException if interrupted while creating large object helper
+     * @since 1.16.0
+     */
+    public TsurugiLargeObjectHelper getLargeObjectHelper() throws IOException, InterruptedException {
+        if (this.lobHelper == null) {
+            var type = getLobTransferType();
+            this.lobHelper = getLargeObjectHelperFactory().createHelper(type);
+        }
+        return this.lobHelper;
+    }
+
     // child
 
     /**
@@ -815,7 +887,7 @@ public class TsurugiSession implements IceaxeTimeoutCloseable {
                     }
                 };
                 IceaxeIoUtil.close(t, IceaxeErrorCode.SESSION_CLOSE_TIMEOUT, IceaxeErrorCode.SESSION_CLOSE_ERROR, //
-                        lowSqlClient, shutdownCloseable, lowSession, lowSessionFuture);
+                        lobHelper, lowSqlClient, shutdownCloseable, lowSession, lowSessionFuture);
             });
         } catch (Throwable e) {
             LOG.trace("session close error", e);

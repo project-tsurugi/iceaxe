@@ -25,7 +25,6 @@ import com.tsurugidb.iceaxe.sql.parameter.mapping.TgConverterParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEmptyParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgEntityParameterMapping;
 import com.tsurugidb.iceaxe.sql.parameter.mapping.TgSingleParameterMapping;
-import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
@@ -165,12 +164,12 @@ public abstract class TgParameterMapping<P> {
     /**
      * convert to {@link Parameter} list.
      *
-     * @param parameter    parameter
-     * @param convertUtil  convert type utility
-     * @param closeableSet Closeable set for execute finished
+     * @param parameter parameter
+     * @param context   low parameter generate context
      * @return parameter list
-     * @throws IOException if an I/O error occurs
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the thread is interrupted
      */
     @IceaxeInternal
-    public abstract List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil, IceaxeCloseableSet closeableSet) throws IOException;
+    public abstract List<Parameter> toLowParameterList(P parameter, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException;
 }

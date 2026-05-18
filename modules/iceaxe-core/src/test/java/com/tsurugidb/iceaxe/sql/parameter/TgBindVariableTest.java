@@ -39,118 +39,98 @@ import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
-import com.tsurugidb.iceaxe.test.TestBlobUtil;
-import com.tsurugidb.iceaxe.test.TestClobUtil;
-import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
+import com.tsurugidb.iceaxe.test.TestLowParameterGenerateContextWrapper;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
 class TgBindVariableTest {
 
     @Test
-    void testOfBoolean() {
+    void testOfBoolean() throws Exception {
         var variable = TgBindVariable.ofBoolean("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.BOOLEAN, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", true), variable.bind(true).toLowParameter(closeableSet));
-        assertEquals(Parameters.of("foo", true), variable.bind(Boolean.TRUE).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", true), variable.bind(true).toLowParameter(null));
+        assertEquals(Parameters.of("foo", true), variable.bind(Boolean.TRUE).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfInt() {
+    void testOfInt() throws Exception {
         var variable = TgBindVariable.ofInt("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.INT, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", 123), variable.bind(123).toLowParameter(closeableSet));
-        assertEquals(Parameters.of("foo", 123), variable.bind(Integer.valueOf(123)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", 123), variable.bind(123).toLowParameter(null));
+        assertEquals(Parameters.of("foo", 123), variable.bind(Integer.valueOf(123)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfLong() {
+    void testOfLong() throws Exception {
         var variable = TgBindVariable.ofLong("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.LONG, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", 123L), variable.bind(123).toLowParameter(closeableSet));
-        assertEquals(Parameters.of("foo", 123L), variable.bind(Long.valueOf(123)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", 123L), variable.bind(123).toLowParameter(null));
+        assertEquals(Parameters.of("foo", 123L), variable.bind(Long.valueOf(123)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfFloat() {
+    void testOfFloat() throws Exception {
         var variable = TgBindVariable.ofFloat("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.FLOAT, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", 123f), variable.bind(123).toLowParameter(closeableSet));
-        assertEquals(Parameters.of("foo", 123f), variable.bind(Float.valueOf(123)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", 123f), variable.bind(123).toLowParameter(null));
+        assertEquals(Parameters.of("foo", 123f), variable.bind(Float.valueOf(123)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfDouble() {
+    void testOfDouble() throws Exception {
         var variable = TgBindVariable.ofDouble("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.DOUBLE, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", 123d), variable.bind(123).toLowParameter(closeableSet));
-        assertEquals(Parameters.of("foo", 123d), variable.bind(Double.valueOf(123)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", 123d), variable.bind(123).toLowParameter(null));
+        assertEquals(Parameters.of("foo", 123d), variable.bind(Double.valueOf(123)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfDecimal() {
+    void testOfDecimal() throws Exception {
         var variable = TgBindVariable.ofDecimal("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.DECIMAL, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", BigDecimal.valueOf(123)), variable.bind(BigDecimal.valueOf(123)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", BigDecimal.valueOf(123)), variable.bind(BigDecimal.valueOf(123)).toLowParameter(null));
         assertEquals(":foo/*DECIMAL*/", variable.toString());
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "1.01", "1.05", "-1.01", "-1.05", "" })
-    void testOfDecimalScale(String value) {
+    void testOfDecimalScale(String value) throws Exception {
         int scale = 1;
         var variable = TgBindVariable.ofDecimal("foo", scale);
         testOfDecimal(variable, value, scale, TgBindVariableBigDecimal.DEFAULT_ROUNDING_MODE);
@@ -158,190 +138,157 @@ class TgBindVariableTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "1.01", "1.05", "-1.01", "-1.05", "" })
-    void testOfDecimalRoundingMode(String value) {
+    void testOfDecimalRoundingMode(String value) throws Exception {
         int scale = 1;
         var mode = RoundingMode.HALF_UP;
         var variable = TgBindVariable.ofDecimal("foo", scale, mode);
         testOfDecimal(variable, value, scale, mode);
     }
 
-    private void testOfDecimal(TgBindVariableBigDecimal variable, String s, int scale, RoundingMode mode) {
+    private void testOfDecimal(TgBindVariableBigDecimal variable, String s, int scale, RoundingMode mode) throws Exception {
         var value = s.isEmpty() ? null : new BigDecimal(s);
         var expected = (value != null) ? value.setScale(scale, mode) : null;
 
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.DECIMAL, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(IceaxeLowParameterUtil.create("foo", expected), variable.bind(value).toLowParameter(closeableSet));
+        assertEquals(IceaxeLowParameterUtil.create("foo", expected), variable.bind(value).toLowParameter(null));
         assertEquals(String.format(":foo/*DECIMAL<%s %d>*/", mode, scale), variable.toString());
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-        assertEquals(IceaxeLowParameterUtil.create("bar", expected), copy.bind(value).toLowParameter(closeableSet));
-
-        assertEquals(0, closeableSet.size());
+        assertEquals(IceaxeLowParameterUtil.create("bar", expected), copy.bind(value).toLowParameter(null));
     }
 
     @Test
-    void testDecimalBind() {
+    void testDecimalBind() throws Exception {
         var variable = TgBindVariable.ofDecimal("foo");
 
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", BigDecimal.valueOf(123)), variable.bind(123).toLowParameter(closeableSet));
-        assertEquals(Parameters.of("foo", BigDecimal.valueOf(123.4)), variable.bind(123.4).toLowParameter(closeableSet));
-
-        assertEquals(0, closeableSet.size());
+        assertEquals(Parameters.of("foo", BigDecimal.valueOf(123)), variable.bind(123).toLowParameter(null));
+        assertEquals(Parameters.of("foo", BigDecimal.valueOf(123.4)), variable.bind(123.4).toLowParameter(null));
     }
 
     @Test
-    void testOfString() {
+    void testOfString() throws Exception {
         var variable = TgBindVariable.ofString("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.STRING, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", "abc"), variable.bind("abc").toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", "abc"), variable.bind("abc").toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfBytes() {
+    void testOfBytes() throws Exception {
         var variable = TgBindVariable.ofBytes("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.BYTES, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", new byte[] { 1, 2, 3 }), variable.bind(new byte[] { 1, 2, 3 }).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", new byte[] { 1, 2, 3 }), variable.bind(new byte[] { 1, 2, 3 }).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfBits() {
+    void testOfBits() throws Exception {
         var variable = TgBindVariable.ofBits("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.BITS, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", new boolean[] { true, false, true }), variable.bind(new boolean[] { true, false, true }).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", new boolean[] { true, false, true }), variable.bind(new boolean[] { true, false, true }).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfDate() {
+    void testOfDate() throws Exception {
         var variable = TgBindVariable.ofDate("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.DATE, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", LocalDate.of(2022, 6, 2)), variable.bind(LocalDate.of(2022, 6, 2)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", LocalDate.of(2022, 6, 2)), variable.bind(LocalDate.of(2022, 6, 2)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfTime() {
+    void testOfTime() throws Exception {
         var variable = TgBindVariable.ofTime("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.TIME, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", LocalTime.of(23, 30, 59)), variable.bind(LocalTime.of(23, 30, 59)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", LocalTime.of(23, 30, 59)), variable.bind(LocalTime.of(23, 30, 59)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfDateTime() {
+    void testOfDateTime() throws Exception {
         var variable = TgBindVariable.ofDateTime("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.DATE_TIME, variable.type());
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), variable.bind(LocalDateTime.of(2022, 9, 22, 23, 30, 59)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59)), variable.bind(LocalDateTime.of(2022, 9, 22, 23, 30, 59)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfOffsetTime() {
+    void testOfOffsetTime() throws Exception {
         var variable = TgBindVariable.ofOffsetTime("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.OFFSET_TIME, variable.type());
         var offset = ZoneOffset.ofHours(9);
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), variable.bind(OffsetTime.of(23, 30, 59, 0, offset)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", OffsetTime.of(23, 30, 59, 0, offset)), variable.bind(OffsetTime.of(23, 30, 59, 0, offset)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfOffsetDateTime() {
+    void testOfOffsetDateTime() throws Exception {
         var variable = TgBindVariable.ofOffsetDateTime("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.OFFSET_DATE_TIME, variable.type());
         var offset = ZoneOffset.ofHours(9);
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), variable.bind(OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)), variable.bind(OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset)).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
-    void testOfZonedDateTime() {
+    void testOfZonedDateTime() throws Exception {
         var variable = TgBindVariable.ofZonedDateTime("foo");
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.ZONED_DATE_TIME, variable.type());
 
         var zone = ZoneId.of("Asia/Tokyo");
         var dateTime = ZonedDateTime.of(2022, 6, 2, 23, 30, 59, 999, zone);
-        var closeableSet = new IceaxeCloseableSet();
-        assertEquals(Parameters.of("foo", dateTime.toOffsetDateTime()), variable.bind(dateTime).toLowParameter(closeableSet));
+        assertEquals(Parameters.of("foo", dateTime.toOffsetDateTime()), variable.bind(dateTime).toLowParameter(null));
 
         var copy = variable.clone("bar");
         assertEquals(variable.getClass(), copy.getClass());
         assertEquals("bar", copy.name());
         assertEquals(variable.type(), copy.type());
-
-        assertEquals(0, closeableSet.size());
     }
 
     @Test
@@ -350,34 +297,44 @@ class TgBindVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.BLOB, variable.type());
         {
-            var closeableSet = new IceaxeCloseableSet();
-            assertEquals(Parameters.blobOf("foo", Path.of("/path/to/file")), variable.bind(TgBlob.of(Path.of("/path/to/file"))).toLowParameter(closeableSet));
-            assertEquals(0, closeableSet.size());
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var actual = variable.bind(TgBlob.of(Path.of("/path/to/file"))).toLowParameter(context);
+
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.blobOf("foo", lobInfo), actual);
+            assertEquals(1, context.closeableSet().size());
         }
         {
-            var closeableSet = new IceaxeCloseableSet();
-            assertEquals(Parameters.blobOf("foo", Path.of("/path/to/file")), variable.bind(Path.of("/path/to/file")).toLowParameter(closeableSet));
-            assertEquals(0, closeableSet.size());
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var actual = variable.bind(Path.of("/path/to/file")).toLowParameter(context);
+
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.blobOf("foo", lobInfo), actual);
+            assertEquals(1, context.closeableSet().size());
         }
         {
-            var closeableSet = new IceaxeCloseableSet();
-            var actual = variable.bind(new ByteArrayInputStream(new byte[] { 1, 2, 3 })).toLowParameter(closeableSet);
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
 
-            try (var blob = TestBlobUtil.getBlob1(closeableSet)) {
-                var path = blob.getPath();
+            var actual = variable.bind(new ByteArrayInputStream(new byte[] { 1, 2, 3 })).toLowParameter(context);
 
-                assertEquals(Parameters.blobOf("foo", path), actual);
-            }
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.blobOf("foo", lobInfo), actual);
+            assertEquals(1, context.closeableSet().size());
         }
         {
-            var closeableSet = new IceaxeCloseableSet();
-            var actual = variable.bind(new byte[] { 1, 2, 3 }).toLowParameter(closeableSet);
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
 
-            try (var blob = TestBlobUtil.getBlob1(closeableSet)) {
-                var path = blob.getPath();
+            var actual = variable.bind(new byte[] { 1, 2, 3 }).toLowParameter(context);
 
-                assertEquals(Parameters.blobOf("foo", path), actual);
-            }
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.blobOf("foo", lobInfo), actual);
+            assertEquals(1, context.closeableSet().size());
         }
 
         var copy = variable.clone("bar");
@@ -392,34 +349,44 @@ class TgBindVariableTest {
         assertEquals("foo", variable.name());
         assertEquals(TgDataType.CLOB, variable.type());
         {
-            var closeableSet = new IceaxeCloseableSet();
-            assertEquals(Parameters.clobOf("foo", Path.of("/path/to/file")), variable.bind(TgClob.of(Path.of("/path/to/file"))).toLowParameter(closeableSet));
-            assertEquals(0, closeableSet.size());
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var actual = variable.bind(TgClob.of(Path.of("/path/to/file"))).toLowParameter(context);
+
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.clobOf("foo", lobInfo), actual);
+            assertEquals(1, context.closeableSet().size());
         }
         {
-            var closeableSet = new IceaxeCloseableSet();
-            assertEquals(Parameters.clobOf("foo", Path.of("/path/to/file")), variable.bind(Path.of("/path/to/file")).toLowParameter(closeableSet));
-            assertEquals(0, closeableSet.size());
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var actual = variable.bind(Path.of("/path/to/file")).toLowParameter(context);
+
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.clobOf("foo", lobInfo), actual);
+            assertEquals(1, context.closeableSet().size());
         }
         {
-            var closeableSet = new IceaxeCloseableSet();
-            var actual = variable.bind(new StringReader("abc")).toLowParameter(closeableSet);
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
 
-            try (var clob = TestClobUtil.getClob1(closeableSet)) {
-                var path = clob.getPath();
+            var actual = variable.bind(new StringReader("abc")).toLowParameter(context);
 
-                assertEquals(Parameters.clobOf("foo", path), actual);
-            }
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.clobOf("foo", lobInfo), actual);
+            assertEquals(1, context.closeableSet().size());
         }
         {
-            var closeableSet = new IceaxeCloseableSet();
-            var actual = variable.bind("abc").toLowParameter(closeableSet);
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
 
-            try (var clob = TestClobUtil.getClob1(closeableSet)) {
-                var path = clob.getPath();
+            var actual = variable.bind("abc").toLowParameter(context);
 
-                assertEquals(Parameters.clobOf("foo", path), actual);
-            }
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.clobOf("foo", lobInfo), actual);
+            assertEquals(1, context.closeableSet().size());
         }
 
         var copy = variable.clone("bar");

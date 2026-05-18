@@ -150,7 +150,7 @@ class DbClobTest extends DbTestTableTester {
                 }
                 var path = Files.createTempFile("iceaxe-dbtest-clob-insert", ".dat");
                 try {
-                    IceaxeFileUtil.writeString(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
+                    IceaxeFileUtil.write(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
                     var clob = TgClob.of(path);
                     var parameter = TgBindParameters.of().addInt("pk", 1).addClob("value", clob);
                     try {
@@ -242,7 +242,7 @@ class DbClobTest extends DbTestTableTester {
                 }
                 var path = Files.createTempFile("iceaxe-dbtest-clob-insert", ".dat");
                 try {
-                    IceaxeFileUtil.writeString(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
+                    IceaxeFileUtil.write(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
                     var parameter = TgBindParameters.of().addInt("pk", 1).addClob("value", path);
                     try {
                         transaction.executeAndGetCount(ps, parameter);
@@ -346,7 +346,7 @@ class DbClobTest extends DbTestTableTester {
                 }
                 var path = Files.createTempFile("iceaxe-dbtest-clob-insert", ".dat");
                 try {
-                    IceaxeFileUtil.writeString(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
+                    IceaxeFileUtil.write(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
                     var clob = TgClob.of(path);
                     var parameter = TgBindParameters.of(pk.bind(1), value.bind(clob));
                     try {
@@ -386,7 +386,7 @@ class DbClobTest extends DbTestTableTester {
                 }
                 var path = Files.createTempFile("iceaxe-dbtest-clob-insert", ".dat");
                 try {
-                    IceaxeFileUtil.writeString(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
+                    IceaxeFileUtil.write(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
                     var parameter = TgBindParameters.of(pk.bind(1), value.bind(path));
                     try {
                         transaction.executeAndGetCount(ps, parameter);
@@ -510,7 +510,7 @@ class DbClobTest extends DbTestTableTester {
                 }
                 var path = Files.createTempFile("iceaxe-dbtest-clob-insert", ".dat");
                 try {
-                    IceaxeFileUtil.writeString(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
+                    IceaxeFileUtil.write(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
                     var clob = TgClob.of(path);
                     var entity = new TestEntity(1, clob);
                     try {
@@ -568,7 +568,7 @@ class DbClobTest extends DbTestTableTester {
                 }
                 var path = Files.createTempFile("iceaxe-dbtest-clob-insert", ".dat");
                 try {
-                    IceaxeFileUtil.writeString(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
+                    IceaxeFileUtil.write(path, "abc", StandardOpenOption.TRUNCATE_EXISTING);
                     var entity = new TestEntity(1, path);
                     try {
                         transaction.executeAndGetCount(ps, entity);

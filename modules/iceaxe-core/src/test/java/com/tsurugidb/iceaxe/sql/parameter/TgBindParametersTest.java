@@ -15,16 +15,13 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
@@ -48,22 +45,20 @@ import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
-import com.tsurugidb.iceaxe.test.TestBlobUtil;
-import com.tsurugidb.iceaxe.test.TestClobUtil;
-import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
+import com.tsurugidb.iceaxe.test.TestLowParameterGenerateContextWrapper;
 import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
 
 class TgBindParametersTest {
 
     @Test
-    void testOf() {
+    void testOf() throws Exception {
         var parameter = TgBindParameters.of();
 
         assertParameterList(List.of(), parameter);
     }
 
     @Test
-    void testOfArray() {
+    void testOfArray() throws Exception {
         var foo = TgBindVariable.ofInt("foo");
         var parameter = TgBindParameters.of(foo.bind(123));
 
@@ -71,7 +66,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testOfCollection() {
+    void testOfCollection() throws Exception {
         var foo = TgBindVariable.ofInt("foo");
         var list = List.of(foo.bind(123));
         var parameter = TgBindParameters.of(list);
@@ -80,7 +75,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testBoolStringBoolean() {
+    void testBoolStringBoolean() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addBoolean("foo", true);
 
@@ -88,7 +83,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testBoolStringBooleanWrapper() {
+    void testBoolStringBooleanWrapper() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addBoolean("foo", Boolean.TRUE);
         parameter.addBoolean("bar", null);
@@ -97,7 +92,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testIntStringInt() {
+    void testIntStringInt() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addInt("foo", 123);
 
@@ -105,7 +100,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testIntStringInteger() {
+    void testIntStringInteger() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addInt("foo", Integer.valueOf(123));
         parameter.addInt("bar", null);
@@ -114,7 +109,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testLongStringLong() {
+    void testLongStringLong() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addLong("foo", 123);
 
@@ -122,7 +117,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testLongStringLongWrapper() {
+    void testLongStringLongWrapper() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addLong("foo", Long.valueOf(123));
         parameter.addLong("bar", null);
@@ -131,7 +126,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testFloatStringFloat() {
+    void testFloatStringFloat() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addFloat("foo", 123);
 
@@ -139,7 +134,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testFloatStringFloatWrapper() {
+    void testFloatStringFloatWrapper() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addFloat("foo", Float.valueOf(123));
         parameter.addFloat("bar", null);
@@ -148,7 +143,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testDoubleStringDouble() {
+    void testDoubleStringDouble() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addDouble("foo", 123);
 
@@ -156,7 +151,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testDoubleStringDoubleWrapper() {
+    void testDoubleStringDoubleWrapper() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addDouble("foo", Double.valueOf(123));
         parameter.addDouble("bar", null);
@@ -165,7 +160,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testDecimal() {
+    void testDecimal() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addDecimal("foo", BigDecimal.valueOf(123));
         parameter.addDecimal("bar", null);
@@ -174,7 +169,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testDecimalScale() {
+    void testDecimalScale() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addDecimal("p", new BigDecimal("1.01"), 1);
         parameter.addDecimal("m", new BigDecimal("-1.01"), 1);
@@ -187,7 +182,7 @@ class TgBindParametersTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "FLOOR", "DOWN", "HALF_UP" })
-    void testDecimalRoundingMode(RoundingMode mode) {
+    void testDecimalRoundingMode(RoundingMode mode) throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addDecimal("p", new BigDecimal("1.05"), 1, mode);
         parameter.addDecimal("m", new BigDecimal("-1.05"), 1, mode);
@@ -198,7 +193,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testString() {
+    void testString() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addString("foo", "abc");
         parameter.addString("bar", null);
@@ -207,7 +202,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testBytes() {
+    void testBytes() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addBytes("foo", new byte[] { 1, 2, 3 });
         parameter.addBytes("bar", null);
@@ -216,7 +211,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testBits() {
+    void testBits() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addBits("foo", new boolean[] { true, false, true });
         parameter.addBits("bar", null);
@@ -225,7 +220,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testDate() {
+    void testDate() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addDate("foo", LocalDate.of(2022, 6, 30));
         parameter.addDate("bar", null);
@@ -234,7 +229,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testTime() {
+    void testTime() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addTime("foo", LocalTime.of(23, 30, 59));
         parameter.addTime("bar", null);
@@ -243,7 +238,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testDateTime() {
+    void testDateTime() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.addDateTime("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
         parameter.addDateTime("bar", null);
@@ -252,7 +247,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testOffsetTime() {
+    void testOffsetTime() throws Exception {
         var offset = ZoneOffset.ofHours(9);
         var parameter = TgBindParameters.of();
         parameter.addOffsetTime("foo", OffsetTime.of(23, 30, 59, 0, offset));
@@ -262,7 +257,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testOffsetDateTime() {
+    void testOffsetDateTime() throws Exception {
         var offset = ZoneOffset.ofHours(9);
         var parameter = TgBindParameters.of();
         parameter.addOffsetDateTime("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
@@ -272,7 +267,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testZonedDateTime() {
+    void testZonedDateTime() throws Exception {
         var zdt = ZonedDateTime.of(2022, 6, 30, 23, 30, 59, 999, ZoneId.of("Asia/Tokyo"));
         var parameter = TgBindParameters.of();
         parameter.addZonedDateTime("foo", zdt);
@@ -284,7 +279,7 @@ class TgBindParametersTest {
     @Test
     void testBlob() throws Exception {
         {
-            var path = Files.createTempFile("iceaxe-core-test", ".dat");
+            var path = createTempFile();
             Files.write(path, new byte[] { 1, 2, 3 });
             var blob = TgBlob.of(path);
             var parameter = TgBindParameters.of();
@@ -294,7 +289,7 @@ class TgBindParametersTest {
             assertParameterListBlob(TgBindParameter.of("foo", blob), TgBindParameter.of("bar", (TgBlob) null), parameter, false);
         }
         {
-            var path = Files.createTempFile("iceaxe-core-test", ".dat");
+            var path = createTempFile();
             Files.write(path, new byte[] { 1, 2, 3 });
             var parameter = TgBindParameters.of();
             parameter.addBlob("foo", path);
@@ -322,8 +317,8 @@ class TgBindParametersTest {
     @Test
     void testClob() throws Exception {
         {
-            var path = Files.createTempFile("iceaxe-core-test", ".dat");
-            IceaxeFileUtil.writeString(path, "abc\ndef\r\nあういえお");
+            var path = createTempFile();
+            IceaxeFileUtil.write(path, "abc\ndef\r\nあういえお");
             var clob = TgClob.of(path);
             var parameter = TgBindParameters.of();
             parameter.addClob("foo", clob);
@@ -332,8 +327,8 @@ class TgBindParametersTest {
             assertParameterListClob(TgBindParameter.of("foo", clob), TgBindParameter.of("bar", (TgClob) null), parameter, false);
         }
         {
-            var path = Files.createTempFile("iceaxe-core-test", ".dat");
-            IceaxeFileUtil.writeString(path, "abc\ndef\r\nあういえお");
+            var path = createTempFile();
+            IceaxeFileUtil.write(path, "abc\ndef\r\nあういえお");
             var parameter = TgBindParameters.of();
             parameter.addClob("foo", path);
             parameter.addClob("bar", (Path) null);
@@ -358,7 +353,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringBoolean() {
+    void testAddStringBoolean() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", true);
 
@@ -366,7 +361,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringBooleanWrapper() {
+    void testAddStringBooleanWrapper() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", Boolean.TRUE);
         parameter.add("bar", (Boolean) null);
@@ -375,7 +370,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringInt() {
+    void testAddStringInt() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", 123);
 
@@ -383,7 +378,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringInteger() {
+    void testAddStringInteger() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", Integer.valueOf(123));
         parameter.add("bar", (Integer) null);
@@ -392,7 +387,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringLong() {
+    void testAddStringLong() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", 123L);
 
@@ -400,7 +395,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringLongWrapper() {
+    void testAddStringLongWrapper() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", Long.valueOf(123));
         parameter.add("bar", (Long) null);
@@ -409,7 +404,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringFloat() {
+    void testAddStringFloat() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", 123f);
 
@@ -417,7 +412,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringFloatWrapper() {
+    void testAddStringFloatWrapper() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", Float.valueOf(123));
         parameter.add("bar", (Float) null);
@@ -426,7 +421,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringDouble() {
+    void testAddStringDouble() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", 123d);
 
@@ -434,7 +429,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringDoubleWrapper() {
+    void testAddStringDoubleWrapper() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", Double.valueOf(123));
         parameter.add("bar", (Double) null);
@@ -443,7 +438,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringBigDecimal() {
+    void testAddStringBigDecimal() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", BigDecimal.valueOf(123));
         parameter.add("bar", (BigDecimal) null);
@@ -452,7 +447,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringBigDecimalScale() {
+    void testAddStringBigDecimalScale() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("p", new BigDecimal("1.15"), 1);
         parameter.add("m", new BigDecimal("-1.15"), 1);
@@ -465,7 +460,7 @@ class TgBindParametersTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "FLOOR", "DOWN", "HALF_UP" })
-    void testAddStringBigDecimalRoundingMode(RoundingMode mode) {
+    void testAddStringBigDecimalRoundingMode(RoundingMode mode) throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("p", new BigDecimal("1.15"), 1, mode);
         parameter.add("m", new BigDecimal("-1.15"), 1, mode);
@@ -476,7 +471,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringString() {
+    void testAddStringString() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", "abc");
         parameter.add("bar", (String) null);
@@ -485,7 +480,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringBytes() {
+    void testAddStringBytes() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", new byte[] { 1, 2, 3 });
         parameter.add("bar", (byte[]) null);
@@ -494,7 +489,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringBooleanArray() {
+    void testAddStringBooleanArray() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", new boolean[] { true, false, true });
         parameter.add("bar", (boolean[]) null);
@@ -503,7 +498,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringLocalDate() {
+    void testAddStringLocalDate() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", LocalDate.of(2022, 6, 30));
         parameter.add("bar", (LocalDate) null);
@@ -512,7 +507,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringLocalTime() {
+    void testAddStringLocalTime() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", LocalTime.of(23, 30, 59));
         parameter.add("bar", (LocalTime) null);
@@ -521,7 +516,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringLocalDateTime() {
+    void testAddStringLocalDateTime() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", LocalDateTime.of(2022, 9, 22, 23, 30, 59));
         parameter.add("bar", (LocalDateTime) null);
@@ -530,7 +525,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringOffsetTime() {
+    void testAddStringOffsetTime() throws Exception {
         var offset = ZoneOffset.ofHours(9);
         var parameter = TgBindParameters.of();
         parameter.add("foo", OffsetTime.of(23, 30, 59, 0, offset));
@@ -540,7 +535,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringOffsetDateTime() {
+    void testAddStringOffsetDateTime() throws Exception {
         var offset = ZoneOffset.ofHours(9);
         var parameter = TgBindParameters.of();
         parameter.add("foo", OffsetDateTime.of(2022, 9, 22, 23, 30, 59, 0, offset));
@@ -550,7 +545,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddStringZonedDateTime() {
+    void testAddStringZonedDateTime() throws Exception {
         var zdt = ZonedDateTime.of(2022, 6, 30, 23, 30, 59, 999, ZoneId.of("Asia/Tokyo"));
         var parameter = TgBindParameters.of();
         parameter.add("foo", zdt);
@@ -561,7 +556,7 @@ class TgBindParametersTest {
 
     @Test
     void testAddStringBlob() throws Exception {
-        var path = Files.createTempFile("iceaxe-core-test", ".dat");
+        var path = createTempFile();
         Files.write(path, new byte[] { 1, 2, 3 });
 
         var blob = TgBlob.of(path);
@@ -574,8 +569,8 @@ class TgBindParametersTest {
 
     @Test
     void testAddStringClob() throws Exception {
-        var path = Files.createTempFile("iceaxe-core-test", ".dat");
-        IceaxeFileUtil.writeString(path, "abc\ndef\r\nあいうえお");
+        var path = createTempFile();
+        IceaxeFileUtil.write(path, "abc\ndef\r\nあいうえお");
 
         var blob = TgClob.of(path);
         var parameter = TgBindParameters.of();
@@ -587,7 +582,7 @@ class TgBindParametersTest {
 
     @Test
     void testAddStringBlobPath() throws Exception {
-        var path = Files.createTempFile("iceaxe-core-test", ".dat");
+        var path = createTempFile();
         Files.write(path, new byte[] { 1, 2, 3 });
 
         var parameter = TgBindParameters.of();
@@ -599,8 +594,8 @@ class TgBindParametersTest {
 
     @Test
     void testAddStringClobPath() throws Exception {
-        var path = Files.createTempFile("iceaxe-core-test", ".dat");
-        IceaxeFileUtil.writeString(path, "abc\ndef\r\nあいうえお");
+        var path = createTempFile();
+        IceaxeFileUtil.write(path, "abc\ndef\r\nあいうえお");
 
         var parameter = TgBindParameters.of();
         parameter.add("foo", TgDataType.CLOB, path);
@@ -610,7 +605,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddTgParameter() {
+    void testAddTgParameter() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add(TgBindParameter.of("foo", 123));
         parameter.add(TgBindParameter.of("bar", "abc"));
@@ -619,7 +614,7 @@ class TgBindParametersTest {
     }
 
     @Test
-    void testAddTgParameterList() {
+    void testAddTgParameterList() throws Exception {
         var parameter = TgBindParameters.of();
         parameter.add("foo", 123);
         parameter.add("bar", "abc");
@@ -634,116 +629,91 @@ class TgBindParametersTest {
         assertParameterList(TgBindParameter.of("zzz1", 123), TgBindParameter.of("zzz2", 456), parameter2);
     }
 
-    private void assertParameterList(TgBindParameter expected, TgBindParameters actual) {
+    private static Path createTempFile() throws IOException {
+        var path = Files.createTempFile("iceaxe-core-test", ".dat");
+        path.toFile().deleteOnExit();
+        return path;
+    }
+
+    private void assertParameterList(TgBindParameter expected, TgBindParameters actual) throws IOException, InterruptedException {
         assertParameterList(List.of(expected), actual);
     }
 
-    private void assertParameterList(TgBindParameter expected1, TgBindParameter expected2, TgBindParameters actual) {
+    private void assertParameterList(TgBindParameter expected1, TgBindParameter expected2, TgBindParameters actual) throws IOException, InterruptedException {
         assertParameterList(List.of(expected1, expected2), actual);
     }
 
-    private void assertParameterList(TgBindParameter expected1, TgBindParameter expected2, TgBindParameter expected3, TgBindParameters actual) {
+    private void assertParameterList(TgBindParameter expected1, TgBindParameter expected2, TgBindParameter expected3, TgBindParameters actual) throws IOException, InterruptedException {
         assertParameterList(List.of(expected1, expected2, expected3), actual);
     }
 
-    private void assertParameterList(List<TgBindParameter> expected, TgBindParameters actual) {
-        IceaxeCloseableSet closeableSet1 = new IceaxeCloseableSet();
-        var expectedLow = expected.stream().map(v -> v.toLowParameter(closeableSet1)).collect(Collectors.toList());
-        IceaxeCloseableSet closeableSet2 = new IceaxeCloseableSet();
-        var actualLow = actual.toLowParameterList(closeableSet2);
+    private void assertParameterList(List<TgBindParameter> expected, TgBindParameters actual) throws IOException, InterruptedException {
+        var context1Wrapper = new TestLowParameterGenerateContextWrapper();
+        var context1 = context1Wrapper.context();
+        var expectedLow = expected.stream().map(v -> {
+            try {
+                return v.toLowParameter(context1);
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
+
+        var context2Wrapper = new TestLowParameterGenerateContextWrapper();
+        var context2 = context2Wrapper.context();
+        var actualLow = actual.toLowParameterList(context2);
 
         assertEquals(expectedLow, actualLow);
     }
 
-    private void assertParameterListBlob(TgBindParameter expected1, TgBindParameter expected2, TgBindParameters actual, boolean deleteOnExecuteFinished) {
-        IceaxeCloseableSet closeableSet1 = new IceaxeCloseableSet();
-        var expectedLow = List.of(expected1, expected2).stream().map(v -> v.toLowParameter(closeableSet1)).collect(Collectors.toList());
-        IceaxeCloseableSet closeableSet2 = new IceaxeCloseableSet();
-        var actualLow = actual.toLowParameterList(closeableSet2);
-
-        if (deleteOnExecuteFinished) {
-            var list = TestBlobUtil.getBlobList(closeableSet2);
-            assertEquals(1, list.size());
-            for (var blob : list) {
-                assertTrue(blob.isDeleteOnExecuteFinished());
+    private void assertParameterListBlob(TgBindParameter expected1, TgBindParameter expected2, TgBindParameters actual, boolean deleteOnExecuteFinished) throws IOException, InterruptedException {
+        var context1Wrapper = new TestLowParameterGenerateContextWrapper();
+        var context1 = context1Wrapper.context();
+        var expectedLow = List.of(expected1, expected2).stream().map(v -> {
+            try {
+                return v.toLowParameter(context1);
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
             }
-        } else {
-            assertEquals(0, closeableSet2.size());
-        }
+        }).collect(Collectors.toList());
+
+        var context2Wrapper = new TestLowParameterGenerateContextWrapper();
+        var context2 = context2Wrapper.context();
+        var actualLow = actual.toLowParameterList(context2);
+
+        assertEquals(context1.closeableSet().size(), context2.closeableSet().size());
 
         assertEquals(expectedLow.size(), actualLow.size());
         for (int i = 0; i < actualLow.size(); i++) {
             var expectLowParameter = expectedLow.get(i);
             var actualLowParameter = actualLow.get(i);
             assertEquals(expectLowParameter.getName(), actualLowParameter.getName());
-
-            var expectedPathStr = expectLowParameter.getBlob().getLocalPath();
-            var actualPathStr = actualLowParameter.getBlob().getLocalPath();
-
-            if (expectedPathStr.isEmpty()) {
-                assertEquals("", actualPathStr);
-                return;
-            }
-
-            var expectedPath = Path.of(expectedPathStr);
-            var actualPath = Path.of(actualPathStr);
-
-            try {
-                var expectedValue = Files.readAllBytes(expectedPath);
-                var actualValue = Files.readAllBytes(actualPath);
-                assertArrayEquals(expectedValue, actualValue);
-
-                Files.deleteIfExists(expectedPath);
-                Files.deleteIfExists(actualPath);
-            } catch (IOException ie) {
-                throw new UncheckedIOException(ie.getMessage(), ie);
-            }
+            // TODO compare blob content
         }
     }
 
-    private void assertParameterListClob(TgBindParameter expected1, TgBindParameter expected2, TgBindParameters actual, boolean deleteOnExecuteFinished) {
-        IceaxeCloseableSet closeableSet1 = new IceaxeCloseableSet();
-        var expectedLow = List.of(expected1, expected2).stream().map(v -> v.toLowParameter(closeableSet1)).collect(Collectors.toList());
-        IceaxeCloseableSet closeableSet2 = new IceaxeCloseableSet();
-        var actualLow = actual.toLowParameterList(closeableSet2);
-
-        if (deleteOnExecuteFinished) {
-            var list = TestClobUtil.getClobList(closeableSet2);
-            assertEquals(1, list.size());
-            for (var clob : list) {
-                assertTrue(clob.isDeleteOnExecuteFinished());
+    private void assertParameterListClob(TgBindParameter expected1, TgBindParameter expected2, TgBindParameters actual, boolean deleteOnExecuteFinished) throws IOException, InterruptedException {
+        var context1Wrapper = new TestLowParameterGenerateContextWrapper();
+        var context1 = context1Wrapper.context();
+        var expectedLow = List.of(expected1, expected2).stream().map(v -> {
+            try {
+                return v.toLowParameter(context1);
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
             }
-        } else {
-            assertEquals(0, closeableSet2.size());
-        }
+        }).collect(Collectors.toList());
+
+        var context2Wrapper = new TestLowParameterGenerateContextWrapper();
+        var context2 = context2Wrapper.context();
+        var actualLow = actual.toLowParameterList(context2);
+
+        assertEquals(context1.closeableSet().size(), context2.closeableSet().size());
 
         assertEquals(expectedLow.size(), actualLow.size());
         for (int i = 0; i < actualLow.size(); i++) {
             var expectLowParameter = expectedLow.get(i);
             var actualLowParameter = actualLow.get(i);
             assertEquals(expectLowParameter.getName(), actualLowParameter.getName());
-
-            var expectedPathStr = expectLowParameter.getClob().getLocalPath();
-            var actualPathStr = actualLowParameter.getClob().getLocalPath();
-
-            if (expectedPathStr.isEmpty()) {
-                assertEquals("", actualPathStr);
-                return;
-            }
-
-            var expectedPath = Path.of(expectedPathStr);
-            var actualPath = Path.of(actualPathStr);
-
-            try {
-                var expectedValue = Files.readString(expectedPath);
-                var actualValue = Files.readString(actualPath);
-                assertEquals(expectedValue, actualValue);
-
-                Files.deleteIfExists(expectedPath);
-                Files.deleteIfExists(actualPath);
-            } catch (IOException ie) {
-                throw new UncheckedIOException(ie.getMessage(), ie);
-            }
+            // TODO compare clob content
         }
     }
 

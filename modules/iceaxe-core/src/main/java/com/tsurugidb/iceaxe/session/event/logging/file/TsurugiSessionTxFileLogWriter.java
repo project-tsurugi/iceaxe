@@ -96,7 +96,7 @@ public class TsurugiSessionTxFileLogWriter implements Closeable {
      */
     public void writeExplain(int sqlId, String contents) throws IOException {
         String fileName = String.format("sql-%d.explain.json", sqlId);
-        IceaxeFileUtil.writeString(outputDir.resolve(fileName), contents);
+        IceaxeFileUtil.write(outputDir.resolve(fileName), contents);
     }
 
     @Override

@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
@@ -315,6 +314,7 @@ class IceaxeConvertUtilTest {
     }
 
     @Test
+    @SuppressWarnings("removal")
     void testToBlob() throws Exception {
         assertNull(target.toBlob(null));
 
@@ -333,7 +333,7 @@ class IceaxeConvertUtilTest {
         {
             byte[] expected = { 1, 2, 3 };
             try (var actual = target.toBlob(new ByteArrayInputStream(expected))) {
-                assertTrue(actual.isDeleteOnExecuteFinished());
+                assertFalse(actual.isDeleteOnExecuteFinished());
                 byte[] actualBytes = actual.readAllBytes();
                 assertArrayEquals(expected, actualBytes);
             }
@@ -341,7 +341,7 @@ class IceaxeConvertUtilTest {
         {
             byte[] expected = { 1, 2, 3 };
             try (var actual = target.toBlob(expected)) {
-                assertTrue(actual.isDeleteOnExecuteFinished());
+                assertFalse(actual.isDeleteOnExecuteFinished());
                 byte[] actualBytes = actual.readAllBytes();
                 assertArrayEquals(expected, actualBytes);
             }
@@ -368,6 +368,7 @@ class IceaxeConvertUtilTest {
     }
 
     @Test
+    @SuppressWarnings("removal")
     void testToClob() throws Exception {
         assertNull(target.toClob(null));
 
@@ -386,7 +387,7 @@ class IceaxeConvertUtilTest {
         {
             String expected = "abc\ndef\r\nあいうえお";
             try (var actual = target.toClob(new StringReader(expected))) {
-                assertTrue(actual.isDeleteOnExecuteFinished());
+                assertFalse(actual.isDeleteOnExecuteFinished());
                 String actualString = actual.readString();
                 assertEquals(expected, actualString);
             }
@@ -394,7 +395,7 @@ class IceaxeConvertUtilTest {
         {
             String expected = "abc\ndef\r\nあいうえお";
             try (var actual = target.toClob(expected)) {
-                assertTrue(actual.isDeleteOnExecuteFinished());
+                assertFalse(actual.isDeleteOnExecuteFinished());
                 String actualString = actual.readString();
                 assertEquals(expected, actualString);
             }

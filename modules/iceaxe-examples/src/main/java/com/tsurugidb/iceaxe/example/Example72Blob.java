@@ -25,19 +25,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.tsurugidb.iceaxe.TsurugiConnector;
+import com.tsurugidb.iceaxe.session.TgLobTransferType;
 import com.tsurugidb.iceaxe.session.TgSessionOption;
-import com.tsurugidb.iceaxe.sql.parameter.TgBindParameter;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
-import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBlob;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.sql.result.mapping.TgSingleResultMapping;
-import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteBlob;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
 import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
@@ -99,28 +98,29 @@ public class Example72Blob {
         var parameterMapping = TgParameterMapping.of(variables);
 
         try (var ps = tm.getSession().createStatement(sql, parameterMapping)) {
-            List<Path> fileList;
+            List<TgRemoteBlob> blobList;
             try (var stream = Files.list(Path.of("dir"))) {
-                fileList = stream.collect(Collectors.toList());
+                var lobFactory = tm.getSession().getLobFactory();
+
+                blobList = stream.map(path -> {
+                    try {
+                        return lobFactory.uploadBlob(path);
+                    } catch (IOException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList());
             }
 
             tm.execute(transaction -> {
                 int i = 0;
-                for (Path path : fileList) {
-                    var parameter = createInsertParameterForBlob(i++, path);
+                for (TgRemoteBlob blob : blobList) {
+                    var parameter = TgBindParameters.of() //
+                            .addInt("pk", i++) //
+                            .addBlob("value", blob);
                     transaction.executeAndGetCountDetail(ps, parameter);
                 }
             });
         }
-    }
-
-    TgBindParameters createInsertParameterForBlob(int pk, Path path) {
-        var blob = TgBlob.of(path);
-        return TgBindParameters.of().addInt("pk", pk).addBlob("value", blob);
-    }
-
-    TgBindParameters createInsertParameterForPath(int pk, Path path) {
-        return TgBindParameters.of().addInt("pk", pk).addBlob("value", path);
     }
 
     void insertBind(TsurugiTransactionManager tm) throws IOException, InterruptedException {
@@ -130,28 +130,27 @@ public class Example72Blob {
         var parameterMapping = TgParameterMapping.of(pk, value);
 
         try (var ps = tm.getSession().createStatement(sql, parameterMapping)) {
-            List<Path> fileList;
+            List<TgRemoteBlob> blobList;
             try (var stream = Files.list(Path.of("dir"))) {
-                fileList = stream.collect(Collectors.toList());
+                var lobFactory = tm.getSession().getLobFactory();
+
+                blobList = stream.map(path -> {
+                    try {
+                        return lobFactory.uploadBlob(path);
+                    } catch (IOException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList());
             }
 
             tm.execute(transaction -> {
                 int i = 0;
-                for (Path path : fileList) {
-                    var parameter = TgBindParameters.of(pk.bind(i++), bindForBlob(value, path));
+                for (TgRemoteBlob blob : blobList) {
+                    var parameter = TgBindParameters.of(pk.bind(i++), value.bind(blob));
                     transaction.executeAndGetCountDetail(ps, parameter);
                 }
             });
         }
-    }
-
-    TgBindParameter bindForBlob(TgBindVariableBlob value, Path path) {
-        var blob = TgBlob.of(path);
-        return value.bind(blob);
-    }
-
-    TgBindParameter bindForPath(TgBindVariableBlob value, Path path) {
-        return value.bind(path);
     }
 
     void inserFromInputStream(TsurugiTransactionManager tm) throws IOException, InterruptedException {
@@ -159,18 +158,18 @@ public class Example72Blob {
         var variables = TgBindVariables.of().addInt("pk").addBlob("value");
         var parameterMapping = TgParameterMapping.of(variables);
 
-        var objectFactory = IceaxeObjectFactory.getDefaultInstance();
-
         try (var ps = tm.getSession().createStatement(sql, parameterMapping)) {
             tm.execute(transaction -> {
+                var lobFactory = tm.getSession().getLobFactory();
+
                 for (int i = 0; i < 10; i++) {
                     try (var is = getInputStream(i)) {
-                        try (var blob = objectFactory.createBlob(is, false)) { // temporary file is created internally
+                        try (var blob = lobFactory.uploadBlob(is)) { // temporary file is created internally when privileged mode
                             var parameter = TgBindParameters.of() //
                                     .addInt("pk", i) //
                                     .addBlob("value", blob);
                             transaction.executeAndGetCountDetail(ps, parameter);
-                        } // delete temporary file in blob.close()
+                        } // delete temporary file in blob.close() when privileged mode
                     }
                 }
                 return;
@@ -222,9 +221,8 @@ public class Example72Blob {
                 for (int i = 0; i < 10; i++) {
                     var parameter = TgBindParameters.of() //
                             .addInt("pk", i) //
-                            .addBlob("value", new byte[] { 1, 2, 3 }) // temporary file is created internally using IceaxeObjectFactory.getDefaultInstance()
-                    ;
-                    transaction.executeAndGetCountDetail(ps, parameter); // delete temporary file in executeAndGetCountDetail()
+                            .addBlob("value", new byte[] { 1, 2, 3 });
+                    transaction.executeAndGetCountDetail(ps, parameter);
                 }
                 return;
             });
@@ -351,6 +349,7 @@ public class Example72Blob {
     void largeObjectPathMapping() throws IOException, InterruptedException {
         var connector = TsurugiConnector.of("tcp://localhost:12345");
         var sessionOption = TgSessionOption.of() //
+                .setLobTransferType(TgLobTransferType.PRIVILEGED) //
                 .addLargeObjectPathMappingOnSend(Path.of("D:/tmp/client"), "/mnt/client") //
                 .addLargeObjectPathMappingOnReceive("/opt/tsurugi/var/data/log", Path.of("D:/tmp/tsurugi"));
         try (var session = connector.createSession(sessionOption)) {

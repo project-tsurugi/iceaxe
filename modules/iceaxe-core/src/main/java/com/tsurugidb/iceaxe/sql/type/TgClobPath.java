@@ -20,6 +20,9 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.util.TgTimeValue;
+
 /**
  * CLOB holding path.
  *
@@ -66,6 +69,12 @@ public class TgClobPath implements TgClob {
     @Override
     public String readString() throws IOException {
         return Files.readString(path);
+    }
+
+    @Override
+    public TgRemoteClob upload(TsurugiSession session, TgTimeValue timeout) throws IOException, InterruptedException {
+        var lobFactory = session.getLobFactory();
+        return lobFactory.uploadClob(path, timeout);
     }
 
     @Override

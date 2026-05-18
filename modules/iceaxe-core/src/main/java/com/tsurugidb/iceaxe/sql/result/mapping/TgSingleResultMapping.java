@@ -29,7 +29,6 @@ import java.time.ZonedDateTime;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
-import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
@@ -268,7 +267,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
                 if (value == null) {
                     return null;
                 }
-                var factory = IceaxeObjectFactory.getDefaultInstance();
+                var factory = record.getLobFactory();
                 return factory.createBlob(value);
             });
         }
@@ -290,7 +289,7 @@ public class TgSingleResultMapping<R> extends TgResultMapping<R> {
                 if (value == null) {
                     return null;
                 }
-                var factory = IceaxeObjectFactory.getDefaultInstance();
+                var factory = record.getLobFactory();
                 return factory.createClob(value);
             });
         }
