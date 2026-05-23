@@ -510,6 +510,10 @@ public class TsurugiConnector {
             lowBuilder.withBlobPathMapping(mapping);
         });
 
+        sessionOption.findBlobRelaySerivceEndpoint().ifPresent(endpoint -> {
+            lowBuilder.withBlobRelayEndpoint(endpoint);
+        });
+
         return lowBuilder;
     }
 

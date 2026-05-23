@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.iceaxe.session;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
@@ -189,6 +190,7 @@ public class TgSessionOption {
     private final Map<TgTimeoutKey, TgTimeValue> timeoutMap = new ConcurrentHashMap<>();
     private TgLobTransferType lobTransferType = TgLobTransferType.DEFAULT;
     private BlobPathMapping.Builder blobPathMappingBuilder = null;
+    private URI blobRelayServiceEndpoint = null;
     private TgCommitOption commitOption = TgCommitOption.of();
     private TgSessionShutdownType closeShutdownType = TgSessionShutdownType.FORCEFUL;
 
@@ -379,6 +381,28 @@ public class TgSessionOption {
             return Optional.empty();
         }
         return Optional.of(blobPathMappingBuilder.build());
+    }
+
+    /**
+     * Set blob relay service endpoint.
+     *
+     * @param endpoint blob relay service endpoint
+     * @return this
+     * @since 1.16.0
+     */
+    public TgSessionOption setBlobRelaySerivceEndpoint(URI endpoint) {
+        this.blobRelayServiceEndpoint = endpoint;
+        return this;
+    }
+
+    /**
+     * Get blob relay service endpoint.
+     *
+     * @return blob relay service endpoint
+     * @since 1.16.0
+     */
+    public Optional<URI> findBlobRelaySerivceEndpoint() {
+        return Optional.ofNullable(this.blobRelayServiceEndpoint);
     }
 
     /**
