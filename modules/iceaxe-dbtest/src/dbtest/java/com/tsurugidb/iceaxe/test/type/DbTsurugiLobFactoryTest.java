@@ -309,8 +309,8 @@ public class DbTsurugiLobFactoryTest extends DbTestTableTester {
         var path = IceaxeObjectFactory.getDefaultInstance().createTempFilePath();
         Files.write(path, new byte[] { 0x12, 0x34 });
         try (TgBlob data = TgBlob.of(path); //
-                TgRemoteBlob clob = factory.uploadBlob(data)) {
-            assertNotNull(clob.getLowLargeObjectInfo());
+                TgRemoteBlob blob = factory.uploadBlob(data)) {
+            assertNotNull(blob.getLowLargeObjectInfo());
         }
 
         try (TgBlob data = TgBlob.of(new byte[] { 0x12, 0x34 }); //

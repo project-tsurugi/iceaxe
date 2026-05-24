@@ -44,7 +44,7 @@ public final class IceaxeFileUtil {
      *
      * @param path    the path to the file
      * @param is      the InputStream to be written
-     * @param options options specifying how the file is opened
+     * @param options options specifying how the copy should be done
      * @throws IOException if an I/O error occurs writing to or creating the file
      * @since 1.16.0
      */

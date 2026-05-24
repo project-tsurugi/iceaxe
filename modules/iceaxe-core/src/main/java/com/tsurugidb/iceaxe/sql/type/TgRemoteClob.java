@@ -26,7 +26,7 @@ import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
 import com.tsurugidb.tsubakuro.common.LargeObjectInfo;
 
 /**
- * Tsrugugi uploaded CLOB.
+ * Tsurugi uploaded CLOB.
  *
  * <p>
  * TgRemoteClob is closed after the SQL statement is executed ({@link TsurugiTransaction#executeStatement(com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement, Object) executeStatement()},

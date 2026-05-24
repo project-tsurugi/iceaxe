@@ -355,7 +355,7 @@ class IceaxeLowParameterUtilTest {
 
     @Test
     void testCreateClobStringString() throws Exception {
-        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createClob("foo", (Reader) null, null));
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createClob("foo", (String) null, null));
 
         var contextWrapper = new TestLowParameterGenerateContextWrapper();
         var context = contextWrapper.context();
