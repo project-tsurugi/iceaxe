@@ -42,7 +42,6 @@ BLOB中継サービスは、クライアントアプリケーションとTsurugi
 （このため、クライアントアプリケーションとTsurugi DBが異なるサーバー上で動いていても使用できます）
 
 なお、この方式が使えるのは、BLOB中継サービスが稼働している場合のみです。
-（Tsurugi 1.11.0では、デフォルトでBLOB中継サービスが稼働しています）
 
 > [!NOTE]
 >
@@ -155,7 +154,7 @@ select文の実行結果の値は、TsurugiResultRecordまたはTsurugiResultEnt
 TsurugiResultRecordからBLOBを取得すると、TgBlobReferenceが返ります。  
 TgBlobReferenceにBLOBデータを取得するメソッドがありますが、TgBlobReferenceは **トランザクションが有効な間のみ** 使用可能であるという制約があります。
 
-トランザクションの外でもBLOBデータを保持し続けるEntityクラス（TsurugiResultEntityやユーザーが用意するEntityクラス）向けには、TgBlobが使用されます。  
+トランザクションの外でもBLOBデータを保持し続けるEntityクラス（TsurugiResultEntityやユーザーが用意するEntityクラス）向けには、TgBlobを使用します。  
 （TsurugiResultEntityからBLOBを取得するとTgBlobが返ります）
 
 TgBlob内部では、一時ファイルやbyte[]の形でBLOBデータを保持します。（デフォルトは一時ファイルを使う方式です）
@@ -284,5 +283,29 @@ docker run -d -p 12345:12345 --name tsurugi -v D:/tmp/client:/mnt/client -v D:/t
         try (var session = connector.createSession(sessionOption)) {
             ～
         }
+```
+
+Iceaxeには、InputStreamやbyte[]を引数としてBLOBデータをアップロードするメソッドがありますが、特権モードのときはメソッド内部で一時ファイルを作成して、そのファイルにBLOBデータを格納してアップロードします。
+
+特権モードでアップロードするファイルは、パスマッピングのaddLargeObjectPathMappingOnSend()で指定したクライアント側のパス上（ディレクトリー内）に作る必要があるため、一時ファイルもそこに作られなければなりません。
+
+一時ファイルはIceaxeObjectFactoryで作成されます。
+以下のようにして一時ファイルを作成するディレクトリーを変更することができます。
+
+```java
+IceaxeObjectFactory.getDefaultInstance().setTempDirectory(Path.of("D:/tmp/client"));
+```
+
+### BLOB中継サービスのエンドポイントを指定する例
+
+BLOB中継サービスのエンドポイント（接続先URI）は、Tsurugi DBから送られ、Iceaxe（Tsubkauro/Java）内部で使用しています。
+
+しかし、ネットワーク環境によっては、Tsurugi DB内部で管理しているホスト名やIPアドレスでは、クライアントから接続できないことがあります。
+
+このため、IceaxeでBLOB中継サービスのエンドポイントを指定することができるようになっています。
+
+```java
+        var uri = URI.create("dns:///localhost:52345");
+        sessionOption.setBlobRelayServiceEndpoint(uri);
 ```
 

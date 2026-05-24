@@ -119,7 +119,7 @@ public abstract class TsurugiLargeObjectHelper implements IceaxeTimeoutCloseable
 
     /**
      * Gets the low-level LargeObjectClient from the Tsurugi session.
-     * 
+     *
      * @param session Tsurugi session
      * @return Low-level LargeObjectClient
      * @throws IOException          If an I/O error occurs while retrieving the LargeObjectClient

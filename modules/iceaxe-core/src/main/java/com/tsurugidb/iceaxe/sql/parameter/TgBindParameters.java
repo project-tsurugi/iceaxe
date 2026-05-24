@@ -461,7 +461,7 @@ public class TgBindParameters {
      * @return this
      * @since 1.16.0
      */
-    public TgBindParameters addBlob(@Nonnull String name, @Nullable TgRemoteClob value) {
+    public TgBindParameters addClob(@Nonnull String name, @Nullable TgRemoteClob value) {
         add(TgBindParameter.of(name, value));
         return this;
     }
@@ -765,6 +765,18 @@ public class TgBindParameters {
     }
 
     /**
+     * add value(BLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since 1.16.0
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable TgRemoteBlob value) {
+        return addBlob(name, value);
+    }
+
+    /**
      * add value(CLOB).
      *
      * @param name  name
@@ -773,6 +785,18 @@ public class TgBindParameters {
      * @since 1.8.0
      */
     public TgBindParameters add(@Nonnull String name, @Nullable TgClob value) {
+        return addClob(name, value);
+    }
+
+    /**
+     * add value(CLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since 1.16.0
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable TgRemoteClob value) {
         return addClob(name, value);
     }
 

@@ -59,8 +59,8 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * set object factory.
-     * 
+     * Set object factory.
+     *
      * @param objectFactory object factory
      */
     public void setIceaxeObjectFactory(IceaxeObjectFactory objectFactory) {
@@ -68,7 +68,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * get object factory.
+     * Get object factory.
      *
      * @return object factory
      */
@@ -81,8 +81,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * 
-     * /** set default persistence type.
+     * Set default persistence type.
      *
      * @param persistenceType persistence type
      */
@@ -91,7 +90,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * get default persistence type.
+     * Get default persistence type.
      *
      * @return persistence type
      */
@@ -100,7 +99,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * get persistence type.
+     * Get persistence type.
      *
      * @param persistenceType persistence type
      * @return persistence type
@@ -113,7 +112,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * set blob upload timeout.
+     * Set blob upload timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -123,7 +122,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * set blob upload timeout.
+     * Set blob upload timeout.
      *
      * @param timeout time
      */
@@ -132,7 +131,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * set clob upload timeout.
+     * Set clob upload timeout.
      *
      * @param time timeout time
      * @param unit timeout unit
@@ -142,7 +141,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * set clob upload timeout.
+     * Set clob upload timeout.
      *
      * @param timeout time
      */
@@ -151,7 +150,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * get blob upload timeout.
+     * Get blob upload timeout.
      *
      * @param value timeout value (if null, use default timeout)
      * @return blob upload timeout
@@ -167,7 +166,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * get clob upload timeout.
+     * Get clob upload timeout.
      *
      * @param value timeout value (if null, use default timeout)
      * @return clob upload timeout
@@ -183,7 +182,7 @@ public class TsurugiLobFactory {
     }
 
     /**
-     * get session option.
+     * Get session option.
      *
      * @return session option
      */

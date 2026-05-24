@@ -390,7 +390,7 @@ public class TgSessionOption {
      * @return this
      * @since 1.16.0
      */
-    public TgSessionOption setBlobRelaySerivceEndpoint(URI endpoint) {
+    public TgSessionOption setBlobRelayServiceEndpoint(URI endpoint) {
         this.blobRelayServiceEndpoint = endpoint;
         return this;
     }
@@ -401,7 +401,7 @@ public class TgSessionOption {
      * @return blob relay service endpoint
      * @since 1.16.0
      */
-    public Optional<URI> findBlobRelaySerivceEndpoint() {
+    public Optional<URI> findBlobRelayServiceEndpoint() {
         return Optional.ofNullable(this.blobRelayServiceEndpoint);
     }
 

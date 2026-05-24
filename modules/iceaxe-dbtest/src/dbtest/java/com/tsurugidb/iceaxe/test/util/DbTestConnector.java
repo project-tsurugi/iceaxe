@@ -35,6 +35,7 @@ import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TgSessionShutdownType;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.session.event.TsurugiSessionEventListener;
+import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.event.TsurugiTransactionEventListener;
 import com.tsurugidb.tsubakuro.channel.common.connection.Credential;
@@ -50,6 +51,9 @@ public class DbTestConnector {
     private static final String SYSPROP_DBTEST_PASSWORD = "tsurugi.dbtest.password";
     private static final String SYSPROP_DBTEST_AUTH_TOKEN = "tsurugi.dbtest.auth-token";
     private static final String SYSPROP_DBTEST_CREDENTIALS = "tsurugi.dbtest.credentials";
+    private static final String SYSPROP_DBTEST_LOB_SEND_PATH_MAPPING = "tsurugi.dbtest.lob-send-path-mapping";
+    private static final String SYSPROP_DBTEST_LOB_RECV_PATH_MAPPING = "tsurugi.dbtest.lob-recv-path-mapping";
+    private static final String SYSPROP_DBTEST_BLOB_RELAY_SERVICE_ENDPOINT = "tsurugi.dbtest.blob-relay-service-endpoint";
 
     private static URI staticEndpoint;
     private static Credential staticCredential;
@@ -57,7 +61,7 @@ public class DbTestConnector {
 
     private static String sessionLabel;
 
-    public static URI getEndPoint() {
+    public static URI getEndpoint() {
         if (staticEndpoint == null) {
             String endpoint = System.getProperty(SYSPROP_DBTEST_ENDPOINT, "tcp://localhost:12345");
             staticEndpoint = URI.create(endpoint);
@@ -66,21 +70,21 @@ public class DbTestConnector {
     }
 
     public static boolean isIpc() {
-        URI endpoint = getEndPoint();
+        URI endpoint = getEndpoint();
         String scheme = endpoint.getScheme();
         return scheme.equals("ipc");
     }
 
     public static boolean isTcp() {
-        URI endpoint = getEndPoint();
+        URI endpoint = getEndpoint();
         String scheme = endpoint.getScheme();
         return scheme.equals("tcp");
     }
 
     public static URI assumeEndpointTcp() {
-        URI endpoint = getEndPoint();
+        URI endpoint = getEndpoint();
         String scheme = endpoint.getScheme();
-        assumeTrue(scheme.equals("tcp"), "ednpoint is not tcp");
+        assumeTrue(scheme.equals("tcp"), "endpoint is not tcp");
         return endpoint;
     }
 
@@ -136,6 +140,35 @@ public class DbTestConnector {
         return Path.of(credentials);
     }
 
+    public static void applyLobPathMapping(TgSessionOption sessionOption) {
+        String sendMapping = getSystemProperty(SYSPROP_DBTEST_LOB_SEND_PATH_MAPPING);
+        if (sendMapping != null) {
+            var pathMapping = new LobPathMapping(sendMapping);
+            sessionOption.addLargeObjectPathMappingOnSend(pathMapping.clientPath, pathMapping.serverPath);
+        }
+
+        String recvMapping = getSystemProperty(SYSPROP_DBTEST_LOB_RECV_PATH_MAPPING);
+        if (recvMapping != null) {
+            var pathMapping = new LobPathMapping(recvMapping);
+            sessionOption.addLargeObjectPathMappingOnReceive(pathMapping.serverPath, pathMapping.clientPath);
+        }
+    }
+
+    public static String getBlobRelayServiceEndpoint() {
+        return getSystemProperty(SYSPROP_DBTEST_BLOB_RELAY_SERVICE_ENDPOINT);
+    }
+
+    private static class LobPathMapping {
+        private final Path clientPath;
+        private final String serverPath;
+
+        public LobPathMapping(String value) {
+            int n = value.lastIndexOf(':');
+            this.clientPath = Path.of(value.substring(0, n));
+            this.serverPath = value.substring(n + 1);
+        }
+    }
+
     private static String getSystemProperty(String key) {
         String value = System.getProperty(key);
         if (value != null && value.isEmpty()) {
@@ -158,7 +191,7 @@ public class DbTestConnector {
     }
 
     public static TsurugiConnector createConnector(Credential credential) {
-        URI endpoint = getEndPoint();
+        URI endpoint = getEndpoint();
         return TsurugiConnector.of(endpoint, credential).setApplicationName("iceaxe-dbtest");
     }
 
@@ -191,15 +224,52 @@ public class DbTestConnector {
     }
 
     public static TsurugiSession createSession(TsurugiConnector connector, String label, long time, TimeUnit unit, TgSessionShutdownType shutdownType) throws IOException {
-        var sessionOption = TgSessionOption.of();
-        sessionOption.setLabel(label);
-        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, time, unit);
-        sessionOption.setCloseShutdownType(shutdownType);
+        var sessionOption = createSessionOption(label, time, unit, shutdownType);
 
         var session = connector.createSession(sessionOption);
         addSession(session);
 //      session.addEventListener(SESSION_LISTENER);
         return session;
+    }
+
+    public static TsurugiSession createSession(TgSessionOption sessionOption) throws IOException {
+        var connector = createConnector();
+        var session = connector.createSession(sessionOption);
+        addSession(session);
+//      session.addEventListener(SESSION_LISTENER);
+        return session;
+    }
+
+    public static TgSessionOption createSessionOption() {
+        return createSessionOption(sessionLabel);
+    }
+
+    public static TgSessionOption createSessionOption(String label) {
+        return createSessionOption(label, 20, TimeUnit.SECONDS, CLOSE_SHUTDOWN_TYPE);
+    }
+
+    public static TgSessionOption createSessionOption(String label, long time, TimeUnit unit, TgSessionShutdownType shutdownType) {
+        var sessionOption = TgSessionOption.of();
+        sessionOption.setLabel(label);
+        sessionOption.setTimeout(TgTimeoutKey.DEFAULT, time, unit);
+        sessionOption.setCloseShutdownType(shutdownType);
+        applyLobPathMapping(sessionOption);
+
+        sessionOption.findLargeObjectPathMapping().ifPresent(mapping -> {
+            for (var entry : mapping.getOnSend()) {
+                Path dir = entry.getClientPath();
+                IceaxeObjectFactory.getDefaultInstance().setTempDirectory(dir);
+                break;
+            }
+        });
+
+        String blobRelayServiceEndpoint = getBlobRelayServiceEndpoint();
+        if (blobRelayServiceEndpoint != null) {
+            var uri = URI.create(blobRelayServiceEndpoint);
+            sessionOption.setBlobRelayServiceEndpoint(uri);
+        }
+
+        return sessionOption;
     }
 
     public static void addSession(TsurugiSession session) {

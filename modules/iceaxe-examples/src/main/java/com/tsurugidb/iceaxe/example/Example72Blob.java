@@ -47,7 +47,7 @@ import com.tsurugidb.iceaxe.transaction.option.TgTxOption;
 public class Example72Blob {
 
     public static void main(String... args) throws IOException, InterruptedException {
-        var connector = TsurugiConnector.of("ipc:tsurugi");
+        var connector = TsurugiConnector.of("tcp://localhost:12345");
         try (var session = connector.createSession()) {
             var setting = TgTmSetting.ofAlways(TgTxOption.ofOCC());
             var tm = session.createTransactionManager(setting);
@@ -66,7 +66,7 @@ public class Example72Blob {
                 + ")" //
         );
 
-        switch (0) {
+        switch (3) {
         case 0:
             insert(tm);
             break;
@@ -164,7 +164,7 @@ public class Example72Blob {
 
                 for (int i = 0; i < 10; i++) {
                     try (var is = getInputStream(i)) {
-                        try (var blob = lobFactory.uploadBlob(is)) { // temporary file is created internally when privileged mode
+                        try (TgRemoteBlob blob = lobFactory.uploadBlob(is)) { // temporary file is created internally when privileged mode
                             var parameter = TgBindParameters.of() //
                                     .addInt("pk", i) //
                                     .addBlob("value", blob);
@@ -345,13 +345,13 @@ public class Example72Blob {
         }
     }
 
-    // docker run -d -p 12345:12345 --name tsurugi -v D:/tmp/client:/mnt/client -v D:/tmp/tsurugi:/opt/tsurugi/var/data/log ghcr.io/project-tsurugi/tsurugidb:latest
+    // docker run -d -p 12345:12345 --name tsurugi -v C:/tmp/client:/mnt/client -v C:/tmp/tsurugi:/opt/tsurugi/var/data/log ghcr.io/project-tsurugi/tsurugidb:latest
     void largeObjectPathMapping() throws IOException, InterruptedException {
         var connector = TsurugiConnector.of("tcp://localhost:12345");
         var sessionOption = TgSessionOption.of() //
                 .setLobTransferType(TgLobTransferType.PRIVILEGED) //
-                .addLargeObjectPathMappingOnSend(Path.of("D:/tmp/client"), "/mnt/client") //
-                .addLargeObjectPathMappingOnReceive("/opt/tsurugi/var/data/log", Path.of("D:/tmp/tsurugi"));
+                .addLargeObjectPathMappingOnSend(Path.of("C:/tmp/client"), "/mnt/client") //
+                .addLargeObjectPathMappingOnReceive("/opt/tsurugi/var/data/log", Path.of("C:/tmp/tsurugi"));
         try (var session = connector.createSession(sessionOption)) {
             var tm = session.createTransactionManager(TgTxOption.ofOCC());
 
@@ -361,7 +361,7 @@ public class Example72Blob {
                 var parameterMapping = TgParameterMapping.of(variables);
                 try (var ps = session.createStatement(sql, parameterMapping)) {
                     tm.execute(transaction -> {
-                        var blobFile = Path.of("D:/tmp/client/blob.bin");
+                        var blobFile = Path.of("C:/tmp/client/blob.bin");
                         Files.write(blobFile, new byte[] { 0x31, 0x32, 0x33 });
                         var parameter = TgBindParameters.of().addInt("pk", 10).addBlob("value", blobFile);
                         transaction.executeAndGetCountDetail(ps, parameter);
@@ -373,7 +373,7 @@ public class Example72Blob {
                 var resultMapping = TgResultMapping.of(record -> record);
                 try (var ps = session.createQuery(sql, resultMapping)) {
                     tm.executeAndForEach(ps, record -> {
-                        try (var blob = record.getBlob("value")) {
+                        try (TgBlobReference blob = record.getBlob("value")) {
                             byte[] buf = blob.readAllBytes();
                             System.out.println(Arrays.toString(buf));
                         }

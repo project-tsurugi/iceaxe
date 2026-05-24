@@ -35,6 +35,8 @@ import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteBlob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteClob;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
@@ -609,6 +611,40 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @param name   name
      * @param getter getter from parameter
      * @return this
+     * @since 1.16.0
+     */
+    public TgEntityParameterMapping<P> addRemoteBlob(String name, Function<P, TgRemoteBlob> getter) {
+        addVariable(name, TgDataType.BLOB);
+        parameterConverterList.add((parameter, context) -> {
+            var value = getter.apply(parameter);
+            return IceaxeLowParameterUtil.create(name, value, context);
+        });
+        return this;
+    }
+
+    /**
+     * add variable.
+     *
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
+     * @return this
+     * @since 1.16.0
+     */
+    public <V> TgEntityParameterMapping<P> addRemoteBlob(String name, Function<P, V> getter, Function<V, TgRemoteBlob> converter) {
+        return addRemoteBlob(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable.
+     *
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
      * @since 1.8.0
      */
     public TgEntityParameterMapping<P> addBlobPath(String name, Function<P, Path> getter) {
@@ -700,6 +736,40 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      */
     public <V> TgEntityParameterMapping<P> addClob(String name, Function<P, V> getter, Function<V, TgClob> converter) {
         return addClob(name, p -> {
+            V value = getter.apply(p);
+            return (value != null) ? converter.apply(value) : null;
+        });
+    }
+
+    /**
+     * add variable.
+     *
+     * @param name   name
+     * @param getter getter from parameter
+     * @return this
+     * @since 1.16.0
+     */
+    public TgEntityParameterMapping<P> addRemoteClob(String name, Function<P, TgRemoteClob> getter) {
+        addVariable(name, TgDataType.CLOB);
+        parameterConverterList.add((parameter, context) -> {
+            var value = getter.apply(parameter);
+            return IceaxeLowParameterUtil.create(name, value, context);
+        });
+        return this;
+    }
+
+    /**
+     * add variable.
+     *
+     * @param <V>       value type
+     * @param name      name
+     * @param getter    getter from parameter
+     * @param converter converter to database data type
+     * @return this
+     * @since 1.16.0
+     */
+    public <V> TgEntityParameterMapping<P> addRemoteClob(String name, Function<P, V> getter, Function<V, TgRemoteClob> converter) {
+        return addRemoteClob(name, p -> {
             V value = getter.apply(p);
             return (value != null) ? converter.apply(value) : null;
         });

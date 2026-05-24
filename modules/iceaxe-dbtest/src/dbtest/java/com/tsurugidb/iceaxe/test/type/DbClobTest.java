@@ -189,7 +189,8 @@ class DbClobTest extends DbTestTableTester {
                     transaction.executeAndGetCount(ps, parameter);
                 }
                 Path path = null;
-                try (var clob = IceaxeObjectFactory.getDefaultInstance().createClob("abc", deleteOnExecuteFinished)) {
+                try (@SuppressWarnings("removal")
+                var clob = IceaxeObjectFactory.getDefaultInstance().createClob("abc", deleteOnExecuteFinished)) {
                     path = clob.getPath();
                     assertTrue(Files.exists(path));
 

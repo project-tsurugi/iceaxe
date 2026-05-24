@@ -189,7 +189,8 @@ class DbBlobTest extends DbTestTableTester {
                     transaction.executeAndGetCount(ps, parameter);
                 }
                 Path path = null;
-                try (var blob = IceaxeObjectFactory.getDefaultInstance().createBlob(new byte[] { 0x12, 0x34, 0x56 }, deleteOnExecuteFinished)) {
+                try (@SuppressWarnings("removal")
+                var blob = IceaxeObjectFactory.getDefaultInstance().createBlob(new byte[] { 0x12, 0x34, 0x56 }, deleteOnExecuteFinished)) {
                     path = blob.getPath();
                     assertTrue(Files.exists(path));
 

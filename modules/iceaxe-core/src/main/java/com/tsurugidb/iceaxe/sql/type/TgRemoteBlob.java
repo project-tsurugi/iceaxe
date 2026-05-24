@@ -34,7 +34,7 @@ import com.tsurugidb.tsubakuro.common.LargeObjectInfo;
  * ({@link TsurugiSqlPreparedStatement#explain(Object)}, {@link TsurugiSqlPreparedQuery#explain(Object)}). If neither of these operations is performed, it is closed when {@link TsurugiSession} is
  * closed.
  * </p>
- * 
+ *
  * @since 1.16.0
  */
 public interface TgRemoteBlob extends IceaxeTimeoutCloseable {

@@ -15,5 +15,8 @@ tasks.named('dbtest') {
     systemProperty 'tsurugi.dbtest.password', findProperty('dbtest.password') ?: ''
     systemProperty 'tsurugi.dbtest.auth-token', findProperty('dbtest.auth-token') ?: ''
     systemProperty 'tsurugi.dbtest.credentials', findProperty('dbtest.credentials') ?: ''
+    systemProperty 'tsurugi.dbtest.lob-send-path-mapping', findProperty('dbtest.lob-send-path-mapping') ?: ''
+    systemProperty 'tsurugi.dbtest.lob-recv-path-mapping', findProperty('dbtest.lob-recv-path-mapping') ?: ''
+    systemProperty 'tsurugi.dbtest.blob-relay-service-endpoint', findProperty('dbtest.blob-relay-service-endpoint') ?: ''
     systemProperty 'com.tsurugidb.tsubakuro.jniverify', 'false'
 }

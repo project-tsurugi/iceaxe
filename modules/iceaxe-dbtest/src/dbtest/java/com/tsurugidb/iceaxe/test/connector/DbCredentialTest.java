@@ -40,7 +40,7 @@ class DbCredentialTest extends DbTestTableTester {
         String password = DbTestConnector.getPassword();
         var credential = new UsernamePasswordCredential(user, password);
 
-        var endpoint = DbTestConnector.getEndPoint();
+        var endpoint = DbTestConnector.getEndpoint();
         var connector = TsurugiConnector.of(endpoint, credential);
         try (var session = connector.createSession()) {
             session.getLowSession();
@@ -53,7 +53,7 @@ class DbCredentialTest extends DbTestTableTester {
         assumeTrue(authToken != null);
         var credential = new RememberMeCredential(authToken);
 
-        var endpoint = DbTestConnector.getEndPoint();
+        var endpoint = DbTestConnector.getEndpoint();
         var connector = TsurugiConnector.of(endpoint, credential);
         try (var session = connector.createSession()) {
             session.getLowSession();
@@ -66,7 +66,7 @@ class DbCredentialTest extends DbTestTableTester {
         assumeTrue(credentials != null);
         var credential = FileCredential.load(credentials);
 
-        var endpoint = DbTestConnector.getEndPoint();
+        var endpoint = DbTestConnector.getEndpoint();
         var connector = TsurugiConnector.of(endpoint, credential);
         try (var session = connector.createSession()) {
             session.getLowSession();

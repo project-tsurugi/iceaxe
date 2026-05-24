@@ -55,6 +55,7 @@ import com.tsurugidb.iceaxe.sql.result.TgResultMapping;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultEntity;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
 import com.tsurugidb.iceaxe.sql.result.mapping.TgEntityResultMapping;
+import com.tsurugidb.iceaxe.sql.type.IceaxeObjectFactory;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.manager.TgTmSetting;
 import com.tsurugidb.iceaxe.transaction.manager.TsurugiTransactionManager;
@@ -80,6 +81,10 @@ public class DbTestTableTester {
     private static TsurugiSession staticSession;
     private static ExecutorService staticService;
     private static DebugClient staticDebugClient;
+
+    static {
+        IceaxeObjectFactory.getDefaultInstance().setDeleteTempFileOnExit(true);
+    }
 
     protected static TsurugiSession getSession() throws IOException {
         synchronized (DbTestTableTester.class) {

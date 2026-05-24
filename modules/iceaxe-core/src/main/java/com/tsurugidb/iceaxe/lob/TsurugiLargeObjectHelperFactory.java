@@ -30,7 +30,7 @@ public class TsurugiLargeObjectHelperFactory {
 
     /**
      * Create a {@link TsurugiLargeObjectHelper} based on the specified {@link TgLobTransferType}.
-     * 
+     *
      * @param lobTransferType the large object transfer type
      * @return the created {@link TsurugiLargeObjectHelper}
      */
@@ -49,7 +49,7 @@ public class TsurugiLargeObjectHelperFactory {
 
     /**
      * Create a {@link TsurugiLobFactory}.
-     * 
+     *
      * @param session the Tsurugi session
      * @return the created {@link TsurugiLobFactory}
      */
