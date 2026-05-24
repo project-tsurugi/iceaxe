@@ -40,7 +40,10 @@ public final class IceaxeFileUtil {
     }
 
     /**
-     * Write an {@linkplain java.io.InputStream InputStream} to a file.
+     * Writes all bytes from the given InputStream to a file.
+     * <p>
+     * This method consumes and closes the provided input stream.
+     * </p>
      *
      * @param path    the path to the file
      * @param is      the InputStream to be written
@@ -57,7 +60,10 @@ public final class IceaxeFileUtil {
     }
 
     /**
-     * Write a {@linkplain java.io.Reader Reader} to a file.
+     * Writes all characters from the given Reader to a file using UTF-8.
+     * <p>
+     * This method consumes and closes the provided reader.
+     * </p>
      *
      * @param path    the path to the file
      * @param reader  the Reader to be written
@@ -74,7 +80,7 @@ public final class IceaxeFileUtil {
     }
 
     /**
-     * Write a {@linkplain java.lang.CharSequence CharSequence} to a file.
+     * Writes all characters from the given CharSequence to a file using UTF-8.
      *
      * @param path    the path to the file
      * @param csq     the CharSequence to be written
@@ -90,7 +96,10 @@ public final class IceaxeFileUtil {
     }
 
     /**
-     * Read all bytes from an InputStream.
+     * Reads all bytes from an InputStream.
+     * <p>
+     * This method consumes and closes the provided input stream.
+     * </p>
      *
      * @param is the InputStream to read from
      * @return a byte array containing all the bytes read from the InputStream
@@ -106,7 +115,7 @@ public final class IceaxeFileUtil {
     }
 
     /**
-     * Read a file and return the content as a String.
+     * Reads a file and return the content as a String.
      *
      * @param path the path to the file
      * @return a String containing the content read from the file
@@ -120,11 +129,14 @@ public final class IceaxeFileUtil {
     }
 
     /**
-     * Read from Reader and return the content as a String.
+     * Reads all characters from the given Reader and returns them as a String.
+     * <p>
+     * This method consumes and closes the provided reader.
+     * </p>
      *
      * @param reader the Reader to read from
      * @return the content read from the Reader as a String
-     * @throws IOException if an I/O error occurs reading from the file
+     * @throws IOException if an I/O error occurs reading from the Reader
      * @since 1.16.0
      */
     public static String readString(Reader reader) throws IOException {
