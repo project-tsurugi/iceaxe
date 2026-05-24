@@ -17,6 +17,7 @@ package com.tsurugidb.iceaxe.util.io;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Objects;
 
 /**
  * A Writer that writes to a StringBuilder.
@@ -43,16 +44,19 @@ public class StringBuilderWriter extends Writer {
 
     @Override
     public void write(char[] cbuf, int off, int len) throws IOException {
+        Objects.requireNonNull(cbuf);
         buffer.append(cbuf, off, len);
     }
 
     @Override
     public void write(String str) throws IOException {
+        Objects.requireNonNull(str);
         buffer.append(str);
     }
 
     @Override
     public void write(String str, int off, int len) throws IOException {
+        Objects.requireNonNull(str);
         buffer.append(str, off, off + len);
     }
 
