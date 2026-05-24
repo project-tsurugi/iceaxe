@@ -419,7 +419,7 @@ public class TgEntityParameterMapping<P> extends TgParameterMapping<P> {
      * @return this
      */
     public TgEntityParameterMapping<P> addTime(String name, Function<P, LocalTime> getter) {
-        addVariable(name, TgDataType.DATE);
+        addVariable(name, TgDataType.TIME);
         parameterConverterList.add((parameter, context) -> {
             var value = getter.apply(parameter);
             return IceaxeLowParameterUtil.create(name, value);
