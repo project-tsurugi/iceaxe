@@ -248,9 +248,11 @@ public class TsurugiLobFactory {
             return null;
         }
 
-        var objectFactory = getIceaxeObjectFactory();
-        var type = getPersistenceType(persistenceType);
-        return objectFactory.createBlob(is, type);
+        try (is) {
+            var objectFactory = getIceaxeObjectFactory();
+            var type = getPersistenceType(persistenceType);
+            return objectFactory.createBlob(is, type);
+        }
     }
 
     /**
@@ -377,9 +379,11 @@ public class TsurugiLobFactory {
             return null;
         }
 
-        var objectFactory = getIceaxeObjectFactory();
-        var type = getPersistenceType(persistenceType);
-        return objectFactory.createClob(reader, type);
+        try (reader) {
+            var objectFactory = getIceaxeObjectFactory();
+            var type = getPersistenceType(persistenceType);
+            return objectFactory.createClob(reader, type);
+        }
     }
 
     /**
@@ -675,7 +679,7 @@ public class TsurugiLobFactory {
         }
 
         var helper = session.getLargeObjectHelper();
-        var t = getBlobUploadTimeout(timeout);
+        var t = getClobUploadTimeout(timeout);
         return helper.uploadClob(session, path, t);
     }
 
@@ -721,7 +725,7 @@ public class TsurugiLobFactory {
         }
 
         var helper = session.getLargeObjectHelper();
-        var t = getBlobUploadTimeout(timeout);
+        var t = getClobUploadTimeout(timeout);
         return helper.uploadClob(session, reader, t);
     }
 
@@ -767,7 +771,7 @@ public class TsurugiLobFactory {
         }
 
         var helper = session.getLargeObjectHelper();
-        var t = getBlobUploadTimeout(timeout);
+        var t = getClobUploadTimeout(timeout);
         return helper.uploadClob(session, value, t);
     }
 
