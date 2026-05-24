@@ -17,6 +17,10 @@ package com.tsurugidb.iceaxe.sql.parameter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -31,7 +35,14 @@ import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
+import com.tsurugidb.iceaxe.sql.type.TgBlobTempFile;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
+import com.tsurugidb.iceaxe.sql.type.TgClobTempFile;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteBlob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteBlobInfo;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteClob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteClobInfo;
+import com.tsurugidb.iceaxe.test.TestLowParameterGenerateContextWrapper;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
 class IceaxeLowParameterUtilTest {
@@ -191,34 +202,168 @@ class IceaxeLowParameterUtilTest {
     }
 
     @Test
-    void testCreateStringBlob() {
-        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (TgBlob) null));
+    void testCreateStringBlob() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (TgBlob) null, null));
 
-        var parameter = IceaxeLowParameterUtil.create("foo", TgBlob.of(Path.of("/path/to/flie")));
-        assertEquals(Parameters.blobOf("foo", Path.of("/path/to/flie")), parameter);
+        {
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var parameter = IceaxeLowParameterUtil.create("foo", TgBlob.of(Path.of("/path/to/flie")), context);
+
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.blobOf("foo", lobInfo), parameter);
+            assertEquals(1, context.closeableSet().size());
+        }
+        {
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var parameter = IceaxeLowParameterUtil.create("foo", new TgBlobTempFile(Path.of("/path/to/flie"), true) {
+            }, context);
+
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.blobOf("foo", lobInfo), parameter);
+            assertEquals(2, context.closeableSet().size());
+        }
     }
 
     @Test
-    void testCreateBlobStringPath() {
-        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createBlob("foo", (Path) null));
+    void testCreateStringRemoteBlob() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (TgRemoteBlob) null, null));
 
-        var parameter = IceaxeLowParameterUtil.createBlob("foo", Path.of("/path/to/flie"));
-        assertEquals(Parameters.blobOf("foo", Path.of("/path/to/flie")), parameter);
+        var contextWrapper = new TestLowParameterGenerateContextWrapper();
+        var context = contextWrapper.context();
+        var lobInfo = contextWrapper.createLowLargeObjectInfo(Path.of("/path/to/flie"));
+
+        var parameter = IceaxeLowParameterUtil.create("foo", new TgRemoteBlobInfo(lobInfo), context);
+
+        assertEquals(Parameters.blobOf("foo", lobInfo), parameter);
+        assertEquals(1, context.closeableSet().size());
     }
 
     @Test
-    void testCreateStringClob() {
-        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (TgClob) null));
+    void testCreateBlobStringPath() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createBlob("foo", (Path) null, null));
 
-        var parameter = IceaxeLowParameterUtil.create("foo", TgClob.of(Path.of("/path/to/flie")));
-        assertEquals(Parameters.clobOf("foo", Path.of("/path/to/flie")), parameter);
+        var contextWrapper = new TestLowParameterGenerateContextWrapper();
+        var context = contextWrapper.context();
+
+        var parameter = IceaxeLowParameterUtil.createBlob("foo", Path.of("/path/to/flie"), context);
+
+        var lobInfo = contextWrapper.lowLargeObjectInfo();
+        assertEquals(Parameters.blobOf("foo", lobInfo), parameter);
+        assertEquals(1, context.closeableSet().size());
     }
 
     @Test
-    void testCreateClobStringPath() {
-        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createClob("foo", (Path) null));
+    void testCreateBlobStringInputStream() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createBlob("foo", (InputStream) null, null));
 
-        var parameter = IceaxeLowParameterUtil.createClob("foo", Path.of("/path/to/flie"));
-        assertEquals(Parameters.clobOf("foo", Path.of("/path/to/flie")), parameter);
+        var contextWrapper = new TestLowParameterGenerateContextWrapper();
+        var context = contextWrapper.context();
+
+        var parameter = IceaxeLowParameterUtil.createBlob("foo", new ByteArrayInputStream(new byte[] { 1, 2, 3 }), context);
+
+        var lobInfo = contextWrapper.lowLargeObjectInfo();
+        assertEquals(Parameters.blobOf("foo", lobInfo), parameter);
+        assertEquals(1, context.closeableSet().size());
+    }
+
+    @Test
+    void testCreateBlobStringBytes() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createBlob("foo", (byte[]) null, null));
+
+        var contextWrapper = new TestLowParameterGenerateContextWrapper();
+        var context = contextWrapper.context();
+
+        var parameter = IceaxeLowParameterUtil.createBlob("foo", new byte[] { 1, 2, 3 }, context);
+
+        var lobInfo = contextWrapper.lowLargeObjectInfo();
+        assertEquals(Parameters.blobOf("foo", lobInfo), parameter);
+        assertEquals(1, context.closeableSet().size());
+    }
+
+    @Test
+    void testCreateStringClob() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (TgClob) null, null));
+
+        {
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var parameter = IceaxeLowParameterUtil.create("foo", TgClob.of(Path.of("/path/to/flie")), context);
+
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.clobOf("foo", lobInfo), parameter);
+            assertEquals(1, context.closeableSet().size());
+        }
+        {
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var parameter = IceaxeLowParameterUtil.create("foo", new TgClobTempFile(Path.of("/path/to/flie"), true) {
+            }, context);
+
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.clobOf("foo", lobInfo), parameter);
+            assertEquals(2, context.closeableSet().size());
+        }
+    }
+
+    @Test
+    void testCreateStringRemoteClob() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.create("foo", (TgRemoteClob) null, null));
+
+        var contextWrapper = new TestLowParameterGenerateContextWrapper();
+        var context = contextWrapper.context();
+        var lobInfo = contextWrapper.createLowLargeObjectInfo(Path.of("/path/to/flie"));
+
+        var parameter = IceaxeLowParameterUtil.create("foo", new TgRemoteClobInfo(lobInfo), context);
+
+        assertEquals(Parameters.clobOf("foo", lobInfo), parameter);
+        assertEquals(1, context.closeableSet().size());
+    }
+
+    @Test
+    void testCreateClobStringPath() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createClob("foo", (Path) null, null));
+
+        var contextWrapper = new TestLowParameterGenerateContextWrapper();
+        var context = contextWrapper.context();
+
+        var parameter = IceaxeLowParameterUtil.createClob("foo", Path.of("/path/to/flie"), context);
+
+        var lobInfo = contextWrapper.lowLargeObjectInfo();
+        assertEquals(Parameters.clobOf("foo", lobInfo), parameter);
+        assertEquals(1, context.closeableSet().size());
+    }
+
+    @Test
+    void testCreateClobStringReader() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createClob("foo", (Reader) null, null));
+
+        var contextWrapper = new TestLowParameterGenerateContextWrapper();
+        var context = contextWrapper.context();
+
+        var parameter = IceaxeLowParameterUtil.createClob("foo", new StringReader("abc"), context);
+
+        var lobInfo = contextWrapper.lowLargeObjectInfo();
+        assertEquals(Parameters.clobOf("foo", lobInfo), parameter);
+        assertEquals(1, context.closeableSet().size());
+    }
+
+    @Test
+    void testCreateClobStringString() throws Exception {
+        assertEquals(Parameters.ofNull("foo"), IceaxeLowParameterUtil.createClob("foo", (String) null, null));
+
+        var contextWrapper = new TestLowParameterGenerateContextWrapper();
+        var context = contextWrapper.context();
+
+        var parameter = IceaxeLowParameterUtil.createClob("foo", "abc", context);
+
+        var lobInfo = contextWrapper.lowLargeObjectInfo();
+        assertEquals(Parameters.clobOf("foo", lobInfo), parameter);
+        assertEquals(1, context.closeableSet().size());
     }
 }

@@ -15,7 +15,6 @@
  */
 package com.tsurugidb.iceaxe.sql.type;
 
-import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -31,6 +30,7 @@ import com.tsurugidb.iceaxe.exception.IceaxeErrorCode;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
+import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeIoUtil;
 import com.tsurugidb.iceaxe.util.IceaxeTimeout;
@@ -165,9 +165,6 @@ public class TgClobReference implements IceaxeTimeoutCloseable {
         return false;
     }
 
-    private static final int STRING_BUFFER_INIT_SIZE = 4 * 1024;
-    private static final int READ_BUFFER_SIZE = 4 * 1024;
-
     /**
      * Reads string.
      *
@@ -177,17 +174,8 @@ public class TgClobReference implements IceaxeTimeoutCloseable {
      * @throws TsurugiTransactionException if server error occurs while processing the request
      */
     public String readString() throws IOException, InterruptedException, TsurugiTransactionException {
-        try (var writer = new CharArrayWriter(STRING_BUFFER_INIT_SIZE); //
-                var reader = openReader()) {
-            var buffer = new char[READ_BUFFER_SIZE];
-            for (;;) {
-                int len = reader.read(buffer);
-                if (len < 0) {
-                    break;
-                }
-                writer.write(buffer, 0, len);
-            }
-            return writer.toString();
+        try (var reader = openReader()) {
+            return IceaxeFileUtil.readString(reader);
         }
     }
 

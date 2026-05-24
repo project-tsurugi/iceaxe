@@ -28,6 +28,7 @@ import com.tsurugidb.iceaxe.exception.IceaxeIOException;
 import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.explain.TgStatementMetadata;
+import com.tsurugidb.iceaxe.sql.parameter.IceaxeLowParameterGenerateContext;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
@@ -188,11 +189,14 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
      * @param parameter    SQL parameter
      * @param closeableSet Closeable set for execute finished
      * @return list of parameter
-     * @throws IOException if an I/O error occurs
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if interrupted while generating low parameter list
      */
-    protected final List<Parameter> getLowParameterList(P parameter, IceaxeCloseableSet closeableSet) throws IOException {
+    protected final List<Parameter> getLowParameterList(P parameter, IceaxeCloseableSet closeableSet) throws IOException, InterruptedException {
+        var session = getSession();
         var convertUtil = getConvertUtil(parameterMapping.getConvertUtil());
-        return parameterMapping.toLowParameterList(parameter, convertUtil, closeableSet);
+        var context = new IceaxeLowParameterGenerateContext(session, convertUtil, closeableSet);
+        return parameterMapping.toLowParameterList(parameter, context);
     }
 
     /**

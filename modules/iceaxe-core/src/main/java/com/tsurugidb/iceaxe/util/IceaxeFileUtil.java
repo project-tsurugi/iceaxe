@@ -16,17 +16,23 @@
 package com.tsurugidb.iceaxe.util;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.util.Objects;
+
+import com.tsurugidb.iceaxe.util.io.StringBuilderWriter;
 
 /**
  * Iceaxe file utility.
  *
  * @since 1.8.0
  */
+@IceaxeInternal
 public final class IceaxeFileUtil {
 
     private IceaxeFileUtil() {
@@ -34,7 +40,47 @@ public final class IceaxeFileUtil {
     }
 
     /**
-     * Write a {@linkplain java.lang.CharSequence CharSequence} to a file.
+     * Writes all bytes from the given InputStream to a file.
+     * <p>
+     * This method consumes and closes the provided input stream.
+     * </p>
+     *
+     * @param path    the path to the file
+     * @param is      the InputStream to be written
+     * @param options options specifying how the copy should be done
+     * @throws IOException if an I/O error occurs writing to or creating the file
+     * @since 1.16.0
+     */
+    public static void write(Path path, InputStream is, CopyOption... options) throws IOException {
+        Objects.requireNonNull(is);
+
+        try (is) {
+            Files.copy(is, path, options);
+        }
+    }
+
+    /**
+     * Writes all characters from the given Reader to a file using UTF-8.
+     * <p>
+     * This method consumes and closes the provided reader.
+     * </p>
+     *
+     * @param path    the path to the file
+     * @param reader  the Reader to be written
+     * @param options options specifying how the file is opened
+     * @throws IOException if an I/O error occurs writing to or creating the file
+     * @since 1.16.0
+     */
+    public static void write(Path path, Reader reader, OpenOption... options) throws IOException {
+        Objects.requireNonNull(reader);
+
+        try (reader; var writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8, options)) {
+            reader.transferTo(writer);
+        }
+    }
+
+    /**
+     * Writes all characters from the given CharSequence to a file using UTF-8.
      *
      * @param path    the path to the file
      * @param csq     the CharSequence to be written
@@ -42,10 +88,64 @@ public final class IceaxeFileUtil {
      * @return the path
      * @throws IOException if an I/O error occurs writing to or creating the file
      */
-    public static Path writeString(Path path, CharSequence csq, OpenOption... options) throws IOException {
+    public static Path write(Path path, CharSequence csq, OpenOption... options) throws IOException {
         Objects.requireNonNull(csq);
 
         byte[] bytes = csq.toString().getBytes(StandardCharsets.UTF_8);
         return Files.write(path, bytes, options);
+    }
+
+    /**
+     * Reads all bytes from an InputStream.
+     * <p>
+     * This method consumes and closes the provided input stream.
+     * </p>
+     *
+     * @param is the InputStream to read from
+     * @return a byte array containing all the bytes read from the InputStream
+     * @throws IOException if an I/O error occurs reading from the InputStream
+     * @since 1.16.0
+     */
+    public static byte[] readAllBytes(InputStream is) throws IOException {
+        Objects.requireNonNull(is);
+
+        try (is) {
+            return is.readAllBytes();
+        }
+    }
+
+    /**
+     * Reads a file and return the content as a String.
+     *
+     * @param path the path to the file
+     * @return a String containing the content read from the file
+     * @throws IOException if an I/O error occurs reading from the file
+     * @since 1.16.0
+     */
+    public static String readString(Path path) throws IOException {
+        Objects.requireNonNull(path);
+
+        return Files.readString(path, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Reads all characters from the given Reader and returns them as a String.
+     * <p>
+     * This method consumes and closes the provided reader.
+     * </p>
+     *
+     * @param reader the Reader to read from
+     * @return the content read from the Reader as a String
+     * @throws IOException if an I/O error occurs reading from the Reader
+     * @since 1.16.0
+     */
+    public static String readString(Reader reader) throws IOException {
+        Objects.requireNonNull(reader);
+
+        try (reader; var writer = new StringBuilderWriter(1024)) {
+            reader.transferTo(writer);
+
+            return writer.getBuffer().toString();
+        }
     }
 }

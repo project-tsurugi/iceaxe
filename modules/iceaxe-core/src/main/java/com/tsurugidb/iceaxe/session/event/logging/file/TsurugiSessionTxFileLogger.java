@@ -84,7 +84,7 @@ public class TsurugiSessionTxFileLogger extends TsurugiSessionTxLogger {
         var outputDir = config.outputDir().resolve("sql_statement");
         try {
             Files.createDirectories(outputDir);
-            IceaxeFileUtil.writeString(outputDir.resolve(fileName), ps.getSql());
+            IceaxeFileUtil.write(outputDir.resolve(fileName), ps.getSql());
         } catch (IOException e) {
             throw new UncheckedIOException(e.getMessage(), e);
         }

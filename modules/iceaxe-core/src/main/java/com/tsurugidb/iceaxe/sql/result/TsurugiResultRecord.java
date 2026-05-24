@@ -34,6 +34,7 @@ import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.result.IceaxeResultNameList.IceaxeAmbiguousNamePolicy;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
 import com.tsurugidb.iceaxe.sql.type.TgClobReference;
+import com.tsurugidb.iceaxe.sql.type.TsurugiLobFactory;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
@@ -168,6 +169,16 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
     @Override
     public IceaxeConvertUtil getConvertUtil() {
         return this.convertUtil;
+    }
+
+    /**
+     * get large object factory.
+     *
+     * @return large object factory
+     * @since 1.16.0
+     */
+    public TsurugiLobFactory getLobFactory() {
+        return getTransaction().getSession().getLobFactory();
     }
 
     /**
@@ -406,11 +417,11 @@ public class TsurugiResultRecord implements TsurugiResultIndexRecord, TsurugiRes
 
     private Object convertForEntity(Object value) throws IOException, InterruptedException, TsurugiTransactionException {
         if (value instanceof TgBlobReference) {
-            var factory = getConvertUtil().getIceaxeObjectFactory();
+            var factory = getLobFactory();
             return factory.createBlob((TgBlobReference) value);
         }
         if (value instanceof TgClobReference) {
-            var factory = getConvertUtil().getIceaxeObjectFactory();
+            var factory = getLobFactory();
             return factory.createClob((TgClobReference) value);
         }
         return value;

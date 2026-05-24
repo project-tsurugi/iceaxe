@@ -1387,7 +1387,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
             if (value == null) {
                 return null;
             }
-            var factory = record.getConvertUtil().getIceaxeObjectFactory();
+            var factory = record.getLobFactory();
             return factory.createBlob(value);
         }, setter);
         return this;
@@ -1424,7 +1424,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
             if (value == null) {
                 return null;
             }
-            var factory = record.getConvertUtil().getIceaxeObjectFactory();
+            var factory = record.getLobFactory();
             return factory.createBlob(value);
         }, setter);
         return this;
@@ -1489,7 +1489,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
             if (value == null) {
                 return null;
             }
-            var factory = record.getConvertUtil().getIceaxeObjectFactory();
+            var factory = record.getLobFactory();
             return factory.createClob(value);
         }, setter);
         return this;
@@ -1523,7 +1523,7 @@ public class TgEntityResultMapping<R> extends TgResultMapping<R> {
     public TgEntityResultMapping<R> addClob(String name, BiConsumer<R, TgClob> setter) {
         set(name, record -> {
             TgClobReference value = record.nextClobOrNull();
-            var factory = record.getConvertUtil().getIceaxeObjectFactory();
+            var factory = record.getLobFactory();
             return factory.createClob(value);
         }, setter);
         return this;

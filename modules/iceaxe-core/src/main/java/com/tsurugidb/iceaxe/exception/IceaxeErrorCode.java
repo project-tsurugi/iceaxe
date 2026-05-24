@@ -15,6 +15,7 @@
  */
 package com.tsurugidb.iceaxe.exception;
 
+import com.tsurugidb.iceaxe.lob.TsurugiLargeObjectHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableListHelper;
 import com.tsurugidb.iceaxe.metadata.TsurugiTableMetadataHelper;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
@@ -23,7 +24,9 @@ import com.tsurugidb.iceaxe.sql.explain.TsurugiExplainHelper;
 import com.tsurugidb.iceaxe.sql.result.TsurugiQueryResult;
 import com.tsurugidb.iceaxe.sql.result.TsurugiResultRecord;
 import com.tsurugidb.iceaxe.sql.result.TsurugiStatementResult;
+import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgBlobReference;
+import com.tsurugidb.iceaxe.sql.type.TgClob;
 import com.tsurugidb.iceaxe.sql.type.TgClobReference;
 import com.tsurugidb.iceaxe.system.TsurugiSystemHelper;
 import com.tsurugidb.iceaxe.transaction.TsurugiTransaction;
@@ -57,6 +60,12 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      * @since 1.11.0
      */
     SESSION_USER_NAME_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.SESSION + 12, "get user name close timeout"),
+    /**
+     * {@link TsurugiLargeObjectHelper#close(long)} error.
+     *
+     * @since 1.16.0
+     */
+    LOB_HELPER_CLOSE_ERROR(IceaxeErrorCodeBlock.SESSION + 799, "TsurugiLargeObjectHelper close error"),
     /**
      * {@link TsurugiSession#shutdown(com.tsurugidb.iceaxe.session.TgSessionShutdownType, long, java.util.concurrent.TimeUnit)} timeout.
      *
@@ -343,7 +352,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      */
     BLOB_CACHE_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 13, "BLOB cache close timeout"),
     /**
-     * {@link TgBlobReference} close timeout.
+     * {@link TgBlob} upload timeout.
+     *
+     * @since 1.16.0
+     */
+    BLOB_UPLOAD_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 14, "BLOB upload timeout"),
+    /**
+     * {@link TgBlob}, {@link TgBlobReference} close timeout.
      *
      * @since 1.8.0
      */
@@ -373,7 +388,13 @@ public enum IceaxeErrorCode implements DiagnosticCode {
      */
     CLOB_CACHE_CLOSE_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 23, "CLOB cache close timeout"),
     /**
-     * {@link TgClobReference} close timeout.
+     * {@link TgClob} upload timeout.
+     *
+     * @since 1.16.0
+     */
+    CLOB_UPLOAD_TIMEOUT(IceaxeErrorCodeBlock.OBJECT + 24, "CLOB upload timeout"),
+    /**
+     * {@link TgClob}, {@link TgClobReference} close timeout.
      *
      * @since 1.8.0
      */

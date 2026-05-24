@@ -20,6 +20,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.util.TgTimeValue;
+
 /**
  * BLOB using temporary file.
  *
@@ -69,6 +72,12 @@ public class TgBlobTempFile implements TgBlob {
     @Override
     public byte[] readAllBytes() throws IOException {
         return Files.readAllBytes(path);
+    }
+
+    @Override
+    public TgRemoteBlob upload(TsurugiSession session, TgTimeValue timeout) throws IOException, InterruptedException {
+        var lobFactory = session.getLobFactory();
+        return lobFactory.uploadBlob(path, timeout);
     }
 
     @Override

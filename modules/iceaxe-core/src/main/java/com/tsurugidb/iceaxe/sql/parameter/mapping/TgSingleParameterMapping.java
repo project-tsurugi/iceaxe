@@ -27,17 +27,15 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import com.tsurugidb.iceaxe.sql.TgDataType;
+import com.tsurugidb.iceaxe.sql.parameter.IceaxeLowParameterGenerateContext;
 import com.tsurugidb.iceaxe.sql.parameter.IceaxeLowParameterUtil;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
-import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
-import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;
 import com.tsurugidb.tsubakuro.sql.Placeholders;;
@@ -56,7 +54,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<Boolean> ofBoolean(String name) {
-        return create(name, TgDataType.BOOLEAN, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.BOOLEAN, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -66,7 +64,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<Integer> ofInt(String name) {
-        return create(name, TgDataType.INT, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.INT, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -76,7 +74,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<Long> ofLong(String name) {
-        return create(name, TgDataType.LONG, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.LONG, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -86,7 +84,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<Float> ofFloat(String name) {
-        return create(name, TgDataType.FLOAT, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.FLOAT, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -96,7 +94,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<Double> ofDouble(String name) {
-        return create(name, TgDataType.DOUBLE, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.DOUBLE, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -106,7 +104,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<BigDecimal> ofDecimal(String name) {
-        return create(name, TgDataType.DECIMAL, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.DECIMAL, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -139,7 +137,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<String> ofString(String name) {
-        return create(name, TgDataType.STRING, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.STRING, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -149,7 +147,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<byte[]> ofBytes(String name) {
-        return create(name, TgDataType.BYTES, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.BYTES, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -159,7 +157,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<boolean[]> ofBits(String name) {
-        return create(name, TgDataType.BITS, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.BITS, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -169,7 +167,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<LocalDate> ofDate(String name) {
-        return create(name, TgDataType.DATE, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.DATE, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -179,7 +177,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<LocalTime> ofTime(String name) {
-        return create(name, TgDataType.TIME, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.TIME, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -189,7 +187,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<LocalDateTime> ofDateTime(String name) {
-        return create(name, TgDataType.DATE_TIME, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.DATE_TIME, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -199,7 +197,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<OffsetTime> ofOffsetTime(String name) {
-        return create(name, TgDataType.OFFSET_TIME, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.OFFSET_TIME, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -209,7 +207,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<OffsetDateTime> ofOffsetDateTime(String name) {
-        return create(name, TgDataType.OFFSET_DATE_TIME, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.OFFSET_DATE_TIME, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -219,7 +217,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @return parameter mapping
      */
     public static TgSingleParameterMapping<ZonedDateTime> ofZonedDateTime(String name) {
-        return create(name, TgDataType.ZONED_DATE_TIME, IceaxeLowParameterUtil::create);
+        return create(name, TgDataType.ZONED_DATE_TIME, (n, v, c) -> IceaxeLowParameterUtil.create(n, v));
     }
 
     /**
@@ -230,12 +228,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @since 1.8.0
      */
     public static TgSingleParameterMapping<TgBlob> ofBlob(String name) {
-        return create(name, TgDataType.BLOB, (n, v, c) -> {
-            if (v != null && v.isDeleteOnExecuteFinished()) {
-                c.add(v);
-            }
-            return IceaxeLowParameterUtil.create(n, v);
-        });
+        return create(name, TgDataType.BLOB, IceaxeLowParameterUtil::create);
     }
 
     /**
@@ -246,12 +239,7 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
      * @since 1.8.0
      */
     public static TgSingleParameterMapping<TgClob> ofClob(String name) {
-        return create(name, TgDataType.CLOB, (n, v, c) -> {
-            if (v != null && v.isDeleteOnExecuteFinished()) {
-                c.add(v);
-            }
-            return IceaxeLowParameterUtil.create(n, v);
-        });
+        return create(name, TgDataType.CLOB, IceaxeLowParameterUtil::create);
     }
 
     /**
@@ -357,14 +345,9 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
         return create(variable.name(), variable.type(), (n, v, c) -> variable.bind(v).toLowParameter(c));
     }
 
-    private static <P> TgSingleParameterMapping<P> create(String name, TgDataType type, BiFunction<String, P, Parameter> generator) {
-        LowParameterGenerator<P> f = (n, v, c) -> generator.apply(n, v);
-        return create(name, type, f);
-    }
-
     @FunctionalInterface
     private interface LowParameterGenerator<P> {
-        Parameter apply(String name, P parameter, IceaxeCloseableSet closeableSet);
+        Parameter apply(String name, P parameter, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException;
     }
 
     private static <P> TgSingleParameterMapping<P> create(String name, TgDataType type, LowParameterGenerator<P> generator) {
@@ -396,8 +379,8 @@ public class TgSingleParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     @Override
-    public List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil, IceaxeCloseableSet closeableSet) throws IOException {
-        var lowParameter = lowParameterGenerator.apply(name, parameter, closeableSet);
+    public List<Parameter> toLowParameterList(P parameter, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        var lowParameter = lowParameterGenerator.apply(name, parameter, context);
         return List.of(lowParameter);
     }
 

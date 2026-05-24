@@ -19,7 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
+import javax.annotation.Nullable;
+
+import com.tsurugidb.iceaxe.session.TsurugiSession;
+import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.iceaxe.util.IceaxeTimeoutCloseable;
+import com.tsurugidb.iceaxe.util.TgTimeValue;
 
 /**
  * BLOB.
@@ -39,11 +44,22 @@ public interface TgBlob extends IceaxeTimeoutCloseable {
     }
 
     /**
+     * Creates a new instance.
+     *
+     * @param value value
+     * @return instance
+     * @since 1.16.0
+     */
+    public static TgBlob of(byte[] value) {
+        return new TgBlobBytes(value);
+    }
+
+    /**
      * get path.
      *
      * @return path
      */
-    public Path getPath();
+    public @Nullable Path getPath();
 
     /**
      * Whether temporary file or not.
@@ -56,7 +72,9 @@ public interface TgBlob extends IceaxeTimeoutCloseable {
      * Whether delete on execute finished.
      *
      * @return {@code true}: delete temporary file on execute finished
+     * @deprecated For removal in a future release. (It will always be {@code false})
      */
+    @Deprecated(since = "1.16.0", forRemoval = true)
     public boolean isDeleteOnExecuteFinished();
 
     /**
@@ -82,6 +100,18 @@ public interface TgBlob extends IceaxeTimeoutCloseable {
      * @throws IOException if an I/O error occurs
      */
     public byte[] readAllBytes() throws IOException;
+
+    /**
+     * Upload BLOB.
+     *
+     * @param session session
+     * @param timeout timeout
+     * @return uploaded BLOB
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     */
+    @IceaxeInternal
+    public TgRemoteBlob upload(TsurugiSession session, TgTimeValue timeout) throws IOException, InterruptedException;
 
     @Override
     public abstract void close() throws IOException;

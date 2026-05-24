@@ -15,6 +15,9 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -29,6 +32,8 @@ import javax.annotation.Nullable;
 
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteBlob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteClob;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.Parameters;
@@ -312,64 +317,246 @@ public final class IceaxeLowParameterUtil {
     /**
      * create parameter.
      *
-     * @param name  parameter name
-     * @param value value
+     * @param name    parameter name
+     * @param value   value
+     * @param context context
      * @return parameter
      * @since 1.8.0
      */
-    public static Parameter create(@Nonnull String name, @Nullable TgBlob value) {
+    public static Parameter create(@Nonnull String name, @Nullable TgBlob value, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        if (value == null) {
+            return Parameters.ofNull(name);
+        }
+        return create0(name, value, context);
+    }
+
+    @SuppressWarnings("removal")
+    private static Parameter create0(String name, TgBlob value, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        if (value.isDeleteOnExecuteFinished()) {
+            context.closeableSet().add(value);
+        }
+
+        var remoteBlob = value.upload(context.session(), null);
+        context.closeableSet().add(remoteBlob);
+
+        var lowLobInfo = remoteBlob.getLowLargeObjectInfo();
+        return Parameters.blobOf(name, lowLobInfo);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name    parameter name
+     * @param value   value
+     * @param context context
+     * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @since 1.16.0
+     */
+    public static Parameter create(@Nonnull String name, @Nullable TgRemoteBlob value, IceaxeLowParameterGenerateContext context) {
         if (value == null) {
             return Parameters.ofNull(name);
         }
 
-        var path = value.getPath();
-        return Parameters.blobOf(name, path);
+        context.closeableSet().add(value);
+        var lowLobInfo = value.getLowLargeObjectInfo();
+        return Parameters.blobOf(name, lowLobInfo);
     }
 
     /**
      * create parameter.
      *
-     * @param name parameter name
-     * @param path path
+     * @param name    parameter name
+     * @param path    path
+     * @param context context
      * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
      * @since 1.8.0
      */
-    public static Parameter createBlob(@Nonnull String name, @Nullable Path path) {
+    public static Parameter createBlob(@Nonnull String name, @Nullable Path path, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
         if (path == null) {
             return Parameters.ofNull(name);
         }
-        return Parameters.blobOf(name, path);
+
+        var lobFactory = context.session().getLobFactory();
+        var remoteBlob = lobFactory.uploadBlob(path);
+        context.closeableSet().add(remoteBlob);
+
+        var lowLobInfo = remoteBlob.getLowLargeObjectInfo();
+        return Parameters.blobOf(name, lowLobInfo);
     }
 
     /**
      * create parameter.
      *
-     * @param name  parameter name
-     * @param value value
+     * @param name    parameter name
+     * @param is      input stream
+     * @param context context
      * @return parameter
-     * @since 1.8.0
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @since 1.16.0
      */
-    public static Parameter create(@Nonnull String name, @Nullable TgClob value) {
+    public static Parameter createBlob(@Nonnull String name, @Nullable InputStream is, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        if (is == null) {
+            return Parameters.ofNull(name);
+        }
+
+        var lobFactory = context.session().getLobFactory();
+        var remoteBlob = lobFactory.uploadBlob(is);
+        context.closeableSet().add(remoteBlob);
+
+        var lowLobInfo = remoteBlob.getLowLargeObjectInfo();
+        return Parameters.blobOf(name, lowLobInfo);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name    parameter name
+     * @param value   value
+     * @param context context
+     * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @since 1.16.0
+     */
+    public static Parameter createBlob(@Nonnull String name, @Nullable byte[] value, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
         if (value == null) {
             return Parameters.ofNull(name);
         }
 
-        var path = value.getPath();
-        return Parameters.clobOf(name, path);
+        var lobFactory = context.session().getLobFactory();
+        var remoteBlob = lobFactory.uploadBlob(value);
+        context.closeableSet().add(remoteBlob);
+
+        var lowLobInfo = remoteBlob.getLowLargeObjectInfo();
+        return Parameters.blobOf(name, lowLobInfo);
     }
 
     /**
      * create parameter.
      *
-     * @param name parameter name
-     * @param path path
+     * @param name    parameter name
+     * @param value   value
+     * @param context context
      * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
      * @since 1.8.0
      */
-    public static Parameter createClob(@Nonnull String name, @Nullable Path path) {
+    public static Parameter create(@Nonnull String name, @Nullable TgClob value, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        if (value == null) {
+            return Parameters.ofNull(name);
+        }
+        return create0(name, value, context);
+    }
+
+    @SuppressWarnings("removal")
+    private static Parameter create0(String name, TgClob value, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        if (value.isDeleteOnExecuteFinished()) {
+            context.closeableSet().add(value);
+        }
+
+        var remoteClob = value.upload(context.session(), null);
+        context.closeableSet().add(remoteClob);
+
+        var lowLobInfo = remoteClob.getLowLargeObjectInfo();
+        return Parameters.clobOf(name, lowLobInfo);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name    parameter name
+     * @param value   value
+     * @param context context
+     * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @since 1.16.0
+     */
+    public static Parameter create(@Nonnull String name, @Nullable TgRemoteClob value, IceaxeLowParameterGenerateContext context) {
+        if (value == null) {
+            return Parameters.ofNull(name);
+        }
+
+        context.closeableSet().add(value);
+        var lowLobInfo = value.getLowLargeObjectInfo();
+        return Parameters.clobOf(name, lowLobInfo);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name    parameter name
+     * @param path    path
+     * @param context context
+     * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @since 1.8.0
+     */
+    public static Parameter createClob(@Nonnull String name, @Nullable Path path, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
         if (path == null) {
             return Parameters.ofNull(name);
         }
-        return Parameters.clobOf(name, path);
+
+        var lobFactory = context.session().getLobFactory();
+        var remoteClob = lobFactory.uploadClob(path);
+        context.closeableSet().add(remoteClob);
+
+        var lowLobInfo = remoteClob.getLowLargeObjectInfo();
+        return Parameters.clobOf(name, lowLobInfo);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name    parameter name
+     * @param reader  reader
+     * @param context context
+     * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @since 1.16.0
+     */
+    public static Parameter createClob(@Nonnull String name, @Nullable Reader reader, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        if (reader == null) {
+            return Parameters.ofNull(name);
+        }
+
+        var lobFactory = context.session().getLobFactory();
+        var remoteClob = lobFactory.uploadClob(reader);
+        context.closeableSet().add(remoteClob);
+
+        var lowLobInfo = remoteClob.getLowLargeObjectInfo();
+        return Parameters.clobOf(name, lowLobInfo);
+    }
+
+    /**
+     * create parameter.
+     *
+     * @param name    parameter name
+     * @param value   value
+     * @param context context
+     * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
+     * @since 1.16.0
+     */
+    public static Parameter createClob(@Nonnull String name, @Nullable String value, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        if (value == null) {
+            return Parameters.ofNull(name);
+        }
+
+        var lobFactory = context.session().getLobFactory();
+        var remoteClob = lobFactory.uploadClob(value);
+        context.closeableSet().add(remoteClob);
+
+        var lowLobInfo = remoteClob.getLowLargeObjectInfo();
+        return Parameters.clobOf(name, lowLobInfo);
     }
 }

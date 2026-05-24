@@ -18,7 +18,6 @@ package com.tsurugidb.iceaxe.sql.parameter.mapping;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -37,6 +36,7 @@ import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
+import com.tsurugidb.iceaxe.test.TestLowParameterGenerateContextWrapper;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.tsubakuro.sql.Parameters;
 
@@ -245,11 +245,11 @@ class TgSingleParameterMappingTest {
         assertMapping(type, 123, mapping);
     }
 
-    private static <P> void assertMapping(TgDataType type, P parameter, TgSingleParameterMapping<P> actualMapping) throws IOException {
+    private static <P> void assertMapping(TgDataType type, P parameter, TgSingleParameterMapping<P> actualMapping) throws Exception {
         assertMapping(type, parameter, parameter, actualMapping);
     }
 
-    private static <P> void assertMapping(TgDataType type, P value, P expectedValue, TgSingleParameterMapping<P> actualMapping) throws IOException {
+    private static <P> void assertMapping(TgDataType type, P value, P expectedValue, TgSingleParameterMapping<P> actualMapping) throws Exception {
         {
             var list = actualMapping.toLowPlaceholderList();
             assertEquals(1, list.size());
@@ -258,18 +258,21 @@ class TgSingleParameterMappingTest {
             assertEquals(type.getLowDataType(), actual.getAtomType());
         }
         {
-            var list = actualMapping.toLowParameterList(value, null, null);
+            var contextWrapper = new TestLowParameterGenerateContextWrapper();
+            var context = contextWrapper.context();
+
+            var list = actualMapping.toLowParameterList(value, context);
             assertEquals(1, list.size());
             var actual = list.get(0);
             assertEquals("foo", actual.getName());
-            assertParameter(expectedValue, actual);
+            assertParameter(expectedValue, actual, contextWrapper);
         }
         {
             assertEquals("TgSingleParameterMapping[:foo/*" + type + "*/]", actualMapping.toString());
         }
     }
 
-    private static void assertParameter(Object expected, Parameter actual) {
+    private static void assertParameter(Object expected, Parameter actual, TestLowParameterGenerateContextWrapper contextWrapper) {
         if (expected == null) {
             assertEquals(Parameters.ofNull("foo"), actual);
             return;
@@ -335,13 +338,13 @@ class TgSingleParameterMappingTest {
             return;
         }
         if (expected instanceof TgBlob) {
-            var path = ((TgBlob) expected).getPath();
-            assertEquals(Parameters.blobOf("foo", path), actual);
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.blobOf("foo", lobInfo), actual);
             return;
         }
         if (expected instanceof TgClob) {
-            var path = ((TgClob) expected).getPath();
-            assertEquals(Parameters.clobOf("foo", path), actual);
+            var lobInfo = contextWrapper.lowLargeObjectInfo();
+            assertEquals(Parameters.clobOf("foo", lobInfo), actual);
             return;
         }
         throw new UnsupportedOperationException(expected.getClass().getName());

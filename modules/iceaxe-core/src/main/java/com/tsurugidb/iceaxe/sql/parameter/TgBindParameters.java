@@ -43,7 +43,8 @@ import com.tsurugidb.iceaxe.sql.TsurugiSqlPreparedStatement;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariable.TgBindVariableBigDecimal;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
-import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteBlob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteClob;
 import com.tsurugidb.iceaxe.util.IceaxeInternal;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 
@@ -388,6 +389,19 @@ public class TgBindParameters {
     /**
      * add value(BLOB).
      *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since 1.16.0
+     */
+    public TgBindParameters addBlob(@Nonnull String name, @Nullable TgRemoteBlob value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(BLOB).
+     *
      * @param name name
      * @param path path
      * @return this
@@ -435,6 +449,19 @@ public class TgBindParameters {
      * @since 1.8.0
      */
     public TgBindParameters addClob(@Nonnull String name, @Nullable TgClob value) {
+        add(TgBindParameter.of(name, value));
+        return this;
+    }
+
+    /**
+     * add value(CLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since 1.16.0
+     */
+    public TgBindParameters addClob(@Nonnull String name, @Nullable TgRemoteClob value) {
         add(TgBindParameter.of(name, value));
         return this;
     }
@@ -738,6 +765,18 @@ public class TgBindParameters {
     }
 
     /**
+     * add value(BLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since 1.16.0
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable TgRemoteBlob value) {
+        return addBlob(name, value);
+    }
+
+    /**
      * add value(CLOB).
      *
      * @param name  name
@@ -746,6 +785,18 @@ public class TgBindParameters {
      * @since 1.8.0
      */
     public TgBindParameters add(@Nonnull String name, @Nullable TgClob value) {
+        return addClob(name, value);
+    }
+
+    /**
+     * add value(CLOB).
+     *
+     * @param name  name
+     * @param value value
+     * @return this
+     * @since 1.16.0
+     */
+    public TgBindParameters add(@Nonnull String name, @Nullable TgRemoteClob value) {
         return addClob(name, value);
     }
 
@@ -794,14 +845,16 @@ public class TgBindParameters {
     /**
      * convert to {@link Parameter} list.
      *
-     * @param closeableSet Closeable set for execute finished
+     * @param context context
      * @return parameter list
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
      */
     @IceaxeInternal
-    public List<Parameter> toLowParameterList(IceaxeCloseableSet closeableSet) {
+    public List<Parameter> toLowParameterList(IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
         var list = new ArrayList<Parameter>(parameterList.size());
         for (var parameter : parameterList) {
-            list.add(parameter.toLowParameter(closeableSet));
+            list.add(parameter.toLowParameter(context));
         }
         return list;
     }

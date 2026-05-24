@@ -15,14 +15,14 @@
  */
 package com.tsurugidb.iceaxe.sql.parameter.mapping;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
+import com.tsurugidb.iceaxe.sql.parameter.IceaxeLowParameterGenerateContext;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindVariables;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
-import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
-import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;;
 
@@ -65,7 +65,7 @@ public class TgConverterParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     @Override
-    public List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil, IceaxeCloseableSet closeableSet) {
-        return parameterConverter.apply(parameter).toLowParameterList(closeableSet);
+    public List<Parameter> toLowParameterList(P parameter, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
+        return parameterConverter.apply(parameter).toLowParameterList(context);
     }
 }

@@ -17,9 +17,8 @@ package com.tsurugidb.iceaxe.sql.parameter.mapping;
 
 import java.util.List;
 
+import com.tsurugidb.iceaxe.sql.parameter.IceaxeLowParameterGenerateContext;
 import com.tsurugidb.iceaxe.sql.parameter.TgParameterMapping;
-import com.tsurugidb.iceaxe.util.IceaxeCloseableSet;
-import com.tsurugidb.iceaxe.util.IceaxeConvertUtil;
 import com.tsurugidb.sql.proto.SqlRequest.Parameter;
 import com.tsurugidb.sql.proto.SqlRequest.Placeholder;;
 
@@ -50,7 +49,7 @@ public class TgEmptyParameterMapping<P> extends TgParameterMapping<P> {
     }
 
     @Override
-    public List<Parameter> toLowParameterList(P parameter, IceaxeConvertUtil convertUtil, IceaxeCloseableSet closeableSet) {
+    public List<Parameter> toLowParameterList(P parameter, IceaxeLowParameterGenerateContext context) {
         return List.of();
     }
 }

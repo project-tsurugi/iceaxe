@@ -35,6 +35,8 @@ import javax.annotation.Nullable;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.type.TgBlob;
 import com.tsurugidb.iceaxe.sql.type.TgClob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteBlob;
+import com.tsurugidb.iceaxe.sql.type.TgRemoteClob;
 
 /**
  * Tsurugi Bind Variable.
@@ -764,6 +766,17 @@ public abstract class TgBindVariable<T> {
         /**
          * bind value.
          *
+         * @param value value
+         * @return bind parameter
+         * @since 1.16.0
+         */
+        public TgBindParameter bind(@Nullable TgRemoteBlob value) {
+            return TgBindParameter.of(name(), value);
+        }
+
+        /**
+         * bind value.
+         *
          * @param path path
          * @return bind parameter
          */
@@ -828,6 +841,17 @@ public abstract class TgBindVariable<T> {
 
         @Override
         public TgBindParameter bind(@Nullable TgClob value) {
+            return TgBindParameter.of(name(), value);
+        }
+
+        /**
+         * bind value.
+         *
+         * @param value value
+         * @return bind parameter
+         * @since 1.16.0
+         */
+        public TgBindParameter bind(@Nullable TgRemoteClob value) {
             return TgBindParameter.of(name(), value);
         }
 

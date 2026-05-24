@@ -78,6 +78,20 @@ public class IceaxeConvertUtil {
     }
 
     /**
+     * get object factory.
+     *
+     * @param factory object factory
+     * @return object factory
+     * @since 1.16.0
+     */
+    public @Nonnull IceaxeObjectFactory getIceaxeObjectFactory(IceaxeObjectFactory factory) {
+        if (this.objectFactory == null && factory != null) {
+            return factory;
+        }
+        return getIceaxeObjectFactory();
+    }
+
+    /**
      * convert to Boolean.
      *
      * @param obj value
@@ -816,18 +830,13 @@ public class IceaxeConvertUtil {
         if (obj instanceof InputStream) {
             var factory = getIceaxeObjectFactory();
             try {
-                return factory.createBlob((InputStream) obj, true);
+                return factory.createBlob((InputStream) obj, null);
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
         }
         if (obj instanceof byte[]) {
-            var factory = getIceaxeObjectFactory();
-            try {
-                return factory.createBlob((byte[]) obj, true);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e.getMessage(), e);
-            }
+            return TgBlob.of((byte[]) obj);
         }
         return null;
     }
@@ -907,18 +916,13 @@ public class IceaxeConvertUtil {
         if (obj instanceof Reader) {
             var factory = getIceaxeObjectFactory();
             try {
-                return factory.createClob((Reader) obj, true);
+                return factory.createClob((Reader) obj, null);
             } catch (IOException e) {
                 throw new UncheckedIOException(e.getMessage(), e);
             }
         }
         if (obj instanceof String) {
-            var factory = getIceaxeObjectFactory();
-            try {
-                return factory.createClob((String) obj, true);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e.getMessage(), e);
-            }
+            return TgClob.of((String) obj);
         }
         return null;
     }
