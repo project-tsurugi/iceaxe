@@ -51,9 +51,11 @@ public class TsurugiRelayLargeObjectHelper extends TsurugiLargeObjectHelper {
             return null;
         }
 
-        var lowLargeObjectClient = getLowLargeObjectClient(session);
-        var future = lowLargeObjectClient.upload(is);
-        return uploadBlob(future, timeout);
+        try (is) {
+            var lowLargeObjectClient = getLowLargeObjectClient(session);
+            var future = lowLargeObjectClient.upload(is);
+            return uploadBlob(future, timeout);
+        }
     }
 
     @Override
@@ -84,9 +86,11 @@ public class TsurugiRelayLargeObjectHelper extends TsurugiLargeObjectHelper {
             return null;
         }
 
-        var lowLargeObjectClient = getLowLargeObjectClient(session);
-        var future = lowLargeObjectClient.upload(reader);
-        return uploadClob(future, timeout);
+        try (reader) {
+            var lowLargeObjectClient = getLowLargeObjectClient(session);
+            var future = lowLargeObjectClient.upload(reader);
+            return uploadClob(future, timeout);
+        }
     }
 
     @Override
