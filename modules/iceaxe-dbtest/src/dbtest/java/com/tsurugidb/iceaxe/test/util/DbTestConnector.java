@@ -143,13 +143,13 @@ public class DbTestConnector {
     public static void applyLobPathMapping(TgSessionOption sessionOption) {
         String sendMapping = getSystemProperty(SYSPROP_DBTEST_LOB_SEND_PATH_MAPPING);
         if (sendMapping != null) {
-            var pathMapping = new LobPathMapping(sendMapping);
+            var pathMapping = LobPathMapping.of(sendMapping);
             sessionOption.addLargeObjectPathMappingOnSend(pathMapping.clientPath, pathMapping.serverPath);
         }
 
         String recvMapping = getSystemProperty(SYSPROP_DBTEST_LOB_RECV_PATH_MAPPING);
         if (recvMapping != null) {
-            var pathMapping = new LobPathMapping(recvMapping);
+            var pathMapping = LobPathMapping.of(recvMapping);
             sessionOption.addLargeObjectPathMappingOnReceive(pathMapping.serverPath, pathMapping.clientPath);
         }
     }
@@ -159,13 +159,22 @@ public class DbTestConnector {
     }
 
     private static class LobPathMapping {
+        static LobPathMapping of(String value) {
+            int n = value.lastIndexOf(':');
+            if (n < 0) {
+                throw new IllegalArgumentException("invalid lob path mapping: " + value);
+            }
+            var clientPath = Path.of(value.substring(0, n));
+            var serverPath = value.substring(n + 1);
+            return new LobPathMapping(clientPath, serverPath);
+        }
+
         private final Path clientPath;
         private final String serverPath;
 
-        public LobPathMapping(String value) {
-            int n = value.lastIndexOf(':');
-            this.clientPath = Path.of(value.substring(0, n));
-            this.serverPath = value.substring(n + 1);
+        private LobPathMapping(Path clientPath, String serverPath) {
+            this.clientPath = clientPath;
+            this.serverPath = serverPath;
         }
     }
 
