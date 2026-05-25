@@ -255,6 +255,8 @@ public class DbTsurugiLobFactoryTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "RELAY", "PRIVILEGED" })
     void uploadBlob(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = getLobTransferAvailableSession(lobTransferType)) {
             uploadBlob_Path(session);
             uploadBlob_InputStream(session);
@@ -322,6 +324,8 @@ public class DbTsurugiLobFactoryTest extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "RELAY", "PRIVILEGED" })
     void uploadClob(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = getLobTransferAvailableSession(lobTransferType)) {
             uploadClob_Path(session);
             uploadClob_Reader(session);

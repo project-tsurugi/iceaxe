@@ -18,6 +18,7 @@ package com.tsurugidb.iceaxe.test.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -724,5 +725,19 @@ public class DbTestTableTester {
 
     protected static void assertUpdateCount(int expected, int actual) {
         assertEquals(expected, actual);
+    }
+
+    protected static void assumeLobTest(String lobTransferType) {
+        disabledIfEnvironmentVariable("DbLobTest_" + lobTransferType);
+    }
+
+    protected static void disabledIfEnvironmentVariable(String value) {
+        String env = System.getenv("ICEAXE_DBTEST_DISABLE");
+        if (env == null) {
+            return;
+        }
+
+        boolean matched = env.contains(value);
+        assumeFalse(matched, () -> "ICEAXE_DBTEST_DISABLE contains " + value);
     }
 }

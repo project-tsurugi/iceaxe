@@ -123,6 +123,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void insertLiteral(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -163,6 +165,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindParameters_TgBlob(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -198,6 +202,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindParameters_TgRemoteBlob(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -233,6 +239,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindParameters_Path(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -283,6 +291,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindParameters_InputStream(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -316,6 +326,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindParameters_bytes(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -347,6 +359,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindVariable_TgBlob(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -379,6 +393,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindVariable_TgRemoteBlob(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -411,6 +427,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindVariable_Path(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -446,6 +464,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindVariable_InputStream(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -476,6 +496,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void bindVariable_bytes(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -504,6 +526,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void userEntity_TgBlob(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -555,6 +579,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void userEntity_TgRemoteBlob(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -606,6 +632,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void userEntity_Path(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -660,6 +688,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void userEntity_bytes(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -707,6 +737,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void userEntity_Object(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
@@ -754,6 +786,8 @@ class DbBlob2Test extends DbTestTableTester {
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
     void singleParameterMapping(String lobTransferType) throws Exception {
+        assumeLobTest(lobTransferType);
+
         try (var session = createTestSession(lobTransferType)) {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
