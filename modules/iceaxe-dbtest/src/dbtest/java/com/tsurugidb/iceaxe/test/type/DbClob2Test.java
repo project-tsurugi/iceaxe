@@ -81,10 +81,9 @@ class DbClob2Test extends DbTestTableTester {
                 null, //
                 "", //
                 "abc", //
-                createTestData(1024) //
-//                createTestData(1024 * 1024), //
-//                createTestData(1024 * 1024 - 1), //
-//                createTestData(1024 * 1024 + 1) //
+                createTestData(1024 * 1024), //
+                createTestData(1024 * 1024 - 1), //
+                createTestData(1024 * 1024 + 1) //
         );
     }
 

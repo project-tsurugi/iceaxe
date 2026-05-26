@@ -80,10 +80,9 @@ class DbBlob2Test extends DbTestTableTester {
                 null, //
                 new byte[] {}, //
                 new byte[] { 0x12, 0x34, 0x56 }, //
-                createTestData(1024) //
-//                createTestData(1024 * 1024), //
-//                createTestData(1024 * 1024 - 1), //
-//                createTestData(1024 * 1024 + 1) //
+                createTestData(1024 * 1024), //
+                createTestData(1024 * 1024 - 1), //
+                createTestData(1024 * 1024 + 1) //
         );
     }
 
