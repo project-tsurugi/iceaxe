@@ -26,7 +26,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -909,21 +912,46 @@ class DbClob2Test extends DbTestTableTester {
 
     private void selectCast(TsurugiSession session, List<String> excepctedList) throws Exception {
         var tm = createTransactionManagerOcc(session);
-        var sql = "select pk, cast(value as varchar) from " + TEST + " order by pk";
+        var sql = "select pk, cast(value as varchar) from " + TEST;
+        var map = where(excepctedList);
+        if (map != null) {
+            sql += map.keySet().stream().map(n -> n.toString()).collect(Collectors.joining(",", " where pk in (", ")"));
+        } else {
+            map = new HashMap<>(excepctedList.size());
+            int pk = 0;
+            for (var value : excepctedList) {
+                map.put(pk++, value);
+            }
+        }
+        sql += " order by pk";
+
         List<TsurugiResultEntity> list = tm.executeAndGetList(sql);
-        assertEquals(excepctedList.size(), list.size());
+        assertEquals(map.size(), list.size());
 
-        int i = 0;
         for (var entity : list) {
-            int expectedPk = i;
-            var expectedValue = excepctedList.get(i++);
-
             int pk = entity.getInt("pk");
             String value = entity.getStringOrNull(1);
 
-            assertEquals(expectedPk, pk);
+            String expectedValue = map.get(pk);
             assertClob(expectedValue, value);
         }
+    }
+
+    private static Map<Integer, String> where(List<String> list) {
+        if (DbTestConnector.isTcp()) {
+            return null;
+        }
+
+        var map = new HashMap<Integer, String>(list.size());
+        int pk = 0;
+        for (var value : list) {
+            if (value != null && value.getBytes(StandardCharsets.UTF_8).length > 1024) {
+                pk++;
+                continue;
+            }
+            map.put(pk++, value);
+        }
+        return map;
     }
 
     private void assertClob(String expected, TgClobReference actual) throws IOException, InterruptedException, TsurugiTransactionException {

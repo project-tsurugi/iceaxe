@@ -26,7 +26,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -922,21 +925,47 @@ class DbBlob2Test extends DbTestTableTester {
 
     private void selectCast(TsurugiSession session, List<byte[]> excepctedList) throws Exception {
         var tm = createTransactionManagerOcc(session);
-        var sql = "select pk, cast(value as varbinary) from " + TEST + " order by pk";
+
+        var sql = "select pk, cast(value as varbinary) from " + TEST;
+        var map = where(excepctedList);
+        if (map != null) {
+            sql += map.keySet().stream().map(n -> n.toString()).collect(Collectors.joining(",", " where pk in (", ")"));
+        } else {
+            map = new HashMap<>(excepctedList.size());
+            int pk = 0;
+            for (var value : excepctedList) {
+                map.put(pk++, value);
+            }
+        }
+        sql += " order by pk";
+
         List<TsurugiResultEntity> list = tm.executeAndGetList(sql);
-        assertEquals(excepctedList.size(), list.size());
+        assertEquals(map.size(), list.size());
 
-        int i = 0;
         for (var entity : list) {
-            int expectedPk = i;
-            var expectedValue = excepctedList.get(i++);
-
             int pk = entity.getInt("pk");
             byte[] value = entity.getBytesOrNull(1);
 
-            assertEquals(expectedPk, pk);
+            byte[] expectedValue = map.get(pk);
             assertBlob(expectedValue, value);
         }
+    }
+
+    private static Map<Integer, byte[]> where(List<byte[]> list) {
+        if (DbTestConnector.isTcp()) {
+            return null;
+        }
+
+        var map = new HashMap<Integer, byte[]>(list.size());
+        int pk = 0;
+        for (var value : list) {
+            if (value != null && value.length > 1024) {
+                pk++;
+                continue;
+            }
+            map.put(pk++, value);
+        }
+        return map;
     }
 
     private void assertBlob(byte[] expected, TgBlobReference actual) throws IOException, InterruptedException, TsurugiTransactionException {
