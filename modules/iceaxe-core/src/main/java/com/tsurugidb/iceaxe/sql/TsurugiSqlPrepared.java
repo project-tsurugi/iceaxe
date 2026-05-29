@@ -215,14 +215,11 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         var connectTimeout = getExplainConnectTimeout();
         var closeTimeout = getExplainCloseTimeout();
 
-        try {
-            var lowParameterList = getLowParameterList(parameter, closeableSet);
+        var lowParameterList = getLowParameterList(parameter, closeableSet);
 
-            var helper = session.getExplainHelper();
-            return helper.explain(session, sql, parameter, lowPs, lowParameterList, connectTimeout, closeTimeout);
-        } finally {
-            // closeableSet is not closed here because it may be needed after explain() (e.g. for execute()).
-        }
+        var helper = session.getExplainHelper();
+        return helper.explain(session, sql, parameter, lowPs, lowParameterList, connectTimeout, closeTimeout);
+        // closeableSet is not closed here because it may be needed after explain() (e.g. for execute()).
     }
 
     // close
