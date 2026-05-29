@@ -195,6 +195,7 @@ class DbBlob2Test extends DbTestTableTester {
                             var parameter = TgBindParameters.of() //
                                     .addInt("pk", pk++) //
                                     .addBlob("value", blob);
+                            ps.explain(parameter);
                             transaction.executeAndGetCount(ps, parameter);
                         }
                     }
@@ -232,6 +233,7 @@ class DbBlob2Test extends DbTestTableTester {
                             var parameter = TgBindParameters.of() //
                                     .addInt("pk", pk++) //
                                     .addBlob("value", blob);
+                            ps.explain(parameter);
                             transaction.executeAndGetCount(ps, parameter);
                         }
                     }
@@ -268,6 +270,7 @@ class DbBlob2Test extends DbTestTableTester {
                             var parameter = TgBindParameters.of() //
                                     .addInt("pk", pk++) //
                                     .addBlob("value", path);
+                            ps.explain(parameter);
                             transaction.executeAndGetCount(ps, parameter);
                         } finally {
                             if (path != null) {

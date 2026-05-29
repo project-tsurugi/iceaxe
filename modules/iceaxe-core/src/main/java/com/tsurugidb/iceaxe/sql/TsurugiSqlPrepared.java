@@ -215,29 +215,13 @@ public abstract class TsurugiSqlPrepared<P> extends TsurugiSql {
         var connectTimeout = getExplainConnectTimeout();
         var closeTimeout = getExplainCloseTimeout();
 
-        Exception save = null;
         try {
             var lowParameterList = getLowParameterList(parameter, closeableSet);
 
             var helper = session.getExplainHelper();
             return helper.explain(session, sql, parameter, lowPs, lowParameterList, connectTimeout, closeTimeout);
-        } catch (Exception e) {
-            save = e;
-            throw e;
         } finally {
-            var exceptionList = closeableSet.close(closeTimeout.getNanos());
-            if (!exceptionList.isEmpty()) {
-                if (save != null) {
-                    for (var e : exceptionList) {
-                        save.addSuppressed(e);
-                    }
-                } else {
-                    var ioe = IceaxeIoUtil.toIOException(exceptionList, IceaxeErrorCode.EXPLAIN_CLOSE_ERROR);
-                    if (ioe != null) {
-                        throw ioe;
-                    }
-                }
-            }
+            // closeableSet is not closed here because it may be needed after explain() (e.g. for execute()).
         }
     }
 
