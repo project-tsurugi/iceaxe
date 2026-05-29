@@ -131,9 +131,6 @@ class DbClob2Test extends DbTestTableTester {
         assumeLobTest(lobTransferType);
 
         try (var session = createTestSession(lobTransferType)) {
-            if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
-                return;
-            }
             session.getSessionOption().setTimeout(TgTimeoutKey.DEFAULT, 60, TimeUnit.SECONDS);
 
             var list = getTestDataList();
@@ -150,7 +147,11 @@ class DbClob2Test extends DbTestTableTester {
                 }
             });
 
-            assertSelect(session, list);
+            if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
+                selectCast(session, list);
+            } else {
+                assertSelect(session, list);
+            }
         }
     }
 
