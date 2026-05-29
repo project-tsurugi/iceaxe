@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.tsurugidb.iceaxe.session.TgLobTransferType;
+import com.tsurugidb.iceaxe.session.TgSessionOption.TgTimeoutKey;
 import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.sql.TgDataType;
 import com.tsurugidb.iceaxe.sql.parameter.TgBindParameters;
@@ -131,6 +133,7 @@ class DbBlob2Test extends DbTestTableTester {
             if (session.getLobTransferType() == TgLobTransferType.NOT_USE) {
                 return;
             }
+            session.getSessionOption().setTimeout(TgTimeoutKey.DEFAULT, 60, TimeUnit.SECONDS);
 
             var list = getTestDataList();
 
