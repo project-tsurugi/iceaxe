@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -127,6 +128,7 @@ class DbClob2Test extends DbTestTableTester {
 
     @ParameterizedTest
     @ValueSource(strings = { "DEFAULT", "NOT_USE", "PRIVILEGED", "RELAY" })
+    @DisabledIfEnvironmentVariable(named = "ICEAXE_DBTEST_DISABLE", matches = ".*DbClob2Test-insertLiteral.*")
     void insertLiteral(String lobTransferType) throws Exception {
         assumeLobTest(lobTransferType);
 
