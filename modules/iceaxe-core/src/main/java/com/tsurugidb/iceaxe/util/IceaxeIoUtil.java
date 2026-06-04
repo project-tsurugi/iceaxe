@@ -378,6 +378,10 @@ public final class IceaxeIoUtil {
      * @since 1.4.0
      */
     public static long calculateTimeoutNanos(long totalTimeoutNanos, long start) {
+        if (totalTimeoutNanos <= 0) {
+            return 0;
+        }
+
         long now = System.nanoTime();
         return Math.max(totalTimeoutNanos - (now - start), TimeUnit.MILLISECONDS.toNanos(1));
     }
