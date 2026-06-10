@@ -25,7 +25,6 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import com.tsurugidb.iceaxe.session.TsurugiSession;
 import com.tsurugidb.iceaxe.transaction.exception.TsurugiTransactionException;
 import com.tsurugidb.iceaxe.util.IceaxeFileUtil;
 
@@ -209,11 +208,14 @@ public class IceaxeObjectFactory {
     /**
      * creates a new TgBlob instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
+     * </p>
+     *
      * @param is              input stream
      * @param persistenceType persistence type
      * @return TgBlob instance
      * @throws IOException if an I/O error occurs when reading or writing
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
      * @since 1.16.0
      */
     public TgBlob createBlob(InputStream is, TgLobPersistenceType persistenceType) throws IOException {
@@ -250,11 +252,14 @@ public class IceaxeObjectFactory {
     /**
      * creates a new TgBlob instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
+     * </p>
+     *
      * @param value           value
      * @param persistenceType persistence type
      * @return TgBlob instance
      * @throws IOException if an I/O error occurs writing to the file
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
      * @since 1.16.0
      */
     public TgBlob createBlob(byte[] value, TgLobPersistenceType persistenceType) throws IOException {
@@ -287,13 +292,16 @@ public class IceaxeObjectFactory {
     /**
      * creates a new TgBlob instance from TgBlobReference.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
+     * </p>
+     *
      * @param value           TgBlobReference
      * @param persistenceType persistence type
      * @return TgBlob instance
      * @throws IOException                 if an I/O error occurs
      * @throws InterruptedException        if interrupted while processing the request
      * @throws TsurugiTransactionException if server error occurs while processing the request
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
      * @since 1.16.0
      */
     public TgBlob createBlob(TgBlobReference value, TgLobPersistenceType persistenceType) throws IOException, InterruptedException, TsurugiTransactionException {
@@ -366,11 +374,14 @@ public class IceaxeObjectFactory {
     /**
      * creates a new TgClob instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
+     * </p>
+     *
      * @param reader          reader
      * @param persistenceType persistence type
      * @return TgClob instance
      * @throws IOException if an I/O error occurs when reading or writing
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
      * @since 1.16.0
      */
     public TgClob createClob(Reader reader, TgLobPersistenceType persistenceType) throws IOException {
@@ -395,7 +406,7 @@ public class IceaxeObjectFactory {
      * @param deleteOnExecuteFinished delete on execute finished
      * @return TgClob instance
      * @throws IOException if an I/O error occurs writing to the file
-     * @deprecated use {@link #createClob(String, TgLobPersistenceType)} or {@link #uploadClob(TsurugiSession, String)} instead
+     * @deprecated use {@link #createClob(String, TgLobPersistenceType)} or {@link TsurugiLobFactory#uploadClob(String)} instead
      */
     @Deprecated(since = "1.16.0", forRemoval = true)
     public TgClob createClob(String value, boolean deleteOnExecuteFinished) throws IOException {
@@ -407,11 +418,14 @@ public class IceaxeObjectFactory {
     /**
      * creates a new TgClob instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
+     * </p>
+     *
      * @param value           value
      * @param persistenceType persistence type
      * @return TgClob instance
      * @throws IOException if an I/O error occurs writing to the file
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
      * @since 1.16.0
      */
     public TgClob createClob(String value, TgLobPersistenceType persistenceType) throws IOException {
@@ -444,13 +458,16 @@ public class IceaxeObjectFactory {
     /**
      * creates a new TgClob instance from TgClobReference.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
+     * </p>
+     *
      * @param value           TgClobReference
      * @param persistenceType persistence type
      * @return TgClob instance
      * @throws IOException                 if an I/O error occurs
      * @throws InterruptedException        if interrupted while processing the request
      * @throws TsurugiTransactionException if server error occurs while processing the request
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
      * @since 1.16.0
      */
     public TgClob createClob(TgClobReference value, TgLobPersistenceType persistenceType) throws IOException, InterruptedException, TsurugiTransactionException {

@@ -236,12 +236,15 @@ public class TsurugiLobFactory {
     /**
      * Creates a new BLOB instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
+     * </p>
+     *
      * @param is              input stream
      * @param persistenceType persistence type
      * @return BLOB instance
      * @throws IOException          when I/O error occurs
      * @throws InterruptedException when interrupted while waiting for I/O operation
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
      */
     public TgBlob createBlob(InputStream is, TgLobPersistenceType persistenceType) throws IOException, InterruptedException {
         if (is == null) {
@@ -270,12 +273,15 @@ public class TsurugiLobFactory {
     /**
      * Creates a new BLOB instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
+     * </p>
+     *
      * @param value           byte array
      * @param persistenceType persistence type
      * @return BLOB instance
      * @throws IOException          when I/O error occurs
      * @throws InterruptedException when interrupted while waiting for I/O operation
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
      */
     public TgBlob createBlob(byte[] value, TgLobPersistenceType persistenceType) throws IOException, InterruptedException {
         if (value == null) {
@@ -303,13 +309,16 @@ public class TsurugiLobFactory {
     /**
      * Creates a new BLOB instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
+     * </p>
+     *
      * @param value           BLOB reference
      * @param persistenceType persistence type
      * @return BLOB instance
      * @throws IOException                 when I/O error occurs
      * @throws InterruptedException        when interrupted while waiting for I/O operation
      * @throws TsurugiTransactionException when transaction error occurs
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgBlob is closed.
      */
     public TgBlob createBlob(TgBlobReference value, TgLobPersistenceType persistenceType) throws IOException, InterruptedException, TsurugiTransactionException {
         if (value == null) {
@@ -367,12 +376,15 @@ public class TsurugiLobFactory {
     /**
      * Creates a new CLOB instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
+     * </p>
+     *
      * @param reader          reader
      * @param persistenceType persistence type
      * @return CLOB instance
      * @throws IOException          when I/O error occurs
      * @throws InterruptedException when interrupted while waiting for I/O operation
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
      */
     public TgClob createClob(Reader reader, TgLobPersistenceType persistenceType) throws IOException, InterruptedException {
         if (reader == null) {
@@ -401,12 +413,15 @@ public class TsurugiLobFactory {
     /**
      * Creates a new CLOB instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
+     * </p>
+     *
      * @param value           string value
      * @param persistenceType persistence type
      * @return CLOB instance
      * @throws IOException          when I/O error occurs
      * @throws InterruptedException when interrupted while waiting for I/O operation
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
      */
     public TgClob createClob(String value, TgLobPersistenceType persistenceType) throws IOException, InterruptedException {
         if (value == null) {
@@ -434,13 +449,16 @@ public class TsurugiLobFactory {
     /**
      * Creates a new CLOB instance.
      *
+     * <p>
+     * If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
+     * </p>
+     *
      * @param value           CLOB reference
      * @param persistenceType persistence type
      * @return CLOB instance
      * @throws IOException                 when I/O error occurs
      * @throws InterruptedException        when interrupted while waiting for I/O operation
      * @throws TsurugiTransactionException when transaction error occurs
-     * @apiNote If the persistence type is FILE, a temporary file is created. The temporary file is deleted when TgClob is closed.
      */
     public TgClob createClob(TgClobReference value, TgLobPersistenceType persistenceType) throws IOException, InterruptedException, TsurugiTransactionException {
         if (value == null) {
@@ -595,9 +613,8 @@ public class TsurugiLobFactory {
      *
      * @param value BLOB reference
      * @return uploaded BLOB
-     * @throws IOException                 when I/O error occurs
-     * @throws InterruptedException        when interrupted while waiting for I/O operation
-     * @throws TsurugiTransactionException when transaction error occurs
+     * @throws IOException          when I/O error occurs
+     * @throws InterruptedException when interrupted while waiting for I/O operation
      */
     public TgRemoteBlob uploadBlob(TgBlob value) throws IOException, InterruptedException {
         return uploadBlob(value, null);
@@ -610,9 +627,8 @@ public class TsurugiLobFactory {
      * @param time  timeout time
      * @param unit  timeout unit
      * @return uploaded BLOB
-     * @throws IOException                 when I/O error occurs
-     * @throws InterruptedException        when interrupted while waiting for I/O operation
-     * @throws TsurugiTransactionException when transaction error occurs
+     * @throws IOException          when I/O error occurs
+     * @throws InterruptedException when interrupted while waiting for I/O operation
      */
     public TgRemoteBlob uploadBlob(TgBlob value, long time, TimeUnit unit) throws IOException, InterruptedException {
         var timeout = TgTimeValue.of(time, unit);
@@ -625,9 +641,8 @@ public class TsurugiLobFactory {
      * @param value   BLOB reference
      * @param timeout timeout
      * @return uploaded BLOB
-     * @throws IOException                 when I/O error occurs
-     * @throws InterruptedException        when interrupted while waiting for I/O operation
-     * @throws TsurugiTransactionException when transaction error occurs
+     * @throws IOException          when I/O error occurs
+     * @throws InterruptedException when interrupted while waiting for I/O operation
      */
     public TgRemoteBlob uploadBlob(TgBlob value, TgTimeValue timeout) throws IOException, InterruptedException {
         if (value == null) {
@@ -780,9 +795,8 @@ public class TsurugiLobFactory {
      *
      * @param value CLOB reference
      * @return uploaded CLOB
-     * @throws IOException                 when I/O error occurs
-     * @throws InterruptedException        when interrupted while waiting for I/O operation
-     * @throws TsurugiTransactionException when transaction error occurs
+     * @throws IOException          when I/O error occurs
+     * @throws InterruptedException when interrupted while waiting for I/O operation
      */
     public TgRemoteClob uploadClob(TgClob value) throws IOException, InterruptedException {
         return uploadClob(value, null);
@@ -795,9 +809,8 @@ public class TsurugiLobFactory {
      * @param time  timeout time
      * @param unit  timeout unit
      * @return uploaded CLOB
-     * @throws IOException                 when I/O error occurs
-     * @throws InterruptedException        when interrupted while waiting for I/O operation
-     * @throws TsurugiTransactionException when transaction error occurs
+     * @throws IOException          when I/O error occurs
+     * @throws InterruptedException when interrupted while waiting for I/O operation
      */
     public TgRemoteClob uploadClob(TgClob value, long time, TimeUnit unit) throws IOException, InterruptedException {
         var timeout = TgTimeValue.of(time, unit);
@@ -810,9 +823,8 @@ public class TsurugiLobFactory {
      * @param value   CLOB reference
      * @param timeout timeout
      * @return uploaded CLOB
-     * @throws IOException                 when I/O error occurs
-     * @throws InterruptedException        when interrupted while waiting for I/O operation
-     * @throws TsurugiTransactionException when transaction error occurs
+     * @throws IOException          when I/O error occurs
+     * @throws InterruptedException when interrupted while waiting for I/O operation
      */
     public TgRemoteClob uploadClob(TgClob value, TgTimeValue timeout) throws IOException, InterruptedException {
         if (value == null) {

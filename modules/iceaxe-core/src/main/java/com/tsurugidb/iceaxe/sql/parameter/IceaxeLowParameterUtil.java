@@ -321,6 +321,8 @@ public final class IceaxeLowParameterUtil {
      * @param value   value
      * @param context context
      * @return parameter
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the operation is interrupted
      * @since 1.8.0
      */
     public static Parameter create(@Nonnull String name, @Nullable TgBlob value, IceaxeLowParameterGenerateContext context) throws IOException, InterruptedException {
@@ -350,8 +352,6 @@ public final class IceaxeLowParameterUtil {
      * @param value   value
      * @param context context
      * @return parameter
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
      * @since 1.16.0
      */
     public static Parameter create(@Nonnull String name, @Nullable TgRemoteBlob value, IceaxeLowParameterGenerateContext context) {
@@ -474,8 +474,6 @@ public final class IceaxeLowParameterUtil {
      * @param value   value
      * @param context context
      * @return parameter
-     * @throws IOException          if an I/O error occurs
-     * @throws InterruptedException if the operation is interrupted
      * @since 1.16.0
      */
     public static Parameter create(@Nonnull String name, @Nullable TgRemoteClob value, IceaxeLowParameterGenerateContext context) {
